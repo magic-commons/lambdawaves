@@ -37,22 +37,22 @@ export function createParticles(canvas, api) {
   const alphaAt = (i, k) => alphas[i * trailLen + ((heads[i] - lens[i] + k) % trailLen + trailLen) % trailLen];
   /** the k-th oldest point of particle i's trail (k = 0 … lens[i]−1), into out */
   function trailAt(i, k, out) { const j = ((heads[i] - lens[i] + k) % trailLen + trailLen) % trailLen, o = (i * trailLen + j) * 3; out[0] = ring[o]; out[1] = ring[o + 1]; out[2] = ring[o + 2]; return out; }
-  /** seed n particles by rejection sampling from |ψ|² — the equilibrium distribution */
-  function seed(n, reg, t, half) {
+  /** seed n particles by rejection sampling from |ψ|² — the equilibrium distribution; `rnd` a seeded generator for a film (025 B2: seed 13) */
+  function seed(n, reg, t, half, rnd = Math.random) {
     const c = reg.at(t), ids = reg.renderSet().ids;
     if (!ids.length) { pts = []; allocTrails(); return 0; }
     let peak = 0;
     for (let k = 0; k < 4000; k++) {
-      const x = (Math.random() * 2 - 1) * half, y = (Math.random() * 2 - 1) * half, z = (Math.random() * 2 - 1) * half;
+      const x = (rnd() * 2 - 1) * half, y = (rnd() * 2 - 1) * half, z = (rnd() * 2 - 1) * half;
       peak = Math.max(peak, psi2(c.re, c.im, ids, x, y, z));
     }
     pts = [];
     let tries = 0;
     while (pts.length < n && tries < n * 4000) {
       tries++;
-      const x = (Math.random() * 2 - 1) * half, y = (Math.random() * 2 - 1) * half, z = (Math.random() * 2 - 1) * half;
+      const x = (rnd() * 2 - 1) * half, y = (rnd() * 2 - 1) * half, z = (rnd() * 2 - 1) * half;
       if (Math.hypot(x, y, z) < 1e-3) continue;
-      if (psi2(c.re, c.im, ids, x, y, z) > Math.random() * peak) pts.push([x, y, z]);
+      if (psi2(c.re, c.im, ids, x, y, z) > rnd() * peak) pts.push([x, y, z]);
     }
     allocTrails();
     lastT = t; state.count = pts.length; state.seededAt = t;
@@ -130,9 +130,9 @@ export function createParticles(canvas, api) {
   const P3 = [0, 0, 0], S3 = [0, 0, 0];
   function release() { if (canvas.width !== 1 || canvas.height !== 1) { canvas.width = 1; canvas.height = 1; } }   // off: no full-stage bitmap kept
   function suspend(t) { if (Number.isFinite(t)) lastT = t; release(); }
-  function draw(obs, half) {
+  function draw(obs, half, box = null) {   // box: { W, H, dpr } — a film's own size (025 B2), in place of the canvas' CSS box and the screen's ratio
     if (!on || !pts.length) { release(); return; }
-    const W = canvas.clientWidth, H = canvas.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = box ? box.W : canvas.clientWidth, H = box ? box.H : canvas.clientHeight, dpr = box ? box.dpr : Math.min(2, window.devicePixelRatio || 1);
     if (W < 32 || H < 32) return;
     if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
@@ -174,7 +174,7 @@ export function createParticles(canvas, api) {
     /** the trail of particle i as an array of [x, y, z], oldest first — for the proofs */
     trailOf(i) { const out = []; if (i < 0 || i >= pts.length) return out; for (let k = 0; k < lens[i]; k++) out.push(trailAt(i, k, [0, 0, 0])); return out; },
     get trailLen() { return trailLen; },
-    setTrail(n) { trailLen = Math.max(2, n | 0); allocTrails(); }, setCap(v) { speedCap = v; },
+    setTrail(n) { trailLen = Math.max(2, n | 0); allocTrails(); }, setCap(v) { speedCap = v; }, get cap() { return speedCap; },
     resetClock(t) { lastT = t; }
   };
 }

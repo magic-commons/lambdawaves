@@ -79,7 +79,8 @@
  *   and H9 an interloping rack frame (the rack's own lock while a film owns the page; the jitter, generation and size
  *   witnesses all see one).
  *   THE KIT'S — H6 the modulation clock (its record clock, or no host at all), H10 the device pixel ratio (an explicit
- *   even size), H11 path-dependent 2-D overlays (a film carries none), H12 the PNG container (its encoder; λWAVES'
+ *   even size), H11 the overlays (λWAVES' since 025 B: lab/film-bake.js lays the graph, the pure overlays and the words over the frame, and
+ *   names the rest OUT), H12 the PNG container (its encoder; λWAVES'
  *   digest is over the frame's RGBA, which is ours) and H13 the gamut (declared to it as colorSpace).
  *
  * ── WHAT THE RACK CALLS ──────────────────────────────────────────────────────────────────────────────────────
@@ -99,7 +100,8 @@ import {
   readback, configureCopy, captionOver, handOver,
 } from './capture.js';
 import { createRecorder } from './mir/render/recorder.js';
-import { RECORD_FPS, estimateFilm, ceilingWarning, fmtMs, fmtBytes } from './mir/render/plan.js';
+import { RECORD_FPS, RECORD_SIZES, estimateFilm, ceilingWarning, fmtMs, fmtBytes } from './mir/render/plan.js';
+import { mp4Parse } from './mir/render/mp4.js';
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    PART 1 — THE LAWS.  Nothing below touches the DOM, WebGPU or a clock; all of it is proved in node.
@@ -449,7 +451,7 @@ export const HAZARDS = Object.freeze([
   hz('modealias', 'app', 'LW.modesAt(t) returns a module-level array of module-level records rewritten in place, so anything that calls modesAt between our call and field.frame\'s consumption rewrites our modes', 'rack.js modesAt / modeRecs', 'modesAt is evaluated inline in the draw, with nothing between', 'covered by the jitter witness — an interloper that could rewrite the modes had to present to do it'),
   hz('interloper', 'app', 'any schedule() from anywhere arms a rAF that resizes the canvas, presents with an unpinned seed and advances the modulation on wall time', 'rack.js schedule / loop', 'the rack\'s own hold while a film owns the page (exportLocked: no rAF is armed), and a drain before frame 0', 'the jitter, generation and size witnesses all fire; the frame is rendered again, and one that will not settle aborts the film by name'),
   hz('dpr', 'kit', 'field.resize multiplies by window.devicePixelRatio, so a film sized by scale inherits the machine\'s DPR', 'field.js resize', 'the kit\'s recorder takes an explicit even size; a scale-sized film records the resolved size and flags sizeFromMachine', 'the manifest carries the resolved size'),
-  hz('overlays', 'kit', 'particles.js integrates an RK4 trajectory from its own lastT to t (and teleports when |dt| > 4, which every loop\'s wrap gap is) on the 2-D #particles layer', 'rack.js loop; particles.js advance', 'a film carries no 2-D overlay layer: the kit composites none (KIT BRIEF 6 is that road); a picture labels the overlays it upscales', 'the picture names its upscaled layers'),
+  hz('overlays', 'app', 'what the screen lays over the field — the NODES chain and its layers, the 2-D overlays (#particles integrates RK4 from its own lastT, seeded by Math.random), the ATOM LABELS and the ESP BAR — is not in the GPU readback', 'rack.js loop; particles.js advance; nodes.js; stage-words.js', '025 B: lab/film-bake.js lays each one that is a function of (t, camera, seed) over the frame at the film\'s scale — the graph compiled at k, the grain hashed from the frame index, PARTICLES reseeded at frame 0 from seed 13 — and names the rest OUT (FLOW, the impulse vector, the KaTeX words); NODES OFF and CHROME OFF leave them off', 'the bake readings (IN or OUT, each with why) ride in the manifest and the frame digest is over the baked picture'),
   hz('deflate', 'kit', 'a PNG container\'s compression is unspecified and changes between browser builds: the PIXELS are exact and the CONTAINER is not', 'mir/render/encoder.js pngBytes', 'the kit encodes every frame; λWAVES\' digest is over the frame\'s RGBA as read off the GPU, which is ours', 'the frame log carries every digest'),
   hz('gamut', 'kit', 'field.js configures the context display-p3 on a wide-gamut screen; the same shader output then means different colour', 'field.js / capture.js configureCopy', 'a display-p3 canvas is declared to the kit\'s recorder (colorSpace), which tags its frames', 'the manifest records the gamut and the swapchain format'),
 ]);
@@ -486,6 +488,62 @@ export function manifest(o = {}) {
       'Wall time appears here only as a report of how long the film took. It was never an input to a picture.',
     ],
   };
+}
+
+/* ── THE OBEDIENCE AUDIT (025 B4) ──────────────────────────────────────────────────────────────────────────────
+ * EVERY SETTING IS A WITNESS: each row of the RENDER card, what was asked, what the kit's result says, what λWAVES' frames saw and what the
+ * FILE holds, side by side.  `audit({ asked, plan, res, last, file, current })` is pure: asked = the card's run options (+ nodes, chrome),
+ * plan = the kit's plan at the tap (rec.plan), res = the kit's result, last = film.last (the frame log), file = fileFacts(res), current =
+ * the stage's CSS box (CURRENT is the stage at DPR 1, even).  → { ok, rows: [{ setting, asked, witness, ok }], lies: [setting] } */
+const even = (n) => Math.max(16, Math.round(n) & ~1);
+export function audit({ asked = {}, plan = null, res = null, last = null, file = null, current = null } = {}) {
+  const rows = [], row = (setting, a, witness, ok) => rows.push({ setting, asked: a, witness, ok: !!ok });
+  const P = plan && plan.plan, fps = Number(asked.fps), tl = /^timeline-/.test(asked.motion || ''), n = res ? res.frames : 0, L = last || {};
+  const want = asked.size ? asked.size : RECORD_SIZES[asked.resolution] ? { w: RECORD_SIZES[asked.resolution][0], h: RECORD_SIZES[asked.resolution][1] } : current ? { w: even(current.w), h: even(current.h) } : null;
+  const sz = (o) => (o ? o.w + '×' + o.h : '—');
+  row('SIZE', (asked.size ? 'PREVIEW ' : asked.resolution || '') + ' ' + sz(want), 'result ' + sz(res && { w: res.width, h: res.height }) + ' · frames ' + sz(L.w && L) + ' · file ' + sz(file),
+    want && res && res.width === want.w && res.height === want.h && L.w === want.w && L.h === want.h && (!file || (file.w === want.w && file.h === want.h)) && want.w % 2 === 0 && want.h % 2 === 0);
+  row('FPS', fps, 'result ' + (res && res.fps) + (file && file.fps ? ' · file ' + file.fps : ''), res && res.fps === fps && L.fps === fps && (!file || !file.fps || Math.abs(file.fps - fps) < 1e-9));
+  const frames = P ? P.frames : tl ? null : Math.max(1, Math.round(asked.durationS * fps));
+  row('FRAMES', frames, 'result ' + n + ' · λWAVES drew ' + (L.frames || 0) + (file && file.frames != null ? ' · file ' + file.frames : ''), n === frames && L.frames === n && (!file || file.frames == null || file.frames === n));
+  row('DURATION', frames / fps + ' s', 'result ' + (res && res.durationS) + ' s' + (file && file.durationS != null ? ' · file ' + file.durationS + ' s' : ''), res && Math.abs(res.durationS - n / fps) < 1e-9 && (!file || file.durationS == null || Math.abs(file.durationS - n / fps) < 0.5 / fps));
+  if (!tl) { const sf = Math.round((asked.offsetS || 0) * fps); row('START AT', (asked.offsetS || 0) + ' s → frame ' + sf, 'result ' + (res && res.offsetS) + ' s', res && Math.abs(res.offsetS - sf / fps) < 1e-9); }
+  else {
+    const r = plan && plan.range, bpf = P ? P.bpm / 60 / fps : 0, beats = (L.log || []).map((x) => x.beat).filter(Number.isFinite), b0 = beats[0], b1 = beats[beats.length - 1];
+    const period = (L.log || []).length && L.log.every((x) => x.period);
+    row('RANGE', asked.motion.replace('timeline-', '').toUpperCase() + (r ? ' beats ' + r.start + ' → ' + r.end : ''), (period ? 'ONE PERIOD\'s own schedule · ' : '') + 'first beat ' + b0 + ' · last beat + 1 frame ' + (b1 + bpf),
+      r && beats.length === n && Math.abs(b0 - r.start) <= bpf / 2 + 1e-9 && Math.abs(b1 + bpf - r.end) <= bpf / 2 + 1e-9);
+  }
+  row('FORMAT', asked.format, 'file ' + (file ? file.kind : '—') + (res ? ' · ' + res.files.length + ' file(s)' : ''), file && file.kind === asked.format);
+  row('MODULATION', asked.modulation ? 'ON' : 'OFF', 'result ' + (res && res.modulation ? 'ON' : 'OFF'), res && !!res.modulation === !!asked.modulation);
+  row('TIMELINE', asked.timeline ? 'ON' : 'OFF', 'result ' + (res && res.timeline ? 'ON' : 'OFF'), res && !!res.timeline === !!asked.timeline);
+  const au = res && res.audio, N = Math.round(n * 48000 / fps), plannedAudio = !!(plan && plan.audio);
+  row('AUDIO', (asked.audio === false ? 'OFF' : 'ON') + (plannedAudio ? ' · ' + plan.audio.clips.join(', ') : ' · no clip in the range'),
+    au ? au.label + ' ' + au.sampleRate + ' · ' + au.samples + ' samples (want ' + N + ')' + (file && file.audioS != null ? ' · file ' + file.audioS + ' s' : '') : 'silent' + (file && file.tracks ? ' · ' + file.tracks + ' trak' : ''),
+    asked.audio === false || !plannedAudio ? !au && (!file || !file.tracks || file.tracks === 1) : !!au && au.samples === N && (!file || file.audioS == null || Math.abs(file.audioS - n / fps) < 1 / 48000 + 1e-9));
+  row('NODES', asked.nodes === false ? 'OFF' : 'ON', 'frames ' + (L.nodes === false ? 'OFF' : 'ON') + ' · ' + ((L.baked || []).find((x) => x.id === 'nodes') || { why: 'an empty graph' }).why, (asked.nodes !== false) === (L.nodes !== false));
+  row('CHROME', asked.chrome === 'off' ? 'OFF' : 'LABELS', 'frames ' + (L.chrome === 'off' ? 'OFF' : 'LABELS') + ' · ' + (L.baked || []).filter((x) => /atomLabels|espBar/.test(x.id)).map((x) => x.id + ' ' + x.state).join(' · '), (asked.chrome === 'off') === (L.chrome === 'off'));
+  return { ok: rows.every((r) => r.ok), rows, lies: rows.filter((r) => !r.ok).map((r) => r.setting) };
+}
+/** what the FILE holds (025 B4): an MP4's moov read by the kit's parser (the size from its avc1 entry, the fps from the video stts, the frames,
+ *  the audio trak's edit) — or, for PNG frames, the first frame's IHDR and the parts' frame ranges.  Reads only the boxes it needs. */
+export async function fileFacts(res) {
+  const f = res && res.files && res.files[0]; if (!f || !f.blob) return null;
+  const at = async (a, b) => new Uint8Array(await f.blob.slice(a, b).arrayBuffer());
+  if (res.format === 'png') {
+    const head = await at(0, Math.min(f.blob.size, 1 << 20)); let w = null, h = null;
+    for (let i = 0; i + 24 < head.length; i++) if (head[i] === 0x89 && head[i + 1] === 0x50 && head[i + 2] === 0x4e && head[i + 3] === 0x47) { const d = new DataView(head.buffer, i + 16, 8); w = d.getUint32(0); h = d.getUint32(4); break; }
+    return { kind: 'png', w, h, frames: res.files.reduce((s, x) => s + (Number.isFinite(x.lastFrame) ? x.lastFrame - x.firstFrame + 1 : 0), 0), durationS: null };
+  }
+  let p = 0, moov = null;
+  while (p + 16 <= f.blob.size) { const b = await at(p, p + 16), d = new DataView(b.buffer); let size = d.getUint32(0); const type = String.fromCharCode(...b.subarray(4, 8));
+    if (size === 1) size = Number(d.getBigUint64(8)); if (size < 8) break; if (type === 'moov') { moov = await at(p, p + size); break; } p += size; }
+  if (!moov) return { kind: 'mp4', w: null, h: null };
+  const m = mp4Parse(moov), v = (m.tracks || []).find((t) => t.handler === 'vide'), a = (m.tracks || []).find((t) => t.handler === 'soun');
+  let w = null, h = null; for (let i = 4; i + 40 < moov.length; i++) if (moov[i] === 0x61 && moov[i + 1] === 0x76 && moov[i + 2] === 0x63 && moov[i + 3] === 0x31) { const d = new DataView(moov.buffer, i + 4 + 24, 4); w = d.getUint16(0); h = d.getUint16(2); break; }
+  const delta = v && v.stts && v.stts[0] ? v.stts[0][1] : 0;
+  return { kind: 'mp4', w, h, fps: delta ? v.timescale / delta : null, frames: v ? v.sampleCount : null, durationS: v ? v.mediaDuration / v.timescale : null, tracks: (m.tracks || []).length,
+    audioS: a && a.edits && a.edits[0] && m.movie ? a.edits[0].segment / m.movie.timescale : null, audioCodec: a ? a.entry : null };
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -538,6 +596,7 @@ export function createFilm(LW, opts = {}) {
   let job = null, cfgUsage = null, token = 0, lastMs = null;   // lastMs: this device's own milliseconds a frame, once a film has run
   let card = null, last = null;   // 0.5.0 C7b: the RENDER card's recorder options (`recorder(o)`) · the last film's frame log and names
   const road = opts.road || {};    // the rack's own: pending() → { caption, spin, yaw0 }, step(dt) (the rotor rates), rotating(), plan(o)
+  const bake = opts.bake || null;  // 025 B: lab/film-bake.js — the graph, the overlays and the words over the frame (none in the node proof)
 
   function limits() { const f = field(); return maxPictureSize(f && f.ok ? f.device.limits : null, opts.canvasCap || 32767); }
   function stateLabel() {
@@ -596,6 +655,8 @@ export function createFilm(LW, opts = {}) {
         case 'interloper': { const s = !!(LW.stats && LW.stats.scheduled); return { state: s ? 'live' : 'off', blocking: false, value: s, note: s ? 'a rack frame is scheduled; a film drains it and the per-frame witnesses catch any that arrive anyway' : 'no rack frame is scheduled' }; }
         case 'gamut': return { state: (f && f.ok && f.gamut && f.gamut !== 'srgb') ? 'live' : 'off', blocking: false, value: f && f.ok ? f.gamut : null, note: (f && f.ok && f.gamut && f.gamut !== 'srgb') ? 'THIS CANVAS IS ' + f.gamut + ': the film is declared display-p3 to the kit\'s encoder' : 'the canvas is sRGB' };
         case 'fieldclock': return { state: 'live', blocking: false, value: LW.fieldRate ? LW.fieldRate.capMs : null, note: 'the field clock caps reconstructs; a film bypasses the tier router entirely' };
+        case 'overlays': { if (!bake) return { state: 'kit', blocking: false, value: null, note: 'no bake: the frame is the field alone' };
+          const r = bake.readings(); return { state: r.length ? 'live' : 'off', blocking: false, value: r, note: r.length ? r.map((x) => x.id + ' ' + x.state).join(' · ') : 'nothing lies over the field' }; }
         case 'modealias': return { state: 'live', blocking: false, value: null, note: 'the mode list is a reused buffer; a film evaluates modesAt inline in the draw' };
         default: return { state: 'kit', blocking: false, value: null, note: 'the kit\'s: ' + ((HAZARDS.find((h) => h.id === id) || {}).pin || '') };
       }
@@ -653,7 +714,8 @@ export function createFilm(LW, opts = {}) {
     if (opts.hold) { try { await opts.hold(false); } catch (_) { /* the host's own restore */ } }
     if (LW.schedule && LW.TIER) LW.schedule(LW.TIER.PRESENT);   // the screen goes back to showing the lab
     const one = J.periods && J.log.length && J.log.every((f) => f.period) ? J.periods[0] : null;   // a film of one period clip is a LOOP
-    last = { log: J.log, kind: one ? 'loop' : J.kind, label: J.label, w: J.size.w, h: J.size.h, fps: J.fps, frames: J.log.length, T: one ? one.s.L : J.sched.mode === 'loop' ? J.sched.L : 0 };
+    last = { log: J.log, kind: one ? 'loop' : J.kind, label: J.label, w: J.size.w, h: J.size.h, fps: J.fps, frames: J.log.length, T: one ? one.s.L : J.sched.mode === 'loop' ? J.sched.L : 0,
+      nodes: J.nodes !== false, chrome: J.chrome || 'labels', baked: J.bake ? J.bake.reads : [] };
     if (J.card) job = null;   // the card's job is the recorder's run's: it ends here
   }
   const check = () => { if (!opts.grab && !gpuOk()) throw new Error('THE GRAPHICS DEVICE IS GONE: the FIELD is not up, so no frame can be read'); };
@@ -662,7 +724,9 @@ export function createFilm(LW, opts = {}) {
   function witnesses(J, wit, t, w, h) {
     const f = field(), pinned = J.pinned, fail = [];
     if (pinned('jitter') && wit.presents !== JITTER_SEED + 1) fail.push('jitter: presents read ' + wit.presents + ', not ' + (JITTER_SEED + 1) + ' — another frame presented during ours');
-    if (pinned('fieldclock') && wit.generation !== 1) fail.push('fieldclock: the field generation advanced ' + wit.generation + ' times, not once');
+    /* 025 B4: a MOLECULE owns the field through its own kernel, which computes only when its volume is dirty — a still volume advances none */
+    const kernel = !!(LW.chem && LW.chem.on), gens = kernel ? [0, 1] : [1];
+    if (pinned('fieldclock') && !gens.includes(wit.generation)) fail.push('fieldclock: the field generation advanced ' + wit.generation + ' times, not ' + (kernel ? 'once at most (a molecule\'s kernel)' : 'once'));
     if (pinned('autoscale') && (wit.canvasW !== w || wit.canvasH !== h)) fail.push('autoscale: the canvas was ' + wit.canvasW + '×' + wit.canvasH + ' at readback, not ' + w + '×' + h);
     const res = f && f.ok ? f.resolution : J.base.resolution;
     if (pinned('governor') && res !== J.base.resolution) fail.push('governor: the field grid moved from ' + J.base.resolution + '³ to ' + res + '³ mid-film');
@@ -711,9 +775,10 @@ export function createFilm(LW, opts = {}) {
       }
     }
     J.rate = LW.clock.rate;
-    if (J.caption) captionOver(shot.rgba, w, h, J.caption);
-    J.log.push({ k: i, t, off: pc ? pc.s.off(at - pc.k0) : J.drive ? t : J.sched.off(i), digest: digest(shot.rgba), retries: tries - 1, ...(pc ? { period: true } : {}) });
-    return { rgba: shot.rgba, width: w, height: h };
+    const rgba = bake ? await bake.apply(J, shot.rgba, w, h, i, t) : shot.rgba;   // 025 B: the screen over the field
+    if (J.caption) captionOver(rgba, w, h, J.caption);
+    J.log.push({ k: i, t, off: pc ? pc.s.off(at - pc.k0) : J.drive ? t : J.sched.off(i), digest: digest(rgba), retries: tries - 1, ...(Number.isFinite(ctx.beat) ? { beat: ctx.beat } : {}), ...(pc ? { period: true } : {}) });
+    return { rgba, width: w, height: h };
   }
 
   /* ── THE CARD'S ROAD (0.5.0 C7b) ─────────────────────────────────────────────────────────────────────────────────────────
@@ -725,7 +790,8 @@ export function createFilm(LW, opts = {}) {
     const J = job;
     if (!J) { const r = road.pending ? road.pending() : {};
       return { token: 'lw-' + (++token) + '-' + Math.round(now()), pending: { t0: LW.clock.t, rate: LW.clock.rate, label: stateLabel(),
-        observable: LW.mat ? VIEW_NAMES[LW.mat.view | 0] : 'density', caption: r.caption || '', spin: r.spin || 0, yaw0: r.yaw0 || 0 } }; }
+        observable: LW.mat ? VIEW_NAMES[LW.mat.view | 0] : 'density', caption: r.caption || '', spin: r.spin || 0, yaw0: r.yaw0 || 0,
+        nodes: !(card && card.nodes && card.nodes() === false), chrome: card && card.chrome ? card.chrome() : 'labels' } }; }
     return { token: J.token, film: manifest({ schedule: J.sched, picture: { w: J.size.w, h: J.size.h, sizeFromMachine: !!J.size.sizeFromMachine, format: J.format, jitterSeed: JITTER_SEED },
       state: { label: J.label, observable: J.observable, version: LW.version || null } }) };
   }
@@ -747,7 +813,7 @@ export function createFilm(LW, opts = {}) {
     const tl = spec.timeline ? arrangement(fps) : { periods: null, on: () => false };
     return { token: A.token || 'lw-' + (++token) + '-' + Math.round(now()), sched, N, fps, pinned: () => true, host: true, card: true,
       drive: !!spec.modulation || tl.on('transport.rate'), format: spec.format, size: { w: spec.width, h: spec.height }, kind: s && s.mode === 'span' ? 'frames' : 'clip',
-      label: p.label || stateLabel(), observable: p.observable || null, caption: p.caption || '', periods: tl.periods,
+      label: p.label || stateLabel(), observable: p.observable || null, caption: p.caption || '', periods: tl.periods, nodes: p.nodes !== false, chrome: p.chrome === 'off' ? 'off' : 'labels',
       poseAt: p.spin && !tl.on('observer.yaw') ? (k) => ({ yaw: p.yaw0 + p.spin * (k / fps) }) : null,   // R4: AUTO-ROTATE rides as the pose path unless a yaw clip is in the take
       beforeFrame: road.step ? ({ dt }) => road.step(dt) : null, retries: DEFAULTS.retries, log: [], contended: 0, aborted: null,
       driven: sched.at(0), rate: 0, prev: null, base: null, drained: null,
@@ -765,7 +831,7 @@ export function createFilm(LW, opts = {}) {
       signature: C.signature, selfTestStages: C.selfTestStages,
       storage: opts.storage, calib: C.calib || opts.calib, wake: opts.wake, guard: opts.guard, hidden: opts.hidden, pauseWhileHidden: opts.pauseWhileHidden,
       colorSpace: f && f.ok && f.gamut && f.gamut !== 'srgb' ? 'display-p3' : undefined,
-      currentSize: () => ({ w: canvas ? canvas.width : 16, h: canvas ? canvas.height : 16 }),
+      currentSize: () => ({ w: canvas ? canvas.clientWidth || canvas.width : 16, h: canvas ? canvas.clientHeight || canvas.height : 16 }),   // 025 B4: CURRENT is the stage at DPR 1, not its backing store (AUTO SCALE × DPR)
     }));
   }
   /** recorder({ editor: () => tl.editor, signature, selfTestStages, calib }) → the card's recorder: the host recorder, handed the
@@ -818,6 +884,7 @@ export function createFilm(LW, opts = {}) {
       const size = P.size || sizeFor(o);
       const J = job = { token: 'lw-' + (++token) + '-' + Math.round(now()), sched, N, fps, pinned, drive, host: drive, format, size, kind: o.kind || P.kind || sched.mode,
         label: o.label || stateLabel(), observable: P.observable || null, caption: o.caption || '', poseAt: o.poseAt || null, beforeFrame: o.beforeFrame || null,
+        nodes: o.nodes !== false, chrome: o.chrome === 'off' ? 'off' : 'labels',
         retries: o.retries === undefined ? DEFAULTS.retries : o.retries, log: [], contended: 0, aborted: null, driven: sched.at(0), rate: 0, prev: null, base: null, drained: null,
         pins: { jitter: pinned('jitter') ? 'presents pinned to ' + JITTER_SEED + ' before every frame' : 'NOT PINNED (unpin)', fieldclock: 'bypassed: field.frame is called directly with modes every frame' } };
       const wall0 = now();
@@ -838,7 +905,7 @@ export function createFilm(LW, opts = {}) {
       const ext = format === 'mp4' ? 'mp4' : 'zip';
       const name = files.length ? uniqueFileName(captureName({ kind: J.kind, label: J.label, w: size.w, h: size.h, fps, frames: delivered, T: sched.mode === 'loop' ? sched.L : 0, ext }), taken) : null;
       const man = manifest({ stamp: stamp(new Date()), schedule: sched,
-        picture: { w: size.w, h: size.h, sizeFromMachine: !!size.sizeFromMachine, clipped: !!size.clipped, format: J.base ? J.base.format : null, gamut: J.base ? J.base.gamut : null, resolution: J.base ? J.base.resolution : null, half: J.base ? J.base.half : null, container: format === 'mp4' ? 'mp4 (the kit\'s WebCodecs encoder and muxer)' : 'png frames in the kit\'s stored ZIP parts', jitterSeed: JITTER_SEED },
+        picture: { w: size.w, h: size.h, sizeFromMachine: !!size.sizeFromMachine, clipped: !!size.clipped, format: J.base ? J.base.format : null, gamut: J.base ? J.base.gamut : null, resolution: J.base ? J.base.resolution : null, half: J.base ? J.base.half : null, container: format === 'mp4' ? 'mp4 (the kit\'s WebCodecs encoder and muxer)' : 'png frames in the kit\'s stored ZIP parts', jitterSeed: JITTER_SEED, nodes: J.nodes, chrome: J.chrome, baked: J.bake ? J.bake.reads : [] },
         state: { label: J.label, observable: J.observable, digest: (LW.stateDigest ? (() => { try { return LW.stateDigest(); } catch (_) { return null; } })() : null), version: LW.version || null },
         pins: J.pins, witnesses: { contended: J.contended, aborted: aborted ? aborted.why : null, drained: J.drained }, frames: J.log,
         ffmpeg: format === 'png' ? 'ffmpeg -framerate ' + fps + ' -i frame_%06d.png -c:v libx264 -pix_fmt yuv420p -crf 18 ' + slug(J.label) + '.mp4' : null });
@@ -923,7 +990,7 @@ export function createFilm(LW, opts = {}) {
     return true;
   }
 
-  return { plan, render, take, verify, hazards, save, discard, limits, sizeFor, frame, recorder, nameFor, get names() { return taken; }, canvas,
+  return { plan, render, take, verify, hazards, save, discard, limits, sizeFor, frame, recorder, nameFor, audit, fileFacts, get names() { return taken; }, canvas,
     get running() { return busy(); }, get last() { return last; },
     laws: { exactSchedule, endpointLaw, arithmeticLaw, planExact, foldOrigin, estimate, digest, manifest, offsetOf, ulpsBetween, HAZARDS } };
 }

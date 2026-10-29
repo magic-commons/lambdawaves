@@ -13,7 +13,7 @@ import { createRenderCard } from './mir/render/panel.js';
 import { fmtBytes } from './mir/render/plan.js';
 import { VIEW_NAMES } from './field.js';
 import { registerClipKind } from './mir/timeline/kinds.js';
-import { el, label, trig, svgNode } from './mir/kit.js';
+import { el, label, trig, svgNode, select } from './mir/kit.js';
 import { handOver } from './capture.js';
 import { fold } from './fold.js';
 
@@ -43,7 +43,23 @@ export function createFilmCard(o) {
   if (ls.get('duration') === null) { ls.set('duration', '6'); ls.set('size', 'current'); ls.set('modulation', o.armed() ? 'on' : 'off'); }
   let scale = SCALES.includes(ls.get('scale')) ? ls.get('scale') : '2', made = null, note = null;
   const film = o.film, cv = film.canvas, say = (m, warn) => { if (made) made.card.setStatus(m, warn ? 'warn' : 'live'); };
-  const recorder = film.recorder({ editor: o.editor, signature: o.digest, selfTestStages: [{ name: 'λWAVES frame determinism', run: () => film.verify({ frames: 6, width: 160 }).then((v) => { if (!v.ok) throw new Error(v.message || v.error); return v.message; }) }] });
+  /* 025 B1 · B3: NODES (ON = the screen's graph baked into each frame · OFF = the field alone, 024's film) and CHROME (LABELS = the ATOM LABELS and the
+     ESP BAR on the frame · OFF), λWAVES' own rows under AUDIO; read at the take (render-exact.js describe → the job) */
+  const nodesOn = () => ls.get('nodes') !== 'off', chrome = () => (ls.get('chrome') === 'off' ? 'off' : 'labels');
+  const recorder = film.recorder({ nodes: nodesOn, chrome, editor: o.editor, signature: o.digest, selfTestStages: [{ name: 'λWAVES frame determinism', run: () => film.verify({ frames: 6, width: 160 }).then((v) => { if (!v.ok) throw new Error(v.message || v.error); return v.message; }) }] });
+  /* 025 B4 · EVERY SETTING IS A WITNESS: each run's options, the kit's plan at the tap and the stage's CSS box, audited against the kit's result, the
+     frame log and the FILE when it lands (render-exact.js audit · fileFacts) — `film.last.audit`; a row that lies is said */
+  const run0 = recorder.run;
+  recorder.run = (opts) => {
+    const asked = { ...opts, nodes: nodesOn(), chrome: chrome() }, current = { w: cv.clientWidth || cv.width, h: cv.clientHeight || cv.height };
+    let plan = null; try { plan = recorder.estimate(opts); } catch (_) { /* the run says why */ }
+    return run0(opts).then(async (res) => {
+      const file = await film.fileFacts(res).catch(() => null), A = film.audit({ asked, plan, res, last: film.last, file, current });
+      if (film.last) film.last.audit = A;
+      if (!A.ok) say('RENDER DISOBEYED: ' + A.lies.join(' · '), true);
+      return res;
+    });
+  };
   made = createRenderCard({ id: 'render', recorder, loadingMark: false, prefix: PREFIX, defaults: { fps: 30, motion: 'still' }, say,
     ...(o.files ? { files: o.files } : {}), ...(o.gallery && o.here ? { gallery: o.gallery, subject: subjectOf(o.here) } : {}),
     save: (blob, name) => handOver(blob, film.nameFor(name)),
@@ -56,6 +72,12 @@ export function createFilmCard(o) {
       s.append(trig({ label: 'PLAN', cls: 'sv-act sv-wide', onFire: () => plan() }).root, trig({ label: 'PLACE ONE PERIOD', cls: 'sv-act sv-wide', onFire: () => place() }).root);
     } });
   const { card, view } = made, C = view.controls, set = (f, v) => { f.value = v; f.dispatchEvent(new Event('change')); };
+  const lwRow = (key, text, aria, items, value, after) => {
+    const r = el('div', 'sr-row'); label(el('span', 'sr-label', r), text); after.closest('.sr-row').after(r);
+    const c = select({ aria, items, value, onChange: (v) => ls.set(key, v) }); c.root.classList.add('sr-sel'); c.root.dataset.field = key; r.appendChild(c.root); return c;
+  };
+  C.nodesSelect = lwRow('nodes', 'nodes', 'Recording NODES graph', [{ id: 'on', label: 'ON · THE SCREEN’S GRAPH' }, { id: 'off', label: 'OFF · THE FIELD ALONE' }], nodesOn() ? 'on' : 'off', C.audioSelect);
+  C.chromeSelect = lwRow('chrome', 'chrome', 'Recording stage words', [{ id: 'labels', label: 'LABELS · ATOMS AND ESP BAR' }, { id: 'off', label: 'OFF · THE PICTURE ALONE' }], chrome(), C.nodesSelect.root);
   /* 017 R4 (call 14) · THE SELF-TEST'S PRINTOUT IS A FOLD, not a scroller in a rack window: its last six lines show, and the fold above them opens
      the earlier ones (the card grows; only the rack scrolls).  The kit writes the whole printout into `C.lines`; the split is the app's. */
   if (C.lines) {
