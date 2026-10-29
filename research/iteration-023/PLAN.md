@@ -44,6 +44,10 @@ R7 THE WORDS ARE LIVE: INFORMATIONAL's stage texts (name, formula, subtitle) lag
 11. (B3) While playing, the pause glyph in the accent colour? Default: as built (the ink).
 12. (B1) The pills show ≈ 250 ms in, before the windows finish sliding. Default: as built.
 13. (B4) The vertical card is 6 px taller for its gaps. Default: as built.
+14. (R7) A re-seat of the stage words jumps into place instead of the old ~1 s glide. Default: as built.
+15. (R3) WAVE's ESP third column is wider so LIVE · SLOW stays on one line, so those knobs stand off EXPOSURE/SOFT's column. Default: as built.
+16. (R2) Under a 376-px viewport NAME is cut with an ellipsis. Default: as built.
+17. (R6) A side ESP strip ignores a vertical CSB on the same side. Default: as built.
 
 ## MERGE ORDER
 D → B → R; each merged with the recipe (`git merge --no-ff --no-commit`, `--ours lab/sw.js`, `pwa.test --write`, rack-deps, new-project, mir-manifest, `./test.sh node`, THE LOCK 843/987) and recorded below.
@@ -53,4 +57,4 @@ D → B → R; each merged with the recipe (`git merge --no-ff --no-commit`, `--
 |---|---|---|---|
 | D | 7335da8f | 9915e18e | kit 1.5.6-alpha.9 (kit-1.5.5 @ 3ce9bc2, bundle carried to .tmp/it021/kit.bundle): D1 rings and CLIP's plane dashed behind the view · D2 KEYBOARD tabs wear glyphs (icons.js mapping) · D3 modulation chip rail on the trig motion · D4 one notch = 1 BPM on the CSB, TIMELINE and modulation tempo fields · D5 no door: T=/t= is the app's periodFx (transport.js:32–34, :114, :255–259; csb.css:130, :143); test.sh node EXIT 0, LOCK 843/0 and 987/0 |
 | B | 9915e18e | 2ab15fa2 | kit 1.5.6-alpha.10 (kit-1.5.5 @ 0272f11, bundle carried): B1 rack.showPills() on EXPAND ALL (≈ 1.26 s) · B2 periodFx gone (expanded panel 392 → 354 px) · B3 no rim/glow on the lit play, the chip motion, the preset chip whole (--touch 34 px in the bar), bar height 92 · B4 the card/FREE bar a 7-column grid with air (206 → 212 px); test.sh node EXIT 0, LOCK 843/0 and 987/0 |
-| R | 2ab15fa2 | | |
+| R | 2ab15fa2 | f5c9aedf | kit 1.5.6-alpha.11 (kit-1.5.5 @ c18957a, bundle carried): R1 P3 · CONVERT · VIVID one row (SETTINGS 598 → 546 px) · R2 INFORMATIONAL four columns, knobs over knobs (872 → 844) · R3 WAVE's ESP rows share columns (652 → 648) · R4 the t readout's 1.4em min-height dropped (3.6 px high before) · R5 the ⓘ upright (skin.css:302 italic Georgia) · R6 the strip's φ · a.u. caption into the hint; a side strip ignores the bar (131/76 → 0 px) · R7 the words re-seat on any rack change and LAND (viewChanged({ land })): 1467 → 83 ms; test.sh node EXIT 0, LOCK 843/0 and 987/0 |
