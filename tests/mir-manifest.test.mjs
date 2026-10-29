@@ -46,6 +46,8 @@ const ACCEPTED = {
   '1.5.6-alpha.10': '16b410f1039f9795ee18f2365aca0aa109743bc9e5c22241efda442dade055c8',
   /* 023 R7 · MIR 1.5.6-alpha.11 on the clone road (kit c18957a): THE WORDS LAND (viewChanged({ land: true }) — the stage words' re-seat lands at once) */
   '1.5.6-alpha.11': 'fe6f4b26077f40194675d7d6d0920d13a3f966507826d8b747c33b88b785c6ea',
+  /* 025 A1 · MIR 1.5.6-alpha.12 on the clone road (kit 6b3c933): THE AUDIO TRACK IN THE MUXER (mp4Parts({ audio }): mp4a+esds or Opus+dOps, elst + roll, interleaved chunks) */
+  '1.5.6-alpha.12': '0ba21c6108c34fdd540251567ec7c128c6dba7670a9c8552fc49df2eacf2df20',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */
