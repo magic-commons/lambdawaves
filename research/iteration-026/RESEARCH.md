@@ -33,3 +33,4 @@ What a Claude can already drive in λWAVES without a pointer, where it lives, an
 
 ## 7. Stitching
 - `ffmpeg -f concat` over films re-encoded to one size/fps (libx264 crf 16 yuv420p, audio AAC or silence), a lower-third `drawtext` per segment for the educational film (the STAGE FORMULA/NAME are OUT of a frame by 025's call 4; the title is put on by the stitch, from the score's `title`).
+- MEASURED (2026-10-29 02:05, Josh's file `media/star.mp3`, 252.9 s MP3 48 k; `.tmp/it026/analyse.mjs` + `refine.mjs`: 100-Hz energy flux, autocorrelation 60–200 BPM, refined 131–136 at 0.02 over the drop section): **133.33 BPM** (a 0.45 s beat; octave check 66.5 is the half-time feel), the DROP at **36.235 s** (the low band under 140 Hz jumps from −44 dB to −11 dB inside 10 ms), so 16 bars = 28.8 s = 864 frames at 30 fps, frame-exact. Josh's "10–30 s" was the intro; the drop is at 36.
