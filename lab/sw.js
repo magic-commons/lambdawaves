@@ -110,7 +110,7 @@ const PRECACHE = [
   ['./h2curve.js',                                                  'df264cf5a7e3'],
   ['./hamiltonian.js',                                              'd0216c32c068'],
   ['./hydrogen.js',                                                 'fc5e6a37d910'],
-  ['./icons.js',                                                    '4e7e8dc25bd9'],
+  ['./icons.js',                                                    '882db6c968a9'],
   ['./img/icon-192.png',                                            '7f335219b4d1'],
   ['./img/icon-512.png',                                            '6524e4958e20'],
   ['./img/icon-apple-180.png',                                      '50a76e1103a7'],
