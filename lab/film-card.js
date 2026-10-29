@@ -15,6 +15,7 @@ import { VIEW_NAMES } from './field.js';
 import { registerClipKind } from './mir/timeline/kinds.js';
 import { el, label, trig, svgNode, sw } from './mir/kit.js';
 import { handOver } from './capture.js';
+import { notice } from './mir/shell/notice.js';
 import { fold } from './fold.js';
 
 const PREFIX = 'lambdawaves.q0.render.', SCALES = ['1', '2', '3', '4'];
@@ -40,11 +41,22 @@ const periodOf = (ed) => { const d = ed && ed.model && ed.model.state(); return 
 registerClipKind('lw-period', { drives: false, value: () => null, validate: (c) => Number.isFinite(c.t0) && c.T > 0 && c.seconds > 0,
   duration: (c, bpm) => c.seconds * bpm / 60, paint: (svg, c, clip, { geometry, height }) => svgNode('rect', { class: 'tl-pattern-group', x: 0, y: 0, width: geometry.width, height }, svg) });
 
+/* 025 C4 · THE BOUNCE SAID: "RENDERED 300 frames · 10.0 s · 1920 × 1080 · 30 fps · Opus 48 k" — read back from the FILE (render-exact.js
+   fileFacts: the avc1 size, the video stts fps, its sample count and seconds, its audio trak's entry), the kit's result only where the file holds
+   no such word (PNG frames' fps, the audio's rate); never the card's options */
+function bounceLine(f, res, preview) {
+  const fps = (f && f.fps) || res.fps, n = f && f.frames != null ? f.frames : res.frames, s = f && f.durationS != null ? f.durationS : n / fps;
+  const au = res.audio ? (res.format === 'png' ? 'WAV' : f && f.audioCodec ? { mp4a: 'AAC', Opus: 'Opus' }[f.audioCodec] || f.audioCodec : res.audio.label) + ' ' + res.audio.sampleRate / 1000 + ' k' : 'silent';
+  return (preview ? 'PREVIEW ' : 'RENDERED ') + n + ' frames · ' + s.toFixed(1) + ' s · ' + (f && f.w ? f.w + ' × ' + f.h : res.width + ' × ' + res.height) + ' · ' + +fps.toFixed(3) + ' fps · ' + au;
+}
+
 export function createFilmCard(o) {
   /* R7 · the first run's film is C7's — 6 s, the canvas' own size, the modulation ON when MOD is armed — seeded once (brief B1) */
   if (ls.get('duration') === null) { ls.set('duration', '6'); ls.set('size', 'current'); ls.set('modulation', o.armed() ? 'on' : 'off'); }
   let scale = SCALES.includes(ls.get('scale')) ? ls.get('scale') : '2', made = null, note = null;
-  const film = o.film, cv = film.canvas, say = (m, warn) => { if (made) made.card.setStatus(m, warn ? 'warn' : 'live'); };
+  /* 025 C4 · `landed`: the line a finished run says, in place of the kit's own "Render complete" / "Preview ready" (one line, the kit's say) */
+  let landed = null;
+  const film = o.film, cv = film.canvas, say = (m, warn) => { if (!made) return; if (landed && /^(Render complete|Preview ready)$/.test(m)) { [m, warn] = landed; landed = null; } made.card.setStatus(m, warn ? 'warn' : 'live'); };
   /* 025 B1 · B3: NODES (ON = the screen's graph baked into each frame · OFF = the field alone, 024's film) and CHROME (LABELS = the ATOM LABELS and the
      ESP BAR on the frame · OFF), λWAVES' own rows under AUDIO; read at the take (render-exact.js describe → the job) */
   const nodesOn = () => ls.get('nodes') !== 'off', chrome = () => (ls.get('chrome') === 'off' ? 'off' : 'labels');
@@ -58,7 +70,8 @@ export function createFilmCard(o) {
     return run0(opts).then(async (res) => {
       const file = await film.fileFacts(res).catch(() => null), A = film.audit({ asked, plan, res, last: film.last, file, current });
       if (film.last) film.last.audit = A;
-      if (!A.ok) say('RENDER DISOBEYED: ' + A.lies.join(' · '), true);
+      landed = A.ok ? [bounceLine(file, res, !!opts.previewS), false] : ['RENDER DISOBEYED: ' + A.lies.join(' · '), true];
+      say(...landed); notice(landed[0], { kind: landed[1] ? 'warn' : 'ok', ms: landed[1] ? 8000 : 5000 });   // the kit's toast, once; the card's status keeps it
       return res;
     });
   };
