@@ -1,0 +1,46 @@
+# Common laws for every iteration 027 builder (Claude Sos, 2026-10-29)
+
+You are an Opus builder in your own git worktree (isolation worktree). First:
+
+    git reset --hard <BASE sha from the CLOSED table of research/iteration-027/PLAN.md>
+    git checkout -b it027-<your-chain>
+
+Read `research/iteration-027/PLAN.md` whole (WHAT STANDS has the D1 facts; your six rows), `PROMPT.md`, then `research/iteration-026/A-BUILD.md` §deviations and `B-BUILD.md` whole (the demos' transformation and the dirty finding), `docs/laws/film.md` (THE BOUNCE, THE FILM IS THE SCREEN, the laws of 026), `docs/laws/scopes-and-records.md` (the three scopes, FOLDERS IS THE PROJECTS HOME), the heads of `lab/projects.js`, `lab/mir/folders/folders.js` (dirty, the gallery), `lab/mir/core/project.js` (parts: capture/restore/signature), `lab/windows/film.js`, `lab/render-exact.js` (frame(), the caption at ≈779), `lab/mapping.js`, `lab/mir/shell/midi.js`, `lab/look.js` — heads only, then grep. The DATABASE map for file:line: grep `/home/joshua-hosain/Documents/DATABASE/CLAUDE/APPS/LAMBDAWAVES/MAP/LAMBDAWAVES FILE DETAIL.md` (read-only). Never cat a big source file.
+Then the `CLAUDE.md` paragraphs that touch your files (grep the file names). Do not read the whole research library.
+
+THE MACHINE: the night run c8 is DONE (06:49); the GPU is free. Never write under `~/Documents/LAMBDAWAVES-VOLUMES/`; its ports 9651/5651 stay untouched. Josh's port 9261 serves the integrator's tree; never touch it. Josh's calls run at their defaults unless the integrator says otherwise in your prompt. Never start `tail -f` or any watcher in the background: a suite runs in the foreground and ends. The CPU is free: run suites normally, but keep ONE browser of your own at a time and no screenshots in bulk (headless WebGPU shares the card).
+
+Laws (standing, Josh's):
+- NO push, NO deploy, NO tag, NO release. Commit locally on your branch only; the integrator merges.
+- THE KIT SENTENCE (CLAUDE.md:6, since chain K): THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: lab/mir is written by adopt.mjs alone; a λWAVES need becomes an additive door numbered 1.5.6-alpha.N with its FOR-MIR line; a removal waits for a line; `node <MIR>/tools/adopt.mjs . --check` says in step. A door is built in a MIR worktree on the kit's
+  own laws (words through `label()`/`t()` + the English pack; parts by class and `data-*`; `.glass` takes the look store), versioned
+  `1.5.6-alpha.N`, then adopted (`MIR-MANIFEST.json` + its pin in `tests/mir-manifest.test.mjs`); `tools/mir-manifest.py` is retired (021 K4).
+  `lab/fonts/**` stays untouched.
+- THE CLONE ROAD (a kit door): the kit's home `~/Documents/MIR` is NOT writable from your worktree. Clone the integrator's bundle into your worktree:
+  `git clone --branch kit-1.5.5 /home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/optimization-2026-09-24/.tmp/it021/kit.bundle .tmp/kit`
+  (kit-1.5.5 @ c13df7d = MIR 1.5.6-alpha.17). Build the door there on the kit's laws, bump `version.js`/`package.json`/the third site, a CHANGELOG
+  line, `npm test` in the clone (re-aim a stale string; never delete a law), commit in the clone; then adopt: `node .tmp/kit/tools/adopt.mjs .`
+  (lab/mir written by adopt alone), pin the new manifest sha in `tests/mir-manifest.test.mjs` ACCEPTED, `node .tmp/kit/tools/adopt.mjs . --check`
+  says in step, `node tests/pwa.test.mjs --write`. At the end `git -C .tmp/kit bundle create <ABSOLUTE path of your worktree>/.tmp/kit-1.5.6-alpha.N.bundle kit-1.5.5 v1.5.5`
+  and put that absolute path in your BUILD note (the integrator carries it). Precedent: research/iteration-022/P-BUILD.md §P1.
+- Josh's dial: "Keep the builds tight and don't bloat the code with random verification/gate codes. Just build the features since we are not even
+  1.0.0 release yet." Fix, simplify, don't add. Diagnostics live in `tools/`, not `lab/`.
+- `lab/rack.js`'s `app` literal is never extended; `node tools/rack-deps.mjs --classes --no-write` stays green (HINGE ≤ 25; spectrum.js is AT 25).
+- Renames are LABEL renames: saved keys, ids, modulation target ids, CSS hooks (`mol-*`, `reg-*`, `#lwMode`, the rack window id `transport`) stay.
+  Every stored key keeps its scope (`docs/STATE-SCOPES.md`): a project open leaves `lambdawaves.q0.settings` byte-identical outside WORKSPACE.
+- THE LOCK (`tools/perf/digest-lock.mjs`, the fixtures) is never re-baked; a leaf that moved is re-captured BY NAME and said in the BUILD note.
+- Never `pkill -f`. Stop only your own pids. Never touch servers 8721/8731/8735/8741/9241/9261/9491/8790/9651.
+- `~/Documents/OBSIDIAN/**` is read-only. The vault folder `for CODEX/` is read-only. Notes for Josh go in the BUILD note, not in his vault.
+- Your own gate server: `python3 tools/gate/server.py <your worktree> <your port> &` — stop it by pid at the end. Browser suites:
+  `nice -n 10 env LW_PORT=<port> GD_PORT=<your gd port> node tests/<suite>.browser-test.mjs`. Pictures through the suites' CDP helper or `tools/`
+  probes into `research/iteration-027/<CHAIN>-shots/` (JPEG, small, few).
+- Light verification: the suites that read your files, ONE visual check per row (before/after where the plan asks for a look). Re-aim a test whose
+  string you moved; never delete a law to pass it. wigner W42-8 flakes under load; re-run alone.
+- One commit per row, message `<ROW> <NAME>: <one line>`, then the next row in the SAME worktree. Write `research/iteration-027/<CHAIN>-BUILD.md`
+  (what changed, files, tests, the CLAUDE.md sentence to add, open questions for Josh). Under 80 lines.
+- `lab/sw.js` only via `node tests/pwa.test.mjs --write` when a file under `lab/` is added or changes bytes.
+- Tokens: read what you need; no long explorations; no sub-agents.
+
+Report at the end (and a partial report if you run short), in this exact shape:
+worktree · branch · commits (sha + row) · tests (which, result) · kit version now · LOCK leaves moved (by name, or none) · blockers · next (unbuilt).
+Under 40 lines.
