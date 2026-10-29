@@ -1,7 +1,7 @@
 /* tools/perf/film-bake.mjs (025 B) — THE FILM IS THE SCREEN, measured: the film's own determinism (`__LW.captureUI.exact.verify`: one short schedule
  * rendered twice through the kit's recorder, digest against digest) with the graph EMPTY and with CURVES + FILM GRAIN + DECOHERE, and a frame of a
  * baked film beside the stage's screenshot at the same t (B-shots); `overlays` (B2: VORTEX + PARTICLES) and `words` (B3: H₂O under ESP).
- *   LW_PORT=9691 GD_PORT=5691 node tools/perf/film-bake.mjs [steps: empty,graph,nodes,overlays,words,shot] [out-dir for the shots]
+ *   LW_PORT=9691 GD_PORT=5691 node tools/perf/film-bake.mjs [steps: empty,graph,nodes,shaders,overlays,words,shot] [out-dir for the shots]
  */
 import { open } from '../gate/gatekit.mjs';
 import fs from 'node:fs';
@@ -29,6 +29,16 @@ try {
     out.graphB = await g.ev(verify); console.log('graphB', JSON.stringify(out.graphB));
     out.sameAcross = JSON.stringify(out.graphA.digests) === JSON.stringify(out.graphB.digests);
     console.log('two verify calls (four runs) agree:', out.sameAcross);
+  }
+  /* 027 N4 · the three stateful/splat SHADER nodes: FEEDBACK + REFRACT + FLOW, the film's own state from black at frame 0 — two calls, four runs */
+  if (STEPS.includes('shaders')) {
+    out.shaders0 = await g.ev(`__LW.nodes.setOff(false); for (const n of __LW.nodes.nodes()) __LW.nodes.remove(n.id);
+      for (const t of ['feedback', 'refract', 'flow']) __LW.nodes.add(t);
+      await new Promise((r) => setTimeout(r, 400)); await __LW.settle(); return __LW.nodes.nodes().map((n) => n.type);`);
+    console.log('shaders', JSON.stringify(out.shaders0));
+    out.shadersA = await g.ev(verify); console.log('shadersA', JSON.stringify(out.shadersA));
+    out.shadersB = await g.ev(verify); console.log('shadersB', JSON.stringify(out.shadersB));
+    console.log('shaders: two verify calls (four runs) agree:', JSON.stringify(out.shadersA.digests) === JSON.stringify(out.shadersB.digests));
   }
   /* B2 · the overlays: VORTEX raised, PARTICLES on and seeded, VORTEX's LOCATE + OVERLAY pressed */
   if (STEPS.includes('overlays')) {

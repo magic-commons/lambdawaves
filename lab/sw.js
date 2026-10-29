@@ -70,7 +70,7 @@ const PRECACHE = [
   ['./equalizer.js',                                                'dd4a442671a6'],
   ['./export3d.js',                                                 'd9d9c83c6cd7'],
   ['./field.js',                                                    'fe3ea02e4fbb'],
-  ['./film-bake.js',                                                '9eb84ea3e7f8'],
+  ['./film-bake.js',                                                '79c8477be4bb'],
   ['./film-card.js',                                                '3631f6772c58'],
   ['./first-run.js',                                                'ebef27ceb60e'],
   ['./flash-law.js',                                                '8f23407a1752'],
