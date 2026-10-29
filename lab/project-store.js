@@ -158,8 +158,9 @@ export function projectFileText(it) {
     the ten others (WATER, BENZENE, N₂, H₂ σu, HELIUM, CHORD, BUCKY, BREAK, TUNNEL, LDA) are deleted — the new demos will be made on the
     app's newer systems (the timeline, the molecules) — and WAVE DANCER is WAVE DANCER PROTOTYPE, re-saved at KNEE 3.  The FILE id
     `wave-dancer` and the seedId `demos/wave-dancer` stay, so a reader's entry seeded from it is refreshed AND renamed in place
-    (lab/projects.js seed()); an entry seeded from a deleted demo stays the reader's (it opens from their store, and no starter names it) */
-export const STARTERS = Object.freeze([['wave-dancer', 'WAVE DANCER PROTOTYPE']]
+    (lab/projects.js seed()); an entry seeded from a deleted demo stays the reader's (it opens from their store, and no starter names it).
+    ITERATION 026: three conducted projects (docs/conductor/) join it, in this order — STAR LOOP, BENZENE π, WATER ESP */
+export const STARTERS = Object.freeze([['wave-dancer', 'WAVE DANCER PROTOTYPE'], ['star-loop', 'STAR LOOP'], ['benzene-pi', 'BENZENE π'], ['water-esp', 'WATER ESP']]
   .map(([file, name]) => Object.freeze({ file, name, folder: 'DEMOS' })));
 /** starterOf(spec, text) → a folders/seed.js starter from the demo file's text.  Its revision is the file's own `saved` stamp and the
  *  picture's mark (`·cover`, iteration 004: the DEMOS took their covers as pictures), so every browser's DEMOS refresh in place once */

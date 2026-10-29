@@ -193,7 +193,7 @@ green('R10 b3–b4 · the 8 vs 24 MB cap: the kit\'s intake takes a 10 MiB λWAV
   for (const s of STARTERS) { const st = starterOf(s, read('../lab/demos/' + s.file + '.lambdawaves.json')), pg = pageFromNotebook(st.data.parts[PART].notebook);
     assert.ok(pg && /^# /.test(pg.md.replace(/^\*[^*]*\*\n\n/, '')), s.file + ': no page 0'); assert.equal(st.readOnly, true); assert.equal(st.folder, 'DEMOS'); }
 }
-green('R10 c · a 1.4 notebook is page 0: the kit\'s pageFromNotebook reads λWAVES\' { title, subtitle, text } as { title, md } with the subtitle as the first italic line (an empty notebook is no page); a 0.4 item\'s notebook rides in the ONE part unchanged — the same page out of the FOLDERS entry and out of its .mir; the bundled demo (iteration 009: WAVE DANCER PROTOTYPE alone) is a read-only DEMOS starter with its page 0');
+green('R10 c · a 1.4 notebook is page 0: the kit\'s pageFromNotebook reads λWAVES\' { title, subtitle, text } as { title, md } with the subtitle as the first italic line (an empty notebook is no page); a 0.4 item\'s notebook rides in the ONE part unchanged — the same page out of the FOLDERS entry and out of its .mir; each bundled demo (WAVE DANCER PROTOTYPE, and since iteration 026 STAR LOOP, BENZENE π, WATER ESP) is a read-only DEMOS starter with its page 0');
 
 /* ── THE UNSAVED MARK (the part's signature, projectKey()), sliced out of rack.js as project-storage.test did ── */
 {
