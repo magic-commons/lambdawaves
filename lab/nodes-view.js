@@ -21,7 +21,7 @@
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
 import { el, label, ariaLabel, chip, onContext } from './mir/kit.js'; import { contextMenu } from './mir/shell/menubar.js';
 import { nodeBody, FOOT } from './node-types.js';
-import { transfer, ownRun } from './nodes-compile.js';
+import { transfer, ownRun, over } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
 /** keysAt(el) — the acts of the graph whose ground `el` is (the `nodes.*` rows run them while it has the focus), or null */
 const GROUNDS = new WeakMap(); export const keysAt = (n) => (n && GROUNDS.get(n)) || null;
@@ -30,9 +30,9 @@ const AT = { in: [65, 16] };                                         // STAGE IN
 const SPAN = 250;                                                    // the column's width, centred in a view that has no pan of its own yet
 const GAP = 36;
 const NOTE = 'Grades the screen only — pictures and films are untouched.';
-const MARK = { table: '·', matrix: '·', prim: '···', layer: '··' };       // THE COST IS ON THE CARD: · folds for free, ·· a layer, ··· a pass
-const CLASSES = ['table', 'matrix', 'prim', 'layer'];
-const markOf = (q, T) => MARK[T.cls !== 'layer' && ownRun(q, T) ? 'prim' : T.cls];
+const MARK = { table: '·', matrix: '·', prim: '···', layer: '··', shader: '····' };   // THE COST IS ON THE CARD: · folds for free, ·· a layer, ··· a pass, ···· a GPU pass (024 S)
+const CLASSES = ['table', 'matrix', 'prim', 'layer', 'shader'];
+const markOf = (q, T) => MARK[!over(T) && ownRun(q, T) ? 'prim' : T.cls];
 const NS = 'http://www.w3.org/2000/svg';
 const hueAt = (h) => [Math.abs(h * 6 - 3) - 1, 2 - Math.abs(h * 6 - 2), 2 - Math.abs(h * 6 - 4)].map((x) => Math.min(1, Math.max(0, x)));
 const ZOOM = [0.5, 2], clampZ = (z) => Math.min(ZOOM[1], Math.max(ZOOM[0], z));
@@ -109,7 +109,7 @@ export function createView(parent, kind, M) {
     const b = el('button', 'nodes-rm', n.bar); b.type = 'button'; chip(b, 'clear', 'REMOVE NODE'); b.addEventListener('click', () => M.remove(q.id));
     if (q.type === 'curves') n.view = M.curvesIn(n.body);
     else { n.body.classList.add('nodes-knobs', 'row', 'fit'); n.ctl = nodeBody(n.body, q, t, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) }); }
-    if (t.cls !== 'layer') {                                          // the foot fold: FADE · MASK · SOFT
+    if (!over(t)) {                                                   // the foot fold: FADE · MASK · SOFT
       const f = el('div', 'nodes-foot', n.c), tg = el('button', 'nodes-foot-t', f), fb = el('div', 'nodes-knobs row fit', f); tg.type = 'button'; label(tg, 'FADE · MASK'); fb.hidden = true;
       tg.setAttribute('aria-expanded', 'false'); tg.addEventListener('click', () => { fb.hidden = !fb.hidden; tg.setAttribute('aria-expanded', String(!fb.hidden)); });
       n.foot = tg; n.fctl = nodeBody(fb, q, { knobs: FOOT }, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) });

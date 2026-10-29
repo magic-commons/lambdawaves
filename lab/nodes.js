@@ -12,17 +12,18 @@
  * Every node knob is a MIR control routed like any other dial (`nodes.<node>.<knob>`, stable).  Records, all PREFERENCE: the grade
  * `lambdawaves.q0.curves`, the reader's curves `.curvePresets`, the graph `.nodes` ({ seq, list: [{ id, type, values, bypass, at, name, fold }],
  * at, pan, zoom, win, off }), the reader's graphs `.nodePresets`.
- *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod }) → { model, filter, nodes(), add(type), remove(id),
+ *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field, mat, present }) → { model, filter, nodes(), add(type), remove(id),
  *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on) } */
 import { el, ariaLabel, chip } from './mir/kit.js';
 import { createWindow } from './mir/window/window.js';
 import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
 import { frame } from './mir/core/frame.js';
-import { compile } from './nodes-compile.js';
+import { compile, over } from './nodes-compile.js';
 import { TABLE_TYPES, MATRIX_TYPES, homeOf, FOOT } from './node-types.js';
 import { LAYER_TYPES, createLayerHost } from './node-layers.js';
 import { PRIM_TYPES } from './node-prims.js';
+import { SHADER_TYPES, createShaderHost } from './node-shader.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { createUserPresets } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
@@ -40,7 +41,7 @@ const SHIPPED = {
   /* 020 X4: POSTER's steps at 85 % (the banding softened, free: a fold), PRINT's contrast in the mid-tones only (a masked run) */
 };
 
-export function createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, onWin = () => {} }) {
+export function createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field = null, mat = {}, present = null, onWin = () => {} }) {
   const store = jsonStore('lambdawaves.q0.nodes');
   const rec = () => { const r = store.get(); return r && r.v === 1 ? r : { v: 1 }; };
   const put = (patch) => store.set({ ...rec(), ...patch });
@@ -53,7 +54,9 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
 
   /* 019 N1 · THE COMPILER: CURVES hands its tables to the graph (a `port`), not to the filter: it is a TABLE node like any other, and alone it
      compiles to the byte-identical filter 018 wrote.  One compile and one filter write per frame, whatever moved */
-  const filter = pictureFilter(canvas), cache = new Map(), layers = createLayerHost(canvas.parentElement);
+  /* 024 S2 · THE SHADER HOST: SHADER nodes draw on the field's device from its tap — set while one lives, cleared when none does */
+  const gpu = field && field.ok ? createShaderHost({ device: field.device, canvas, tap: field.tap, present }) : null;
+  const filter = pictureFilter(canvas), cache = new Map(), layers = createLayerHost(canvas.parentElement, gpu);
   let passes = 0, nodes = [];
   const flags = { view: null, solo: null };                          // 020 X3 · A FLAG IS NOT A RECORD: VIEW HERE and SOLO die with the session
   const how = () => ({ upTo: flags.view, solo: flags.solo, off: !!rec().off });
@@ -65,7 +68,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     curves: { cls: 'table', label: 'CURVES', hint: 'a transfer curve per channel, as Photoshop draws it', knobs: [],
       neutral: () => model.amount() === 0 || model.channels.every((ch) => isIdentity(model.points(ch))),
       fn: () => { const T = curveTables(); return (y, ch) => { if (T.MASTER) y = lookup(T.MASTER, y); if (T[ch]) y = lookup(T[ch], y); return y; }; } },
-    ...TABLE_TYPES, ...MATRIX_TYPES, ...PRIM_TYPES, ...LAYER_TYPES,
+    ...TABLE_TYPES, ...MATRIX_TYPES, ...PRIM_TYPES, ...LAYER_TYPES, ...SHADER_TYPES,
   };
 
   /* THE LIST: the record's nodes as saved (at most one CURVES); else 018's one-node graph, or a reader who graded before NODES kept a
@@ -97,7 +100,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      its BASE (the registry's), a modulator's write is PAINTED (show), as every rack dial (mod-port.js) */
   const ID = (q, k) => 'nodes.' + q.id + '.' + k;
   const routed = (id) => !!(mod && mod.registry && mod.registry.has(id) && mod.registry.isModulated(id));
-  const knobsOf = (q) => [...TYPES[q.type].knobs, ...(TYPES[q.type].cls === 'layer' ? [] : FOOT)].filter((K) => !K.colour && !K.options);   // X4: FADE and SOFT too
+  const knobsOf = (q) => [...TYPES[q.type].knobs, ...(over(TYPES[q.type]) ? [] : FOOT)].filter((K) => !K.colour && !K.options);   // X4: FADE and SOFT too
   const knobOf = (q, k) => { for (const v of views) { const w = v.widget(q.id, k); if (w) return w; } return null; };
   /* 021 R2 · THE FLASH GUARD reaches NODES: each knob's 10 % step is a tenth of its span (in ln for a log knob) — conservative, uncalibrated */
   const flashStep = (K) => (K.log && K.min > 0 ? Math.log(K.max / K.min) : K.max - K.min) / 10;
