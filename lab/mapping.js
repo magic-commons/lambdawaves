@@ -3,7 +3,8 @@
  * and ONE LEARN that arms all three at once: the first input wins (a keydown binds through the table with the steal law: a taken chord asks,
  * LEARN and the same chord again take it; a MIDI message is mapped; a moved MACRO knob is routed to the action).  A `gesture` row (full screen,
  * a clipboard, a file picker) wants a real press: KEY only.  × on a chip unbinds.  The search line filters by word.  MIDI is asked for only on
- * a press (LEARN or CONNECT MIDI); Safari and the iPad have none, and the MIDI column says so.  The map is PREFERENCE `lambdawaves.q0.midi`. */
+ * a press (LEARN or CONNECT MIDI) — or at boot where a saved map exists and the browser already grants it (027 D4, resumeMidi); Safari and
+ * the iPad have none, and the MIDI column says so.  The map is PREFERENCE `lambdawaves.q0.midi`. */
 import { el, label, trig } from './mir/kit.js'; import { createMidi, midiSupport } from './mir/shell/midi.js'; import { jsonStore } from './mir/core/prefs.js';
 import { displayChord } from './mir/shell/keys.js'; import { t } from './mir/core/i18n.js';
 import { ORDER } from './key-table.js';
@@ -12,6 +13,17 @@ export const MIDI_KEY = 'lambdawaves.q0.midi';
 /** targetOf(id) — the modulation target an action answers as: `action.` + its id, each segment lower-case alphanumeric (the registry's grammar) */
 export const targetOf = (id) => 'action.' + id.toLowerCase().split('.').map((s) => s.replace(/[^a-z0-9]/g, '').replace(/^(\d)/, 'n$1') || 'x').join('.');
 const midiText = (k) => { const [kind, ch, n] = k.split(':'); return (kind === 'cc' ? 'CC ' : 'NOTE ') + ch + '·' + n; };
+
+/** resumeMidi(midi, say) → true when live (027 D4 · A MAPPED CONTROLLER IS LIVE AT LAUNCH): a saved map is the consent its LEARN asked for, so
+ *  the boot asks again only where the browser already grants MIDI — no prompt; 'prompt' waits for a hand (CONNECT MIDI, LEARN); a refusal
+ *  is said once, never thrown.  A browser with no 'midi' permission name lets the request decide.  The saved notes and CCs bind as it lands. */
+export async function resumeMidi(midi, say = () => {}) {
+  if (!midiSupport().ok || !Object.keys(midi.map()).length) return false;
+  let st = 'granted'; try { st = (await navigator.permissions.query({ name: 'midi' })).state; } catch (_) { /* no such permission name here */ }
+  if (st === 'prompt') return false;
+  if (st !== 'denied' && await midi.start()) return true;
+  say(t('MIDI was refused: the saved mapping waits for CONNECT MIDI')); return false;
+}
 
 export function createMapping(app, { kt }) {
   const A = app.sh.ACTIONS, T = kt.table, support = midiSupport();
@@ -85,7 +97,9 @@ export function createMapping(app, { kt }) {
     const reg = (rows) => M.batch(() => { for (const r of rows) if (r.surface && !r.gesture && r.kind !== 'hold') { const toggle = r.kind === 'toggle' && r.get;
       M.register(targetOf(r.id), { label: (r.short || r.label).toUpperCase(), group: 'action', map: toggle ? 'toggle' : 'trigger', get: () => 0, set: () => {},   /* 021 D0: an act's base is 0, never its state (a film's resume signature counts every base; MOD and GOVERNOR moved it) */
         fire: (on) => (toggle ? A.fire(r.id, on) : A.run(r.id)) }); n++; } });
-    reg(A.list()); A.onAdd(reg); return n;
+    reg(A.list()); A.onAdd(reg);
+    resumeMidi(midi, (m) => { say(m, 'warn'); if (app.w.wMet) app.w.wMet.setStatus(m, 'warn'); });   // 027 D4: METERS says a refusal once
+    return n;
   }
   return { root, midi, paint, install, learn, stop, targetOf };
 }
