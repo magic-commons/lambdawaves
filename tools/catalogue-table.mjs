@@ -55,7 +55,7 @@ const HAND = {
   /* a demo plays a system: its word and oracle are that row's (S30) */
   /* iteration 009: the ten others left (WATER · BENZENE · N₂ · H₂ σu · HELIUM 0.5.0, CHORD 0.6.0, BUCKY 0.6.1, BREAK 0.7.1, TUNNEL 0.7.2, LDA 0.7.3);
      WAVE DANCER is WAVE DANCER PROTOTYPE, its row's id `demo:wave-dancer` kept */
-  demos: { 'wave-dancer': ['hydrogen', '0.5.0'] },
+  demos: { 'wave-dancer': ['hydrogen', '0.5.0'], 'star-loop': ['hydrogen', '1.0.0'], 'benzene-pi': ['C6H6', '1.0.0'], 'water-esp': ['H2O', '1.0.0'] },   // 026: the conducted three
 };
 
 const plain = (s) => s.replace(/<\/?m>/g, '');

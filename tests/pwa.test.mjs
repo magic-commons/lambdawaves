@@ -321,7 +321,7 @@ assert.ok(listed.includes('manifest.webmanifest'), 'sw.js: the manifest itself m
 
 /* The prose in sw.js must name every rule the walk actually applies, so the two cannot drift apart silently. */
 const never = SW.LW_SW.NEVER_PRECACHE.map(([k]) => k).join(' ');
-for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'an adopted kit module no root reaches (R5-W1)', 'a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/covers/, vendor/nist/)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
+for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'an adopted kit module no root reaches (R5-W1)', 'a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
   assert.ok(never.includes(rule), `sw.js: NEVER_PRECACHE does not document the rule "${rule}" that the walk applies`);
 /* and the exception must be REAL, not merely written: every licence text in lab/ is in the precache list. */
 const licences = onDisk.filter(LICENCE);
@@ -335,8 +335,8 @@ console.log(`PASS precache list == lab/ on disk: ${listed.length} files, ${(byte
    lab/library.json — the catalogue lab/molecules.js reads — is precached like any file; each row names lab/library/<sha-256>.json,
    which must exist and hash to its name; and nothing sits in library/ that no row reaches (precache what a root reaches, and
    ship nothing a root does not).  tools/orbital-library.mjs --check proves the bytes are the solver's. */
-assert.deepEqual(DATA, ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/covers/', 'vendor/nist/'],
-  'sw.js §1b: the DATA roots are exactly library/, volumes/, the ladder\'s four basis records (iteration 004 V1), the pictures (iteration 005 A) and the measured lines (iteration 016 E3) — one rule, these members');
+assert.deepEqual(DATA, ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/'],
+  'sw.js §1b: the DATA roots are exactly library/, volumes/, the ladder\'s four basis records (iteration 004 V1), the Picker\'s pictures (iteration 005 A), the demos with their covers (iteration 026: demos/ whole, the precache ceiling) and the measured lines (iteration 016 E3) — one rule, these members');
 assert.ok(listed.includes('library.json'), 'sw.js: the catalogue lab/library.json must be precached — offline, the menu could not name a record');
 const CAT = JSON.parse(text('library.json')), dataFiles = onDisk.filter((f) => f.startsWith('library/'));
 assert.ok(Array.isArray(CAT.rows) && CAT.rows.length >= 2, 'lab/library.json: no rows');

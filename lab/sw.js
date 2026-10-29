@@ -49,7 +49,7 @@ const PRECACHE = [
   ['./camera-law.js',                                               'f2fc22d0e16d'],
   ['./canon-gauge.js',                                              'e760a258cd23'],
   ['./capture.js',                                                  '9a4fe540b94a'],
-  ['./catalogue.js',                                                '272fd2f38941'],
+  ['./catalogue.js',                                                '2318a16ded86'],
   ['./central.js',                                                  '0c721b92b0ca'],
   ['./chemview.js',                                                 'eb8a4ed74b2c'],
   ['./chord-audio.js',                                              '015d0dd91a07'],
@@ -59,7 +59,6 @@ const PRECACHE = [
   ['./csb-favs.js',                                                 '3daf1aaf6183'],
   ['./csb-search.js',                                               '939a2bd20669'],
   ['./csb.css',                                                     'a5570ed910b3'],
-  ['./demos/wave-dancer.lambdawaves.json',                          'c8c61c14152c'],
   ['./density.js',                                                  'b7e7f8bde4fb'],
   ['./dft-grid.js',                                                 '4a75ae325355'],
   ['./dynamics.js',                                                 '0821063b67a1'],
@@ -380,7 +379,7 @@ const PRECACHE = [
   ['./period.js',                                                   '395a63570deb'],
   ['./picker-fx.js',                                                '0b9a1f85c4ec'],
   ['./picker.js',                                                   '29d59d22b109'],
-  ['./project-store.js',                                            '4cff94c833c7'],
+  ['./project-store.js',                                            '8f2d39f032a9'],
   ['./projects.js',                                                 '178c4bd380cc'],
   ['./qho.js',                                                      'c0dfa6e21c94'],
   ['./rack.js',                                                     '9a168da2c184'],
@@ -468,12 +467,15 @@ const PRECACHE = [
  * m/<id>.lwm molecules; in a checkout lab/volumes is the git-ignored dev link to ~/Documents/LAMBDAWAVES-VOLUMES/dist, which no
  * walk follows) and the four basis records only a volume rung needs (STO-6G, 3-21G, 6-31G, 6-31G*: 675 KB the live card never
  * asks for) — fetched with the volume that names them, kept by the page in DATA_CACHE beside it.
- * THE PICTURES (iteration 005 A) are DATA by the same rule: img/menu/ (the Picker's thumbnails, 720 KB) and demos/covers/ (the one
- * demo cover since iteration 009, 20 KB) — deployed, never precached, kept by the page in DATA_CACHE after their first good answer (library.js keepData),
- * so an installed app shows them offline from its second run; a picture not yet held is the tile's own placeholder.
+ * THE PICTURES (iteration 005 A) are DATA by the same rule: img/menu/ (the Picker's thumbnails, 720 KB) and the demo covers — deployed,
+ * never precached, kept by the page in DATA_CACHE after their first good answer (library.js keepData), so an installed app shows them
+ * offline from its second run; a picture not yet held is the tile's own placeholder.
+ * THE DEMOS (iteration 026) are DATA whole: demos/ (the four demo files, 270 KB, and their covers) — deployed, never precached; a demo
+ * file is read by the boot's seed (FOLDERS' DEMOS store it, and a DEMOS press opens that copy offline) and is never kept here, so a
+ * changed demo still reaches every browser (its `saved` stamp is the DEMOS refresh revision).
  * THE MEASURED LINES (iteration 016 E3) are DATA by the same rule: vendor/nist/ (NIST ASD's neutral lines, 330 KB, tools/nist-lines.py) — read when
  * EMISSION SPECTRA first meets the ATOM, kept by the page after that answer; HYDROGEN's lines are computed and never need it. */
-const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/covers/', 'vendor/nist/'];
+const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/'];
 const DATA_CACHE = 'lw-data-v1';
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
@@ -484,7 +486,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
-  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/covers/, vendor/nist/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures and the demo covers, kept as the page first shows them.'],
+  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures and the demo covers, kept as the page first shows them, and the demo files FOLDERS seeds from.'],
   ['a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)', 'kit data an adoption brings that the running lab fetches only when a language is chosen, or never: deployed, never precached, never cached (offline, a language other than English stays English).'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
   ['an adopted kit module no root reaches (R5-W1)', '0.5.0 C0: MIR is adopted whole, so lab/mir/ holds modules for consumers λWAVES has not reached yet. tests/wiring.test.mjs walks the roots and names them (--unreached-kit); tests/pwa.test.mjs and tools/build-deploy.mjs READ that set, so a kit module joins this precache the day a consumer imports it. Deployed, never precached, never failed (PLAN §9).'],
