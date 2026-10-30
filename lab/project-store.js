@@ -65,7 +65,7 @@ export function toFiles(c) {
   const entries = items.map((it, i) => {
     const folder = normalizeFolder(typeof it.folder === 'string' ? it.folder : parent(it.path)), own = typeof it.name === 'string' && it.name ? it.name : leaf(it.path);
     const e = { id: ids[i], name: uniqueName(own, folder, done), folder,
-      at: Number.isFinite(Date.parse(it.saved)) ? Date.parse(it.saved) : 0, thumb: typeof it.thumb === 'string' ? it.thumb : '',
+      at: Number.isFinite(Date.parse(it.saved)) ? Date.parse(it.saved) : 0, thumb: typeof it.thumb === 'string' && /^data:image\//.test(it.thumb) ? it.thumb : '',   // 028 R-24: a picture, never a URL
       facts: isObj(it.facts) ? it.facts : {},
       payload: { parts: { [PART]: { data: it.data, notebook: it.notebook, ...(isObj(it.part) ? it.part : {}) }, ...(isObj(it.parts) ? it.parts : {}) }, ...(isObj(it.payload) ? it.payload : {}) },
       bytes: 0 };

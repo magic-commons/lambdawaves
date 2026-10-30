@@ -10,7 +10,9 @@
  * An installed volume is DEVICE CONTENT, like a library record (lab/library.js): it lives in the Cache Storage 'lw-vol-<id>' — a name no
  * build changes (sw.js collects only its own 'lw-lab-' caches), never precached, never in a project, a link or a history row — and it holds
  * every m/<id>.lwm and t/<id>.webp of the catalogue, the catalogue itself, and its own shelf entry (so the shelf reads offline).  An .lwm is
- * kept only after its bytes hash to the catalogue's sha-256; a thumbnail has no hash in format v1 and is kept as served.
+ * kept only after its bytes hash to the catalogue's sha-256, and carries that sha in its `x-lw-sha256` header (028 R-07): a re-edition under
+ * the same id makes a kept file whose sha differs NOT KEPT on every read (install · installStatus · kept · the file road), so it is fetched
+ * again; a thumbnail has no hash in format v1 and is kept as served.
  *   shelf()                       the published volumes; [] when none is (no volumes.json): "no volumes are published yet"
  *   index(volId)                  the catalogue (from this device when installed, else the network), checked against the shelf's indexSha256
  *   status(volId)                 'absent' | 'partial n/N' | 'installed'   (installStatus: the same as { state, n, N, bytes, total })
@@ -49,6 +51,11 @@ export function watch(fn) { if (typeof fn === 'function') watchers.add(fn); retu
 const changed = (volume, what, id = null) => { for (const f of watchers) { try { f({ volume, what, id }); } catch (_) { /* a watcher's fault is its own */ } } };
 const hex = async (buf) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map((b) => b.toString(16).padStart(2, '0')).join('');
 const caching = () => typeof caches !== 'undefined';
+/* 028 R-07 · a kept file's sha-256 rides in its put's headers; url → that sha ('' for a file kept before the header: not kept) */
+const SHA = 'x-lw-sha256';
+const keptShas = async (c) => new Map(await Promise.all((await c.keys().catch(() => [])).map(async (q) => [q.url, (await c.match(q).catch(() => null))?.headers.get(SHA) || ''])));
+const isKept = (shas, f) => shas.has(f.url) && (!f.sha || shas.get(f.url) === f.sha);
+const json = (body, sha) => new Response(body, { headers: { 'content-type': 'application/json', ...(sha ? { [SHA]: sha } : {}) } });
 /* a READ never creates a volume's cache (a look writes nothing); the first install does */
 async function store(volId, create = false) {
   if (!caching()) return null;
@@ -127,9 +134,9 @@ export async function installStatus(volId) {
   let idx = null; try { idx = await index(volId); } catch (_) { idx = null; }
   const N = idx ? idx.molecules.length : (v.count || 0), total = idx ? idx.molecules.reduce((s, m) => s + (m.bytes || 0), 0) : (v.bytes || 0);
   if (!c || !idx) return { state: 'absent', n: 0, N, bytes: 0, total };
-  const keys = new Set((await c.keys().catch(() => [])).map((r) => r.url));
+  const shas = await keptShas(c);
   let n = 0, bytes = 0;
-  for (const m of idx.molecules) { const fs = filesOf(v, m); if (keys.has(fs[0].url)) bytes += m.bytes || 0; if (fs.every((f) => keys.has(f.url))) n++; }
+  for (const m of idx.molecules) { const fs = filesOf(v, m); if (isKept(shas, fs[0])) bytes += m.bytes || 0; if (fs.every((f) => isKept(shas, f))) n++; }
   return { state: n === 0 ? 'absent' : n < N ? 'partial' : 'installed', n, N, bytes, total };
 }
 async function status(volId) {
@@ -146,16 +153,16 @@ export function install(volId, { onProgress = null, signal = null } = {}) {
     const v = await volume(volId), buf = await indexBytes(v), idx = await index(volId);
     const c = await store(volId, true);
     if (!c) return { ok: false, why: 'this browser has no Cache Storage' };
-    await c.put(indexUrl(v), new Response(buf.slice(0), { headers: { 'content-type': 'application/json' } }));
-    await c.put(SHELF_URL, new Response(JSON.stringify(v), { headers: { 'content-type': 'application/json' } }));
-    const keys = new Set((await c.keys()).map((r) => r.url));
+    await c.put(indexUrl(v), json(buf.slice(0), v.indexSha256));
+    await c.put(SHELF_URL, json(JSON.stringify(v)));
+    const shas = await keptShas(c);
     const total = idx.molecules.reduce((s, m) => s + (m.bytes || 0), 0), N = idx.molecules.length;
     const left = new Map();   // molecule id → files still to fetch
     let bytes = 0, n = 0;
     const queue = [];
     for (const m of idx.molecules) {
-      const fs = filesOf(v, m), todo = fs.filter((f) => !keys.has(f.url));
-      if (keys.has(fs[0].url)) bytes += m.bytes || 0;   // its .lwm is kept already
+      const fs = filesOf(v, m), todo = fs.filter((f) => !isKept(shas, f));
+      if (isKept(shas, fs[0])) bytes += m.bytes || 0;   // its .lwm is kept already, under this edition's sha
       if (!todo.length) { n++; continue; }
       left.set(m.id, todo.length); for (const f of todo) queue.push({ ...f, mol: m });
     }
@@ -169,7 +176,7 @@ export function install(volId, { onProgress = null, signal = null } = {}) {
         if (!r.ok) { if (attempt) throw new Error('the server answered ' + r.status); continue; }
         const b = await r.arrayBuffer();
         if (f.sha && await hex(b) !== f.sha) { if (attempt) throw new Error('its bytes do not match the catalogue'); continue; }
-        await c.put(f.url, new Response(b, { headers: { 'content-type': f.type, 'content-length': String(b.byteLength) } }));
+        await c.put(f.url, new Response(b, { headers: { 'content-type': f.type, 'content-length': String(b.byteLength), ...(f.sha ? { [SHA]: f.sha } : {}) } }));
         return b.byteLength;
       }
       return 0;
@@ -218,21 +225,21 @@ export function installFile(volId, file, { onProgress = null, signal = null } = 
     const c = await store(v.id, true);
     if (!c) return { ok: false, why: 'this browser has no Cache Storage' };
     const keyOf = (f) => (f.path === 'index.json' ? indexUrl(v) : inVolume(v, f.path));
-    const kept = new Map((await Promise.all((await c.keys()).map(async (q) => [q.url, (await c.match(q).catch(() => null))?.headers.get('content-length')]))));
-    const todo = lwv.files.filter((f) => kept.get(keyOf(f)) !== String(f.length));   // resumable: a file kept at its length was checked when it was kept
+    const shas = await keptShas(c);
+    const todo = lwv.files.filter((f) => shas.get(keyOf(f)) !== f.sha256);   // resumable: a file kept under its sha was checked when it was kept (R-07: a stale index.json is replaced)
     const total = lwv.files.reduce((s, f) => s + f.length, 0), need = todo.reduce((s, f) => s + f.length, 0);
     const est = await navigator.storage?.estimate?.().catch(() => null);
     if (est && est.quota && est.quota - (est.usage || 0) < need) return { ok: false, why: `${volLabel(v)} needs ${size(need)} and this device has ${size(Math.max(0, est.quota - (est.usage || 0)))} free for it` };
     const N = lwv.files.length;
     let n = N - todo.length, bytes = total - need;
     const tell = (url) => { if (onProgress) try { onProgress({ n, N, bytes, total, ratio: total ? bytes / total : 1, file: url }); } catch (_) { /* a listener's fault is its own */ } };
-    await c.put(SHELF_URL, new Response(JSON.stringify(v), { headers: { 'content-type': 'application/json' } }));
+    await c.put(SHELF_URL, json(JSON.stringify(v)));
     tell(null);
     for (const f of todo) {
       if (signal && signal.aborted) return { ok: false, cancelled: true, n, N, bytes, total };
       const b = await file.slice(f.offset, f.offset + f.length).arrayBuffer();
       if (b.byteLength !== f.length || await hex(b) !== f.sha256) return { ok: false, why: `${f.path} in ${name} does not match its index — the file is damaged; download it again`, n, N, bytes, total };
-      try { await c.put(keyOf(f), new Response(b, { headers: { 'content-type': f.path.endsWith('.json') ? 'application/json' : f.path.endsWith('.webp') ? 'image/webp' : 'application/octet-stream', 'content-length': String(b.byteLength) } })); }
+      try { await c.put(keyOf(f), new Response(b, { headers: { 'content-type': f.path.endsWith('.json') ? 'application/json' : f.path.endsWith('.webp') ? 'image/webp' : 'application/octet-stream', 'content-length': String(b.byteLength), [SHA]: f.sha256 } })); }
       catch (err) { return { ok: false, why: err && err.name === 'QuotaExceededError' ? 'this device is out of room for it' : String(err && err.message || err), n, N, bytes, total }; }
       n++; bytes += f.length; tell(keyOf(f));
     }
@@ -257,8 +264,8 @@ export async function kept(volId) {
   const c = await store(volId), out = new Set();
   if (!c) return out;
   let v, idx; try { v = await volume(volId); idx = await index(volId); } catch (_) { return out; }
-  const keys = new Set((await c.keys().catch(() => [])).map((r) => r.url));
-  for (const m of idx.molecules) if (filesOf(v, m).every((f) => keys.has(f.url))) out.add(m.id);
+  const shas = await keptShas(c);
+  for (const m of idx.molecules) if (filesOf(v, m).every((f) => isKept(shas, f))) out.add(m.id);
   return out;
 }
 const runningOne = new Map();
@@ -271,10 +278,12 @@ export function installMolecule(volId, molId, { onProgress = null, signal = null
     if (!v.index) return { ok: false, why: volLabel(v) + ' installs from its file (the PICKER\'s LIBRARY: OPEN FILE…)' };
     const c = await store(volId, true);
     if (!c) return { ok: false, why: 'this browser has no Cache Storage' };
-    const keys = new Set((await c.keys().catch(() => [])).map((r) => r.url));
-    if (!keys.has(indexUrl(v))) await c.put(indexUrl(v), new Response((await indexBytes(v)).slice(0), { headers: { 'content-type': 'application/json' } }));
-    if (!keys.has(SHELF_URL)) await c.put(SHELF_URL, new Response(JSON.stringify(v), { headers: { 'content-type': 'application/json' } }));
-    const fs = filesOf(v, m).filter((f) => !keys.has(f.url)), total = fs.reduce((s, f) => s + (f.lwm ? m.bytes || 0 : 0), 0) || 1;
+    const shas = await keptShas(c);
+    if (!isKept(shas, { url: indexUrl(v), sha: v.indexSha256 || null }) || !shas.has(SHELF_URL)) {   // a new edition's catalogue and shelf entry replace the old
+      await c.put(indexUrl(v), json((await indexBytes(v)).slice(0), v.indexSha256));
+      await c.put(SHELF_URL, json(JSON.stringify(v)));
+    }
+    const fs = filesOf(v, m).filter((f) => !isKept(shas, f)), total = fs.reduce((s, f) => s + (f.lwm ? m.bytes || 0 : 0), 0) || 1;
     let got = 0;
     const tell = () => { if (onProgress) try { onProgress({ bytes: got, total, ratio: Math.min(1, got / total) }); } catch (_) { /* a listener's fault is its own */ } };
     tell();
@@ -289,13 +298,14 @@ export function installMolecule(volId, molId, { onProgress = null, signal = null
         const u = new Uint8Array(n); let o = 0; for (const p of parts) { u.set(p, o); o += p.byteLength; } b = u.buffer;
       } else b = await r.arrayBuffer();
       if (f.sha && await hex(b) !== f.sha) return { ok: false, why: 'its bytes do not match the catalogue' };
-      try { await c.put(f.url, new Response(b, { headers: { 'content-type': f.type, 'content-length': String(b.byteLength) } })); }
+      try { await c.put(f.url, new Response(b, { headers: { 'content-type': f.type, 'content-length': String(b.byteLength), ...(f.sha ? { [SHA]: f.sha } : {}) } })); }
       catch (e) { return { ok: false, why: e && e.name === 'QuotaExceededError' ? 'this device is out of room for it' : String(e && e.message || e) }; }
       if (f.lwm) { got = total; tell(); }
     }
-    for (const u of basesOf(v)) await keepData(u);   // the rungs open offline (a basis record already kept is not fetched again)
+    const failed = [];   // the rungs open offline (a basis record already kept is not fetched again); 028 R-21: one not kept is said
+    for (const u of basesOf(v)) if (!await keepData(u)) failed.push({ id: 'basis', url: u, why: 'the basis record could not be kept' });
     const storage = await asked.then(() => storageInfo()).catch(() => null);
-    return { ok: true, id: molId, bytes: m.bytes || 0, storage };
+    return { ok: !failed.length, id: molId, bytes: m.bytes || 0, failed, storage, why: failed.length ? 'a basis record could not be kept — press again online' : '' };
   })().catch((e) => ({ ok: false, why: String(e && e.message || e) })).finally(() => { runningOne.delete(key); changed(volId, 'molecule', molId); });
   runningOne.set(key, job);
   return job;
