@@ -121,7 +121,7 @@ const PRECACHE = [
   ['./img/icon.svg',                                                'e59093ac4a71'],
   ['./img/lambdawaves-logo.svg',                                    'fc49b1e62e10'],
   ['./img/warning-sign.png',                                        'df32331830ce'],
-  ['./index.html',                                                  'b26a3f9e4cbb'],
+  ['./index.html',                                                  '3d3820c3920c'],
   ['./informational.js',                                            '2ee9b2f3099e'],
   ['./kepler.js',                                                   'f8fb43706f76'],
   ['./keplerview.js',                                               '023792d43cfa'],

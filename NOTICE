@@ -15,7 +15,8 @@ THIRD-PARTY COMPONENTS
 
 The following third-party works are redistributed with λWAVES under their own
 licences.  Each licence file named below ships in the tree beside the work it
-covers; nothing here is fetched from a third-party host at run time.
+covers; nothing here is fetched from a third-party host at run time.  Entries
+9 and 10 are scientific data, not software; they are listed for attribution.
 
 The three interface typefaces are SUBSET for this lab.  A subset is a Modified
 Version under the SIL Open Font License, and each entry below says so.
@@ -97,11 +98,56 @@ Version under the SIL Open Font License, and each entry below says so.
     Files:     the twenty KaTeX_*.woff2 faces in lab/mir/shell/vendor/katex/fonts/
     Licence:   lab/mir/shell/vendor/katex/fonts/OFL.txt
 
-7.  lab/mir/mod.js, lab/mir/curve.js, lab/mir/glyph.js
+7.  lab/mir/glyph.js
     From:      the MANDELBROT app, © 2026 Joshua Hosain · Magic Commons,
                GNU General Public License v3.0 only — the same author and licence as
-               λWAVES, so no third-party obligation arises.  Taken by sha256
-               with provenance headers; see lab/mir/PORT-NOTES.md.
+               λWAVES, so no third-party obligation arises.  Its header names the
+               one edit made for this tree.
+
+8.  Spectral, Playfair Display, Alegreya SC  —  the notebook's typefaces
+    Licence:   SIL Open Font License, Version 1.1 (26 February 2007)
+    Notice:    Copyright 2017 The Spectral Project Authors
+               (https://github.com/productiontype/Spectral)
+               Copyright 2017 The Playfair Display Project Authors
+               (https://github.com/clauseggers/Playfair-Display), with Reserved
+               Font Name "Playfair Display"
+               Copyright 2011 The Alegreya Project Authors
+               (https://github.com/huertatipografica/Alegreya)
+    Modified:  NO.  The fourteen WOFF2 files are Google Fonts' own latin and
+               latin-ext files, fetched 2026-10-01 and redistributed unmodified,
+               so each keeps its name.
+    Files:     lab/fonts/info/Spectral-*.woff2 (8), PlayfairDisplay-*.woff2 (4),
+               AlegreyaSC-*.woff2 (2)
+    Licence:   lab/fonts/info/Spectral-OFL.txt, PlayfairDisplay-OFL.txt,
+               AlegreyaSC-OFL.txt
+    Source:    lab/fonts/info/SOURCE.txt (each file's URL and size)
+
+9.  Basis Set Exchange records  —  the Gaussian basis sets of MOLECULES
+    Records:   STO-3G (H–Kr), STO-6G, 3-21G, 6-31G, 6-31G* (H–Kr), 6-31+G*
+               (H–Ar), each stored verbatim as the BSE API returned it.
+    From:      https://www.basissetexchange.org — each record's API URL and the
+               sha-256 of its stored bytes are in lab/vendor/bse/index.json.
+    Licence:   The Basis Set Exchange project releases its repository, which
+               carries these records, under the BSD 3-Clause licence
+               (Copyright 2020 The Molecular Sciences Software Institute,
+               Virginia Tech).  Neither the BSE site nor that repository names a
+               separate licence for the data (read 2026-10-30).  The basis sets
+               themselves are published results of their original authors,
+               named by reference key inside each record.
+    Citation:  as the BSE asks: B. P. Pritchard, D. Altarawy, B. Didier,
+               T. D. Gibson, T. L. Windus, "A New Basis Set Exchange: An Open,
+               Up-to-date Resource for the Molecular Sciences Community",
+               J. Chem. Inf. Model. 59 (2019) 4814–4820,
+               doi:10.1021/acs.jcim.9b00725.
+    Files:     lab/vendor/bse/*-v1.json, lab/vendor/bse/index.json
+
+10. NIST Atomic Spectra Database  —  the measured lines of EMISSION SPECTRA
+    From:      A. Kramida, Yu. Ralchenko, J. Reader and the NIST ASD Team, NIST
+               Atomic Spectra Database, https://physics.nist.gov/asd (fetched
+               2026-10-25; the query is recorded in the file).
+    Licence:   a work of the U.S. Government, in the public domain in the United
+               States.  Credited here and on the ABOUT face.
+    Files:     lab/vendor/nist/lines.json (written by tools/nist-lines.py)
 
 ────────────────────────────────────────────────────────────────────────────
 WITH THANKS
