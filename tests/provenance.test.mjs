@@ -9,6 +9,7 @@ import { CATALOGUE } from '../lab/catalogue.js';
 
 const at = (rel) => fileURLToPath(new URL(rel, import.meta.url)), doc = readFileSync(at('../docs/PROVENANCE.md'), 'utf8');
 execFileSync(process.execPath, [at('../tools/provenance.mjs'), '--check'], { stdio: 'pipe' });   // throws unless the file is in step
+execFileSync(process.execPath, [at('../tools/pyscf-table.mjs'), '--check'], { stdio: 'pipe' });   // 028 R-26: README's PySCF table is the fixtures'
 const cells = (l) => l.slice(2, -2).split(/(?<!\\) \| /), ids = new Set(CATALOGUE.map((r) => r.id));
 const rows = doc.split('\n').filter((l) => l.startsWith('| ') && ids.has(cells(l)[0])).map(cells);
 assert.equal(rows.length, CATALOGUE.length, 'one row for every catalogue row');
