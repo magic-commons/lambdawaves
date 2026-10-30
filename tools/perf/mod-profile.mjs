@@ -103,11 +103,11 @@ const PROBE = String.raw`(() => {
   window.__MP = {
     start() {
       R.frames = []; R.long = []; R.heap = []; R.pres = []; R.regions = {}; R.reasons = {}; for (const b in R.by) R.by[b] = {};
-      R.cur = null; lastWin = null; ids.clear(); knobs.clear();
+      R.cur = null; lastWin = null; ids.clear(); knobs.clear(); R.byId = {};
       V = __LW.mod && __LW.mod.view; F = __LW.field;
       const Hh = __LW.mod && __LW.mod.host;
       if (Hh) {
-        unsub = Hh.registry.subscribe('*', (ev) => { const c = R.cur; if (!c || !R.on) return; if (c.w0 < 0) c.w0 = now() - c.t0; c.writes++; ids.add(ev.id); R.reasons[ev.reason] = (R.reasons[ev.reason] || 0) + 1; });
+        unsub = Hh.registry.subscribe('*', (ev) => { const c = R.cur; if (!c || !R.on) return; if (c.w0 < 0) c.w0 = now() - c.t0; c.writes++; ids.add(ev.id); R.reasons[ev.reason] = (R.reasons[ev.reason] || 0) + 1; R.byId[ev.id] = (R.byId[ev.id] || 0) + 1; });
         offAdv = Hh.clock.onAdvance((kind) => { const c = R.cur; if (c && R.on) { c.adv = now() - c.t0; c.ticks++; } });
       }
       if (F && F.frame) { f0 = F.frame; F.frame = function (a) { const t = now(); try { return f0.call(this, a); } finally { const c = R.cur; if (R.on) { R.pres.push(t); if (c) { c.field += now() - t; c.pres++; } } } }; }
@@ -126,7 +126,7 @@ const PROBE = String.raw`(() => {
       if (unsub) unsub(); if (offAdv) offAdv(); if (f0) { F.frame = f0; f0 = null; } if (mo) mo.disconnect(); if (po) po.disconnect(); unsub = offAdv = mo = po = null;
       const K = ['ts', 'span', 'loop', 'raf', 'timer', 'obs', 'ev', 'mut', 'moSelf', 'knobs', 'writes', 'ids', 'w0', 'adv', 'ticks', 'field', 'pres', 'win', 'inflight', 'fft'];
       return { secs: (R.t1 - R.t0) / 1000, keys: K, frames: R.frames.map((f) => K.map((k) => +(+f[k]).toFixed(3))), by: R.by, long: R.long, longOk: R.longOk, heap: R.heap,
-        pres: R.pres.map((t) => +t.toFixed(3)), regions: R.regions, reasons: R.reasons };
+        pres: R.pres.map((t) => +t.toFixed(3)), regions: R.regions, reasons: R.reasons, byId: R.byId };
     },
   };
 })();`;
@@ -223,6 +223,7 @@ function summarise(r) {
     long: { supported: r.longOk, n: r.long.length, maxMs: r.long.length ? +Math.max(...r.long.map((l) => l[1])).toFixed(1) : 0 },
     heap, top: { raf: top(r.by.raf), timer: top(r.by.timer), obs: top(r.by.obs), ev: top(r.by.ev) },
     regions: Object.entries(r.regions).sort((x, y) => y[1] - x[1]).slice(0, 10).map(([k, v]) => [k, Math.round(v / r.secs)]), reasons: r.reasons,
+    writesById: Object.entries(r.byId || {}).sort((x, y) => y[1] - x[1]).slice(0, 16).map(([k, v]) => [k, +(v / r.secs).toFixed(1)]),   // 029 M5: target writes per second, by id
   };
 }
 

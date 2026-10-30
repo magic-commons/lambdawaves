@@ -26,6 +26,17 @@ try {
     blur:'22px',vivid:.5,errors:[] });
   console.log('PASS fresh desktop defaults: visibility, quality, light refractive frost, 22px blur and 50% vivid');
 
+  // 029 M1: a STAGE write re-inks the header λ alone; every square keeps its fill, and the λ wears what the kit's full paint gives it
+  const marks = await g.ev(`const L=__LW, F=document.querySelector('.stage-follow'), follow=F.classList.contains('on');
+    const read=()=>({lam:[...document.querySelectorAll('#title .lam')].map(e=>e.style.color).join(),
+      nb:[...document.querySelectorAll('.nb-logo .lam')].map(e=>e.style.color).join(),
+      sq:[...document.querySelectorAll('#title .mark rect, .nb-logo .mark rect, #busyMark .mark rect, .mod-logo .mark rect, .dev-loading .mark rect')].map(r=>r.getAttribute('fill')).join()});
+    if(follow)F.click(); L.setStage(0); const a=read(); L.setStage(1); const b=read(); L.paintMarks(); const full=read();
+    L.setStage(0.04); if(follow)F.click();
+    return {moved:!!a.lam&&a.lam!==b.lam, lam:b.lam===full.lam, nb:a.nb===b.nb&&b.nb===full.nb, sq:!!a.sq&&a.sq===b.sq&&b.sq===full.sq, errors:__e.slice()};`);
+  assert.deepEqual(marks, { moved:true, lam:true, nb:true, sq:true, errors:[] });
+  console.log('PASS a STAGE write re-inks the header λ against its ground and leaves every square and the notebook λ as the full paint has them');
+
   const colour = await g.ev(`
     const L=__LW,f=L.field,m=L.mat,p=L.palette;
     if(!f.ok)return {skip:f.error||'no WebGPU adapter'};
