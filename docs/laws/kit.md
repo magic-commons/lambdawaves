@@ -22,6 +22,8 @@ THE DOORS OF 023 (D, B, R): 1.5.6-alpha.9 — behind the view plane is dashed (C
 
 THE DOORS OF 025 (A, C): 1.5.6-alpha.12 — the muxer's audio trak (`mp4.js` `audio:`; one-track output byte-identical); alpha.13 — the offline mixdown (`render/audio-mix.js`); alpha.14 — the audio encoder ladder AAC → Opus, the priming by impulse, the WAV; alpha.15 — the AUDIO row, the result's `audio`, the refusal for a LIVE source only; alpha.16 — the self-test's alignment stage; alpha.17 — the render panel's even rows (`even`, `ranges`, `controls.switches`; opt-in, BASINS unchanged). The kit reads 1.5.6-alpha.17; the bundle `.tmp/it021/kit.bundle` (kit-1.5.5 @ c13df7d) carries 1.5.5 and every door until Josh fetches it.
 
+THE DOORS OF 029 (M2, M3, M1's line; the clone road from .tmp/it021/kit.bundle, the bundle back at .tmp/it029/kit.bundle for Josh): 1.5.6-alpha.18 — `core/perf.js setText` writes the existing text node's data (a characterData record, never a replaced node: the dock's span observer, control-help and stage-words stop waking on every knob value); alpha.19 — the modulation window writes only what changed (`paint`, `paintAudio`, `paintAudioMeter`, `paintMinTrace` through setText/setAttr/setVar; a composed style compared with the string last written; the look byte-identical by DOM and screenshot digest); alpha.20 — `accent.paintInk()`, the header λ's half of paintMarks, so a STAGE write re-inks one mark (λWAVES' look.js paintInk is one call). The kit reads 1.5.6-alpha.20. Open FOR-MIR: a live AUDIO band's hint still rewrites while its values move (~560/s with the microphone on).
+
 ## The standing paragraphs
 
 MIR owns generic instrument behavior. Before changing modulation controls, read

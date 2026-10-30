@@ -3,7 +3,7 @@
 λWAVES is a WebGPU quantum-orbital lab, a PWA in vanilla ES modules: hydrogen's 140 states, the atoms, the molecules and their volumes,
 drawn by one ray-marched field, played by one clock, modulated, arranged on a timeline and filmed. Its UI kit is MIR, vendored in `lab/mir/**`.
 This page is the two pages every agent reads whole: the standing constraints, the gates, and the index of `docs/laws/` (read only the file you need).
-THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: lab/mir is written by adopt.mjs alone; a λWAVES need becomes an additive door numbered 1.5.6-alpha.N with its FOR-MIR line; a removal waits for a line; `node <MIR>/tools/adopt.mjs . --check` says in step. The doors stand at 1.5.6-alpha.17 (MIR-MANIFEST.json is the number).
+THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: lab/mir is written by adopt.mjs alone; a λWAVES need becomes an additive door numbered 1.5.6-alpha.N with its FOR-MIR line; a removal waits for a line; `node <MIR>/tools/adopt.mjs . --check` says in step. The doors stand at 1.5.6-alpha.20 (MIR-MANIFEST.json is the number).
 Where things live: `lab/` the app (`main.js` → `rack.js` `boot()`; its modules in `lab/shell/` and `lab/windows/`; `lab/mir/**` the kit; `lab/fonts/**`
 vendored faces) · `tools/` diagnostics, generators and probes · `tests/` the node (`*.test.mjs`) and browser (`*.browser-test.mjs`) suites ·
 `research/iteration-0NN/` each iteration's PLAN and BUILD notes · `docs/` the references · `docs/laws/` the laws by subject.
@@ -11,7 +11,7 @@ vendored faces) · `tools/` diagnostics, generators and probes · `tests/` the n
 ## THE STANDING CONSTRAINTS (never break one)
 
 - NO push, NO deploy, NO tag, NO release until Josh says so. Commit locally on your own branch; the integrator merges.
-- THE KIT SENTENCE (line 6): the base is 1.5.5, the doors 1.5.6-alpha.1…17 on top of it; a door is built on the clone road (docs/laws/kit.md). `lab/fonts/**` stays untouched.
+- THE KIT SENTENCE (line 6): the base is 1.5.5, the doors 1.5.6-alpha.1…20 on top of it; a door is built on the clone road (docs/laws/kit.md). `lab/fonts/**` stays untouched.
 - Josh's dial: "Keep the builds tight and don't bloat the code with random verification/gate codes. Just build the features since we are not even
   1.0.0 release yet." Fix, simplify, don't add. Diagnostics live in `tools/`, never in `lab/`; one light visual or functional check per row.
 - `lab/rack.js`'s `app` literal is never extended (fixed-shape namespaces, each under 128 keys); NO MODULE IMPORTS FROM rack.js (only `main.js`);
