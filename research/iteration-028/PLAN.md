@@ -42,7 +42,18 @@ One chain per severity band, Opus builders, each fix with the test of its failur
 the recipe. Kit findings ride FOR-MIR. The 1.0 cut follows the last confirmed critical/high fix.
 
 ## CALLS FOR JOSH
-Written at the end of REVIEW.md by the synthesis agent (the calls the fleet could not default).
+REVIEW.md §5 holds six. Josh (10-30 00:xx, "let's continue") did not answer them one by one; the integrator took these DEFAULTS, each reversible:
+CALL 1 → (C) 1.0 = the last confirmed critical/high fix of this review closed (the fleet's reading; RELEASING.md and release-1.0.0/BUILD-PLAN.md
+cite it in chain F). CALL 2 → harden the broker's code (chain E); the RUNNING broker pid 1055617 is Josh's to stop (`tools/gemma/stop.sh`). CALL 3 →
+the law line + dg2's hash printed, no retry machinery (Josh's gate dial). CALL 4 → (a) one `### wave NN:` line per closed iteration in REPORT.md;
+no 0.9.10 tag — 1.0 names 017–028. CALL 5 → stays Josh's (LEGAL §5 items 1–5; chain F writes the fleet's wording as a proposal he confirms).
+CALL 6 → the activate-time sweep (the default). Josh overrides any of these by a word; the note of the cut lists them.
+
+## R2 — THE CHAINS (REVIEW.md §6; one Opus builder at a time, Josh's 10-29 dial; merge order E → A · B · C · D → F)
+E tools and gates (launched 10-30 first) · A the worker · B the boot, the restore, the word · C the volumes and the stored collection · D the field
+and the film · F the words that ship (last: it regenerates CHANGELOG.md after E's judge lands). Each builder: its branch, one commit per row, the
+test of the failure, the gates of its §6 paragraph; the integrator merges with the recipe (`--no-ff --no-commit`, `--ours lab/sw.js`, pwa --write,
+rack-deps, new-project, mir-manifest, `./test.sh node`, THE LOCK 843/987 when lab/ drew differently).
 
 ## CLOSED
 | row | base | commit | note |
