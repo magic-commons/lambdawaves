@@ -183,7 +183,7 @@ async function state(name, grids) {
     const dg2 = await F.fieldDigest();
     const a = await rp(320, 240), b = await rp(1024, 640), pk = packHash();
     out[g] = { digest: dg.hash, integral: dg.integral, maxRho: dg.maxRho, nan: dg.nan, half: dg.half, res: dg.res,
-      repeat: dg2.hash === dg.hash, reconstructed: F.generation > gen, rp: a.hash, rpL: b.hash, nonBlack: b.nonBlack,
+      repeat: dg2.hash === dg.hash, digest2: dg2.hash, reconstructed: F.generation > gen, rp: a.hash, rpL: b.hash, nonBlack: b.nonBlack,
       pack: pk.pack, count: pk.count, space: F.space, t: LW.clock.t, hamiltonian: LW.hamiltonian };
   }
   return out;
@@ -250,7 +250,7 @@ try {
     const o = await g.ev(`return await __DL.state(${JSON.stringify(s)}, ${JSON.stringify(GRIDS)});`);
     if (!o || o.E) throw new Error('state ' + s + ': ' + JSON.stringify(o));
     result.states[s] = o;
-    console.log('state', s, GRIDS.map((gr) => gr + ':' + o[gr].digest + (o[gr].repeat ? '' : ' (NOT REPEATABLE)')).join(' '), ((Date.now() - t) / 1000).toFixed(1) + ' s');
+    console.log('state', s, GRIDS.map((gr) => gr + ':' + o[gr].digest + (o[gr].repeat ? '' : ' (NOT REPEATABLE: second ' + o[gr].digest2 + ')')).join(' '), ((Date.now() - t) / 1000).toFixed(1) + ' s');
   }
   result.pageErrors = await g.ev('return (window.__e || []).slice(0, 10);');
   const ledger = await g.ev('return __LW.field.renderPipelines || null;');   // K2: which specialised present pipelines the run compiled
@@ -262,8 +262,11 @@ if (failed) { console.error('DIGEST LOCK: the run failed —', failed); process.
 /* ── compare / write ─────────────────────────────────────────────────────────────────────────────────────── */
 const sortKeys = (v) => Array.isArray(v) ? v.map(sortKeys) : (v && typeof v === 'object') ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortKeys(v[k])])) : v;
 const leaves = (o, pre = '', acc = {}) => { if (o && typeof o === 'object' && !Array.isArray(o)) { for (const k of Object.keys(o)) leaves(o[k], pre ? pre + '.' + k : k, acc); } else acc[pre] = JSON.stringify(o); return acc; };
-const unrepeatable = [];
-for (const [s, o] of Object.entries(result.states)) for (const [gr, e] of Object.entries(o)) if (!e.repeat) unrepeatable.push(s + '@' + gr);
+const unrepeatable = [], second = {};   // R-22: dg2's hash is printed beside a `repeat` DIFF, never kept as a leaf
+for (const [s, o] of Object.entries(result.states)) for (const [gr, e] of Object.entries(o)) {
+  second[`states.${s}.${gr}.repeat`] = e.digest2; delete e.digest2;
+  if (!e.repeat) unrepeatable.push(s + '@' + gr);
+}
 if (MODE === 'write') {
   fs.writeFileSync(FIXTURE, JSON.stringify(sortKeys(result), null, 1) + '\n');
   const n = Object.keys(leaves({ states: result.states, styles: result.styles, lines: result.lines })).length;
@@ -287,7 +290,7 @@ const metaDiff = ['obs', 'canvas', 'dpr', 'format', 'gamut', 'theme', 'lightUI']
 const adapterSame = same(fixture.meta && fixture.meta.adapter, result.meta.adapter);
 /* a difference in `pack`/`count` alone (the CPU record bytes) is reported apart from the GPU readbacks: K7 changes it by design */
 const gpu = diffs.filter((x) => !/\.pack$|\.count$/.test(x.k)), cpu = diffs.filter((x) => /\.pack$|\.count$/.test(x.k));
-for (const x of diffs.slice(0, 60)) console.log('DIFF', x.k, 'base', x.base, 'now', x.now);
+for (const x of diffs.slice(0, 60)) console.log('DIFF', x.k, 'base', x.base, 'now', x.now, ...(x.k in second ? ['· second digest', second[x.k]] : []));
 if (metaDiff.length) console.log('META DIFFERS (inputs, not outputs):', metaDiff.join(', '));
 if (!adapterSame) console.log('ADAPTER DIFFERS: the fixture is machine-specific', JSON.stringify(fixture.meta && fixture.meta.adapter), JSON.stringify(result.meta.adapter));
 console.log(`DIGEST LOCK ${diffs.length || metaDiff.length ? 'RED' : 'GREEN'}: ${Object.keys(A).length} values compared · ${gpu.length} readback differences · ${cpu.length} record-byte differences · unrepeatable now: ${unrepeatable.length ? unrepeatable.join(', ') : 'none'} · page errors ${result.pageErrors.length} · ${((Date.now() - t0) / 1000).toFixed(0)} s`);

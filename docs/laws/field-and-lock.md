@@ -4,7 +4,7 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ## The laws of 021
 
-THE LOCK (`tools/perf/digest-lock.mjs`, the fixtures) is never re-baked: a leaf that moved is re-captured BY NAME and said in the BUILD note. Through 021 it reads 843 · 0 (`--check --query gastab=0`) and 987 · 0 (the same with `--fixture research/release-0.4.0/measure/digest-lock-s4a.json`) on this machine.
+THE LOCK (`tools/perf/digest-lock.mjs`, the fixtures) is never re-baked: a leaf that moved is re-captured BY NAME and said in the BUILD note. Through 021 it reads 843 · 0 (`--check --query gastab=0`) and 987 · 0 (the same with `--fixture research/release-0.4.0/measure/digest-lock-s4a.json`) on this machine. THE momentum@128 `repeat` leaf may flip under a second GPU client (028 R-22: a headless browser or a recorder holding the card): re-run the lock once ALONE before reporting it; the DIFF line names the second digest beside the leaf. 843 · 0 and 987 · 0 stay the law.
 
 ## The standing paragraphs
 
