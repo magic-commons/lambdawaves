@@ -14,6 +14,7 @@ import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's sour
 import { repair, createPrefs } from '../lab/mir/core/prefs.js';
 import { THEMES } from '../lab/mir/shell/themes.js';
 import { lookSchema } from '../lab/mir/shell/gui.js';
+import { createSettingsStore, SETTINGS_KEY } from '../lab/settings-store.js';
 /** what a boot wears (0.5.0 C2): an older blob lifted (liftLook), repaired by the kit's own LOOK_SCHEMA rows, over the device's
  *  first-run material as their defaults — rack.js' LOOK_DEFAULTS into createLook */
 function bootMaterial(s, mobile) {
@@ -172,6 +173,13 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   P.set('text', 'light'); const again = open(S), kept = { preset: again.preset(), text: again.get('text') };
   judge('A SAVED LOOK KEEPS ITS NAME (027 D5): FROST saved with its old TEXT LIGHT read CUSTOM; the look store migrates it once to FROST (TEXT AUTO), and a TEXT LIGHT chosen afterwards stays',
     before === 'custom' && eq(after, { preset: 'frost', text: 'theme', theme: 'dark', v: LOOK_VERSION }) && eq(kept, { preset: 'custom', text: 'light' }), { before, after, kept });
+}
+{
+  /* 028 R-02 · A BLOB THAT IS NOT AN OBJECT READS {}: the JSON texts `null`, `[]`, `5` (a foreign writer) would reach boot()'s
+     readSettings().nativeLayout and crash it with no way back; read() answers {} for any non-object, as for an absent or unparsable one */
+  const got = ['null', '[]', '5', '"s"', 'true', '{"x":1}'].map((t) => createSettingsStore({ getItem: (k) => (k === SETTINGS_KEY ? t : null) }).read());
+  judge('A BLOB THAT IS NOT AN OBJECT READS {} (028 R-02): null, [], 5, "s", true read as {}; an object reads as itself',
+    eq(got, [{}, {}, {}, {}, {}, { x: 1 }]), got);
 }
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'first-run.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

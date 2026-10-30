@@ -396,7 +396,7 @@ const PRECACHE = [
   ['./rpa-inspector.js',                                            'baf1eaa062e7'],
   ['./scf.js',                                                      '76359349f917'],
   ['./separable.js',                                                'e99b6c67ebd5'],
-  ['./settings-store.js',                                           '8178b4e1e687'],
+  ['./settings-store.js',                                           '7c2d6424b7a7'],
   ['./shadowview.js',                                               'ad101af8b299'],
   ['./shell/controller.js',                                         'c390666dba8d'],
   ['./shell/facade.js',                                             '3af9ac49423d'],

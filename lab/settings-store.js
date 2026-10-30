@@ -1,6 +1,6 @@
 /* settings-store.js — THE SETTINGS ADAPTER (0.5.0 A1): the one door to `lambdawaves.q0.settings`, this browser's settings blob
  * (docs/STATE-SCOPES.md).  rack.js reads and writes the blob only through createSettingsStore(): `read()` is the object ({} when
- * the key is absent or unreadable), `write(obj)` stores JSON.stringify(obj), the same bytes its seven writers built by hand
+ * the key is absent, unreadable or not an object: `null`, `[]`, `5`), `write(obj)` stores JSON.stringify(obj), the same bytes its seven writers built by hand
  * (saveSettings' whole object; six `{ ...S, x }` merges, each in its own order), and `remove()` is FORGET.  Storage is resolved
  * lazily inside the try, because touching localStorage can throw (a blocked or private profile); a refused write answers false.
  * THE SPLIT the kit will read: WORKSPACE is the arrangement inside this blob (MIR 1.5 `createRack({ store })` takes it at C3);
@@ -75,7 +75,7 @@ export function forgetRecords(storage) {
 export function createSettingsStore(storage) {
   const ls = () => storage || globalThis.localStorage;
   return { key: SETTINGS_KEY,
-    read() { try { return JSON.parse(ls().getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; } },
+    read() { try { const v = JSON.parse(ls().getItem(SETTINGS_KEY) || '{}'); return v !== null && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch (e) { return {}; } },
     write(obj) { try { ls().setItem(SETTINGS_KEY, JSON.stringify(obj)); return true; } catch (e) { return false; } },
     remove() { try { ls().removeItem(SETTINGS_KEY); return true; } catch (e) { return false; } } };
 }
