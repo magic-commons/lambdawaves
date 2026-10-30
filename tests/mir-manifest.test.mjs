@@ -58,6 +58,9 @@ const ACCEPTED = {
   '1.5.6-alpha.16': '3908370e824e5a44eb68691c11f6460c907ea50e905d544bb9f1a7a2112f8800',
   /* 025 C3 · MIR 1.5.6-alpha.17 on the clone road: THE EVEN ROWS (the render panel's `even` · `ranges` · `controls.switches`) */
   '1.5.6-alpha.17': 'd4bc54b78ed65730c29f527040f077525e3b440745ee384740b33fb5b4027009',
+  /* 029 M2 · M3 · M1 · MIR 1.5.6-alpha.18–.20 on the clone road: A TEXT WRITE KEEPS ITS NODE (setText → characterData), THE MODULATION WINDOW
+     WRITES ONLY WHAT CHANGED, THE STAGE RE-INKS ONE MARK (accent.paintInk); adopted once, at .20 */
+  '1.5.6-alpha.20': '3f1940761b40e84cf9d6afc19f5166a5469ae3d5d501cf7710b15f26101d78bf',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */

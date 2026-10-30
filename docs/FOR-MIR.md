@@ -136,3 +136,16 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - **folders/files.js entryOk** (λWAVES 028 R-24): accept `thumb` only when it matches `/^data:image\//` — the test toThumb already applies on the capture road — so a stored URL or an over-long string never reaches the gallery's `url(…)`. λWAVES carries the app-side test (lab/project-store.js toFiles) until then.
 - **vendor KaTeX** (λWAVES 028 R-31): 0.16.47 (last 0.16, drop-in) or 0.18.2 with its fonts; keep `trust:false`; version + sha256 in a VENDOR manifest.
 - **shell/about.js kitType** (λWAVES 028 R-16): list the info/ faces (Spectral, Playfair Display, Alegreya SC) when fonts/info/ is adopted, as shell/gui.js's ABOUT already does; an app on createApp's ABOUT names only three faces today. λWAVES' own static ABOUT (index.html) names them app-side.
+
+## 029 (2026-10-30)
+- DONE in **1.5.6-alpha.18** (λWAVES 029 M2): `core/perf.js setText` writes the one text node's `data` (a characterData record) instead of
+  replacing it (a childList record); identical text writes nothing. The dock span, the rack's scroll pill, control-help and λWAVES'
+  furniture observer no longer wake on a knob value (scene c: childList records 385 → 1 a second).
+- DONE in **1.5.6-alpha.19** (λWAVES 029 M3): the modulation window's paint (work bar, macro rail, device cards, AUDIO device and its meters)
+  writes only what changed: `setText` / `setAttr` / `setVar`, a composed style against the string last written, a band's hint only when
+  its values move (scene b: the window's records 1,614 → 168 a second, its paint 10.8 → 5.8 ms a second).
+- DONE in **1.5.6-alpha.20** (λWAVES 029 M1's line, closed): `accent.paintInk()` — the header λ's half of `paintMarks` alone;
+  `lab/look.js paintInk` is now one call to it (its batch and wheel guards kept).
+- Open: the AUDIO band hints carry live values (`{out}% output · {db} dB input`), so while the microphone is live each band's title is
+  rewritten every paint and control-help adopts it (≈ 560 callbacks a second in scene c). A hint that reads its values when it opens would
+  remove them; that is a change of the hint's behaviour, so it waits for a line.

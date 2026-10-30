@@ -14,7 +14,7 @@
  *   3 : 1 floor against the ground it is drawn on (palette.js visibleInk) — the header's over the STAGE, the
  *   notebook's over the CARD.  A TURN is one pass of the palette through the squares; BUSY loops it.
  *
- * createAccent(options) → { apply, set, wheelColor, accentColor, paintMarks, turn, busy, hueSat, a, b, vivid, bright, model }
+ * createAccent(options) → { apply, set, wheelColor, accentColor, markInk, paintMarks, paintInk, turn, busy, hueSat, a, b, vivid, bright, model }
  * accentPart({ get, set, subscribe }) → a project part (core/project.js) carrying ACCENT A, B, VIVID and BRIGHTNESS
  * towardWhite(rgb, k) → rgb mixed toward white in OKLCH
  *   options.accentStops  palette stops the two UI accents read          (default: palette 'lambda')
@@ -97,8 +97,14 @@ export function createAccent(options = {}) {
   }
 
   let turnSheet = null, turnDirty = true;
+  /** paintInk() — the header λ's half of paintMarks alone (1.5.6-alpha.20, λWAVES 029 M1): the one mark drawn on the stage,
+   *  re-inked against stageGround(); no square, no notebook λ, no turn sheet (a modulated STAGE moves only this) */
+  function paintInk() {
+    const ink = gamut(markInk(0, stageGround()));
+    for (const lam of document.querySelectorAll('#title .lam')) lam.style.color = ink;
+  }
   function paintMarks() {
-    for (const lam of document.querySelectorAll('#title .lam')) lam.style.color = gamut(markInk(0, stageGround()));
+    paintInk();
     for (const lam of document.querySelectorAll('.nb-logo .lam')) lam.style.color = gamut(markInk(0));
     document.querySelectorAll(MARK_SELECTOR).forEach((r, i) => {
       const k = i % MARK_N;
@@ -169,7 +175,7 @@ export function createAccent(options = {}) {
     if (patch.wheelStops) wheelLUT = toLUT(patch.wheelStops);
     apply();
   }
-  return { apply, set, wheelColor, accentColor, markInk, paintMarks, turn, busy, hueSat,
+  return { apply, set, wheelColor, accentColor, markInk, paintMarks, paintInk, turn, busy, hueSat,
     get a() { return o.a; }, get b() { return o.b; }, get vivid() { return o.vivid; }, get bright() { return o.bright; }, get hueShift() { return o.hueShift; }, get paletteOn() { return o.paletteOn; }, get model() { return o.model; } };
 }
 
