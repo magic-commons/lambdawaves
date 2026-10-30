@@ -301,11 +301,14 @@ unreadable for you, please open an issue; that is the kind of bug he most wants 
 
 ## Privacy
 
-λWAVES is a static site. Nothing you do is sent anywhere: projects, notes and settings live in your
-browser's localStorage and in files you export yourself. The microphone is opened only when you add
-an AUDIO device to the modulation rack, its signal never leaves the page, and it is released when the
-last AUDIO device is removed. There is no analytics. Cloudflare serves the files and keeps its own
-ordinary server logs.
+λWAVES is a static site with no accounts and no analytics. Nothing you make is sent anywhere: projects, notes and settings
+live in your browser's localStorage, audio you drop on the TIMELINE in IndexedDB (`mir-assets`), and anything else in files
+you export yourself. After the page loads it asks its own origin for a new build at most every 30 minutes, and fetches the
+records, volumes, pictures, demos and measured lines you open, keeping them in Cache Storage for offline use. An image in an
+imported notebook is fetched from wherever the note points (`SECURITY.md` says what that host learns). The microphone is
+opened only when you add an AUDIO device to the modulation rack, its signal never leaves the page, and it is released when
+the last AUDIO device is removed; Web MIDI reconnects at launch only where you saved a mapping and the browser already grants
+it. Cloudflare serves the files and keeps its own ordinary server logs. `SECURITY.md` lists every request.
 
 ## Citing
 
