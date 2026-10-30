@@ -433,7 +433,7 @@ const PRECACHE = [
   ['./vendor/bse/sto-3g-v1.json',                                   '22ce59b9ec99'],
   ['./verbs.js',                                                    '7c547209a47f'],
   ['./volumes-format.js',                                           '8763d35dd611'],
-  ['./volumes.js',                                                  '878e1bd820e9'],
+  ['./volumes.js',                                                  '9251c653890f'],
   ['./vortex.js',                                                   'baf5ad65b7ca'],
   ['./well.js',                                                     '82f249acd7df'],
   ['./wigner.js',                                                   '668d13ce809c'],
