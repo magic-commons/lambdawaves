@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /* tools/changelog.mjs — generate CHANGELOG.md from the git tags and REPORT.md's wave headings.
  *   node tools/changelog.mjs            write CHANGELOG.md at the repo root
- *   node tools/changelog.mjs --check    write nothing; exit 1 if the file on disk is out of date
+ *   node tools/changelog.mjs --check    write nothing; exit 1 if the file on disk is out of date, or the version seats disagree
+ *                                       (028 R-27: CITATION.cff's `version:` is BUILD_LINE's number; CHANGELOG's newest heading is the newest tag)
  *   node tools/changelog.mjs --stdout   print the document to stdout, write nothing
  *
  * STDOUT CARRIES THE DOCUMENT AND NOTHING ELSE — under `--check`, which prints no document, it carries
@@ -309,8 +310,13 @@ const unparsedInHistory = releases.reduce((n, r) => n + r.unparsed.length, 0);
 if (TO_STDOUT) { process.stdout.write(text); }
 else if (CHECK) {
   const on_disk = existsSync(OUT) ? readFileSync(OUT, 'utf8') : null;
-  if (on_disk === text) process.stdout.write('CHANGELOG.md is up to date.\n');
-  else die(`CHANGELOG.md is ${on_disk === null ? 'missing' : 'out of date'}.  Run: node tools/changelog.mjs`);
+  if (on_disk !== text) die(`CHANGELOG.md is ${on_disk === null ? 'missing' : 'out of date'}.  Run: node tools/changelog.mjs`);
+  const build = (readFileSync(join(ROOT, 'lab/build-line.js'), 'utf8').match(/BUILD_LINE = '([^ ']+)/) || [])[1];
+  const cff = (readFileSync(join(ROOT, 'CITATION.cff'), 'utf8').match(/^version:\s*["']?([^"'\s]+)/m) || [])[1];
+  const heading = (on_disk.match(/^## `([^`]+)`/m) || [])[1], tag = (tagsOldestFirst().pop() || {}).name;
+  if (cff !== build) die(`CITATION.cff says version ${cff}; lab/build-line.js's BUILD_LINE says ${build}.`);
+  if (heading !== tag) die(`CHANGELOG.md's newest release heading is ${heading}; the newest tag is ${tag}.`);
+  process.stdout.write(`CHANGELOG.md is up to date; CITATION.cff and BUILD_LINE say ${build}; the newest heading is ${tag}.\n`);
 } else {
   writeFileSync(OUT, text, 'utf8');
 }
