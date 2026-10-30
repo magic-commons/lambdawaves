@@ -472,6 +472,70 @@ function mentions(orphan) {
   return [...new Set(hits)];
 }
 
+/* ══ 6c. R-05 · THE NAMES.  An `import { x }` its target does not export is an ES-module link error before boot(), and most
+ * kit importers are never loaded by node — so the walk's edges are judged by name: each `import { … }`, default import and
+ * `export { … } from` against what its target exports, following `export * from`. */
+const groups = (toks, j, end, pick) => {                     // `{ a, b as c }` from j (after `{`) → pick(first, last) per group
+  for (let g = []; j < end; j++) {
+    const v = toks[j].v;
+    if (v === ',' || v === '}') { if (g.length) pick(g[0], g[g.length - 1]); g = []; if (v === '}') return; }
+    else if (toks[j].t === 'name' || toks[j].t === 'str') g.push(v);
+  }
+};
+const exportsMemo = new Map();
+function exportsOf(file) {
+  if (exportsMemo.has(file)) return exportsMemo.get(file);
+  const names = new Set(); exportsMemo.set(file, names);
+  const { toks } = lex(read(file), rel(file));
+  for (let k = 0; k < toks.length; k++) {
+    if (toks[k].t !== 'name' || toks[k].v !== 'export' || (toks[k - 1] && toks[k - 1].v === '.')) continue;
+    let j = k + 1;
+    if (toks[j].v === 'default') names.add('default');
+    else if (toks[j].v === '*') {
+      if (toks[j + 1].v === 'as') names.add(toks[j + 2].v);
+      else for (const x of exportsOf(path.resolve(path.dirname(file), toks[j + 2].v))) if (x !== 'default') names.add(x);
+    } else if (toks[j].v === '{') groups(toks, j + 1, toks.length, (_, out) => names.add(out));
+    else {
+      if (toks[j].v === 'async') j++;
+      if (toks[j].v === 'function' || toks[j].v === 'class') { j += toks[j + 1].v === '*' ? 2 : 1; names.add(toks[j].v); continue; }
+      names.add(toks[++j].v);                                // const/let/var: the first declarator, then any after a depth-0 `,`
+      for (let d = 0; ++j < toks.length;) {
+        const v = toks[j].v;
+        if (v === '(' || v === '[' || v === '{') d++;
+        else if (v === ')' || v === ']' || v === '}') d--;
+        else if (d === 0 && (v === ';' || /^(export|import|function|class|const|let|var)$/.test(v))) break;
+        else if (d === 0 && v === ',' && toks[j + 2] && toks[j + 2].v === '=') names.add(toks[j + 1].v);
+      }
+    }
+  }
+  return names;
+}
+const missingNames = [];
+for (const [file, src] of sourceOf) {
+  if (classicRoots.has(file)) continue;
+  const { toks } = lex(src, rel(file));
+  for (let k = 0; k < toks.length; k++) {
+    const t = toks[k], n = toks[k + 1];
+    if (t.t !== 'name' || !n || (toks[k - 1] && toks[k - 1].v === '.')) continue;
+    const isImport = t.v === 'import' && n.v !== '(' && n.v !== '.' && n.t !== 'str';
+    if (!isImport && !(t.v === 'export' && n.v === '{')) continue;
+    let end = k + 1;
+    while (end < toks.length && toks[end].v !== ';' && !(toks[end].v === 'from' && toks[end + 1] && toks[end + 1].t === 'str')) end++;
+    if (!toks[end] || toks[end].v !== 'from') continue;    // a plain `export { … }`
+    const r = resolveSpec(file, toks[end + 1].v);
+    if (!r.file || !/\.m?js$/.test(r.file) || !existsSync(r.file)) continue;
+    const want = [];
+    let j = k + 1;
+    if (isImport && toks[j].t === 'name') { want.push('default'); j += toks[j + 1].v === ',' ? 2 : 1; }
+    if (toks[j].v === '{') groups(toks, j + 1, end, (inName) => want.push(inName));
+    const have = exportsOf(r.file);
+    for (const w of want) if (!have.has(w)) missingNames.push(`${rel(file)}:${lineOf(src, t.at)} imports '${w}' from ${rel(r.file)}, which does not export it`);
+  }
+}
+console.log(`\n  ── THE NAMES (R-05) ──────────────────────────────────────────────────────────────────────\n    MISSING: ${missingNames.length}`);
+for (const m of missingNames) console.log(`    ${m}`);
+assert.equal(missingNames.length, 0, `\n  ${missingNames.length} named import${missingNames.length === 1 ? '' : 's'} its target does not export (see above) — an ES-module link error before boot().\n`);
+
 /* ══ 7.  THE REPORT, THEN THE VERDICT ════════════════════════════════════════════════════════════════════ */
 const days = (iso) => Math.floor((TODAY - new Date(iso + 'T00:00:00Z')) / 86400000);
 const WARN_DAYS = 14, EXPIRE_DAYS = 60;

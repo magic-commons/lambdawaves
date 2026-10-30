@@ -19,7 +19,7 @@ history row and undo takes the whole turn back. Nothing leaves your network, and
 tools/gemma/start.sh      # Ollama if it is not up; the model if it is not pulled (one download, ≈ 6.6 GB); then the broker
 tools/gemma/stop.sh       # the broker only, by its pid (Ollama is left running: Odysseus may be using it)
 ```
-The broker listens on `https://0.0.0.0:9443` (`GEMMA_PORT`). It uses the gate server's certificate pair, found the way
+The broker listens on `https://127.0.0.1:9443` (`GEMMA_PORT`); `GEMMA_HOST=0.0.0.0` puts her on the LAN for the iPad (see The LAN). It uses the gate server's certificate pair, found the way
 `tools/gate/server.py` finds it: `LW_CERTS`, then `~/.config/lambdawaves/certs`, then `.certs/` at the repo root. If there is no pair,
 run `tools/gate/server.py` once and it makes one. The pair is self-signed. On the iPad, open `https://<desktop>:9443/health` once and
 accept the certificate, or the page's ask fails at the TLS step. `GET /health` answers `{ ok, model, ollama, pulled }`.
@@ -68,15 +68,18 @@ from `node tools/gemma/verb-doc.mjs`, run once when the broker starts. The promp
 the table changes.
 
 ## The log
-Each turn is one JSON line in `~/.cache/lambdawaves-gemma/log.jsonl`: time, your text, her `say`, the verbs that passed, the notebook,
+Each turn is one JSON line in `~/.cache/lambdawaves-gemma/log.jsonl`: time, your text (only with `GEMMA_LOG=1`), her `say`, the verbs that passed, the notebook,
 the raw answer when the broker changed it, the milliseconds and the model. The broker's own output is in
 `~/.cache/lambdawaves-gemma/broker.log`.
 
 ## The LAN
-The broker binds `0.0.0.0`, and it answers `Access-Control-Allow-Origin: *` because the page's origin varies (`127.0.0.1`, the
-desktop's hostname, the iPad's view of it). That is acceptable for a LAN tool and would not be on the open internet. Its only routes
-are `POST /ask` and `GET /health` (plus the CORS preflight). It reads no files and runs nothing a request names. It has no
-authentication: anyone on your Wi-Fi can ask her questions and use your GPU. Stop her when you do not need her.
+The broker binds `127.0.0.1` unless you start her with `GEMMA_HOST=0.0.0.0`, and says LAN OPT-IN when you do. A browser page may ask
+only from a loopback origin, this desktop's hostname (or `<hostname>.local`), or an exact origin listed in `GEMMA_ORIGINS`
+(comma-separated); any other origin gets 403 and no CORS headers, never `*`. She answers the `Access-Control-Allow-Private-Network`
+preflight for the origins she allows, and that header is what lets a page on a PUBLIC address reach a host on your LAN, so list only
+origins you serve yourself. Two asks run at once; a third gets 429. Her only routes are `POST /ask` and `GET /health` (plus the CORS
+preflight). She reads no files and runs nothing a request names. She has no authentication: on the LAN, anyone on your Wi-Fi can ask
+her questions with curl and use your GPU. Stop her when you do not need her (`tools/gemma/stop.sh`).
 
 ## Without the model
 `node tools/gemma/replay.mjs [--port 9351] [--list file.json]` feeds a canned verb list ("benzene from a new project") to a served page
