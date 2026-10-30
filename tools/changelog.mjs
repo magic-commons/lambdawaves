@@ -54,6 +54,12 @@
  * commits have not changed, and RED the moment any of those three do — including a wave heading edited in an
  * uncommitted REPORT.md, which is release content and is read from the working tree on purpose.
  *
+ * THE COMMITS ARE THE TAGS' (028 F).  The UNRELEASED section lists its WAVES and no commits: a list of the commits
+ * since the newest tag moves with every commit — including the one that commits this file — so a committed
+ * CHANGELOG.md could never be in step on a moving branch, and `--check` in verify.yml would be red on every push.
+ * A tag freezes its commits, and the release section lists them then.  The same holds for the section's very
+ * existence: it is there when there are unreleased WAVES, not when there are commits.
+ *
  * NO DEPENDENCIES — node's standard library and `git`, matching the charter of the rest of the project.
  */
 import { execFileSync } from 'node:child_process';
@@ -201,7 +207,7 @@ const modified = dirtyLines.filter(l => !l.startsWith('??')).length;
 const untracked = dirtyLines.filter(l => l.startsWith('??')).length;
 /* NOTE the absence of `dirtyLines` here, and see the header: whether the tree is dirty is advice for stdout,
  * never a fact in the document.  An UNRELEASED section exists when there is unreleased RELEASE CONTENT. */
-const hasUnreleased = unreleasedWaves.length > 0 || unreleasedCommits.length > 0;
+const hasUnreleased = unreleasedWaves.length > 0;   // the commits are listed by the tag that freezes them (header: THE COMMITS ARE THE TAGS')
 
 /* A wave that a tag once had and the working tree no longer does — the other way a wave goes missing. */
 const vanished = [...seen].filter(n => !working.waves.has(n)).sort((a, b) => a - b);
@@ -241,29 +247,12 @@ if (hasUnreleased) {
   put('## UNRELEASED — not frozen');
   put('');
   const since = tags.length ? `\`${tags[tags.length - 1].name}\`` : 'the start of the repository';
-  const bits = [];
-  if (unreleasedWaves.length) bits.push(`${unreleasedWaves.length} wave${unreleasedWaves.length === 1 ? '' : 's'}`);
-  bits.push(`${unreleasedCommits.length} commit${unreleasedCommits.length === 1 ? '' : 's'}`);
-  put(`Work since ${since} — ${bits.join(', ')}.  **Nothing here is frozen**: no tag points at it, the numbers may`);
-  put('still move, and it may be amended or dropped before a release carries it.  How dirty the working tree is on');
-  put('any given afternoon is deliberately not recorded here — it changes on every save, and this file has to stay');
-  put('stable enough to gate on.');
+  put(`Work since ${since} — ${unreleasedWaves.length} wave${unreleasedWaves.length === 1 ? '' : 's'}.  **Nothing here is frozen**: no tag points at it,`);
+  put('the numbers may still move, and it may be amended or dropped before a release carries it.  Its commits are listed');
+  put('when a tag freezes them; until then they move with every commit, and this file has to stay stable enough to gate on.');
   put('');
-  if (unreleasedWaves.length) {
-    for (const w of unreleasedWaves) put(waveLine(w));
-    put('');
-  } else {
-    put('_No new waves — changes to work already released._');
-    put('');
-  }
-  if (unreleasedCommits.length) {
-    put('<details><summary>commits</summary>');
-    put('');
-    for (const c of unreleasedCommits) put(`- \`${c.short}\` ${c.date} — ${trimSubject(c.subject)}`);
-    put('');
-    put('</details>');
-    put('');
-  }
+  for (const w of unreleasedWaves) put(waveLine(w));
+  put('');
 }
 
 for (const r of [...releases].reverse()) {
@@ -341,7 +330,7 @@ for (const r of releases) {
 }
 if (hasUnreleased) {
   const range = unreleasedWaves.length ? (unreleasedWaves.length === 1 ? `wave ${unreleasedWaves[0].n}` : `waves ${unreleasedWaves[0].n}–${unreleasedWaves[unreleasedWaves.length - 1].n}`) : '—';
-  out.write(`    ${'UNRELEASED'.padEnd(13)}${head.date}  ${head.short}  ${range} (${unreleasedWaves.length}), ${unreleasedCommits.length} commit${unreleasedCommits.length === 1 ? '' : 's'}\n`);
+  out.write(`    ${'UNRELEASED'.padEnd(13)}${head.date}  ${head.short}  ${range} (${unreleasedWaves.length}), ${unreleasedCommits.length} commit${unreleasedCommits.length === 1 ? '' : 's'} (not listed until a tag)\n`);
 }
 /* Advice, not content — this is the number that must never reach the file. */
 out.write(`  working tree   ${modified} tracked file${modified === 1 ? '' : 's'} changed, ${untracked} untracked `

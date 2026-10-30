@@ -119,7 +119,7 @@ and the code disagree, the code is right; please say so in an issue.
   (`tests/status.test.mjs` holds the two equal). README's PySCF table is `node tools/pyscf-table.mjs` (`--check`).
 - Every key is PREFERENCE (settings, never in a project or link), WORKSPACE (the window arrangement) or PROJECT (the work): `docs/STATE-SCOPES.md`.
 - NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through the same restore-with-rollback road as any project; `node tools/new-project.mjs --check` proves the shipped file byte-exact against the modulation model and the boot defaults. The undo ring covers the whole PROJECT scope (not the camera pose, the notebook text or the quality hint): `serialize({ scope: 'edit' })` in, `restore(S, { history: true })` out; a project open, a link and NEW each start a new timeline whose bottom row is named for its origin.
-- The laws: CLAUDE.md (two pages since 021 D2: the standing constraints, the gates, the index) and `docs/laws/*.md` (the laws by subject), REPORT.md (the notebook every session appends to), `docs/`
+- The laws: CLAUDE.md (two pages since 021 D2: the standing constraints, the gates, the index) and `docs/laws/*.md` (the laws by subject), REPORT.md (the notebook to 0.5.2; since iteration 017 one wave line per closed iteration, the work itself in `research/iteration-0NN/`), `docs/`
   (the optimization record, `ui/STYLE-LOCK.md`, `SHIPPING-READINESS.md`) and RELEASING.md.
 - `lab/mir/**` (and `lab/fonts/**`) is the adopted MIR interface kit: MIR 1.5.5 plus the doors 1.5.6-alpha.1…17 (`MIR-MANIFEST.json` is the number). The law is THE KIT SENTENCE, CLAUDE.md:6:
   "THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS" — `lab/mir` is written by MIR's `adopt.mjs` alone, a λWAVES need is an additive

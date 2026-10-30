@@ -65,5 +65,6 @@ git switch dev && git merge main                   # dev takes the fix too, so i
 
 `research/beta/` holds the next era's dossier (Beta: causal atoms, flexible benzene) and its build
 contracts; `docs/SHIPPING-READINESS.md` holds what still stands between an alpha and 1.0; `REPORT.md`
-is the notebook every session appends to. A new Claude session starts by reading those three and
+is the notebook to 0.5.2 and, since iteration 017, one wave line per closed iteration (the iterations themselves live in
+`research/iteration-0NN/`). A new Claude session starts by reading those three and
 `git log --oneline -20` on `dev`.
