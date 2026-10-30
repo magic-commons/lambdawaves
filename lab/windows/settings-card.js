@@ -4,7 +4,7 @@ import { TIER } from '../tier.js';
 import { el, knob, sw, seg, readout, group, label } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
-    { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, look, applyAccent, paintMarks, field, mod, MOD } = app.ctl;
+    { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
     ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
     const gi = group(ui.set.body, 'INTERFACE');
     const ri = el('div', 'row tight', gi);
@@ -59,7 +59,7 @@ export function createSettingsCard(app) {
       app.state.stageMix = Math.max(0, Math.min(1, Number.isFinite(+v) ? +v : 0));
       const a = themeGround(), b = mat.stageCustom;
       mat.bg = app.state.stageFollow ? a.slice() : [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * app.state.stageMix);
-      paintMarks(); schedule(TIER.PRESENT);
+      look.paintInk(); schedule(TIER.PRESENT);
     }
     app.hooks.restage = () => setStageMix(app.state.stageMix);
     function setStageColour(colour) {
@@ -75,7 +75,7 @@ export function createSettingsCard(app) {
     app.hooks.setStageColour = setStageColour;
     app.hooks.setStageFollow = setStageFollow;
     ui.stageK = knob({ label: 'STAGE', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
-    app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); ui.stageK.set(x); setStageMix(x); return x; };
+    app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); if (x === app.state.stageMix) return x; ui.stageK.set(x); setStageMix(x); return x; };   // 029 M1: the value in force writes nothing
     { const seat = el('div', 'stage-seat', rt); ui.stageSeat = { root: seat };
       ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
       /* iteration 016 P7 (Josh: "if a user chooses a background color, let that automatically" turn it on): a pick leaves FOLLOW THEME and, when the

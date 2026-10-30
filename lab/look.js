@@ -108,8 +108,16 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
     if (accent.hueShift !== (mat.hueShift || 0) || accent.paletteOn !== !!mat.paletteOn) return applyAccent();   // the wheel moved under the mark
     accent.paintMarks();
   }
+  /* 029 M1 · THE STAGE RE-INKS ONE MARK: the header λ is the only mark drawn on the stage; the nine squares are the wheel verbatim and the
+     notebook's λ reads the CARD, so a STAGE write re-asks only the λ's ink, by the kit's own law (accent.markInk against stageGround) */
+  function paintInk() {
+    if (batch) { dirty = true; return; }
+    if (accent.hueShift !== (mat.hueShift || 0) || accent.paletteOn !== !!mat.paletteOn) return applyAccent();
+    const ink = gamutCss(accent.markInk(0, stageGround()));
+    for (const lam of document.querySelectorAll('#title .lam')) lam.style.color = ink;
+  }
   let inkCv = null;
-  return { prefs, accent, ctx, get: prefs.get, applyAccent, paintMarks, stageGround,
+  return { prefs, accent, ctx, get: prefs.get, applyAccent, paintMarks, paintInk, stageGround,
     /** set(patch) — the store, then the page at once (a flip is on the page in the same task, as setTheme's always was) */
     set(patch) { prefs.set(patch); prefs.apply({ now: true }); },
     /** every row again, now that the engine's hooks exist (the boot's applySettings) */
