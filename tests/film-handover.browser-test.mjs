@@ -8,6 +8,7 @@
 //      card's own film leaves the store on a REAL tap on DISCARD RENDER
 //   3  TAKE A PICTURE from a script (no activation) → 1 download, 0 shares
 //   4  REAL taps on CAPTURE IMAGE then DOWNLOAD IMAGE (the save inside the second tap) → 1 share, 0 downloads
+//   5  (028 R-01) a SHADER node live through a 1-s clip and a picture → 0 uncapturederror, the stage presents after each
 //   0  (027 D3) a 2-s STILL film with the clock paused and VORTEX raised gives the stage back: its screenshot hash before = after
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
@@ -127,6 +128,24 @@ try {
   assert.equal(t4.downloads, 0, 'DOWNLOAD IMAGE inside a live tap also downloaded: ' + JSON.stringify(t4));
   assert.deepEqual(t4.errs, []);
   pass(`real taps on CAPTURE IMAGE (${t4.held.w} × ${t4.held.h}) then DOWNLOAD IMAGE → 1 share (${t4.shares[0].names[0]}), 0 downloads`);
+
+  /* ── 5 · (028 R-01) A SHADER NODE LIVE THROUGH A FILM AND A PICTURE: the field keeps its tap's COPY_SRC when each hands the context
+         back — 0 uncapturederror over the presents after a 1-s clip and after a picture (the old road: ~2 per present, a black stage, on
+         Chromium; this Firefox does not validate a surface copy, so the context's own usage is read too: COPY_SRC while the tap reads) ── */
+  const t5 = await ev(`const L = __LW, gpu = []; L.field.device.addEventListener('uncapturederror', (e) => gpu.push(String(e.error && e.error.message).slice(0, 120)));
+    L.nodes.setOff(false); L.nodes.add('feedback'); await new Promise((r) => setTimeout(r, 400)); await L.settle();
+    const shows = async () => { const p = L.field.stats.presents; for (let i = 0; i < 8; i++) { L.schedule(L.TIER.PRESENT); await L.settle(); } return L.field.stats.presents - p; };
+    const copy = () => !!(L.field.canvas.getContext('webgpu').getConfiguration().usage & GPUTextureUsage.COPY_SRC);
+    const before = await shows(), e0 = gpu.length, u0 = copy();
+    const r = await L.captureUI.exact.take('clip', { fps: 30, seconds: 1, scale: 1 }).done;
+    const afterClip = await shows(), e1 = gpu.length, u1 = copy();
+    await L.captureUI.picture(); const afterPicture = await shows();
+    return { ok: r.ok, before, afterClip, afterPicture, errs: [e0, e1 - e0, gpu.length - e1], copySrc: [u0, u1, copy()], first: gpu[0] || '', nodes: L.nodes.nodes().map((n) => n.type) };`);
+  assert.equal(t5.ok, true, 'the 1-s clip with a SHADER node failed: ' + JSON.stringify(t5));
+  assert.ok(t5.afterClip > 0 && t5.afterPicture > 0, 'the stage did not present after the film or the picture: ' + JSON.stringify(t5));
+  assert.deepEqual(t5.errs, [0, 0, 0], 'validation errors with a SHADER node live [before, after the clip, after the picture]: ' + JSON.stringify(t5));
+  assert.deepEqual(t5.copySrc, [true, true, true], 'the context lost the tap\'s COPY_SRC [before, after the clip, after the picture]: ' + JSON.stringify(t5));
+  pass(`a SHADER node (${t5.nodes.join(' · ')}) live through a 1-s clip and a picture: COPY_SRC kept, 0 uncapturederror, ${t5.afterClip} and ${t5.afterPicture} presents after`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {
