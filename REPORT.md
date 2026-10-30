@@ -5831,3 +5831,59 @@ proposed text; N7 stale lab comments. The integrator's candidates are each confi
 before `go` dismissed).
 
 Hand-off: `research/release-0.5.2/R-V-REPORT.md`.
+
+---
+
+## THE ITERATIONS, ONE WAVE LINE EACH (from 017; 028 CALL 4 → a)
+
+From iteration 017 on, the work lives in `research/iteration-0NN/` (PLAN.md with its CLOSED table, and a BUILD note per chain); this
+notebook carries one wave line per closed iteration, taken from that PLAN's title and CLOSED rows, so `tools/changelog.mjs` can name them.
+Iterations 001–016 are the tags v0.5.3-alpha … v0.9.9-alpha and their commit lists. No tag names 017–028 yet; the 1.0 tag will be the first.
+
+### wave 225 (iteration 017): THE BUG HUNT — Josh's by-hand note in seven chains: the restore side, the 140 grid, the diamonds and no inner scroll, the layout polish, the speed-run trace
+
+`research/iteration-017/PLAN.md` (CLOSED: X · W · R · S · R4 · P · CLOSE).
+
+### wave 226 (iteration 018): THE WIDE LIST — six chains, kit 1.5.0-alpha.29 → .32: the menu and the chrome, WAVE · CAMERA · the colours, SPECTRUM · the register · the rack defaults, projects · CURVES presets · NODES, the CSB and the FINDER, MIR OPTIONS
+
+`research/iteration-018/PLAN.md` (CLOSED: A–F · CLOSE).
+
+### wave 227 (iteration 019): NODES — the NODES window and its graph, kit 1.5.0-alpha.33
+
+`research/iteration-019/PLAN.md` (CLOSED: N1–N5).
+
+### wave 228 (iteration 020): BUGS · IMPROVEMENTS · THE BUFFER · NODES BEYOND — the stage and the windows, the CONTROL SURFACE, PLAYBACK LOCK (LOCKED 60: the frame time's spread to 0), NODES beyond (five modules, CURVES byte-identical)
+
+`research/iteration-020/PLAN.md` (CLOSED: S · T · L · X).
+
+### wave 229 (iteration 021): BACKEND: THE HOLISTIC REVIEW AND THE DREAM — MIR 1.5.5 cut, app cycles 46 → 0, STATE-SCOPES generated, the action registry and the menus, the icon table, CLAUDE.md in two pages beside docs/laws
+
+`research/iteration-021/PLAN.md` (CLOSED: K · G · R · I · V · D · CLOSE).
+
+### wave 230 (iteration 022): FRONT END: UI UNIFICATION — context menus, tight relief, hints within 60, fit rows, the expanded CONTROL SURFACE, one availability law; kit 1.5.6-alpha.4 → .8; BASINS on 1.5.6-alpha.8
+
+`research/iteration-022/PLAN.md` (CLOSED: P · S · H · F · C · E · CLOSE · BASINS).
+
+### wave 231 (iteration 023): QUICK REQUESTS: THE BAR, THE ROWS, THE DOORS — kit 1.5.6-alpha.9 → .11: dashed behind the view, KEYBOARD glyphs, one notch = 1 BPM, the bar's pills and rows, shorter windows
+
+`research/iteration-023/PLAN.md` (CLOSED: D · B · R).
+
+### wave 232 (iteration 024): ADVANCED NODE / SHADER TEST: DECOHERE — field.tap, the SHADER node (lab/node-shader.js, HEAVY), the palette LUT
+
+`research/iteration-024/PLAN.md` (CLOSED: S).
+
+### wave 233 (iteration 025): VIDEO EXPORT: THE BOUNCE — the film's audio track and offline mixdown, NODES and the SHADER baked into the film, FILE › RENDER… and EXPORT FRAMES…; kit 1.5.6-alpha.12 → .17
+
+`research/iteration-025/PLAN.md` (CLOSED: A · B · C).
+
+### wave 234 (iteration 026): THE CONDUCTOR — a film from a SCORE (tools/conduct.mjs, __LW.conduct), integer targets for style, view and palette, three demos with covers
+
+`research/iteration-026/PLAN.md` (CLOSED: A · B).
+
+### wave 235 (iteration 027): THE DEFECTS — the FEEDBACK, REFRACT and FLOW nodes, A DEMO OPENS CLEAN, a mapped controller live at launch, a saved look keeps its name; NEBULA, BUBBLDYNE and AUTOMATA on MIR 1.5.6-alpha.17 in clones
+
+`research/iteration-027/PLAN.md` (CLOSED: S1 · N · D · S2 · S3).
+
+### wave 236 (iteration 028): STABILITY FINALITY — the review (eight finders, two skeptics a finding, Codex's second opinion; 31 confirmed rows, 0 critical, 3 high) and its six chains: the tools and gates, the worker, the boot and the restore, the volumes, the field and the film, the words that ship
+
+`research/iteration-028/REVIEW.md`, `PLAN.md` and the chains' notes `E-BUILD.md`, `A-BUILD.md`, `B-BUILD.md`, `C-BUILD.md`, `D-BUILD.md`, `F-BUILD.md`.

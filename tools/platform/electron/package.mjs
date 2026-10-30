@@ -9,11 +9,14 @@ import { distHash } from './dist-hash.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url)), REPO = path.resolve(HERE, '../../..'), OUT = path.join(HERE, 'out'), DIST = path.join(REPO, 'dist');
 execFileSync(process.execPath, ['tools/build-deploy.mjs', '--quiet'], { cwd: REPO, stdio: 'inherit' }); // throws, and so stops, on failure
+// 028 R-28: the binary's version is BUILD_LINE's leading token (the one place the number lives); package.json's version is 0.0.0, not a seat.
+const appVersion = (fs.readFileSync(path.join(REPO, 'lab/build-line.js'), 'utf8').match(/BUILD_LINE = '([^ ']+)/) || [])[1];
+if (!appVersion) throw new Error('package.mjs: no BUILD_LINE in lab/build-line.js');
 const ver = (m) => JSON.parse(fs.readFileSync(path.join(HERE, 'node_modules', m, 'package.json'), 'utf8')).version;
-const paths = await packager({ dir: HERE, out: OUT, platform: ['linux', 'win32'], arch: 'x64', asar: true, overwrite: true, extraResource: [DIST],
+const paths = await packager({ dir: HERE, out: OUT, platform: ['linux', 'win32'], arch: 'x64', asar: true, overwrite: true, extraResource: [DIST], appVersion,
   ignore: [/^\/(out|node_modules)(\/|$)/, /^\/(package|smoke-run|dist-hash)\.mjs$/] });
 const git = (...a) => { try { return execFileSync('git', ['-C', REPO, ...a], { encoding: 'utf8' }).trim(); } catch { return null; } };
-const id = { gitSha: git('rev-parse', 'HEAD'), gitTag: git('describe', '--tags', '--always'), ...distHash(DIST), electron: ver('electron'), packager: ver('@electron/packager'), builtAt: new Date().toISOString() };
+const id = { appVersion, gitSha: git('rev-parse', 'HEAD'), gitTag: git('describe', '--tags', '--always'), ...distHash(DIST), electron: ver('electron'), packager: ver('@electron/packager'), builtAt: new Date().toISOString() };
 fs.writeFileSync(path.join(OUT, 'build-identity.json'), JSON.stringify(id, null, 1) + '\n');
 const source = `# λWAVES desktop — corresponding source\n\nThis binary was built from https://github.com/magic-commons/lambdawaves at tag \`${id.gitTag}\`, commit \`${id.gitSha}\`.\n` +
   `The source archive is attached to the matching GitHub Release. dist/ sha256 ${id.distSha256} (${id.fileCount} files), Electron ${id.electron}, built ${id.builtAt}.\n` +

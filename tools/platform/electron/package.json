@@ -1,10 +1,10 @@
 {
   "name": "lambdawaves-desktop",
-  "version": "0.2.3-alpha.3",
+  "version": "0.0.0",
   "private": true,
   "type": "commonjs",
   "license": "GPL-3.0-only",
-  "description": "λWAVES desktop host: loads the built dist/ over a privileged lambdawaves:// scheme.",
+  "description": "λWAVES desktop host: loads the built dist/ over a privileged lambdawaves:// scheme. The binary's version is BUILD_LINE's (lab/build-line.js), stamped by package.mjs; this field is not a seat.",
   "main": "main.cjs",
   "scripts": {
     "start": "electron .",

@@ -1,9 +1,8 @@
 # DEPLOY — λWAVES Alpha
 
-**Current release status (2026-09-10):** read [SHIPPING-READINESS](docs/SHIPPING-READINESS.md) first.
-`./test.sh` is green: every node suite and both shipped browser suites pass. What remains open is
-outside this tree — real-device acceptance (iPad, phone, installed PWA update) and the Cloudflare
-login, deployment and DNS, which are Josh's steps below. Run `npm ci --ignore-scripts` to install
+**Current release status:** the 2026-10-30 block atop [SHIPPING-READINESS](docs/SHIPPING-READINESS.md) — what 1.0
+means, the gate's counts, Wrangler 4.156.0, the remote. What remains open is outside this tree — real-device acceptance
+(iPad, phone, installed PWA update) and the Cloudflare login, deployment and DNS, which are Josh's steps below. Run `npm ci --ignore-scripts` to install
 the pinned Wrangler toolchain before using the `npx` commands.
 
 λWAVES is a static application on **Cloudflare Workers + Static Assets**. Shipping it is **three commands
@@ -119,7 +118,7 @@ to `/`**. `sw.js` precaches `./index.html` — it fetches that exact URL with a 
 the result under the clean key. Under a trailing-slash mode the stored response carries `redirected =
 true`, and `sw.js` hands precisely that response to `respondWith()` for every navigation; a navigation
 request's redirect mode is `manual`, so the browser refuses it. The app would install, work on the first
-visit, and **fail to open from the second launch onward**. Measured against wrangler 4.129.0 on this exact
+visit, and **fail to open from the second launch onward**. Measured in September against wrangler 4.129.0 (the lock is 4.156.0 since 028 R-13; not re-measured — §V6 holds the setting) on this exact
 `dist/`:
 
 | `html_handling` | `GET /` | `GET /index.html?__rev=x` |
@@ -251,7 +250,8 @@ Recorded so they read as decisions rather than drift.
 | `V1: precached "x" … different bytes` / `V5: tests/pwa.test.mjs FAILED` | `node tests/pwa.test.mjs --write` — a wave edited `lab/` and `sw.js` §1 is stale. This is the normal case, and it matters: `sw.js` derives its cache *name* from those hashes, so a stale one means returning visitors keep serving old bytes forever |
 | `V1: dist/x.js is neither precached nor covered by a rule` | a wave added a file. Same command |
 | `V2: … (looked for dist/…)` | a real broken link |
-| `V2: … (climbs above the deployment root)` | a reference that leaves lab/ — it resolves on the LAN and gate servers (they serve the repo root) and 404s on the deployed origin. If it is a diagnostic reached only by an explicit flag (the device report, `?report=1`), name it in the build's `DEV_ONLY` table with the reason; anything else is a real broken link |
+| `V2: … (climbs above the deployment root)` | a reference that leaves lab/ — it resolves on the LAN and gate servers (they serve the repo root) and 404s on the deployed origin. If it is a diagnostic reached only by an explicit flag (the device report, `?report=1`; THE CONDUCTOR, `__LW.conduct`), name it in the build's `DEV_ONLY` table with the reason; anything else is a real broken link |
+| `V2: … [base] (no shipped file under dist/…)` / `[base] ships empty BY DESIGN` | a `new URL('./dir/', …)` base with nothing shipped under it. `volumes/` is the one by design (the build's `EMPTY_BASE` table, 028 R-32): only `--shelf` fills it, and without a shelf `shelf()` reads the 404 as "no volumes published". Any other empty base is a broken road |
 | `V2: manifest "id" …` | `id` is the one manifest member resolved against the **origin**, not against the manifest, so a relative value does not travel with the app. Delete the `id` member in `lab/manifest.webmanifest` — it then falls back to `start_url`, which is `"./"` and is correct at every address |
 | `V3: … no register(…)` | nothing registers the service worker, so the precache and the whole offline layer are inert. One line at the end of boot: `if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');` — **relative**, which is what keeps the same bytes working on `./serve.sh`, under `wrangler dev`, and at the origin root |
 | `V4: SharedArrayBuffer` | a wave introduced cross-origin isolation. `_headers` must then grow COOP/COEP and every subresource must be CORP-clean. None of it is needed today and none is sent |

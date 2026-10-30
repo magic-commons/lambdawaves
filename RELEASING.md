@@ -1,6 +1,6 @@
 # Releasing λWAVES
 
-> **0.9.1 (2026-10-16):** the engine's cuts since v0.5.3 are local on `yan-c` (tags, CHANGELOG and snapshots, nothing pushed or deployed); pushing them, and so moving `main` and the live site, is Josh's decision (0.9.0's law). The rule below is September's and stands for that day.
+> **2026-10-30 (iteration 028):** the engine's cuts since v0.5.3 are local on `yan-c` (tags, CHANGELOG and snapshots, nothing pushed or deployed; `origin/main` is at `28fe4457`, 2026-10-04); pushing them, and so moving `main` and the live site, is Josh's decision (0.9.0's law). The rule below is September's and stands for that day. The status of the tree is the 2026-10-30 block atop `docs/SHIPPING-READINESS.md`.
 
 Two branches, two addresses, one rule: **`main` is what is live, and it only moves when a release is cut.**
 
@@ -28,8 +28,10 @@ When `dev` has been green for a while and has lived on the iPad and the desktop 
 ```bash
 git switch main && git merge --ff-only dev         # main takes exactly what dev is; if this refuses, dev must be rebased on main first
 ./test.sh                                          # the whole gate, browser half included, on the release
+npm audit && (cd tools/platform/electron && npm audit)   # reads 0 in both packages (028 R-13, R-30)
+# BUILD_LINE (lab/build-line.js) and CITATION.cff's version: + date-released: are written together, before the tag
 git tag -a v0.2.0-alpha -m "…what changed…"        # semantic version + stage; the changelog is generated from tags
-node tools/changelog.mjs && git commit -am "CHANGELOG for v0.2.0-alpha" && git push --follow-tags
+node tools/changelog.mjs && node tools/changelog.mjs --check && git commit -am "CHANGELOG for v0.2.0-alpha" && git push --follow-tags
 node tools/snapshot-release.mjs v0.2.0-alpha       # the playable snapshot of the release (Josh's rule, 2026-09-25): ~/Documents/LAMBDAWAVES-RELEASES/<tag>/ + the vault index note
 node tools/build-deploy.mjs && npx wrangler deploy # the release goes live
 gh release create v0.2.0-alpha --generate-notes    # the GitHub Release page
@@ -37,9 +39,10 @@ git switch dev
 ```
 
 Version numbers: `0.x.0-alpha` while features are still being added and the file format may move;
-`0.x.0-beta` once a project saved today is promised to open next month; `1.0.0` when the device
-matrix, the installed-PWA update test and a screen-reader pass in `docs/SHIPPING-READINESS.md` are
-closed. Bump the middle number for a release, the last for a hotfix.
+`0.x.0-beta` once a project saved today is promised to open next month; `1.0.0` as PLAN 028 defines it:
+**1.0 is the tree in which the last confirmed critical or high fix of the 028 review is closed** (`research/iteration-028/PLAN.md` § CALLS FOR JOSH, CALL 1 → C, the integrator's default of 2026-10-30; Josh overrides it by a word). The device matrix, the installed-PWA update test and a screen-reader pass are what 1.0 ships WITH and
+says as UNVERIFIED (`docs/SHIPPING-READINESS.md`'s 2026-10-30 status); closing them is after 1.0, not before it.
+Bump the middle number for a release, the last for a hotfix.
 
 ## A hotfix (something broken on the live site)
 
@@ -62,5 +65,6 @@ git switch dev && git merge main                   # dev takes the fix too, so i
 
 `research/beta/` holds the next era's dossier (Beta: causal atoms, flexible benzene) and its build
 contracts; `docs/SHIPPING-READINESS.md` holds what still stands between an alpha and 1.0; `REPORT.md`
-is the notebook every session appends to. A new Claude session starts by reading those three and
+is the notebook to 0.5.2 and, since iteration 017, one wave line per closed iteration (the iterations themselves live in
+`research/iteration-0NN/`). A new Claude session starts by reading those three and
 `git log --oneline -20` on `dev`.

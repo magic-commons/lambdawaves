@@ -1,5 +1,13 @@
 # 1.0.0 "λWAVES" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈06:50 while 0.8.1 builds; base filled at the 0.9.1 cut)
 
+> **2026-10-30 (iteration 028, chain F) — THE DEFINITION IS PLAN 028's.** **1.0 is the tree in which the last confirmed critical or high fix of the 028 review is closed** (`research/iteration-028/PLAN.md` § CALLS FOR JOSH, CALL 1 → C, the integrator's default of 2026-10-30; Josh overrides it by a word). This plan no longer defines
+> 1.0; it is what 1.0 SHIPS WITH. THE PAPER (W1) and THE STANDALONE (W2) stand as written, and their device section says the iPad and
+> iPhone rows UNVERIFIED, the win32-x64 package built and not run, and (028) the Android upload key gone (`docs/ACCEPTANCE-MATRIX.md`).
+> Two lines of THE CUT below changed with the tree: BUILD_LINE lives in `lab/build-line.js` (021 D1), not `lab/rack.js`; and CHANGELOG.md
+> is generated and judged (`node tools/changelog.mjs --check`, 028 R-27), so the MAJOR-FEATURES LIST is not hand-written at its head — the
+> cuts since v0.5.3 are its tag sections, and iterations 017–028 are one `### wave` line each in REPORT.md (028 CALL 4 → a), which the
+> v1.0.0 tag will be the first to carry. CITATION.cff's version and date move with BUILD_LINE.
+
 The engine plan's D.18 (`../release-0.6.0/PLAN.md` l.48 "the standalone; the paper beside it"; l.308–310: "the standalone; the paper's seven sections written FROM the
 certification table; the prior-art pass before any 'novel'. What the paper cannot say: 'real-time' for a card or a record; 'Lindblad' beyond the random-clock case;
 any RC accuracy as the texel's; 'H₂⁺' without '1s-LCAO' if it returns; 'the quasicrystal' for a 256-vertex patch; 'DFT-certified' beyond 0.7.3's PySCF numbers;
