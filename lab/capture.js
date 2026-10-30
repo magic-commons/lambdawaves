@@ -591,10 +591,12 @@ export function captionOver(rgba, w, h, text) {
   return true;
 }
 
-/** the context's usage.  COPY_SRC is not the default and no readback can be taken without it; `false` puts the plain one back. */
+/** the context's usage.  COPY_SRC is not the default and no readback can be taken without it; `false` hands the context back to the
+ *  field (its gamut, and COPY_SRC while a SHADER node's tap reads — 028 R-01). */
 export function configureCopy(f, canvas, withCopy) {
   const c = f && f.ok && canvas ? canvas.getContext('webgpu') : null;
   if (!c) return false;
+  if (!withCopy && f.reconfigure) { f.reconfigure(); return true; }
   const base = { device: f.device, format: f.format, alphaMode: 'opaque' };
   if (f.gamut && f.gamut !== 'srgb') base.colorSpace = 'display-p3';
   if (withCopy) base.usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC;

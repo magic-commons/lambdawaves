@@ -238,6 +238,18 @@ struct VO { @builtin(position) pos: vec4f, @location(0) col: vec4f };
 }
 @fragment fn fs(i: VO) -> @location(0) vec4f { return i.col; }
 `;
+/* STRAIGHT (028 R-23): the film's target as the 2-D canvas takes it — each premultiplied byte over the alpha byte, rounded half to even in
+   integers (the bytes the JS loop on the readback made, now on the GPU, read from the written bytes so the hardware's rounding is kept) */
+const STRAIGHT = FULL + /* wgsl */ `
+@group(0) @binding(0) var src: texture_2d<f32>;
+@fragment fn fs(@builtin(position) fc: vec4f) -> @location(0) vec4f {
+  let q = vec4u(round(textureLoad(src, vec2i(fc.xy), 0) * 255.0)); let A = q.a;
+  if (A == 0u || A == 255u) { return vec4f(q) / 255.0; }
+  let n = q.rgb * 255u; let o = n / A; let r2 = 2u * (n - o * A); let a = vec3u(A);
+  let up = (r2 > a) | ((r2 == a) & ((o & vec3u(1u)) == vec3u(1u)));
+  return vec4f(vec3f(min(o + select(vec3u(0u), vec3u(1u), up), vec3u(255u))), f32(A)) / 255.0;
+}
+`;
 const ADD = { srcFactor: 'one', dstFactor: 'one', operation: 'add' };
 /* the passes: a WGSL module, its entry points, the target (f16 = an rgba16float state, else the canvas or the film's rgba8unorm), additive or not */
 const PASSES = {
@@ -247,6 +259,7 @@ const PASSES = {
   fbshow: { code: FBSHOW, vs: 'vt', fs: 'fs' },
   fade: { code: FADE, vs: 'vt', fs: 'fs', f16: true },
   trail: { code: TRAIL, vs: 'vs', fs: 'fs', add: true, f16: true },
+  straight: { code: STRAIGHT, vs: 'vt', fs: 'fs' },
 };
 const COL = { ink: 0, picture: 1, palette: 2 };
 
@@ -340,17 +353,25 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
     if (!last || !device) return null;
     const id = (l && l.id) || 'decohere', type = (l && l.type) || 'decohere', { w, h } = last;
     let r = films.get(id);
-    if (!r || r.type !== type) { if (r) { free(r); r.ub.destroy(); } r = { el: null, ub: ubuf(), type, at: -1 }; films.set(id, r); }
-    if (!r.out || r.out.width !== w || r.out.height !== h) { if (r.out) r.out.destroy(); r.out = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: U.RENDER_ATTACHMENT | U.COPY_SRC }); }
+    if (!r || r.type !== type) { if (r) { free(r); r.ub.destroy(); if (r.out) for (const k of ['out', 'st', 'buf']) r[k].destroy(); } r = { el: null, ub: ubuf(), type, at: -1 }; films.set(id, r); }
+    const bpr = Math.ceil(w * 4 / 256) * 256;
+    if (!r.out || r.out.width !== w || r.out.height !== h) {        // 028 R-23: the target, its straight copy, the MAP_READ buffer and the bytes, once per size
+      if (r.out) for (const k of ['out', 'st', 'buf']) r[k].destroy();
+      r.out = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: U.RENDER_ATTACHMENT | U.TEXTURE_BINDING });
+      r.st = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: U.RENDER_ATTACHMENT | U.COPY_SRC });
+      r.buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ }); r.rgba = new Uint8ClampedArray(w * h * 4);
+    }
     if (i === 0) r.fresh = true;
     r.values = values; draw(r, r.out, i !== r.at); r.at = i;
-    const bpr = Math.ceil(w * 4 / 256) * 256, buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ }), enc = device.createCommandEncoder();
-    enc.copyTextureToBuffer({ texture: r.out }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: h }, [w, h, 1]); device.queue.submit([enc.finish()]);
+    const { buf, rgba } = r, enc = device.createCommandEncoder(), sp = pipe('straight', 'rgba8unorm');
+    const s = enc.beginRenderPass({ colorAttachments: [{ view: r.st.createView(), loadOp: 'clear', clearValue: [0, 0, 0, 0], storeOp: 'store' }] });
+    s.setPipeline(sp); s.setBindGroup(0, group(sp, r.out.createView())); s.draw(3); s.end();
+    enc.copyTextureToBuffer({ texture: r.st }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: h }, [w, h, 1]); device.queue.submit([enc.finish()]);
     await buf.mapAsync(GPUMapMode.READ);
-    const src = new Uint8Array(buf.getMappedRange()), rgba = new Uint8ClampedArray(w * h * 4);
+    const src = new Uint8Array(buf.getMappedRange());
     for (let y = 0; y < h; y++) rgba.set(src.subarray(y * bpr, y * bpr + w * 4), y * w * 4);
-    buf.unmap(); buf.destroy();
-    return { rgba, w, h };
+    buf.unmap();
+    return { rgba, w, h };   // STRAIGHT alpha, the record's own array: read it before the next bake
   }
   const onTap = (tex, w, h) => { last = { tex, w, h }; for (const r of recs.values()) draw(r, null, true); };
   return {
