@@ -467,6 +467,14 @@ if (refs.length < 150) fail('V2', `only ${refs.length} references found across d
 const DEV_ONLY = {
   [`${at('rack.js')} → ../tools/perf/device-report.js`]:
     'THE DEVICE REPORT (2026-09-25): a diagnostic behind ?report=1 / __LW.report(); it lives in tools/ and is never shipped (its header says so); a normal boot never fetches it',
+  [`${at('shell/facade.js')} → ../../tools/conduct-score.js`]:
+    'THE CONDUCTOR (026 A2): __LW.conduct.apply, called by tools/conduct.mjs against a local server; it lives in tools/ beside its bounce (lab/ stands under the 8 MiB precache ceiling) and a normal boot never fetches it',
+};
+/* A DATA ROOT'S EMPTY BASE (028 R-32) — volumes/ is sw.js §1b's DATA root that only THE SHELF (--shelf) fills: a deploy holds no volume
+   folder, and without a shelf lab/volumes.js' shelf() reads the 404 as "no volumes published" and answers from the device.  An empty base
+   anywhere else is a broken road. */
+const EMPTY_BASE = {
+  [`${at('volumes.js')} → ./volumes/`]: 'THE SHELF (iteration 005 S): filled by --shelf; without one shelf() answers from the device',
 };
 const dangling = new Set(), escaped = new Set(), siteRoot = new Map(), external = new Map(), devOnly = [];
 for (const { from, ref, kind } of refs) {
@@ -483,8 +491,11 @@ for (const { from, ref, kind } of refs) {
   }
   if (kind === 'base') {
     const prefix = target.endsWith('/') ? target : target + '/';
-    if (![...inDist].some((file) => file.startsWith(prefix)))
-      dangling.add(`dist/${from} → ${ref}  [base]  (no shipped file under dist/${prefix})`);
+    if (![...inDist].some((file) => file.startsWith(prefix))) {
+      const why = EMPTY_BASE[`${from} → ${ref}`];
+      if (why) devOnly.push(`dist/${from} → ${ref}  [base]  ships empty BY DESIGN — ${why}`);
+      else dangling.add(`dist/${from} → ${ref}  [base]  (no shipped file under dist/${prefix})`);
+    }
     continue;
   }
   /* A reference to a DIRECTORY — the manifest's start_url and scope are "./" — is a request for that
@@ -501,7 +512,7 @@ for (const d of dangling) fail('V2', d);
 for (const e of escaped)  fail('V2', e);
 for (const d of devOnly)  note(d);
 if (!dangling.size && !escaped.size)
-  console.log(`PASS  ${refs.length} relative src / href / import / url() / manifest references walked; every one resolves to a file that is in dist/. ${devOnly.length ? `${devOnly.length} dev-only reference(s) climb above the deployment root by design (see NOTES).` : 'None climbs above the deployment root.'}`);
+  console.log(`PASS  ${refs.length} relative src / href / import / url() / manifest references walked; every one resolves to a file that is in dist/. ${devOnly.length ? `${devOnly.length} reference(s) by design: dev-only above the deployment root, or a DATA root's empty base (see NOTES).` : 'None climbs above the deployment root.'}`);
 console.log(`      site-root ("/…") paths found: ${siteRoot.size ? '' : 'none — the ABOUT face\'s three file links were removed by wave 55; the FILES ship anyway (dossier §8), so /LICENSE, /NOTICE and /REPORT.md all answer'}`);
 for (const [k, kind] of siteRoot) console.log(`        [${kind}] ${k}`);
 console.log(`      absolute URLs (clicked, never loaded — V1's precache and the worker's cross-origin refusal keep them off the critical path): ${[...external.keys()].join(' ') || 'none'}`);
