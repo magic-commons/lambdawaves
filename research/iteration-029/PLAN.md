@@ -1,0 +1,57 @@
+# ITERATION 029 — THE PERFORMANCE PASS (Claude Yan, integrator on `yan-c`; Josh 2026-10-30)
+
+Josh's word: `PROMPT.md`. 028 closed at d5688af7 (the review, the six chains, the tree at its 1.0 gate). 029 makes the modulated lab USABLE
+before the beta: measured first, then fixed in the order of the measurement, every speedup with its number, no pixel moved.
+
+## WHAT IS KNOWN (before measuring — hypotheses, not findings)
+- The modulation engine is the KIT's (`lab/mir/modulation/`: mod.js 3,151 lines · window.js 3,437 · host.js 1,140 · bind.js 434 · audio-capture.js
+  264) under the law THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: a kit-side speedup is a DOOR 1.5.6-alpha.18+ built on the clone road
+  (docs/laws/kit.md), adopted by adopt.mjs, with its FOR-MIR line — never a hand edit of `lab/mir/**`.
+- The app's port is `lab/mod-port.js` (204 lines): `setKnob(k, v)` writes every routed knob through the DOM each tick (`k.show(v)` / `k.set(v)`),
+  the cadence is 60 Hz (`cadence.hz`), `routeDots` walks `document.querySelectorAll('[data-param]')` (017 F6 named the 400 ms interval; now a rAF);
+  `lab/shell/modulation.js` (343) seats the targets (a modulated `material.style` / `material.view` presses a seg button).
+- The 028 review (dimension 5, headless Firefox, ratios only): worst rAF gap 283 ms with 73 lanes; longest task 124 ms inside a film; heap flat;
+  "headless compositors dominate; headed Chromium got SwiftShader" — nobody has measured the real screen. Josh has: "super laggy".
+- 017's perf rows (research/iteration-017/P-BUILD.md, X-BUILD.md): the steady timers, the rack's layout observer stamping every card, the things
+  that made WAVE DANCER feel fine while the rest stuttered ("a sticky setting").
+- The AUDIO device is MICROPHONE-ONLY (the kit's privacy law; `audio-capture.js`: one FFT of 2,048 bins at 48 kHz per feed); the timeline's
+  audio CLIPS are analysed offline (`audio-analysis.js`, 100 Hz envelopes) — the STAR LOOP demo rides those. A headless benchmark feeds the
+  AUDIO device from `media/star.mp3` through a fake capture (the port's `audio` factory is injectable: `installModulation({ audio })`,
+  bind.js:105) or plays STAR LOOP's clip lanes; both are measured.
+
+## THE LAW OF 029 (to docs/laws/iterations.md at the close)
+EVERY SPEEDUP HAS ITS NUMBER (before and after, the same probe, the same scene; p50 · p95 · p99 of the frame and the tick); THE LOCK NEVER
+MOVES (843/0 · 987/0 after every row — a speedup that changes a pixel is a style, not a speedup); THE KIT MOVES BY DOORS (alpha.18+ on the
+clone road, one FOR-MIR line each); IDLE COSTS NOTHING, AND A HIDDEN KNOB COSTS NOTHING (the port writes only what is on screen and only
+when the shown value would change).
+
+## M0 — THE INSTRUMENT (one Opus agent, read-only but for `tools/perf/` and `research/iteration-029/`)
+`tools/perf/mod-profile.mjs` on the gate kit (headless Firefox, the RTX): opens a project (WAVE DANCER demo · STAR LOOP demo · Josh's export
+when it lands), arms modulation, PLAYs 30 s at 1080p in four scenes — (a) the modulation window CLOSED, (b) OPEN, (c) the AUDIO device live
+on a fake capture fed from `media/star.mp3` (the drop, 36–66 s), (d) 73 lanes (the 028 stress scene) — and samples per frame: the rAF gap,
+the modulation tick's ms (the port's `onAdvance`/the host's step wrapped), `setKnob` calls and distinct knobs written, DOM mutations
+(MutationObserver, subtree), long tasks (PerformanceObserver), JS heap; reports p50/p95/p99 and the TOP OFFENDERS (a `performance.mark`
+budget per subsystem: tick · knobs · window paint · field present · chem). Then ONE headed Chromium trace on the RTX (`/snap/bin/chromium
+--enable-unsafe-webgpu --ignore-gpu-blocklist --enable-features=Vulkan --use-angle=vulkan --ozone-platform=x11`, display :0, 30 s, CDP
+Tracing via `tools/perf/cdp.mjs`) for the real categories: scripting · style/layout · paint · GPU — the window WILL appear on Josh's screen
+for 30 s; said before it does. Output `research/iteration-029/M0-MEASURE.md`: the numbers, the offenders ranked by ms per frame, and the
+proposed rows M1…Mn each with its expected gain and its side (app / kit door). No fix in M0.
+
+## M1 … Mn — THE FIXES (cut from M0-MEASURE.md; one Opus builder at a time; merge order by measured gain)
+Candidates the measurement will confirm or dismiss (NOT a to-do list): the port writes a knob only when its shown value changes and only if
+the knob is on screen (IntersectionObserver / the card's open state) · one DOM write batch per tick, never per lane · the modulation
+window's lane scopes at their own cadence and only while visible (kit door) · the tick's allocations (kit door: typed arrays reused) ·
+`routeDots` never on the hot path · the governor's floor and `cadence.hz` under load (a 30 Hz modulation cadence when the frame is late,
+said in METERS) · the seg-press targets (material.style/view) debounced · the field's uniform upload once per frame, not per param ·
+the audio FFT's bin count/feed cadence · the layout observer's stamping (017). Each row: the probe before/after, THE LOCK, the modulation
+proofs (`node tools/x-probe.mjs x4` byte-identical CURVES; `flash-routes` node; `routed-knob` · `curves` · `lfo-tension` browser).
+
+## CALLS FOR JOSH
+1. Export "002 WAVE DANCER" (FILE › EXPORT) to `research/iteration-029/002-wave-dancer.lambdawaves.json` — the exact scene becomes the benchmark.
+2. The beta's name: `v0.9.9-beta` at the cut (default), or `0.9.9` plain.
+3. "Usable for everyone": the target machine for the numbers — default: the RTX at 60 Hz AND a software-GPU/integrated profile (Chromium
+   SwiftShader or `--use-angle=swiftshader`) as the floor; the laptop/iPad rows stay UNVERIFIED without a device.
+
+## CLOSED
+| row | base | commit | note |
+|---|---|---|---|
