@@ -20,6 +20,8 @@ import { seed } from '../lab/mir/folders/seed.js';
 import { pageFromNotebook } from '../lab/mir/shell/pages.js';
 import { readInput } from '../lab/mir/core/intake.js';
 import { finiteOver } from '../lab/shell/persist.js';
+import { createSession } from '../lab/mir/core/session.js';
+import { takeResume } from '../lab/projects.js';
 import { wrap, stringify, LIMITS } from '../lab/mir/core/envelope.js';
 import { PJ_KEY, PART, MAX_PROJECT_BYTES, MAX_LIBRARY_CHARS, createProjectStore, toFiles, fromFiles, validateProjectCollection, touchRecent,
   parseProjectFile, projectFileText, STARTERS, starterOf } from '../lab/project-store.js';
@@ -236,4 +238,19 @@ green('the unsaved mark is the part\'s signature, projectKey(): the domain under
   assert.ok(rack.includes('if (domain.auto || !Number.isFinite(domain.half)) domain.half ='), 'applyRebuild has no belt for a non-finite half');
 }
 green('a file\'s number is taken only when it is one (028 R-04): domain.half null, exposure \'boom\', a NaN slice pos and a null in a quat keep the current numbers; a valid file passes unchanged; restore\'s four spreads and the rebuild\'s belt');
+{
+  /* 028 R-12 · A SESSION THE KIT CANNOT READ IS KEPT, NOT RESUMED AS NOTHING: a future `v` and an unparsable text are copied to
+     `.failed`, the record stays as it was, autosave stays unarmed (the next edit cannot overwrite it); a readable record still resumes */
+  const K = 'lambdawaves.q0.session', part = { capture: () => ({ lambdawaves: { x: 1 } }), restore: () => ({ failed: [] }), signature: () => 's', subscribe: null };
+  for (const text of ['{"v":2,"parts":{"lambdawaves":{"x":1}}}', '{"garbage']) {
+    const S = memory({ [K]: text }), session = createSession({ key: K, storage: S, parts: part, win: null, doc: null });
+    assert.equal(takeResume(session, S), false, text);
+    assert.equal(S.getItem(K + '.failed'), text); assert.equal(S.getItem(K), text); assert.equal(session.armed(), false, text);
+    session.destroy();
+  }
+  const S = memory({ [K]: '{"v":1,"parts":{"lambdawaves":{"x":1}}}' }), session = createSession({ key: K, storage: S, parts: part, win: null, doc: null });
+  assert.equal(takeResume(session, S), true); assert.equal(S.getItem(K + '.failed'), null); assert.equal(session.armed(), true);
+  session.destroy();
+}
+green('a session the kit cannot read is kept (028 R-12): a future v and an unparsable text go to .failed, the record stands and autosave stays unarmed; a v1 record resumes and arms');
 console.log(`GREEN project-formats: ${greens} judged lines`);

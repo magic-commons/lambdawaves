@@ -382,7 +382,7 @@ const PRECACHE = [
   ['./picker-fx.js',                                                '173203b5246e'],
   ['./picker.js',                                                   '62a2557bf5b3'],
   ['./project-store.js',                                            '8f2d39f032a9'],
-  ['./projects.js',                                                 '178c4bd380cc'],
+  ['./projects.js',                                                 'a0615ea52761'],
   ['./qho.js',                                                      'c0dfa6e21c94'],
   ['./rack.js',                                                     '80ad34c17590'],
   ['./radiation.js',                                                '678be6f37657'],
