@@ -3,27 +3,33 @@
 
     python3 tools/gemma/broker.py            (tools/gemma/start.sh runs it with nohup; tools/gemma/stop.sh stops it by pid)
 
-Python 3 stdlib only.  HTTPS on 0.0.0.0:9443 (GEMMA_PORT) so the iPad reaches it by the desktop's hostname, with the gate server's
+Python 3 stdlib only.  HTTPS on 127.0.0.1:9443 (GEMMA_PORT); GEMMA_HOST=0.0.0.0 is the explicit LAN opt-in (the iPad reaches it by the
+desktop's hostname), said at start.  A browser Origin must be loopback, this host's name, or listed in GEMMA_ORIGINS (comma-separated
+exact origins) — anything else is 403 with no CORS headers; two asks run at once, a third is 429.  It uses the gate server's
 own certificate pair (tools/gate/server.py's road: LW_CERTS, MB_CERTS, ~/.config/lambdawaves/certs, then .certs/ at the repo root —
 never a second pair).  Routes:
 
     POST /ask      { text, inventory, history }  ->  { say, verbs, notebook?, ms, model }
     GET  /health   { ok, model, ollama, pulled }
-    OPTIONS *      the CORS preflight (Access-Control-Allow-Origin: * — a LAN tool; docs/GEMMA.md says so)
+    OPTIONS *      the CORS preflight (the allowed Origin echoed, never `*`; docs/GEMMA.md says so)
 
 One ask is one Ollama POST /api/chat (127.0.0.1:11434, stream false, temperature 0.2, `format` = the reply JSON schema built from the
 verb table, so the model's grammar is constrained to {say, verbs:[{verb, args}], notebook?}).  The system prompt is built ONCE at start
 from `node tools/gemma/verb-doc.mjs` (the table, the reply schema, the catalogue of ids), so it never drifts from the tree.  Every verb
 is validated against the table before the answer leaves (an unknown verb is dropped and said in `say`); each turn is one JSON line in
-~/.cache/lambdawaves-gemma/log.jsonl.  The page runs the verbs through its own hand roads; the broker never touches the app.
+~/.cache/lambdawaves-gemma/log.jsonl (your words in it only with GEMMA_LOG=1).  The page runs the verbs through its own hand roads; the broker never touches the app.
 """
-import http.server, json, os, ssl, subprocess, sys, time, urllib.error, urllib.request
+import http.server, json, os, socket, ssl, subprocess, sys, threading, time, urllib.error, urllib.parse, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))                  # tools/gemma/ -> tools/ -> repo
 MODEL = os.environ.get("GEMMA_MODEL", "gemma4:e4b")
 PORT = int(os.environ.get("GEMMA_PORT", "9443"))
-HOST = os.environ.get("GEMMA_HOST", "0.0.0.0")
+HOST = os.environ.get("GEMMA_HOST", "127.0.0.1")              # 0.0.0.0 = the LAN, by your word only
+ORIGIN_HOSTS = {"127.0.0.1", "localhost", "::1", socket.gethostname().lower(), socket.gethostname().lower() + ".local"}
+ORIGINS = {o.strip().rstrip("/") for o in os.environ.get("GEMMA_ORIGINS", "").split(",") if o.strip()}
+LOG_TEXT = os.environ.get("GEMMA_LOG") == "1"                  # the raw prompt reaches the log only when asked for
+BUSY = threading.BoundedSemaphore(2)                           # the request cap: a third concurrent ask is 429
 CTX = int(os.environ.get("GEMMA_CTX", "8192"))                 # the prompt + catalogue is ~3 k tokens; 8 k leaves room for 6 turns
 VERBS_MODULE = os.environ.get("GEMMA_VERBS", "")               # verb-doc's [module]; empty = lab/verbs.js, else the stub (warned)
 OLLAMA = "http://127.0.0.1:11434"
@@ -169,7 +175,7 @@ def ask(body):
     except ValueError: raise BrokerError(502, "the model's answer was not JSON: %s" % content[:200])
     out = validate(reply if isinstance(reply, dict) else {})
     out.update(ms=ms, model=MODEL)
-    log({"at": time.strftime("%Y-%m-%dT%H:%M:%S"), "text": text, "say": out["say"], "verbs": out["verbs"],
+    log({"at": time.strftime("%Y-%m-%dT%H:%M:%S"), "text": text if LOG_TEXT else None, "say": out["say"], "verbs": out["verbs"],
          "notebook": out.get("notebook"), "raw": None if reply == out else content[:2000], "ms": ms, "model": MODEL})
     return out
 
@@ -189,8 +195,13 @@ class H(http.server.BaseHTTPRequestHandler):
         except (ssl.SSLError, OSError, ValueError): raise ConnectionAbortedError("tls handshake failed or timed out")
         super().setup()
         self.request.settimeout(TIMEOUT_S + 10)
+    def origin_ok(self):
+        o = self.headers.get("Origin")
+        if o is None: return True                               # not a browser page (curl, the replay tool)
+        return o.rstrip("/") in ORIGINS or (urllib.parse.urlsplit(o).hostname or "").lower() in ORIGIN_HOSTS
     def cors(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
+        if not self.headers.get("Origin") or not self.origin_ok(): return
+        self.send_header("Access-Control-Allow-Origin", self.headers["Origin"]); self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Private-Network", "true")
@@ -201,12 +212,18 @@ class H(http.server.BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store"); self.end_headers(); self.wfile.write(b)
     def route(self): return self.path.split("?", 1)[0]
     def do_OPTIONS(self):
+        if not self.origin_ok(): self.send(403, {"error": "origin not allowed (GEMMA_ORIGINS)"}); return
         self.send_response(204); self.cors(); self.send_header("Access-Control-Max-Age", "600"); self.end_headers()
     def do_GET(self):
         if self.route() == "/health": self.send(200, health())
         else: self.send(404, {"error": "only POST /ask (and GET /health)"})
     def do_POST(self):
         if self.route() != "/ask": self.send(404, {"error": "only POST /ask (and GET /health)"}); return
+        if not self.origin_ok(): self.send(403, {"error": "origin not allowed (GEMMA_ORIGINS)"}); return
+        if not BUSY.acquire(blocking=False): self.send(429, {"error": "two asks are already running"}); return
+        try: self.answer()
+        finally: BUSY.release()
+    def answer(self):
         n = int(self.headers.get("Content-Length") or 0)
         if n <= 0 or n > MAX_BODY: self.send(413 if n > MAX_BODY else 400, {"error": "a body of 1 byte to %d KiB" % (MAX_BODY // 1024)}); return
         try: body = json.loads(self.rfile.read(n).decode("utf-8"))
@@ -230,4 +247,7 @@ if __name__ == "__main__":
     httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True, do_handshake_on_connect=False)
     print("λWAVES gemma broker on https://%s:%d/ask -> %s (%s) · verbs from %s · prompt %d chars"
           % (HOST, PORT, OLLAMA, MODEL, SOURCE, len(SYSTEM)), flush=True)
+    if HOST not in ("127.0.0.1", "localhost", "::1"):
+        print("LAN OPT-IN: bound to %s — anyone on this network can ask (browser pages only from %s)"
+              % (HOST, ", ".join(sorted(ORIGIN_HOSTS | ORIGINS))), flush=True)
     httpd.serve_forever()

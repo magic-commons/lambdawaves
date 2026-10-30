@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tools/gemma/start.sh — bring Gemma up: the userspace Ollama, the model, the broker (0.6.6 G3). Safe to re-run; skips what is up.
-#   tools/gemma/start.sh                          → gemma4:e4b, broker on https://0.0.0.0:9443
+#   tools/gemma/start.sh                          → gemma4:e4b, broker on https://127.0.0.1:9443 (GEMMA_HOST=0.0.0.0 for the LAN; docs/GEMMA.md)
 #   GEMMA_MODEL=gemma4:12b tools/gemma/start.sh   (when the stage is light: the RTX 3070's 8 GB is shared with it)
 # Stop with tools/gemma/stop.sh (the broker only — Ollama is Josh's and Odysseus may be using it).
 set -u
@@ -54,7 +54,7 @@ else
   echo $! > "$CACHE/broker.pid"
   for _ in $(seq 1 40); do curl -kfs "https://127.0.0.1:$GEMMA_PORT/health" >/dev/null 2>&1 && break; sleep 0.25; done
   if curl -kfs "https://127.0.0.1:$GEMMA_PORT/health" >/dev/null 2>&1; then
-    echo "[ok] broker on https://$(hostname):$GEMMA_PORT/ask  (model $GEMMA_MODEL, pid $(cat "$CACHE/broker.pid"), log $CACHE/broker.log)"
+    echo "[ok] broker on https://${GEMMA_HOST:-127.0.0.1}:$GEMMA_PORT/ask  (model $GEMMA_MODEL, pid $(cat "$CACHE/broker.pid"), log $CACHE/broker.log)"
   else
     echo "[!!] the broker did not answer — see $CACHE/broker.log"; tail -5 "$CACHE/broker.log"; rm -f "$CACHE/broker.pid"; exit 1
   fi
