@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const ORIGIN = 'lambdawaves://app';
 const START = ORIGIN + '/index.html?sw=0&warn=0';
 const SMOKE = process.env.LW_SMOKE_DIR || '';
-const SWITCHES = []; // Linux-only WebGPU switches: none needed (RTX 3070, Wayland, Electron 44.4.5, 2026-09-24)
+const SWITCHES = []; // Linux-only WebGPU switches: none needed (RTX 3070, Wayland, Electron 44.4.5, 2026-09-24; 44.10.0 smoke 17/17, 2026-10-30)
 if (process.platform === 'linux') for (const s of SWITCHES) app.commandLine.appendSwitch(...s.split('='));
 
 protocol.registerSchemesAsPrivileged([{ scheme: 'lambdawaves', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, codeCache: true } }]);
