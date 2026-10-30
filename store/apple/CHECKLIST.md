@@ -34,7 +34,7 @@ Status on 2026-09-24. The Apple pages cited here were read that day. Re-read any
 
 ## Waits for the licence decision (before the **public** release, not before TestFlight)
 
-- [ ] The store distribution licence for the App Store build, with counsel (`LEGAL-PROVENANCE.md` §4). GPL-3.0-only and Apple's minimum EULA terms conflict. Josh, as sole copyright holder, can dual-license. Until that is decided, submit only for TestFlight.
+- [ ] The store distribution licence for the App Store build, with counsel (`LEGAL-PROVENANCE.md` §4). GPL-3.0-only and Apple's minimum EULA terms conflict. Josh, the only human author (`LEGAL-PROVENANCE.md` §2 row 1: five commits are his own Claude Code session's under the agent identity), can dual-license; counsel confirms. Until that is decided, submit only for TestFlight.
 
 ## Apple pages read for this kit (all 2026-09-24)
 

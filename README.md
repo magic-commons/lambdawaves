@@ -40,7 +40,8 @@ truth, and he would like to hear about it.
   parts, notably the modulation window's devices and the performance work. Google's Gemini
   made graphics and icons (the mark, the warning orbital, icon work) and proposed interface designs
   from screenshots. Commits carry the tools' own
-  attribution trailers (`Co-Authored-By: Claude …`); the accountable author of every line is Joshua.
+  attribution trailers (`Co-Authored-By: Claude …`); five commits of 2026-10-04/05 carry the agent identity
+  `Claude <noreply@anthropic.com>` as their author (a Claude Code session he ran and merged). The accountable author of every line is Joshua.
 - **What was human-decided.** The idea, the physics to show (hydrogen, exact; n ≤ 6 at first, n ≤ 7 since iteration 008), the
   instrument metaphor, and which of the agents' proposals stayed. The visual language in `docs/ui`,
   the laws in `CONTRIBUTING.md` and the tests were written by the agents from what he asked for and
