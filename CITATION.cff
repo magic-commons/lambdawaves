@@ -6,13 +6,13 @@ authors:
   - family-names: Hosain
     given-names: Joshua
     affiliation: Magic Commons
-version: 0.9.0-alpha
-date-released: 2026-10-16
+version: 0.9.9-alpha
+date-released: 2026-10-25
 license: GPL-3.0-only
 repository-code: https://github.com/magic-commons/lambdawaves
 url: https://lambdawaves.magic-commons.com
 abstract: >-
-  λWAVES reconstructs the 91 hydrogen eigenstates with n ≤ 6 from their closed forms on the GPU as a
+  λWAVES reconstructs the 140 hydrogen eigenstates with n ≤ 7 from their closed forms on the GPU as a
   playable wave field, evolved field-free by their phases alone, and solves small molecules live
   (Hartree–Fock and Kohn–Sham LDA in vendored Gaussian bases) or opens them from a library of
   precomputed records, with a modulation rack, projects and shareable state links. Every system

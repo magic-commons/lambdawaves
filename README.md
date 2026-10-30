@@ -1,6 +1,6 @@
 # λWAVES
 
-**A playable hydrogen shadow.** 91 exact eigenstates of hydrogen, reconstructed on the
+**A playable hydrogen shadow.** 140 exact eigenstates of hydrogen, reconstructed on the
 GPU as a wave field you can play like an instrument — tune amplitudes, phases and
 viewpoints, then watch the eigenmodes interfere and the cloud bloom into motion.
 
@@ -41,7 +41,7 @@ truth, and he would like to hear about it.
   made graphics and icons (the mark, the warning orbital, icon work) and proposed interface designs
   from screenshots. Commits carry the tools' own
   attribution trailers (`Co-Authored-By: Claude …`); the accountable author of every line is Joshua.
-- **What was human-decided.** The idea, the physics to show (hydrogen, n ≤ 6, exact), the
+- **What was human-decided.** The idea, the physics to show (hydrogen, exact; n ≤ 6 at first, n ≤ 7 since iteration 008), the
   instrument metaphor, and which of the agents' proposals stayed. The visual language in `docs/ui`,
   the laws in `CONTRIBUTING.md` and the tests were written by the agents from what he asked for and
   what he rejected. Every design decision went through his eyes and his hands on the real app before it
@@ -64,11 +64,11 @@ of contributions made the same way this was.
 ## What it actually is
 
 The core is exact, not a simulation of a simulation. λWAVES holds the hydrogen closed
-forms for **n ≤ 6 — all 91 (n, l, m) states**, with Condon–Shortley-phase complex
+forms for **n ≤ 7 — all 140 (n, l, m) states**, with Condon–Shortley-phase complex
 spherical harmonics, and evolves them by the one thing a diagonal Hamiltonian permits:
 multiplying each coefficient by `e^{-iE_n t}`. For field-free hydrogen nothing is integrated, so nothing
 drifts. What does step in time is said where it runs: MOLECULES' RUN (real-time TDHF), MO-REGISTRY's DRIVE
-and SONG and the FLOW tracers integrate; INTER-SHELL STARK is an eigensolve over the 91 labels; VIBRATE moves
+and SONG and the FLOW tracers integrate; INTER-SHELL STARK is an eigensolve over the 140 labels; VIBRATE moves
 the nuclei by a closed-form cos ωt and the density by one linear step. The node gate (`tests/hydrogen.test.mjs`)
 reads the radial norms within 3e-9 of 1 (its bound 1e-6, by quadrature) and the table-typed anchors within
 3e-16 (its bound 1e-12).
@@ -78,7 +78,8 @@ grid straight from the closed-form mode tables — no basis textures — and a r
 presenter draws density, phase, Re ψ, Im ψ or a difference. Measured on an RTX 3070 (headless Firefox,
 1920 × 994, batches of at least 2.5 s, 2026-09-24): presenting the default 1s + 2p_z at 96³ and 160 steps
 takes 3.25 ms per frame in the phase view and 2.10 ms for density, and reconstructing it 0.1 ms;
-reconstructing all 91 labels takes 1.43 ms at 96³ and 3.40 ms at 128³
+reconstructing all 91 labels of the n ≤ 6 set took 1.43 ms at 96³ and 3.40 ms at 128³ (measured before n = 7
+joined; the 140-label figure has not been re-measured)
 (`research/optimization-2026-09-24/probes/K/k2-present.out.json`, `k9-throughput.out.json`,
 `k1-time.out.json`). The grid is held to the CPU in each picture's own metric at 64³
 (`tests/field-law.browser-test.mjs`; the bounds are `tests/helpers/field-law.mjs`, read on that RTX 3070 in Firefox):
@@ -156,7 +157,7 @@ why `html_handling` is `"none"`, and what the build refuses to let you do.
 |---|---|
 | **Needs** | A browser with WebGPU in a secure context (https or localhost). Chrome/Edge 113+, Firefox 141+, Safari 26 / iPadOS 26. No WebGL fallback: without WebGPU you get a banner, not a lab. |
 | **Runs well on** | A desktop GPU (measured on an RTX 3070: about 3 ms per frame at 96³) and an M-series iPad (the quality governor drops ray steps, then the grid, under load). |
-| **Physics (the release)** | Exact hydrogen (n ≤ 6), plus MOLECULES: Hartree–Fock in vendored Gaussian bases (STO-3G for H–Kr; 6-31+G\* for H, C, N, O, F molecules up to 46 Cartesian AOs) — RHF for closed shells, UHF for the 7 open shells — and Kohn–Sham LDA (Slater + VWN5) up to benzene's 36 STO-3G AOs. 98 molecules: 61 solved live (59 enabled; CuH and ZnH₂ are listed and disabled, their RHF reference is not a minimum) and 37 opened from the library, which holds 38 records — 37 solved here and compared with PySCF, C₆₀'s energy PySCF's own (the table below). RPA and TDA spectra, and real-time TDHF. MO-REGISTRY plays orbital packets or many-electron TD-CIS states, drives them with a field, and shows their current. Nuclei are fixed except under VIBRATE (one harmonic normal mode); the wavefunction methods stop at single excitations, and LDA's correlation is the VWN5 functional's. Geometries are fixed: measured for the live molecules (each entry names its source; AlH₃'s is not a measurement), computed for 36 of the 38 records. The five legacy windows (QCD, H₂⁺, HELIUM, H₂, ELECTROSTATICS) were deleted in 0.5.0; an older project that used one opens on its shim and says so (`docs/LEGACY-WINDOWS.md`). Every system λWAVES plays is a row of the catalogue on the MODEL sheet (186 rows, `lab/catalogue.js`), with its word — EXACT, NUMERICAL or UNCHECKED — and its oracle test. |
+| **Physics (the release)** | Exact hydrogen (n ≤ 7, 140 states), plus MOLECULES: Hartree–Fock in vendored Gaussian bases (STO-3G for H–Kr; 6-31+G\* for H, C, N, O, F molecules up to 46 Cartesian AOs) — RHF for closed shells, UHF for the 7 open shells — and Kohn–Sham LDA (Slater + VWN5) up to benzene's 36 STO-3G AOs. 98 molecules: 61 solved live (59 enabled; CuH and ZnH₂ are listed and disabled, their RHF reference is not a minimum) and 37 opened from the library, which holds 38 records — 37 solved here and compared with PySCF, C₆₀'s energy PySCF's own (the table below). RPA and TDA spectra, and real-time TDHF. MO-REGISTRY plays orbital packets or many-electron TD-CIS states, drives them with a field, and shows their current. Nuclei are fixed except under VIBRATE (one harmonic normal mode); the wavefunction methods stop at single excitations, and LDA's correlation is the VWN5 functional's. Geometries are fixed: measured for the live molecules (each entry names its source; AlH₃'s is not a measurement), computed for 36 of the 38 records. The five legacy windows (QCD, H₂⁺, HELIUM, H₂, ELECTROSTATICS) were deleted in 0.5.0; an older project that used one opens on its shim and says so (`docs/LEGACY-WINDOWS.md`). Every system λWAVES plays is a row of the catalogue on the MODEL sheet (186 rows, `lab/catalogue.js`), with its word — EXACT, NUMERICAL or UNCHECKED — and its oracle test. |
 | **Not yet** | A real device matrix, an installed-PWA update test, a screen-reader pass — see `docs/SHIPPING-READINESS.md`. |
 
 ## Against PySCF
@@ -344,8 +345,9 @@ for the one rule, and `MIR-MANIFEST.json` for which bytes are the kit's.
 
 GNU General Public License v3.0 only — Copyright 2026 Joshua Hosain. See [`LICENSE`](LICENSE).
 
-Third-party notices in [`NOTICE`](NOTICE): Spinwerad 0.3, Roboto 3.015, KaTeX 0.16.11,
-marked 12.0.2.
+Third-party notices in [`NOTICE`](NOTICE): Spinwerad 0.3, Roboto 3.015, STIX Two Math 2.0.2, KaTeX 0.16.11 and its
+fonts, marked 12.0.2, the notebook's Spectral, Playfair Display and Alegreya SC; the Basis Set Exchange records and NIST's
+measured lines are credited there as data.
 
 A reference, not a dependency: [ChronusQ](https://github.com/xsligroup/chronusq_public) (Williams-Young et al.,
 *WIREs Comput. Mol. Sci.* 10, e1436 (2020)) is the real-time electronic-structure package λWAVES' molecular
