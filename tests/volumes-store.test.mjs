@@ -1,6 +1,7 @@
 /* tests/volumes-store.test.mjs — lab/volumes.js' store over a fake Cache Storage and a fake network (028 CHAIN C).
  * R-07: a file kept under an older edition's sha (same volume id, a re-edition) is NOT KEPT on each read road — installStatus, kept,
- * install re-fetches it, the .lwv file road re-slices it — and a stale index.json of equal length is replaced by the file road. */
+ * install re-fetches it, the .lwv file road re-slices it — and a stale index.json of equal length is replaced by the file road.
+ * R-21: installMolecule is not ok while a basis record it needs was not kept, and says which. */
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 
@@ -84,4 +85,11 @@ await seed('lw-vol-vol-f', [[F + 'index.json', fx1], [F + 'm/a.lwm', a1], [F + '
   assert.equal(await kept('lw-vol-vol-f', F + 'm/a.lwm'), sha(a2), 'installFile: a stale .lwm of equal length is re-sliced');
   assert.equal((await V.installStatus('vol-f')).state, 'installed', 'installFile: installed afterwards (the kept catalogue reads)'); }
 
-console.log('PASS the volumes store: a file kept under a stale sha is not kept on installStatus, kept, install and the .lwv road; a stale index.json is replaced');
+/* R-21: a molecule kept while a ladder basis record could not be (keepData false: the record's fetch fails, lw-data-v1 empty) */
+{ stores.delete('lw-data-v1'); basisDown = true;
+  const r = await V.installMolecule('vol-t', 'b');
+  basisDown = false;
+  assert.equal(r.ok, false, 'installMolecule: not ok when a basis record it needs was not kept');
+  assert(r.failed.length && r.failed.every((f) => f.id === 'basis') && /basis record/.test(r.why), 'installMolecule: the failed records and a why that says so'); }
+
+console.log('PASS the volumes store: a file kept under a stale sha is not kept on installStatus, kept, install and the .lwv road; a stale index.json is replaced; installMolecule says a basis record it could not keep');

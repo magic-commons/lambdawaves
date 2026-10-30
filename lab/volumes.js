@@ -302,9 +302,10 @@ export function installMolecule(volId, molId, { onProgress = null, signal = null
       catch (e) { return { ok: false, why: e && e.name === 'QuotaExceededError' ? 'this device is out of room for it' : String(e && e.message || e) }; }
       if (f.lwm) { got = total; tell(); }
     }
-    for (const u of basesOf(v)) await keepData(u);   // the rungs open offline (a basis record already kept is not fetched again)
+    const failed = [];   // the rungs open offline (a basis record already kept is not fetched again); 028 R-21: one not kept is said
+    for (const u of basesOf(v)) if (!await keepData(u)) failed.push({ id: 'basis', url: u, why: 'the basis record could not be kept' });
     const storage = await asked.then(() => storageInfo()).catch(() => null);
-    return { ok: true, id: molId, bytes: m.bytes || 0, storage };
+    return { ok: !failed.length, id: molId, bytes: m.bytes || 0, failed, storage, why: failed.length ? 'a basis record could not be kept — press again online' : '' };
   })().catch((e) => ({ ok: false, why: String(e && e.message || e) })).finally(() => { runningOne.delete(key); changed(volId, 'molecule', molId); });
   runningOne.set(key, job);
   return job;
