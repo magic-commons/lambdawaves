@@ -292,15 +292,34 @@ try {
   pass(`the badge at ${SIZES.map(([W, H]) => W + '×' + H).join(', ')} (the last is the phone), the window resized for real: its text whole, on screen, topmost, first with STATUS TAGS on, ` +
     `the desktop row ≥ ${narrowest} px; the caret off by at most ${worst} px, tags on and off, and re-aimed by a resize alone`);
 
-  /* ── 11 · a tab whose build another tab replaced: its badge's press reloads ── */
-  const s11a = await g2.ev(`const sw = __LW.sw; window.__reloads = 0; sw.state = 'ready'; sw.asked = false; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'replaced' }; sw.offer();
+  /* ── 11 · a tab whose build another tab replaced (iteration 028 R-03): one holding no work reloads at once; one holding work (a moved
+     clock) is told RELOAD NOW, and its badge's press reloads.  And a PRESS the worker refused (other windows open) is re-offered with the
+     count, its UPDATE reads UPDATE ALL, and a real press on it asks with force: true ── */
+  const s11 = await g2.ev(`const sw = __LW.sw; const arm = (b) => { sw.state = 'ready'; sw.asked = false; sw.reloads = 0; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: b }; sw.offer(); };
+    __LW.scrub(0); await __LW.settle(); window.__reloads = 0; arm('replaced-clean');
+    const clean = { told: sw.controllerChanged(), reloads: window.__reloads };
+    __LW.scrub(5); await __LW.settle(); window.__reloads = 0; arm('replaced');
     const told = sw.controllerChanged();
-    return { told, state: sw.state, pane: __pane().shown, badge: __badges().build.text };`);
-  assert.deepEqual(s11a, { told: 'told', state: 'replaced', pane: false, badge: 'THIS BUILD WAS REPLACED IN ANOTHER TAB · RELOAD WHEN READY' });
+    return { clean, told: { told, state: sw.state, pane: __pane().shown, badge: __badges().build.text } };`);
+  assert.deepEqual(s11.clean, { told: 'reloaded', reloads: 1 }, 'a tab holding no work whose build another tab replaced must reload at once');
+  assert.deepEqual(s11.told, { told: 'told', state: 'replaced', pane: false, badge: 'THIS BUILD WAS REPLACED IN ANOTHER TAB · RELOAD NOW' });
   t = await g2.tap('#badges > .badge.build'); assert.equal(t.ok, 1, 'the replaced badge not pressable: ' + JSON.stringify(t));
   const s11b = await g2.ev(`return { reloads: window.__reloads, state: __LW.sw.state };`);
   assert.equal(s11b.reloads, 1, 'a press on the replaced badge must reload');
-  pass(`a tab told its build was replaced hides the pane, and a real press on its badge ("${s11a.badge}") reloads (${s11b.reloads})`);
+  const s11c = await g2.ev(`const sw = __LW.sw; window.__taken = undefined; sw.take = (o) => { window.__taken = o; };
+    sw.state = 'ready'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'busy-press' }; sw.accept();
+    const kind = sw.message({ type: 'LW_SW_BUSY', windows: 3 });
+    return { kind, state: sw.state, others: sw.others, pane: __pane().shown, lead: document.querySelector('#offer p').textContent,
+      buttons: [...document.querySelectorAll('#offer .offer-row .trig')].map((b) => b.textContent.trim()) };`);
+  assert.deepEqual([s11c.kind, s11c.state, s11c.others, s11c.pane], ['busy', 'ready', 2, true], 'a refused press must be re-offered with the count: ' + JSON.stringify(s11c));
+  assert.match(s11c.lead, /^2 OTHER WINDOWS ARE open on this build\. UPDATE ALL /);
+  assert.deepEqual(s11c.buttons, ['UPDATE ALL', 'LATER']);
+  t = await g2.tap('#offer .offer-row .trig:first-child'); assert.equal(t.ok, 1, 'UPDATE ALL not pressable: ' + JSON.stringify(t));
+  const s11d = await g2.ev(`return { taken: window.__taken ?? null, state: __LW.sw.state };`);
+  assert.deepEqual(s11d, { taken: { force: true }, state: 'taking' }, 'UPDATE ALL must take with force: true');
+  await g2.ev(`__LW.sw.others = 0; __LW.scrub(0); await __LW.settle(); return 1;`);
+  pass(`a replaced tab holding no work reloads at once (${s11.clean.reloads}); one holding work is told ("${s11.told.badge}") and a real press on its badge reloads; ` +
+    `a refused press is re-offered — "${s11c.lead.slice(0, 40)}…", ${s11c.buttons.join(' · ')} — and UPDATE ALL takes with force: true`);
 
   /* ── 12 · a build announced while UPDATE APP runs, or while a take is under way, restarts nothing ── */
   const s12 = await g2.ev(`const sw = __LW.sw, out = {};

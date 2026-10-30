@@ -10,7 +10,9 @@
  * worst failure a cache can cause.  So: no skipWaiting() on install, no clients.claim() ever.  A new worker
  * precaches itself and then WAITS; the old worker keeps serving every byte of the build the session started
  * on until the last tab of that session closes.  The UI is told a build is ready (§5); an untouched session
- * takes it (main.js, rack.js `untouched`), and any other session's USER decides.
+ * takes it (main.js, rack.js `untouched`), and any other session's USER decides.  skipWaiting() re-points EVERY
+ * window in scope, not only the one that asked, so every take counts the windows and, with a second one open,
+ * is refused until the user presses UPDATE ALL — consent given for all of them (§6).
  * The price is honest and small: the very first visit runs uncontrolled, so offline works from the SECOND
  * launch onward.  We pay it rather than swap assets under a page that is already running.
  *
@@ -137,7 +139,7 @@ const PRECACHE = [
   ['./library.json',                                                '0a3531a7c866'],
   ['./linalg.js',                                                   'da2367cdcb97'],
   ['./look.js',                                                     'ffa61a3b76d3'],
-  ['./main.js',                                                     '12bd2115791c'],
+  ['./main.js',                                                     '0067ace0ec7c'],
   ['./manifest.webmanifest',                                        '975e5f242a0c'],
   ['./mapping.js',                                                  'af6824a8f2df'],
   ['./mathworker.js',                                               '24e51f82f922'],
@@ -422,7 +424,7 @@ const PRECACHE = [
   ['./status.js',                                                   'da2e112c115c'],
   ['./sturmian.js',                                                 '9865f0c8c247'],
   ['./sturmianreg.js',                                              'e9f1d20c0ec0'],
-  ['./sw-client.js',                                                '0f1ffadd0978'],
+  ['./sw-client.js',                                                'd7e0d34a5c53'],
   ['./tier.js',                                                     '8a0b625a5b35'],
   ['./user-presets.js',                                             '3808f2602145'],
   ['./valence.js',                                                  '3b4e39e5b9b0'],
@@ -455,7 +457,7 @@ const PRECACHE = [
 /* ── 1b. DATA — THE ONE PRECACHE EXEMPTION (0.4.0 S4a · PLAN B2) ──────────────────────────────────────────────────
  * A file under a DATA root is CONTENT-ADDRESSED DEVICE CONTENT: deployed, NEVER precached, fetched when the lab asks for it and
  * kept by the page in DATA_CACHE, a name no build changes — so a new build never clears an installed record (§4 collects only
- * PREFIX caches).  lab/library/<sha-256>.json are the orbital records; lab/library.json, the catalogue that reaches them, is
+ * PREFIX caches, and from DATA_CACHE only SWEEP: the three roots whose names carry no hash).  lab/library/<sha-256>.json are the orbital records; lab/library.json, the catalogue that reaches them, is
  * an ordinary precached file.  tests/pwa.test.mjs and tools/build-deploy.mjs READ this list: it is the one rule, and the 0.5.0
  * kit-file policy extends it rather than adding a second:
  * SKIP (0.5.0 A11) — kit data an adoption brings and the lab reads lazily or never: DEPLOYED, NEVER PRECACHED, and nothing more
@@ -469,14 +471,19 @@ const PRECACHE = [
  * asks for) — fetched with the volume that names them, kept by the page in DATA_CACHE beside it.
  * THE PICTURES (iteration 005 A) are DATA by the same rule: img/menu/ (the Picker's thumbnails, 720 KB) and the demo covers — deployed,
  * never precached, kept by the page in DATA_CACHE after their first good answer (library.js keepData), so an installed app shows them
- * offline from its second run; a picture not yet held is the tile's own placeholder.
+ * offline from its second run; a picture not yet held is the tile's own placeholder.  Their names carry no hash and a re-render keeps
+ * the name, so they are kept for ONE BUILD: every new build's activate (§4) sweeps img/menu/ and demos/covers/ out of DATA_CACHE, and
+ * the next view keeps the deployed bytes (iteration 028 R-08).  The records, the basis records and the volumes are named by what they
+ * hold or kept by a press, and stay.
  * THE DEMOS (iteration 026) are DATA whole: demos/ (the four demo files, 270 KB, and their covers) — deployed, never precached; a demo
  * file is read by the boot's seed (FOLDERS' DEMOS store it, and a DEMOS press opens that copy offline) and is never kept here, so a
  * changed demo still reaches every browser (its `saved` stamp is the DEMOS refresh revision).
  * THE MEASURED LINES (iteration 016 E3) are DATA by the same rule: vendor/nist/ (NIST ASD's neutral lines, 330 KB, tools/nist-lines.py) — read when
- * EMISSION SPECTRA first meets the ATOM, kept by the page after that answer; HYDROGEN's lines are computed and never need it. */
+ * EMISSION SPECTRA first meets the ATOM, kept by the page after that answer and swept with the pictures; HYDROGEN's lines are computed
+ * and never need it. */
 const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/'];
 const DATA_CACHE = 'lw-data-v1';
+const SWEEP = ['img/menu/', 'demos/covers/', 'vendor/nist/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4)
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */
@@ -486,7 +493,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
-  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures and the demo covers, kept as the page first shows them, and the demo files FOLDERS seeds from.'],
+  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures, the demo covers and the measured lines, kept as the page first shows them until the next build sweeps them (their names carry no hash), and the demo files FOLDERS seeds from.'],
   ['a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)', 'kit data an adoption brings that the running lab fetches only when a language is chosen, or never: deployed, never precached, never cached (offline, a language other than English stays English).'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
   ['an adopted kit module no root reaches (R5-W1)', '0.5.0 C0: MIR is adopted whole, so lab/mir/ holds modules for consumers λWAVES has not reached yet. tests/wiring.test.mjs walks the roots and names them (--unreached-kit); tests/pwa.test.mjs and tools/build-deploy.mjs READ that set, so a kit module joins this precache the day a consumer imports it. Deployed, never precached, never failed (PLAN §9).'],
@@ -531,10 +538,14 @@ const BY_PATH = new Map(PRECACHE.map(([u]) => [new URL(u, BASE).pathname, new UR
 const BYTES_HINT = PRECACHE.length;
 
 /* ── 3. INSTALL — fill the cache, then WAIT.  No skipWaiting(). ─────────────────────────────────────────
- * Each file is fetched with `cache: 'reload'` AND a ?__rev=<content hash> so neither the HTTP cache nor any
- * proxy in between can hand us yesterday's bytes; the response is then PUT under the clean URL. If a single
- * file fails, the whole install rejects and the browser throws the new worker away — the old one keeps
- * serving, which is exactly the outcome we want from a half-uploaded deploy. */
+ * BUSTED BY CONTENT AND VERIFIED BY CONTENT.  Each file is fetched with `cache: 'reload'` AND a ?__rev=<content
+ * hash>, and the buster alone guarantees nothing: Workers Static Assets ignores the query when it matches, and a
+ * deploy swaps the files at once, so an install that straddles a deploy is answered with the NEXT build's bytes
+ * (or a sign-in page from an access front) under this build's names.  So the body is digested, and a file whose
+ * sha-256 does not begin with its recorded 12 hex, or that arrived by a redirect, rejects the install; what is
+ * PUT under the clean URL is a fresh Response of exactly the verified bytes.  If a single file fails, the whole
+ * install rejects and the browser throws the new worker away — the old one keeps serving, and the next sw.js
+ * the browser fetches installs again — which is exactly the outcome we want from a half-uploaded deploy. */
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
@@ -543,8 +554,11 @@ self.addEventListener('install', (event) => {
       const href = new URL(url, BASE).href;
       if (already.has(new URL(href).pathname)) return;          // a re-install of the same build is free
       const res = await fetch(new Request(href + (href.includes('?') ? '&' : '?') + '__rev=' + rev, { cache: 'reload' }));
-      if (!res || !res.ok) throw new Error('precache ' + url + ' → ' + (res && res.status));
-      await cache.put(new Request(href), res);
+      if (!res || !res.ok || res.redirected) throw new Error('precache ' + url + ' → ' + (res && (res.redirected ? 'redirected' : res.status)));
+      const body = await res.arrayBuffer();
+      const got = [...new Uint8Array(await crypto.subtle.digest('SHA-256', body))].slice(0, 6).map((b) => b.toString(16).padStart(2, '0')).join('');
+      if (got !== rev) throw new Error('precache ' + url + ' → bytes ' + got + ', recorded ' + rev);
+      await cache.put(new Request(href), new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers }));
     }));
     /* THE SIGNAL (§5): if a worker is already live, this install is an UPDATE and the sessions running on
        the old build are told — while they keep running on it. A first install announces nothing. */
@@ -552,15 +566,25 @@ self.addEventListener('install', (event) => {
   })());
 });
 
-/* ── 4. ACTIVATE — collect the caches no worker will ever read again.  No clients.claim(). ──────────────
+/* ── 4. ACTIVATE — collect the caches no worker will ever read again, and SWEEP's stale pictures.  No clients.claim(). ──
  * Because §3 never calls skipWaiting(), activate can only run when the previous worker has been released —
  * i.e. when no page is left on the old build. So this sweep can never delete the cache a live session is
- * reading. The one exception is the user-driven path in §6, and §5's cache miss falls through to the
- * network, so even that page degrades to "slower" and never to "broken". */
+ * reading. The one exception is §6's UPDATE ALL, pressed with other windows open: their old cache is collected under
+ * them, and a lazy import there is answered by the NEW build's cache (a mixed build) or, for a path the deploy
+ * dropped, a 404.  That is why §6 refuses any take while a second window is open unless the user said UPDATE ALL,
+ * and why the page tells each other window at once (sw-client.js: one holding no work reloads, one holding work
+ * is told RELOAD NOW).
+ * THE SWEEP (iteration 028 R-08): the pictures, the covers and the measured lines are kept under names a re-render does not change,
+ * so a kept copy would answer for the deployed one forever; each new build deletes them from DATA_CACHE and the page keeps the new
+ * bytes on their next view.  library/<sha>.json, the basis records and lw-vol-* are untouched. */
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const names = await caches.keys();
     await Promise.all(names.filter((n) => n.startsWith(PREFIX) && n !== CACHE).map((n) => caches.delete(n)));
+    if (names.includes(DATA_CACHE)) {
+      const dc = await caches.open(DATA_CACHE);
+      await Promise.all((await dc.keys()).filter((r) => SWEEP.some((d) => new URL(r.url).pathname.startsWith(SCOPE + d))).map((r) => dc.delete(r)));
+    }
     await announce({ type: 'LW_SW_ACTIVE', build: BUILD, files: PRECACHE.length });
   })());
 });
@@ -614,12 +638,14 @@ async function serve(pathname, req) {
 
 /* ── 6. THE UI CHANNEL — how the lab asks, and how the USER (never the worker) takes an update ──────────
  *   page → worker  { type: 'LW_SW_HELLO' }         → replies { type:'LW_SW_BUILD', build, files, cache }
- *   page → worker  { type: 'LW_SW_SKIP_WAITING' }  → this waiting worker takes over; the page reloads on
- *                                                    navigator.serviceWorker's 'controllerchange'.  A PRESS.
- *   page → worker  { type: 'LW_SW_SKIP_WAITING', alone: true }
- *                                                  → a QUIET TAKE (wave 133: an untouched session) — taken
- *                                                    only while ONE window is in scope, else refused with:
- *   worker → page  { type: 'LW_SW_BUSY', windows }  → the quiet take was refused; the page offers it instead.
+ *   page → worker  { type: 'LW_SW_SKIP_WAITING' }  → a PRESS (or, with `alone: true`, wave 133's QUIET TAKE for an
+ *                                                    untouched session — the page's word; counted the same): this
+ *                                                    waiting worker takes over only while ONE window is in scope;
+ *                                                    the page reloads on 'controllerchange'.  Else refused with:
+ *   worker → page  { type: 'LW_SW_BUSY', windows }  → the take was refused; the page offers it (after a press, as
+ *                                                    "n other windows are open … UPDATE ALL").
+ *   page → worker  { type: 'LW_SW_SKIP_WAITING', force: true }
+ *                                                  → UPDATE ALL: the user said yes for every window; taken at once.
  *   worker → page  { type: 'LW_SW_WAITING', build } → a new build finished installing and is waiting (§3).
  *   worker → page  { type: 'LW_SW_ACTIVE',  build } → a build took over (first install, or after a skip).
  * SKIP_WAITING is the ONLY thing in this file that can end a session's build, and only the interface can
@@ -635,11 +661,12 @@ self.addEventListener('message', (event) => {
   }
 });
 
-/* A QUIET TAKE (page: an untouched session) asks with `alone: true` and is refused when another window is in scope —
-   skipWaiting() re-points every client, and the second window may hold work.  A PRESS never asks; the user said yes.
-   The press path reaches skipWaiting() without an await, so it is taken in the same turn as the message. */
+/* EVERY TAKE COUNTS THE WINDOWS (iteration 028 R-03; wave 133 counted only the quiet take): skipWaiting() re-points every client
+   in scope, and a window that did not ask may hold work and would lazy-load from a build it did not boot on.  With a second window
+   open the asking page is told LW_SW_BUSY and offers UPDATE ALL, which asks again with `force: true` — the user's yes for every
+   window.  The forced path reaches skipWaiting() without an await, so it is taken in the same turn as the message. */
 async function takeover(event, d) {
-  if (d.alone) {
+  if (!d.force) {
     const windows = (await self.clients.matchAll({ includeUncontrolled: true, type: 'window' })).length;
     if (windows > 1) { if (event.source && event.source.postMessage) event.source.postMessage({ type: 'LW_SW_BUSY', windows }); return; }
   }
