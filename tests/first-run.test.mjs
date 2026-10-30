@@ -137,7 +137,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const demos = readdirSync(demoDir).filter((f) => f.endsWith('.lambdawaves.json')).map((f) => JSON.parse(readFileSync(new URL(f, demoDir), 'utf8')));
   const wires = {
     seed: src.includes("const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 };"),
-    restore: src.includes("Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));") && !src.includes('Object.assign(quality, pr.quality'),
+    restore: src.includes("Object.assign(quality, finiteOver(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop')));") && !src.includes('Object.assign(quality, pr.quality'),
     serializeStillWrites: src.includes('quality: { ...quality }'),
     gridPairingAgrees: src.includes('quality.steps = { 64: 110, 96: 160, 128: 240 }[+v]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[+v];')
       && eq(GRID_PAIRING, { 64: { steps: 110, scale: 0.75 }, 96: { steps: 160, scale: 1 }, 128: { steps: 240, scale: 1 } }),
