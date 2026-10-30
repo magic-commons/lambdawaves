@@ -46,7 +46,38 @@ said in METERS) · the seg-press targets (material.style/view) debounced · the 
 the audio FFT's bin count/feed cadence · the layout observer's stamping (017). Each row: the probe before/after, THE LOCK, the modulation
 proofs (`node tools/x-probe.mjs x4` byte-identical CURVES; `flash-routes` node; `routed-knob` · `curves` · `lfo-tension` browser).
 
+## Q — THE FRONT END QUICK FIX (Josh 10-30, "029 FRONT END"; one builder; with the M rows, file-disjoint from them)
+The main menu (the Picker): the empty space between the search bar and the tags goes; the tag lines are TWO rows with a VISIBLE horizontal
+scroll bar (the kit's scroll pill if it has one, else the house scrollbar); the room won goes to the molecule thumbnails, which read cramped.
+Files: `lab/picker.js`, `lab/skin.css`/`lab.css` (the Picker's seats; label-only — no CSS hook renamed). Proof: `picker-looks` and `library`
+browser suites, one before/after shot pair at 1440 × 900 in `research/iteration-029/Q-shots/`; no stored key, THE LOCK untouched (no field change).
+
+## R — THE REPO FINALIZATION (Josh 10-30: "get ready to push 0.9.9 BETA"; LAST, after every code row, one builder; Josh reviews before any push)
+1. ONE VOICE: every public-facing text (README, CONTRIBUTING, SECURITY, DEPLOY, RELEASING, CHANGELOG's hand parts, NOTICE, CITATION, docs/*.md
+   that ship, the ABOUT and the hints) reads as an engineering repository's — plain, formal, no agent register ("the law of", "Josh's word",
+   "Claude Yan", "the fleet"), no first-person speech written for Josh. The AI disclosure: AI_POLICY.md goes; README keeps two or three
+   sentences (the lab was built with AI coding agents under the author's direction; the physics, tests and gates are the proof; see LEGAL-PROVENANCE)
+   — nothing in Josh's voice that Josh did not write. The internal instruction set (CLAUDE.md, docs/laws/, docs/NOTES-FOR-AGENTS.md) keeps its
+   register: it is for agents, and the laws' names are its index — but it says so in one line at the top of CLAUDE.md.
+2. ONLY THE APPLICATION: `research/` (29 iterations of PLAN/BUILD notes, shots, scores), `REPORT.md`'s wave notebook, docs/history/, the
+   store/ drafts, `serve-lan.*`, `.claude/handoffs/` — each either SHIPS (it serves a user or a contributor), MOVES to the vault
+   (`~/Documents/DATABASE/CLAUDE/APPS/LAMBDAWAVES/RESEARCH/`, which already exists; git history keeps every byte, a tag
+   `research-archive-2026-10-30` marks the last tree that held them) or is DELETED (junk, random texts). The builder writes the table first
+   (path → ships / moves / deleted → why) in `research/iteration-029/R-REPO.md`; JOSH READS THE TABLE BEFORE THE MOVE (CALL 4); the laws and
+   CLAUDE.md that cite moved paths are rewritten to cite the vault or the tag. `media/star.mp3` is Josh's copyrighted track: it never ships
+   (verify .gitignore; move it beside the vault's FILMS if the repo must not even hold it ignored).
+3. THE LAYOUT: top level = README · LICENSE · NOTICE · CHANGELOG · CITATION.cff · SECURITY · CONTRIBUTING · CODE_OF_CONDUCT · package.json ·
+   wrangler.jsonc · lab/ · tools/ · tests/ · docs/; DEPLOY, RELEASING, LEGAL-PROVENANCE, SHIPPING-READINESS, ACCEPTANCE-MATRIX under docs/release/;
+   every path a tool or a test reads is moved WITH its reader (grep before move; `./test.sh node`, `node tools/build-deploy.mjs`,
+   `node tools/changelog.mjs --check` green after). GitHub side (gh is logged in as magic-commons; the GitHub MCP is not connected): the
+   repository description, topics, the README's badges only if they are true (no CI badge for a workflow that never ran); nothing pushed —
+   the push is Josh's.
+4. THE SWEEP: knip's 14 deliberate keeps, 0 unused files, dependency-cruiser 0 cycles, `npm audit` 0 — restated in RELEASING.md's release-day
+   list as the beta's checks; the tag `v0.9.9-beta` is cut by Josh's word (CALL 2) after this row.
+
 ## CALLS FOR JOSH
+4. The R-REPO.md table (ships / moves / deleted) before anything moves — the default if you say "go": research/, REPORT.md's notebook,
+   docs/history/ and the handoffs MOVE to the vault; store/ drafts move; AI_POLICY.md is folded; serve-lan.* ships under tools/.
 1. Export "002 WAVE DANCER" (FILE › EXPORT) to `research/iteration-029/002-wave-dancer.lambdawaves.json` — the exact scene becomes the benchmark.
 2. The beta's name: `v0.9.9-beta` at the cut (default), or `0.9.9` plain.
 3. "Usable for everyone": the target machine for the numbers — default: the RTX at 60 Hz AND a software-GPU/integrated profile (Chromium
