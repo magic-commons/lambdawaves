@@ -1,5 +1,22 @@
 # Shipping readiness
 
+## Status — 2026-10-30 (iteration 028, STABILITY FINALITY)
+
+- **What 1.0 means.** **1.0 is the tree in which the last confirmed critical or high fix of the 028 review is closed** (`research/iteration-028/PLAN.md` § CALLS FOR JOSH, CALL 1 → C, the integrator's default of 2026-10-30; Josh overrides it by a word). The three HIGH rows of `research/iteration-028/REVIEW.md` (R-01 the SHADER node's black stage
+  after a film, R-02 a `null` settings blob, R-03 a press that swapped the build under other tabs) are merged on `yan-c` with the test of
+  each failure. What 1.0 ships WITH, and says as UNVERIFIED where it is: the device matrix (`docs/ACCEPTANCE-MATRIX.md`: one RTX 3070
+  in Firefox and Electron on Linux; the Windows package built, not run; the iPad and iPhone rows UNVERIFIED; the Android upload key
+  gone), the installed-PWA update test on a real device, a real microphone for AUDIO, and a screen-reader pass — none of them done.
+- **The gate:** `./test.sh node` runs 116 node suites (`tests/*.test.mjs`, pwa last) plus `state-scopes --check` and `hints-census
+  --check`; the browser gate is 41 suites (`tests/*.browser-test.mjs`). THE LOCK 843 · 0 and 987 · 0 (028 D, own server).
+- **The deploy tooling:** Wrangler 4.156.0 locked (028 R-13), the sharp override gone; `npm audit` 0 in the repo and 0 in
+  `tools/platform/electron` (Electron 44.10.0). `node tools/build-deploy.mjs` passes §V1–§V5 again (028 D R-32: the conductor is
+  DEV_ONLY, `volumes/` an empty base by design).
+- **The remote:** `origin` = github.com/magic-commons/lambdawaves; `origin/main` stands at `28fe4457` (2026-10-04). Two workflows:
+  `gate.yml` (`npm test` on push and pull request; the README badge) and `verify.yml` (`./test.sh node`, the deploy build, `changelog
+  --check`, the Wrangler dry-run). Nothing since 2026-10-04 is pushed, so neither has run on this tree.
+- **Not deployed:** the live site was last deployed in September; pushing, deploying and the store submissions are Josh's.
+
 ## Status — 2026-10-16 (0.9.0 "Certification")
 
 - **The public face says what the tree measures.** README's field law gives three metrics each for hydrogen and
@@ -85,15 +102,16 @@ historical; long-session, mobile, microphone and production acceptance remain op
   Regression tests cover nested files and directory links. This is a packaging
   guard, not a comprehensive credential scanner.
 - `.gitignore` excludes local environment files, keys and Python cache files.
-- Wrangler 4.129.0 and its dependency graph are locked. Miniflare's sharp dependency
-  is overridden to patched 0.35.4 for [GHSA-rgj7-g3m4-5g8c](https://github.com/advisories/GHSA-rgj7-g3m4-5g8c).
+- Wrangler 4.156.0 and its dependency graph are locked (028 R-13; 4.129.0 when this paragraph was
+  written). The sharp override (0.35.4 for [GHSA-rgj7-g3m4-5g8c](https://github.com/advisories/GHSA-rgj7-g3m4-5g8c))
+  is gone: miniflare now brings sharp 0.35.5.
   `npm ci --ignore-scripts`, the deployment dry-run, and npm audit (zero reported
   vulnerabilities) passed locally. This is deployment-only tooling; none of these dependencies ship in `dist/`.
 - GitHub Actions audits dependencies, runs Node suites, verifies deployment assets,
   performs a Wrangler dry-run and checks for source
   mutation. Actions are pinned to resolved v4 commit SHAs; permissions are read-only
   and checkout credentials are not persisted. There is no deployment step. The
-  repository currently has no remote, so hosted CI has not run.
+  remote exists (`origin`, see the 2026-10-30 status); nothing since 2026-10-04 is pushed, so hosted CI has not run on this tree.
 
 Local Wrangler HTTP checks passed for `/`, `/index.html?__rev=x`, `/sw.js`,
 `/notebook-math.js`, `/manifest.webmanifest`, `/LICENSE`, `/NOTICE`, `/REPORT.md`
@@ -112,7 +130,7 @@ headers. This does not certify production routing or installed clients.
 | P1 | Imported projects/notebook content are untrusted. An allowlist sanitizer exists in `rack.js`; that is not an exhaustive security review. | Claude: preserve sanitizer and KaTeX trust restrictions; test malformed/oversized imports, hostile HTML/URLs and storage failures without losing saved projects. Audit vendored marked/KaTeX advisories before public launch. |
 | P1 | Audio and capture require real-device testing. | Device tester: permission denial/revocation, disconnect/reconnect, no sound before consent, stopping capture, export cancellation and restoration. Test actual microphone input, not just model fixtures. |
 | P1 | README previously promised browser versions without a tested support matrix. | Record tested OS/browser/GPU combinations. Verify keyboard focus, touch targets, zoom, reduced motion and photosensitivity interlock on those devices. |
-| P1 | Deploy tooling must stay reproducible and patched. | Use `npm ci --ignore-scripts` from the committed lockfile; review upgrades and the sharp override together. Rehearse routing, dry-run and rollback after changes. |
+| P1 | Deploy tooling must stay reproducible and patched. | Use `npm ci --ignore-scripts` from the committed lockfile; review upgrades together (the sharp override was dropped at 028 R-13). Rehearse routing, dry-run and rollback after changes. |
 | P2 | Large `rack.js`, layered CSS and long browser gate are expensive to maintain. | Claude: split by behavioral ownership after reproducing defects; replace source-text assertions with focused behavior tests where useful. Avoid a broad rewrite before a trustworthy baseline. |
 
 ## Shipping dos and don'ts
