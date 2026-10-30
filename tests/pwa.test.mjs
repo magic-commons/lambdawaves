@@ -518,7 +518,7 @@ console.log(`PASS no external URL is loaded anywhere in lab/ — ${LOADERS.lengt
    tab would be answered with the lab's own index.html") was refused at /lab/ by a scope check that is a
    NO-OP at '/'. The sentence was right, the mount was wrong, and the whole class closes by running the
    matrix at both. `mount` ends in '/'. */
-function loadWorker(mount = '/lab/') {
+function loadWorker(mount = '/lab/', tamper = null) {   // tamper(rel, response) → the response the network gives instead (R-06)
   const origin = 'https://host.invalid';
   const state = { caches: new Map(), fetched: [], skip: 0, claim: 0, posted: [], handlers: {} };
   class FakeCache {
@@ -538,7 +538,8 @@ function loadWorker(mount = '/lab/') {
     state.fetched.push({ url: req.url, cache: req.cache });
     const rel = u.pathname.startsWith(mount) ? u.pathname.slice(mount.length) : u.pathname.replace(/^\//, '');
     if (!rel || !existsSync(path.join(LAB, rel)) || statSync(path.join(LAB, rel)).isDirectory()) return new Response('', { status: 404 });
-    return new Response(read(rel), { status: 200 });
+    const res = new Response(read(rel), { status: 200 });
+    return tamper ? tamper(rel, res) : res;
   };
   const self_ = {
     location: { href: `${origin}${mount}sw.js`, origin },
@@ -610,6 +611,17 @@ assert.equal(SW.skip, 0, 'sw.js: an update install called skipWaiting()');
 assert.equal(SW.fetched.length, 0, 'sw.js: re-installing the same build refetched files it already holds');
 assert.deepEqual(SW.posted.map((m) => m.type), ['LW_SW_WAITING'], 'sw.js: an update install must raise the "a new build is ready" signal the interface reads');
 assert.equal(SW.posted[0].build, BUILD);
+
+/* E3b — ITERATION 028 R-06 · VERIFIED BY CONTENT.  An install that straddles a deploy is answered with the next build's bytes under this
+   build's names (the static host ignores ?__rev=); a body whose sha-256 is not its recorded prefix, or a redirected answer, rejects the install. */
+for (const [why, tamper] of [
+  ['wrong bytes', (rel, res) => (rel === 'rack.js' ? new Response('/* another build */', { status: 200 }) : res)],
+  ['a redirect', (rel, res) => (rel === 'main.js' ? Object.defineProperty(new Response('<html>sign in</html>', { status: 200 }), 'redirected', { value: true }) : res)],
+]) {
+  const W = loadWorker('/lab/', tamper);
+  let p; await W.handlers.install[0]({ waitUntil: (x) => { p = x; } });
+  await assert.rejects(p, /precache \.\/(rack|main)\.js/, `sw.js: an install answered with ${why} for one file resolved — a mix of two builds stored under one name`);
+}
 
 /* E4 — FETCH: cache-first over the precache, and every refusal actually refuses.  AT BOTH MOUNTS.
  * WAVE 68.  The matrix below is a function of the mount and it is run twice: at '/lab/' (./serve.sh, the
@@ -742,7 +754,7 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
 }
 
 console.log(`PASS update policy executed, not described: install precaches ${pc.length} files with cache:'reload' + ?__rev=<content hash> and does NOT skipWaiting; ` +
-  `activate collects only stale lw-lab-* and does NOT claim; fetch is cache-first over the precache and refuses POST / Range / cross-origin / out-of-scope / unlisted, growing nothing; ` +
+  `every body is digested against its recorded hash (wrong bytes or a redirect reject the install); activate collects only stale lw-lab-* and does NOT claim; fetch is cache-first over the precache and refuses POST / Range / cross-origin / out-of-scope / unlisted, growing nothing; ` +
   `the fetch matrix ran AT BOTH MOUNTS — ${mLab.mount} (scope ${mLab.scope}) and ${mRoot.mount} (scope ${mRoot.scope}, which is what ships) — and a navigation is answered ONLY at the app entry (${mRoot.entry.join(' ')}), so /LICENSE, /NOTICE, /REPORT.md, the six licence texts and a typo all reach the network at either address; ` +
   `the one path to a new build is the interface's LW_SW_SKIP_WAITING — a press takes it at once, and a quiet take (alone: true, an untouched session) is taken with one window in scope and refused with LW_SW_BUSY at two. Cache name ${SW.LW_SW.CACHE}, derived — the string appears nowhere in the source.`);
 

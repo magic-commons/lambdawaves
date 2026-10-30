@@ -531,10 +531,14 @@ const BY_PATH = new Map(PRECACHE.map(([u]) => [new URL(u, BASE).pathname, new UR
 const BYTES_HINT = PRECACHE.length;
 
 /* ── 3. INSTALL — fill the cache, then WAIT.  No skipWaiting(). ─────────────────────────────────────────
- * Each file is fetched with `cache: 'reload'` AND a ?__rev=<content hash> so neither the HTTP cache nor any
- * proxy in between can hand us yesterday's bytes; the response is then PUT under the clean URL. If a single
- * file fails, the whole install rejects and the browser throws the new worker away — the old one keeps
- * serving, which is exactly the outcome we want from a half-uploaded deploy. */
+ * BUSTED BY CONTENT AND VERIFIED BY CONTENT.  Each file is fetched with `cache: 'reload'` AND a ?__rev=<content
+ * hash>, and the buster alone guarantees nothing: Workers Static Assets ignores the query when it matches, and a
+ * deploy swaps the files at once, so an install that straddles a deploy is answered with the NEXT build's bytes
+ * (or a sign-in page from an access front) under this build's names.  So the body is digested, and a file whose
+ * sha-256 does not begin with its recorded 12 hex, or that arrived by a redirect, rejects the install; what is
+ * PUT under the clean URL is a fresh Response of exactly the verified bytes.  If a single file fails, the whole
+ * install rejects and the browser throws the new worker away — the old one keeps serving, and the next sw.js
+ * the browser fetches installs again — which is exactly the outcome we want from a half-uploaded deploy. */
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
@@ -543,8 +547,11 @@ self.addEventListener('install', (event) => {
       const href = new URL(url, BASE).href;
       if (already.has(new URL(href).pathname)) return;          // a re-install of the same build is free
       const res = await fetch(new Request(href + (href.includes('?') ? '&' : '?') + '__rev=' + rev, { cache: 'reload' }));
-      if (!res || !res.ok) throw new Error('precache ' + url + ' → ' + (res && res.status));
-      await cache.put(new Request(href), res);
+      if (!res || !res.ok || res.redirected) throw new Error('precache ' + url + ' → ' + (res && (res.redirected ? 'redirected' : res.status)));
+      const body = await res.arrayBuffer();
+      const got = [...new Uint8Array(await crypto.subtle.digest('SHA-256', body))].slice(0, 6).map((b) => b.toString(16).padStart(2, '0')).join('');
+      if (got !== rev) throw new Error('precache ' + url + ' → bytes ' + got + ', recorded ' + rev);
+      await cache.put(new Request(href), new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers }));
     }));
     /* THE SIGNAL (§5): if a worker is already live, this install is an UPDATE and the sessions running on
        the old build are told — while they keep running on it. A first install announces nothing. */
