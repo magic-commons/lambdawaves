@@ -17,11 +17,15 @@ let since = now();
 /** count(name, n) — bump a counter; frame.js feeds `frames` and `timers` here */
 export function count(name, n = 1) { C[name] = (C[name] || 0) + n; }
 
-/** setText(el, s) — write text only when it changed */
+/** setText(el, s) — write text only when it changed.  An element holding one text node keeps it and takes the new
+ *  `data` (1.5.6-alpha.18): a characterData record, not a childList one, so the page's subtree-childList observers
+ *  (the dock's span, the rack's scroll pill, control-help) do not wake on every knob value. */
 export function setText(el, s) {
   const v = s === undefined || s === null ? '' : String(s);
   if (el.textContent === v) { C.skipped++; return false; }
-  el.textContent = v; C.writes++; return true;
+  const t = el.firstChild;
+  if (v && t && t === el.lastChild && t.nodeType === 3) t.data = v; else el.textContent = v;
+  C.writes++; return true;
 }
 
 /** setVar(el, name, v) — write one style property (custom or not) only when it changed; null removes it */

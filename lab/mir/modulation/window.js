@@ -49,7 +49,7 @@ import { workspaceSwitch } from '../window/workspaces.js';
 import { bindTempoField } from '../shell/transport.js';
 import { tweenRect, presence, owns, settled } from '../core/motion.js';
 import { createProximity } from '../core/proximity.js';
-import { rect as rectOf } from '../core/perf.js';
+import { rect as rectOf, setText, setAttr, setVar } from '../core/perf.js';
 import { t, tn, phrase, onLanguage } from '../core/i18n.js';
 import { clipKinds } from '../timeline/kinds.js';
 import { normalizeTimelinePoints } from '../timeline/source.js';
@@ -1511,10 +1511,18 @@ export function createModulation(host, port) {
 
   /* Live modulation ticks can call this dozens of times per second. Avoid notifying
      the accessibility tree when a value is already current. */
-  function attr(elm, name, value) {
-    const next = String(value);
-    if (elm.getAttribute(name) !== next) elm.setAttribute(name, next);
+  function attr(elm, name, value) { setAttr(elm, name, String(value)); }
+  /* 1.5.6-alpha.19 · THE PAINT WRITES ONLY WHAT CHANGED.  A style the paint composes (a cssText, a height, a dash) reads back
+     in the browser's own spelling, so it is compared with the string this paint last wrote to that element; a hint whose
+     values are already on the node (hint() keeps them, data-t-hvars) is not written again —
+     each write was three attribute records and control-help's adopt of the title, every band, every paint. */
+  const wrote = new WeakMap();
+  function style(elm, prop, v) {
+    let m = wrote.get(elm); if (!m) wrote.set(elm, m = {});
+    if (m[prop] === v) return;
+    m[prop] = v; if (prop === 'cssText') elm.style.cssText = v; else elm.style[prop] = v;
   }
+  const hintStale = (node, vars) => node.dataset.tHvars !== JSON.stringify(vars);   // a node that wears one hint sentence: only its values can move
   /** the four attributes a `role="slider"` owes a reader, in one place */
   function aria(elm, label, lo, hi, now, text) {
     attr(elm, 'aria-label', label);
@@ -1786,11 +1794,11 @@ export function createModulation(host, port) {
     if (s.kind === 'audio') {
       /* no time base: the follower IS a level, so the level is the trace and the dot sits on it */
       const x = X(s.out);
-      t.path.setAttribute('d', 'M' + x + ' ' + Y(0) + 'L' + x + ' ' + Y(1));
-      t.fill.setAttribute('d', 'M50 ' + Y(0) + 'L' + x + ' ' + Y(0) + 'L' + x + ' ' + Y(1) + 'L50 ' + Y(1) + 'Z');
+      attr(t.path, 'd', 'M' + x + ' ' + Y(0) + 'L' + x + ' ' + Y(1));
+      attr(t.fill, 'd', 'M50 ' + Y(0) + 'L' + x + ' ' + Y(0) + 'L' + x + ' ' + Y(1) + 'L50 ' + Y(1) + 'Z');
       t.sig = 'audio';
-      t.dot.style.setProperty('--tx', x);
-      t.dot.style.setProperty('--ty', Y(0.5));
+      setVar(t.dot, '--tx', x);
+      setVar(t.dot, '--ty', Y(0.5));
       return;
     }
     const sig = sigOf(s, 26, 200);
@@ -1808,8 +1816,8 @@ export function createModulation(host, port) {
          as a hairline at 26 px — closed back along the rest line, never along the box's edge */
       t.fill.setAttribute('d', d ? d + 'L50 ' + Y(1) + 'L50 ' + Y(0) + 'Z' : '');
     }
-    t.dot.style.setProperty('--tx', X(shapeAtHead(s)));
-    t.dot.style.setProperty('--ty', Y(headU(s)));
+    setVar(t.dot, '--tx', X(shapeAtHead(s)));
+    setVar(t.dot, '--ty', Y(headU(s)));
   }
 
   /* the editor boxes' one observer: a box that gains a size after a paint skipped it is redrawn (the play dot) */
@@ -2785,31 +2793,32 @@ export function createModulation(host, port) {
     const selected=audBands.get(rec.id)||'level';
     for(const key of M.AUDIO_FOLLOWED) {
       const row=ui.rows[key],o=ro.outs[key],lo=position(o.floorDb),hi=position(o.ceilingDb);
-      row.head.setAttribute('aria-pressed',String(key===selected));
-      row.row.dataset.selected=String(key===selected);
+      attr(row.head,'aria-pressed',key===selected);
+      attr(row.row,'data-selected',key===selected);
       const db=v=>(v>0?'+':'')+(Math.abs(v)<.05?'0':v.toFixed(1));
-      row.text.textContent=db(o.floorDb)+'…'+db(o.ceilingDb)+' dB';
+      setText(row.text,db(o.floorDb)+'…'+db(o.ceilingDb)+' dB');
       const input=position(o.inputDb),mix=ro.levelMix[key];
       const vertical=rec.dev.root.classList.contains('m2cmp');
       if(vertical){
-        row.low.style.cssText='height:'+lo+'%;bottom:0';row.high.style.cssText='height:'+(100-hi)+'%;bottom:'+hi+'%';
-        row.zone.style.cssText='height:'+(hi-lo)+'%;bottom:'+lo+'%';row.fill.style.cssText='height:'+input+'%;bottom:0';row.cursor.style.cssText='bottom:'+input+'%';
+        style(row.low,'cssText','height:'+lo+'%;bottom:0');style(row.high,'cssText','height:'+(100-hi)+'%;bottom:'+hi+'%');
+        style(row.zone,'cssText','height:'+(hi-lo)+'%;bottom:'+lo+'%');style(row.fill,'cssText','height:'+input+'%;bottom:0');style(row.cursor,'cssText','bottom:'+input+'%');
       }else{
-        row.low.style.cssText='width:'+lo+'%;left:0';row.high.style.cssText='width:'+(100-hi)+'%;left:'+hi+'%';
-        row.zone.style.cssText='width:'+(hi-lo)+'%;left:'+lo+'%';row.fill.style.cssText='width:'+input+'%;left:0';row.cursor.style.cssText='left:'+input+'%';
+        style(row.low,'cssText','width:'+lo+'%;left:0');style(row.high,'cssText','width:'+(100-hi)+'%;left:'+hi+'%');
+        style(row.zone,'cssText','width:'+(hi-lo)+'%;left:'+lo+'%');style(row.fill,'cssText','width:'+input+'%;left:0');style(row.cursor,'cssText','left:'+input+'%');
       }
-      row.mix.arc.style.strokeDasharray=(clamp01(mix)*.75).toFixed(4)+' 1';row.mix.dial.classList.toggle('m2zero',mix<=0);
-      row.mix.value.textContent=Math.round(mix*100)+'%';row.mix.dial.setAttribute('aria-valuenow',String(Math.round(mix*100)));row.mix.dial.setAttribute('aria-valuetext',Math.round(mix*100)+' percent');
+      style(row.mix.arc,'strokeDasharray',(clamp01(mix)*.75).toFixed(4)+' 1');row.mix.dial.classList.toggle('m2zero',mix<=0);
+      setText(row.mix.value,Math.round(mix*100)+'%');attr(row.mix.dial,'aria-valuenow',Math.round(mix*100));attr(row.mix.dial,'aria-valuetext',Math.round(mix*100)+' percent');
       for(const endpoint of ['floorDb','ceilingDb']) {
         const h=row.handles[endpoint],p=position(o[endpoint]);
-        h.style.cssText=vertical?'bottom:'+p+'%':'left:'+p+'%';h.setAttribute('aria-orientation',vertical?'vertical':'horizontal');
-        h.setAttribute('aria-valuemin',endpoint==='floorDb'?M.AUDIO_RANGE_MIN:o.floorDb+M.AUDIO_RANGE_GAP);
-        h.setAttribute('aria-valuemax',endpoint==='floorDb'?o.ceilingDb-M.AUDIO_RANGE_GAP:M.AUDIO_RANGE_MAX);
-        h.setAttribute('aria-valuenow',o[endpoint]);h.setAttribute('aria-valuetext',o[endpoint].toFixed(1)+' dB');
+        style(h,'cssText',vertical?'bottom:'+p+'%':'left:'+p+'%');attr(h,'aria-orientation',vertical?'vertical':'horizontal');
+        attr(h,'aria-valuemin',endpoint==='floorDb'?M.AUDIO_RANGE_MIN:o.floorDb+M.AUDIO_RANGE_GAP);
+        attr(h,'aria-valuemax',endpoint==='floorDb'?o.ceilingDb-M.AUDIO_RANGE_GAP:M.AUDIO_RANGE_MAX);
+        attr(h,'aria-valuenow',o[endpoint]);attr(h,'aria-valuetext',o[endpoint].toFixed(1)+' dB');
       }
-      hintTo(row.head,'{band} · {out}% output · {db} dB input',{band:BAND_WORD[key]||key,out:(o.out*100).toFixed(0),db:Number.isFinite(o.inputDb)?o.inputDb.toFixed(1):'−∞'});
+      const hv={band:BAND_WORD[key]||key,out:(o.out*100).toFixed(0),db:Number.isFinite(o.inputDb)?o.inputDb.toFixed(1):'−∞'};
+      if(hintStale(row.head,hv))hintTo(row.head,'{band} · {out}% output · {db} dB input',hv);
     }
-    const out=ro.outs[selected];ui.hint.textContent=t('{band} · A {a} · R {r} · H {h} ms',{band:BAND_WORD[selected]||selected,a:out.attackMs.toFixed(0),r:out.releaseMs.toFixed(0),h:out.holdMs.toFixed(0)});   // tr: A, R and H are the initials of ATTACK, RELEASE and HOLD (the peak hold), each in milliseconds: use the initials of your own labels
+    const out=ro.outs[selected];setText(ui.hint,t('{band} · A {a} · R {r} · H {h} ms',{band:BAND_WORD[selected]||selected,a:out.attackMs.toFixed(0),r:out.releaseMs.toFixed(0),h:out.holdMs.toFixed(0)}));   // tr: A, R and H are the initials of ATTACK, RELEASE and HOLD (the peak hold), each in milliseconds: use the initials of your own labels
   }
 
   /** the AUDIO device's words and lamps — the capture's own state first, because a follower with no
@@ -2823,22 +2832,22 @@ export function createModulation(host, port) {
     const ring = rec.audRing;
     if (cap.live && ring) { ring.hist[ring.i] = ro.outs.level.out; ring.i = (ring.i + 1) % ring.hist.length; }
     A.srcBtn.classList.toggle('on', cap.live);
-    A.srcBtn.setAttribute('aria-pressed', String(cap.live));
-    A.srcBtn.textContent = cap.live ? t('AUDIO ON') : t('AUDIO IN');
-    A.liveLed.style.background = cap.live ? 'var(--acc2)' : '';
-    A.liveTxt.textContent = cap.live ? t('LIVE') : (CAPTURE_WORD[cap.state] ? t(CAPTURE_WORD[cap.state].t) : String(cap.state));   // tr[LIVE]: the microphone is open and being listened to right now
+    attr(A.srcBtn, 'aria-pressed', cap.live);
+    setText(A.srcBtn, cap.live ? t('AUDIO ON') : t('AUDIO IN'));
+    style(A.liveLed, 'background', cap.live ? 'var(--acc2)' : '');
+    setText(A.liveTxt, cap.live ? t('LIVE') : (CAPTURE_WORD[cap.state] ? t(CAPTURE_WORD[cap.state].t) : String(cap.state)));   // tr[LIVE]: the microphone is open and being listened to right now
     A.live.classList.toggle('on', cap.live);
-    A.note.textContent = cap.live
+    setText(A.note, cap.live
       ? (ro.sampleRate ? t('{k} kHz · {hz} Hz feed', { k: (ro.sampleRate / 1000).toFixed(1), hz: ro.feedHz.toFixed(0) }) : t('listening'))
-      : (cap.reason || t('audio input is closed — press {:AUDIO IN}'));
-    if (dev.audioState) { dev.audioState.textContent = cap.live ? (ro.gateOpen ? t('OPEN') : t('GATED')) : t('OFF');   // tr[GATED]: the audio input's noise gate is shut: the sound is below the threshold, so nothing passes (the opposite of OPEN)
+      : (cap.reason || t('audio input is closed — press {:AUDIO IN}')));
+    if (dev.audioState) { setText(dev.audioState, cap.live ? (ro.gateOpen ? t('OPEN') : t('GATED')) : t('OFF'));   // tr[GATED]: the audio input's noise gate is shut: the sound is below the threshold, so nothing passes (the opposite of OPEN)
       dev.audioState.classList.toggle('on', cap.live && ro.gateOpen);
       dev.audioState.classList.toggle('bad', cap.state === 'denied' || cap.state === 'error'); }
     if (dev.status) {
       dev.status.main.classList.toggle('on', cap.live && ro.gateOpen);
-      dev.status.text.textContent = cap.live ? (ro.gateOpen ? t('OPEN') : t('GATED')) : t('OFF');
-      if (dev.status.middle) dev.status.middle.textContent = t('{:LEVEL} {v}', { v: ro.outs.level.out.toFixed(2) });
-      dev.status.out.textContent = t('{n} OUT', { n: pad2(outsOf(s)) });
+      setText(dev.status.text, cap.live ? (ro.gateOpen ? t('OPEN') : t('GATED')) : t('OFF'));
+      if (dev.status.middle) setText(dev.status.middle, t('{:LEVEL} {v}', { v: ro.outs.level.out.toFixed(2) }));
+      setText(dev.status.out, t('{n} OUT', { n: pad2(outsOf(s)) }));
     }
     /* each socket says which macro holds it, by NUMBER — the same reading the rail's indicator and
        the minimised strip give, so one macro is one number wherever you meet it */
@@ -2848,25 +2857,26 @@ export function createModulation(host, port) {
     for (const key of Object.keys(A.outs)) {
       const row = A.outs[key], sock = M.scalarOutputId ? M.scalarOutputId(s.id, key) : null;
       const ix = sock ? macros.findIndex((m) => m.sourceId === sock) : -1;
-      row.slot.textContent = key === 'hit' ? t('EVT') : (ix >= 0 ? String(ix + 1) : '--');   // tr[EVT]: short for EVENT: this output fires on a hit (an onset), it does not carry a level
+      setText(row.slot, key === 'hit' ? t('EVT') : (ix >= 0 ? String(ix + 1) : '--'));   // tr[EVT]: short for EVENT: this output fires on a hit (an onset), it does not carry a level
       const v = ro.outs[key] ? ro.outs[key].out : 0;
       row.row.classList.toggle('on', cap.live && (key === 'hit' ? v > 0 : v > 0.02));
       row.box.classList.toggle('on', ix >= 0);
-      row.row.dataset.routeSelected = String(key === selectedRoute);
+      attr(row.row, 'data-route-selected', key === selectedRoute);
     }
     if (dev.minLeds) {
       for (const key of ['level', 'low', 'mid', 'high']) {
         const lamp = dev.minLeds[key], out = ro.outs[key];
-        if (lamp) lamp.style.setProperty('--signal', clamp01(out ? out.out : 0).toFixed(4));
+        if (lamp) setVar(lamp, '--signal', clamp01(out ? out.out : 0).toFixed(4));
       }
     }
     const selectedSock = M.scalarOutputId ? M.scalarOutputId(s.id, selectedRoute) : null;
     const selectedIx = selectedSock ? macros.findIndex((m) => m.sourceId === selectedSock) : -1;
     if (dev.minNum) {
-      dev.minNum.textContent = selectedIx >= 0 ? String(selectedIx + 1) : '--';
+      setText(dev.minNum, selectedIx >= 0 ? String(selectedIx + 1) : '--');
       dev.minNum.classList.toggle('m2nomac', selectedIx < 0);
       attr(dev.minNum, 'aria-label', selectedIx >= 0 ? t('{band} audio routing macro {i}', { band: BAND_WORD[selectedRoute] || selectedRoute, i: selectedIx + 1 }) : t('{band} audio routing: {:HAND}', { band: BAND_WORD[selectedRoute] || selectedRoute }));
-      hintTo(dev.minNum, '{band} routing — click to cycle available macros', { band: BAND_WORD[selectedRoute] || selectedRoute });
+      const hv = { band: BAND_WORD[selectedRoute] || selectedRoute };
+      if (hintStale(dev.minNum, hv)) hintTo(dev.minNum, '{band} routing — click to cycle available macros', hv);
     }
     paintAudioMeter(rec, ro);
   }
@@ -2914,23 +2924,23 @@ export function createModulation(host, port) {
     const on = powered();
     transport.xport.classList.toggle('on', on);
     attr(transport.xport, 'aria-pressed', on);
-    transport.tempoNum.textContent = T.bpm.toFixed(T.bpm < 100 ? 1 : 0);
+    setText(transport.tempoNum, T.bpm.toFixed(T.bpm < 100 ? 1 : 0));
 
 
-    transport.tempoHz.textContent = (T.bpm / 60).toFixed(2) + ' Hz';
-    transport.sync.textContent = M.syncMode() === 'wall' ? t('WALL') : t('FREE');
+    setText(transport.tempoHz, (T.bpm / 60).toFixed(2) + ' Hz');
+    setText(transport.sync, M.syncMode() === 'wall' ? t('WALL') : t('FREE'));
     transport.sync.classList.toggle('on', M.syncMode() === 'wall');
     const hz = port.cadence ? port.cadence() : 60;
-    transport.cad.textContent = hz + ' HZ';
+    setText(transport.cad, hz + ' HZ');
     transport.cad.classList.toggle('on', hz === 120);
     transport.holds.forEach((b, i) => {
       const on = !!T.hold && T.holdNote === HOLD_NOTE[i];
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      attr(b, 'aria-pressed', on);
       b.classList.toggle('on', on);
       b.classList.toggle('held', on);
     });
     const nd = M.dormantCount();
-    foot.dead.textContent = '⊘ ' + nd;
+    setText(foot.dead, '⊘ ' + nd);
     foot.dead.classList.toggle('off', nd === 0);
     /* WAVE 98 · AND THE LANE IS RE-PLACED WHEN THAT NUMBER MOVES.  `sizeLaw.workBars` takes `dead` as
        an INPUT and adds 46 px of extension for the warning, but `place()` only ever ran on a card
@@ -2959,11 +2969,11 @@ export function createModulation(host, port) {
         hintTo(rec.numSeat, 'Master depth for {macro}', { macro: m.name });
       }
       if (rec.kind === 'trigger') {
-        rec.signal.style.setProperty('--hit', M.triggerLevel(m.id).toFixed(4));
-        rec.vnum.textContent = t('{n} SUB', { n: M.subCountOfTrigger(m.id) });
+        setVar(rec.signal, '--hit', M.triggerLevel(m.id).toFixed(4));
+        setText(rec.vnum, t('{n} SUB', { n: M.subCountOfTrigger(m.id) }));
       } else {
-        rec.signal.style.setProperty('--fill', clamp01(m.value).toFixed(4));
-        rec.vnum.textContent = (100 * m.value).toFixed(0) + '%';
+        setVar(rec.signal, '--fill', clamp01(m.value).toFixed(4));
+        setText(rec.vnum, (100 * m.value).toFixed(0) + '%');
       }
 
 
@@ -2990,24 +3000,24 @@ export function createModulation(host, port) {
       if (force && dev.mac) dev.mac.textContent = heldBy ? String(heldIx + 1) : '--';
       if (dev.bus) {
         const f = s.triggerId ? fireSources().find((q) => q.id === s.triggerId) : null;
-        dev.bus.textContent = f ? f.label : '--';
+        setText(dev.bus, f ? f.label : '--');
         dev.bus.classList.toggle('m2bushit', !!(f && f.hit));   /* a signal binding, not a hand one */
       }
       if (force && dev.lfoWave) dev.lfoWave.textContent = shapeLabel(s);
       const st = stateOf(s);
-      if (dev.envStage) dev.envStage.textContent = stateWord(st);
+      if (dev.envStage) setText(dev.envStage, stateWord(st));
       const outs = outsOf(s);
       if (dev.status) {
         dev.status.main.classList.toggle('on', s.on && st !== 'IDLE' && st !== 'OFF');
-        dev.status.text.textContent = stateWord(st);
-        dev.status.out.textContent = t('{value} · {n} OUT', { value: s.out.toFixed(2), n: pad2(outs) });
+        setText(dev.status.text, stateWord(st));
+        setText(dev.status.out, t('{value} · {n} OUT', { value: s.out.toFixed(2), n: pad2(outs) }));
       }
       /* the folded strip's bay */
-      if (dev.meterFill) dev.meterFill.style.height = pct(s.out);
+      if (dev.meterFill) style(dev.meterFill, 'height', pct(s.out));
       if (force && dev.minName) dev.minName.textContent = s.label || kindWord(s.kind);
-      if (dev.minOut) dev.minOut.textContent = stateWord(st);
+      if (dev.minOut) setText(dev.minOut, stateWord(st));
       if (force && dev.minNum) dev.minNum.textContent = heldBy ? String(M.macroList().filter((m) => m.kind !== 'trigger').indexOf(heldBy) + 1) : '--';
-      if (dev.envMinProgFill) dev.envMinProgFill.style.height = pct(s.kind === 'env' && s.timeScale > 0 ? s.t / s.timeScale : 0);
+      if (dev.envMinProgFill) style(dev.envMinProgFill, 'height', pct(s.kind === 'env' && s.timeScale > 0 ? s.t / s.timeScale : 0));
       if (force && dev.compactLfo) { dev.compactLfo.shapeValue.textContent = shapeLabel(s);
                             dev.compactLfo.macroValue.textContent = heldBy ? heldBy.name : '--'; }
 
@@ -3038,8 +3048,8 @@ export function createModulation(host, port) {
         if (sig !== g.sig) { g.sig = sig; render(rec); }
       }
       const x = g.X(headU(s)).toFixed(2);
-      dev.ed.play.setAttribute('x1', x); dev.ed.play.setAttribute('x2', x);
-      dev.ed.pdot.setAttribute('cx', x); dev.ed.pdot.setAttribute('cy', g.Y(shapeAtHead(s)).toFixed(2));
+      attr(dev.ed.play, 'x1', x); attr(dev.ed.play, 'x2', x);
+      attr(dev.ed.pdot, 'cx', x); attr(dev.ed.pdot, 'cy', g.Y(shapeAtHead(s)).toFixed(2));
       if (force && dev.minWavePath) dev.minWavePath.setAttribute('d', minShapeD(s));
     }
 

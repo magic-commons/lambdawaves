@@ -53,7 +53,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const PROBE = String.raw`(() => {
   if (window.__MP) return;
   const now = () => performance.now(), MO0 = window.MutationObserver, PO0 = window.PerformanceObserver;
-  const R = { on: false, frames: [], cur: null, by: { raf: {}, timer: {}, obs: {}, ev: {} }, long: [], heap: [], pres: [], regions: {}, reasons: {} };
+  const R = { on: false, frames: [], cur: null, by: { raf: {}, timer: {}, obs: {}, ev: {} }, long: [], heap: [], pres: [], regions: {}, reasons: {}, types: {} };
   const key = new WeakMap(), src = (fn) => { let k = key.get(fn); if (!k) { k = fn.name || String(fn).replace(/\s+/g, ' ').slice(0, 72); key.set(fn, k); } return k; };
   const add = (b, name, d) => { if (!R.on) return; if (R.cur) R.cur[b] += d; const e = R.by[b][name] || (R.by[b][name] = [0, 0]); e[0] += d; e[1]++; };
   let ids = new Set(), knobs = new Set(), lastWin = null, lastHeap = 0, V = null, F = null;
@@ -102,7 +102,7 @@ const PROBE = String.raw`(() => {
   let mo = null, unsub = null, offAdv = null, f0 = null, po = null;
   window.__MP = {
     start() {
-      R.frames = []; R.long = []; R.heap = []; R.pres = []; R.regions = {}; R.reasons = {}; for (const b in R.by) R.by[b] = {};
+      R.frames = []; R.long = []; R.heap = []; R.pres = []; R.regions = {}; R.reasons = {}; R.types = {}; for (const b in R.by) R.by[b] = {};
       R.cur = null; lastWin = null; ids.clear(); knobs.clear(); R.byId = {};
       V = __LW.mod && __LW.mod.view; F = __LW.field;
       const Hh = __LW.mod && __LW.mod.host;
@@ -113,7 +113,7 @@ const PROBE = String.raw`(() => {
       if (F && F.frame) { f0 = F.frame; F.frame = function (a) { const t = now(); try { return f0.call(this, a); } finally { const c = R.cur; if (R.on) { R.pres.push(t); if (c) { c.field += now() - t; c.pres++; } } } }; }
       if (window.__MP_MO !== false) {
         mo = new MO0((recs) => { const t = now(), c = R.cur; if (!c || !R.on) return; c.mut += recs.length;
-          for (const r of recs) { const el = r.target.nodeType === 1 ? r.target : r.target.parentElement; if (!el || !el.closest) continue;
+          for (const r of recs) { R.types[r.type] = (R.types[r.type] || 0) + 1; const el = r.target.nodeType === 1 ? r.target : r.target.parentElement; if (!el || !el.closest) continue;
             const k = el.closest('[data-param]'); if (k) knobs.add(k.dataset.param); const g = region(el); R.regions[g] = (R.regions[g] || 0) + 1; }
           c.moSelf += now() - t; });
         mo.observe(document.documentElement, { subtree: true, attributes: true, characterData: true, childList: true });
@@ -126,7 +126,7 @@ const PROBE = String.raw`(() => {
       if (unsub) unsub(); if (offAdv) offAdv(); if (f0) { F.frame = f0; f0 = null; } if (mo) mo.disconnect(); if (po) po.disconnect(); unsub = offAdv = mo = po = null;
       const K = ['ts', 'span', 'loop', 'raf', 'timer', 'obs', 'ev', 'mut', 'moSelf', 'knobs', 'writes', 'ids', 'w0', 'adv', 'ticks', 'field', 'pres', 'win', 'inflight', 'fft'];
       return { secs: (R.t1 - R.t0) / 1000, keys: K, frames: R.frames.map((f) => K.map((k) => +(+f[k]).toFixed(3))), by: R.by, long: R.long, longOk: R.longOk, heap: R.heap,
-        pres: R.pres.map((t) => +t.toFixed(3)), regions: R.regions, reasons: R.reasons, byId: R.byId };
+        pres: R.pres.map((t) => +t.toFixed(3)), regions: R.regions, reasons: R.reasons, byId: R.byId, types: R.types };
     },
   };
 })();`;
@@ -223,6 +223,7 @@ function summarise(r) {
     long: { supported: r.longOk, n: r.long.length, maxMs: r.long.length ? +Math.max(...r.long.map((l) => l[1])).toFixed(1) : 0 },
     heap, top: { raf: top(r.by.raf), timer: top(r.by.timer), obs: top(r.by.obs), ev: top(r.by.ev) },
     regions: Object.entries(r.regions).sort((x, y) => y[1] - x[1]).slice(0, 10).map(([k, v]) => [k, Math.round(v / r.secs)]), reasons: r.reasons,
+    mutationTypes: Object.fromEntries(Object.entries(r.types || {}).map(([k, v]) => [k, Math.round(v / r.secs)])),   // 029 M2: records per second by type (childList · characterData · attributes)
     writesById: Object.entries(r.byId || {}).sort((x, y) => y[1] - x[1]).slice(0, 16).map(([k, v]) => [k, +(v / r.secs).toFixed(1)]),   // 029 M5: target writes per second, by id
   };
 }
