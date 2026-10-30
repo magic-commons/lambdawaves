@@ -253,4 +253,9 @@ green('a file\'s number is taken only when it is one (028 R-04): domain.half nul
   session.destroy();
 }
 green('a session the kit cannot read is kept (028 R-12): a future v and an unparsable text go to .failed, the record stands and autosave stays unarmed; a v1 record resumes and arms');
+/* 028 R-24: a stored thumbnail is a data:image/ picture or nothing — a URL or any other string reads as '' (the kit re-captures it) */
+{ const ok = 'data:image/jpeg;base64,AAAA', item = (thumb) => ({ path: 'a', saved: '2026-10-30T00:00:00Z', data: {}, notebook: '', thumb });
+  const th = toFiles({ items: { a: item('https://attacker.example/t.png'), b: { ...item(ok), path: 'b' }, c: { ...item('x'.repeat(4096)), path: 'c' } } }).entries.map((e) => e.thumb);
+  assert.deepEqual(th, ['', ok, ''], 'toFiles keeps a data:image/ thumb only'); }
+green('a stored thumbnail is a data:image/ picture or nothing (028 R-24): a URL thumb and a long non-data string read as \'\'');
 console.log(`GREEN project-formats: ${greens} judged lines`);
