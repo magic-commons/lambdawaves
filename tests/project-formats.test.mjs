@@ -19,6 +19,9 @@ import { createFiles } from '../lab/mir/folders/files.js';
 import { seed } from '../lab/mir/folders/seed.js';
 import { pageFromNotebook } from '../lab/mir/shell/pages.js';
 import { readInput } from '../lab/mir/core/intake.js';
+import { finiteOver } from '../lab/shell/persist.js';
+import { createSession } from '../lab/mir/core/session.js';
+import { takeResume } from '../lab/projects.js';
 import { wrap, stringify, LIMITS } from '../lab/mir/core/envelope.js';
 import { PJ_KEY, PART, MAX_PROJECT_BYTES, MAX_LIBRARY_CHARS, createProjectStore, toFiles, fromFiles, validateProjectCollection, touchRecent,
   parseProjectFile, projectFileText, STARTERS, starterOf } from '../lab/project-store.js';
@@ -216,4 +219,38 @@ green('R10 c · a 1.4 notebook is page 0: the kit\'s pageFromNotebook reads λWA
   assert.match(rack, /signature: \(\) => projectKey\(\),/, 'the part\'s signature is not projectKey()');
 }
 green('the unsaved mark is the part\'s signature, projectKey(): the domain under AUTO, the clock and the governor\'s scale do not dirty a project; a subtitle and a manual domain edit do');
+{
+  /* 028 R-04 · A FILE'S NUMBER IS TAKEN ONLY WHEN IT IS ONE: restore() spreads a file's obs, mat, quality and domain through finiteOver;
+     a `domain.half: null` (it froze the stage, and the session kept it) and a mat exposure 'boom', a slice pos NaN, a quat with a null
+     keep the current numbers; a valid file passes byte-for-byte; and the four Object.assign sites and the rebuild's belt read so */
+  const domain = { auto: true, half: 7 };
+  Object.assign(domain, finiteOver(domain, { auto: false, half: null }));
+  assert.deepEqual(domain, { auto: false, half: 7 });
+  const mat = { exposure: 1, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, style: 1 }, obs = { yaw: 0.6, quat: [0, 0, 0, 1], shift: [0, 0] };
+  assert.deepEqual(finiteOver(mat, { exposure: 'boom', slice: { mode: 1, axis: 2, pos: NaN, thick: 0.1 }, espSurf: 'iso' }),
+    { exposure: 1, slice: { mode: 1, axis: 2, pos: 0, thick: 0.1 }, espSurf: 'iso' });
+  assert.deepEqual(finiteOver(obs, { yaw: null, quat: [0, null, 0, 1] }), { yaw: 0.6, quat: [0, 0, 0, 1] });
+  const good = { exposure: 6.5, slice: { mode: 2, axis: 0, pos: 0.25, thick: 0.05 }, style: 3 };
+  assert.equal(JSON.stringify(finiteOver(mat, good)), JSON.stringify(good));
+  const persist = read('../lab/shell/persist.js'), rack = read('../lab/rack.js');
+  for (const site of ['Object.assign(obs, finiteOver(obs,', 'Object.assign(mat, finiteOver(mat,', 'Object.assign(quality, finiteOver(quality,', 'Object.assign(app.ctl.domain, finiteOver(app.ctl.domain,'])
+    assert.ok(persist.includes(site), 'restore() spreads unchecked: ' + site);
+  assert.ok(rack.includes('if (domain.auto || !Number.isFinite(domain.half)) domain.half ='), 'applyRebuild has no belt for a non-finite half');
+}
+green('a file\'s number is taken only when it is one (028 R-04): domain.half null, exposure \'boom\', a NaN slice pos and a null in a quat keep the current numbers; a valid file passes unchanged; restore\'s four spreads and the rebuild\'s belt');
+{
+  /* 028 R-12 · A SESSION THE KIT CANNOT READ IS KEPT, NOT RESUMED AS NOTHING: a future `v` and an unparsable text are copied to
+     `.failed`, the record stays as it was, autosave stays unarmed (the next edit cannot overwrite it); a readable record still resumes */
+  const K = 'lambdawaves.q0.session', part = { capture: () => ({ lambdawaves: { x: 1 } }), restore: () => ({ failed: [] }), signature: () => 's', subscribe: null };
+  for (const text of ['{"v":2,"parts":{"lambdawaves":{"x":1}}}', '{"garbage']) {
+    const S = memory({ [K]: text }), session = createSession({ key: K, storage: S, parts: part, win: null, doc: null });
+    assert.equal(takeResume(session, S), false, text);
+    assert.equal(S.getItem(K + '.failed'), text); assert.equal(S.getItem(K), text); assert.equal(session.armed(), false, text);
+    session.destroy();
+  }
+  const S = memory({ [K]: '{"v":1,"parts":{"lambdawaves":{"x":1}}}' }), session = createSession({ key: K, storage: S, parts: part, win: null, doc: null });
+  assert.equal(takeResume(session, S), true); assert.equal(S.getItem(K + '.failed'), null); assert.equal(session.armed(), true);
+  session.destroy();
+}
+green('a session the kit cannot read is kept (028 R-12): a future v and an unparsable text go to .failed, the record stands and autosave stays unarmed; a v1 record resumes and arms');
 console.log(`GREEN project-formats: ${greens} judged lines`);

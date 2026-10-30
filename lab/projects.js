@@ -39,6 +39,14 @@ import { keepData } from './library.js';   // iteration 005 A: the demo covers a
 import { PJ_KEY, PART, MAX_PROJECT_BYTES, MAX_LIBRARY_CHARS, UNTOUCHED, pathOf, splitPath, readCollection, createProjectStore, touchRecent,
   parseProjectFile, projectFileText, STARTERS, starterOf } from './project-store.js';
 
+/** takeResume(session, storage) — RESUME's take.  028 R-12 (app side, until the kit's resume() does it — docs/FOR-MIR.md): a record the kit
+ *  cannot read (a future `v`, unparsable) is not "nothing" — it is kept as `lambdawaves.q0.session.failed` and resume is not called, so
+ *  autosave stays unarmed and the next edit cannot write over it; the failed line then says what is true. */
+export function takeResume(session, storage, key = 'lambdawaves.q0.session') {
+  let t = null; try { t = storage.getItem(key); } catch (_) {}
+  if (t != null && !session.read()) { try { storage.setItem(key + '.failed', t); } catch (_) {} return false; }
+  const r = session.resume(); return !!(r && r.ok && !r.failed.length);
+}
 export function createProjects(port) {
   const ls = globalThis.localStorage, store = createProjectStore(ls);
   /* THE PART'S subscribe (0.5.0 C6b): rack.js calls `changed()` when the ring moves and the notebook is typed in; it says so once a
@@ -301,7 +309,7 @@ export function createProjects(port) {
     resume(session) {
       unarmed = session;
       return openPayload(null, { label: 'resume', say: null, clean: false, failed: 'the last session could not be put back (kept as lambdawaves.q0.session.failed; autosave is off until a project opens)' },
-        { rollback: true, take: () => { const r = session.resume(); return !!(r && r.ok && !r.failed.length); } });
+        { rollback: true, take: () => takeResume(session, ls) });
     },
     /** openWith(take, meta) — a restore that is not a stored project (a link, quick LOAD) on the same road: the snapshot, `take()`, the
      *  roll-back when it did not take; the caller keeps its own landing (meta.land false) */

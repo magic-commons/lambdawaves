@@ -239,7 +239,7 @@ export async function boot(dom) {
      are written to the slot the frame's head captured (the tail used to write the NEXT slot, so the getter read the
      last frame alone: AUDIT-B FB2, AUDIT-F F5). */
   const loopRing = new Float64Array(60);
-  const loopFaults = new Set(); let lastFault = '';                  // LA4: the messages a thrown frame has reported, and the last frame's own
+  const loopFaults = new Set(); let lastFault = '', faultRun = 0;    // LA4: the messages a thrown frame has reported, and the last frame's own (028 R-11: and its run)
   const ringMedian = (r) => { const a = Array.from(r).filter((v) => v > 0).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; }; app.loop.loopRing = loopRing; app.loop.ringMedian = ringMedian;
   let winStart = 0, winFrames = 0, winRecon = 0, winSteps = 0;
   /* a schedule() from INSIDE the loop only raises `pending` — the loop's own tail registers the next frame.  Before wave
@@ -325,7 +325,7 @@ export async function boot(dom) {
   function applyRebuild() {
     busyWrap(null);                                                    // wave 48: a rebuild is BUSY work — synchronous, so it only shows when the frame-gap rule catches it running long
     const HH = getHamiltonian();
-    if (domain.auto) domain.half = (app.state.molSession && app.state.molSession.selected) ? app.state.chem.half : (app.state.space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3), reg));   // ignore a slap's 1e-4 tails
+    if (domain.auto || !Number.isFinite(domain.half)) domain.half = (app.state.molSession && app.state.molSession.selected) ? app.state.chem.half : (app.state.space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3), reg));   // ignore a slap's 1e-4 tails
     if (field.ok) field.setSpace(app.state.space === 'p' ? HH.kernelSpace.p : HH.kernelSpace.x);
     if (field.ok && HH.radialTable) field.setRadialTable(HH.radialTable());   // QUARKONIUM: the tabulated radial rows the kernel reads
     if (field.ok) {
@@ -624,6 +624,7 @@ export async function boot(dom) {
          `pending` unconsumed, and re-arming on it would spin a paused instrument at the display rate forever.  The
          next schedule() arms a frame as it always does. */
       if (inLoop) { inLoop = false; loopTail(fault !== '' && fault === lastFault); }
+      faultRun = fault !== '' && fault === lastFault ? faultRun + 1 : 0; if (faultRun === 1) dom.banner.warn('a frame could not be drawn', fault);   // 028 R-11: a fault that repeats is said to the user once a run (the banner counts the runs)
       lastFault = fault;
     }
   }
