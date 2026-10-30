@@ -3,7 +3,8 @@ import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import net from 'node:net';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
+import https from 'node:https';
 import { fileURLToPath } from 'node:url';
 
 const repo = fileURLToPath(new URL('..', import.meta.url));
@@ -56,5 +57,20 @@ try {
     released.listen(port, '127.0.0.1', resolve);
   });
   await close(released);
-  console.log('GREEN gate-tools: suite discovery, failure propagation, mode isolation, port ownership and server cleanup');
+
+  // R-10: a percent-encoded dot is still a dot segment — the server judges the path it will serve, not the raw one.
+  for (const [d, f] of [['.claude', 'x.txt'], ['.tmp', 'y.txt'], ['lab', 'ok.txt']]) {
+    mkdirSync(path.join(fixture, d), { recursive: true }); writeFileSync(path.join(fixture, d, f), 'x');
+  }
+  const srv = spawn('python3', [path.join(fixture, 'tools/gate/server.py'), fixture, String(port)],
+    { env: { ...process.env, LW_CERTS: path.join(fixture, '.certs') }, stdio: ['ignore', 'pipe', 'inherit'] });
+  try {
+    await new Promise((resolve, reject) => { srv.stdout.on('data', (b) => /gate server on/.test(b) && resolve()); srv.once('exit', reject); });
+    const status = (p) => new Promise((resolve, reject) => https.get({ host: '127.0.0.1', port, path: p, rejectUnauthorized: false },
+      (r) => { r.resume(); resolve(r.statusCode); }).on('error', reject));
+    assert.equal(await status('/lab/ok.txt'), 200);
+    assert.equal(await status('/%2Eclaude/x.txt'), 404);
+    assert.equal(await status('/lab/%2E%2E/%2Etmp/y.txt'), 404);
+  } finally { srv.kill(); }
+  console.log('GREEN gate-tools: suite discovery, failure propagation, mode isolation, port ownership, server cleanup and encoded dot segments');
 } finally { rmSync(fixture, { recursive: true, force: true }); }

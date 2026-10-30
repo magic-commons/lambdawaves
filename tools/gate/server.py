@@ -33,7 +33,7 @@ lab/ is ../tools/perf/device-report.js); the pair lives OUTSIDE the tree by defa
 idle `nc` can no longer park the accept loop for everyone; and non-loopback requests are logged
 to stderr (the loopback gate stays quiet).
 """
-import http.server, os, ssl, subprocess, sys
+import http.server, os, posixpath, ssl, subprocess, sys, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))          # tools/gate/ -> tools/ -> repo
@@ -76,10 +76,11 @@ class H(http.server.SimpleHTTPRequestHandler):
         super().setup()
     def loopback(self): return self.client_address[0] in LOOPBACK
     def allowed(self):
-        path = self.path.split("?", 1)[0].split("#", 1)[0]
+        # judged as translate_path will read it (unquoted, then normalized), so /%2Eclaude/ and /lab/%2E%2E/ are not a way round
+        path = posixpath.normpath(urllib.parse.unquote(self.path.split("?", 1)[0].split("#", 1)[0]))
         if any(seg.startswith(".") for seg in path.split("/") if seg): return False      # .certs .claude .tmp .git …
         if self.loopback(): return True
-        return path.startswith(LAN_PREFIXES)
+        return (path + "/").startswith(LAN_PREFIXES)
     def send_head(self):
         if not self.allowed(): self.send_error(404); return None
         return super().send_head()
