@@ -83,6 +83,23 @@ try {
   assert.equal(impulse.active, false);
   assert.deepEqual(impulse.errors, []);
   console.log('PASS the impulse overlay clears every frame outside the hydrogen overlay domain');
+
+  /* 028 R-11 · A FAULT THAT REPEATS IS SAID: a frame that throws the same message twice running puts the banner up (one word, no throw) */
+  const fault = await g.ev(`
+    const mat = __LW.mat, axis = mat.axis, pane = () => document.getElementById('mir-banner');
+    const before = !!(pane() && !pane().hidden && pane().textContent.includes('a frame could not be drawn'));
+    Object.defineProperty(mat, 'axis', { get() { throw new Error('R-11 probe fault'); }, configurable: true, enumerable: true });
+    __LW.play();
+    for (let i = 0; i < 100 && !(pane() && !pane().hidden); i++) await new Promise((q) => setTimeout(q, 20));
+    Object.defineProperty(mat, 'axis', { value: axis, writable: true, configurable: true, enumerable: true });
+    __LW.pause(); await __LW.settle();
+    const p = pane(), shown = !!(p && !p.hidden && p.textContent.includes('a frame could not be drawn') && p.textContent.includes('R-11 probe fault'));
+    if (p) p.querySelector('.mir-banner-x').click();
+    const errs = __e.filter((e) => !e.includes('R-11 probe fault'));
+    return { before, shown, errs };
+  `);
+  assert.deepEqual(fault, { before: false, shown: true, errs: [] }, JSON.stringify(fault));
+  console.log('PASS a frame fault that repeats puts the banner up: "a frame could not be drawn" with the message (028 R-11)');
 } finally {
   await g.close();
 }
