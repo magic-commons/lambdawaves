@@ -455,7 +455,7 @@ const PRECACHE = [
 /* ── 1b. DATA — THE ONE PRECACHE EXEMPTION (0.4.0 S4a · PLAN B2) ──────────────────────────────────────────────────
  * A file under a DATA root is CONTENT-ADDRESSED DEVICE CONTENT: deployed, NEVER precached, fetched when the lab asks for it and
  * kept by the page in DATA_CACHE, a name no build changes — so a new build never clears an installed record (§4 collects only
- * PREFIX caches).  lab/library/<sha-256>.json are the orbital records; lab/library.json, the catalogue that reaches them, is
+ * PREFIX caches, and from DATA_CACHE only SWEEP: the three roots whose names carry no hash).  lab/library/<sha-256>.json are the orbital records; lab/library.json, the catalogue that reaches them, is
  * an ordinary precached file.  tests/pwa.test.mjs and tools/build-deploy.mjs READ this list: it is the one rule, and the 0.5.0
  * kit-file policy extends it rather than adding a second:
  * SKIP (0.5.0 A11) — kit data an adoption brings and the lab reads lazily or never: DEPLOYED, NEVER PRECACHED, and nothing more
@@ -469,14 +469,19 @@ const PRECACHE = [
  * asks for) — fetched with the volume that names them, kept by the page in DATA_CACHE beside it.
  * THE PICTURES (iteration 005 A) are DATA by the same rule: img/menu/ (the Picker's thumbnails, 720 KB) and the demo covers — deployed,
  * never precached, kept by the page in DATA_CACHE after their first good answer (library.js keepData), so an installed app shows them
- * offline from its second run; a picture not yet held is the tile's own placeholder.
+ * offline from its second run; a picture not yet held is the tile's own placeholder.  Their names carry no hash and a re-render keeps
+ * the name, so they are kept for ONE BUILD: every new build's activate (§4) sweeps img/menu/ and demos/covers/ out of DATA_CACHE, and
+ * the next view keeps the deployed bytes (iteration 028 R-08).  The records, the basis records and the volumes are named by what they
+ * hold or kept by a press, and stay.
  * THE DEMOS (iteration 026) are DATA whole: demos/ (the four demo files, 270 KB, and their covers) — deployed, never precached; a demo
  * file is read by the boot's seed (FOLDERS' DEMOS store it, and a DEMOS press opens that copy offline) and is never kept here, so a
  * changed demo still reaches every browser (its `saved` stamp is the DEMOS refresh revision).
  * THE MEASURED LINES (iteration 016 E3) are DATA by the same rule: vendor/nist/ (NIST ASD's neutral lines, 330 KB, tools/nist-lines.py) — read when
- * EMISSION SPECTRA first meets the ATOM, kept by the page after that answer; HYDROGEN's lines are computed and never need it. */
+ * EMISSION SPECTRA first meets the ATOM, kept by the page after that answer and swept with the pictures; HYDROGEN's lines are computed
+ * and never need it. */
 const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/'];
 const DATA_CACHE = 'lw-data-v1';
+const SWEEP = ['img/menu/', 'demos/covers/', 'vendor/nist/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4)
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */
@@ -486,7 +491,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
-  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures and the demo covers, kept as the page first shows them, and the demo files FOLDERS seeds from.'],
+  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures, the demo covers and the measured lines, kept as the page first shows them until the next build sweeps them (their names carry no hash), and the demo files FOLDERS seeds from.'],
   ['a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)', 'kit data an adoption brings that the running lab fetches only when a language is chosen, or never: deployed, never precached, never cached (offline, a language other than English stays English).'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
   ['an adopted kit module no root reaches (R5-W1)', '0.5.0 C0: MIR is adopted whole, so lab/mir/ holds modules for consumers λWAVES has not reached yet. tests/wiring.test.mjs walks the roots and names them (--unreached-kit); tests/pwa.test.mjs and tools/build-deploy.mjs READ that set, so a kit module joins this precache the day a consumer imports it. Deployed, never precached, never failed (PLAN §9).'],
@@ -559,15 +564,22 @@ self.addEventListener('install', (event) => {
   })());
 });
 
-/* ── 4. ACTIVATE — collect the caches no worker will ever read again.  No clients.claim(). ──────────────
+/* ── 4. ACTIVATE — collect the caches no worker will ever read again, and SWEEP's stale pictures.  No clients.claim(). ──
  * Because §3 never calls skipWaiting(), activate can only run when the previous worker has been released —
  * i.e. when no page is left on the old build. So this sweep can never delete the cache a live session is
  * reading. The one exception is the user-driven path in §6, and §5's cache miss falls through to the
- * network, so even that page degrades to "slower" and never to "broken". */
+ * network, so even that page degrades to "slower" and never to "broken".
+ * THE SWEEP (iteration 028 R-08): the pictures, the covers and the measured lines are kept under names a re-render does not change,
+ * so a kept copy would answer for the deployed one forever; each new build deletes them from DATA_CACHE and the page keeps the new
+ * bytes on their next view.  library/<sha>.json, the basis records and lw-vol-* are untouched. */
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const names = await caches.keys();
     await Promise.all(names.filter((n) => n.startsWith(PREFIX) && n !== CACHE).map((n) => caches.delete(n)));
+    if (names.includes(DATA_CACHE)) {
+      const dc = await caches.open(DATA_CACHE);
+      await Promise.all((await dc.keys()).filter((r) => SWEEP.some((d) => new URL(r.url).pathname.startsWith(SCOPE + d))).map((r) => dc.delete(r)));
+    }
     await announce({ type: 'LW_SW_ACTIVE', build: BUILD, files: PRECACHE.length });
   })());
 });

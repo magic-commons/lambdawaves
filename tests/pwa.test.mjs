@@ -526,6 +526,7 @@ function loadWorker(mount = '/lab/', tamper = null) {   // tamper(rel, response)
     async keys() { return [...this.m.keys()].map((u) => new Request(u)); }
     async put(req, res) { this.m.set(typeof req === 'string' ? req : req.url, res); }
     async match(req) { return this.m.get(typeof req === 'string' ? req : req.url); }
+    async delete(req) { return this.m.delete(typeof req === 'string' ? req : req.url); }
   }
   const caches = {
     async open(n) { if (!state.caches.has(n)) state.caches.set(n, new FakeCache()); return state.caches.get(n); },
@@ -748,9 +749,13 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
   assert.equal(hit && await hit.clone().text(), 'the device copy', 'sw.js: an installed record was not answered from lw-data-v1');
   assert.equal(W.fetched.length, 0, 'sw.js: an installed record still went to the network');
   W.caches.set('lw-lab-anolderbuild', new W.FakeCache());
+  /* iteration 028 R-08: a picture kept under a name no hash is in is swept by the new build's activate; the record stays */
+  const pic = 'https://host.invalid/lab/img/menu/' + readdirSync(path.join(LAB, 'img/menu'))[0];
+  await dc.put(pic, new Response('a picture of the last build'));
   let p; await W.handlers.activate[0]({ waitUntil: (x) => { p = x; } }); await p;
   assert.ok(W.caches.has(W.LW_SW.DATA_CACHE) && !W.caches.has('lw-lab-anolderbuild'), 'sw.js: activate must collect a stale build and keep lw-data-v1');
-  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there, and a new build's activate keeps it.`);
+  assert.deepEqual([dc.m.has(url), dc.m.has(pic)], [true, false], 'sw.js: a new build\'s activate must keep the content-addressed record and sweep the kept picture (R-08)');
+  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there, and a new build's activate keeps the record and sweeps a kept picture (img/menu/, demos/covers/, vendor/nist/ carry no hash).`);
 }
 
 console.log(`PASS update policy executed, not described: install precaches ${pc.length} files with cache:'reload' + ?__rev=<content hash> and does NOT skipWaiting; ` +
