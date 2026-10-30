@@ -87,9 +87,11 @@ else warning.onAccept(() => pick(session.hasResume() ? 'resume' : 'boot'));
  * THE ONE LAW, and the half of it that is this file's: the worker never takes itself (no skipWaiting on
  * install, no clients.claim, no timer), and the only message that can end a session's build is sent from
  * LW.sw.accept().  Since wave 133 the page may send it FOR AN UNTOUCHED SESSION (rack.js `untouched`: a
- * reload would lose nothing) as a quiet take, `alone: true`, which the worker refuses while a second window
- * is open; otherwise only on a press — the badge or the offer's UPDATE.  What a controllerchange MEANS is
- * the page's decision, and sw-client.js makes it: the tab that asked reloads, a tab that did not ask is told.
+ * reload would lose nothing) as a quiet take, `alone: true`; otherwise only on a press — the badge or the
+ * offer's UPDATE.  Since iteration 028 the worker refuses either while a second window is open, and only the
+ * offer's UPDATE ALL (`force: true`) takes it for every window.  What a controllerchange MEANS is the page's
+ * decision, and sw-client.js makes it: the tab that asked reloads, a tab that did not ask reloads when it holds
+ * no work and is told to otherwise.
  *
  * THE AUTOMATION BYPASS is exactly the photosensitivity warning's (main.js `warning.needed`), for a reason
  * of the same size: a worker installed on the gate's origin would serve every later navigation out of a
@@ -124,7 +126,7 @@ function installLayer(LW) {
     const arm = (w) => {
       if (!w || w === armed) return;
       armed = w;
-      sw.buildReady((opt) => w.postMessage(opt && opt.alone ? { type: 'LW_SW_SKIP_WAITING', alone: true } : { type: 'LW_SW_SKIP_WAITING' }));
+      sw.buildReady((opt) => w.postMessage({ type: 'LW_SW_SKIP_WAITING', ...opt }));   // opt: {} a press, { alone } a quiet take, { force } UPDATE ALL
     };
     const watch = (w) => {
       if (!w) return;

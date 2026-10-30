@@ -705,28 +705,34 @@ SW.handlers.message[0]({ data: { type: 'LW_SW_HELLO' }, ports: [{ postMessage: (
 assert.deepEqual(reply, { type: 'LW_SW_BUILD', build: BUILD, files: pc.length, cache: SW.LW_SW.CACHE }, 'sw.js: LW_SW_HELLO must answer with the build the session is running');
 SW.handlers.message[0]({ data: { type: 'LW_SW_NOT_A_THING' }, ports: [] });
 assert.equal(SW.skip, 0, 'sw.js: an unknown message took the update');
-SW.handlers.message[0]({ data: { type: 'LW_SW_SKIP_WAITING' }, ports: [] });
-assert.equal(SW.skip, 1, 'sw.js: LW_SW_SKIP_WAITING is the interface\'s explicit "the user said yes" and must be the one thing that takes the update');
-/* E5b — WAVE 133 · THE QUIET TAKE.  An untouched session's page asks with `alone: true`; the worker takes it only while ONE
-   window is in scope, because skipWaiting() re-points every client and a second window may hold work.  Refused, it tells
-   the asking page LW_SW_BUSY and the page offers the build instead.  The handler hands its promise to waitUntil. */
-const quietTake = async (windows) => {
+/* E5b — THE COUNT (wave 133's quiet take; iteration 028 R-03 every take).  skipWaiting() re-points every client in scope, so a press
+   or a quiet take (`alone: true`, an untouched session) is taken only while ONE window is in scope; refused, the asking page is told
+   LW_SW_BUSY with the count and offers UPDATE ALL, which asks with `force: true` and is taken at once.  The handler hands its promise
+   to waitUntil. */
+const take = async (data, windows) => {
   const busy = [];
   const saved = SW.self_.clients.matchAll;
   SW.self_.clients.matchAll = async () => Array.from({ length: windows }, () => ({ postMessage: () => {} }));
   let p = null;
-  SW.handlers.message[0]({ data: { type: 'LW_SW_SKIP_WAITING', alone: true }, ports: [], source: { postMessage: (m) => busy.push(m) }, waitUntil: (x) => { p = x; } });
+  SW.handlers.message[0]({ data: { type: 'LW_SW_SKIP_WAITING', ...data }, ports: [], source: { postMessage: (m) => busy.push(m) }, waitUntil: (x) => { p = x; } });
+  const sameTurn = SW.skip;
   assert.ok(p && typeof p.then === 'function', 'sw.js: a SKIP_WAITING message must hand its work to waitUntil, or the worker may be stopped mid-count');
   await p;
   SW.self_.clients.matchAll = saved;
-  return busy;
+  return { busy, sameTurn };
 };
-let busy = await quietTake(1);
+let r = await take({}, 1);
+assert.equal(SW.skip, 1, 'sw.js: LW_SW_SKIP_WAITING with one window in scope is the interface\'s explicit "the user said yes" and must take the update');
+assert.deepEqual(r.busy, [], 'sw.js: a take that was taken must not also report busy');
+r = await take({ alone: true }, 1);
 assert.equal(SW.skip, 2, 'sw.js: a quiet take with ONE window in scope must take the update');
-assert.deepEqual(busy, [], 'sw.js: a quiet take that was taken must not also report busy');
-busy = await quietTake(2);
-assert.equal(SW.skip, 2, 'sw.js: a quiet take with a SECOND window in scope took the update — that window may hold work');
-assert.deepEqual(busy, [{ type: 'LW_SW_BUSY', windows: 2 }], 'sw.js: a refused quiet take must tell the asking page LW_SW_BUSY with the window count');
+for (const data of [{}, { alone: true }]) {
+  r = await take(data, 2);
+  assert.equal(SW.skip, 2, `sw.js: a ${data.alone ? 'quiet take' : 'PRESS'} with a SECOND window in scope took the update — that window did not ask, may hold work, and would lazy-load from the new build`);
+  assert.deepEqual(r.busy, [{ type: 'LW_SW_BUSY', windows: 2 }], 'sw.js: a refused take must tell the asking page LW_SW_BUSY with the window count');
+}
+r = await take({ force: true }, 2);
+assert.deepEqual([SW.skip, r.sameTurn, r.busy], [3, 3, []], 'sw.js: UPDATE ALL (force: true) must take the update at once, in the same turn as the message, with any number of windows');
 /* on the CODE, not the prose — the header of sw.js discusses skipWaiting and clients.claim at length. */
 const swCode = live(swSrc);
 assert.equal((swCode.match(/skipWaiting\(\)/g) || []).length, 1, 'sw.js: skipWaiting() appears more than once in the code — there must be exactly one path to it, the interface\'s message (a press, or a quiet take for an untouched session)');
@@ -761,7 +767,7 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
 console.log(`PASS update policy executed, not described: install precaches ${pc.length} files with cache:'reload' + ?__rev=<content hash> and does NOT skipWaiting; ` +
   `every body is digested against its recorded hash (wrong bytes or a redirect reject the install); activate collects only stale lw-lab-* and does NOT claim; fetch is cache-first over the precache and refuses POST / Range / cross-origin / out-of-scope / unlisted, growing nothing; ` +
   `the fetch matrix ran AT BOTH MOUNTS — ${mLab.mount} (scope ${mLab.scope}) and ${mRoot.mount} (scope ${mRoot.scope}, which is what ships) — and a navigation is answered ONLY at the app entry (${mRoot.entry.join(' ')}), so /LICENSE, /NOTICE, /REPORT.md, the six licence texts and a typo all reach the network at either address; ` +
-  `the one path to a new build is the interface's LW_SW_SKIP_WAITING — a press takes it at once, and a quiet take (alone: true, an untouched session) is taken with one window in scope and refused with LW_SW_BUSY at two. Cache name ${SW.LW_SW.CACHE}, derived — the string appears nowhere in the source.`);
+  `the one path to a new build is the interface's LW_SW_SKIP_WAITING — a press or a quiet take (alone: true) is taken with one window in scope and refused with LW_SW_BUSY at two, and UPDATE ALL (force: true) is taken at once. Cache name ${SW.LW_SW.CACHE}, derived — the string appears nowhere in the source.`);
 
 /* ══ F.  THE FONT LICENCES, READ OUT OF THE BINARIES (wave 59) ═══════════════════════════════════════════
  * A licence audit found the one defect in this tree with real consequences: our five-glyph subset of gluk's

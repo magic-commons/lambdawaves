@@ -10,7 +10,9 @@
  * worst failure a cache can cause.  So: no skipWaiting() on install, no clients.claim() ever.  A new worker
  * precaches itself and then WAITS; the old worker keeps serving every byte of the build the session started
  * on until the last tab of that session closes.  The UI is told a build is ready (§5); an untouched session
- * takes it (main.js, rack.js `untouched`), and any other session's USER decides.
+ * takes it (main.js, rack.js `untouched`), and any other session's USER decides.  skipWaiting() re-points EVERY
+ * window in scope, not only the one that asked, so every take counts the windows and, with a second one open,
+ * is refused until the user presses UPDATE ALL — consent given for all of them (§6).
  * The price is honest and small: the very first visit runs uncontrolled, so offline works from the SECOND
  * launch onward.  We pay it rather than swap assets under a page that is already running.
  *
@@ -137,7 +139,7 @@ const PRECACHE = [
   ['./library.json',                                                '0a3531a7c866'],
   ['./linalg.js',                                                   'da2367cdcb97'],
   ['./look.js',                                                     'ffa61a3b76d3'],
-  ['./main.js',                                                     '12bd2115791c'],
+  ['./main.js',                                                     '0067ace0ec7c'],
   ['./manifest.webmanifest',                                        '975e5f242a0c'],
   ['./mapping.js',                                                  'af6824a8f2df'],
   ['./mathworker.js',                                               '24e51f82f922'],
@@ -422,7 +424,7 @@ const PRECACHE = [
   ['./status.js',                                                   'da2e112c115c'],
   ['./sturmian.js',                                                 '9865f0c8c247'],
   ['./sturmianreg.js',                                              'e9f1d20c0ec0'],
-  ['./sw-client.js',                                                '0f1ffadd0978'],
+  ['./sw-client.js',                                                'd7e0d34a5c53'],
   ['./tier.js',                                                     '8a0b625a5b35'],
   ['./user-presets.js',                                             '3808f2602145'],
   ['./valence.js',                                                  '3b4e39e5b9b0'],
@@ -567,8 +569,11 @@ self.addEventListener('install', (event) => {
 /* ── 4. ACTIVATE — collect the caches no worker will ever read again, and SWEEP's stale pictures.  No clients.claim(). ──
  * Because §3 never calls skipWaiting(), activate can only run when the previous worker has been released —
  * i.e. when no page is left on the old build. So this sweep can never delete the cache a live session is
- * reading. The one exception is the user-driven path in §6, and §5's cache miss falls through to the
- * network, so even that page degrades to "slower" and never to "broken".
+ * reading. The one exception is §6's UPDATE ALL, pressed with other windows open: their old cache is collected under
+ * them, and a lazy import there is answered by the NEW build's cache (a mixed build) or, for a path the deploy
+ * dropped, a 404.  That is why §6 refuses any take while a second window is open unless the user said UPDATE ALL,
+ * and why the page tells each other window at once (sw-client.js: one holding no work reloads, one holding work
+ * is told RELOAD NOW).
  * THE SWEEP (iteration 028 R-08): the pictures, the covers and the measured lines are kept under names a re-render does not change,
  * so a kept copy would answer for the deployed one forever; each new build deletes them from DATA_CACHE and the page keeps the new
  * bytes on their next view.  library/<sha>.json, the basis records and lw-vol-* are untouched. */
@@ -633,12 +638,14 @@ async function serve(pathname, req) {
 
 /* ── 6. THE UI CHANNEL — how the lab asks, and how the USER (never the worker) takes an update ──────────
  *   page → worker  { type: 'LW_SW_HELLO' }         → replies { type:'LW_SW_BUILD', build, files, cache }
- *   page → worker  { type: 'LW_SW_SKIP_WAITING' }  → this waiting worker takes over; the page reloads on
- *                                                    navigator.serviceWorker's 'controllerchange'.  A PRESS.
- *   page → worker  { type: 'LW_SW_SKIP_WAITING', alone: true }
- *                                                  → a QUIET TAKE (wave 133: an untouched session) — taken
- *                                                    only while ONE window is in scope, else refused with:
- *   worker → page  { type: 'LW_SW_BUSY', windows }  → the quiet take was refused; the page offers it instead.
+ *   page → worker  { type: 'LW_SW_SKIP_WAITING' }  → a PRESS (or, with `alone: true`, wave 133's QUIET TAKE for an
+ *                                                    untouched session — the page's word; counted the same): this
+ *                                                    waiting worker takes over only while ONE window is in scope;
+ *                                                    the page reloads on 'controllerchange'.  Else refused with:
+ *   worker → page  { type: 'LW_SW_BUSY', windows }  → the take was refused; the page offers it (after a press, as
+ *                                                    "n other windows are open … UPDATE ALL").
+ *   page → worker  { type: 'LW_SW_SKIP_WAITING', force: true }
+ *                                                  → UPDATE ALL: the user said yes for every window; taken at once.
  *   worker → page  { type: 'LW_SW_WAITING', build } → a new build finished installing and is waiting (§3).
  *   worker → page  { type: 'LW_SW_ACTIVE',  build } → a build took over (first install, or after a skip).
  * SKIP_WAITING is the ONLY thing in this file that can end a session's build, and only the interface can
@@ -654,11 +661,12 @@ self.addEventListener('message', (event) => {
   }
 });
 
-/* A QUIET TAKE (page: an untouched session) asks with `alone: true` and is refused when another window is in scope —
-   skipWaiting() re-points every client, and the second window may hold work.  A PRESS never asks; the user said yes.
-   The press path reaches skipWaiting() without an await, so it is taken in the same turn as the message. */
+/* EVERY TAKE COUNTS THE WINDOWS (iteration 028 R-03; wave 133 counted only the quiet take): skipWaiting() re-points every client
+   in scope, and a window that did not ask may hold work and would lazy-load from a build it did not boot on.  With a second window
+   open the asking page is told LW_SW_BUSY and offers UPDATE ALL, which asks again with `force: true` — the user's yes for every
+   window.  The forced path reaches skipWaiting() without an await, so it is taken in the same turn as the message. */
 async function takeover(event, d) {
-  if (d.alone) {
+  if (!d.force) {
     const windows = (await self.clients.matchAll({ includeUncontrolled: true, type: 'window' })).length;
     if (windows > 1) { if (event.source && event.source.postMessage) event.source.postMessage({ type: 'LW_SW_BUSY', windows }); return; }
   }
