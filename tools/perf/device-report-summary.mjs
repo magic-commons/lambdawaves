@@ -1,7 +1,7 @@
 /* tools/perf/device-report-summary.mjs — read one or more device reports (tools/perf/device-report.js, saved by serve-lan.py
- * under research/device-reports/, or pasted from the toast's COPY into a .json file) and print them as Markdown: one
+ * under .tmp/device-reports/, or pasted from the toast's COPY into a .json file) and print them as Markdown: one
  * glance row per device, then per device the GPU rows, the scenes, and each edge's 250 ms series with what changed in it.
- *   node tools/perf/device-report-summary.mjs [file.json | dir ...]      (default: research/device-reports/)
+ *   node tools/perf/device-report-summary.mjs [file.json | dir ...]      (default: .tmp/device-reports/)
  *   --brief    the glance table only */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,7 +10,7 @@ const args = process.argv.slice(2);
 const brief = args.includes('--brief');
 const inputs = args.filter((a) => !a.startsWith('--'));
 const files = [];
-for (const a of inputs.length ? inputs : ['research/device-reports']) {
+for (const a of inputs.length ? inputs : ['.tmp/device-reports']) {
   if (!fs.existsSync(a)) { console.error('no such file or folder: ' + a); process.exitCode = 1; continue; }
   if (fs.statSync(a).isDirectory()) for (const f of fs.readdirSync(a).sort()) { if (f.endsWith('.json')) files.push(path.join(a, f)); }
   else files.push(a);

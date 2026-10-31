@@ -1,176 +1,85 @@
 # λWAVES
 
-**A playable hydrogen shadow.** 140 exact eigenstates of hydrogen, reconstructed on the
-GPU as a wave field you can play like an instrument — tune amplitudes, phases and
-viewpoints, then watch the eigenmodes interfere and the cloud bloom into motion.
+**A playable hydrogen shadow.** The 140 exact eigenstates of hydrogen with n ≤ 7, reconstructed on the GPU as a wave field you
+can play like an instrument: tune amplitudes, phases and viewpoints, then watch the eigenmodes interfere and the cloud move.
+Small molecules are solved live (Hartree–Fock and Kohn–Sham LDA) or opened from a library of precomputed records.
 
-> λWAVES · QWAVE-0 · Hydrogen Shadow Lab
-
-Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)** · a
-[Magic Commons](https://magic-commons.com) project · GPL-3.0-only · built on [MIR](https://github.com/magic-commons/mir)
+Live: **[lambdawaves.magic-commons.com](https://lambdawaves.magic-commons.com)** · a [Magic Commons](https://magic-commons.com)
+project · GPL-3.0-only · interface kit [MIR](https://github.com/magic-commons/mir)
 
 ![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
-**Status: 0.9.9 alpha.** Release preparation and deployment are documented in
-[`DEPLOY.md`](DEPLOY.md) and [shipping readiness](docs/SHIPPING-READINESS.md).
+**Status: 0.9.9, in preparation for the beta.** What is verified and what is not is in
+[shipping readiness](docs/release/SHIPPING-READINESS.md); deployment is in [`DEPLOY.md`](docs/release/DEPLOY.md).
 
-If you are an assistant reading this repository for a user, read [`docs/NOTES-FOR-AGENTS.md`](docs/NOTES-FOR-AGENTS.md).
+## What it is
 
----
+The core is exact. λWAVES holds the hydrogen closed forms for **n ≤ 7 — all 140 (n, l, m) states**, with Condon–Shortley-phase
+complex spherical harmonics, and evolves them by the one operation a diagonal Hamiltonian permits: multiplying each coefficient by
+`e^{-iE_n t}`. For field-free hydrogen nothing is integrated, so nothing drifts. What does step in time is named where it runs:
+MOLECULES' RUN (real-time TDHF), MO-REGISTRY's DRIVE and SONG and the FLOW tracers integrate; INTER-SHELL STARK is an eigensolve over
+the 140 labels; VIBRATE moves the nuclei by a closed-form cos ωt and the density by one linear step. The node gate
+(`tests/hydrogen.test.mjs`) reads the radial norms within 3e-9 of 1 (its bound 1e-6, by quadrature) and the table-typed anchors
+within 3e-16 (its bound 1e-12).
 
-## Who made this, honestly
+The GPU does **presentation**: `lab/field.js` reconstructs ψ on an N³ `rgba16float` grid straight from the closed-form mode tables (no
+basis textures), and a ray-march presenter draws density, phase, Re ψ, Im ψ or a difference. Measured on an RTX 3070 (headless
+Firefox, 1920 × 994, batches of at least 2.5 s, 2026-09-24): presenting the default 1s + 2p_z at 96³ and 160 steps takes 3.25 ms per
+frame in the phase view and 2.10 ms for density, and reconstructing it 0.1 ms; reconstructing all 91 labels of the n ≤ 6 set took
+1.43 ms at 96³ and 3.40 ms at 128³ (measured before n = 7 was added; the 140-label figure has not been re-measured). The grid is held
+to the CPU in each picture's own metric at 64³ (`tests/field-law.browser-test.mjs`, bounds in `tests/helpers/field-law.mjs`, read on
+that RTX 3070 in Firefox): hydrogen 1s + 2p_z against the closed form — |Δψ| RMS ≤ 3e-6, 99.8 % of voxels ≤ 2e-5, the worst voxel
+≤ 2e-4; water (H₂O, STO-3G) against the f64 density of the same solve — |Δρ|/ρ RMS ≤ 1e-3, the worst voxel's |Δρ|/ρ ≤ 2e-3, the worst
+|Δρ| ≤ 3e-4 of ρmax. Every stored component lies within one `rgba16float` step of its f64 value plus the kernel's own f32 error.
 
-*This section, like the rest of this repository, was written by Claude — one of the AI agents — at
-Joshua's request. He asked for the truth of his part, which is this:*
+Around that sits the instrument: a rack of windows (STATE, SPECTRUM, ORBIT, PLANE, KEPLER, VORTEX, MOLECULES, MO-REGISTRY, WIGNER,
+RADIATION, …), a transport with one clock, a modulation rack with drag-to-patch macros, a timeline, NODES, presets, projects,
+shareable state links, film rendering, FILE › EXPORT SHAPE (GLB · OBJ · STL, the density isosurface on screen) and EXPORT GRID
+(NPZ · Gaussian cube, ψ on the grid) — see [`docs/EXPORT.md`](docs/EXPORT.md) — and an offline-capable PWA.
 
-Joshua is not a programmer. He knows nothing of computer science or software engineering, and he did
-not write a line of the code, the tests or the documents. λWAVES came out of weeks of iterative
-prompting: he described what he wanted to see, sent screenshots of what was wrong, said "no, like the
-modulation window does it," and ran the app until it felt right. The agents wrote everything. He
-decided what stayed.
-
-That changes how you should read the rest. The README, the tests and the long notebook in `REPORT.md`
-describe the code as the agents understood it. Where a claim and the code disagree, the code is the
-truth, and he would like to hear about it.
-
-### AI disclosure
-
-- **Tools.** Claude Code with Anthropic's Claude models (Fable 5.1, Opus, Sonnet) wrote most of
-  the code, the tests and the documents. OpenAI's Codex with GPT-5.6 built and refactored large
-  parts, notably the modulation window's devices and the performance work. Google's Gemini
-  made graphics and icons (the mark, the warning orbital, icon work) and proposed interface designs
-  from screenshots. Commits carry the tools' own
-  attribution trailers (`Co-Authored-By: Claude …`); five commits of 2026-10-04/05 carry the agent identity
-  `Claude <noreply@anthropic.com>` as their author (a Claude Code session he ran and merged). The accountable author of every line is Joshua.
-- **What was human-decided.** The idea, the physics to show (hydrogen, exact; n ≤ 6 at first, n ≤ 7 since iteration 008), the
-  instrument metaphor, and which of the agents' proposals stayed. The visual language in `docs/ui`,
-  the laws in `CONTRIBUTING.md` and the tests were written by the agents from what he asked for and
-  what he rejected. Every design decision went through his eyes and his hands on the real app before it
-  stayed; none of it was typed by him.
-- **What was verified, and how.** The physics is checked by the Node suites in `tests/`, which compare the
-  reconstruction against closed forms (norms to 3e-9, revival times, GPU voxels against the CPU
-  to 3e-6 RMS, 2e-4 at the worst voxel). The interface is checked by a real headless Firefox with WebGPU (`./test.sh`). He has
-  used the app on an RTX 3070 desktop and an iPad, daily, for weeks. He has not read the code.
-- **What was not verified.** No one with a computer-science background has reviewed this code.
-  It has not been tested with a real screen reader, on a phone in the wild, or by anyone but him
-  and the agents. Treat security claims with that in mind and read `SECURITY.md`.
-- **Known risks.** Vendored code (KaTeX, marked, the fonts) is attributed in `NOTICE` and was
-  not audited by him. The modulation window was ported from his other project by an agent and its
-  provenance notes are in `lab/mir/modulation/`. If an agent copied something it should not
-  have, tell him and it comes out.
-
-If that makes you want to help, `CONTRIBUTING.md` says how, and `AI_POLICY.md` says what he asks
-of contributions made the same way this was.
-
-## What it actually is
-
-The core is exact, not a simulation of a simulation. λWAVES holds the hydrogen closed
-forms for **n ≤ 7 — all 140 (n, l, m) states**, with Condon–Shortley-phase complex
-spherical harmonics, and evolves them by the one thing a diagonal Hamiltonian permits:
-multiplying each coefficient by `e^{-iE_n t}`. For field-free hydrogen nothing is integrated, so nothing
-drifts. What does step in time is said where it runs: MOLECULES' RUN (real-time TDHF), MO-REGISTRY's DRIVE
-and SONG and the FLOW tracers integrate; INTER-SHELL STARK is an eigensolve over the 140 labels; VIBRATE moves
-the nuclei by a closed-form cos ωt and the density by one linear step. The node gate (`tests/hydrogen.test.mjs`)
-reads the radial norms within 3e-9 of 1 (its bound 1e-6, by quadrature) and the table-typed anchors within
-3e-16 (its bound 1e-12).
-
-What the GPU does is **presentation**: `field.js` reconstructs ψ on an N³ rgba16float
-grid straight from the closed-form mode tables — no basis textures — and a raymarch
-presenter draws density, phase, Re ψ, Im ψ or a difference. Measured on an RTX 3070 (headless Firefox,
-1920 × 994, batches of at least 2.5 s, 2026-09-24): presenting the default 1s + 2p_z at 96³ and 160 steps
-takes 3.25 ms per frame in the phase view and 2.10 ms for density, and reconstructing it 0.1 ms;
-reconstructing all 91 labels of the n ≤ 6 set took 1.43 ms at 96³ and 3.40 ms at 128³ (measured before n = 7
-joined; the 140-label figure has not been re-measured)
-(`research/optimization-2026-09-24/probes/K/k2-present.out.json`, `k9-throughput.out.json`,
-`k1-time.out.json`). The grid is held to the CPU in each picture's own metric at 64³
-(`tests/field-law.browser-test.mjs`; the bounds are `tests/helpers/field-law.mjs`, read on that RTX 3070 in Firefox):
-hydrogen 1s + 2p_z against the closed form — |Δψ| RMS ≤ 3e-6, 99.8 % of voxels ≤ 2e-5, the worst voxel ≤ 2e-4;
-water (H₂O, STO-3G) against the f64 density of the same solve — |Δρ|/ρ RMS ≤ 1e-3, the worst voxel's |Δρ|/ρ ≤ 2e-3,
-the worst |Δρ| ≤ 3e-4 of ρmax. Every stored component lies within one rgba16float step of its f64 value plus the
-kernel's own f32 error.
-
-Around that sits an instrument: a rack of windows (STATE, SPECTRUM, ORBIT, PLANE,
-KEPLER, VORTEX, MOLECULES, MO-REGISTRY, WIGNER, RADIATION, …), a transport with one clock, a
-modulation plug-in with drag-to-patch macros, presets, projects, shareable state links,
-FILE › EXPORT SHAPE (GLB · OBJ · STL, the density isosurface on screen for Blender or Cinema 4D) and
-EXPORT GRID (NPZ · Gaussian cube, ψ on the grid for NumPy or a chemistry viewer) — see
-[`docs/EXPORT.md`](docs/EXPORT.md) — and an offline-capable PWA.
-
-**Requires a working WebGPU adapter in a secure context.** Browser support varies
-by OS, GPU and driver; see the [WebGPU compatibility reference](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API).
-The release device matrix is still pending; see [shipping readiness](docs/SHIPPING-READINESS.md).
+**It requires a working WebGPU adapter in a secure context.** Browser support varies by OS, GPU and driver; see the
+[WebGPU compatibility reference](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API).
 
 ## Run it
 
 ```bash
-./serve.sh          # https://127.0.0.1:8700/lab/   (or: npm run serve)
-./serve-lan.sh      # the same, reachable from a phone or iPad on the LAN
+tools/serve.sh          # https://127.0.0.1:8700/lab/   (or: npm run serve)
+tools/serve-lan.sh      # the same, reachable from a tablet or phone on the local network
 ```
 
-Requirements: Node 22+, Python 3 and OpenSSL (the local server makes its own self-signed
-certificate on first run), and a browser with WebGPU.
+Requirements: Node 22+, Python 3 and OpenSSL (the local server makes its own self-signed certificate on first run), and a browser
+with WebGPU. The lab is a static tree of ES modules with no build step: what you edit is what the browser runs. For a first look,
+open FOLDERS (O) and choose a demo under DEMOS — WAVE DANCER PROTOTYPE, STAR LOOP, BENZENE π or WATER ESP — each opens ready to play.
 
-The lab is a static tree of ES modules. There is no build step for development — what
-you edit is what the browser runs.
+## Tests and gates
 
-For a first look, open FOLDERS (O) and press **WAVE DANCER PROTOTYPE** under DEMOS (the one demo since iteration 009): a
-saved performance — an A/B transition between two four-state superpositions with a modulation rack
-driving exposure, softness and the stage — opens ready to play.
-
-## The gate
-
-```bash
-npm test                 # the maths and the file laws — fast        (./test.sh node)
-npm run test:browser     # a real headless Firefox drives the real UI (./test.sh browser)
-npm run test:all         # both                                       (./test.sh)
-```
-
-The browser gate runs every `tests/*.browser-test.mjs` — current UI, pointer input,
-GPU recovery, chemistry and molecular fields — against one owned HTTPS server. It needs Firefox and
-geckodriver on PATH. `./test.sh legacy` runs the historical wave-by-wave gate in
-`tests/legacy/`; it asserts laws later waves superseded and is not part of the shipped gate. It starts its own HTTPS server on 8701 and
-geckodriver on 5202; `LW_PORT` / `GD_PORT` select unused ports. `GECKODRIVER` and
-`FIREFOX_BINARY` can select installed executables. It refuses occupied ports. Blocks are
-written as **laws in prose** — each one states what must be true and then measures it,
-so a failure reads as a sentence rather than an assertion number.
-
-**After any edit under `lab/`, run `node tests/pwa.test.mjs --write`.** `sw.js` derives
-its cache name from its own precache hashes; a stale hash means the name does not move
-when the bytes do, and every returning visitor is served the old bytes for ever.
-
-## Ship it
-
-```bash
-node tests/pwa.test.mjs --write   # re-hash lab/ into sw.js §1
-node tools/build-deploy.mjs       # assemble dist/, prove it, print the payload
-npm ci --ignore-scripts          # install the pinned deploy CLI (not shipped)
-npx wrangler deploy --dry-run     # compiles and checks, uploads nothing
-npx wrangler deploy               # publish exactly that
-```
-
-Read **[shipping readiness](docs/SHIPPING-READINESS.md)** and **[DEPLOY.md](DEPLOY.md)** first — it explains why λWAVES gets its own hostname
-(a service worker's scope is an origin, and it outlives the deploy that installed it),
-why `html_handling` is `"none"`, and what the build refuses to let you do.
+`npm test` (`./test.sh node`) runs every node suite — the mathematics against closed forms and PySCF fixtures, the file and state
+laws, and the PWA integrity check — plus the state-scope and hint checks; `npm run test:browser` (`./test.sh browser`) drives the
+real interface in headless Firefox with WebGPU against one owned HTTPS server (Firefox and geckodriver on `PATH`; `LW_PORT` and
+`GD_PORT` choose free ports, occupied ports are refused). The field's pixels are held by a digest gate, `tools/perf/digest-lock.mjs`,
+which compares each frame against two recorded fixtures in `tests/fixtures/`. **After any edit under `lab/`, run `node tests/pwa.test.mjs --write`**: the service
+worker derives its cache name from its precache hashes, and a stale hash would serve returning visitors the old bytes.
+`./test.sh legacy` runs the historical gate in `tests/legacy/`, which asserts superseded behaviour and is not part of the release gate.
 
 ## Requirements and limitations
 
 | | |
 |---|---|
-| **Needs** | A browser with WebGPU in a secure context (https or localhost). Chrome/Edge 113+, Firefox 141+, Safari 26 / iPadOS 26. No WebGL fallback: without WebGPU you get a banner, not a lab. |
+| **Needs** | A browser with WebGPU in a secure context (https or localhost): Chrome/Edge 113+, Firefox 141+, Safari 26 / iPadOS 26. There is no WebGL fallback: without WebGPU the page shows a notice instead of the lab. |
 | **Runs well on** | A desktop GPU (measured on an RTX 3070: about 3 ms per frame at 96³) and an M-series iPad (the quality governor drops ray steps, then the grid, under load). |
-| **Physics (the release)** | Exact hydrogen (n ≤ 7, 140 states), plus MOLECULES: Hartree–Fock in vendored Gaussian bases (STO-3G for H–Kr; 6-31+G\* for H, C, N, O, F molecules up to 46 Cartesian AOs) — RHF for closed shells, UHF for the 7 open shells — and Kohn–Sham LDA (Slater + VWN5) up to benzene's 36 STO-3G AOs. 98 molecules: 61 solved live (59 enabled; CuH and ZnH₂ are listed and disabled, their RHF reference is not a minimum) and 37 opened from the library, which holds 38 records — 37 solved here and compared with PySCF, C₆₀'s energy PySCF's own (the table below). RPA and TDA spectra, and real-time TDHF. MO-REGISTRY plays orbital packets or many-electron TD-CIS states, drives them with a field, and shows their current. Nuclei are fixed except under VIBRATE (one harmonic normal mode); the wavefunction methods stop at single excitations, and LDA's correlation is the VWN5 functional's. Geometries are fixed: measured for the live molecules (each entry names its source; AlH₃'s is not a measurement), computed for 36 of the 38 records. The five legacy windows (QCD, H₂⁺, HELIUM, H₂, ELECTROSTATICS) were deleted in 0.5.0; an older project that used one opens on its shim and says so (`docs/LEGACY-WINDOWS.md`). Every system λWAVES plays is a row of the catalogue on the MODEL sheet (186 rows, `lab/catalogue.js`), with its word — EXACT, NUMERICAL or UNCHECKED — and its oracle test. |
-| **Not yet** | A real device matrix, an installed-PWA update test, a screen-reader pass — see `docs/SHIPPING-READINESS.md`. |
+| **Physics** | Exact hydrogen (n ≤ 7, 140 states), plus MOLECULES: Hartree–Fock in vendored Gaussian bases (STO-3G for H–Kr; 6-31+G\* for H, C, N, O, F molecules up to 46 Cartesian AOs) — RHF for closed shells, UHF for the 7 open shells — and Kohn–Sham LDA (Slater + VWN5) up to benzene's 36 STO-3G AOs. 98 molecules: 61 solved live (59 enabled; CuH and ZnH₂ are listed and disabled, their RHF reference is not a minimum) and 37 opened from the library, which holds 38 records — 37 solved here and compared with PySCF, C₆₀'s energy PySCF's own (the table below). RPA and TDA spectra, and real-time TDHF. MO-REGISTRY plays orbital packets or many-electron TD-CIS states, drives them with a field, and shows their current. Nuclei are fixed except under VIBRATE (one harmonic normal mode); the wavefunction methods stop at single excitations, and LDA's correlation is the VWN5 functional's. Geometries are fixed: measured for the live molecules (each entry names its source; AlH₃'s is not a measurement), computed for 36 of the 38 records. Five early windows (QCD, H₂⁺, HELIUM, H₂, ELECTROSTATICS) were removed in 0.5.0; an older project that used one opens on a placeholder and says so ([`docs/LEGACY-WINDOWS.md`](docs/LEGACY-WINDOWS.md)). Every system λWAVES plays is a row of the catalogue on the MODEL sheet (186 rows, `lab/catalogue.js`), with its status — EXACT, NUMERICAL or UNCHECKED — and its oracle test. |
+| **Not yet verified** | A device matrix beyond one desktop, the installed-PWA update on a real device, a real microphone for the AUDIO source, and a screen-reader pass — see [shipping readiness](docs/release/SHIPPING-READINESS.md). No independent code review has been made. |
 
 ## Against PySCF
 
-A molecule's energy is NUMERICAL: checked against PySCF on the same atoms and the same basis decimals, never against
-experiment (`tests/fixtures/oracles/README.md` says what each fixture holds and which script wrote it). A library record
-is written only if the app's solve is within 1e-8 Eh of PySCF's (`tools/orbital-library.mjs`). A live molecule is
-compared on the device; the node gate re-solves every enabled one in STO-3G and reads its agreement back from the
-STATUS line (`tests/status.test.mjs`), and holds a bound on these: every enabled closed shell up to 14 STO-3G AOs plus HBr,
-Br₂, C₂H₄ and C₆H₆ at max(1e-9, 3e-12·|E|) Eh (`tests/molecules.test.mjs`, `tests/chem-sweep.test.mjs`), every open
-shell at 1e-8 Eh (`tests/uhf.test.mjs`), the 6-31+G\* molecules up to 27 AOs at 1e-9 Eh (`tests/basis-631.test.mjs`)
-and the LDA eight at 1e-6 Eh (`tests/rks.test.mjs`). The tables are written by `node tools/pyscf-table.mjs`.
+A molecule's energy is NUMERICAL: checked against PySCF on the same atoms and the same basis decimals, never against experiment
+(`tests/fixtures/oracles/README.md` says what each fixture holds and which script in `tools/oracles/` wrote it). A
+library record is written only if the app's solve is within 1e-8 Eh of PySCF's (`tools/orbital-library.mjs`). A live molecule is
+compared on the device; the node gate re-solves every enabled one in STO-3G and reads its agreement back from the STATUS line
+(`tests/status.test.mjs`), and holds a bound on these: every enabled closed shell up to 14 STO-3G AOs plus HBr, Br₂, C₂H₄ and C₆H₆ at
+max(1e-9, 3e-12·|E|) Eh (`tests/molecules.test.mjs`, `tests/chem-sweep.test.mjs`), every open shell at 1e-8 Eh (`tests/uhf.test.mjs`),
+the 6-31+G\* molecules up to 27 AOs at 1e-9 Eh (`tests/basis-631.test.mjs`) and the LDA eight at 1e-6 Eh (`tests/rks.test.mjs`). The
+tables are written by `node tools/pyscf-table.mjs`.
 
 <details><summary>The PySCF table</summary>
 
@@ -291,66 +200,69 @@ and the LDA eight at 1e-6 Eh (`tests/rks.test.mjs`). The tables are written by `
 
 ## Accessibility
 
-The instrument was built to be reachable by keyboard: every control is a real button or slider
-with a name, a value and arrow-key steps; windows are landmarks; the canvas is described in one
-sentence that changes only when the instrument's state changes. That was checked by a headless
-browser, not by a person using a screen reader. Motion: a photosensitivity notice stands before the
-first frame. A flash guard then holds the four routes that set the picture's brightness — EXPOSURE, GAMMA,
-STAGE and KNEE — to three flashes a second whenever a modulator drives them, and says so in METERS; it has
-no off switch. It is partial: HUE, a molecule's KICK, the register's morph and the camera are not held, so a
-patch on those can still flash. If something is unreachable or
-unreadable for you, please open an issue; that is the kind of bug he most wants to hear about.
+Every control is a real button or slider with a name, a value and arrow-key steps; windows are landmarks; the canvas is described in
+one sentence that changes only when the instrument's state changes. This was checked by a headless browser, not by a person using a
+screen reader. A photosensitivity notice stands before the first frame. A flash guard then holds the four routes that set the
+picture's brightness — EXPOSURE, GAMMA, STAGE and KNEE — to three flashes a second whenever a modulator drives them, and says so in
+METERS; it has no off switch. It is partial: HUE, a molecule's KICK, the register's morph and the camera are not held, so a patch on
+those can still flash. Please open an issue for anything unreachable or unreadable.
 
 ## Privacy
 
-λWAVES is a static site with no accounts and no analytics. Nothing you make is sent anywhere: projects, notes and settings
-live in your browser's localStorage, audio you drop on the TIMELINE in IndexedDB (`mir-assets`), and anything else in files
-you export yourself. After the page loads it asks its own origin for a new build at most every 30 minutes, and fetches the
-records, volumes, pictures, demos and measured lines you open, keeping them in Cache Storage for offline use. An image in an
-imported notebook is fetched from wherever the note points (`SECURITY.md` says what that host learns). The microphone is
-opened only when you add an AUDIO device to the modulation rack, its signal never leaves the page, and it is released when
-the last AUDIO device is removed; Web MIDI reconnects at launch only where you saved a mapping and the browser already grants
-it. Cloudflare serves the files and keeps its own ordinary server logs. `SECURITY.md` lists every request.
-
-## Citing
-
-If λWAVES helps a talk, a lesson or a paper, `CITATION.cff` has the reference (GitHub shows it as
-"Cite this repository").
-
-## MIR
-
-The interface — tokens, materials, widgets, gestures, window chrome and the modulation window — is
-**MIR**, Magic Commons' kit, adopted into `lab/mir/` and `lab/fonts/` from its own repository
-(`../MIR`). λWAVES keeps only its own selectors in `lab.css` and `skin.css`. See `CONTRIBUTING.md`
-for the one rule, and `MIR-MANIFEST.json` for which bytes are the kit's.
+λWAVES is a static site with no accounts and no analytics. Nothing you make is sent anywhere: projects, notes and settings live in
+your browser's localStorage, audio you drop on the TIMELINE in IndexedDB (`mir-assets`), and anything else in files you export
+yourself. After the page loads it asks its own origin for a new build at most every 30 minutes, and fetches the records, volumes,
+pictures, demos and measured lines you open, keeping them in Cache Storage for offline use. An image in an imported notebook is
+fetched from wherever the note points (`SECURITY.md` says what that host learns). The microphone is opened only when you add an AUDIO
+device to the modulation rack, its signal never leaves the page, and it is released when the last AUDIO device is removed; Web MIDI
+reconnects at launch only where a mapping was saved and the browser already grants it. Cloudflare serves the files and keeps its own
+ordinary server logs. `SECURITY.md` lists every request.
 
 ## The documents
 
 | File | What it is |
 |---|---|
-| [`REPORT.md`](REPORT.md) | The lab notebook — every law, constant, measured number and named proof, for whoever builds next; since iteration 017 one wave line per iteration, the iterations in `research/`. Not release notes. |
-| [`CHANGELOG.md`](CHANGELOG.md) | What changed between releases, newest first. Generated by `node tools/changelog.mjs`. |
-| [`DEPLOY.md`](DEPLOY.md) | Shipping: three commands and a login, and the traps around them. |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | The house rules, the gate, and where things live. Read before a pull request. |
-| [`docs/SHIPPING-READINESS.md`](docs/SHIPPING-READINESS.md) | What still stands between this tree and a public release. |
-| [`docs/ui/`](docs/ui) | The style lock, the motion law, the anti-patterns and the references every UI wave reads. |
-| [`docs/history/`](docs/history) | Past handoffs and task boards, kept for provenance. Nothing there is current instruction. |
-| [`research/`](research) | The maths rounds behind the physics — adversarial two-lab ledgers and their prints. |
+| [`CHANGELOG.md`](CHANGELOG.md) | What changed between releases, newest first; generated by `node tools/changelog.mjs`. |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | The rules for a change, the gate, and where things live. |
+| [`SECURITY.md`](SECURITY.md) | Every request the page makes, what stays on your device, and how to report a problem. |
+| [`DEPLOY.md`](docs/release/DEPLOY.md) · [`RELEASING.md`](docs/release/RELEASING.md) | Deployment to Cloudflare, and how a release is cut. |
+| [`SHIPPING-READINESS.md`](docs/release/SHIPPING-READINESS.md) · [`ACCEPTANCE-MATRIX.md`](docs/release/ACCEPTANCE-MATRIX.md) | What is verified, what is not, and the evidence per device. |
+| [`LEGAL-PROVENANCE.md`](docs/release/LEGAL-PROVENANCE.md) | Every shipped component's origin, licence and copyright holder, and the authorship record. |
+| [`docs/EXPORT.md`](docs/EXPORT.md) | The shape and grid exports. |
+| [`docs/PROVENANCE.md`](docs/PROVENANCE.md) | Every catalogue row's source and oracle (generated). |
+| [`docs/ui/`](docs/ui) | The interface's style lock, motion law and anti-patterns. |
+| [`CLAUDE.md`](CLAUDE.md) · [`docs/laws/`](docs/laws) · [`docs/NOTES-FOR-AGENTS.md`](docs/NOTES-FOR-AGENTS.md) | The instruction set for coding agents working in this repository. |
+
+## The interface kit
+
+The interface — tokens, materials, widgets, gestures, window chrome and the modulation window — is **MIR**, Magic Commons' kit,
+adopted into `lab/mir/` and `lab/fonts/` from its own repository. λWAVES keeps only its own selectors in `lab.css` and `skin.css`.
+`CONTRIBUTING.md` gives the rule for those folders, and `MIR-MANIFEST.json` lists which bytes are the kit's.
+
+## AI disclosure
+
+λWAVES was built with AI coding agents — principally Claude Code with Anthropic's Claude models, with OpenAI Codex and Google Gemini
+for parts of the code and the graphics — under the direction of its author, Joshua Hosain. Its claims rest on what can be checked —
+the physics against closed forms and PySCF, the node and browser suites, and the pixel gates — rather than on any claim of authorship.
+The authorship record (commit identities, attribution trailers, AI-generated assets) is in [`LEGAL-PROVENANCE.md`](docs/release/LEGAL-PROVENANCE.md).
+
+## Citing
+
+`CITATION.cff` has the reference (GitHub shows it as "Cite this repository").
 
 ## Branches
 
-- **`main`** — the working integration branch. Release readiness requires current gate and device acceptance.
-- **`dev`** — iterative work. Waves land here first.
+- **`main`** — the release. It moves only when a release is cut; see `docs/release/RELEASING.md`.
+- **`dev`** — development.
 
 ## Licence
 
 GNU General Public License v3.0 only — Copyright 2026 Joshua Hosain. See [`LICENSE`](LICENSE).
 
-Third-party notices in [`NOTICE`](NOTICE): Spinwerad 0.3, Roboto 3.015, STIX Two Math 2.0.2, KaTeX 0.16.11 and its
-fonts, marked 12.0.2, the notebook's Spectral, Playfair Display and Alegreya SC; the Basis Set Exchange records and NIST's
-measured lines are credited there as data.
+Third-party notices are in [`NOTICE`](NOTICE): Spinwerad 0.3, Roboto 3.015, STIX Two Math 2.0.2, KaTeX 0.16.11 and its fonts,
+marked 12.0.2, the notebook's Spectral, Playfair Display and Alegreya SC; the Basis Set Exchange records and NIST's measured lines are
+credited there as data.
 
-A reference, not a dependency: [ChronusQ](https://github.com/xsligroup/chronusq_public) (Williams-Young et al.,
-*WIREs Comput. Mol. Sci.* 10, e1436 (2020)) is the real-time electronic-structure package λWAVES' molecular
-propagation studied and cites (`research/chronusq-2026-09-11/`). ChronusQ is released under GPL v2 and λWAVES under
-GPL-3.0-only, so it is read and cited, never merged: no ChronusQ code is in this tree (`NOTICE`).
+A reference, not a dependency: [ChronusQ](https://github.com/xsligroup/chronusq_public) (Williams-Young et al., *WIREs Comput. Mol.
+Sci.* 10, e1436 (2020)) is the real-time electronic-structure package λWAVES' molecular propagation studied and cites. ChronusQ is
+released under GPL v2 and λWAVES under GPL-3.0-only, so it is read and cited, never merged: no ChronusQ code is in this tree (`NOTICE`).

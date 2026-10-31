@@ -2,7 +2,7 @@
 /* tools/provenance.mjs — THE PROVENANCE REGISTRY + THE FINGERPRINT (0.9.0 Z2 · research/release-0.9.0/BUILD-PLAN.md row Z2): writes docs/PROVENANCE.md, one
  * row for every row of lab/catalogue.js (0.7.4 C1), each column READ from the file named beside its reader — nothing is typed here but headings and joins.
  * THE HEAD: the lock's scope in tools/perf/digest-lock.mjs' own words and both fixtures' own fields; the FINGERPRINT row from the saved device report
- * (research/release-0.9.0/z2-fingerprint.json: `__LW.report({ only: 'fingerprint' })`, tools/perf/device-report.js, on this machine); the FIELD LAW line's seat.
+ * (tests/fixtures/z2-fingerprint.json: `__LW.report({ only: 'fingerprint' })`, tools/perf/device-report.js, on this machine); the FIELD LAW line's seat.
  *   node tools/provenance.mjs           write docs/PROVENANCE.md
  *   node tools/provenance.mjs --check   write nothing; exit 1 unless docs/PROVENANCE.md is byte for byte what this writes */
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -20,10 +20,10 @@ const DL = read('tools/perf/digest-lock.mjs').split('*/')[0].split('\n').map((l)
 const scope = DL.match(/THE LOCK'S SCOPE \([^)]*\): (.*?which is never a lock\.)/)[1];
 const counts = DL.match(/(`--check --query gastab=0` compares 860 values.*?\)\.)/)[1];
 const fx = (p) => { const F = json(p), q = new URL(F.url).searchParams.get('gastab'); return `\`${p}\` — made ${F.made}, build “${F.meta.build}”, ${F.meta.ua.split(') ').pop()}, its url ${q === null ? 'without `gastab`' : 'with `gastab=' + q + '`'}, no commit field`; };
-const LOCK = `**THE LOCK** (\`tools/perf/digest-lock.mjs\`, its header): ${scope} ${counts} The fixtures, from their own fields: the default ${fx('research/optimization-2026-09-24/digest-lock-base.json')}; the 1004-value ${fx('research/release-0.4.0/measure/digest-lock-s4a.json')} (the header: “recorded on the S4a base tree”).`;
+const LOCK = `**THE LOCK** (\`tools/perf/digest-lock.mjs\`, its header): ${scope} ${counts} The fixtures, from their own fields: the default ${fx('tests/fixtures/digest-lock-base.json')}; the 1004-value ${fx('tests/fixtures/digest-lock-s4a.json')} (the header: “recorded on the S4a base tree”).`;
 
-/* (ii) THE FINGERPRINT — research/release-0.9.0/z2-fingerprint.json: tools/perf/device-report.js' R.fingerprint as the report returned it (0.5.4 P11) */
-const FP = json('research/release-0.9.0/z2-fingerprint.json'), R = FP.report, f = R.fingerprint, a = f.adapter;
+/* (ii) THE FINGERPRINT — tests/fixtures/z2-fingerprint.json: tools/perf/device-report.js' R.fingerprint as the report returned it (0.5.4 P11) */
+const FP = json('tests/fixtures/z2-fingerprint.json'), R = FP.report, f = R.fingerprint, a = f.adapter;
 const DEVICE = `**FINGERPRINT** · ${R.device} · ${R.build} · ${R.at} · commit \`${FP.commit.slice(0, 7)}\` · adapter (vendor, architecture, device, description) ${JSON.stringify([a.vendor, a.architecture, a.device, a.description])}`
   + ` · driver ${f.driver ?? 'null'} · ${f.browser.ua} · ${f.features.length} features offered, shader-f16 offered ${f.shaderF16.offered} · requested ${f.shaderF16.requested} · granted ${f.shaderF16.granted}`
   + ` · ${Object.keys(f.limits).length} limits · ${f.format} · digests ${f.digests.grid}³ at t = ${f.digests.states[0].t}: ${f.digests.states.map((s) => s.id + ' `' + s.hash + '`').join(', ')} (\`${FP.road}\`).`;
@@ -36,7 +36,7 @@ const BASIS = files.map(([r, t]) => `${r.name}: \`lab/vendor/bse/${r.file}\`, Ba
 
 /* the oracle fixtures — each file's own `provenance` (tests/fixtures/oracles/README.md, 0.5.4 P10); a script is the provenance's written_by / tool for that key */
 const FIXTURE = Object.fromEntries(['library-v1', 'sto-3g-v1', 'uhf-v1', 'rks-v1', '6-31+g-star-v1'].map((n) => [FX + n + '.json', json(FX + n + '.json')]));
-const C60 = 'research/release-0.4.0/library-census/c60-occupied.json';   // C₆₀'s record names it (oracle.source); tools/library/frontier.py --occupied writes it (save('c60-occupied.json'))
+const C60 = 'tools/library/census/c60-occupied.json';   // C₆₀'s record names it (oracle.source); tools/library/frontier.py --occupied writes it (save('c60-occupied.json'))
 const scriptOf = (file, key) => { if (file === C60) return 'tools/library/frontier.py --occupied'; const p = FIXTURE[file].provenance;
   const all = [p.tool || p.written_by, ...Object.values(p).filter((v) => v && v.written_by).map((v) => v.written_by)];   // no key: every writer of the file
   return key === 'library' ? p.library.written_by : key === 'molecules_extended' ? p.appended.written_by : key ? all[0] : all.join('`, `'); };
@@ -51,7 +51,7 @@ for (const c of CATALOGUE.filter((r) => r.shelf === 'molecules' && MOL.has(r.id)
   const m = MOL.get(c.id), L = libRow.get(c.id), g631 = m.oracle && m.oracle['6-31+g-star'] ? ' · 6-31+G*' : '';
   let src, orc, E, d, rec = null, geom = null, gen = 'live solve';
   if (L) {
-    const D = json('lab/library/' + L.hash + '.json'), [file, path] = D.oracle.source.split(' '), [key, id] = path.split('.');
+    const D = json('lab/library/' + L.hash + '.json'), [named, path] = D.oracle.source.split(' '), [key, id] = path.split('.'), file = named.replace('research/release-0.4.0/library-census/', 'tools/library/census/');   // the record names the census by its earlier path
     src = D.stem.geometrySource; orc = oracle(file, key, id); E = D.oracle.energy; d = e3(L.oracle.delta); rec = L.hash.slice(0, 8); geom = L.status.geometry; gen = LIB.generator.split(' ')[0];
   } else {
     const file = FX + (m.multiplicity > 1 ? 'uhf-v1.json' : 'sto-3g-v1.json'), key = m.multiplicity > 1 ? 'molecules' : 'library', F = FIXTURE[file][key][c.id];
@@ -70,8 +70,8 @@ const tally = LIB.rows.reduce((o, r) => ((o[r.status.geometry] = [...(o[r.status
 const GEOM = Object.entries(tally).map(([k, ids]) => `${k} ${ids.length}${ids.length <= 2 ? ' (' + ids.join(', ') + ')' : ''}`).join(', ');
 
 /* Research, not merged — research/release-0.5.4/survey/CHAT-AND-ASKS.md §A9, its heading and its own "Cautioned" words */
-const A9 = read('research/release-0.5.4/survey/CHAT-AND-ASKS.md').split('### A9 · ')[1].split('\n### ')[0];
-const A9_LINE = `Sol's A9 archive (the C++ libraries, ${A9.split('\n')[0]}) is cited by its research path, \`research/release-0.5.4/survey/CHAT-AND-ASKS.md\` §A9, and not merged: “${A9.match(/Cautioned: ([^;]*);/)[1]}”.`;
+/* the A9 paragraph's words, frozen when its survey left the tree (the research archive holds the survey) */
+const A9_LINE = "Sol's A9 archive (the C++ libraries, C:5015) is cited by its research path, `research/release-0.5.4/survey/CHAT-AND-ASKS.md` §A9, and not merged: “nothing cloned or incorporated (C:5209)”.";
 
 const text = `# λWAVES · THE PROVENANCE REGISTRY
 

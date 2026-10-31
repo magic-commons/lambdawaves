@@ -298,7 +298,7 @@ if (CENSUS) {
   let tableDefect = 0; for (const a of IRR) for (const b of IRR) { let s = 0; for (let c = 0; c < 10; c++) s += sizes[c] * chiOf(a, c) * chiOf(b, c); tableDefect = Math.max(tableDefect, Math.abs(s - (a === b ? 120 : 0))); }
   const decompose = (chi) => { const m = {}; let resid = 0; for (const irr of IRR) { let s = 0; for (let k = 0; k < 120; k++) s += chi[k] * chiOf(irr, cls[k]); s /= 120; const r = Math.round(s); resid = Math.max(resid, Math.abs(s - r)); if (r) m[irr] = r; } return { m, resid }; };
   /* Sol's own fixture: the 60 coordinates of the ideal truncated icosahedron (both edge kinds 1.400 Å) */
-  const solC60 = JSON.parse(readFileSync(new URL('research/release-0.4.0/measure/round2-sol-exact.json', ROOT), 'utf8')).directC60;
+  const solC60 = JSON.parse(readFileSync(new URL('tools/library/census/round2-sol-exact.json', ROOT), 'utf8')).directC60;
   const X = solC60.coordinatesAngstrom;
   const perms = ops.map((R) => X.map((p) => { const q = mv(R, p); let best = -1, bd = Infinity; X.forEach((r, k) => { const d = dist(q, r); if (d < bd) { bd = d; best = k; } }); if (bd > 1e-6) throw new Error('C60 is not I_h-symmetric'); return best; }));
   const fixed = perms.map((p) => p.filter((b, a) => b === a).length);

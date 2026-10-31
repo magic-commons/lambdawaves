@@ -6,7 +6,7 @@ import numpy as np
 from scipy.optimize import minimize
 import networkx as nx
 from pyscf import gto
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'research/release-0.4.0/library-census'
+ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'tools/library/census'
 present=json.loads((OUT/'present-input.json').read_text())['molecules']
 refs=json.loads((ROOT/'tools/library/reference-geometries.json').read_text())
 def cif_geometry(code):
@@ -168,8 +168,8 @@ from scipy.spatial import ConvexHull
 verts=np.array([np.mean(ico[list(f)],axis=0) for f in ConvexHull(ico).simplices]);dist=np.linalg.norm(verts[:,None]-verts[None,:],axis=2);edge=dist[dist>1e-5].min();verts*=1.54/edge
 ang=[[6,*v] for v in verts]+[[1,*(v+1.09*v/np.linalg.norm(v))] for v in verts]
 add('C20H20','dodecahedrane','ORGANIC',ang,'optimised here, UNVERIFIED against experiment; ideal dodecahedral carbon cage built here; RHF relaxation',motifs=['cage','ring:5'],opt=True)
-old=json.loads((ROOT/'research/release-0.4.0/measure/round2-sol-exact.json').read_text())['directC60']
-add('C60','buckminsterfullerene (equal-edge reference fixture)','ORGANIC',[[6,*v] for v in old['coordinatesAngstrom']],'Round 2 reference geometry: tools/symmetry/round2-sol-exact.py and research/release-0.4.0/measure/round2-sol-exact.json; ideal truncated icosahedron, equal C-C edges; DERIVED, UNVERIFIED against experiment',motifs=['cage','ring:5','ring:6'],mode='frontier')
+old=json.loads((ROOT/'tools/library/census/round2-sol-exact.json').read_text())['directC60']
+add('C60','buckminsterfullerene (equal-edge reference fixture)','ORGANIC',[[6,*v] for v in old['coordinatesAngstrom']],'Round 2 reference geometry: tools/symmetry/round2-sol-exact.py and tools/library/census/round2-sol-exact.json; ideal truncated icosahedron, equal C-C edges; DERIVED, UNVERIFIED against experiment',motifs=['cage','ring:5','ring:6'],mode='frontier')
 # Conditional candidates are inventoried, not silently solved with a different basis.
 for id,ang in [('HI',[[1,0,0,0],[53,0,0,1.61]]),('CH3I',[[6,0,0,0],[53,0,0,2.14],[1,1.03,0,-.36],[1,-.515,.892,-.36],[1,-.515,-.892,-.36]]),('XeF2',[[54,0,0,0],[9,0,0,2.0],[9,0,0,-2.0]]),('XeF4',[[54,0,0,0],[9,2,0,0],[9,-2,0,0],[9,0,2,0],[9,0,-2,0]]),('I2',[[53,0,0,-1.33],[53,0,0,1.33]])]:
     add(id,id+' conditional MODEL','HEAVY',ang,'UNVERIFIED initial model coordinates only; cannot optimise on the required vendored STO-3G because iodine/xenon are absent; not a usable geometry record')

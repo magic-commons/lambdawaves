@@ -1,23 +1,22 @@
 # Ask Gemma (0.6.6)
 
-## Hidden since iteration 011 (Q6)
-Josh, 2026-10-19: "Also Gemma doesn't seem to appear to work. Isn't she built into the app? Or if not can we just hide the feature for
-now until we find out our own lightweight AI assistant in the app?" She is not built in, so ASK is hidden behind one flag,
+## Hidden in the current build
+The assistant is not built into the app (it needs a local model and a broker), so since 2026-10-19 ASK is hidden behind one flag,
 `ASK_ENABLED = false` in `lab/ask.js`. While it is off, the ASK button and the type box do not mount, the / key row is not in the key table,
 and SETTINGS does not build the GEMMA address. The page never calls the broker. A stored `askOk` or `askUrl` and a saved `ask` chord are
 kept as they were. The verb table (`lab/verbs.js`) and the notebook's `lw:` links work as before. To bring her back, set the flag to
 `true` and run `node tests/pwa.test.mjs --write`. Everything below describes her as she works with the flag on.
 
 ## What she is
-Gemma is a local Gemma 4 model that drives λWAVES through a table of verbs. She runs outside the browser, in Josh's userspace
-Ollama (`~/ollama`), behind a small HTTPS broker on the workstation (`tools/gemma/broker.py`). The page sends her your words and the
+Gemma is a local Gemma 4 model that drives λWAVES through a table of verbs. She runs outside the browser, in a user-space
+Ollama on the workstation (`~/ollama`), behind a small HTTPS broker on the workstation (`tools/gemma/broker.py`). The page sends her your words and the
 app's own readouts. She sends back a short JSON list of verbs. The page runs that list through its own hand roads, so one ask is one
 history row and undo takes the whole turn back. Nothing leaves your network, and no model weights ever reach the PWA.
 
 ## How to start her
 ```
 tools/gemma/start.sh      # Ollama if it is not up; the model if it is not pulled (one download, ≈ 6.6 GB); then the broker
-tools/gemma/stop.sh       # the broker only, by its pid (Ollama is left running: Odysseus may be using it)
+tools/gemma/stop.sh       # the broker only, by its pid (Ollama is left running: another client may be using it)
 ```
 The broker listens on `https://127.0.0.1:9443` (`GEMMA_PORT`); `GEMMA_HOST=0.0.0.0` puts her on the LAN for the iPad (see The LAN). It uses the gate server's certificate pair, found the way
 `tools/gate/server.py` finds it: `LW_CERTS`, then `~/.config/lambdawaves/certs`, then `.certs/` at the repo root. If there is no pair,

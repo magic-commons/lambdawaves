@@ -1,6 +1,6 @@
 # FILE › EXPORT SHAPE / GRID
 
-Five rows, five files, no dialog (CLAUDE.md, `research/release-0.3.3/BRIEF-134.md` R6). Each writes **what is on
+Five rows, five files, no dialog. Each writes **what is on
 screen right now** — the grid the field holds, at the ISO level the shader uses, in the palette on screen — never
 a second computation that could disagree with the picture. The work (the grid readback, marching cubes, and
 every writer) runs off the frame path, in the maths worker's `export` op (`lab/export3d.js`, `lab/mathworker.js`);
@@ -81,6 +81,5 @@ surface. The same law holds for the palette (`paletteOn`, the stops, HUE, INVERT
 `EXPORTED shape.glb · 212 k triangles · 8.4 MB · 0.31 s`. A row is disabled while an export is already running or
 the FIELD (WebGPU) is down; a second press while one is in flight is refused rather than queued.
 
-See also `research/release-0.3.3/PLAN.md` and `research/release-0.3.3/BRIEF-134.md` for the brief this module was
-built against, `tests/export3d.test.mjs` for the byte-exact node proof of every format, and
+See also `tests/export3d.test.mjs` for the byte-exact node proof of every format, and
 `tests/export3d.browser-test.mjs` for the wiring proof against the real field and the real worker.

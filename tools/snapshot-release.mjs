@@ -22,7 +22,8 @@ const ALL = args.includes('--all'), FORCE = args.includes('--force');
 const tags = args.filter((a) => !a.startsWith('--'));
 const DEST = process.env.LW_SNAPSHOTS || path.join(os.homedir(), 'Documents', 'LAMBDAWAVES-RELEASES');
 const VAULT_NOTE = process.env.LW_SNAPSHOT_INDEX || path.join(os.homedir(), 'Documents', 'OBSIDIAN', 'LAMBDAWAVES RELEASES — INDEX.md');
-const PARTS = ['lab', 'serve.sh', 'tools/gate/server.py', 'README.md', 'CHANGELOG.md', 'LICENSE', 'NOTICE', 'CITATION.cff'];
+const PARTS = ['lab', 'serve.sh', 'tools/serve.sh', 'tools/gate/server.py',   // serve.sh at the root until 0.9.9, tools/serve.sh after
+  'README.md', 'CHANGELOG.md', 'LICENSE', 'NOTICE', 'CITATION.cff'];
 
 const git = (...a) => execFileSync('git', a, { encoding: 'utf8' }).trim();
 const allTags = () => git('tag', '--list', 'v*', '--sort=version:refname').split('\n').filter(Boolean);
@@ -43,11 +44,11 @@ function snapshot(t) {
   const parts = PARTS.filter((p) => { try { git('cat-file', '-e', `${t}:${p}`); return true; } catch (_) { return false; } });
   const tar = execFileSync('git', ['archive', '--format=tar', t, ...parts], { maxBuffer: 1 << 30 });
   execFileSync('tar', ['-x', '-C', dir], { input: tar });
-  const info = tagInfo(t);
+  const info = tagInfo(t), serve = parts.includes('serve.sh') ? './serve.sh' : 'tools/serve.sh';
   const play = `# λWAVES ${t} — a playable snapshot\n\n` +
     `Exported from the git tag \`${t}\` (commit \`${info.commit}\`, ${info.date}) by \`tools/snapshot-release.mjs\`.\n` +
     `Release note: ${info.message}\n\n` +
-    `## Play it\n\n\`\`\`\ncd "${dir}"\n./serve.sh 8790\n\`\`\`\n\n` +
+    `## Play it\n\n\`\`\`\ncd "${dir}"\n${serve} 8790\n\`\`\`\n\n` +
     `then open https://127.0.0.1:8790/lab/ — the server is the vendored \`tools/gate/server.py\` (self-signed, it makes\n` +
     `its own certificate in \`.certs/\` on first run; accept it once). Add \`?sw=0\` to the address to play without the\n` +
     `service worker (no offline install, nothing cached). Each snapshot is its own origin by port, so its saved projects\n` +
@@ -69,9 +70,9 @@ function writeIndex() {
   const note = `---\ntitle: LAMBDAWAVES RELEASES — index\ncreated: 2026-09-25\ntags:\n  - lambdawaves\n  - releases\n  - index\n---\n\n` +
     `# λWAVES releases — the playable snapshots\n\n` +
     `Every tagged release of λWAVES, exported as a copy you can play after the tree has moved on. Made by\n` +
-    `\`node tools/snapshot-release.mjs <tag>\` in the repository (RELEASING.md names it as a release step); the copies live\n` +
+    `\`node tools/snapshot-release.mjs <tag>\` in the repository (docs/release/RELEASING.md names it as a release step); the copies live\n` +
     `in \`${DEST}\`, one folder per tag, each with a PLAY.md. This note is rewritten from what is on disk.\n\n` +
-    `To play one: \`cd "${DEST}/<tag>" && ./serve.sh 8790\`, then https://127.0.0.1:8790/lab/ (accept the self-signed\n` +
+    `To play one: \`cd "${DEST}/<tag>" && ./serve.sh 8790\` (\`tools/serve.sh\` from 0.9.9), then https://127.0.0.1:8790/lab/ (accept the self-signed\n` +
     `certificate once). The git tag is the record; the snapshot is the copy.\n\n` +
     `| Release | Date | Commit | What it was | Folder |\n|---|---|---|---|---|\n${table}\n\n` +
     `The pre-release freezes (\`pre-alpha-1\`, \`pre-alpha-2\`) exist as tags only.\n`;

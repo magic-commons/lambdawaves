@@ -1,9 +1,8 @@
-# DEPLOY — λWAVES Alpha
+# Deploying λWAVES
 
-**Current release status:** the 2026-10-30 block atop [SHIPPING-READINESS](docs/SHIPPING-READINESS.md) — what 1.0
-means, the gate's counts, Wrangler 4.156.0, the remote. What remains open is outside this tree — real-device acceptance
-(iPad, phone, installed PWA update) and the Cloudflare login, deployment and DNS, which are Josh's steps below. Run `npm ci --ignore-scripts` to install
-the pinned Wrangler toolchain before using the `npx` commands.
+**Current status:** the status block at the top of [shipping readiness](SHIPPING-READINESS.md). What remains open is
+outside this tree: real-device acceptance (iPad, phone, installed PWA update) and the Cloudflare login, deployment and DNS — the
+maintainer's steps below. Run `npm ci --ignore-scripts` to install the pinned Wrangler toolchain before using the `npx` commands.
 
 λWAVES is a static application on **Cloudflare Workers + Static Assets**. Shipping it is **three commands
 and a login**, in this order, **with no edit to `lab/` in between** — the repo is actively worked on, and a
@@ -18,17 +17,17 @@ npx wrangler deploy               # publish exactly that
 
 The first command is not optional and it is not a formality: `sw.js` derives its **cache name** from its
 own precache hashes, so a stale entry means the name does not move when the bytes do and every returning
-visitor is served the old bytes for ever, silently (ANTI-PATTERN 14). The build's §V1 is the gate that
-catches it — it has caught itself twice in one afternoon — and it exits non-zero when it does.
+visitor is served the old bytes for ever, silently (`docs/ui/ANTI-PATTERNS.md` #14). The build's §V1 is the gate that
+catches it, and it exits non-zero when it does.
 
 If the build exits non-zero, **do not deploy**: it says what is wrong and, for the common case, the one
 command that fixes it. Everything below assumes it printed `dist/ is complete and verified`.
 
 **The address.** λWAVES gets its **own hostname** — `lambdawaves.magic-commons.com`, staged first on
 `lambdawaves.<account>.workers.dev`. The app is at the **origin root**, so someone given the URL lands
-directly inside λWAVES (dossier §1, §3, §23). There is deliberately no Magic Commons homepage and no
-Josh's Library UI in this phase; the parent site will one day *link* to this application rather than
-contain its infrastructure, which is what lets λWAVES keep an independent release cycle (§2, §22).
+directly inside λWAVES. There is deliberately no Magic Commons homepage and no library interface in this
+phase; the parent site will one day *link* to this application rather than contain its infrastructure, which
+is what lets λWAVES keep an independent release cycle.
 
 ---
 
@@ -50,28 +49,26 @@ build will hold you to it. Do not move it under a shared root without doing both
 
 Keep the hostname ASCII. `λ` percent-encodes to `%CE%BB`, which is what a browser copies, what chat
 clients mangle, and what nobody can type. λWAVES is already the display name — the `<title>`, the manifest
-`name`, the mark — and none of that has to be in the URL (§3).
+`name`, the mark — and none of that has to be in the URL.
 
 ---
 
 ## What ships
 
-Everything under `lab/` except `smoke.html`, plus `LICENSE`, `NOTICE`, `REPORT.md`, `CHANGELOG.md`, and
-generated `robots.txt`, `_headers` and `_redirects`. **The build prints the true figures on every run —
-file count, bytes, certain requests and the ceiling — and they are the numbers to quote.** (They were
-typed into this paragraph once and were stale within two waves: it said 129 files / ~3.1 MiB / 80 requests
-against a measured 135 / 3.51 MiB / 83 after the `mir/` port landed. This is the one place in this
-document that will silently rot, so it now defers.) From the second launch the service worker answers
-everything and the app makes **zero** network requests — measured in Firefox with the server killed:
-83 resources, 83 from the worker, 0 from the network, navigation included.
+Everything under `lab/` except `smoke.html`, plus the repository documents the build's DOCS table names
+(`LICENSE`, `NOTICE`, `CHANGELOG.md`, …) and the generated `robots.txt`, `_headers` and `_redirects`. **The
+build prints the true figures on every run — file count, bytes, certain requests and the ceiling — and they
+are the numbers to quote;** this document does not repeat them. From the second launch the service worker
+answers everything and the app makes **zero** network requests (measured in Firefox with the server stopped:
+every resource from the worker, none from the network, navigation included).
 
 `smoke.html` is dropped: it is a diagnostic bench that boots the strobing WebGPU field with **no
 photosensitivity gate**. `tests/smoke.mjs` opens it from the dev server, never from `dist/`.
 Not shipped: `research/`, `tests/`, `tools/`, `docs/`, `serve*.sh`, `.tmp/`, `.git/`.
 
-Nothing in `lab/` is rewritten. Every path in it is relative, so the build is a pure move and `./serve.sh`
+Nothing in `lab/` is rewritten. Every path in it is relative, so the build is a pure move and `tools/serve.sh`
 and `./test.sh` keep working unchanged — the build re-proves that by walking every `src` / `href` /
-`import` / `url(` / `new URL(` / `Worker(` reference in the assembled tree (§29 step 2, §8).
+`import` / `url(` / `new URL(` / `Worker(` reference in the assembled tree.
 
 ---
 
@@ -89,11 +86,11 @@ npx wrangler dev                   # http://localhost:8787/
 > are both already in `.gitignore`.
 
 `wrangler dev` is the point of parity: it reproduces ES module loading, MIME types, the `_headers` rules,
-`_redirects`, secure-context behaviour and real 404s. `file://` reproduces none of them (§11).
+`_redirects`, secure-context behaviour and real 404s. `file://` reproduces none of them.
 
 ---
 
-## The first pass — dossier §29, step by step
+## The first deployment, step by step
 
 Steps 1–3, 5 and 7 are **done, and re-done on every build**; the rest are yours.
 
@@ -106,8 +103,8 @@ Steps 1–3, 5 and 7 are **done, and re-done on every build**; the rest are your
 | 5 | add robots.txt | generated; `ALPHA_UNLISTED` in the tool is the switch |
 | 6 | run locally through Wrangler | `npx wrangler dev` — see above |
 | 7 | fix deployment-specific failures only | done: MIME types, the `/index.html` 307 (below), module resolution, case |
-| 8 | **commit known-good local state** | yours: `git add -A && git commit`, then `git tag v0.1.0-alpha`. `.gitignore` covers `node_modules/`, `dist/` **and `.wrangler/`** — that last one is created by step 6's `wrangler dev`, two lines above the `git add -A`, and was not ignored until wave 68 |
-| 9 | **deploy** | yours: `npx wrangler login`, `npx wrangler deploy --dry-run`, then `npx wrangler deploy`. **`wrangler.jsonc` now sets `"workers_dev": false`** (wave 68), so there is no staging hostname unless you deliberately flip it — a workers.dev origin is a second permanent root-scoped service worker and a second PWA identity on an address you stop using, and `localStorage` is per origin so anything a tester saves there is stranded. Prefer: attach the custom domain (step 10) and smoke-test at the address that ships |
+| 8 | **commit known-good local state** | yours: `git add -A && git commit`, then `git tag v0.1.0-alpha`. `.gitignore` covers `node_modules/`, `dist/` **and `.wrangler/`** — that last one is created by step 6's `wrangler dev`, two lines above the `git add -A` |
+| 9 | **deploy** | yours: `npx wrangler login`, `npx wrangler deploy --dry-run`, then `npx wrangler deploy`. **`wrangler.jsonc` sets `"workers_dev": false`**, so there is no staging hostname unless you deliberately flip it — a workers.dev origin is a second permanent root-scoped service worker and a second PWA identity on an address you stop using, and `localStorage` is per origin so anything a tester saves there is stranded. Prefer: attach the custom domain (step 10) and smoke-test at the address that ships |
 | 10 | **connect the custom subdomain** | yours, in the dashboard: Workers & Pages → `lambdawaves` → Settings → Domains & Routes → Add → Custom Domain → `lambdawaves.magic-commons.com`. If `magic-commons.com` is already on Cloudflare, the DNS record is created for you and TLS is issued automatically; if not, add the site to Cloudflare and repoint the nameservers at your registrar first |
 | 11 | **test again** | the checklist below |
 | 12 | document the release procedure | this file |
@@ -118,7 +115,7 @@ to `/`**. `sw.js` precaches `./index.html` — it fetches that exact URL with a 
 the result under the clean key. Under a trailing-slash mode the stored response carries `redirected =
 true`, and `sw.js` hands precisely that response to `respondWith()` for every navigation; a navigation
 request's redirect mode is `manual`, so the browser refuses it. The app would install, work on the first
-visit, and **fail to open from the second launch onward**. Measured in September against wrangler 4.129.0 (the lock is 4.156.0 since 028 R-13; not re-measured — §V6 holds the setting) on this exact
+visit, and **fail to open from the second launch onward**. Measured in September against wrangler 4.129.0 (the lock is now 4.156.0; not re-measured — §V6 holds the setting) on this exact
 `dist/`:
 
 | `html_handling` | `GET /` | `GET /index.html?__rev=x` |
@@ -132,17 +129,17 @@ So `wrangler.jsonc` sets `html_handling: "none"` and the build writes `_redirect
 `/ → /index.html 200` — status 200 in `_redirects` is a **rewrite**, not a redirect: no `Location`, no
 hop, nothing for the worker to choke on. The build fails if anyone changes `html_handling` back while
 `index.html` is precached. (The dossier says to treat its config as "a starting configuration rather than
-immutable doctrine" and use the supported equivalent that preserves the architecture — §10.)
+immutable doctrine" and use the supported equivalent that preserves the architecture.)
 
 ---
 
-## After deploying — the fourteen acceptance criteria (§30)
+## After deploying — the fourteen acceptance criteria
 
 Work down this list on the custom domain (step 11) — or on workers.dev first if you deliberately staged
 there. **LOAD THE PAGE TWICE BEFORE BELIEVING ANY OF IT.** A first visit is uncontrolled by design (no
-`skipWaiting()`), so it is the one visit in which the service worker cannot be wrong: criterion 8 was
-green on every first visit and false from the second launch onward for two waves. Open `/LICENSE` in a new
-tab after a reload, not before.
+`skipWaiting()`), so it is the one visit in which the service worker cannot be wrong: criterion 8 once
+passed on every first visit and failed from the second launch onward. Open `/LICENSE` in a new tab after a
+reload, not before.
 
 | # | criterion | how to check |
 |---|---|---|
@@ -150,16 +147,16 @@ tab after a reload, not before.
 | 2 | no Magic Commons homepage needed | nothing in `dist/` refers to one |
 | 3 | loads over HTTPS | Cloudflare provides it; the padlock is the check. WebGPU needs a secure context and this is it |
 | 4 | all CSS, JS, fonts, images, vendor assets load | DevTools → Network: no 404s. The build already proved every reference resolves; this confirms the upload |
-| 5 | major systems operate as they do locally | FIELD · SHADOW · VORTEX · ORBIT · LADDER · particles · Kepler; orbit, drag, keys, play/pause, rack, notebook, project save/load/export/import (§18) |
+| 5 | major systems operate as they do locally | FIELD · SHADOW · VORTEX · ORBIT · LADDER · particles · Kepler; orbit, drag, keys, play/pause, rack, notebook, project save/load/export/import |
 | 6 | browser persistence works | settings, notebook and projects survive a reload |
-| 7 | WebGPU-unavailable fails informatively | the **WebGPU unavailable** banner appears rather than a blank stage (§19) |
-| 8 | LICENSE / NOTICE / REPORT links work | `/LICENSE`, `/NOTICE`, `/REPORT.md`, `/CHANGELOG.md` — all four open **as text in a tab**, not as downloads. Verified locally through `wrangler dev` |
-| 9 | search engines asked not to index | `/robots.txt` is `User-agent: * / Disallow: /`, and every response carries `X-Robots-Tag: noindex`. **UNLISTED IS NOT PRIVATE**: anyone with the URL can open it, and that is intended for the Alpha. This is an indexing request, not access control — if real restriction is ever wanted, that is Cloudflare Access, evaluated separately (§4, §26) |
+| 7 | WebGPU-unavailable fails informatively | the **WebGPU unavailable** banner appears rather than a blank stage |
+| 8 | the shipped documents open | `/LICENSE`, `/NOTICE`, `/CHANGELOG.md` and every other document the build ships open **as text in a tab**, not as downloads. Verified locally through `wrangler dev` |
+| 9 | search engines asked not to index | `/robots.txt` is `User-agent: * / Disallow: /`, and every response carries `X-Robots-Tag: noindex`. **UNLISTED IS NOT PRIVATE**: anyone with the URL can open it, and that is intended for the Alpha. This is an indexing request, not access control — if real restriction is ever wanted, that is Cloudflare Access, evaluated separately |
 | 10 | Git contains the complete deployable source | `lab/` + `tools/` + `wrangler.jsonc`; `dist/` is generated and gitignored |
 | 11 | a known commit corresponds to production | tag the commit you deploy (`git tag v0.1.0-alpha`); `npx wrangler deployments list` names the live version |
 | 12 | a rollback procedure exists and has been tested | below — **do it once, deliberately, before you need it** |
 | 13 | updating no longer needs manual file editing | build, `wrangler deploy`. No FTP, no replacing individual files |
-| 14 | linkable from Magic Commons later without migration | the parent site adds `<a href="https://lambdawaves.magic-commons.com">Launch λWAVES</a>` and nothing here changes (§22, §32) |
+| 14 | linkable from Magic Commons later without migration | the parent site adds `<a href="https://lambdawaves.magic-commons.com">Launch λWAVES</a>` and nothing here changes |
 
 Two more worth checking while you are in DevTools, because they are what makes it an *app*:
 
@@ -167,7 +164,7 @@ Two more worth checking while you are in DevTools, because they are what makes i
 - **Application → Service Workers** shows one worker, scope `/`. Reload once, tick **Network → Offline**,
   reload again → λWAVES boots with no network. Offline works from the **second** launch, never the first:
   the first visit runs uncontrolled because `sw.js` never calls `clients.claim()`. That is deliberate and is
-  not a bug to chase. An UPDATE is different since wave 133: a build that finishes installing while the
+  not a bug to chase. An update is different: a build that finishes installing while the
   session is untouched (nothing edited, nothing unsaved, no capture running, paused at t = 0, one window) is
   taken at once — one reload. Otherwise the build badge and its pane offer it, and STATUS TAGS, on or off,
   never hides them; a press takes it. An untouched session that is only playing, or whose clock has moved, is
@@ -186,7 +183,7 @@ npx wrangler rollback <version-id> # put a previous version back
 
 Or in the dashboard: Workers & Pages → `lambdawaves` → Deployments → the older version → Rollback.
 Deploy twice, roll back to the first, confirm the site changed, then roll forward. A pipeline whose
-rollback has never been run is not a pipeline (§17).
+rollback has never been run is not a pipeline.
 
 **How to tell it worked, without looking.** Every other section of this document gives a measured
 expectation and this one used to give an instruction, which is no use at midnight. Before rolling back,
@@ -219,7 +216,7 @@ deploy is an expected one.
 
 ---
 
-## Deliberate differences from the dossier
+## Deliberate differences from the deployment dossier
 
 Recorded so they read as decisions rather than drift.
 
@@ -229,16 +226,13 @@ Recorded so they read as decisions rather than drift.
 - **§7 sketches a `public/` directory.** We keep `lab/` and let the build produce the deployable
   directory instead. §7 itself says the layout is "illustrative rather than mandatory", asks to preserve
   a rational existing structure, and warns against unnecessary migration churn — and `lab/` is wired into
-  `./serve.sh`, `./test.sh` and 40+ test files. `wrangler.jsonc` therefore points `assets.directory` at
+  `tools/serve.sh`, `./test.sh` and 40+ test files. `wrangler.jsonc` therefore points `assets.directory` at
   `./dist`, not `./public`.
-- **§8 expects `/LICENSE`, `/NOTICE`, `/REPORT.md` to be linked from the app.** Wave 55 made those links
-  **relative, not absent** — this paragraph used to say "deliberately removed", and it was wrong about two
-  of the three: `lab/index.html` still carries `<a href="./LICENSE">` and `<a href="./NOTICE">`, and only
-  the `/REPORT.md` link is genuinely gone. The distinction mattered: relative links worked on the dev
-  server and then, at the origin root, were answered by our own service worker with the lab's own
-  `index.html` — nine `target="_blank"` licence links each opening a second copy of λWAVES. That is
-  wave 68's blocker A, fixed in `sw.js` §5, and criterion 8 is met because the URLs answer **from the
-  second launch too**, which is the only launch that ever tested it.
+- **§8 expects the licence documents to be linked from the app.** The links are **relative**:
+  `lab/index.html` carries `<a href="./LICENSE">` and `<a href="./NOTICE">`. Relative links worked on the
+  dev server and then, at the origin root, were once answered by the app's own service worker with the
+  lab's `index.html` — nine `target="_blank"` licence links each opening a second copy of λWAVES. `sw.js` §5
+  fixes that, and criterion 8 is met because the URLs answer **from the second launch too**.
 - **§10's `html_handling`** — see the measured table above.
 
 ---
@@ -247,14 +241,14 @@ Recorded so they read as decisions rather than drift.
 
 | it says | do |
 |---|---|
-| `V1: precached "x" … different bytes` / `V5: tests/pwa.test.mjs FAILED` | `node tests/pwa.test.mjs --write` — a wave edited `lab/` and `sw.js` §1 is stale. This is the normal case, and it matters: `sw.js` derives its cache *name* from those hashes, so a stale one means returning visitors keep serving old bytes forever |
-| `V1: dist/x.js is neither precached nor covered by a rule` | a wave added a file. Same command |
+| `V1: precached "x" … different bytes` / `V5: tests/pwa.test.mjs FAILED` | `node tests/pwa.test.mjs --write` — an edit to `lab/` left `sw.js` §1 stale. This is the normal case, and it matters: `sw.js` derives its cache *name* from those hashes, so a stale one means returning visitors keep serving old bytes forever |
+| `V1: dist/x.js is neither precached nor covered by a rule` | a file was added. Same command |
 | `V2: … (looked for dist/…)` | a real broken link |
 | `V2: … (climbs above the deployment root)` | a reference that leaves lab/ — it resolves on the LAN and gate servers (they serve the repo root) and 404s on the deployed origin. If it is a diagnostic reached only by an explicit flag (the device report, `?report=1`; THE CONDUCTOR, `__LW.conduct`), name it in the build's `DEV_ONLY` table with the reason; anything else is a real broken link |
-| `V2: … [base] (no shipped file under dist/…)` / `[base] ships empty BY DESIGN` | a `new URL('./dir/', …)` base with nothing shipped under it. `volumes/` is the one by design (the build's `EMPTY_BASE` table, 028 R-32): only `--shelf` fills it, and without a shelf `shelf()` reads the 404 as "no volumes published". Any other empty base is a broken road |
+| `V2: … [base] (no shipped file under dist/…)` / `[base] ships empty BY DESIGN` | a `new URL('./dir/', …)` base with nothing shipped under it. `volumes/` is the one by design (the build's `EMPTY_BASE` table): only `--shelf` fills it, and without a shelf `shelf()` reads the 404 as "no volumes published". Any other empty base is a broken road |
 | `V2: manifest "id" …` | `id` is the one manifest member resolved against the **origin**, not against the manifest, so a relative value does not travel with the app. Delete the `id` member in `lab/manifest.webmanifest` — it then falls back to `start_url`, which is `"./"` and is correct at every address |
-| `V3: … no register(…)` | nothing registers the service worker, so the precache and the whole offline layer are inert. One line at the end of boot: `if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');` — **relative**, which is what keeps the same bytes working on `./serve.sh`, under `wrangler dev`, and at the origin root |
-| `V4: SharedArrayBuffer` | a wave introduced cross-origin isolation. `_headers` must then grow COOP/COEP and every subresource must be CORP-clean. None of it is needed today and none is sent |
+| `V3: … no register(…)` | nothing registers the service worker, so the precache and the whole offline layer are inert. One line at the end of boot: `if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');` — **relative**, which is what keeps the same bytes working on `tools/serve.sh`, under `wrangler dev`, and at the origin root |
+| `V4: SharedArrayBuffer` | a change introduced cross-origin isolation. `_headers` must then grow COOP/COEP and every subresource must be CORP-clean. None of it is needed today and none is sent |
 | `V6: html_handling is "…"` | the 307 trap. Set `html_handling: "none"` |
 | `V6: assets.directory … but this build writes …` | `wrangler.jsonc` points somewhere else; Wrangler would deploy the wrong bytes |
 

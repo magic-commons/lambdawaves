@@ -130,10 +130,10 @@ if (ONLY.includes('fallback') && recs.tryptophan) {
 const lib = await json('./library.json'), c60row = lib && lib.rows.find((r) => r.id === 'C60');
 let c60 = c60row ? decodeRecord(await json('./library/' + c60row.hash + '.json')) : null, c60from = c60 ? 'lab/library/' + c60row.hash + '.json' : null;
 if (!c60) {
-  const F = await json('../research/release-0.4.0/library-census/c60-frontier.json'), A = 1 / 0.52917721092;
+  const F = await json('../tools/library/census/c60-frontier.json'), A = 1 / 0.52917721092;
   if (F) { const cols = [...F.frontier.HOMO.indices, ...F.frontier.LUMO.indices], all = [...F.frontier.HOMO.coefficientColumns, ...F.frontier.LUMO.coefficientColumns], n = all[0].length, C = new Float64Array(n * n);
     cols.forEach((k, j) => { for (let i = 0; i < n; i++) C[i * n + k] = all[j][i]; });
-    c60 = { atoms: F.geometry.atomsAngstrom.map(([Z, x, y, z]) => ({ Z, x: x * A, y: y * A, z: z * A })), cols, C, ground: { nocc: 180, nAO: n } }; c60from = 'research/release-0.4.0/library-census/c60-frontier.json'; }
+    c60 = { atoms: F.geometry.atomsAngstrom.map(([Z, x, y, z]) => ({ Z, x: x * A, y: y * A, z: z * A })), cols, C, ground: { nocc: 180, nAO: n } }; c60from = 'tools/library/census/c60-frontier.json'; }
 }
 if (ONLY.includes('c60') && c60) {
   const ref = await json('../research/release-0.4.0/measure/c60-voxels-pyscf.json');

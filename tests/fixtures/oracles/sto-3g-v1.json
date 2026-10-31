@@ -1,6 +1,6 @@
 {
  "provenance": {
-  "written_by": "research/h2o-2026-09-11/scratch/fix-mol6.py",
+  "written_by": "tools/oracles/fix-mol6.py",
   "pyscf": "2.14.0",
   "numpy": "2.4.6",
   "basis": "lab/vendor/bse/sto-3g-v1.json",
@@ -14,7 +14,7 @@
   "dipole_convention": "sum_A Z_A R_A - Tr(D M), M_ab = <a|q|b>; PySCF dip_moment(unit=AU)",
   "placements": "ROUND 4 OPUS section 5: NH3 beta from cos^2 b = (2 cos HNH + 1)/3; CH4 d = r/sqrt(3)",
   "appended": {
-   "written_by": "research/h2o-2026-09-11/scratch/fix-mol8.py",
+   "written_by": "tools/oracles/fix-mol8.py",
    "molecules": [
     "C2H4",
     "C6H6"
@@ -28,7 +28,7 @@
   "bse_sha256_superseded": "db98a404682de686543ffe09b56f555d6fc11add3b289b35e74c11f9df91c609",
   "bse_widened": "2026-09-12: the vendored STO-3G record went from H, Li-F (db98a404...) to H-Kr (elements 1-36, 22ce59b9...) so lab/molecules.js could reach Na-Kr.  The H and Li-F electron_shells are BYTE-IDENTICAL decimals in both records, so every energy under `molecules` and `molecules_extended` is unchanged and was re-proved against the engine after the swap (tests/rhf-molecules.test.mjs, 1e-9).  fix-mol6.py and fix-mol8.py assert the OLD hash and will refuse to re-run until it is edited in them -- that refusal is correct: the record did change.",
   "library": {
-   "written_by": "research/h2o-2026-09-11/scratch/fix-molecules.py",
+   "written_by": "tools/oracles/fix-molecules.py",
    "pyscf": "2.14.0",
    "numpy": "2.4.6",
    "bse_sha256": "22ce59b9ec993c5b47b4349bb74f5efd372dab99afa4f427b374b8cdc3c0778b",
@@ -3911,7 +3911,7 @@
     "2  H 1s",
     "3  H 1s"
    ],
-   "source": "NOT A MEASUREMENT: monomeric AlH\u2083 has no determined gas-phase structure (Al\u2082H\u2086 is what has been observed). Planar D\u2083\u2095 at r = 1.4769 \u00c5, this repository's own RHF/STO-3G minimum on the vendored decimals (scanned by research/h2o-2026-09-11/scratch/fix-molecules.py). STO-3G shortens Al\u2013H by \u22480.1 \u00c5 against correlated estimates",
+   "source": "NOT A MEASUREMENT: monomeric AlH\u2083 has no determined gas-phase structure (Al\u2082H\u2086 is what has been observed). Planar D\u2083\u2095 at r = 1.4769 \u00c5, this repository's own RHF/STO-3G minimum on the vendored decimals (scanned by tools/oracles/fix-molecules.py). STO-3G shortens Al\u2013H by \u22480.1 \u00c5 against correlated estimates",
    "predicted_ms": 55,
    "disabled": false,
    "disabled_reason": null,

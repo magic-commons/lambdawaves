@@ -9,7 +9,7 @@ import { clusterRanges } from '../lab/canon-gauge.js';
 
 const record = JSON.parse(readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8'));
 registerRecord('sto-3g', record);
-const probe = JSON.parse(readFileSync(new URL('../research/molecular-orbitals-2026-10-01/names-probe.json', import.meta.url), 'utf8'));
+const probe = JSON.parse(readFileSync(new URL('../tests/fixtures/names-probe.json', import.meta.url), 'utf8'));
 const solve = (id, atoms = moleculeAtoms(id), extra = {}) => moleculeRHF({ atoms, basis: 'sto-3g', charge: moleculeCharge(id), record, ...extra });
 const input = (sol, atoms) => ({ atoms, S: sol.integrals.S, C: sol.C, eps: sol.orbitalEnergies, nocc: sol.nocc, basis: sol.basis, converged: sol.converged });
 const sym = (id) => MOLECULE_BY_ID.get(id).symmetry;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Exact ring arithmetic, C60 geometry, and bounded-memory direct RHF; lab is read-only.
-~/bin/scipython -I tools/symmetry/round2-sol-exact.py --out research/release-0.4.0/measure/round2-sol-exact.json
+~/bin/scipython -I tools/symmetry/round2-sol-exact.py --out tools/library/census/round2-sol-exact.json
 """
 import argparse
 import json

@@ -2,13 +2,13 @@
  *
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --write    record the lock on THIS tree
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --check    re-run and compare, exit 1 on any difference
- *   options:  --fixture <path>   (default research/optimization-2026-09-24/digest-lock-base.json)
+ *   options:  --fixture <path>   (default tests/fixtures/digest-lock-base.json)
  *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=0'   (appended to the lab URL; W125:
  *             the gas table is the default, so the pre-W125 base fixture is checked with `--query 'gastab=0'`, and
  *             digest-lock-base-w125.json is the base with it on)
  *             --nowarm   (K2) do not warm the specialised present pipelines: every readPixels draws with the generic one
  *             --states a,b,c   only these states (0.4.0 S4a: `--states` with the thirteen pre-S4a names checks the old fixture
- *                        on a tree that has the new ones; research/release-0.4.0/measure/digest-lock-s4a.json is the lock
+ *                        on a tree that has the new ones; tests/fixtures/digest-lock-s4a.json is the lock
  *                        S4c checks: the 1004 values plus benzene, lysine and lysine's HOMO, recorded on the S4a base tree)
  *   THE COUNTS ON THE 0.5.0 TREE (each retired state is 48 values: 3 grids × 16; the fixtures are never re-baked):
  *             `--check --query gastab=0` compares 860 values, and the same plus `--fixture research/release-0.4.0/measure/
@@ -71,7 +71,7 @@ const flag = (k) => args.includes(k);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 && i + 1 < args.length ? args[i + 1] : d; };
 const MODE = flag('--write') ? 'write' : flag('--check') ? 'check' : null;
 if (!MODE) { console.error('usage: node tools/perf/digest-lock.mjs --write|--check [--fixture f] [--only states,styles,lines] [--grids 64,96,128] [--query q]'); process.exit(2); }
-const FIXTURE = path.resolve(ROOT, opt('--fixture', 'research/optimization-2026-09-24/digest-lock-base.json'));
+const FIXTURE = path.resolve(ROOT, opt('--fixture', 'tests/fixtures/digest-lock-base.json'));
 const ONLY = opt('--only', 'states,styles,lines').split(',');
 const GRIDS = opt('--grids', '64,96,128').split(',').map(Number);
 const QUERY = opt('--query', '');

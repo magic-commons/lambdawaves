@@ -1,29 +1,30 @@
 #!/usr/bin/env python3
-"""serve-lan.py — the lab over HTTPS for OTHER devices on the local network (an iPad on the same Wi-Fi).
+"""tools/serve-lan.py — the lab over HTTPS for OTHER devices on the local network (an iPad on the same Wi-Fi).
 
-    python3 serve-lan.py [port]        default 8710 (the λWAVES range is 8700–8799)
+    python3 tools/serve-lan.py [port]  default 8710 (the λWAVES range is 8700–8799)
 
-Binds every interface (0.0.0.0), unlike the kit's server2.py which is localhost-only.  Same self-signed cert pair
-(MB_CERTS overrides the directory) — the tablet will warn once about the certificate; accept it.  The page needs
+Binds every interface (0.0.0.0), unlike tools/gate/server.py which is localhost-only.  It uses the gate server's self-signed
+pair (LW_CERTS or MB_CERTS override the directory; run tools/serve.sh once to make it) — the tablet will warn once about the
+certificate; accept it.  The page needs
 WebGPU: Safari on iPadOS 26 has it on by default; on iPadOS 18 enable it under Settings → Apps → Safari →
 Advanced → Feature Flags → WebGPU.  Static files only, no-store, no directory index writing.
 
 THE DEVICE REPORT (2026-09-25): the one write it accepts is a POST of lab/device-report.js' JSON to /report (or
 /lab/report) — the page sends it after https://<this machine>:<port>/lab/?report=1&post=1 has measured the device.
-The body is saved to research/device-reports/inbox/<UTC ISO time>-<device>.json (never overwriting), answered 204
+The body is saved to .tmp/device-reports/<UTC ISO time>-<device>.json (never overwriting), answered 204
 and logged in one line.  THE CAPS (2026-10-08 security review §3 fix 4): Content-Type must be application/json (a web
 page cannot send that cross-origin without a preflight this server does not answer), the body at most 512 KB (the
 largest real report is 204,689 B), `kind` must be "lambdawaves-device-report", at most 50 reports per run and one per
-client every 10 s.  The inbox is gitignored: move a report into research/device-reports/ by hand after reading it.
+client every 10 s.  The inbox is gitignored: keep a report elsewhere by hand after reading it.
 THE SURFACE (§3 fixes 1, 3, 5): a path segment starting with "." is 404, directory listings are 404, a LAN client
 reads only /lab/ and /tools/perf/, the TLS handshake runs in the connection's thread with a 15 s timeout, and every
 request is logged to stderr.  Everything else is the static server above.
 """
 import datetime, http.server, json, os, re, socket, ssl, sys, threading, time
-HERE = os.path.dirname(os.path.abspath(__file__))
-CERTS = os.environ.get("MB_CERTS") or os.path.expanduser("~/mandelbrot/certs")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))     # the repository: this file is tools/serve-lan.py
+CERTS = os.environ.get("LW_CERTS") or os.environ.get("MB_CERTS") or os.path.expanduser("~/.config/lambdawaves/certs")   # tools/gate/server.py's default
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8710
-REPORTS = os.path.join(HERE, "research", "device-reports", "inbox")     # gitignored; promote by hand
+REPORTS = os.path.join(ROOT, ".tmp", "device-reports")     # gitignored
 MAX_REPORT = 512 * 1024
 MAX_REPORTS_PER_RUN, PER_CLIENT_S = 50, 10
 LAN_PREFIXES = ("/lab/", "/tools/perf/")
@@ -32,7 +33,7 @@ _lock, _count, _last = threading.Lock(), [0], {}
 
 class H(http.server.SimpleHTTPRequestHandler):
     timeout = HANDSHAKE_S
-    def __init__(self, *a, **k): super().__init__(*a, directory=HERE, **k)
+    def __init__(self, *a, **k): super().__init__(*a, directory=ROOT, **k)
     def setup(self):
         self.request.settimeout(HANDSHAKE_S)                     # self.connection exists only after super().setup()
         try: self.request.do_handshake()
@@ -89,7 +90,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         else:
             self.send_error(500, "could not name the report file"); return
         self.send_response(204); self.end_headers()
-        print("report ← %s · %d B → research/device-reports/inbox/%s  (read it, then move it up by hand)" % (self.client_address[0], n, name), flush=True)
+        print("report ← %s · %d B → .tmp/device-reports/%s  (read it, then keep it by hand)" % (self.client_address[0], n, name), flush=True)
 
 def lan_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

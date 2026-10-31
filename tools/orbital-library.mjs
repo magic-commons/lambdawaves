@@ -54,7 +54,9 @@ import { evaluator } from '../lab/molecular-field.js';
 import { moleculeLatex, stemOf, EV } from '../lab/latex-state.js';   // 0.5.1 D2: the stem's solve-decided members are the lab head's own composition
 import { validateRecord, recordPath, SCHEMA, atomsKey as geometryKey } from '../lab/library.js';
 
-const ROOT = new URL('../', import.meta.url), at = (rel) => fileURLToPath(new URL(rel, ROOT));
+/* The census lives in tools/library/census/; the records keep naming it by its earlier research path (their bytes are the gate's). */
+const moved = (rel) => rel.replace('research/release-0.4.0/library-census/', 'tools/library/census/');
+const ROOT = new URL('../', import.meta.url), at = (rel) => fileURLToPath(new URL(moved(rel), ROOT));
 const LAB = at('lab/'), CATALOGUE = LAB + 'library.json';
 const CENSUS_FILE = 'research/release-0.4.0/library-census/census.json', ORACLE_FILE = 'tests/fixtures/oracles/library-v1.json', IDS_FILE = 'tools/library/pubchem-ids.json';
 const args = process.argv.slice(2), CHECK = args.includes('--check'), GATE_ONLY = args.includes('--gate');
@@ -455,7 +457,7 @@ function fixtureEntry(id) {
  * carries ITS columns instead — every occupied index and the LUMO set, `cols` 0 … 182 — checked at the same 92 points on a sample of
  * them, so MOLECULES draws the density through the field's FACTOR road (ρ = 2 Σ_k φ_k²), exactly, with no D. */
 function buildFrontier(e) {
-  const read = (p) => JSON.parse(readFileSync(fileURLToPath(new URL('../' + p, import.meta.url)), 'utf8'));
+  const read = (p) => JSON.parse(readFileSync(at(p), 'utf8'));
   const F = read(e.frontier.dump), O = e.frontier.occupied && existsSync(at(e.frontier.occupied)) ? read(e.frontier.occupied) : null, P = O ? O.samples : read(e.frontier.samples), b0 = bse[e.basis || S3];
   if (F.basis.sha256 !== sha(b0.text) || (O && O.basisSha256 !== F.basis.sha256)) throw new Error(`orbital-library: ${e.id}'s dump was made on another basis file`);
   if (O && !(Math.abs(O.solver.energyEh - F.solver.energyEh) < 1e-9 && O.solver.converged)) throw new Error(`orbital-library: ${e.id}'s occupied dump is not the frontier dump's calculation`);

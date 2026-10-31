@@ -2,7 +2,7 @@
 """Query the requested interpreter's BSE package; never download or vendor a basis."""
 import json,sys
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'research/release-0.4.0/library-census'
+ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'tools/library/census'
 r={'status':'MEASURED','pythonExecutable':sys.executable,'isolatedMode':bool(sys.flags.isolated),'numericTagging':'Atomic numbers DERIVED identifiers; package queries MEASURED. Null coverage is UNVERIFIED with the recorded reason.','atomicNumbers':[53,54],'basis':'STO-3G','importable':False,'coverage':None,'coverageStatus':'UNVERIFIED','vendoredAnything':False}
 try:
     import basis_set_exchange as bse

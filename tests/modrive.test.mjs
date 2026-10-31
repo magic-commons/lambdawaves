@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { createMO } from './lib/mo.js';
 import { createMODrive, sin2Pulse } from '../lab/modrive.js';
 
-const ref = JSON.parse(readFileSync(new URL('../research/astra-2026-09-05/reference-drive.json', import.meta.url)));
+const ref = JSON.parse(readFileSync(new URL('../tests/fixtures/reference-drive.json', import.meta.url)));
 const close = (a, b, tol = 1e-11) => assert.ok(Math.abs(a - b) < tol, `${a} != ${b}, tolerance ${tol}`);
 const mo = createMO({ kind: 'lcao1s' }), R = ref.R, M = mo.basisAt(R).M;
 // Closed integrals, independent of the new quadrature: two normalised spherical densities centred at ±R/2.

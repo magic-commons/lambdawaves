@@ -21,7 +21,7 @@ orc = json.load(open(os.path.join(HERE, '..', 'oracle-h2o.json')))
 Cj = json.load(open(os.path.join(HERE, 'gen3-Cj.json')))
 out = {
  'provenance': {
-   'written_by': 'research/h2o-2026-09-11/scratch/fixgen-response.py',
+   'written_by': 'tools/oracles/fixgen-response.py',
    'pyscf': __import__('pyscf').__version__,
    'basis': 'STO-3G, BSE v1 decimals (research/h2o-2026-09-11/sto-3g.bse.json)',
    'bse_sha256': hashlib.sha256(open(os.path.join(HERE, '..', 'sto-3g.bse.json'), 'rb').read()).hexdigest(),

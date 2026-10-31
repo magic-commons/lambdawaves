@@ -26,12 +26,12 @@ and the code disagree, the code is right; please say so in an issue.
 
 - `navigator.gpu` exists only on `https://` pages or on `localhost` / `127.0.0.1`. A plain `http://` LAN address
   gets no WebGPU and the app shows its no-GPU banner. Source: `tools/gate/server.py` (header comment).
-- `./serve.sh [port]` serves the repository over HTTPS with a self-signed pair it makes in `.certs/`
+- `tools/serve.sh [port]` serves the repository over HTTPS with a self-signed pair it makes in `.certs/`
   (`LW_CERTS` names another folder); open `https://127.0.0.1:8700/lab/` and accept the warning once. Source:
-  `serve.sh`, `tools/gate/server.py`.
-- For another device on the same network, `./serve-lan.sh [port]` binds every interface (default 8710;
+  `tools/serve.sh`, `tools/gate/server.py`.
+- For another device on the same network, `tools/serve-lan.sh [port]` binds every interface (default 8710;
   `MB_CERTS` names the certificate folder). Safari on iPadOS 26 has WebGPU on by default; on iPadOS 18 it is a
-  feature flag under the same Advanced menu. Source: `serve-lan.py` (header comment).
+  feature flag under the same Advanced menu. Source: `tools/serve-lan.py` (header comment).
 
 ## 3. Reading GPU times
 
@@ -70,7 +70,7 @@ and the code disagree, the code is right; please say so in an issue.
 
 ## 5. The device self-report
 
-- On the desktop run `./serve-lan.sh`; on the device open `https://<desktop LAN address>:8710/lab/?report=1&post=1`
+- On the desktop run `tools/serve-lan.sh`; on the device open `https://<desktop LAN address>:8710/lab/?report=1&post=1`
   and keep hands off for about three minutes. A toast says what it is doing. Source: `tools/perf/device-report.js`,
   `serve-lan.py`.
 - It records the platform (UA, pointer, DPR, viewport), the display's cadence with nothing playing, the WebGPU
@@ -94,10 +94,10 @@ and the code disagree, the code is right; please say so in an issue.
   `tests/*.browser-test.mjs` in a real headless Firefox against its own HTTPS server; it takes about 20 minutes
   and uses the GPU. Source: `test.sh`.
 - After any edit under `lab/`, run `node tests/pwa.test.mjs --write`: it re-stamps the service worker's precache
-  hashes in `lab/sw.js`, or the pwa suite fails. Source: AI_POLICY.md, RELEASING.md.
+  hashes in `lab/sw.js`, or the pwa suite fails. Source: CONTRIBUTING.md, docs/release/RELEASING.md.
 - The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 843 values, and 987 with the s4a fixture since iteration 008 W — both runs with `--query gastab=0`; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
   `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (843) and the same with
-  `--fixture research/release-0.4.0/measure/digest-lock-s4a.json` (987), against a tree served by `tools/gate/server.py`.
+  `--fixture tests/fixtures/digest-lock-s4a.json` (987), against a tree served by `tools/gate/server.py`.
   Source: `tools/perf/digest-lock.mjs` (header).
 - A change to CSS or to what the page builds at boot is checked with MIR's `tools/stylehash.mjs` (computed
   styles and pixels, theme × card × frost, before and after). Source: `research/optimization-2026-09-24/BUILD-BRIEF.md`.
@@ -120,11 +120,11 @@ and the code disagree, the code is right; please say so in an issue.
 - Every key is PREFERENCE (settings, never in a project or link), WORKSPACE (the window arrangement) or PROJECT (the work): `docs/STATE-SCOPES.md`.
 - NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through the same restore-with-rollback road as any project; `node tools/new-project.mjs --check` proves the shipped file byte-exact against the modulation model and the boot defaults. The undo ring covers the whole PROJECT scope (not the camera pose, the notebook text or the quality hint): `serialize({ scope: 'edit' })` in, `restore(S, { history: true })` out; a project open, a link and NEW each start a new timeline whose bottom row is named for its origin.
 - The laws: CLAUDE.md (two pages since 021 D2: the standing constraints, the gates, the index) and `docs/laws/*.md` (the laws by subject), REPORT.md (the notebook to 0.5.2; since iteration 017 one wave line per closed iteration, the work itself in `research/iteration-0NN/`), `docs/`
-  (the optimization record, `ui/STYLE-LOCK.md`, `SHIPPING-READINESS.md`) and RELEASING.md.
+  (the optimization record, `ui/STYLE-LOCK.md`, `release/SHIPPING-READINESS.md`) and docs/release/RELEASING.md.
 - `lab/mir/**` (and `lab/fonts/**`) is the adopted MIR interface kit: MIR 1.5.5 plus the doors 1.5.6-alpha.1…17 (`MIR-MANIFEST.json` is the number). The law is THE KIT SENTENCE, CLAUDE.md:6:
   "THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS" — `lab/mir` is written by MIR's `adopt.mjs` alone, a λWAVES need is an additive
   door `1.5.6-alpha.N` made in [MIR](https://github.com/magic-commons/mir) with its `docs/FOR-MIR.md` line, a removal waits for a
-  line, and `node <MIR>/tools/adopt.mjs . --check` says "in step". Source: CLAUDE.md:6, AI_POLICY.md.
+  line, and `node <MIR>/tools/adopt.mjs . --check` says "in step". Source: CLAUDE.md:6, CONTRIBUTING.md.
 - The debug surface is `window.__LW` (`serialize()`, `restore()`, `fieldDigest()`, `readPixels()`, `perf`,
   `governor`, `quality`, `layout`, `report()`). Source: `lab/shell/facade.js` (`createFacade`; `rack.js` adds the late members at their seats).
 - A window's "copy" is one clipboard road: `layout.copyText(id, text)` writes and flashes `copied` on the named
@@ -136,9 +136,9 @@ and the code disagree, the code is right; please say so in an issue.
 
 - Every release has a playable copy made by `node tools/snapshot-release.mjs <tag>`: the tag's `lab/`, `serve.sh`
   and server, exported with `git archive` into `~/Documents/LAMBDAWAVES-RELEASES/<tag>/` (`LW_SNAPSHOTS` moves
-  it). To play one: `cd` into it, `./serve.sh 8790`, open `https://127.0.0.1:8790/lab/`. Source:
-  `tools/snapshot-release.mjs`, RELEASING.md.
-- From a clone, `git worktree add ../lw-<tag> <tag>` and `./serve.sh` there does the same.
+  it). To play one: `cd` into it, `./serve.sh 8790` (`tools/serve.sh` from 0.9.9), open `https://127.0.0.1:8790/lab/`. Source:
+  `tools/snapshot-release.mjs`, docs/release/RELEASING.md.
+- From a clone, `git worktree add ../lw-<tag> <tag>` and its serve script there does the same.
 - Projects and settings live in the browser's storage for one origin (host and port). A snapshot served on another
   port starts fresh and cannot touch the projects of the copy on 8700. Source: `lab/settings-store.js` (`SETTINGS_KEY` and the
   FAMILIES table).

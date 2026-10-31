@@ -39,7 +39,7 @@ def coords_bohr(atoms_ang):
 rec, sha = vendored('sto-3g-v1.json')
 mol = build(rec, H2O_ANG); n = mol.nao_nr()
 r = mol.intor('int1e_r').reshape(3, n, n)
-out = {'provenance': {'written_by': 'research/h2o-2026-09-11/scratch/fix-h2o.py', 'pyscf': __import__('pyscf').__version__,
+out = {'provenance': {'written_by': 'tools/oracles/fix-h2o.py', 'pyscf': __import__('pyscf').__version__,
                       'numpy': np.__version__, 'basis': 'lab/vendor/bse/sto-3g-v1.json', 'bse_sha256': sha,
                       'cart': True, 'ang_to_bohr': ANG,
                       'geometry': 'ROUND 2 ledger H2O: O (0,0,0.1173), H (0,+-0.7572,-0.4692) angstrom',

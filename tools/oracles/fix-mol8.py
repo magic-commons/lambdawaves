@@ -147,7 +147,7 @@ for name, atoms_ang, extra in CASES:
         print('      %d  RPA %.9f  TDA %.9f  f %.6f  |mu| %s' % (i, rec['rpa']['roots_au'][i], rec['tda']['roots_au'][i],
               rec['rpa']['oscillator_strength'][i], np.array2string(np.array(rec['rpa']['abs_mu_per_axis'][i]), precision=6)))
 
-prov['appended'] = {'written_by': 'research/h2o-2026-09-11/scratch/fix-mol8.py',
+prov['appended'] = {'written_by': 'tools/oracles/fix-mol8.py',
                     'molecules': [c[0] for c in CASES],
                     'response': 'RPA: tdscf.rhf.TDHF, singlet, nstates %d, conv_tol 1e-12.  TDA: DENSE eigh(A) -- PySCF\'s TDA Davidson returned residuals (0.0017...0.0081) for benzene\'s six lowest degenerate roots; `tda_davidson` keeps that unconverged reading for the record.' % NROOT,
                     'pyscf': __import__('pyscf').__version__, 'numpy': np.__version__,

@@ -6,7 +6,7 @@ import { rhf } from '../lab/scf.js';
 
 const close = (a, b, tol, what) => assert.ok(Math.abs(a - b) < tol, `${what}: ${a} vs ${b} (tol ${tol})`);
 const fx = JSON.parse(readFileSync(new URL('./fixtures/h2o-response.json', import.meta.url)));
-const h2 = JSON.parse(readFileSync(new URL('../research/chronusq-2026-09-11/oracle-pyscf.json', import.meta.url)));
+const h2 = JSON.parse(readFileSync(new URL('../tests/fixtures/oracle-pyscf.json', import.meta.url)));
 
 /* 1. H₂O STO-3G: the ten singlet roots, oscillator strengths and transition dipoles against PySCF TDHF/TDA. */
 {

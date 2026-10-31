@@ -20,7 +20,12 @@ try {
     __LW.layout.finder.close();
     __LW.layout.menu.open();
     const win = [...document.querySelectorAll('#menubar .mb-btn')].find(b => b.dataset.menu === 'WINDOW'); win.click();
-    const windows = [...win.parentElement.querySelectorAll('.mb-item .mb-lbl')].map(l => l.textContent);
+    /* 021 I3: WINDOW's rows sit in submenus (menubar.browser-test's road): each submenu row is pressed open and its list read */
+    const windows = [], walk = async (list) => { for (const it of [...list.querySelectorAll(':scope > .mb-item')]) {
+      windows.push(it.querySelector('.mb-lbl').textContent); if (!it.hasAttribute('aria-expanded')) continue;
+      if (it.getAttribute('aria-expanded') !== 'true') it.click(); await new Promise((q) => setTimeout(q, 30));
+      const sub = [...document.querySelectorAll('#menubar .mb-sub-list')].find((l) => l.mbRow === it); if (sub) await walk(sub); } };
+    await walk(win.parentElement.querySelector('.mb-list'));
     __LW.layout.menu.close();
     const saved = __LW.serialize();
     return {

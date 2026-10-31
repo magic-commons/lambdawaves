@@ -1,10 +1,10 @@
-# Hosting the volumes (iteration 005 S, THE SHELF)
+# Hosting the volumes
 
 A volume is one file, `LAMBDAWAVES-VOL-<numeral>.lwv`. The reader downloads it once and opens it in the app; the app keeps every
 molecule on the device and never fetches it again. The app holds no link to where the file lives: no URL and no host name appear in
-`lab/`. The link belongs to Josh's donation page.
+`lab/`. The link belongs to the maintainer's donation page.
 
-## Josh's road
+## Publishing a volume
 
 1. **Pack with the themes and the archive** (the data stay in `~/Documents/LAMBDAWAVES-VOLUMES/`, never in git):
    ```
@@ -21,7 +21,7 @@ molecule on the device and never fetches it again. The app holds no link to wher
 3. **Ship the shelf with the app:** `node tools/build-deploy.mjs --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json` puts the
    small `volumes.json` (title, count, size, `archive: { name, bytes, sha256 }`) at `dist/volumes/volumes.json`. No volume bytes ship.
    An entry without an archive is refused.
-4. **After a donation,** the donor gets the Drive link on Josh's page.
+4. **After a donation,** the donor gets the Drive link on the donation page.
 
 ## What the reader does
 

@@ -11,7 +11,7 @@ from scipy.optimize import minimize,minimize_scalar
 from threadpoolctl import threadpool_limits,threadpool_info
 import pyscf
 from pyscf import gto,scf,symm,lib
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'research/release-0.4.0/library-census';ROW=OUT/'rows';ROW.mkdir(exist_ok=True)
+ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'tools/library/census';ROW=OUT/'rows';ROW.mkdir(exist_ok=True)
 REC=json.loads((ROOT/'lab/vendor/bse/sto-3g-v1.json').read_text());REC631=json.loads((ROOT/'lab/vendor/bse/6-31+g-star-v1.json').read_text())
 INPUT=json.loads((OUT/'census-input.json').read_text());META=json.loads((OUT/'present-input.json').read_text());lib.num_threads(2)
 blas_limits=threadpool_limits(limits=1,user_api='blas')

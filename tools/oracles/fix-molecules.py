@@ -1,7 +1,7 @@
 # fix-molecules.py -- THE LIBRARY'S ORACLE.  PySCF cart=True RHF for every entry of lab/molecules.js, on the
 # VENDORED BSE STO-3G decimals (H-Kr, sha256 22ce59b9...), at the geometries lab/molecules.js pins -- appended to
 # lab/oracles/sto-3g-v1.json under the key `library`.  Run:
-#     ~/miniforge3/envs/sci/bin/python research/h2o-2026-09-11/scratch/fix-molecules.py
+#     ~/miniforge3/envs/sci/bin/python tools/oracles/fix-molecules.py
 #
 # ADDITIVE.  `molecules` (fix-mol6.py's six) and `molecules_extended` (fix-mol8.py's two) are read back and kept
 # byte-for-byte; only `library`, `library_d_probe`, `library_alh3_scan` and a `library` provenance block are written.
@@ -198,7 +198,7 @@ out['library'] = records
 out['library_alh3_scan'] = scan
 out['library_d_probe'] = probe
 out['provenance']['library'] = {
-    'written_by': 'research/h2o-2026-09-11/scratch/fix-molecules.py',
+    'written_by': 'tools/oracles/fix-molecules.py',
     'pyscf': __import__('pyscf').__version__, 'numpy': np.__version__,
     'bse_sha256': SHA, 'bse_elements': 'H-Kr (1-36)', 'cart': True, 'unit': 'bohr', 'ang_to_bohr': ANG,
     'conv_tol': 1e-13, 'conv_tol_grad': 1e-10,

@@ -16,7 +16,7 @@ GRID = ['0', '1e-12', '1e-8', '0.05', '0.1', '0.25', '0.3', '0.49999999', '0.5',
         '43.99999999', '44', '44.00000001', '46', '50', '52.55', '60', '70', '100', '200', '300',
         '1000', '3000', '10000']
 rows = [{'t': repr(float(g)), 'F': [mp.nstr(Fref(m, g), 25, strip_zeros=False) for m in range(MM+1)]} for g in GRID]
-out = {'provenance': {'written_by': 'research/h2o-2026-09-11/scratch/fix-boys.py',
+out = {'provenance': {'written_by': 'tools/oracles/fix-boys.py',
                       'referee': 'mpmath %s at 70 decimal digits, gammainc, cross-checked against hyp1f1 to 1e-60' % mp.__version__,
                       'definition': 'F_m(t) = int_0^1 x^{2m} exp(-t x^2) dx', 'mmax': MM,
                       'note': 'grid pins the two regime switches 0.5 and 44 and their +-1e-8 neighbours; t is the exact double, referee evaluated at that double'},

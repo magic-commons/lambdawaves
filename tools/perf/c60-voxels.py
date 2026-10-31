@@ -14,7 +14,7 @@ from pyscf import gto, lib
 
 ROOT = Path(__file__).resolve().parents[2]
 lib.num_threads(2)
-front = json.loads((ROOT / 'research/release-0.4.0/library-census/c60-frontier.json').read_text())
+front = json.loads((ROOT / 'tools/library/census/c60-frontier.json').read_text())
 rec = json.loads((ROOT / 'lab/vendor/bse/sto-3g-v1.json').read_text())
 basis = [[l] + [[float(e), float(sh['coefficients'][col][k])] for k, e in enumerate(sh['exponents'])]
          for sh in rec['elements']['6']['electron_shells'] for col, l in enumerate(sh['angular_momentum'])]
@@ -39,6 +39,6 @@ pts = (np.array(vox, dtype=float) + 0.5) / N * 2 * half - half
 values = mol.eval_gto('GTOval_cart', pts) @ CP
 out = {'status': 'MEASURED', 'meaning': 'PySCF (libcint GTOval_cart) signed frontier orbitals at the centres of 256 voxels of the 96^3 grid; voxels and the grid DERIVED, values MEASURED',
        'N': N, 'half': half, 'voxels': vox, 'orbitalIndices': front['frontier']['HOMO']['indices'] + front['frontier']['LUMO']['indices'],
-       'values': values.tolist(), 'source': 'research/release-0.4.0/library-census/c60-frontier.json coefficients mapped back into PySCF order; no fresh SCF'}
+       'values': values.tolist(), 'source': 'tools/library/census/c60-frontier.json coefficients mapped back into PySCF order; no fresh SCF'}
 (ROOT / 'research/release-0.4.0/measure/c60-voxels-pyscf.json').write_text(json.dumps(out, indent=1, allow_nan=False) + '\n')
 print(json.dumps({'half': half, 'voxels': len(vox), 'maxAbs': float(np.max(np.abs(values)))}))

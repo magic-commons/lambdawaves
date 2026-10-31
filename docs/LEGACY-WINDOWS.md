@@ -1,7 +1,7 @@
 # LEGACY WINDOWS
 
-**All five are gone (0.5.0, R5-L1).** QCD, H₂⁺ and HELIUM were deleted in D9; H₂ and ELECTROSTATICS in D9b, on Josh's
-ruling of 2026-10-09 ("H2 and Electrostatics should go"). **ATOMS left this list in 0.4.0 S3 (R-A2):** it is back as the
+**All five were removed in 0.5.0:** QCD, H₂⁺ and HELIUM first, then H₂ and ELECTROSTATICS (2026-10-09). **ATOMS left this
+list in 0.4.0:** it is back as the
 periodic-table window — H–Kr cells in SPECTRUM's own picker, opened by SPECTRUM's ATOM, with its own row in + and WINDOW.
 
 Every older project still opens. A file that used a retired window opens on that window's **restore shim** (`rack.js`

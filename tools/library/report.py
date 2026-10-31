@@ -2,7 +2,7 @@
 """Render the tagged census tables and a one-page sizing digest; exclusive output."""
 import json,re
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'research/release-0.4.0/library-census'
+ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'tools/library/census'
 data=json.loads((OUT/'census.json').read_text());rows=data['rows'];tot=data['totals'];water=json.loads((OUT/'water-conversion.json').read_text());front=json.loads((OUT/'c60-frontier.json').read_text())
 def f(v,fmt='.9f',tag='M'):
     return 'U: unavailable' if v is None else tag+': '+format(v,fmt)

@@ -1,6 +1,6 @@
 // 0.5.2 G-W · THE RUNTIME FACADE FIXTURE — `window.__LW`, as the page hands it to the suites, is pinned by name, kind and order:
 // `Object.entries(Object.getOwnPropertyDescriptors(__LW))` → [name, kind] with kind = get (an accessor) | method (a function value) |
-// value, in property order.  The fixture (research/release-0.5.2/lw-facade.json) was captured on v0.5.1-alpha (U7) and is re-captured
+// value, in property order.  The fixture (tests/fixtures/lw-facade.json) was captured on v0.5.1-alpha (U7) and is re-captured
 // only by a row that changes the facade on purpose and says the diff (R0: the dead `windowActivity` wrapper and the first `frost` left).
 // A static walker cannot see this once the literal lives in a module (R5 moves it whole); the page can.  One scene:
 //   1 boot (a driver: no notice, no title screen), LW.ready, a settle; the descriptors match the fixture — names, kinds, order
@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { open } from '../tools/gate/gatekit.mjs';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
-const FIXTURE = new URL('../research/release-0.5.2/lw-facade.json', import.meta.url);
+const FIXTURE = new URL('../tests/fixtures/lw-facade.json', import.meta.url);
 const write = process.argv.includes('--write');
 let n = 0, failed = false;
 const pass = (m) => console.log('PASS ' + ++n + ' ' + m);

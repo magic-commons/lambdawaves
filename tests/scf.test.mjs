@@ -3,7 +3,7 @@ import { sBasis, sto3g1s, ZETA } from './lib/gaussian.js';
 import { rhf } from '../lab/scf.js';
 import { sto3gH2, sto3gIntegrals, eriTensor } from '../lab/h2ci.js';
 import { readFileSync } from 'node:fs';
-const oracle = JSON.parse(readFileSync(new URL('../research/chronusq-2026-09-11/oracle-pyscf.json', import.meta.url)));
+const oracle = JSON.parse(readFileSync(new URL('../tests/fixtures/oracle-pyscf.json', import.meta.url)));
 
 const close = (a, b, tol, what) => assert.ok(Math.abs(a - b) < tol, `${what}: ${a} vs ${b} (tol ${tol})`);
 const H = (z) => ({ z, Z: 1, ...sto3g1s(ZETA.H) }), He = (z) => ({ z, Z: 2, ...sto3g1s(ZETA.He) });

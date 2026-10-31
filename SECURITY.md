@@ -9,8 +9,8 @@ own origin unless said:
   the Picker's pictures, the demo files and their covers, and NIST's measured lines — each fetched when you open what needs
   it, and kept in Cache Storage so the next time works offline.
 - **An imported notebook's images.** A note's `![](https://…)` is fetched from wherever it points, on every open of the
-  project that carries it. That host learns your address and the time. The kit's fix is filed (`docs/FOR-MIR.md`, 028
-  R-09); until it lands, treat a notebook from someone else as a page that can see you open it.
+  project that carries it. That host learns your address and the time. The fix belongs to the interface kit and is filed
+  there (`docs/FOR-MIR.md`); until it lands, treat a notebook from someone else as a page that can see you open it.
 - **The ASK assistant** is switched off in this build (`lab/ask.js` `ASK_ENABLED`). Switched on by a developer, it posts
   your words to a broker on your own machine or network (`docs/GEMMA.md`).
 

@@ -1,5 +1,5 @@
 # λWAVES
-
+These files are the agents' instruction set (this page, `docs/laws/`, `docs/NOTES-FOR-AGENTS.md`, `docs/ui/`, `docs/FOR-MIR.md`), in their working register; the laws' names in capitals are its index.
 λWAVES is a WebGPU quantum-orbital lab, a PWA in vanilla ES modules: hydrogen's 140 states, the atoms, the molecules and their volumes,
 drawn by one ray-marched field, played by one clock, modulated, arranged on a timeline and filmed. Its UI kit is MIR, vendored in `lab/mir/**`.
 This page is the two pages every agent reads whole: the standing constraints, the gates, and the index of `docs/laws/` (read only the file you need).
@@ -43,7 +43,7 @@ After ANY edit under `lab/`:
 - the kit: `node tests/mir-manifest.test.mjs` and `node <MIR>/tools/adopt.mjs . --check` ("in step").
 - anything that draws: THE LOCK on your own server (`python3 tools/gate/server.py <tree> <port> &`, stopped by pid at the end):
   `nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --query gastab=0` (843 · 0) and the same with
-  `--fixture research/release-0.4.0/measure/digest-lock-s4a.json` (987 · 0).
+  `--fixture tests/fixtures/digest-lock-s4a.json` (987 · 0).
 - `window.__LW`: `tests/lw-facade.browser-test.mjs` (a change re-captures with `--write` and says the diff).
 - the settings blob: `node tools/settings-probe.mjs`; the camera routes: `node tools/camera-routes.mjs`; the stage's hit road: `node tools/hit-probe-set.mjs`.
 
