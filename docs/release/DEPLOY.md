@@ -17,7 +17,13 @@ node tools/build-deploy.mjs --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes
                                   # assemble dist/ with the shelf and the volumes that travel as files (../VOLUMES-HOSTING.md), prove it
 npx wrangler deploy --dry-run     # compiles and checks, uploads nothing, costs nothing
 npx wrangler deploy               # publish exactly that
+node tools/release/live-check.mjs # THE WIRE IS THE BUILD: the live index.html and sw.js are byte for byte dist/'s, or no one installs
 ```
+
+The fourth command exists because of a finding (030 V): a zone feature that rewrites responses — Cloudflare's JavaScript Detections and
+Bot Fight Mode (a per-request `<script>` before `</body>`), Rocket Loader, Email Obfuscation, Web Analytics — makes the live page differ
+from the build, and `sw.js` then refuses the install for every visitor, silently. Keep every one of them OFF for this hostname; the check
+names the first differing line when one is on.
 
 The first command is not optional and it is not a formality: `sw.js` derives its **cache name** from its
 own precache hashes, so a stale entry means the name does not move when the bytes do and every returning
