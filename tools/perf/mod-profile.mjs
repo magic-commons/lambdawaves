@@ -438,6 +438,7 @@ async function chromium(srv) {
       await send('Profiler.enable'); await send('Profiler.setSamplingInterval', { interval: 200 });
       await ev(`__MP.start(); ${s.audio ? 'if (window.__fakeMic) __fakeMic.restart();' : ''} __LW.play(); return 1;`);
       await sleep(1500);                                                   // the play's own edge out of the record
+      run.envPlay = await ev(ENV);                                         // 029 M8: what the play itself runs at (LIGHT's canvas), read before the trace
       trace = [];
       await send('Tracing.start', { categories: 'devtools.timeline,v8.execute,blink.user_timing,disabled-by-default-devtools.timeline.frame,disabled-by-default-devtools.timeline', transferMode: 'ReportEvents' });
       await send('Profiler.start');
@@ -455,7 +456,7 @@ async function chromium(srv) {
       trace = [];
       out.runs.push(run);
       const m = run.sum, t = run.trace;
-      console.log(`[${li + 1}/${levers.length}] ${run.lever}: fps ${m.fps} · present p50/p95/p99 ${m.present?.p50}/${m.present?.p95}/${m.present?.p99} · >17.5 ${m.present?.over17} · dropped ${t.droppedFrames} · draw ${t.drawFrames} · main busy ${t.busyMs} ms ${JSON.stringify(t.byCategoryMs)} · GPU top ${t.gpuProcess?.topLevelMs} ms · env ${run.env && !run.env.E ? JSON.stringify({ s: [run.env.autoScale, run.env.scale, run.env.auto], steps: run.env.steps, cap: run.env.capMs, lock: run.env.lock, hz: run.env.hz, cad: run.env.cadence, look: run.env.look, tier: run.env.tier, perf: run.env.perfTier, hold: run.env.hold, hid: run.env.uiHidden, frost: run.env.frost, canvas: run.env.canvas }) : JSON.stringify(run.env)} · audio ${run.audio ? run.audio.live : '-'}`);
+      console.log(`[${li + 1}/${levers.length}] ${run.lever}: fps ${m.fps} · present p50/p95/p99 ${m.present?.p50}/${m.present?.p95}/${m.present?.p99} · >17.5 ${m.present?.over17} · dropped ${t.droppedFrames} · draw ${t.drawFrames} · main busy ${t.busyMs} ms ${JSON.stringify(t.byCategoryMs)} · GPU top ${t.gpuProcess?.topLevelMs} ms · env ${run.env && !run.env.E ? JSON.stringify({ s: [run.env.autoScale, run.env.scale, run.env.auto], steps: run.env.steps, cap: run.env.capMs, lock: run.env.lock, hz: run.env.hz, cad: run.env.cadence, look: run.env.look, tier: run.env.tier, perf: run.env.perfTier, hold: run.env.hold, hid: run.env.uiHidden, frost: run.env.frost, canvas: run.env.canvas, play: run.envPlay && { canvas: run.envPlay.canvas, hold: run.envPlay.hold } }) : JSON.stringify(run.env)} · audio ${run.audio ? run.audio.live : '-'}`);
       fs.mkdirSync(path.dirname(JSON_OUT), { recursive: true }); fs.writeFileSync(JSON_OUT, JSON.stringify(out, null, 1));
     }
     if (!LEVERS) Object.assign(out, out.runs[0]);   // M0's single-run shape (out.sum, out.trace, out.profile) for its readers
