@@ -17,8 +17,14 @@
 - **The remote.** `origin` is github.com/magic-commons/lambdawaves (public); `main` and `dev` carry the beta (`9c9a3c80`, 2026-10-31) and every
   release tag is on the remote. Two workflows: `gate.yml` (`npm test` on push and pull request; the README badge) and `verify.yml`
   (`./test.sh node`, the deploy build, `changelog --check`, the Wrangler dry run); both green on the beta.
-- **Deployed.** lambdawaves.magic-commons.com serves the beta since 2026-10-31 (Cloudflare Workers + Static Assets, 1,459 files); the GitHub
-  Release `v0.9.9-beta` is marked a pre-release. A store submission remains the maintainer's decision.
+- **Deployed.** lambdawaves.magic-commons.com serves the beta since 2026-10-31 (Cloudflare Workers + Static Assets); the GitHub Release
+  `v0.9.9-beta` is marked a pre-release. A store submission remains the maintainer's decision.
+- **The free plan.** The account carries no payment method and the Worker has no code: every request is a static-asset request, free and
+  unlimited, so no traffic can produce a bill. The build's §V7 holds the plan's 20,000-file / 25 MiB budget: 15,674 files ship today.
+- **The library.** VOL. I (6,927 molecules) and the filling VOL. III travel with the site as files, so INSTALL and the single-molecule
+  fetch work; VOL. II is its 5.76 GB archive, handed out from the maintainer's Drive and opened in PICKER › LIBRARY (`docs/VOLUMES-HOSTING.md`).
+- **Hardening (030).** Every response carries a Content-Security-Policy (SECURITY.md); both workflows pin their actions by hash with read-only
+  permissions; install scripts are off; `main` is protected (required checks, no force-push); Dependabot alerts and secret scanning are on.
 
 ## Release blockers
 
