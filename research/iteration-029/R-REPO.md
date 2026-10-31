@@ -10,9 +10,9 @@ Base: `yan-c` @ `81343d6a`. Every tracked top-level path and every folder under 
   **Nothing has moved.** `tools/release/archive-research.sh` prints the plan (dry run, the default) and does it with `--apply`.
 - **DELETED** — junk, a duplicate, or a text folded elsewhere.
 
-Counts (rows of this table): **SHIPS 47** (8 relocated) · **MOVES 27** · **DELETED 3**. In files: 3,404 tracked under `research/`; after
-R3 relocates the 28 the gates read, 3,376 move, plus `REPORT.md`, `docs/history/` (9), five dated docs, `store/` (34) and
-`.claude/handoffs/` (2).
+Counts (rows of this table): **SHIPS 55** (14 of them relocated inside the tree) · **MOVES 20** · **DELETED 3**. In files: 3,404 tracked
+under `research/` at the base; R3 relocated the 178 the gates and tools read (the census's 160 among them), so 3,227 move (the count at the
+rehearsed `--apply`, this row's notes included), plus `REPORT.md`, `docs/history/` (9), five dated docs, `store/` (34) and `.claude/handoffs/` (2).
 
 ## 1. The top level
 
@@ -117,6 +117,7 @@ submission is made.
 | `tools/gemma/` | SHIPS | the ASK broker (off in the build; `lab/ask.js` names it) |
 | `tools/lattice/` | SHIPS | writes `lab/ab-patch.json` |
 | `tools/oracles/` (new, R3) | SHIPS | the fixture scripts, §3 |
+| `tools/knip.json` (new, R5) | SHIPS | the senior pass's knip configuration, so RELEASING's knip line is reproducible |
 | `tools/release/` (new, R1) | SHIPS until applied | `archive-research.sh`; `--apply` removes it with the rest (one use) |
 | `tools/*.mjs` (top level) | SHIPS | generators and probes. About twenty are one row's screenshot sheets (`b-` `c-` `d-` `e-` `f-` `h-` `m-` `s-` `t-` `v-shots`, `n-shots.py`, `skin-sheet`, `csb-sheet`, `row-fit`, `edges-probe`, `glyph-sheet`, `decohere-shots`), each writing into `research/iteration-0NN/*-shots` — after the move into the ignored local folder. Candidate MOVE: **Josh's call, not in the script** |
 | `tools/disk.mjs` | DELETED | its one subject is `research/` (it wrote `research/DISK.md`) |

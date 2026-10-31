@@ -121,20 +121,21 @@ rep CLAUDE.md "\`REPORT.md\` (the history)" "\`docs/WAVES.md\` and the tag \`$TA
 rep CLAUDE.md "the laws' names in capitals are its index." "the laws' names in capitals are its index. $LEGEND"   # same line: CLAUDE.md:6 stays the kit sentence
 after docs/NOTES-FOR-AGENTS.md "# " "
 $LEGEND"
-rep .gitignore "# papers 2026-10-24:" "# The research record is archived (tag $TAG); research/ is a local folder for the tools' shots and scores.
-/research/
-# (was) papers 2026-10-24:"
+node -e 'const fs=require("fs"),f=".gitignore",L=fs.readFileSync(f,"utf8").split("\n"),i=L.findIndex((x)=>x.startsWith("# papers 2026-10-24:"));
+  if(i<0){console.error("archive-research: no papers block in .gitignore");process.exit(1)}
+  fs.writeFileSync(f,L.filter((x,k)=>k!==i&&!x.startsWith("research/")).join("\n").replace(/\n*$/,"\n"))'
+printf '\n# The research record is archived (tag %s); research/ is a local folder for the tools'"'"' shots and scores.\n/research/\n' "$TAG" >> .gitignore
 rep .github/workflows/verify.yml "reads the tags and REPORT.md at each one" "reads the tags and the wave headings at each one"
 git rm -q -- tools/release/archive-research.sh
 
-node tools/changelog.mjs >/dev/null
+node tools/changelog.mjs >/dev/null 2>&1
 git add -A -- CLAUDE.md docs/NOTES-FOR-AGENTS.md .gitignore .github tools CHANGELOG.md docs/WAVES.md
 
 say ""
 say "gates:"
 ./test.sh node >/tmp/archive-research-node.log 2>&1 && say "  ./test.sh node: EXIT 0" || die "./test.sh node red (log /tmp/archive-research-node.log)"
 node tools/build-deploy.mjs --quiet >/dev/null && say "  build-deploy: rc 0" || die "build-deploy red"
-node tools/changelog.mjs --check && say "  changelog --check: rc 0" || die "changelog --check red"
+node tools/changelog.mjs --check 2>/dev/null && say "  changelog --check: rc 0" || die "changelog --check red"
 node tools/provenance.mjs --check && say "  provenance --check: rc 0" || die "provenance --check red"
 node tools/rack-deps.mjs --classes --no-write >/dev/null && say "  rack-deps --classes: rc 0" || die "rack-deps red"
 say ""

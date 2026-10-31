@@ -120,6 +120,7 @@ function tagsOldestFirst() {
   const out = git('for-each-ref', '--format=%(refname:short)%09%(creatordate:unix)', 'refs/tags').trim();
   if (!out) return [];
   return out.split('\n').map(l => { const [name, when] = l.split('\t'); return { name, when: Number(when) }; })
+    .filter(t => /^(v\d|pre-alpha)/.test(t.name))   // release tags only: a marker such as research-archive-2026-10-30 is not a release
     .sort((a, b) => a.when - b.when || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 }
 
