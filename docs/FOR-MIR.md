@@ -149,3 +149,8 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - Open: the AUDIO band hints carry live values (`{out}% output · {db} dB input`), so while the microphone is live each band's title is
   rewritten every paint and control-help adopts it (≈ 560 callbacks a second in scene c). A hint that reads its values when it opens would
   remove them; that is a change of the hint's behaviour, so it waits for a line.
+- Open (λWAVES 029 M6 §2 → M7, a line, no door now): the frost row's hold on a context flag (`c.hold`), so any app can hold the glass on its
+  own motion signal without writing FROST · STILL into the store; λWAVES measured −4.3 ms/frame of GPU main thread at 120 Hz (029 M6).
+  λWAVES does it app-side today (`lab/look.js`: the frost row's `run` overridden in `createLook`'s schema map, `ctx.hold`).
+- Open, for 1.6 (029 M6 §2): QUALITY BALANCED as "hold while moving" would keep a theme's glass at rest for the same cost as lite (4.22 vs
+  4.33 ms measured). A change to an existing enum's meaning, so a line, never a door.

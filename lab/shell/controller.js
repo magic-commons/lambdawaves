@@ -72,8 +72,9 @@ export async function createController(app) {
   const fieldRate = { capMs: 0, lock: false, hz: 0, refreshMs: () => frameBudget.milliseconds('120') };   // 020 L1 PLAYBACK LOCK: lock → the clock steps rate/hz per present (hz 0 = DISPLAY: every rAF, a step of the frame budget's refresh); a PREFERENCE (shell/settings.js)
   /* PERFORMANCE: 'full' updates every CPU window every frame; '120' updates them every 4th frame (≈30 Hz at 120 Hz)
      while the FIELD still presents every frame — the picture never waits for a readout.  The profile is an EMA of
-     the milliseconds each stage costs per frame, so the mode is chosen on numbers, not on faith. */
-  const perf = { mode: '120', cpuEvery: 4, profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, vortex: 0, particles: 0, kepler: 0, skeleton: 0, slice: 0, calculus: 0, meters: 0, badges: 0, atoms: 0, wigner: 0, radiation: 0, emission: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
+     the milliseconds each stage costs per frame, so the mode is chosen on numbers, not on faith.  (029 M7: the seg is READERS now;
+     `tier` is PERFORMANCE · QUALITY | BALANCED | LIGHT, a PREFERENCE `perfTier`, set by SETTINGS' seg alone: windows/settings-card.js) */
+  const perf = { mode: '120', cpuEvery: 4, tier: 'quality', profile: { total: 0, field: 0, spectrum: 0, shadow: 0, orbit: 0, vortex: 0, particles: 0, kepler: 0, skeleton: 0, slice: 0, calculus: 0, meters: 0, badges: 0, atoms: 0, wigner: 0, radiation: 0, emission: 0 }, counts: { frames: 0, cpu: 0 }, ring: new Float64Array(60), work: {}, wall: {} };   // work: an EMA of the cost of the updates that DID work (≥ 1 ms), wall: when the last one ran
   const frameBudget = createFrameBudget();
   const perfBudgetMs = () => frameBudget.milliseconds(perf.mode);
   const tick = (name, fn) => { const a = performance.now(); fn(); const d = performance.now() - a; perf.profile[name] = perf.profile[name] * 0.9 + d * 0.1; if (d >= 1) { perf.work[name] = perf.work[name] ? perf.work[name] * 0.7 + d * 0.3 : d; perf.wall[name] = a; } };

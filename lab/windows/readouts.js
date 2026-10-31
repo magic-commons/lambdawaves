@@ -141,7 +141,7 @@ export function createReadouts(app) {
     /* iteration 008 S · LAST IMPULSE left STATE for this one line: escaped norm · Δp, and under it k, λ = 2π/k and the axis (the K key, the
        Ctrl+drag bow, SQUEEZE-IN; written by static-field.js and kepler.js through `ui.kickRo`) */
     ui.kickRo = readout({ label: 'IMPULSE  escaped · Δp', value: '—', cls: 'wide', sub: 'no impulse yet · Ctrl + drag on the stage, or K' }); wMet.row('tight').appendChild(ui.kickRo.root);
-  el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. PERFORMANCE (SETTINGS › QUALITY) at 120 Hz updates visible CPU readers every fourth frame while the field continues to present each frame.';
+  el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. READERS (SETTINGS › FIELD QUALITY) at 120 Hz updates visible CPU readers every fourth frame while the field continues to present each frame.';
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
