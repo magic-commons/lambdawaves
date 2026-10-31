@@ -1,6 +1,6 @@
 # Shipping readiness
 
-## Status — 2026-10-31 (0.9.9-beta, tagged locally as `v0.9.9-beta`; not pushed, not deployed)
+## Status — 2026-10-31 (0.9.9-beta, released: tag `v0.9.9-beta`, deployed)
 
 - **What 1.0 means.** 1.0 is the tree in which the last confirmed critical or high finding of the 0.9.9 stability review is closed.
   The review's three high findings — the SHADER node's black stage after a film, a `null` settings blob, and an update press that
@@ -14,11 +14,11 @@
 - **The deploy tooling.** Wrangler 4.156.0 is locked; `npm audit` reads 0 in the repository; in `tools/platform/electron`
   (Electron 44.10.0) it reads 0 high and 5 moderate (glob and minimatch under the build-time `@electron/packager` 20.3.0; the only
   offered fix is a major downgrade). `node tools/build-deploy.mjs` passes §V1–§V5.
-- **The remote.** `origin` is github.com/magic-commons/lambdawaves (public); `origin/main` stands at `28fe4457` (2026-10-04). The
-  release tags since `v0.5.3` exist locally only. Two workflows: `gate.yml` (`npm test` on push and pull request; the README badge) and
-  `verify.yml` (`./test.sh node`, the deploy build, `changelog --check`, the Wrangler dry run). Neither has run on this tree.
-- **Not deployed.** The live site was last deployed in September 2026. Pushing, deploying and any store submission are the
-  maintainer's decisions.
+- **The remote.** `origin` is github.com/magic-commons/lambdawaves (public); `main` and `dev` carry the beta (`9c9a3c80`, 2026-10-31) and every
+  release tag is on the remote. Two workflows: `gate.yml` (`npm test` on push and pull request; the README badge) and `verify.yml`
+  (`./test.sh node`, the deploy build, `changelog --check`, the Wrangler dry run); both green on the beta.
+- **Deployed.** lambdawaves.magic-commons.com serves the beta since 2026-10-31 (Cloudflare Workers + Static Assets, 1,459 files); the GitHub
+  Release `v0.9.9-beta` is marked a pre-release. A store submission remains the maintainer's decision.
 
 ## Release blockers
 
