@@ -6,22 +6,32 @@ molecule on the device and never fetches it again. The app holds no link to wher
 
 ## Publishing a volume
 
-1. **Pack with the themes and the archive** (the data stay in `~/Documents/LAMBDAWAVES-VOLUMES/`, never in git):
+1. **Pack with the cut and the archive** (the data stay in `~/Documents/LAMBDAWAVES-VOLUMES/`, never in git):
    ```
    node tools/volumes/pack.mjs --candidates ~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json \
-        --themes tools/volumes/themes.json --archive --incremental
+        --volume vol-1 --numeral I --title 'All the Molecules' --sole --max-gb 5.25 --wip --next II --incremental --archive --fetchable
    node tools/menu-thumbs.mjs --volume vol-<n>     # once per volume that lacks pictures, then pack again
    ```
-   Every finished molecule goes to the first theme it matches (THE CLASSICS · MEDICINE · LIFE AND FOOD · MATERIALS, ATMOSPHERE AND
-   FUEL · THE REST). A theme past 5 GB continues as "· 2" and takes the next numeral. To rename a theme, edit `themes.json`. The
-   packer writes `dist/vol-<n>/`, ONE `dist/volumes.json`, and per volume `dist/LAMBDAWAVES-VOL-<numeral>.lwv` plus its `.sha256`.
-   It reads each archive back before it finishes. The same dist always gives the same bytes.
+   Every finished molecule fills VOL. I until the cut (5.25 GiB of `.lwm` and pictures), then the next numeral ("· 2", "· 3"); a released
+   volume is never refilled and the last one is WIP until it is cut. `--fetchable` keeps `index` beside `archive`, which the dev link and
+   `--ship` need. (`--themes tools/volumes/themes.json` is the other road: one volume per theme.) The packer writes `dist/vol-<n>/`, ONE
+   `dist/volumes.json`, and per volume `dist/LAMBDAWAVES-VOL-<numeral>.lwv` plus its `.sha256`. It reads each archive back before it
+   finishes. The same dist always gives the same bytes.
 2. **Upload each `.lwv`** to Google Drive and share it as "anyone with the link". The `.sha256` beside it is for anyone who wants to
    check a download (`sha256sum -c`).
-3. **Ship the shelf with the app:** `node tools/build-deploy.mjs --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json` puts the
-   small `volumes.json` (title, count, size, `archive: { name, bytes, sha256 }`) at `dist/volumes/volumes.json`. No volume bytes ship.
-   An entry without an archive is refused.
+3. **Ship the shelf with the app:** `node tools/build-deploy.mjs --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-3`
+   puts `volumes.json` at `dist/volumes/volumes.json`. A volume named by `--ship` travels with the site as static assets (its folder is
+   copied to `dist/volumes/vol-<n>/` and its entry keeps `index`, so INSTALL and the single-molecule fetch work); every other entry keeps
+   only `archive: { name, bytes, sha256 }` and its bytes come from the Drive file. An entry with neither is refused.
 4. **After a donation,** the donor gets the Drive link on the donation page.
+
+## The free plan: a volume as files
+
+Cloudflare Workers static assets are free with unlimited requests, within 20,000 files per deploy and 25 MiB per file; the account
+carries no payment method, so there is nothing to bill. VOL. I (13,855 files) travels with the site this way (`--ship vol-1`), and the
+LIBRARY installs it with one press or fetches one molecule at a time. VOL. II would push the deploy past 20,000 files, so it is an
+archive on Drive until a second assets-only Worker on the path `/volumes/vol-2/*` carries it (which needs the main Worker on a route
+instead of a custom domain). `tools/build-deploy.mjs` §V7 THE FREE PLAN refuses a build over either limit and says what is left.
 
 ## What the reader does
 

@@ -8,9 +8,13 @@ maintainer's steps below. Run `npm ci --ignore-scripts` to install the pinned Wr
 and a login**, in this order, **with no edit to `lab/` in between** — the repo is actively worked on, and a
 build from ten minutes ago is not the build you are shipping.
 
+**The free plan.** The account has no payment method and the Worker has no code: every request is a static-asset request, free and
+unlimited, and the build's §V7 holds the free plan's 20,000-file / 25 MiB budget. Nothing here can produce a bill; keep it so.
+
 ```
 node tests/pwa.test.mjs --write   # re-hash lab/ into sw.js §1 — REQUIRED after any lab/ edit
-node tools/build-deploy.mjs       # assemble dist/, prove it, print the payload
+node tools/build-deploy.mjs --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-3
+                                  # assemble dist/ with the shelf and the volumes that travel as files (../VOLUMES-HOSTING.md), prove it
 npx wrangler deploy --dry-run     # compiles and checks, uploads nothing, costs nothing
 npx wrangler deploy               # publish exactly that
 ```

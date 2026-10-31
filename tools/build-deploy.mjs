@@ -46,7 +46,7 @@
  * ./test.sh keep working, and the dossier's "preserve a rational existing structure, avoid unnecessary
  * migration churn" (§7) and "preserving working behavior" (§35) are honoured by construction.
  */
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, copyFileSync, statSync, existsSync, lstatSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, copyFileSync, cpSync, statSync, existsSync, lstatSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
@@ -96,6 +96,7 @@ const ARGS = new Set(process.argv.slice(2));
 const RUN_TEST = !ARGS.has('--no-test');
 const QUIET    = ARGS.has('--quiet');
 const SHELF    = ARGS.has('--shelf') ? process.argv[process.argv.indexOf('--shelf') + 1] : null;
+const SHIP     = new Set(ARGS.has('--ship') ? process.argv[process.argv.indexOf('--ship') + 1].split(',').filter(Boolean) : []);   // 030: the volumes that travel as files
 
 const SEGS = BASE_PATH.split('/').filter(Boolean);
 const SITE = SEGS.length ? SEGS.join('/') + '/' : '';       // dist-relative prefix; '' at an origin root
@@ -216,16 +217,27 @@ for (const [file] of SHIP_EXTRA) {
 }
 mkdirSync(path.join(DIST, '.well-known'), { recursive: true });   // Android TWA: Digital Asset Links, origin root
 copyFileSync(path.join(ROOT, 'tools/platform/android/assetlinks.json'), path.join(DIST, '.well-known/assetlinks.json'));
-/* THE SHELF (iteration 005 S): the small same-origin volumes.json; a deploy holds no volume folder, so an entry keeps only its archive
-   (the reader downloads the .lwv and opens it in PICKER › LIBRARY) — `index` is dropped, and an entry without an archive is refused */
+/* THE SHELF (iteration 005 S; 030 THE FREE PLAN): the small same-origin volumes.json. A volume named by --ship travels WITH the site as
+   static assets (dist/volumes/vol-<n>/ copied from beside the shelf; its entry keeps `index`, so the LIBRARY's one-press INSTALL and the
+   single-molecule fetch work — requests to static assets are free and unlimited on the free plan; §V7 holds the file budget). Every other
+   entry keeps only its archive (the reader downloads the .lwv and opens it in PICKER › LIBRARY): `index` is dropped, and an entry with
+   neither is refused (the next volume, still filling with no molecule yet, is allowed). */
 if (SHELF) {
-  const shelf = JSON.parse(readFileSync(path.resolve(SHELF), 'utf8'));
-  const bad = !shelf || shelf.schema !== 1 || !Array.isArray(shelf.volumes) ? ['not a schema-1 shelf'] : shelf.volumes.filter((v) => !v.archive || !v.archive.name || !v.archive.sha256).map((v) => `${v.id} has no archive`);
-  if (bad.length) { console.error(`--shelf ${SHELF}: ${bad.join('; ')} (pack it with --archive)`); process.exit(2); }
-  for (const v of shelf.volumes) delete v.index;
+  const shelf = JSON.parse(readFileSync(path.resolve(SHELF), 'utf8')), srcDir = path.dirname(path.resolve(SHELF));
+  const bad = !shelf || shelf.schema !== 1 || !Array.isArray(shelf.volumes) ? ['not a schema-1 shelf'] : shelf.volumes.flatMap((v) => {
+    if (SHIP.has(v.id)) return typeof v.index === 'string' && existsSync(path.join(srcDir, v.id, 'index.json')) ? [] : [`${v.id} is named by --ship but has no index beside the shelf`];
+    if (v.wip === true && v.count === 0) return [];
+    return v.archive && v.archive.name && v.archive.sha256 ? [] : [`${v.id} has no archive`];
+  });
+  for (const id of SHIP) if (!shelf || !Array.isArray(shelf.volumes) || !shelf.volumes.some((v) => v.id === id)) bad.push(`--ship ${id} is not on the shelf`);
+  if (bad.length) { console.error(`--shelf ${SHELF}: ${bad.join('; ')} (pack it with --archive, or name the volume with --ship)`); process.exit(2); }
   mkdirSync(path.join(DIST, at('volumes')), { recursive: true });
+  for (const v of shelf.volumes) {
+    if (SHIP.has(v.id)) cpSync(path.join(srcDir, v.id), path.join(DIST, at('volumes/' + v.id)), { recursive: true });
+    else delete v.index;
+  }
   writeFileSync(path.join(DIST, at('volumes/volumes.json')), JSON.stringify(shelf, null, 1) + '\n');
-  console.log(`  shelf    volumes/volumes.json  ${shelf.volumes.map((v) => 'VOL. ' + v.numeral + ' ' + v.archive.name).join(' · ')}`);
+  console.log(`  shelf    volumes/volumes.json  ${shelf.volumes.map((v) => 'VOL. ' + v.numeral + ' ' + (SHIP.has(v.id) ? 'as files' : v.archive ? v.archive.name : 'FILLING')).join(' · ')}`);
 }
 console.log(`lab/ → dist/${SITE} : ${labFiles.length - dropped.size} files`);
 for (const [f, why] of DROP)       console.log(`  dropped  ${f.padEnd(16)} ${QUIET ? '' : why}`);
@@ -307,10 +319,18 @@ H.push('# (statelink.js) and the only query read at boot is location.search.  wr
 H.push('# not_found_handling "404-page" and NOT "single-page-application": a mistyped asset URL must 404,');
 H.push('# not return 200 of HTML that fails later and more confusingly.');
 H.push('');
+H.push('#');
+H.push('# THE CONTENT SECURITY POLICY (030 THE HARDENING).  Scripts, workers, fonts, the manifest and every fetch come from this');
+H.push("# origin alone: index.html has no inline script and the lab runs no eval.  Styles allow 'unsafe-inline' because KaTeX and");
+H.push('# the kit write style attributes; pictures and films are the blob: and data: URLs the app itself makes, and a picture may');
+H.push('# also be https: because a note\'s `![](https://…)` is the reader\'s own choice (SECURITY.md says what that fetch tells).  ASK (lab/ask.js)');
+H.push("# posts to a broker on the visitor's own machine, which connect-src refuses here — on the live site it was never reachable.");
+H.push('# Measured on the built tree under `wrangler dev` before it shipped (030 H-BUILD).');
 H.push('/*');
 H.push('  Cache-Control: public, max-age=0, must-revalidate');
 H.push('  X-Content-Type-Options: nosniff');
 H.push('  Referrer-Policy: strict-origin-when-cross-origin');
+H.push("  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'");
 if (ALPHA_UNLISTED) {
   H.push('  X-Robots-Tag: noindex');
   H.push('# ↑ robots.txt asks a crawler not to FETCH; it does not stop a URL learned from a link being indexed.');
@@ -696,6 +716,16 @@ else {
 }
 
 /* ══ 3.  THE PAYLOAD ════════════════════════════════════════════════════════════════════════════════════ */
+/* ══ V7.  THE FREE PLAN (030) ═══════════════════════════════════════════════════════════════════════════
+ * Workers Static Assets on the free plan: at most 20,000 files per deploy and 25 MiB per file, requests free and unlimited, and
+ * no payment method on the account.  A volume shipped as files (--ship) spends this budget; the check says what is left. */
+rule('V7 · THE FREE PLAN');
+const FREE_FILES = 20000, FREE_FILE_BYTES = 25 * 1024 * 1024;
+const over = distFiles.filter((r) => statSync(path.join(DIST, r)).size > FREE_FILE_BYTES);
+if (distFiles.length > FREE_FILES) fail('V7', `dist/ holds ${distFiles.length} files; the free plan deploys at most ${FREE_FILES} — ship one volume less (--ship)`);
+for (const r of over) fail('V7', `dist/${r} is ${kb(statSync(path.join(DIST, r)).size)}; the free plan serves files up to 25 MiB`);
+if (distFiles.length <= FREE_FILES && !over.length) console.log(`PASS  ${distFiles.length} of ${FREE_FILES} files (${FREE_FILES - distFiles.length} left for the volumes), every file under 25 MiB.`);
+
 rule('3 · PAYLOAD');
 const sizes = distFiles.map((r) => [r, statSync(path.join(DIST, r)).size]).sort((a, b) => b[1] - a[1]);
 const total = sizes.reduce((n, [, s]) => n + s, 0);

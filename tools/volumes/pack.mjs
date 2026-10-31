@@ -46,7 +46,7 @@
  *   indices-only form; validateRecord(record) = [] and chem.open answers its energy with 0 solver calls, or no file.
  *   ε and the energy are the solver's f64; C is f32 (7 digits: the picture's precision, stated in the header); Mulliken f32.
  * Deterministic bytes: no clock enters a .lwm, index.json or volumes.json (the solver's clocks stay in raw/); sha-256 per file. */
-import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, readdirSync, copyFileSync, openSync, writeSync, closeSync, unlinkSync, rmdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, readdirSync, copyFileSync, openSync, readSync, writeSync, closeSync, unlinkSync, rmdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { homedir } from 'node:os';
@@ -339,9 +339,13 @@ function writeArchive(entry, rows, vdir) {
   closeSync(fd); renameSync(tmp, out);
   const digest = hash.digest('hex');
   writeFileSync(out + '.sha256', `${digest}  ${name}\n`);
-  /* read back through the app's reader: the index parses and every file sits where it says, with its bytes */
-  const back = readFileSync(out), idx = parseLwv(back.subarray(0, base));
-  for (const f of idx.files) if (sha(back.subarray(f.offset, f.offset + f.length)) !== f.sha256) throw new Error(`${name}: ${f.path} does not read back`);
+  /* read back through the app's reader: the index parses and every file sits where it says, with its bytes — entry by entry at its
+     offset, since an archive is larger than one Buffer may be (VOL. I is 5.95 GB; readFileSync stops at 2 GiB) */
+  const rfd = openSync(out, 'r');
+  const slice = (offset, length) => { const b = Buffer.alloc(length); let n = 0; while (n < length) { const k = readSync(rfd, b, n, length - n, offset + n); if (!k) break; n += k; } return b; };
+  const idx = parseLwv(slice(0, base));
+  for (const f of idx.files) if (sha(slice(f.offset, f.length)) !== f.sha256) { closeSync(rfd); throw new Error(`${name}: ${f.path} does not read back`); }
+  closeSync(rfd);
   return { name, bytes: at, sha256: digest };
 }
 

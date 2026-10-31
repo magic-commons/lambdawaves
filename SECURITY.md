@@ -1,7 +1,8 @@
 # Security
 
-λWAVES is a static site: no server code, no accounts, no analytics. After the page loads it makes these requests, all to its
-own origin unless said:
+λWAVES is a static site: no server code, no accounts, no analytics. Every response carries a Content-Security-Policy that lets
+scripts, workers, fonts, the manifest and every fetch come from this origin alone (a note's own `https:` pictures are the one
+outside source it allows). After the page loads it makes these requests, all to its own origin unless said:
 
 - **The build check.** When the page is shown and 30 minutes have passed since the last check, the service worker asks for
   `sw.js` again and compares it byte for byte; a new build is offered, never forced.
