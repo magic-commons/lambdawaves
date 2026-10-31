@@ -21,8 +21,9 @@ reconnects only where the browser already grants MIDI, without a prompt.
 
 What stays on your device: localStorage (projects, notes, settings), Cache Storage (the precached build in `lw-lab-<build>`, the
 records above in `lw-data-v1` and `lw-vol-*`), IndexedDB `mir-assets` (audio you drop on the TIMELINE), and the files you
-export. Cloudflare serves the files and keeps its own ordinary server logs.
+export. Cloudflare serves the files and keeps its own ordinary server logs; its responses also carry its `nel` and `report-to` headers
+(network-error reports to Cloudflare), which this page does not control.
 
 If you find a problem — an XSS through an imported project or notebook, a way to make the service worker serve stale
-bytes, a leak of microphone audio, a request this page does not name — open a GitHub issue marked **security**, or write
-to the address on [magic-commons.com](https://magic-commons.com). Please include the project file or the steps.
+bytes, a leak of microphone audio, a request this page does not name — report it privately through GitHub's **Report a
+vulnerability** (the repository's Security tab); a public issue is for everything else. Please include the project file or the steps.

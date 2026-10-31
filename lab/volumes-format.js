@@ -31,10 +31,11 @@ export function parseLwm(input) {
   if (8 + H > u8.length) throw new Error('volumes-format: the header runs past the end of the file');
   const header = JSON.parse(new TextDecoder().decode(u8.subarray(8, 8 + H)));
   if (header.schema !== LWM_SCHEMA) throw new Error(`volumes-format: schema ${header.schema} is not ${LWM_SCHEMA}`);
+  if (header.rungs != null && (typeof header.rungs !== 'object' || Array.isArray(header.rungs))) throw new Error('volumes-format: the header\'s rungs are not a table');   // 030 V
   const base = pad8(8 + H);
   const bytesOf = (b) => {
     const T = DTYPE[b && b.dtype];
-    if (!T || !Number.isInteger(b.offset) || b.offset % 8 || !Number.isInteger(b.length) || b.length < 0) throw new Error('volumes-format: a malformed blob descriptor');
+    if (!T || !Number.isInteger(b.offset) || b.offset < 0 || b.offset % 8 || !Number.isInteger(b.length) || b.length < 0) throw new Error('volumes-format: a malformed blob descriptor');   // 030 V: a negative offset aliased the header
     const start = base + b.offset, end = start + b.length * T.BYTES_PER_ELEMENT;
     if (end > u8.length) throw new Error('volumes-format: a blob runs past the end of the file');
     return { T, bytes: u8.subarray(start, end) };
@@ -122,7 +123,9 @@ export function parseLwv(input) {
   const idx = JSON.parse(new TextDecoder().decode(u8.subarray(8, end)));
   if (!idx || idx.schema !== 1 || !idx.volume || typeof idx.volume.id !== 'string' || !Array.isArray(idx.files) || !idx.files.length) throw new Error('volumes-format: the volume file\'s index is not schema 1');
   let at = pad8(end);
+  const seen = new Set();   // 030 V: a path appears once (a second index.json would overwrite the first in the cache)
   for (const f of idx.files) {
+    if (f && seen.has(f.path)) throw new Error(`volumes-format: ${f.path} appears twice in the volume file`); if (f) seen.add(f.path);
     if (!f || typeof f.path !== 'string' || !/^(?!\/)(?!.*\.\.)[A-Za-z0-9._+/-]{1,200}$/.test(f.path) || !/^[0-9a-f]{64}$/.test(f.sha256)
       || !Number.isSafeInteger(f.offset) || !Number.isSafeInteger(f.length) || f.length < 0 || f.offset % 8 || f.offset < at) throw new Error('volumes-format: a malformed file entry in the volume file');
     at = pad8(f.offset + f.length);

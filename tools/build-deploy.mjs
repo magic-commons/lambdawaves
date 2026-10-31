@@ -46,7 +46,7 @@
  * ./test.sh keep working, and the dossier's "preserve a rational existing structure, avoid unnecessary
  * migration churn" (§7) and "preserving working behavior" (§35) are honoured by construction.
  */
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, copyFileSync, cpSync, statSync, existsSync, lstatSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, copyFileSync, statSync, existsSync, lstatSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
@@ -224,17 +224,44 @@ copyFileSync(path.join(ROOT, 'tools/platform/android/assetlinks.json'), path.joi
    neither is refused (the next volume, still filling with no molecule yet, is allowed). */
 if (SHELF) {
   const shelf = JSON.parse(readFileSync(path.resolve(SHELF), 'utf8')), srcDir = path.dirname(path.resolve(SHELF));
+  /* 030 V (findings 2–4): the shelf is data. Every field is held to the app's own shapes (lab/volumes.js SAFE and RELATIVE), a shipped
+     volume's index.json is re-hashed against indexSha256, and the folder is copied file by file through lstat — index.json, m/<id>.lwm and
+     t/<id>[.<look>].webp and nothing else: a symlink, a dotfile or any other name FAILS the build and is named. */
+  const SAFE = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,95}$/, HEX = /^[0-9a-f]{64}$/, PART = /^(index\.json|m\/[A-Za-z0-9._+-]+\.lwm|t\/[A-Za-z0-9._+-]+\.webp)$/;
+  const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
   const bad = !shelf || shelf.schema !== 1 || !Array.isArray(shelf.volumes) ? ['not a schema-1 shelf'] : shelf.volumes.flatMap((v) => {
-    if (SHIP.has(v.id)) return typeof v.index === 'string' && existsSync(path.join(srcDir, v.id, 'index.json')) ? [] : [`${v.id} is named by --ship but has no index beside the shelf`];
-    if (v.wip === true && v.count === 0) return [];
-    return v.archive && v.archive.name && v.archive.sha256 ? [] : [`${v.id} has no archive`];
+    if (!v || typeof v !== 'object' || !SAFE.test(String(v.id))) return [`an entry's id is not a plain name: ${JSON.stringify(v && v.id)}`];
+    const e = [];
+    if (typeof v.numeral !== 'string' || typeof v.title !== 'string' || !Number.isSafeInteger(v.count)) e.push(`${v.id}: numeral, title and count are not the expected shapes`);
+    if (v.archive != null && !(v.archive && typeof v.archive === 'object' && SAFE.test(String(v.archive.name)) && HEX.test(String(v.archive.sha256)) && Number.isSafeInteger(v.archive.bytes) && v.archive.bytes > 0)) e.push(`${v.id}: the archive entry is malformed (name, bytes, sha256)`);
+    if (v.indexSha256 != null && !HEX.test(String(v.indexSha256))) e.push(`${v.id}: indexSha256 is not a sha-256`);
+    if (SHIP.has(v.id)) {
+      if (v.index !== `${v.id}/index.json` || !HEX.test(String(v.indexSha256))) e.push(`${v.id} is named by --ship but its entry has no ${v.id}/index.json with an indexSha256`);
+      else if (!existsSync(path.join(srcDir, v.id, 'index.json'))) e.push(`${v.id} is named by --ship but has no index.json beside the shelf`);
+      else if (sha256(readFileSync(path.join(srcDir, v.id, 'index.json'))) !== v.indexSha256) e.push(`${v.id}/index.json does not hash to the shelf's indexSha256 (pack again)`);
+    } else if (!(v.archive || (v.wip === true && v.count === 0))) e.push(`${v.id} has no archive`);
+    return e;
   });
-  for (const id of SHIP) if (!shelf || !Array.isArray(shelf.volumes) || !shelf.volumes.some((v) => v.id === id)) bad.push(`--ship ${id} is not on the shelf`);
+  for (const id of SHIP) if (!shelf || !Array.isArray(shelf.volumes) || !shelf.volumes.some((v) => v && v.id === id)) bad.push(`--ship ${id} is not on the shelf`);
   if (bad.length) { console.error(`--shelf ${SHELF}: ${bad.join('; ')} (pack it with --archive, or name the volume with --ship)`); process.exit(2); }
   mkdirSync(path.join(DIST, at('volumes')), { recursive: true });
   for (const v of shelf.volumes) {
-    if (SHIP.has(v.id)) cpSync(path.join(srcDir, v.id), path.join(DIST, at('volumes/' + v.id)), { recursive: true });
-    else delete v.index;
+    if (!SHIP.has(v.id)) { delete v.index; continue; }                       // an archive volume keeps indexSha256: installFile checks the edition by it
+    const src = path.join(srcDir, v.id), dst = path.join(DIST, at('volumes/' + v.id));
+    if (!(path.resolve(dst) + path.sep).startsWith(path.resolve(DIST) + path.sep)) { console.error(`--ship ${v.id}: the destination leaves dist/`); process.exit(2); }
+    const parts = [];
+    const walkVol = (dir, rel) => {
+      for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name < b.name ? -1 : 1)) {
+        const r = rel ? rel + '/' + e.name : e.name, f = path.join(dir, e.name), st = lstatSync(f);
+        if (st.isSymbolicLink()) { console.error(`--ship ${v.id}: ${r} is a symlink; a volume holds files alone`); process.exit(2); }
+        if (st.isDirectory()) { if (r !== 'm' && r !== 't') { console.error(`--ship ${v.id}: ${r}/ is not a volume folder (m/ and t/ alone)`); process.exit(2); } walkVol(f, r); continue; }
+        if (!st.isFile() || !PART.test(r)) { console.error(`--ship ${v.id}: ${r} is not a volume file (index.json, m/<id>.lwm, t/<id>[.<look>].webp)`); process.exit(2); }
+        parts.push(r);
+      }
+    };
+    walkVol(src, '');
+    for (const r of parts) { mkdirSync(path.dirname(path.join(dst, r)), { recursive: true }); copyFileSync(path.join(src, r), path.join(dst, r)); }
+    console.log(`  volume   ${v.id}: ${parts.length} files copied through lstat (index.json, m/, t/ alone)`);
   }
   writeFileSync(path.join(DIST, at('volumes/volumes.json')), JSON.stringify(shelf, null, 1) + '\n');
   console.log(`  shelf    volumes/volumes.json  ${shelf.volumes.map((v) => 'VOL. ' + v.numeral + ' ' + (SHIP.has(v.id) ? 'as files' : v.archive ? v.archive.name : 'FILLING')).join(' · ')}`);
@@ -330,6 +357,7 @@ H.push('/*');
 H.push('  Cache-Control: public, max-age=0, must-revalidate');
 H.push('  X-Content-Type-Options: nosniff');
 H.push('  Referrer-Policy: strict-origin-when-cross-origin');
+H.push('  Strict-Transport-Security: max-age=31536000; includeSubDomains');   // 030 V: a fresh visit never asks over plain http again
 H.push("  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'");
 if (ALPHA_UNLISTED) {
   H.push('  X-Robots-Tag: noindex');

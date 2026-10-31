@@ -21,7 +21,8 @@ export function finiteOver(cur, v) {
   if (typeof cur === 'number') return Number.isFinite(v) ? v : cur;
   if (Array.isArray(cur)) return Array.isArray(v) && cur.every(Number.isFinite) && !v.every(Number.isFinite) ? cur : v;
   if (!cur || typeof cur !== 'object' || !v || typeof v !== 'object' || Array.isArray(v)) return v;
-  const o = { ...v }; for (const k in o) if (k in cur) o[k] = finiteOver(cur[k], o[k]); return o;
+  const o = { ...v }; for (const k of ['__proto__', 'constructor', 'prototype']) if (Object.prototype.hasOwnProperty.call(o, k)) delete o[k];   // 030 V: a file's key never re-parents a live object
+  for (const k in o) if (k in cur) o[k] = finiteOver(cur[k], o[k]); return o;
 }
 export function createPersist(app) {
   const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
@@ -296,7 +297,7 @@ export function createPersist(app) {
         if (pr.overlays) { const O = pr.overlays;
           if (O.vortex) { vortex.setOn(!!O.vortex.on); vortex.setOverlay(!!O.vortex.overlay); }
           if (O.kepler !== undefined) { kepler.setOn(!!O.kepler); if (ui.keplerSw) ui.keplerSw.set(!!O.kepler); }
-          if (O.particles) { const count = pr.instruments && pr.instruments.particles && Number.isFinite(pr.instruments.particles.count) ? pr.instruments.particles.count : O.particles.count; if (O.particles.on) { particles.setOn(true); particles.seed(count || 160, reg, clock.t, app.ctl.domain.half); } else particles.setOn(false); ui.pOn.set(!!O.particles.on); }
+          if (O.particles) { const count = pr.instruments && pr.instruments.particles && Number.isFinite(pr.instruments.particles.count) ? pr.instruments.particles.count : O.particles.count; if (O.particles.on) { particles.setOn(true); particles.seed(Math.min(600, Math.max(20, count || 160)), reg, clock.t, app.ctl.domain.half);   /* 030 V: the knob's range, so a file cannot freeze the tab */ } else particles.setOn(false); ui.pOn.set(!!O.particles.on); }
           if (O.dials !== undefined && app.w.spectrum.setDials && !(pr.readers && pr.readers.spectrum)) app.w.spectrum.setDials(!!O.dials); }
         if (pr.readers) {
           if (pr.readers.spectrum) { const S = pr.readers.spectrum; if (Number.isFinite(S.selected)) app.w.spectrum.select(S.selected); if (S.dials !== undefined) app.w.spectrum.setDials(!!S.dials); }

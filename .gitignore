@@ -33,3 +33,6 @@ lab/volumes
 
 # The research record is archived (tag research-archive-2026-10-30); research/ is a local folder for the tools' shots and scores.
 /research/
+
+# 030 V (finding 5): the agents' handoffs are local working notes; the record lives in the vault, never in the tree again.
+.claude/handoffs/
