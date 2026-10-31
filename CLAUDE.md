@@ -1,12 +1,12 @@
 # λWAVES
-These files are the agents' instruction set (this page, `docs/laws/`, `docs/NOTES-FOR-AGENTS.md`, `docs/ui/`, `docs/FOR-MIR.md`), in their working register; the laws' names in capitals are its index.
+These files are the agents' instruction set (this page, `docs/laws/`, `docs/NOTES-FOR-AGENTS.md`, `docs/ui/`, `docs/FOR-MIR.md`), in their working register; the laws' names in capitals are its index. A `research/…` path, `REPORT.md` or `docs/history/…` cited in these files is archived: the tag `research-archive-2026-10-30` holds it, and so does the vault copy at `~/Documents/DATABASE/CLAUDE/APPS/LAMBDAWAVES/RESEARCH/<the same path>`.
 λWAVES is a WebGPU quantum-orbital lab, a PWA in vanilla ES modules: hydrogen's 140 states, the atoms, the molecules and their volumes,
 drawn by one ray-marched field, played by one clock, modulated, arranged on a timeline and filmed. Its UI kit is MIR, vendored in `lab/mir/**`.
 This page is the two pages every agent reads whole: the standing constraints, the gates, and the index of `docs/laws/` (read only the file you need).
 THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: lab/mir is written by adopt.mjs alone; a λWAVES need becomes an additive door numbered 1.5.6-alpha.N with its FOR-MIR line; a removal waits for a line; `node <MIR>/tools/adopt.mjs . --check` says in step. The doors stand at 1.5.6-alpha.20 (MIR-MANIFEST.json is the number).
 Where things live: `lab/` the app (`main.js` → `rack.js` `boot()`; its modules in `lab/shell/` and `lab/windows/`; `lab/mir/**` the kit; `lab/fonts/**`
 vendored faces) · `tools/` diagnostics, generators and probes · `tests/` the node (`*.test.mjs`) and browser (`*.browser-test.mjs`) suites ·
-`research/iteration-0NN/` each iteration's PLAN and BUILD notes · `docs/` the references · `docs/laws/` the laws by subject.
+the iteration notes in the vault (`~/Documents/DATABASE/CLAUDE/APPS/LAMBDAWAVES/RESEARCH/research/iteration-0NN/`) · `docs/` the references · `docs/laws/` the laws by subject.
 
 ## THE STANDING CONSTRAINTS (never break one)
 
@@ -87,4 +87,4 @@ A law a gate enforces is cited by its gate, not restated: THE LOCK (the field's 
 Elsewhere: `docs/NOTES-FOR-AGENTS.md` §6 (the gates, longer) and §7 (where things live) · `docs/STATE-SCOPES.md` (generated; every key and
 its scope) · `docs/FOR-MIR.md` (the kit's open asks, § FOR 1.5.6) · the DATABASE app map
 (`~/Documents/DATABASE/CLAUDE/APPS/LAMBDAWAVES/MAP/LAMBDAWAVES APP MAP.md`: read the entry page, then grep its index) ·
-`research/iteration-0NN/PLAN.md` (the iteration in flight: its laws, rows and Josh's calls) · `REPORT.md` (the history).
+`~/Documents/DATABASE/CLAUDE/APPS/LAMBDAWAVES/RESEARCH/research/iteration-0NN/PLAN.md` (the iteration in flight: its laws, rows and Josh's calls) · `docs/WAVES.md` and the tag `research-archive-2026-10-30` (the history).

@@ -1,5 +1,7 @@
 # Notes for agents
 
+A `research/…` path, `REPORT.md` or `docs/history/…` cited in these files is archived: the tag `research-archive-2026-10-30` holds it, and so does the vault copy at `~/Documents/DATABASE/CLAUDE/APPS/LAMBDAWAVES/RESEARCH/<the same path>`.
+
 For an assistant helping someone run, tune or contribute to λWAVES. These are the facts that save the most
 time. Each one names where it comes from in this repository; external links are in those files. Where a note
 and the code disagree, the code is right; please say so in an issue.

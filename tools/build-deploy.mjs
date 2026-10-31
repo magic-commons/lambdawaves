@@ -123,7 +123,6 @@ const DROP = [
 const SHIP_EXTRA = [
   ['LICENSE',      'GPL-3.0 §4: the source distribution carries the complete licence text. Dossier §8, §25.'],
   ['NOTICE',       'project copyright, warranty and third-party attribution notices. Dossier §8, §25.'],
-  ['REPORT.md',    'the lab notebook — the laws, the constants, the measured numbers and the named proofs. Dossier §8 and acceptance criterion 8 want /REPORT.md to work. 226 KB, never loaded by the running lab, never precached (a .md by rule), so it costs a reader nothing unless they ask for it.'],
   ['CHANGELOG.md', 'the release history, generated from REPORT.md by tools/changelog.mjs. Dossier §15 makes it the traceability record a tester quotes ("the VORTEX issue happened in v0.3.1-alpha"), which is only useful if it is reachable from the deployed address.'],
 ];
 /* NOT SHIPPED, and why:
@@ -517,7 +516,7 @@ console.log(`      site-root ("/…") paths found: ${siteRoot.size ? '' : 'none 
 for (const [k, kind] of siteRoot) console.log(`        [${kind}] ${k}`);
 console.log(`      absolute URLs (clicked, never loaded — V1's precache and the worker's cross-origin refusal keep them off the critical path): ${[...external.keys()].join(' ') || 'none'}`);
 /* Acceptance criterion 8: the three document URLs must work. Asserted, not assumed. */
-for (const f of ['LICENSE', 'NOTICE', 'REPORT.md', 'CHANGELOG.md'])
+for (const f of ['LICENSE', 'NOTICE', 'CHANGELOG.md'])
   if (!inDist.has(at(f))) fail('V2', `/${f} is not in dist/ — dossier §8 and acceptance criterion 8 require that URL to answer`);
 console.log(`      documents at the deployment root: ${SHIP_EXTRA.map(([f]) => '/' + f).join('  ')}  — all present.`);
 

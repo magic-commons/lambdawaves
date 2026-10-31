@@ -1648,11 +1648,11 @@ function main(argv) {
   }
   console.log(summary(R));
   if (argv.includes('--no-write')) return;
-  const dir = path.join(ROOT, 'research', 'release-0.5.2');
+  const dir = path.join(ROOT, '.tmp', 'rack-deps');
   mkdirSync(dir, { recursive: true });
   writeFileSync(path.join(dir, 'RACK-DEPS.md'), markdown(R));
   writeFileSync(path.join(dir, 'rack-deps.json'), jsonText(R));
-  console.log('\nwrote research/release-0.5.2/RACK-DEPS.md and research/release-0.5.2/rack-deps.json');
+  console.log('\nwrote .tmp/rack-deps/RACK-DEPS.md and .tmp/rack-deps/rack-deps.json');
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main(process.argv.slice(2));
