@@ -1,6 +1,6 @@
 # Shipping readiness
 
-## Status — 2026-10-30 (0.9.9, before the beta cut)
+## Status — 2026-10-31 (0.9.9-beta, tagged locally as `v0.9.9-beta`; not pushed, not deployed)
 
 - **What 1.0 means.** 1.0 is the tree in which the last confirmed critical or high finding of the 0.9.9 stability review is closed.
   The review's three high findings — the SHADER node's black stage after a film, a `null` settings blob, and an update press that

@@ -6,8 +6,8 @@ authors:
   - family-names: Hosain
     given-names: Joshua
     affiliation: Magic Commons
-version: 0.9.9-alpha
-date-released: 2026-10-25
+version: 0.9.9-beta
+date-released: 2026-10-31
 license: GPL-3.0-only
 repository-code: https://github.com/magic-commons/lambdawaves
 url: https://lambdawaves.magic-commons.com

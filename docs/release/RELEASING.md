@@ -26,7 +26,7 @@ before `npx wrangler deploy --env dev`; `wrangler.jsonc` keeps that environment.
 ## Release-day checks
 
 Run on the release commit; each must read as below before the tag. The right-hand column is what each read on 2026-10-30
-(the 0.9.9 tree before the beta cut, the Linux workstation with the RTX 3070).
+(the 0.9.9 tree the day before the beta cut, the Linux workstation with the RTX 3070).
 
 ```bash
 ./test.sh node                                     # 116 node suites (pwa last) + state-scopes --check + hints-census --check: EXIT 0
@@ -36,7 +36,7 @@ npx --no-install dependency-cruiser --no-config --include-only '^lab' --output-t
 npm audit                                          # 0 vulnerabilities
 (cd tools/platform/electron && npm audit)          # 5 moderate (glob, minimatch under @electron/packager 20.3.0); 0 high
 node tools/build-deploy.mjs --quiet                # rc 0: dist/ 1,740 files, 29.59 MiB
-node tools/changelog.mjs --check                   # rc 0: CHANGELOG, CITATION.cff and BUILD_LINE (0.9.9-alpha) in step
+node tools/changelog.mjs --check                   # rc 0: CHANGELOG, CITATION.cff and BUILD_LINE (0.9.9-beta) in step
 # THE LOCK on a served tree (python3 tools/gate/server.py . <p> &), both fixtures: 0 readback differences
 nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --query gastab=0                                            # 843 · 0
 nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --query gastab=0 --fixture tests/fixtures/digest-lock-s4a.json # 987 · 0

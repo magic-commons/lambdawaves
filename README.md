@@ -9,7 +9,7 @@ project · GPL-3.0-only · interface kit [MIR](https://github.com/magic-commons/
 
 ![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
-**Status: 0.9.9, in preparation for the beta.** What is verified and what is not is in
+**Status: 0.9.9-beta.** What is verified and what is not is in
 [shipping readiness](docs/release/SHIPPING-READINESS.md); deployment is in [`DEPLOY.md`](docs/release/DEPLOY.md).
 
 ## What it is

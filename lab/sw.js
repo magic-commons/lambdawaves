@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '628d7346cc22'],
-  ['./build-line.js',                                               '9ab98af90ecc'],
+  ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '73e135b080e2'],
   ['./calculus.js',                                                 '41922d244a06'],
   ['./calculusview.js',                                             '14c1b51d2eda'],
