@@ -29,7 +29,7 @@ const git = (...a) => execFileSync('git', a, { encoding: 'utf8' }).trim();
 const allTags = () => git('tag', '--list', 'v*', '--sort=version:refname').split('\n').filter(Boolean);
 const tagInfo = (t) => {
   const date = git('log', '-1', '--format=%cs', t);
-  const commit = git('rev-parse', '--short', t);
+  const commit = git('rev-parse', '--short', `${t}^{commit}`);   // the commit, not an annotated tag's own object
   let message = '';
   try { message = git('tag', '-l', '--format=%(contents:subject)', t); } catch (_) {}
   return { tag: t, date, commit, message: message || git('log', '-1', '--format=%s', t) };
@@ -41,7 +41,7 @@ function snapshot(t) {
   const dir = path.join(DEST, t);
   if (fs.existsSync(dir) && !FORCE) { console.log(`snapshot: ${t} exists at ${dir} (use --force to re-export)`); return true; }
   fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
-  const parts = PARTS.filter((p) => { try { git('cat-file', '-e', `${t}:${p}`); return true; } catch (_) { return false; } });
+  const parts = PARTS.filter((p) => { try { execFileSync('git', ['cat-file', '-e', `${t}:${p}`], { stdio: 'ignore' }); return true; } catch (_) { return false; } });
   const tar = execFileSync('git', ['archive', '--format=tar', t, ...parts], { maxBuffer: 1 << 30 });
   execFileSync('tar', ['-x', '-C', dir], { input: tar });
   const info = tagInfo(t), serve = parts.includes('serve.sh') ? './serve.sh' : 'tools/serve.sh';
