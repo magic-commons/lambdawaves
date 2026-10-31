@@ -27,9 +27,16 @@ nothing is written.
 - **The repo:** one voice in every public text; the AI disclosure is three sentences in nobody's assumed voice; AI_POLICY.md is gone; the release documents
   under docs/release; the serve scripts under tools; the molecular-names suite green again; RELEASING's release-day list carries today's numbers.
 
+## Your answer to the default (10-31: "as close to default as possible while sacrificing just enough without losing the animations") — DONE
+**SMOOTH ships**: the live glass and every motion kept; the only trim is the canvas at 85 % while the clock plays (the pause edge repaints full; films and
+pictures never see it). On your screen, Picker closed: GPU main 8.3 → 7.4 ms a frame, p95 13.1 → 10.0 ms, dropped ≈190 → 67 per 20 s. The seg is
+PERFORMANCE · FULL | SMOOTH | BALANCED | LIGHT — FULL is everything on, BALANCED holds the glass (p95 9.6, 30 dropped), LIGHT for weak GPUs. Measured and
+refused for the default: a smaller blur radius (buys nothing), DISCONNECTED off while playing (visible), 110 march steps (moves playing pixels). One note:
+every earlier measurement ran with the Picker open over the field; with it open SMOOTH reads 7.6 ms (under the 8.3 budget, above the 7.5 target) — holding
+the Picker's own frost while the field plays is the Picker's look and your call. Eleven JPEGs for your eye in `research/iteration-029/M10-shots/`.
+
 ## Your calls (each one word)
-1. **BALANCED as the shipped default.** One line (`lab/shell/settings.js`, `applySettings`: `|| 'quality'` → `|| 'balanced'`). It changes the interface's
-   pixels while playing, never the stage's. The glass is yours. On a 60 Hz panel QUALITY already fits twice over; on 120 Hz it is the eureka for every first run.
+1. ~~BALANCED as the default~~ — answered above (SMOOTH).
 2. **The archive.** `research/iteration-029/R-REPO.md` (vault copy "… REPO TABLE 2026-10-31"): SHIPS 55 · MOVES 20 (3,227 research files, REPORT.md's notebook,
    docs/history, five dated docs, store/, the handoffs → the vault; history kept under the tag) · DELETED 3. "Go" = the tag `research-archive-2026-10-30`, then
    `tools/release/archive-research.sh --apply`, then the gates.
