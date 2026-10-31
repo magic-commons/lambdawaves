@@ -339,6 +339,7 @@ export async function boot(dom) {
   }
 
 
+  const PLAY_CAP = { smooth: 0.85, light: 0.5 };   // 029 M8/M10 · PERFORMANCE: the canvas scale's ceiling WHILE PLAYING (measured: SMOOTH's 0.85 is the smallest step under 7.5 ms of GPU main thread, M10-BUILD)
   function loop(nowMs) {
     rafId = 0;
     if (page.hidden || app.state.exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
@@ -351,7 +352,7 @@ export async function boot(dom) {
     else if (!cornerAxis.hidden) cornerAxis.hidden=true;
     if(ui.frameSw) { const mode=mat.frame===false?'OFF':(mat.frameMode||'box').toUpperCase(); if(ui.frameSw.root.dataset.mode!==mode)ui.frameSw.root.dataset.mode=mode; }
     if(ui.axisSw) { const mode=mat.axis===false?'OFF':(mat.axisMode||'box').toUpperCase(); if(ui.axisSw.root.dataset.mode!==mode)ui.axisSw.root.dataset.mode=mode; }
-    look.moving(clock.playing || (perf.tier !== 'quality' && !!app.state.modHost && app.state.modHost.clock.isRunning()));   /* 029 M7: under BALANCED / LIGHT a modulated write moves the picture too.  WAVE 67: the FROST policy's one per-frame act — a compare, no read of anything (0.5.0 C2: on the
+    look.moving(clock.playing || ((perf.tier === 'balanced' || perf.tier === 'light') && !!app.state.modHost && app.state.modHost.clock.isRunning()));   /* 029 M7: under BALANCED / LIGHT a modulated write moves the picture too.  WAVE 67: the FROST policy's one per-frame act — a compare, no read of anything (0.5.0 C2: on the
                       edge the kit's frost row writes frost-hold under STILL: the filter moves while the field runs, never the fill).
                       It rides the loop rather than the play button because there are seven ways to start the
                       transport in this lab (the button, the key, LW.play, the A/B switch, the bow, the slap,
@@ -473,7 +474,7 @@ export async function boot(dom) {
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
       field.setStepCap(tabletMotion ? tablet.steps : Infinity);   // full saved quality returns on the first still frame
-      tick('field', () => { const sc = quality.scale * (quality.auto ? quality.autoScale : 1); field.resize(perf.tier === 'light' && clock.playing ? Math.min(sc, 0.5) : sc); if (mat.style >= STYLE.balls && field.setAtoms) { field.setAtoms(app.state.chem.on ? app.state.chem.atomsNow() : null, app.state.chem.on ? moleculeCharge(app.state.chem.preset()) : 0); field.setEspGrid(app.state.chem.on ? app.state.chem.espGrid() : null); } field.frame({ modes, refModes: app.state.pendingRef, obs, mat, molecule: !!(app.state.molSession && app.state.molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
+      tick('field', () => { const sc = quality.scale * (quality.auto ? quality.autoScale : 1); field.resize(clock.playing && PLAY_CAP[perf.tier] ? Math.min(sc, PLAY_CAP[perf.tier]) : sc); if (mat.style >= STYLE.balls && field.setAtoms) { field.setAtoms(app.state.chem.on ? app.state.chem.atomsNow() : null, app.state.chem.on ? moleculeCharge(app.state.chem.preset()) : 0); field.setEspGrid(app.state.chem.on ? app.state.chem.espGrid() : null); } field.frame({ modes, refModes: app.state.pendingRef, obs, mat, molecule: !!(app.state.molSession && app.state.molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
       app.state.pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
     }
@@ -505,7 +506,7 @@ export async function boot(dom) {
       autoQ.presented = autoQ.lastMs = autoQ.m0 = 0;                 // the play's intervals, and the edge's own transition interval, are not the still picture's
       if (gov.drop) { gov.drop = 0; gov.changes++; schedule(TIER.REBUILD); }
       if (quality.auto && quality.autoScale < 1) { quality.autoScale = 1; autoQ.changes++; schedule(TIER.PRESENT); if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale).toFixed(0) + '%', ''); }   // the still picture repaints at full size on the next frame (REFUTE-B: nothing else would)
-      if (perf.tier === 'light') schedule(TIER.PRESENT);              // 029 M8 · LIGHT: the canvas was at most half while playing; the still picture repaints full
+      if (perf.tier === 'smooth' || perf.tier === 'light') schedule(TIER.PRESENT);   // 029 M8/M10 · SMOOTH and LIGHT: the canvas was capped while playing; the still picture repaints full
     }
     app.state.playedLast = clock.playing;
     perf.counts.frames++;
@@ -657,7 +658,7 @@ export async function boot(dom) {
   const lockWord = () => 'LOCKED ' + (fieldRate.hz ? fieldRate.hz + ' Hz' : 'DISPLAY');   // 020 L2: METERS and the governor say PLAYBACK LOCK
   function paintGovernor() {
     if (!ui.govRo) return;
-    const st = (perf.tier !== 'quality' ? perf.tier.toUpperCase() + ' · ' : '') + (fieldRate.lock ? lockWord() + ' · ' : '') + (!gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop : 'nominal');
+    const st = perf.tier.toUpperCase() + ' · ' + (fieldRate.lock ? lockWord() + ' · ' : '') + (!gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop : 'nominal');
     ui.govRo.set(`${st} · ${gov.median ? gov.median.toFixed(1) : '—'} ms · ${field.ok ? field.resolution : 0}³`, !gov.on ? '' : gov.drop ? 'warn' : 'ok');
     const parked = [...gov.parked.entries()].map(([n, p]) => n + ' ' + p.cost.toFixed(0) + ' ms');
     ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') : 'all readers active') + ' · budget ' + (perfBudgetMs() * 4 / 3).toFixed(0) + ' ms · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%');

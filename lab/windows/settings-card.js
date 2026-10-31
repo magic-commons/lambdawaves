@@ -140,11 +140,13 @@ export function createSettingsCard(app) {
       { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
       onChange: (v) => { setPerfMode(v); saveSettings(); } });
     r5b.appendChild(ui.perfSeg.root);
-    /* 029 M7/M8 · PERFORMANCE (M6-SYNTHESIS §2): a PREFERENCE `perfTier` (absent = QUALITY), never a look key.  BALANCED holds the frost while the
-       picture moves (look.js hold); LIGHT also caps the canvas at half while playing (rack.js loop).  ui.setTier is the one road (applySettings too) */
-    ui.setTier = (t) => { perf.tier = t === 'balanced' || t === 'light' ? t : 'quality'; look.hold(perf.tier !== 'quality'); ui.tierSeg.set(perf.tier); schedule(TIER.PRESENT); };
-    ui.tierSeg = seg({ label: 'PERFORMANCE', value: 'quality', options: [
-      { id: 'quality', label: 'QUALITY', title: 'The glass as the look says, always' },
+    /* 029 M7/M8/M10 · PERFORMANCE (M6-SYNTHESIS §2, M10-BUILD): a PREFERENCE `perfTier` (absent = SMOOTH; M7's `quality` reads FULL), never a look key.
+       SMOOTH keeps the live glass and draws the canvas at 85 % while playing; BALANCED holds the frost while the picture moves (look.js hold); LIGHT
+       also caps the canvas at half while playing (rack.js loop).  ui.setTier is the one road (applySettings too) */
+    ui.setTier = (t) => { perf.tier = t === 'quality' ? 'full' : ['full', 'balanced', 'light'].includes(t) ? t : 'smooth'; look.hold(perf.tier === 'balanced' || perf.tier === 'light'); ui.tierSeg.set(perf.tier); schedule(TIER.PRESENT); };
+    ui.tierSeg = seg({ label: 'PERFORMANCE', value: 'smooth', options: [
+      { id: 'full', label: 'FULL', title: 'Everything as the look says, always' },
+      { id: 'smooth', label: 'SMOOTH', title: 'Live glass; canvas at 85 % while playing' },
       { id: 'balanced', label: 'BALANCED', title: 'Hold the frost while the picture moves' },
       { id: 'light', label: 'LIGHT', title: 'Hold the frost; half-size canvas while playing' }],
       onChange: (v) => { ui.setTier(v); saveSettings(); } });
@@ -202,7 +204,7 @@ export function createSettingsCard(app) {
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
     ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>Performance.</b> FIELD CLOCK cap limits how often ψ is reconstructed from the register; the picture still presents every frame, so it saves CPU time, not GPU time. AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE: QUALITY keeps the glass as the look says; BALANCED holds the frost while the picture moves (the look returns at rest); LIGHT also draws the canvas at half size while playing (films and pictures keep their own size). READERS 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH 1 is ±½ output level. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    el('div', 'note', gq).innerHTML = '<b>Performance.</b> FIELD CLOCK cap limits how often ψ is reconstructed from the register; the picture still presents every frame, so it saves CPU time, not GPU time. AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE: FULL keeps everything as the look says; SMOOTH, the default, keeps the live glass and every motion and draws the canvas at 85 % while playing (full size at rest, in films and in pictures); BALANCED holds the frost while the picture moves (the look returns at rest); LIGHT also draws the canvas at half size while playing (films and pictures keep their own size). READERS 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH 1 is ±½ output level. KEEP FRAMES updates the playhead every frame and may cost performance.';
     el('div', 'note', gq).innerHTML = '<b>Playback.</b> WALL follows the wall clock. LOCKED steps time by exactly one CADENCE step per frame and holds the render scale, so a recording never sees a skipped or doubled step; a slow frame slows time instead. LATENCY is the time from a knob to the picture.';
   }
   return { createFieldQuality };
