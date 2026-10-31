@@ -317,7 +317,7 @@ const themeOf = (T, c) => {
   const k = T.findIndex((t) => meets(t, c)); return k >= 0 ? k : fallback; };
 const roman = (n) => [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]
   .reduce((s, [v, r]) => { while (n >= v) { s += r; n -= v; } return s; }, '');
-const pad8 = (n) => (n + 7) & ~7;
+const pad8 = (n) => Math.ceil(n / 8) * 8;   // plain arithmetic: a bitwise AND wraps at 2 GiB, and VOL. I is 5.95 GB
 
 /* ── THE ARCHIVE: 'LWV1' · u32 H · the index JSON · pad to 8 · every file 8-aligned; deterministic (no clock; the same dist → the same bytes) ── */
 function writeArchive(entry, rows, vdir) {

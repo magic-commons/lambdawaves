@@ -21,7 +21,7 @@
 export const MAGIC = 'LWM1', LWM_SCHEMA = 1, LWV_MAGIC = 'LWV1';
 const DTYPE = { f64: Float64Array, f32: Float32Array, i32: Int32Array, f16: Uint16Array };   // f16: IEEE binary16 bits (iteration 014 C1's potential grid)
 const LE = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
-const pad8 = (n) => (n + 7) & ~7;
+const pad8 = (n) => Math.ceil(n / 8) * 8;   // plain arithmetic: a bitwise AND wraps at 2 GiB, and an archive is 5.95 GB (030)
 
 export function parseLwm(input) {
   if (!LE) throw new Error('volumes-format: a big-endian host cannot read a .lwm (its arrays are little-endian)');
