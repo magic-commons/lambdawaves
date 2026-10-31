@@ -75,12 +75,14 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
   const stageGround = () => mat.bg;                                  // the header λ sits on the CANVAS: the live STAGE colour
   const accent = createAccent({ model: 'palette', vivid: defaults.vivid, wheelStops, stageGround, gamut: (rgb) => gamutCss(rgb),
     onAccent: (A, B) => { const v = getModView(); if (v) v.setAccent(A, B); } });
-  const ctx = { doc: document, accent, moving: false, lastAccent: null };
+  const ctx = { doc: document, accent, moving: false, hold: false, lastAccent: null };
   const home = { ...LOOK_HOME, ...defaults };
   const schema = lookSchema().map((r) => ({ ...r, ...(r.key in home ? { default: home[r.key] } : {}),
     ...(HOME_MAPS[r.key] ? { apply: r.apply.map((sp) => (sp.map ? { ...sp, map: HOME_MAPS[r.key](sp) } : sp)) } : {}),
     ...(r.key === 'blur' ? { max: 30 } : r.key.startsWith('accent') ? { wrap: false } : {}),   // GLASS BLUR's travel (the kit's row stops at 24): no stored value moves; an ACCENT keeps END's 360° (wave 68: it renders as 0°, a fold left the eye at 0° and HOME dead)
-    ...(r.key === 'theme' ? { apply: [...r.apply, { run: (v, s, e) => { if (seen !== v + e.theme) { seen = v + e.theme; onTheme(e.theme, v); } } }] } : {}) }));
+    ...(r.key === 'theme' ? { apply: [...r.apply, { run: (v, s, e) => { if (seen !== v + e.theme) { seen = v + e.theme; onTheme(e.theme, v); } } }] } : {}),
+    /* 029 M7 · PERFORMANCE · BALANCED: the kit's frost-hold run, also on ctx.hold — any FROST behaves as STILL while the picture moves; the store is never written */
+    ...(r.key === 'frost' ? { apply: r.apply.map((sp) => (sp.run ? { run: (v, s, e, c) => document.body.classList.toggle('frost-hold', (v === 'still' || c.hold) && !!c.moving) } : sp)) } : {}) }));
   /* 018 F2 · THE λWAVES SKIN: the first-run look itself (every row's home above, the device's material included), first in MIR OPTIONS' SKIN
      stepper, so a first run reads λWAVES and RESET LOOK returns to it; the kit's THEMES follow.  A skin states the kit's THEME_KEYS and its
      one tone the COLOUR_KEYS; LIGHT · DARK · SYSTEM, the hints and HELP stay the reader's own (shell/themes.js). */
@@ -123,6 +125,8 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
     rerun() { seen = ''; ctx.lastAccent = null; prefs.apply({ now: true }); },
     /** FROST · STILL holds the frost while the picture moves: the kit's run writes frost-hold on the edge */
     moving(b) { if (ctx.moving !== b) { ctx.moving = b; prefs.apply({ now: true }); } },
+    /** 029 M7: PERFORMANCE BALANCED and LIGHT hold the frost while the picture moves, whatever FROST says (at rest the look is the user's) */
+    hold(b) { if (ctx.hold !== b) { ctx.hold = b; prefs.apply({ now: true }); } },
     setGamut(fn) { gamutCss = fn; },
     markBatchBegin() { batch++; },
     markBatchEnd() { if (batch > 0 && --batch === 0 && dirty) { dirty = false; paintMarks(); } },

@@ -351,7 +351,7 @@ export async function boot(dom) {
     else if (!cornerAxis.hidden) cornerAxis.hidden=true;
     if(ui.frameSw) { const mode=mat.frame===false?'OFF':(mat.frameMode||'box').toUpperCase(); if(ui.frameSw.root.dataset.mode!==mode)ui.frameSw.root.dataset.mode=mode; }
     if(ui.axisSw) { const mode=mat.axis===false?'OFF':(mat.axisMode||'box').toUpperCase(); if(ui.axisSw.root.dataset.mode!==mode)ui.axisSw.root.dataset.mode=mode; }
-    look.moving(clock.playing);   /* WAVE 67: the FROST policy's one per-frame act — a compare, no read of anything (0.5.0 C2: on the
+    look.moving(clock.playing || (perf.tier !== 'quality' && !!app.state.modHost && app.state.modHost.clock.isRunning()));   /* 029 M7: under BALANCED / LIGHT a modulated write moves the picture too.  WAVE 67: the FROST policy's one per-frame act — a compare, no read of anything (0.5.0 C2: on the
                       edge the kit's frost row writes frost-hold under STILL: the filter moves while the field runs, never the fill).
                       It rides the loop rather than the play button because there are seven ways to start the
                       transport in this lab (the button, the key, LW.play, the A/B switch, the bow, the slap,
@@ -656,7 +656,7 @@ export async function boot(dom) {
   const lockWord = () => 'LOCKED ' + (fieldRate.hz ? fieldRate.hz + ' Hz' : 'DISPLAY');   // 020 L2: METERS and the governor say PLAYBACK LOCK
   function paintGovernor() {
     if (!ui.govRo) return;
-    const st = (fieldRate.lock ? lockWord() + ' · ' : '') + (!gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop : 'nominal');
+    const st = (perf.tier !== 'quality' ? perf.tier.toUpperCase() + ' · ' : '') + (fieldRate.lock ? lockWord() + ' · ' : '') + (!gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop : 'nominal');
     ui.govRo.set(`${st} · ${gov.median ? gov.median.toFixed(1) : '—'} ms · ${field.ok ? field.resolution : 0}³`, !gov.on ? '' : gov.drop ? 'warn' : 'ok');
     const parked = [...gov.parked.entries()].map(([n, p]) => n + ' ' + p.cost.toFixed(0) + ' ms');
     ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') : 'all readers active') + ' · budget ' + (perfBudgetMs() * 4 / 3).toFixed(0) + ' ms · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%');

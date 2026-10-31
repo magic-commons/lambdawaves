@@ -38,7 +38,7 @@
  * and the top self-time functions.  THE WINDOW APPEARS ON THE SCREEN for the run; the pid is closed at the end.
  * --lever a,b,c… (029 M6, with --chromium): ONE browser for the whole sweep; each lever is a FRESH FIRST-RUN PAGE (the origin's storage cleared,
  * then the scene) with the lever set through the page's own doors (LEVER below), SECS of trace, the summary kept and the trace dropped.  A
- * lever may be a pair: 'lock60+uiflat'.  Repeat 'default' first and last to bracket drift.  --swiftshader: the same, HEADLESS on the
+ * lever may be a pair: 'lock60+uiflat'.  029 M7/M8: 'balanced' and 'light' press SETTINGS › FIELD QUALITY › PERFORMANCE.  Repeat 'default' first and last to bracket drift.  --swiftshader: the same, HEADLESS on the
  * software GPU (SwiftShader's Vulkan under Dawn) — the integrated-GPU proxy, ratios only; no window appears.
  * One browser at a time (the GPU is shared); nice -n 10 is the caller's. */
 import fs from 'node:fs'; import path from 'node:path'; import os from 'node:os'; import net from 'node:net';
@@ -154,8 +154,11 @@ const SCENE = {
    that caps the PRESENT: the loop presents only on a 1/60 tick), the MODULATION cadence seg, and the march's steps (mat.steps, which the
    GRID seg writes through quality.steps at the next rebuild) */
 const LOOK = (o) => `__LW.look.set(${JSON.stringify(o)}); __LW.look.apply({ now: true });`;
+/* 029 M7/M8: PERFORMANCE · BALANCED | LIGHT, pressed on SETTINGS › FIELD QUALITY's own seg (the user's door; it writes the blob's perfTier) */
+const TIER_SEG = (word) => `{ const s = [...document.querySelectorAll('.segw')].find((x) => x.querySelector('.k-lbl') && x.querySelector('.k-lbl').textContent === 'PERFORMANCE');
+  const b = s && [...s.querySelectorAll('.seg-b')].find((x) => x.textContent === '${word}'); if (!b) throw new Error('no PERFORMANCE ${word}'); b.click(); }`;
 const LEVER = {
-  default: '',
+  default: '', balanced: TIER_SEG('BALANCED'), light: TIER_SEG('LIGHT'),
   tinted: LOOK({ card: 'tinted' }), solid: LOOK({ card: 'solid' }), blur0: LOOK({ blur: 0 }), frostoff: LOOK({ frost: 'off' }), still: LOOK({ frost: 'still' }),
   veil0: LOOK({ veil: 0 }), nodisc: LOOK({ disconnected: false }), uilite: LOOK({ quality: 'balanced' }), uiflat: LOOK({ quality: 'light' }),
   swift: '__LW.look.applyPreset("swift"); __LW.look.apply({ now: true });',
@@ -220,7 +223,7 @@ const ENV = `return { inner: [innerWidth, innerHeight], canvas: (() => { const c
   governor: __LW.governor.state, autoScale: __LW.quality.autoScale, auto: __LW.quality.auto, scale: __LW.quality.scale, presents: __LW.stats.presents, skipped: __LW.stats.skipped,
   steps: __LW.mat.steps, capMs: __LW.fieldRate.capMs, hz: __LW.fieldRate.hz, uiHidden: __LW.uiHidden, frost: __LW.frostLive, card: __LW.cardStyle, dpr: devicePixelRatio,
   look: (() => { const g = (k) => __LW.look.get(k); return { card: g("card"), frost: g("frost"), blur: g("blur"), veil: g("veil"), disconnected: g("disconnected"), quality: g("quality") }; })(),
-  tier: document.documentElement.dataset.uiTier || 'full',
+  tier: document.documentElement.dataset.uiTier || 'full', perfTier: __LW.settings.perfTier || 'quality', hold: document.body.classList.contains('frost-hold'),
   build: __LW.build, modPaint: __LW.mod.view && __LW.mod.view.performance ? __LW.mod.view.performance() : null, errs: (window.__e || []).slice(0, 8) };`;
 
 /* ── THE NUMBERS ─────────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -452,7 +455,7 @@ async function chromium(srv) {
       trace = [];
       out.runs.push(run);
       const m = run.sum, t = run.trace;
-      console.log(`[${li + 1}/${levers.length}] ${run.lever}: fps ${m.fps} · present p50/p95/p99 ${m.present?.p50}/${m.present?.p95}/${m.present?.p99} · >17.5 ${m.present?.over17} · dropped ${t.droppedFrames} · draw ${t.drawFrames} · main busy ${t.busyMs} ms ${JSON.stringify(t.byCategoryMs)} · GPU top ${t.gpuProcess?.topLevelMs} ms · env ${run.env && !run.env.E ? JSON.stringify({ s: [run.env.autoScale, run.env.scale, run.env.auto], steps: run.env.steps, cap: run.env.capMs, lock: run.env.lock, hz: run.env.hz, cad: run.env.cadence, look: run.env.look, tier: run.env.tier, hid: run.env.uiHidden, frost: run.env.frost, canvas: run.env.canvas }) : JSON.stringify(run.env)} · audio ${run.audio ? run.audio.live : '-'}`);
+      console.log(`[${li + 1}/${levers.length}] ${run.lever}: fps ${m.fps} · present p50/p95/p99 ${m.present?.p50}/${m.present?.p95}/${m.present?.p99} · >17.5 ${m.present?.over17} · dropped ${t.droppedFrames} · draw ${t.drawFrames} · main busy ${t.busyMs} ms ${JSON.stringify(t.byCategoryMs)} · GPU top ${t.gpuProcess?.topLevelMs} ms · env ${run.env && !run.env.E ? JSON.stringify({ s: [run.env.autoScale, run.env.scale, run.env.auto], steps: run.env.steps, cap: run.env.capMs, lock: run.env.lock, hz: run.env.hz, cad: run.env.cadence, look: run.env.look, tier: run.env.tier, perf: run.env.perfTier, hold: run.env.hold, hid: run.env.uiHidden, frost: run.env.frost, canvas: run.env.canvas }) : JSON.stringify(run.env)} · audio ${run.audio ? run.audio.live : '-'}`);
       fs.mkdirSync(path.dirname(JSON_OUT), { recursive: true }); fs.writeFileSync(JSON_OUT, JSON.stringify(out, null, 1));
     }
     if (!LEVERS) Object.assign(out, out.runs[0]);   // M0's single-run shape (out.sum, out.trace, out.profile) for its readers

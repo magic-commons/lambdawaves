@@ -4,7 +4,7 @@ import { TIER } from '../tier.js';
 import { el, knob, sw, seg, readout, group, label } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
-    { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
+    { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, perf, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
     ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
     const gi = group(ui.set.body, 'INTERFACE');
     const ri = el('div', 'row tight', gi);
@@ -133,11 +133,20 @@ export function createSettingsCard(app) {
     const r5b = el('div', 'row tight', gq);
     ui.autoSw = sw({ label: 'AUTO SCALE', value: true, title: 'Adjust canvas resolution to the frame budget', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
     ui.govSw = sw({ label: 'GOVERNOR', value: true, title: 'Protect the frame rate automatically', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
-    ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [   // 0.4.0 S3: out of METERS, beside the GOVERNOR it works with
+    ui.perfSeg = seg({ label: 'READERS', value: '120', options: [   // 0.4.0 S3: out of METERS, beside the GOVERNOR it works with (029 M7: the label READERS; key `perfMode`, ids unchanged)
       { id: 'full', label: 'FULL', title: 'Update visible readers every frame' },
       { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
       onChange: (v) => { setPerfMode(v); saveSettings(); } });
     r5b.appendChild(ui.perfSeg.root);
+    /* 029 M7/M8 · PERFORMANCE (M6-SYNTHESIS §2): a PREFERENCE `perfTier` (absent = QUALITY), never a look key.  BALANCED holds the frost while the
+       picture moves (look.js hold); LIGHT also caps the canvas at half while playing (rack.js loop).  ui.setTier is the one road (applySettings too) */
+    ui.setTier = (t) => { perf.tier = t === 'balanced' || t === 'light' ? t : 'quality'; look.hold(perf.tier !== 'quality'); ui.tierSeg.set(perf.tier); schedule(TIER.PRESENT); };
+    ui.tierSeg = seg({ label: 'PERFORMANCE', value: 'quality', options: [
+      { id: 'quality', label: 'QUALITY', title: 'The glass as the look says, always' },
+      { id: 'balanced', label: 'BALANCED', title: 'Hold the frost while the picture moves' },
+      { id: 'light', label: 'LIGHT', title: 'Hold the frost; half-size canvas while playing' }],
+      onChange: (v) => { ui.setTier(v); saveSettings(); } });
+    r5b.appendChild(ui.tierSeg.root);
     /* iteration 016 W4 (Josh, call 7: "60 | 120 HZ probably moves into SETTINGS"): the modulation's update rate, beside the GOVERNOR — off the modulation
        window's work bar (mod-port.js `cadenceKey: false`) and the control surface's expander; the kit's record keeps it (controller.js saveMod) */
     ui.cadSeg = seg({ label: 'MODULATION', value: String(MOD.hz), options: [
@@ -191,7 +200,7 @@ export function createSettingsCard(app) {
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
     ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH 1 is ±½ output level. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE: QUALITY keeps the glass as the look says; BALANCED holds the frost while the picture moves (the look returns at rest); LIGHT also draws the canvas at half size while playing (films and pictures keep their own size). READERS 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH 1 is ±½ output level. KEEP FRAMES updates the playhead every frame and may cost performance.';
     el('div', 'note', gq).innerHTML = '<b>Playback.</b> WALL follows the wall clock. LOCKED steps time by exactly one CADENCE step per frame and holds the render scale, so a recording never sees a skipped or doubled step; a slow frame slows time instead. LATENCY is the time from a knob to the picture.';
   }
   return { createFieldQuality };
