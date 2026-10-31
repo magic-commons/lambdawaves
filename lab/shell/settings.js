@@ -90,7 +90,7 @@ export function createSettings(app) {
     if (s.governor === false) app.ctl.setGovernor(false);                 // wave 45: the governor held off
     if (s.keepFrames === true) app.ctl.setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)
     app.ctl.setPerfMode(s.perfMode === 'full' ? 'full' : '120');
-    if (ui.setTier) ui.setTier(s.perfTier || 'quality');   // 029 M7: PERFORMANCE, absent = QUALITY (BALANCED as the shipped default is Josh's call: this one word)
+    if (ui.setTier) ui.setTier(s.perfTier || 'smooth');   // 029 M10: PERFORMANCE, absent = SMOOTH (Josh 10-31: the shipped default); M7's 'quality' reads FULL (setTier)
     app.ctl.fieldRate.lock = s.playLock === true; app.ctl.fieldRate.hz = [30, 60, 120].includes(s.playHz) ? s.playHz : 0; if (ui.showPlayback) ui.showPlayback();   // 020 L2: absent = WALL · DISPLAY         // an absent key takes the official 120 Hz profile; an explicit FULL choice survives
     if (typeof s.friction === 'number') app.host.camera.setFriction(s.friction);   // wave 51: the camera's feel comes back … but AUTO-ROTATE never does (see saveSettings); 018 B4: SPIN left, an old `spin` is read by nothing
     if (typeof s.dragGain === 'number') app.host.camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them

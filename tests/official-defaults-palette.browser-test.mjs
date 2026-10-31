@@ -20,11 +20,14 @@ try {
       auto:__LW.quality.auto,domain:__LW.domain.auto,governor:__LW.governor.on,
       theme:__LW.themeChoice,card:__LW.cardStyle,frost:__LW.frost,
       blur:getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim(),
-      vivid:+vivid,errors:__e.slice()};`);
+      vivid:+vivid,
+      // 029 M10: PERFORMANCE · FULL | SMOOTH | BALANCED | LIGHT, and a first run takes SMOOTH (the look above untouched)
+      tier:(()=>{const r=[...document.querySelectorAll('[role=radiogroup]')].find(x=>x.getAttribute('aria-label')==='PERFORMANCE'),bs=r?[...r.querySelectorAll('.seg-b')]:[];
+        return bs.map(x=>x.textContent+(x.getAttribute('aria-checked')==='true'?'*':'')).join('|');})(),errors:__e.slice()};`);
   assert.deepEqual(fresh, { tags:true,captions:true,hints:true,helpOff:true,lean:true,aaHidden:true,chemAaShown:true,
     auto:true,domain:true,governor:true,theme:'light',card:'refractive',frost:'always',
-    blur:'22px',vivid:.5,errors:[] });
-  console.log('PASS fresh desktop defaults: visibility, quality, light refractive frost, 22px blur and 50% vivid');
+    blur:'22px',vivid:.5,tier:'FULL|SMOOTH*|BALANCED|LIGHT',errors:[] });
+  console.log('PASS fresh desktop defaults: visibility, quality, light refractive frost, 22px blur, 50% vivid and PERFORMANCE SMOOTH');
 
   // 029 M1: a STAGE write re-inks the header λ alone; every square keeps its fill, and the λ wears what the kit's full paint gives it
   const marks = await g.ev(`const L=__LW, F=document.querySelector('.stage-follow'), follow=F.classList.contains('on');

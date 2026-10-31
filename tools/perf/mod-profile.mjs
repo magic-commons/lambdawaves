@@ -42,7 +42,7 @@
  * software GPU (SwiftShader's Vulkan under Dawn) — the integrated-GPU proxy, ratios only; no window appears.
  * One browser at a time (the GPU is shared); nice -n 10 is the caller's. */
 import fs from 'node:fs'; import path from 'node:path'; import os from 'node:os'; import net from 'node:net';
-import { spawn, execFileSync } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process'; import { createHash } from 'node:crypto'; import zlib from 'node:zlib';
 
 const argv = process.argv.slice(2);
 const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
@@ -51,6 +51,7 @@ const SECS = Number(opt('--secs', 30)), CHROM = opt('--chromium', null), MO = !a
 const SCENES = (opt('--scenes', 'idle,a,b,bh,bf,c,c2,d,e')).split(',');
 const AUDIO = opt('--audio', process.env.STAR || path.join(ROOT, 'media/star.mp3'));
 const LEVERS = opt('--lever', null), SWS = argv.includes('--swiftshader');
+const SHOTS = opt('--shots', null);   // 029 M10: per run a JPEG of the playing picture, and the paused stage (interface hidden) before and after REST: its digest, and the trim's difference on a still frame
 const JSON_OUT = opt('--json', path.join(TMP, (CHROM ? (SWS ? 'swiftshader-' : 'chromium-') + CHROM + (LEVERS ? '-levers' : '') : 'firefox') + '.json'));
 const W = 1920, H = 1080;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -153,22 +154,35 @@ const SCENE = {
    off the seg), AUTO SCALE off + the canvas scale (quality.scale, the GRID seg's own pairing), PLAYBACK LOCK at CADENCE 60 (the one door
    that caps the PRESENT: the loop presents only on a 1/60 tick), the MODULATION cadence seg, and the march's steps (mat.steps, which the
    GRID seg writes through quality.steps at the next rebuild) */
+const KEEP = (o) => `window.__lv = Object.assign(window.__lv || {}, ${o});`;
+const STEPS = (n) => KEEP('{ steps: __LW.quality.steps, mstep: __LW.mat.steps }') + ` __LW.quality.steps = ${n}; __LW.mat.steps = ${n};`;
+const SCALE = (k) => KEEP('{ auto: __LW.quality.auto, scale: __LW.quality.scale }') + ` __LW.quality.auto = false; __LW.quality.scale = ${k};`;
+const BLURX = (k) => KEEP("{ blur: __LW.look.get('blur') }") + ` __LW.look.set({ blur: Math.round(__lv.blur * ${k}) }); __LW.look.apply({ now: true });`;
 const LOOK = (o) => `__LW.look.set(${JSON.stringify(o)}); __LW.look.apply({ now: true });`;
 /* 029 M7/M8: PERFORMANCE · BALANCED | LIGHT, pressed on SETTINGS › FIELD QUALITY's own seg (the user's door; it writes the blob's perfTier) */
 const TIER_SEG = (word) => `{ const s = [...document.querySelectorAll('.segw')].find((x) => x.querySelector('.k-lbl') && x.querySelector('.k-lbl').textContent === 'PERFORMANCE');
   const b = s && [...s.querySelectorAll('.seg-b')].find((x) => x.textContent === '${word}'); if (!b) throw new Error('no PERFORMANCE ${word}'); b.click(); }`;
 const LEVER = {
   default: '', balanced: TIER_SEG('BALANCED'), light: TIER_SEG('LIGHT'),
+  /* 029 M10: every scene opens with THE PICKER up (the front page opens at boot; PREP's demo open does not close it), its full-page frost over
+     the playing field.  'lab' closes it through its action (L): the lab as a player sees it */
+  lab: "if (document.body.classList.contains('menu-open')) __LW.run('menu');",
+  smooth: TIER_SEG('SMOOTH'), full: TIER_SEG('FULL'),
   tinted: LOOK({ card: 'tinted' }), solid: LOOK({ card: 'solid' }), blur0: LOOK({ blur: 0 }), frostoff: LOOK({ frost: 'off' }), still: LOOK({ frost: 'still' }),
   veil0: LOOK({ veil: 0 }), nodisc: LOOK({ disconnected: false }), uilite: LOOK({ quality: 'balanced' }), uiflat: LOOK({ quality: 'light' }),
   swift: '__LW.look.applyPreset("swift"); __LW.look.apply({ now: true });',
   hidden: "if (!__LW.uiHidden) __LW.actions.run('hide');",
   fc60: '__LW.fieldRate.capMs = 16;', fc30: '__LW.fieldRate.capMs = 33;',
-  scale75: '__LW.quality.auto = false; __LW.quality.scale = 0.75;', scale50: '__LW.quality.auto = false; __LW.quality.scale = 0.5;',
+  scale75: SCALE(0.75), scale50: SCALE(0.5),
   lock60: '__LW.fieldRate.lock = true; __LW.fieldRate.hz = 60;',
   mod120: '__LW.mod.setCadence(120);',
-  steps110: '__LW.quality.steps = 110; __LW.mat.steps = 110;', steps80: '__LW.quality.steps = 80; __LW.mat.steps = 80;',
+  steps110: STEPS(110), steps80: STEPS(80),
+  scale90: SCALE(0.9), scale85: SCALE(0.85), scale80: SCALE(0.8), blur75: BLURX(0.75), blur60: BLURX(0.6),
 };
+/* 029 M10 · a trim meant to act WHILE PLAYING ONLY is measured as its lever, then put back at rest (REST) before the paused capture, as the build would */
+const REST = { scale: '__LW.quality.auto = __lv.auto; __LW.quality.scale = __lv.scale;', blur: '__LW.look.set({ blur: __lv.blur }); __LW.look.apply({ now: true });',
+  steps: '__LW.quality.steps = __lv.steps; __LW.mat.steps = __lv.mstep;' };
+const restJs = (name) => [...new Set(name.split('+').map((k) => k.replace(/\d+$/, '')).filter((k) => k in REST))].map((k) => REST[k]).join(' ');
 const leverJs = (name) => name.split('+').map((k) => { if (!(k in LEVER)) throw new Error('no lever ' + k + ' (have: ' + Object.keys(LEVER).join(' ') + ')'); return LEVER[k]; }).join(' ');
 const PREP = (s) => `window.confirm = () => true; window.__w = (n) => new Promise((r) => setTimeout(r, n));
   try { if (__LW.warning && __LW.warning.dismiss) __LW.warning.dismiss(); } catch (_) {}
@@ -223,7 +237,8 @@ const ENV = `return { inner: [innerWidth, innerHeight], canvas: (() => { const c
   governor: __LW.governor.state, autoScale: __LW.quality.autoScale, auto: __LW.quality.auto, scale: __LW.quality.scale, presents: __LW.stats.presents, skipped: __LW.stats.skipped,
   steps: __LW.mat.steps, capMs: __LW.fieldRate.capMs, hz: __LW.fieldRate.hz, uiHidden: __LW.uiHidden, frost: __LW.frostLive, card: __LW.cardStyle, dpr: devicePixelRatio,
   look: (() => { const g = (k) => __LW.look.get(k); return { card: g("card"), frost: g("frost"), blur: g("blur"), veil: g("veil"), disconnected: g("disconnected"), quality: g("quality") }; })(),
-  tier: document.documentElement.dataset.uiTier || 'full', perfTier: __LW.settings.perfTier || 'quality', hold: document.body.classList.contains('frost-hold'),
+  glass: (() => { const d = document.querySelector('.dev:not(.closed) > .dev-body'); return { blurVar: getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim(), surface: getComputedStyle(document.body).getPropertyValue('--surface-filter').trim(), dev: d ? getComputedStyle(d).backdropFilter : null }; })(), dither: __LW.mat.dither, picker: document.body.classList.contains('menu-open'),
+  tier: document.documentElement.dataset.uiTier || 'full', perfTier: __LW.settings.perfTier || 'smooth', hold: document.body.classList.contains('frost-hold'),
   build: __LW.build, modPaint: __LW.mod.view && __LW.mod.view.performance ? __LW.mod.view.performance() : null, errs: (window.__e || []).slice(0, 8) };`;
 
 /* ── THE NUMBERS ─────────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -368,6 +383,24 @@ const MAIN_SELF = (events) => {
     gpuProcess: (() => { const gm = meta.find((e) => e.args && /CrGpuMain/.test(e.args.name)); if (!gm) return null;
       const g = events.filter((e) => e.pid === gm.pid && e.tid === gm.tid && e.ph === 'X'); return { events: g.length, topLevelMs: +(g.reduce((a, e) => a + (e.dur || 0), 0) / 1000).toFixed(0) }; })() };
 };
+/* 029 M10: an 8-bit RGB(A) PNG decoded (zlib + the five scanline filters) → { w, h, ch, px }, and the per-pixel max-channel difference of two */
+function pngPixels(buf) {
+  let p = 8, w = 0, h = 0, ct = 0; const idat = [];
+  while (p < buf.length) { const n = buf.readUInt32BE(p), t = buf.toString('ascii', p + 4, p + 8), d = buf.subarray(p + 8, p + 8 + n);
+    if (t === 'IHDR') { w = d.readUInt32BE(0); h = d.readUInt32BE(4); ct = d[9]; if (d[8] !== 8) throw new Error('PNG depth ' + d[8]); } else if (t === 'IDAT') idat.push(d); p += 12 + n; }
+  const ch = ct === 6 ? 4 : 3, raw = zlib.inflateSync(Buffer.concat(idat)), st = w * ch, px = Buffer.alloc(st * h);
+  for (let y = 0; y < h; y++) { const f = raw[y * (st + 1)], s = y * (st + 1) + 1, o = y * st;
+    for (let i = 0; i < st; i++) { const a = i >= ch ? px[o + i - ch] : 0, b = y ? px[o - st + i] : 0, c = i >= ch && y ? px[o - st + i - ch] : 0, x = raw[s + i];
+      px[o + i] = (x + (f === 0 ? 0 : f === 1 ? a : f === 2 ? b : f === 3 ? (a + b) >> 1 : (() => { const q = a + b - c, pa = Math.abs(q - a), pb = Math.abs(q - b), pc = Math.abs(q - c); return pa <= pb && pa <= pc ? a : pb <= pc ? b : c; })())) & 255; } }
+  return { w, h, ch, px };
+}
+function pxDiff(a, b) {
+  if (a.w !== b.w || a.h !== b.h) return { size: [a.w, a.h, b.w, b.h] };
+  let mx = 0, sum = 0, n2 = 0; const hist = new Uint32Array(256), N = a.w * a.h;
+  for (let i = 0, j = 0; i < N; i++, j += a.ch) { const d = Math.max(Math.abs(a.px[j] - b.px[j]), Math.abs(a.px[j + 1] - b.px[j + 1]), Math.abs(a.px[j + 2] - b.px[j + 2])); hist[d]++; sum += d; if (d > mx) mx = d; if (d > 2) n2++; }
+  let acc = 0, p99 = 0; for (let d = 0; d < 256; d++) { acc += hist[d]; if (acc >= 0.99 * N) { p99 = d; break; } }
+  return { max: mx, mean: +(sum / N).toFixed(3), p99, over2pct: +(100 * n2 / N).toFixed(2) };
+}
 function profileTop(p, n = 12) {
   const self = new Map(), byId = new Map(p.nodes.map((q) => [q.id, q]));
   for (let i = 0; i < p.samples.length; i++) self.set(p.samples[i], (self.get(p.samples[i]) || 0) + (p.timeDeltas[i] || 0));
@@ -445,8 +478,25 @@ async function chromium(srv) {
       await sleep(SECS * 1000);
       const prof0 = await send('Profiler.stop');
       const done = new Promise((r) => { traceDone = r; }); await send('Tracing.end'); await Promise.race([done, sleep(60000)]); traceDone = null;
+      if (SHOTS) { fs.mkdirSync(SHOTS, { recursive: true }); const j = await send('Page.captureScreenshot', { format: 'jpeg', quality: 70 }); if (j.result) fs.writeFileSync(path.join(SHOTS, `${li + 1}-${run.lever}-playing.jpg`), Buffer.from(j.result.data, 'base64')); }
       const raw = await ev('const r = __MP.stop(); __LW.pause(); return r;');
       run.env = await ev(ENV);
+      if (SHOTS) {   // the paused stage, still (the modulation and the mic stopped), the interface hidden: A = the trim still on, B = after REST, C = B again
+        await ev("__LW.mod.arm(false); try { if (window.__fakeMic && __fakeMic.src) __fakeMic.src.stop(); } catch (_) {} if (!__LW.uiHidden) __LW.actions.run('hide'); __LW.schedule(__LW.TIER.PRESENT); await __LW.settle(); await __w(1200); return 1;");
+        const raf2 = 'await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return 1;';
+        const png = async () => { await ev(raf2); await send('Page.captureScreenshot', { format: 'png' }); await ev(raf2); return (await send('Page.captureScreenshot', { format: 'png' })).result.data; };   // the first capture can return the surface's previous frame
+        const A = await png();
+        await ev((lever ? restJs(lever) : '') + ' __LW.schedule(__LW.TIER.PRESENT); await __LW.settle(); await __w(1200); return 1;');
+        run.envRest = await ev(ENV);
+        const B = await png();
+        await ev('__LW.schedule(__LW.TIER.PRESENT); await __LW.settle(); await __w(800); return 1;');
+        const C = await png();
+        const [pa, pb, pc] = [A, B, C].map((x) => pngPixels(Buffer.from(x, 'base64')));
+        const dig = (p) => createHash('sha256').update(p.px).digest('hex').slice(0, 16);   // the decoded pixels, not the PNG's bytes
+        for (const [k, x] of [['trim', A], ['paused', B]]) fs.writeFileSync(path.join(SHOTS, `${li + 1}-${run.lever}-${k}.png`), Buffer.from(x, 'base64'));
+        run.paused = { digest: dig(pb), stable: dig(pb) === dig(pc), trimDigest: dig(pa), diff: pxDiff(pa, pb), drift: pxDiff(pb, pc) };
+        console.log(`[${li + 1}/${levers.length}] ${run.lever}: paused digest ${run.paused.digest} (stable ${run.paused.stable}, drift ${JSON.stringify(run.paused.drift)}) · the trim on a still frame ${JSON.stringify(run.paused.diff)} · canvas trim ${run.env && run.env.canvas} → rest ${run.envRest && run.envRest.canvas} · glass ${JSON.stringify(run.env && run.env.glass)} · dither ${run.env && run.env.dither}`);
+      }
       if (!LEVERS) try { fs.mkdirSync(TMP, { recursive: true }); const fd = fs.openSync(path.join(TMP, 'chromium-' + CHROM + '.trace.ndjson'), 'w');   // a single run keeps M0's raw record (a sweep keeps summaries only)
         for (let i = 0; i < trace.length; i += 5000) fs.writeSync(fd, trace.slice(i, i + 5000).map((e) => JSON.stringify(e)).join('\n') + '\n'); fs.closeSync(fd);
         fs.writeFileSync(path.join(TMP, 'chromium-' + CHROM + '.cpuprofile'), JSON.stringify(prof0.result ? prof0.result.profile : {})); } catch (e) { run.saveError = String(e); }   // the raw record first: a summariser fault never costs the run
