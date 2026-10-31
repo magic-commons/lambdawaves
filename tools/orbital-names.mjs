@@ -18,7 +18,7 @@ const ROOT = new URL('../', import.meta.url);
 const args = process.argv.slice(2), has = (f) => args.includes(f);
 const record = JSON.parse(readFileSync(new URL('lab/vendor/bse/sto-3g-v1.json', ROOT), 'utf8'));
 registerRecord('sto-3g', record);
-const probe = JSON.parse(readFileSync(new URL('research/molecular-orbitals-2026-10-01/names-probe.json', ROOT), 'utf8'));
+const probe = JSON.parse(readFileSync(new URL('tests/fixtures/names-probe.json', ROOT), 'utf8'));
 let failures = 0;
 const fail = (msg) => { failures++; console.log('FAIL ' + msg); };
 

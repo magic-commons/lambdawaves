@@ -1,6 +1,6 @@
 {
  "provenance": {
-  "written_by": "research/h2o-2026-09-11/scratch/fix-boys.py",
+  "written_by": "tools/oracles/fix-boys.py",
   "referee": "mpmath 1.4.1 at 70 decimal digits, gammainc, cross-checked against hyp1f1 to 1e-60",
   "definition": "F_m(t) = int_0^1 x^{2m} exp(-t x^2) dx",
   "mmax": 8,

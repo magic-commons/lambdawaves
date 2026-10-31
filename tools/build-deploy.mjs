@@ -9,7 +9,7 @@
  *
  * Node stdlib only — this repo has no dependencies and the thing that ships it must not be the exception.
  * (`wrangler` is a devDependency of the DEPLOY, installed by npm and never imported here; the no-deps
- * charter is about the shipped app, and dist/ still contains nothing but the lab. DEPLOY.md says so.)
+ * charter is about the shipped app, and dist/ still contains nothing but the lab. docs/release/DEPLOY.md says so.)
  *
  * ── WHAT THIS IS FOR ───────────────────────────────────────────────────────────────────────────────────
  * λWAVES is a static application.  Shipping it is therefore ONE command and ONE login, and the only reason
@@ -42,7 +42,7 @@
  * — which is what lets the same bytes run at 127.0.0.1:8700/lab/, on the LAN, under `wrangler dev`, and at
  * an origin root.  So the whole build is a move, and §V2 re-proves that by walking every reference in the
  * assembled tree rather than assuming it — including the one member of the manifest for which "./" is NOT
- * relative to the manifest (see MANIFEST IDENTITY in §V2).  Nothing in lab/ is rewritten, ./serve.sh and
+ * relative to the manifest (see MANIFEST IDENTITY in §V2).  Nothing in lab/ is rewritten, tools/serve.sh and
  * ./test.sh keep working, and the dossier's "preserve a rational existing structure, avoid unnecessary
  * migration churn" (§7) and "preserving working behavior" (§35) are honoured by construction.
  */
@@ -462,7 +462,7 @@ for (const [rel, needle] of [[at('main.js'), './rack.js'], [INDEX, './main.js'],
 if (refs.length < 150) fail('V2', `only ${refs.length} references found across dist/ — the scan has stopped seeing the source`);
 
 /* DEV-ONLY REFERENCES — the one kind of escape that is by design.  Each entry names a reference that resolves only
-   where the repo root is served (serve-lan.py, tools/gate/server.py) and is meant to 404 on the deployed origin, where
+   where the repo root is served (tools/serve-lan.py, tools/gate/server.py) and is meant to 404 on the deployed origin, where
    nothing reaches it but an explicit flag.  Every other escape is a broken link. */
 const DEV_ONLY = {
   [`${at('rack.js')} → ../tools/perf/device-report.js`]:
@@ -595,7 +595,7 @@ else {
   if (reg) {
     /* At an origin root './sw.js' and '/sw.js' resolve to the same URL and the same scope, so neither is
        wrong TODAY.  Relative is still the one to keep: it is the reason the same bytes serve correctly
-       from /lab/ on ./serve.sh, from localhost:8787 under `wrangler dev`, and from the origin root. */
+       from /lab/ on tools/serve.sh, from localhost:8787 under `wrangler dev`, and from the origin root. */
     if (reg[1].startsWith('/') && SITE)
       fail('V3', `register('${reg[1]}') is a hostname-root path, but the app is served from ${URLPATH} — there is no such file, and if there were, the worker's scope would be the whole origin. Use './sw.js'.`);
     else if (reg[1].startsWith('/'))
@@ -607,7 +607,7 @@ else {
          scope over somebody else's application.  The rule the header states is 'relative is the one to keep,
          everywhere', so the gate now says exactly that, at the root as well.  It costs nothing while main.js
          is right and it is the only way the claim stays true after the move. */
-      fail('V3', `register('${reg[1]}') is absolute. It resolves correctly at an origin root TODAY, so nothing is broken yet — and that is precisely why this fails rather than warns: it breaks ./serve.sh (which serves the lab at /lab/) now, and the day λWAVES moves under a shared origin an absolute path takes the worker's scope over the whole domain. './sw.js' is right everywhere. Use it.`);
+      fail('V3', `register('${reg[1]}') is absolute. It resolves correctly at an origin root TODAY, so nothing is broken yet — and that is precisely why this fails rather than warns: it breaks tools/serve.sh (which serves the lab at /lab/) now, and the day λWAVES moves under a shared origin an absolute path takes the worker's scope over the whole domain. './sw.js' is right everywhere. Use it.`);
     else console.log(`PASS  register('${reg[1]}') is relative → the worker is served from ${URLPATH}sw.js and its scope is ${URLPATH}${SITE ? '' : ' — the whole origin, which is correct: this hostname is λWAVES and nothing else'}.`);
   }
 }
@@ -648,7 +648,7 @@ else {
 rule('V6 · wrangler.jsonc');
 const WFILE = ['wrangler.jsonc', 'wrangler.json', 'wrangler.toml'].map((f) => path.join(ROOT, f)).find(existsSync);
 if (!WFILE) fail('V6', 'no wrangler.jsonc at the repo root — `npx wrangler dev` and `npx wrangler deploy` have nothing to read (dossier §10)');
-else if (WFILE.endsWith('.toml')) console.log(`NOTE  ${path.basename(WFILE)} is TOML; not parsed here. The jsonc form is what DEPLOY.md documents.`);
+else if (WFILE.endsWith('.toml')) console.log(`NOTE  ${path.basename(WFILE)} is TOML; not parsed here. The jsonc form is what docs/release/DEPLOY.md documents.`);
 else {
   /* JSONC → JSON: strip comments, respecting string literals so a "//" inside a URL survives. */
   const raw = readFileSync(WFILE, 'utf8');
@@ -766,9 +766,9 @@ if (problems.length) {
     console.log(`${broken.length ? '\n' : ''}THE SITE WOULD LOAD, BUT THE PWA IS NOT WIRED IN (${unwired.length}) — every artefact exists and is proved;`);
     console.log('nothing in the document reaches for it, so this deploys as an ordinary web page with no offline and no install:');
     for (const p of unwired) console.log(`  ✗ ${p.section}: ${p.msg}`);
-    console.log('  → DEPLOY.md · "The line that is missing".');
+    console.log('  → docs/release/DEPLOY.md · "The line that is missing".');
   }
-  console.log('\nsee DEPLOY.md.');
+  console.log('\nsee docs/release/DEPLOY.md.');
   process.exit(1);
 }
-console.log(`\ndist/ is complete and verified — ${distFiles.length} files, ${kb(total)}.  Next: \`npx wrangler dev\`, then DEPLOY.md.`);
+console.log(`\ndist/ is complete and verified — ${distFiles.length} files, ${kb(total)}.  Next: \`npx wrangler dev\`, then docs/release/DEPLOY.md.`);

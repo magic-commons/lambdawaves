@@ -18,4 +18,4 @@ for g in json.load(open('geoms-631.json')):
     mf = scf.RHF(mol); mf.conv_tol = 1e-13; mf.conv_tol_grad = 1e-9; e = mf.kernel()
     res.append({'id': g['id'], 'nAO': int(mol.nao), 'energy': float(e), 'converged': bool(mf.converged), 'homo': float(mf.mo_energy[mol.nelectron//2-1]), 'lumo': float(mf.mo_energy[mol.nelectron//2])})
     print(g['id'], mol.nao, '%.12f' % e, mf.converged, flush=True)
-json.dump({'provenance': {'pyscf': pyscf.__version__, 'numpy': np.__version__, 'bse_sha256': hashlib.sha256(raw).hexdigest(), 'cart': True, 'unit': 'bohr', 'written_by': 'research/molecular-waves-2026-09-18/basis/oracle-631.py'}, 'molecules': res}, open('oracle-631.json','w'), indent=1)
+json.dump({'provenance': {'pyscf': pyscf.__version__, 'numpy': np.__version__, 'bse_sha256': hashlib.sha256(raw).hexdigest(), 'cart': True, 'unit': 'bohr', 'written_by': 'tools/oracles/oracle-631.py'}, 'molecules': res}, open('oracle-631.json','w'), indent=1)

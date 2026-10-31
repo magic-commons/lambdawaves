@@ -4,7 +4,7 @@ import json,math
 from pathlib import Path
 import numpy as np
 from pyscf import gto,lib
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'research/release-0.4.0/library-census'
+ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'tools/library/census'
 lib.num_threads(2);front=json.loads((OUT/'c60-frontier.json').read_text());rec=json.loads((ROOT/'lab/vendor/bse/sto-3g-v1.json').read_text())
 basis=[[l]+[[float(e),float(sh['coefficients'][col][k])] for k,e in enumerate(sh['exponents'])] for sh in rec['elements']['6']['electron_shells'] for col,l in enumerate(sh['angular_momentum'])]
 mol=gto.M(atom=[('C',tuple(a[1:])) for a in front['geometry']['atomsAngstrom']],basis={'C':basis},unit='Angstrom',cart=True,verbose=0)

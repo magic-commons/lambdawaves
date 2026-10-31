@@ -1,5 +1,5 @@
 /* molecules.test.mjs — THE LIBRARY'S GATE.  lab/molecules.js against lab/md.js's own basis and against the PySCF
- * oracle research/h2o-2026-09-11/scratch/fix-molecules.py wrote into lab/oracles/sto-3g-v1.json (`library`), now tests/fixtures/oracles/sto-3g-v1.json.
+ * oracle tools/oracles/fix-molecules.py wrote into lab/oracles/sto-3g-v1.json (`library`), now tests/fixtures/oracles/sto-3g-v1.json.
  *
  *   node tests/molecules.test.mjs
  *
@@ -41,7 +41,7 @@ const MOLECULES = ALL.filter((m) => m.multiplicity === 1);
   assert.equal(prov.bse_sha256, oracle.provenance.bse_sha256, 'the library block names the same record as the file');
   assert.equal(prov.cart, true); assert.equal(prov.unit, 'bohr');
   close(prov.ang_to_bohr, ANGSTROM, 0, 'ang_to_bohr is md.js\'s ANGSTROM');
-  assert.equal(prov.written_by, 'research/h2o-2026-09-11/scratch/fix-molecules.py');
+  assert.equal(prov.written_by, 'tools/oracles/fix-molecules.py');
   assert.deepEqual(Object.keys(LIB).sort(), MOLECULES.map((m) => m.id).sort(), 'every entry has an oracle record and no record is orphaned');
   assert.equal(MOLECULES.length, new Set(MOLECULES.map((m) => m.id)).size, 'the ids are unique');
   console.log(`PASS oracle provenance: PySCF ${prov.pyscf}, STO-3G v1 ${prov.bse_sha256.slice(0, 8)}… (${prov.bse_elements}), ${Object.keys(LIB).length} library records in bohr, cart=True, conv_tol ${prov.conv_tol}.`);

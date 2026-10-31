@@ -2,12 +2,12 @@
 
 Two branches, one public address, one rule: **`main` is what is live, and it moves only when a release is cut.** The current state
 of the tree (what is pushed, what is deployed, what is verified) is the status block at the top of
-[`docs/SHIPPING-READINESS.md`](docs/SHIPPING-READINESS.md).
+[`SHIPPING-READINESS.md`](SHIPPING-READINESS.md).
 
 | Branch | Address | What it is |
 |---|---|---|
 | `main` | https://lambdawaves.magic-commons.com | The release. Frozen between releases; every commit on it is a tagged release or a hotfix. |
-| `dev` | local only (`./serve.sh 8711` → https://127.0.0.1:8711/lab/) | Development. It is not deployed anywhere public: the `dev.lambdawaves.magic-commons.com` worker was deleted on 2026-09-12. |
+| `dev` | local only (`tools/serve.sh 8711` → https://127.0.0.1:8711/lab/) | Development. It is not deployed anywhere public: the `dev.lambdawaves.magic-commons.com` worker was deleted on 2026-09-12. |
 
 ## Day to day (on `dev`)
 
@@ -16,7 +16,7 @@ git switch dev
 # … edit lab/ …
 node tests/pwa.test.mjs --write && npm test        # rehash + the node gate
 git commit -am "…" && git push                     # CI runs the node gate
-./serve.sh 8711                                    # play the development copy locally
+tools/serve.sh 8711                                # play the development copy locally
 ```
 
 The development copy is played on the local machine, or on the local network with `LW_HOST`. If a private development URL is ever
@@ -37,7 +37,7 @@ node tools/build-deploy.mjs --quiet                # dist/ assembled and verifie
 node tools/changelog.mjs --check                   # CHANGELOG, CITATION.cff and BUILD_LINE in step: rc 0
 # THE LOCK on a served tree (tools/gate/server.py), both fixtures: 0 changed leaves
 nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --query gastab=0
-nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --fixture research/release-0.4.0/measure/digest-lock-s4a.json
+nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --fixture tests/fixtures/digest-lock-s4a.json
 ```
 
 ## Cutting a release (dev → main)
@@ -59,7 +59,7 @@ git switch dev
 Version numbers: `0.x.0-alpha` while features are still being added and the file format may move; `0.x.0-beta` once a project saved
 today is promised to open next month; `1.0.0` is the tree in which the last confirmed critical or high finding of the 0.9.9 stability
 review is closed. The device matrix, the installed-PWA update test and a screen-reader pass are what 1.0 ships with and states as
-unverified (`docs/SHIPPING-READINESS.md`); closing them comes after 1.0, not before it. Bump the middle number for a release, the last
+unverified (`SHIPPING-READINESS.md`); closing them comes after 1.0, not before it. Bump the middle number for a release, the last
 for a hotfix.
 
 ## A hotfix (something broken on the live site)

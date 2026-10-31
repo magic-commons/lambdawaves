@@ -69,7 +69,9 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
-const REPORT = 'REPORT.md';
+/* The wave headings: docs/WAVES.md (the headings alone, once the notebook left the tree) or REPORT.md (the notebook, and every older tag). */
+const WAVES = 'docs/WAVES.md', NOTEBOOK = 'REPORT.md';
+const REPORT = existsSync(join(ROOT, WAVES)) ? WAVES : NOTEBOOK;
 const OUT = join(ROOT, 'CHANGELOG.md');
 
 const ARGS = new Set(process.argv.slice(2));
@@ -136,8 +138,11 @@ function commitsIn(range) {
 
 /* REPORT.md as it stood at `ref`, or null if the path did not exist there. */
 function reportAt(ref) {
-  try { return execFileSync('git', ['show', `${ref}:${REPORT}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }); }
-  catch { return null; }
+  for (const path of [WAVES, NOTEBOOK]) {
+    try { return execFileSync('git', ['show', `${ref}:${path}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] }); }
+    catch { /* not at this ref: try the other name */ }
+  }
+  return null;
 }
 
 /* A commit subject, cut to something a changelog line can hold.  Deterministic: the first em-dash clause if

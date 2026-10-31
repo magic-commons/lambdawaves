@@ -2,10 +2,10 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {basisFrom,ANGSTROM,rdOf} from '../../lab/md.js';
-const root=new URL('../../',import.meta.url),out=new URL('research/release-0.4.0/library-census/',root);
+const root=new URL('../../',import.meta.url),out=new URL('tools/library/census/',root);
 const read=(p)=>JSON.parse(readFileSync(new URL(p,root)));
-const frontier=read('research/release-0.4.0/library-census/c60-frontier.json');
-const samples=read('research/release-0.4.0/library-census/c60-pyscf-samples.json');
+const frontier=read('tools/library/census/c60-frontier.json');
+const samples=read('tools/library/census/c60-pyscf-samples.json');
 const rec=read('lab/vendor/bse/sto-3g-v1.json');
 const atoms=frontier.geometry.atomsAngstrom.map(([Z,x,y,z])=>({Z,x:x*ANGSTROM,y:y*ANGSTROM,z:z*ANGSTROM}));
 const b=basisFrom(atoms,rec),coeffs=[...frontier.frontier.HOMO.coefficientColumns,...frontier.frontier.LUMO.coefficientColumns];

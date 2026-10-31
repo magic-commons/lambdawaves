@@ -4,7 +4,7 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ## The laws of 021
 
-THE LOCK (`tools/perf/digest-lock.mjs`, the fixtures) is never re-baked: a leaf that moved is re-captured BY NAME and said in the BUILD note. Through 021 it reads 843 · 0 (`--check --query gastab=0`) and 987 · 0 (the same with `--fixture research/release-0.4.0/measure/digest-lock-s4a.json`) on this machine. THE momentum@128 `repeat` leaf may flip under a second GPU client (028 R-22: a headless browser or a recorder holding the card): re-run the lock once ALONE before reporting it; the DIFF line names the second digest beside the leaf. 843 · 0 and 987 · 0 stay the law.
+THE LOCK (`tools/perf/digest-lock.mjs`, the fixtures) is never re-baked: a leaf that moved is re-captured BY NAME and said in the BUILD note. Through 021 it reads 843 · 0 (`--check --query gastab=0`) and 987 · 0 (the same with `--fixture tests/fixtures/digest-lock-s4a.json`) on this machine. THE momentum@128 `repeat` leaf may flip under a second GPU client (028 R-22: a headless browser or a recorder holding the card): re-run the lock once ALONE before reporting it; the DIFF line names the second digest beside the leaf. 843 · 0 and 987 · 0 stay the law.
 
 ## The standing paragraphs
 
@@ -20,5 +20,5 @@ CLIP is an ON switch with its lamp and the kind CLIP | SLAB (`mat.slice.mode` 0 
 
 THE LOCK is SAME-MACHINE
 (843 + 987 values since iteration 008 W took Re+Im's 17 style rows out of each fixture — once 860 + 1004; iteration 008 G re-captured the 15 particle rows `styles.{density,phase,real,imag,diff}/{grain,dust,bands}` by name, the counts unchanged; iteration 008 Q moved the default KNEE 0.6 → 3 (`field.js` `KNEE_DEFAULT`), so every readback that composites the volume was re-captured by name (175 + 193 leaves: the states' rp/rpL, every style and flag row but ADD's, the line rows' rp) — the field digests, record bytes, ADD rows and linePixels held, and the tree at KNEE 0.6 read 843/0 and 987/0; ≤ 64 AO tile states; no time-dependent molecular packet, STATES run, FLOW or `record()` is in it). Its 1004-value
-fixture (`research/release-0.4.0/measure/digest-lock-s4a.json`) predates the gas table and is checked WITH `--query gastab=0`, as the tool's
+fixture (`tests/fixtures/digest-lock-s4a.json`) predates the gas table and is checked WITH `--query gastab=0`, as the tool's
 header says; without it the gas states read red at every grid.

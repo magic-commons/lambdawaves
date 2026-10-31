@@ -1,6 +1,6 @@
 # The conductor — a film from a score
 
-1. Write a SCORE (`SCORE.md`; worked examples in `research/iteration-026/scores/`): tempo, bars, the register or molecule, the look, the camera, the nodes, lanes in beats and the targets' own units (`TARGETS.md`), audio bands, triggers, the render fields.
+1. Write a SCORE (`SCORE.md`; worked examples in `examples/`): tempo, bars, the register or molecule, the look, the camera, the nodes, lanes in beats and the targets' own units (`TARGETS.md`), audio bands, triggers, the render fields.
 2. Put the track in `media/` (gitignored). `node tools/conduct-bpm.mjs media/track.mp3` gives the tempo; the drop is where the low band steps.
 3. `node tools/conduct.mjs <score.json> --out <DIR>` — it opens the lab headless, applies the score (`__LW.conduct.apply`, `tools/conduct-score.js`), presses RENDER through the card's own fields and leaves `<NAME>.mp4 · .lambdawaves.json · .audit.json · .sheet.jpg` side by side. `--project-only` applies and saves without a render. Exit 1 on RENDER DISOBEYED.
 4. Read the sheet (one tile per bar). Read `applied` / `refused` / `clamps` in the audit when something looks wrong. Change the score, re-conduct; keep every pass.

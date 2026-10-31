@@ -3,7 +3,7 @@
 import ast,json,math,re,sys
 from pathlib import Path
 import numpy as np
-ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'research/release-0.4.0/library-census'
+ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'tools/library/census'
 tree=ast.parse((ROOT/'tools/library/prepare.py').read_text())
 parser=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='smiles_graph')
 exec(compile(ast.Module(body=[parser],type_ignores=[]),'checked-smiles-parser','exec'))

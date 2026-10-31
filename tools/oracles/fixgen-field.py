@@ -58,7 +58,7 @@ for lev in (1, 2, 3):
     a = mol.eval_gto('GTOval', g.coords)
     becke[str(lev)] = {'points': int(len(g.weights)), 'integral': float(dft.numint.eval_rho(mol, a, D) @ g.weights)}
 out = {
- 'provenance': {'written_by': 'research/h2o-2026-09-11/scratch/fixgen-field.py', 'pyscf': __import__('pyscf').__version__,
+ 'provenance': {'written_by': 'tools/oracles/fixgen-field.py', 'pyscf': __import__('pyscf').__version__,
    'basis': 'STO-3G, BSE v1 decimals', 'ang_to_bohr': ANG,
    'bse_sha256': hashlib.sha256(open(os.path.join(HERE, '..', 'sto-3g.bse.json'), 'rb').read()).hexdigest(),
    'shells': 'per-Cartesian-component primitive norm N_lmn(alpha), each contracted component renormalised to unit '

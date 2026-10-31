@@ -4,7 +4,7 @@ node_modules/
 .tmp-server.log
 .tmp-server.pid
 dist/
-# `npx wrangler dev` (DEPLOY.md step 6) creates .wrangler/{cache,state,tmp} in the repository root.
+# `npx wrangler dev` (docs/release/DEPLOY.md step 6) creates .wrangler/{cache,state,tmp} in the repository root.
 .wrangler/
 
 # tools/gate/server.py generates a self-signed certificate pair here on first run; a private key never enters the repository.
@@ -19,7 +19,6 @@ dist/
 *.p12
 *.pfx
 __pycache__/
-research/device-reports/inbox/
 # The platform shells' build output.
 tools/platform/electron/out/
 # Store trailer and screenshot raw material (screen recordings), kept beside the repository, never in it.

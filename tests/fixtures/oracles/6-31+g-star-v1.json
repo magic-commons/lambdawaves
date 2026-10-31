@@ -7,7 +7,7 @@
   "widened": "2026-10-17 (iteration 004 V1): the vendored record widened from H, C, N, O, F (ddcbd84d…, the file these energies were computed on) to H–Ar (b38353af…); the H, C, N, O, F electron_shells are byte-identical decimals in both, so every energy here is the same calculation on either file (lab/vendor/bse/index.json).",
   "cart": true,
   "unit": "bohr",
-  "written_by": "research/molecular-waves-2026-09-18/basis/oracle-631.py"
+  "written_by": "tools/oracles/oracle-631.py"
  },
  "molecules": [
   {

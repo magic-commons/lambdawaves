@@ -23,7 +23,7 @@ cross-module writes, forward + shared ≤ 25 per moving module; the loop and the
 `tests/rack-deps.test.mjs` its law. A law that reads the app's SOURCE reads `tests/helpers/app-source.mjs` (`appSource()` in node,
 `appFiles()` fetched in the page: rack.js, then every module under `lab/windows/` and `lab/shell/`), never `lab/rack.js` alone.
 `tests/lw-facade.browser-test.mjs` pins `window.__LW` — names, kinds (get / method / value) and order — against
-`research/release-0.5.2/lw-facade.json`; a row that changes the facade re-captures it with `--write` and says the diff.
+`tests/fixtures/lw-facade.json`; a row that changes the facade re-captures it with `--write` and says the diff.
 
 THE CONTROLLER (0.5.2 R1) is `lab/shell/controller.js` `createController(app)` — the governor and AUTO SCALE's one rule, the look, the
 busy marks, the mod port, the rotation drive, `createField` and its GPU recovery, the maths workers and the ONE ROAD of state mutations
@@ -99,6 +99,6 @@ THE FACADE (0.5.2 R5) is `lab/shell/facade.js` `createFacade(app)`, which return
 comments travelling (`Object.assign` would freeze a getter into a value) — destructuring its 121 backward names once at its top (it is seated after every
 module), reading its 21 shared lets as `app.state.x` and `warning` as `app.hooks.warning`; `boot()` keeps the `/* ── the diagnostics surface` header (the
 tool's anchor), `const LW = createFacade(app); window.__LW = LW; app.sh.LW = LW;` and every member it adds later (`LW.curves`, `LW.bootView` …
-`LW.stageText`, `LW.ready`, `LW.report`) at its seat, so `research/release-0.5.2/lw-facade.json` holds without `--write`. Every slot the facade reads is
+`LW.stageText`, `LW.ready`, `LW.report`) at its seat, so `tests/fixtures/lw-facade.json` holds without `--write`. Every slot the facade reads is
 filled exactly once by its owner (`research/release-0.5.2/integrator/doubles.mjs` reads 0), and `boot()`'s seat destructures keep naming what a module
 returns even where only a module reads it: `tools/rack-deps.mjs --classes` knows a crossing name by its boot-level declaration.

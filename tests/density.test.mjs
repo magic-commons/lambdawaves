@@ -10,8 +10,8 @@ import { spectrum, peaks } from '../lab/absorb.js';
 import { CONVENTIONS } from '../lab/molecule-state.js';
 
 const close = (a, b, tol, what) => assert.ok(Math.abs(a - b) < tol, `${what}: ${a} vs ${b} (tol ${tol})`);
-const ref = JSON.parse(readFileSync(new URL('../research/astra-2026-09-05/reference-drive.json', import.meta.url)));
-const oracle = JSON.parse(readFileSync(new URL('../research/chronusq-2026-09-11/oracle-pyscf.json', import.meta.url)));
+const ref = JSON.parse(readFileSync(new URL('../tests/fixtures/reference-drive.json', import.meta.url)));
+const oracle = JSON.parse(readFileSync(new URL('../tests/fixtures/oracle-pyscf.json', import.meta.url)));
 
 /* 1. The Hermitian eigensolver by realification: a random 5×5 Hermitian matrix, A V = V w, V†V = I. */
 {

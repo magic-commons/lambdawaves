@@ -3,7 +3,7 @@
 A SCORE is one JSON file in **bars, beats and the targets' own units**. `tools/conduct.mjs <score.json>` applies it in the lab
 (`__LW.conduct.apply(score)`, the module `tools/conduct-score.js`) through the app's live doors into a project saved as
 `CONDUCT/<name>`, bounces it with the RENDER card's own fields, and leaves `<name>.mp4 · .lambdawaves.json · .audit.json · .sheet.jpg`.
-The target table is [TARGETS.md](TARGETS.md) (generated: `tools/conduct-targets.mjs`). Examples: `research/iteration-026/scores/`.
+The target table is [TARGETS.md](TARGETS.md) (generated: `tools/conduct-targets.mjs`). Examples: [`examples/`](examples).
 
 **THE SCORE THINKS IN BARS.** Every time is a beat on the ruler at the score's tempo (a bar = `meter` beats). An effect lands on a divisor of
 the bar (¼ · ½ · 1 · 2 · 4 bars). Seconds appear once: `audio.offset`, the point in the file that plays at beat 0.
@@ -63,7 +63,7 @@ target; two lanes on one target never overlap. The conductor refuses the later o
 - the FIRST band's clip KEEPs the file (it plays on the film: Opus-in-MP4); `keep: false` makes every band signal-only. `node tools/conduct-bpm.mjs <file>` measures the tempo and the first strong onset.
 
 ## Three examples
-**A 2-bar hydrogen test** (`research/iteration-026/scores/test-2bar.score.json`): a yaw lane, an exposure breathing every half bar (repeat), a STYLE step at bar 2.
+**A 2-bar hydrogen test** (`docs/conductor/examples/test-2bar.score.json`): a yaw lane, an exposure breathing every half bar (repeat), a STYLE step at bar 2.
 ```json
 { "conduct": 1, "name": "TEST 2BAR", "tempo": { "bpm": 120, "meter": 4 }, "bars": 2, "base": null,
   "system": { "preset": "1s+2pz", "rate": 40 },

@@ -1,6 +1,6 @@
 # Deploying λWAVES
 
-**Current status:** the status block at the top of [shipping readiness](docs/SHIPPING-READINESS.md). What remains open is
+**Current status:** the status block at the top of [shipping readiness](SHIPPING-READINESS.md). What remains open is
 outside this tree: real-device acceptance (iPad, phone, installed PWA update) and the Cloudflare login, deployment and DNS — the
 maintainer's steps below. Run `npm ci --ignore-scripts` to install the pinned Wrangler toolchain before using the `npx` commands.
 
@@ -66,7 +66,7 @@ every resource from the worker, none from the network, navigation included).
 photosensitivity gate**. `tests/smoke.mjs` opens it from the dev server, never from `dist/`.
 Not shipped: `research/`, `tests/`, `tools/`, `docs/`, `serve*.sh`, `.tmp/`, `.git/`.
 
-Nothing in `lab/` is rewritten. Every path in it is relative, so the build is a pure move and `./serve.sh`
+Nothing in `lab/` is rewritten. Every path in it is relative, so the build is a pure move and `tools/serve.sh`
 and `./test.sh` keep working unchanged — the build re-proves that by walking every `src` / `href` /
 `import` / `url(` / `new URL(` / `Worker(` reference in the assembled tree.
 
@@ -226,7 +226,7 @@ Recorded so they read as decisions rather than drift.
 - **§7 sketches a `public/` directory.** We keep `lab/` and let the build produce the deployable
   directory instead. §7 itself says the layout is "illustrative rather than mandatory", asks to preserve
   a rational existing structure, and warns against unnecessary migration churn — and `lab/` is wired into
-  `./serve.sh`, `./test.sh` and 40+ test files. `wrangler.jsonc` therefore points `assets.directory` at
+  `tools/serve.sh`, `./test.sh` and 40+ test files. `wrangler.jsonc` therefore points `assets.directory` at
   `./dist`, not `./public`.
 - **§8 expects the licence documents to be linked from the app.** The links are **relative**:
   `lab/index.html` carries `<a href="./LICENSE">` and `<a href="./NOTICE">`. Relative links worked on the
@@ -247,7 +247,7 @@ Recorded so they read as decisions rather than drift.
 | `V2: … (climbs above the deployment root)` | a reference that leaves lab/ — it resolves on the LAN and gate servers (they serve the repo root) and 404s on the deployed origin. If it is a diagnostic reached only by an explicit flag (the device report, `?report=1`; THE CONDUCTOR, `__LW.conduct`), name it in the build's `DEV_ONLY` table with the reason; anything else is a real broken link |
 | `V2: … [base] (no shipped file under dist/…)` / `[base] ships empty BY DESIGN` | a `new URL('./dir/', …)` base with nothing shipped under it. `volumes/` is the one by design (the build's `EMPTY_BASE` table): only `--shelf` fills it, and without a shelf `shelf()` reads the 404 as "no volumes published". Any other empty base is a broken road |
 | `V2: manifest "id" …` | `id` is the one manifest member resolved against the **origin**, not against the manifest, so a relative value does not travel with the app. Delete the `id` member in `lab/manifest.webmanifest` — it then falls back to `start_url`, which is `"./"` and is correct at every address |
-| `V3: … no register(…)` | nothing registers the service worker, so the precache and the whole offline layer are inert. One line at the end of boot: `if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');` — **relative**, which is what keeps the same bytes working on `./serve.sh`, under `wrangler dev`, and at the origin root |
+| `V3: … no register(…)` | nothing registers the service worker, so the precache and the whole offline layer are inert. One line at the end of boot: `if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');` — **relative**, which is what keeps the same bytes working on `tools/serve.sh`, under `wrangler dev`, and at the origin root |
 | `V4: SharedArrayBuffer` | a change introduced cross-origin isolation. `_headers` must then grow COOP/COEP and every subresource must be CORP-clean. None of it is needed today and none is sent |
 | `V6: html_handling is "…"` | the 307 trap. Set `html_handling: "none"` |
 | `V6: assets.directory … but this build writes …` | `wrangler.jsonc` points somewhere else; Wrangler would deploy the wrong bytes |

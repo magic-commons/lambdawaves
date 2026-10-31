@@ -10,7 +10,7 @@ project · GPL-3.0-only · interface kit [MIR](https://github.com/magic-commons/
 ![gate](https://github.com/magic-commons/lambdawaves/actions/workflows/gate.yml/badge.svg)
 
 **Status: 0.9.9, in preparation for the beta.** What is verified and what is not is in
-[shipping readiness](docs/SHIPPING-READINESS.md); deployment is in [`DEPLOY.md`](DEPLOY.md).
+[shipping readiness](docs/release/SHIPPING-READINESS.md); deployment is in [`DEPLOY.md`](docs/release/DEPLOY.md).
 
 ## What it is
 
@@ -43,8 +43,8 @@ shareable state links, film rendering, FILE › EXPORT SHAPE (GLB · OBJ · STL,
 ## Run it
 
 ```bash
-./serve.sh              # https://127.0.0.1:8700/lab/   (or: npm run serve)
-./serve-lan.sh          # the same, reachable from a tablet or phone on the local network
+tools/serve.sh          # https://127.0.0.1:8700/lab/   (or: npm run serve)
+tools/serve-lan.sh      # the same, reachable from a tablet or phone on the local network
 ```
 
 Requirements: Node 22+, Python 3 and OpenSSL (the local server makes its own self-signed certificate on first run), and a browser
@@ -57,7 +57,7 @@ open FOLDERS (O) and choose a demo under DEMOS — WAVE DANCER PROTOTYPE, STAR L
 laws, and the PWA integrity check — plus the state-scope and hint checks; `npm run test:browser` (`./test.sh browser`) drives the
 real interface in headless Firefox with WebGPU against one owned HTTPS server (Firefox and geckodriver on `PATH`; `LW_PORT` and
 `GD_PORT` choose free ports, occupied ports are refused). The field's pixels are held by a digest gate, `tools/perf/digest-lock.mjs`,
-which compares each frame against two recorded fixtures. **After any edit under `lab/`, run `node tests/pwa.test.mjs --write`**: the service
+which compares each frame against two recorded fixtures in `tests/fixtures/`. **After any edit under `lab/`, run `node tests/pwa.test.mjs --write`**: the service
 worker derives its cache name from its precache hashes, and a stale hash would serve returning visitors the old bytes.
 `./test.sh legacy` runs the historical gate in `tests/legacy/`, which asserts superseded behaviour and is not part of the release gate.
 
@@ -68,12 +68,12 @@ worker derives its cache name from its precache hashes, and a stale hash would s
 | **Needs** | A browser with WebGPU in a secure context (https or localhost): Chrome/Edge 113+, Firefox 141+, Safari 26 / iPadOS 26. There is no WebGL fallback: without WebGPU the page shows a notice instead of the lab. |
 | **Runs well on** | A desktop GPU (measured on an RTX 3070: about 3 ms per frame at 96³) and an M-series iPad (the quality governor drops ray steps, then the grid, under load). |
 | **Physics** | Exact hydrogen (n ≤ 7, 140 states), plus MOLECULES: Hartree–Fock in vendored Gaussian bases (STO-3G for H–Kr; 6-31+G\* for H, C, N, O, F molecules up to 46 Cartesian AOs) — RHF for closed shells, UHF for the 7 open shells — and Kohn–Sham LDA (Slater + VWN5) up to benzene's 36 STO-3G AOs. 98 molecules: 61 solved live (59 enabled; CuH and ZnH₂ are listed and disabled, their RHF reference is not a minimum) and 37 opened from the library, which holds 38 records — 37 solved here and compared with PySCF, C₆₀'s energy PySCF's own (the table below). RPA and TDA spectra, and real-time TDHF. MO-REGISTRY plays orbital packets or many-electron TD-CIS states, drives them with a field, and shows their current. Nuclei are fixed except under VIBRATE (one harmonic normal mode); the wavefunction methods stop at single excitations, and LDA's correlation is the VWN5 functional's. Geometries are fixed: measured for the live molecules (each entry names its source; AlH₃'s is not a measurement), computed for 36 of the 38 records. Five early windows (QCD, H₂⁺, HELIUM, H₂, ELECTROSTATICS) were removed in 0.5.0; an older project that used one opens on a placeholder and says so ([`docs/LEGACY-WINDOWS.md`](docs/LEGACY-WINDOWS.md)). Every system λWAVES plays is a row of the catalogue on the MODEL sheet (186 rows, `lab/catalogue.js`), with its status — EXACT, NUMERICAL or UNCHECKED — and its oracle test. |
-| **Not yet verified** | A device matrix beyond one desktop, the installed-PWA update on a real device, a real microphone for the AUDIO source, and a screen-reader pass — see [shipping readiness](docs/SHIPPING-READINESS.md). No independent code review has been made. |
+| **Not yet verified** | A device matrix beyond one desktop, the installed-PWA update on a real device, a real microphone for the AUDIO source, and a screen-reader pass — see [shipping readiness](docs/release/SHIPPING-READINESS.md). No independent code review has been made. |
 
 ## Against PySCF
 
 A molecule's energy is NUMERICAL: checked against PySCF on the same atoms and the same basis decimals, never against experiment
-(`tests/fixtures/oracles/README.md` says what each fixture holds and which script wrote it). A
+(`tests/fixtures/oracles/README.md` says what each fixture holds and which script in `tools/oracles/` wrote it). A
 library record is written only if the app's solve is within 1e-8 Eh of PySCF's (`tools/orbital-library.mjs`). A live molecule is
 compared on the device; the node gate re-solves every enabled one in STO-3G and reads its agreement back from the STATUS line
 (`tests/status.test.mjs`), and holds a bound on these: every enabled closed shell up to 14 STO-3G AOs plus HBr, Br₂, C₂H₄ and C₆H₆ at
@@ -225,9 +225,9 @@ ordinary server logs. `SECURITY.md` lists every request.
 | [`CHANGELOG.md`](CHANGELOG.md) | What changed between releases, newest first; generated by `node tools/changelog.mjs`. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | The rules for a change, the gate, and where things live. |
 | [`SECURITY.md`](SECURITY.md) | Every request the page makes, what stays on your device, and how to report a problem. |
-| [`DEPLOY.md`](DEPLOY.md) · [`RELEASING.md`](RELEASING.md) | Deployment to Cloudflare, and how a release is cut. |
-| [`docs/SHIPPING-READINESS.md`](docs/SHIPPING-READINESS.md) · [`docs/ACCEPTANCE-MATRIX.md`](docs/ACCEPTANCE-MATRIX.md) | What is verified, what is not, and the evidence per device. |
-| [`LEGAL-PROVENANCE.md`](LEGAL-PROVENANCE.md) | Every shipped component's origin, licence and copyright holder, and the authorship record. |
+| [`DEPLOY.md`](docs/release/DEPLOY.md) · [`RELEASING.md`](docs/release/RELEASING.md) | Deployment to Cloudflare, and how a release is cut. |
+| [`SHIPPING-READINESS.md`](docs/release/SHIPPING-READINESS.md) · [`ACCEPTANCE-MATRIX.md`](docs/release/ACCEPTANCE-MATRIX.md) | What is verified, what is not, and the evidence per device. |
+| [`LEGAL-PROVENANCE.md`](docs/release/LEGAL-PROVENANCE.md) | Every shipped component's origin, licence and copyright holder, and the authorship record. |
 | [`docs/EXPORT.md`](docs/EXPORT.md) | The shape and grid exports. |
 | [`docs/PROVENANCE.md`](docs/PROVENANCE.md) | Every catalogue row's source and oracle (generated). |
 | [`docs/ui/`](docs/ui) | The interface's style lock, motion law and anti-patterns. |
@@ -244,7 +244,7 @@ adopted into `lab/mir/` and `lab/fonts/` from its own repository. λWAVES keeps 
 λWAVES was built with AI coding agents — principally Claude Code with Anthropic's Claude models, with OpenAI Codex and Google Gemini
 for parts of the code and the graphics — under the direction of its author, Joshua Hosain. Its claims rest on what can be checked —
 the physics against closed forms and PySCF, the node and browser suites, and the pixel gates — rather than on any claim of authorship.
-The authorship record (commit identities, attribution trailers, AI-generated assets) is in [`LEGAL-PROVENANCE.md`](LEGAL-PROVENANCE.md).
+The authorship record (commit identities, attribution trailers, AI-generated assets) is in [`LEGAL-PROVENANCE.md`](docs/release/LEGAL-PROVENANCE.md).
 
 ## Citing
 
@@ -252,7 +252,7 @@ The authorship record (commit identities, attribution trailers, AI-generated ass
 
 ## Branches
 
-- **`main`** — the release. It moves only when a release is cut; see `RELEASING.md`.
+- **`main`** — the release. It moves only when a release is cut; see `docs/release/RELEASING.md`.
 - **`dev`** — development.
 
 ## Licence

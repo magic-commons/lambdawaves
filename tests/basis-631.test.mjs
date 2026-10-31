@@ -1,5 +1,5 @@
 /* tests/basis-631.test.mjs — THE LARGER BASIS: 6-31+G* (H, C, N, O, F), Cartesian d shells, against PySCF on the same
- * vendored decimals (tests/fixtures/oracles/6-31+g-star-v1.json, written by research/molecular-waves-2026-09-18/basis/oracle-631.py).
+ * vendored decimals (tests/fixtures/oracles/6-31+g-star-v1.json, written by tools/oracles/oracle-631.py).
  * The gate runs the cheap half of the oracle (≤ 27 AOs, a few hundred ms each); the whole table — nineteen molecules
  * to 3e-12 — is the research record engine-631.json.  Also: the rule that decides where the card offers the basis. */
 import assert from 'node:assert/strict';

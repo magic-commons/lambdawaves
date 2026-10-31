@@ -62,7 +62,7 @@ CASES = [
   ('CH4', ch4()[0], -39.726810112299, ch4()[1]),
   ('N2',  [(7, (0, 0, 0)), (7, (0, 0, 1.09768))], -107.495887883412, {'r_angstrom': 1.09768}),
 ]
-out = {'provenance': {'written_by': 'research/h2o-2026-09-11/scratch/fix-mol6.py',
+out = {'provenance': {'written_by': 'tools/oracles/fix-mol6.py',
                       'pyscf': __import__('pyscf').__version__, 'numpy': np.__version__,
                       'basis': 'lab/vendor/bse/sto-3g-v1.json', 'bse_sha256': SHA, 'bse_version': '1',
                       'cart': True, 'unit': 'bohr', 'ang_to_bohr': ANG,

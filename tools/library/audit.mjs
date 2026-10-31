@@ -3,10 +3,10 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {basisFrom,ANGSTROM} from '../../lab/md.js';
-const root=new URL('../../',import.meta.url),out=new URL('research/release-0.4.0/library-census/',root);
+const root=new URL('../../',import.meta.url),out=new URL('tools/library/census/',root);
 const read=(name)=>JSON.parse(readFileSync(new URL(name,root)));
-const census=read('research/release-0.4.0/library-census/census.json'),rows=census.rows;
-const original=read('research/release-0.4.0/library-census/present-input.json');
+const census=read('tools/library/census/census.json'),rows=census.rows;
+const original=read('tools/library/census/present-input.json');
 const rec=read('lab/vendor/bse/sto-3g-v1.json'),rec631=read('lab/vendor/bse/6-31+g-star-v1.json');
 assert.equal(rows.length,117);assert.equal(new Set(rows.map(r=>r.id)).size,rows.length);
 assert.equal(rows.filter(r=>r.family==='amino-acids').length,20);assert.equal(rows.filter(r=>r.family==='nucleobases').length,5);
@@ -34,7 +34,7 @@ for(const r of rows){
 for(const m of original.molecules){const r=rows.find(r=>r.id===m.id);assert.ok(r);assert.deepEqual(r.geometry.atomsAngstrom,m.ang);assert.equal(r.charge,m.charge);assert.equal(r.nAO_STO3G,m.nAO);assert.equal(r.appPredictedMs,m.predictedMs);}
 assert.equal(bytes,census.totals.predictedStoBytes);assert.equal(pass,census.totals.gatePass);
 assert.equal(Object.values(census.sections).reduce((n,s)=>n+s.rows,0),rows.length);
-const field=read('research/release-0.4.0/library-census/c60-field-check.json');assert.ok(field.pass);
-const f=read('research/release-0.4.0/library-census/c60-frontier.json');assert.equal(f.status,'DRAFT');assert.ok(f.waterProof.pass);assert.ok(f.validation.fullGroupLabelsVerified);assert.equal(f.solver.orbitalEnergiesEh.length,300);assert.equal(f.solver.occupations.reduce((x,y)=>x+y,0),360);
+const field=read('tools/library/census/c60-field-check.json');assert.ok(field.pass);
+const f=read('tools/library/census/c60-frontier.json');assert.equal(f.status,'DRAFT');assert.ok(f.waterProof.pass);assert.ok(f.validation.fullGroupLabelsVerified);assert.equal(f.solver.orbitalEnergiesEh.length,300);assert.equal(f.solver.occupations.reduce((x,y)=>x+y,0),360);
 const result={status:'MEASURED',pass:true,checks:['all original geometries/charges preserved','both vendored AO-count checks where available','charge-adjusted occupied counts','record-byte arithmetic','independent literal diversity gate replay','family cardinalities','finite final energies/gaps/times','conditional basis nulls','section/byte totals','water coefficient proof','full Ih character proof','C60 signed-field proof'],numericStatus:'All counts DERIVED from the audited inputs',rows:rows.length,originalRows:original.molecules.length,pinnedBasisCountChecks:basisChecks,gatePass:pass,gateFail:rows.length-pass,predictedStoBytes:bytes};
 writeFileSync(new URL('audit.json',out),JSON.stringify(result,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(result));

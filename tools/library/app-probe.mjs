@@ -5,7 +5,7 @@ import {MOLECULES, COST, CAP_MS, moleculeAtoms} from '../../lab/molecules.js';
 import {moleculeRHF,registerRecord} from '../../lab/rhf-molecule.js';
 import {basisFrom,rdOf,ANGSTROM} from '../../lab/md.js';
 const root=new URL('../../',import.meta.url);
-const out=new URL('research/release-0.4.0/library-census/',root);
+const out=new URL('tools/library/census/',root);
 mkdirSync(out,{recursive:true});
 const rec=JSON.parse(readFileSync(new URL('lab/vendor/bse/sto-3g-v1.json',root)));
 registerRecord('sto-3g',rec);

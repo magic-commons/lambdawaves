@@ -103,7 +103,7 @@ assert.equal(W.chemSpectrum(Lm).roots.length, 960); assert.equal(calls() - c0, 0
        it opens with no solver call, answers whole (no spectrum to wait for), has no density, refuses everything it does not carry,
        and its columns are the dump's, laid out n × n where every reader indexes them */
 const C60 = load('C60'), Cd = decodeRecord(C60), Cm = { atoms: Cd.atoms, basis: 'sto-3g', charge: 0 };
-const dump = JSON.parse(readFileSync(at('../research/release-0.4.0/library-census/c60-occupied.json'), 'utf8'));
+const dump = JSON.parse(readFileSync(at('../tools/library/census/c60-occupied.json'), 'utf8'));
 assert.deepEqual(Cd.cols, Array.from({ length: 183 }, (_, k) => k)); assert.equal(Cd.D, null);
 assert.deepEqual(C60.caps, { orbitals: true, states: false, rpa: false, tdhf: false });
 assert.ok(/DRAFT GEOMETRY/.test(C60.stem.geometrySource) && /UNVERIFIED/.test(C60.stem.geometrySource), 'the record says its geometry is a draft');

@@ -1,7 +1,7 @@
 // wrangler.jsonc — λWAVES Alpha on Cloudflare Workers + Static Assets.
 //
 // This is the OTHER half of the deploy; `node tools/build-deploy.mjs` is the first half and its §V6
-// checks this file on every run, so the two cannot drift. Read DEPLOY.md before changing anything here.
+// checks this file on every run, so the two cannot drift. Read docs/release/DEPLOY.md before changing anything here.
 //
 // ASSETS-ONLY, DELIBERATELY. There is no "main", so there is no Worker script: Cloudflare serves the
 // static directory and nothing runs on the server. The dossier's rule is "static application first,
@@ -24,7 +24,7 @@
 
   // RETIRE THE STAGING ORIGIN. This is the same hazard the whole OWN_ORIGIN argument is
   // built around, one level up. With no key here the default is TRUE, and attaching a custom domain does
-  // NOT turn it off — so after DEPLOY.md step 10 there would be TWO live origins, each with its own
+  // NOT turn it off — so after docs/release/DEPLOY.md step 10 there would be TWO live origins, each with its own
   // ROOT-SCOPED, permanently-installed service worker, its own localStorage, and (because the manifest
   // has no `id` and falls back to `start_url`, which is origin-scoped) ITS OWN INSTALLED PWA IDENTITY.
   // That is a worker you cannot purge from a server, on an address you stopped using: the exact thing
@@ -32,7 +32,7 @@
   //
   // THE ORDER MATTERS AND IT IS THE ONE THING TO GET RIGHT HERE: this is `false` from the first deploy,
   // so no staging origin is ever created and nothing is ever installed from one. The workers.dev smoke
-  // test in DEPLOY.md step 9 therefore needs this flipped to `true` for that one deploy and back to
+  // test in docs/release/DEPLOY.md step 9 therefore needs this flipped to `true` for that one deploy and back to
   // `false` before step 10 — and anyone who does that must know that localStorage is per-origin, so
   // EVERYTHING A TESTER SAVES ON THE STAGING URL — settings, notebook, projects — is stranded there.
   // The alternative, and the better one for an alpha with a handful of testers: attach the custom domain
@@ -41,11 +41,11 @@
 
   // THE ADDRESS (2026-09-11). A custom-domain route: `wrangler deploy` attaches lambdawaves.magic-commons.com to
   // this Worker and writes the DNS record in the zone, so the deploy and the address are one act, repeatable
-  // from a clean machine — DEPLOY.md step 10 no longer needs the dashboard. The zone must be on this account.
+  // from a clean machine — docs/release/DEPLOY.md step 10 no longer needs the dashboard. The zone must be on this account.
   "routes": [{ "pattern": "lambdawaves.magic-commons.com", "custom_domain": true }],
 
   // THE EXPERIMENTAL COPY (2026-09-11) — NOT DEPLOYED since 2026-09-12: the public dev worker was deleted;
-  // a dev URL needs Cloudflare Access in front first (RELEASING.md). `npx wrangler deploy --env dev` publishes the same dist/ as a second
+  // a dev URL needs Cloudflare Access in front first (docs/release/RELEASING.md). `npx wrangler deploy --env dev` publishes the same dist/ as a second
   // Worker with its own name and address, so the dev branch can be played on real devices without touching
   // the release. Everything not named here is inherited from the top level.
   "env": {
@@ -62,7 +62,7 @@
     // and proves the result. Pointing this at lab/ would ship an unverified tree missing all of that.
     // (The dossier's §7 sketch says "public/"; we keep the repo's existing lab/ and let the build
     // produce the deployable directory — §7 itself asks to preserve a rational structure and avoid
-    // migration churn. DEPLOY.md records that as a deliberate difference.)
+    // migration churn. docs/release/DEPLOY.md records that as a deliberate difference.)
     "directory": "./dist",
 
     // "none", NOT the dossier's illustrative "auto-trailing-slash" — and this one was MEASURED, against
@@ -97,5 +97,5 @@
   }
 
   // The custom hostname (lambdawaves.magic-commons.com) is attached in the Cloudflare dashboard once the
-  // workers.dev deployment has been smoke-tested — dossier §23 stages B then C, and DEPLOY.md step 10.
+  // workers.dev deployment has been smoke-tested — dossier §23 stages B then C, and docs/release/DEPLOY.md step 10.
 }

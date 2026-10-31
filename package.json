@@ -9,7 +9,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "serve": "bash serve.sh",
+    "serve": "bash tools/serve.sh",
     "test": "bash test.sh node",
     "test:browser": "bash test.sh browser",
     "test:all": "bash test.sh all",
