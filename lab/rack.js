@@ -473,7 +473,7 @@ export async function boot(dom) {
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
       field.setStepCap(tabletMotion ? tablet.steps : Infinity);   // full saved quality returns on the first still frame
-      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); if (mat.style >= STYLE.balls && field.setAtoms) { field.setAtoms(app.state.chem.on ? app.state.chem.atomsNow() : null, app.state.chem.on ? moleculeCharge(app.state.chem.preset()) : 0); field.setEspGrid(app.state.chem.on ? app.state.chem.espGrid() : null); } field.frame({ modes, refModes: app.state.pendingRef, obs, mat, molecule: !!(app.state.molSession && app.state.molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
+      tick('field', () => { const sc = quality.scale * (quality.auto ? quality.autoScale : 1); field.resize(perf.tier === 'light' && clock.playing ? Math.min(sc, 0.5) : sc); if (mat.style >= STYLE.balls && field.setAtoms) { field.setAtoms(app.state.chem.on ? app.state.chem.atomsNow() : null, app.state.chem.on ? moleculeCharge(app.state.chem.preset()) : 0); field.setEspGrid(app.state.chem.on ? app.state.chem.espGrid() : null); } field.frame({ modes, refModes: app.state.pendingRef, obs, mat, molecule: !!(app.state.molSession && app.state.molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
       app.state.pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
     }
@@ -505,6 +505,7 @@ export async function boot(dom) {
       autoQ.presented = autoQ.lastMs = autoQ.m0 = 0;                 // the play's intervals, and the edge's own transition interval, are not the still picture's
       if (gov.drop) { gov.drop = 0; gov.changes++; schedule(TIER.REBUILD); }
       if (quality.auto && quality.autoScale < 1) { quality.autoScale = 1; autoQ.changes++; schedule(TIER.PRESENT); if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale).toFixed(0) + '%', ''); }   // the still picture repaints at full size on the next frame (REFUTE-B: nothing else would)
+      if (perf.tier === 'light') schedule(TIER.PRESENT);              // 029 M8 · LIGHT: the canvas was at most half while playing; the still picture repaints full
     }
     app.state.playedLast = clock.playing;
     perf.counts.frames++;
