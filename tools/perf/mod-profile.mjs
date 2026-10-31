@@ -2,6 +2,7 @@
  *
  *   node tools/perf/mod-profile.mjs [--scenes idle,a,b,bh,bf,c,c2,d,e] [--secs 30] [--audio <star.mp3>] [--json out.json] [--no-mo]
  *   node tools/perf/mod-profile.mjs --chromium b|c [--secs 30] [--json out.json]      (ONE headed Chromium on DISPLAY=:0, CDP trace)
+ *   node tools/perf/mod-profile.mjs --chromium c --lever default,tinted,hidden,lock60,…,default [--secs 20] [--swiftshader]   (029 M6: the levers)
  *
  * Nothing under lab/ is touched.  The tool builds a SHADOW ROOT in .tmp/mod-profile/root (every top-level entry of the tree a
  * symlink; lab/ a directory of symlinks whose one copied file is index.html, with one classic <script src="../mp-probe.js"> put
@@ -35,6 +36,10 @@
  * --ozone-platform=x11), the same probe by Page.addScriptToEvaluateOnNewDocument, the scene, then 30 s of Tracing (devtools.timeline,
  * v8.execute, blink.user_timing, disabled-by-default-devtools.timeline.frame) + a Profiler sample: main-thread self time by category
  * and the top self-time functions.  THE WINDOW APPEARS ON THE SCREEN for the run; the pid is closed at the end.
+ * --lever a,b,c… (029 M6, with --chromium): ONE browser for the whole sweep; each lever is a FRESH FIRST-RUN PAGE (the origin's storage cleared,
+ * then the scene) with the lever set through the page's own doors (LEVER below), SECS of trace, the summary kept and the trace dropped.  A
+ * lever may be a pair: 'lock60+uiflat'.  Repeat 'default' first and last to bracket drift.  --swiftshader: the same, HEADLESS on the
+ * software GPU (SwiftShader's Vulkan under Dawn) — the integrated-GPU proxy, ratios only; no window appears.
  * One browser at a time (the GPU is shared); nice -n 10 is the caller's. */
 import fs from 'node:fs'; import path from 'node:path'; import os from 'node:os'; import net from 'node:net';
 import { spawn, execFileSync } from 'node:child_process';
@@ -45,9 +50,12 @@ const ROOT = process.cwd(), TMP = path.join(ROOT, '.tmp/mod-profile'), SH = path
 const SECS = Number(opt('--secs', 30)), CHROM = opt('--chromium', null), MO = !argv.includes('--no-mo');
 const SCENES = (opt('--scenes', 'idle,a,b,bh,bf,c,c2,d,e')).split(',');
 const AUDIO = opt('--audio', process.env.STAR || path.join(ROOT, 'media/star.mp3'));
-const JSON_OUT = opt('--json', path.join(TMP, (CHROM ? 'chromium-' + CHROM : 'firefox') + '.json'));
+const LEVERS = opt('--lever', null), SWS = argv.includes('--swiftshader');
+const JSON_OUT = opt('--json', path.join(TMP, (CHROM ? (SWS ? 'swiftshader-' : 'chromium-') + CHROM + (LEVERS ? '-levers' : '') : 'firefox') + '.json'));
 const W = 1920, H = 1080;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const KIDS = new Set();   // the pids this run started (the server, the browser): a SIGTERM / SIGINT stops them by pid before the tool exits
+for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => { for (const pid of KIDS) { try { process.kill(pid, 'SIGTERM'); } catch (_) {} } process.exit(143); });
 
 /* ── THE PROBE (page side; a classic script, first in <head>) ───────────────────────────────────────────────────────────── */
 const PROBE = String.raw`(() => {
@@ -140,6 +148,25 @@ const SCENE = {
   bh: { demo: 'wave-dancer', win: true, setup: 'if (!__LW.uiHidden) __LW.keys.toggleUI();' },   // b with the interface HIDDEN (H): the modulation without the glass
   bf: { demo: 'wave-dancer', win: true, setup: "__LW.setFrost('off');" },                          // b with FROST OFF: the blur's share
 };
+/* 029 M6 · THE LEVERS, each through a door the page already has (nothing under lab/ changes): the look store (the kit's `mir.gui` rows, as
+   SETTINGS and MIR OPTIONS set them), the hide action, the FIELD CLOCK cap (fieldRate.capMs: the seg offers MAX · 30 · 15 · 5 Hz; 60 Hz is
+   off the seg), AUTO SCALE off + the canvas scale (quality.scale, the GRID seg's own pairing), PLAYBACK LOCK at CADENCE 60 (the one door
+   that caps the PRESENT: the loop presents only on a 1/60 tick), the MODULATION cadence seg, and the march's steps (mat.steps, which the
+   GRID seg writes through quality.steps at the next rebuild) */
+const LOOK = (o) => `__LW.look.set(${JSON.stringify(o)}); __LW.look.apply({ now: true });`;
+const LEVER = {
+  default: '',
+  tinted: LOOK({ card: 'tinted' }), solid: LOOK({ card: 'solid' }), blur0: LOOK({ blur: 0 }), frostoff: LOOK({ frost: 'off' }), still: LOOK({ frost: 'still' }),
+  veil0: LOOK({ veil: 0 }), nodisc: LOOK({ disconnected: false }), uilite: LOOK({ quality: 'balanced' }), uiflat: LOOK({ quality: 'light' }),
+  swift: '__LW.look.applyPreset("swift"); __LW.look.apply({ now: true });',
+  hidden: "if (!__LW.uiHidden) __LW.actions.run('hide');",
+  fc60: '__LW.fieldRate.capMs = 16;', fc30: '__LW.fieldRate.capMs = 33;',
+  scale75: '__LW.quality.auto = false; __LW.quality.scale = 0.75;', scale50: '__LW.quality.auto = false; __LW.quality.scale = 0.5;',
+  lock60: '__LW.fieldRate.lock = true; __LW.fieldRate.hz = 60;',
+  mod120: '__LW.mod.setCadence(120);',
+  steps110: '__LW.quality.steps = 110; __LW.mat.steps = 110;', steps80: '__LW.quality.steps = 80; __LW.mat.steps = 80;',
+};
+const leverJs = (name) => name.split('+').map((k) => { if (!(k in LEVER)) throw new Error('no lever ' + k + ' (have: ' + Object.keys(LEVER).join(' ') + ')'); return LEVER[k]; }).join(' ');
 const PREP = (s) => `window.confirm = () => true; window.__w = (n) => new Promise((r) => setTimeout(r, n));
   try { if (__LW.warning && __LW.warning.dismiss) __LW.warning.dismiss(); } catch (_) {}
   const P = __LW.projects; try { P.folders.close(); } catch (_) {} await __w(300);
@@ -191,6 +218,9 @@ const WCOST = `const H = __LW.mod.host, R = H.registry, out = [];
 const ENV = `return { inner: [innerWidth, innerHeight], canvas: (() => { const c = document.getElementById('field') || document.querySelector('canvas'); return c ? [c.width, c.height] : null; })(),
   adapter: __LW.field.adapterInfo, fieldOk: __LW.field.ok, res: __LW.field.resolution, lock: __LW.fieldRate.lock, cadence: __LW.mod.cadence,
   governor: __LW.governor.state, autoScale: __LW.quality.autoScale, auto: __LW.quality.auto, scale: __LW.quality.scale, presents: __LW.stats.presents, skipped: __LW.stats.skipped,
+  steps: __LW.mat.steps, capMs: __LW.fieldRate.capMs, hz: __LW.fieldRate.hz, uiHidden: __LW.uiHidden, frost: __LW.frostLive, card: __LW.cardStyle, dpr: devicePixelRatio,
+  look: (() => { const g = (k) => __LW.look.get(k); return { card: g("card"), frost: g("frost"), blur: g("blur"), veil: g("veil"), disconnected: g("disconnected"), quality: g("quality") }; })(),
+  tier: document.documentElement.dataset.uiTier || 'full',
   build: __LW.build, modPaint: __LW.mod.view && __LW.mod.view.performance ? __LW.mod.view.performance() : null, errs: (window.__e || []).slice(0, 8) };`;
 
 /* ── THE NUMBERS ─────────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -247,6 +277,7 @@ async function serve(dir) {
   const port = await pickPort();
   const p = spawn('python3', [path.join(ROOT, 'tools/gate/server.py'), dir, String(port)], { stdio: ['ignore', 'pipe', 'pipe'] });
   for (let i = 0; i < 50; i++) { await sleep(200); if (!(await free(port))) break; }
+  KIDS.add(p.pid);
   console.log(`gate server pid ${p.pid} on ${port} (GD ${port - 4000}) → ${dir}`);
   return { port, stop: () => { try { process.kill(p.pid, 'SIGTERM'); } catch (_) {} } };
 }
@@ -345,58 +376,86 @@ function profileTop(p, n = 12) {
 }
 async function chromium(srv) {
   const s = SCENE[CHROM]; if (!s) throw new Error('--chromium takes a scene name');
+  const levers = LEVERS ? LEVERS.split(',') : [null]; for (const l of levers) if (l) leverJs(l);   // an unknown lever fails before any window
   if (!process.env.DISPLAY) process.env.DISPLAY = ':0';
   let cport = 9300; for (let p = 9301; p < 9399; p++) if (await free(p)) { cport = p; break; }
   const base = path.join(os.homedir(), 'snap/chromium/common'); fs.mkdirSync(base, { recursive: true });
   const prof = fs.mkdtempSync(path.join(base, 'lw-m0-'));
-  console.log(`>>> A HEADED CHROMIUM WINDOW WILL APPEAR ON DISPLAY ${process.env.DISPLAY} FOR ABOUT ${SECS + 40} s (029 M0, scene ${CHROM}); it is closed by pid at the end.`);
-  const proc = spawn('/snap/bin/chromium', ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--enable-features=Vulkan', '--use-angle=vulkan', '--ozone-platform=x11',
+  const each = SECS + 45;
+  if (SWS) console.log(`>>> HEADLESS Chromium on SwiftShader (no window), scene ${CHROM}, ${levers.length} run(s).`);
+  else console.log(`>>> A HEADED CHROMIUM WINDOW WILL APPEAR ON DISPLAY ${process.env.DISPLAY} FOR ABOUT ${Math.round(levers.length * each / 6) / 10} min (029, scene ${CHROM}${LEVERS ? ', levers ' + LEVERS : ''}); it is closed by pid at the end.`);
+  const gpuArgs = SWS ? ['--headless=new', '--enable-unsafe-webgpu', '--enable-unsafe-swiftshader', '--use-webgpu-adapter=swiftshader', '--use-angle=swiftshader', '--enable-features=Vulkan', '--use-vulkan=swiftshader']
+    : ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist', '--enable-features=Vulkan', '--use-angle=vulkan', '--ozone-platform=x11'];
+  const proc = spawn('/snap/bin/chromium', [...gpuArgs,
     '--no-first-run', '--no-default-browser-check', '--ignore-certificate-errors', '--autoplay-policy=no-user-gesture-required', '--enable-precise-memory-info',
     `--remote-debugging-port=${cport}`, `--user-data-dir=${prof}`, `--window-size=${W},${H}`, '--window-position=0,0', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
+  KIDS.add(proc.pid); console.log('chromium pid ' + proc.pid);
   let errText = ''; proc.stderr.on('data', (d) => { errText += d; if (errText.length > 20000) errText = errText.slice(-20000); });
-  const out = { at: new Date().toISOString(), browser: 'chromium-headed', scene: CHROM, secs: SECS, pid: proc.pid };
+  const out = { at: new Date().toISOString(), browser: SWS ? 'chromium-headless-swiftshader' : 'chromium-headed', scene: CHROM, secs: SECS, pid: proc.pid, runs: [] };
   try {
     let ver = null; for (let i = 0; i < 80 && !ver; i++) { try { ver = await (await fetch(`http://127.0.0.1:${cport}/json/version`)).json(); } catch { await sleep(250); } }
     if (!ver) throw new Error('chromium did not open its DevTools port (display access?): ' + errText.slice(-600));
+    out.version = ver.Browser;
     const tgt = (await (await fetch(`http://127.0.0.1:${cport}/json/list`)).json()).find((t) => t.type === 'page');
     const ws = new WebSocket(tgt.webSocketDebuggerUrl); await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
-    let id = 0; const pend = new Map(), trace = []; let traceDone = null;
+    let id = 0; const pend = new Map(); let trace = [], traceDone = null;
     ws.onmessage = (m) => { const d = JSON.parse(m.data); if (d.id && pend.has(d.id)) { pend.get(d.id)(d); pend.delete(d.id); return; }
       if (d.method === 'Tracing.dataCollected') for (const e of d.params.value) trace.push(e); else if (d.method === 'Tracing.tracingComplete' && traceDone) traceDone(); };
-    const send = (method, params = {}) => new Promise((res) => { const i = ++id; pend.set(i, res); ws.send(JSON.stringify({ id: i, method, params })); });
+    const send = (method, params = {}) => new Promise((res, rej) => { const i = ++id; const to = setTimeout(() => { pend.delete(i); rej(new Error('CDP ' + method + ' gave no answer in 180 s')); }, 180000);   // nothing waits forever
+      pend.set(i, (d) => { clearTimeout(to); res(d); }); ws.send(JSON.stringify({ id: i, method, params })); });
     const ev = async (body) => { const r = await send('Runtime.evaluate', { expression: `(async () => { ${body} })()`, awaitPromise: true, returnByValue: true });
       if (r.result && r.result.exceptionDetails) return { E: r.result.exceptionDetails.exception?.description || r.result.exceptionDetails.text }; return r.result ? r.result.result.value : r.error; };
     await send('Page.enable'); await send('Runtime.enable');
     await send('Page.addScriptToEvaluateOnNewDocument', { source: PROBE });
-    const url = `https://127.0.0.1:${srv.port}/lab/?sw=0&warn=0&starter=home`;
+    const origin = `https://127.0.0.1:${srv.port}`, url = `${origin}/lab/?sw=0&warn=0&starter=home`;
     const ready = async () => { for (let i = 0; i < 900; i++) { const v = await ev('try { if (window.__LW && __LW.warning && __LW.warning.open) __LW.warning.dismiss(); } catch (_) {} return !!(window.__LW && __LW.ready);').catch(() => false); if (v === true) return true; await sleep(100); } return false; };
     for (const pass of [0, 1]) { await send('Page.navigate', { url }); await sleep(1500); out['ready' + pass] = await ready(); }   // main-thread.mjs' warm-up: a fresh browser loses its first device
-    out.prep = await ev(PREP(s));
-    if (s.setup) out.setup = await ev(s.setup + ' await __w(600); return { uiHidden: __LW.uiHidden, frost: __LW.frostLive };');
-    if (s.audio) {
-      await ev(FAKE_MIC);
-      out.audio = await ev(`const b = [...document.querySelectorAll('.m2audsrc')].find((x) => x.offsetParent); if (!b) return { found: false }; b.scrollIntoView({ block: 'center' }); await __w(300); b.click();
-        for (let i = 0; i < 60 && !document.querySelector('.m2audsrc.on'); i++) await __w(100); return { found: true, live: !!document.querySelector('.m2audsrc.on'), ctx: window.__fakeMic ? __fakeMic.ac.state : null };`);
-    }
-    await ev('__LW.pause(); await __LW.settle(); await __w(1000); return 1;');
-    out.envBefore = await ev(ENV);
-    await send('Profiler.enable'); await send('Profiler.setSamplingInterval', { interval: 200 });
-    await ev(`__MP.start(); ${s.audio ? 'if (window.__fakeMic) __fakeMic.restart();' : ''} __LW.play(); return 1;`);
-    await sleep(1500);                                                   // the play's own edge out of the record
-    await send('Tracing.start', { categories: 'devtools.timeline,v8.execute,blink.user_timing,disabled-by-default-devtools.timeline.frame,disabled-by-default-devtools.timeline', transferMode: 'ReportEvents' });
-    await send('Profiler.start');
-    await sleep(SECS * 1000);
-    const prof0 = await send('Profiler.stop');
-    const done = new Promise((r) => { traceDone = r; }); await send('Tracing.end'); await Promise.race([done, sleep(60000)]);
-    const raw = await ev('const r = __MP.stop(); __LW.pause(); return r;');
-    out.env = await ev(ENV);
-    try { fs.mkdirSync(TMP, { recursive: true }); const fd = fs.openSync(path.join(TMP, 'chromium-' + CHROM + '.trace.ndjson'), 'w');
-      for (let i = 0; i < trace.length; i += 5000) fs.writeSync(fd, trace.slice(i, i + 5000).map((e) => JSON.stringify(e)).join('\n') + '\n'); fs.closeSync(fd);
-      fs.writeFileSync(path.join(TMP, 'chromium-' + CHROM + '.cpuprofile'), JSON.stringify(prof0.result ? prof0.result.profile : {})); } catch (e) { out.saveError = String(e); }   // the raw record first: a summariser fault never costs the run
+    console.log(`ready ${out.ready0}/${out.ready1} · ${out.version}`);
     const safe = (f) => { try { return f(); } catch (e) { return { error: String(e && e.stack || e).slice(0, 400) }; } };
-    out.sum = raw && raw.frames ? safe(() => summarise(raw)) : { error: raw };
-    out.trace = { events: trace.length, ...safe(() => MAIN_SELF(trace)) };
-    out.profile = prof0.result ? safe(() => profileTop(prof0.result.profile)) : { error: prof0.error };
+    for (const [li, lever] of levers.entries()) {
+      const run = { lever: lever || 'default' };
+      if (li > 0) {   // a FRESH FIRST-RUN PAGE per lever: the origin's storage cleared (the look store a lever wrote with it), then the scene
+        await send('Page.navigate', { url: 'about:blank' }); await sleep(500);
+        await send('Storage.clearDataForOrigin', { origin, storageTypes: 'all' });
+        await send('Page.navigate', { url }); await sleep(1500); run.ready = await ready();
+      }
+      run.prep = await ev(PREP(s));
+      if (s.setup) run.setup = await ev(s.setup + ' await __w(600); return { uiHidden: __LW.uiHidden, frost: __LW.frostLive };');
+      const hide = lever && lever.split('+').includes('hidden');
+      console.log(`[${li + 1}/${levers.length}] ${run.lever}: ready ${run.ready !== false} · scene prepared`);
+      if (lever && lever !== 'default') run.leverSet = await ev(leverJs(lever.split('+').filter((k) => k !== 'hidden').join('+') || 'default') + ' await __w(800); return 1;');
+      if (s.audio) {
+        await ev(FAKE_MIC);
+        run.audio = await ev(`const b = [...document.querySelectorAll('.m2audsrc')].find((x) => x.offsetParent); if (!b) return { found: false }; b.scrollIntoView({ block: 'center' }); await __w(300); b.click();
+          for (let i = 0; i < 60 && !document.querySelector('.m2audsrc.on'); i++) await __w(100); return { found: true, live: !!document.querySelector('.m2audsrc.on'), ctx: window.__fakeMic ? __fakeMic.ac.state : null };`);
+      }
+      if (hide) run.hidden = await ev(LEVER.hidden + ' await __w(800); return { uiHidden: __LW.uiHidden, live: !!(document.querySelector(".m2audsrc.on")) };');   // hidden AFTER the AUDIO press (the hidden interface has no button to press)
+      await ev('__LW.pause(); await __LW.settle(); await __w(1000); return 1;');
+      run.envBefore = await ev(ENV);
+      await send('Profiler.enable'); await send('Profiler.setSamplingInterval', { interval: 200 });
+      await ev(`__MP.start(); ${s.audio ? 'if (window.__fakeMic) __fakeMic.restart();' : ''} __LW.play(); return 1;`);
+      await sleep(1500);                                                   // the play's own edge out of the record
+      trace = [];
+      await send('Tracing.start', { categories: 'devtools.timeline,v8.execute,blink.user_timing,disabled-by-default-devtools.timeline.frame,disabled-by-default-devtools.timeline', transferMode: 'ReportEvents' });
+      await send('Profiler.start');
+      await sleep(SECS * 1000);
+      const prof0 = await send('Profiler.stop');
+      const done = new Promise((r) => { traceDone = r; }); await send('Tracing.end'); await Promise.race([done, sleep(60000)]); traceDone = null;
+      const raw = await ev('const r = __MP.stop(); __LW.pause(); return r;');
+      run.env = await ev(ENV);
+      if (!LEVERS) try { fs.mkdirSync(TMP, { recursive: true }); const fd = fs.openSync(path.join(TMP, 'chromium-' + CHROM + '.trace.ndjson'), 'w');   // a single run keeps M0's raw record (a sweep keeps summaries only)
+        for (let i = 0; i < trace.length; i += 5000) fs.writeSync(fd, trace.slice(i, i + 5000).map((e) => JSON.stringify(e)).join('\n') + '\n'); fs.closeSync(fd);
+        fs.writeFileSync(path.join(TMP, 'chromium-' + CHROM + '.cpuprofile'), JSON.stringify(prof0.result ? prof0.result.profile : {})); } catch (e) { run.saveError = String(e); }   // the raw record first: a summariser fault never costs the run
+      run.sum = raw && raw.frames ? safe(() => summarise(raw)) : { error: raw };
+      run.trace = { events: trace.length, ...safe(() => MAIN_SELF(trace)) };
+      run.profile = prof0.result ? safe(() => profileTop(prof0.result.profile, 8)) : { error: prof0.error };
+      trace = [];
+      out.runs.push(run);
+      const m = run.sum, t = run.trace;
+      console.log(`[${li + 1}/${levers.length}] ${run.lever}: fps ${m.fps} · present p50/p95/p99 ${m.present?.p50}/${m.present?.p95}/${m.present?.p99} · >17.5 ${m.present?.over17} · dropped ${t.droppedFrames} · draw ${t.drawFrames} · main busy ${t.busyMs} ms ${JSON.stringify(t.byCategoryMs)} · GPU top ${t.gpuProcess?.topLevelMs} ms · env ${run.env && !run.env.E ? JSON.stringify({ s: [run.env.autoScale, run.env.scale, run.env.auto], steps: run.env.steps, cap: run.env.capMs, lock: run.env.lock, hz: run.env.hz, cad: run.env.cadence, look: run.env.look, tier: run.env.tier, hid: run.env.uiHidden, frost: run.env.frost, canvas: run.env.canvas }) : JSON.stringify(run.env)} · audio ${run.audio ? run.audio.live : '-'}`);
+      fs.mkdirSync(path.dirname(JSON_OUT), { recursive: true }); fs.writeFileSync(JSON_OUT, JSON.stringify(out, null, 1));
+    }
+    if (!LEVERS) Object.assign(out, out.runs[0]);   // M0's single-run shape (out.sum, out.trace, out.profile) for its readers
     ws.close();
   } finally {
     try { process.kill(proc.pid, 'SIGTERM'); } catch (_) {}
@@ -415,4 +474,4 @@ catch (e) { console.error('MOD-PROFILE ERROR', e); out = { error: String(e && e.
 finally { srv.stop(); }
 fs.mkdirSync(path.dirname(JSON_OUT), { recursive: true }); fs.writeFileSync(JSON_OUT, JSON.stringify(out, null, 1));
 console.log('wrote ' + JSON_OUT);
-if (CHROM && out.trace) console.log(JSON.stringify({ sum: { fps: out.sum.fps, present: out.sum.present, loop: out.sum.loopMs, js: out.sum.jsMs }, trace: out.trace, profile: out.profile }, null, 1));
+if (CHROM && !LEVERS && out.trace) console.log(JSON.stringify({ sum: { fps: out.sum.fps, present: out.sum.present, loop: out.sum.loopMs, js: out.sum.jsMs }, trace: out.trace, profile: out.profile }, null, 1));
