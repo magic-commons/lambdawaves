@@ -925,3 +925,30 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .dev[data-id="equalizer"] .row.fit > .sw { grid-column: span 2; }
 /* MOLECULES: MORPH and FLOW beside A ↔ B; the method's seg, VALENCE and the chevron */
 .dev .reg-morph.fit > .sw, .dev .mol-mrow.fit > .sw { grid-column: span 2; }
+
+/* 030 THE TIP JAR: a colorful QR in a turning conic ring — a card on the shelf, and once a session a sheet before an install (♥ TIP · NO
+   THANKS; both go on). The QR's own picture is tools/tip-qr.py's. The sheet is the kit's glass on no dark layer. */
+@property --tip-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes mm-tip-spin { to { --tip-a: 360deg; } }
+@keyframes mm-tip-in { from { opacity: 0; transform: translateY(10px) scale(.95); } }
+#lwMenu .mm-tip { text-decoration: none; color: inherit; align-content: center; }
+#lwMenu .mm-tip-art { position: relative; display: block; width: 172px; aspect-ratio: 1; padding: 7px; border-radius: 30px; isolation: isolate; transition: transform 320ms cubic-bezier(.3, 1.6, .5, 1); }
+#lwMenu .mm-tip-art::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; animation: mm-tip-spin 10s linear infinite;
+  background: conic-gradient(from var(--tip-a), #ff4fa3, #ffb347, #ffe66d, #5ce1a5, #4fc3ff, #8b5cf6, #ff4fa3); }
+#lwMenu .mm-tip-art::after { content: ''; position: absolute; inset: -10px; z-index: -2; border-radius: 40px; opacity: .45; filter: blur(18px); animation: mm-tip-spin 10s linear infinite;
+  background: conic-gradient(from var(--tip-a), #ff4fa3, #ffb347, #ffe66d, #5ce1a5, #4fc3ff, #8b5cf6, #ff4fa3); }
+#lwMenu .mm-tip-art img { display: block; width: 100%; height: 100%; border-radius: 24px; background: #fff; }
+#lwMenu .mm-tip:hover .mm-tip-art, #lwMenu .mm-tip:focus-visible .mm-tip-art { transform: scale(1.05) rotate(-3deg); }
+#lwMenu .mm-tip-word { font-size: 11px; letter-spacing: .24em; opacity: .75; transition: color 160ms, opacity 160ms; }
+#lwMenu .mm-tip:hover .mm-tip-word, #lwMenu .mm-tip:focus-visible .mm-tip-word { color: var(--acc); opacity: 1; }
+#lwMenu .mm-tip-back { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; }
+#lwMenu .mm-tip-sheet { display: grid; gap: 14px; justify-items: center; padding: 26px 28px 22px; border-radius: 28px; animation: mm-tip-in 300ms cubic-bezier(.3, 1.4, .5, 1); }
+#lwMenu .mm-tip-sheet .mm-tip-art { width: 200px; }
+#lwMenu .mm-tip-free { font-size: 10px; letter-spacing: .26em; opacity: .6; }
+#lwMenu .mm-tip-row { display: flex; gap: 10px; }
+#lwMenu .mm-tip-yes, #lwMenu .mm-tip-no { font-size: 11px; letter-spacing: .18em; padding: 9px 18px; border-radius: 999px; color: inherit; text-decoration: none; transition: transform 160ms, color 120ms; }
+#lwMenu .mm-tip-yes { color: #fff; background: linear-gradient(120deg, #ff4fa3, #8b5cf6 55%, #4fc3ff); }
+#lwMenu .mm-tip-no { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+#lwMenu .mm-tip-yes:hover, #lwMenu .mm-tip-yes:focus-visible { transform: scale(1.06); }
+#lwMenu .mm-tip-no:hover, #lwMenu .mm-tip-no:focus-visible { color: var(--acc); }
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-tip-art::before, #lwMenu .mm-tip-art::after, #lwMenu .mm-tip-sheet { animation: none; } #lwMenu .mm-tip-art { transition: none; } }

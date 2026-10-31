@@ -28,6 +28,9 @@ import { RM, animate, pointerFrame, tiltPictures, enterTiles, develop, swapLine,
 import * as V from './volumes.js';
 import { keepData, keepSection, installed, safariTab } from './library.js';
 
+/* 030 THE TIP JAR: the donation link, written by tools/tip-qr.py together with img/tip-qr.svg (its picture). Empty: no card, no sheet. */
+const TIP_URL = '';
+
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
   + 'Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og').split(' ');
@@ -538,9 +541,30 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
           if (!arm.take()) { arm.arm(); word.textContent = 'REMOVE ' + volName(v) + '? PRESS AGAIN'; return; }
           await V.remove(v.id); await paint(); return;
         }
-        if (pick) pick.click(); else run(null);
+        const go = () => { if (pick) pick.click(); else run(null); };
+        if (TIP_URL && !tipAsked) { tipAsked = true; tipSheet(go, !pick); return; }   // 030 THE TIP JAR: asked once a session; both answers go on
+        go();
       });
       paint(); return { paint, run };
+    }
+    /* 030 THE TIP JAR: the colorful QR (img/tip-qr.svg) in a turning ring — a card on the shelf, and once a session a sheet before an install
+       with ♥ TIP and NO THANKS. Both continue: nothing is withheld. A file volume's chooser waits for its own press after ♥ TIP (the new
+       tab took the click's gesture); NO THANKS, Escape or a press outside opens it at once. */
+    let tipAsked = false;
+    const tipArt = (host) => { const f = el('span', 'mm-tip-art', host), img = el('img', '', f); img.src = 'img/tip-qr.svg'; img.alt = 'QR code: the tip jar'; img.width = img.height = 196; img.decoding = 'async'; return f; };
+    const tipLink = (a) => { a.href = TIP_URL; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
+    function tipCard() { const c = tipLink(el('a', 'mm-vol mm-tip', shelfEl)); c.title = 'Everything here is free. A tip keeps it growing.'; tipArt(c); el('span', 'mm-tip-word', c, '♥ TIP JAR'); }
+    function tipSheet(go, follow) {
+      const back = el('div', 'mm-tip-back', root), s = el('div', 'mm-tip-sheet glass', back); s.dataset.mirSurface = 'menu';
+      s.setAttribute('role', 'dialog'); s.setAttribute('aria-modal', 'true'); s.setAttribute('aria-label', 'tip jar');
+      tipArt(s); el('span', 'mm-tip-free', s, 'FREE EITHER WAY');
+      const row = el('div', 'mm-tip-row', s), yes = tipLink(el('a', 'mm-tip-yes', row, '♥ TIP')), no = el('button', 'mm-tip-no', row, 'NO THANKS'); no.type = 'button';
+      yes.title = 'Opens the tip jar in a new tab; the install goes on'; no.title = 'Go on without a tip';
+      const key = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(true); } };
+      const done = (cont) => { window.removeEventListener('keydown', key, true); back.remove(); if (cont) go(); };
+      yes.addEventListener('click', () => done(follow)); no.addEventListener('click', () => done(true));
+      back.addEventListener('click', (e) => { if (e.target === back) done(true); });
+      window.addEventListener('keydown', key, true); no.focus();
     }
     function card(v) {
       /* iteration 012 L1: the numeral, the count and the bases — the title and the blurb are the hover's (title), the size the install's, and
@@ -571,6 +595,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         return;
       }
       vols = s.volumes; for (const v of s.volumes) card(v);
+      if (TIP_URL) tipCard();   // 030 THE TIP JAR: the last card on the shelf
       enterTiles([...shelfEl.children]);
     }
     async function enter(v) {
