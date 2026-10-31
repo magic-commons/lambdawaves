@@ -94,7 +94,7 @@ and the code disagree, the code is right; please say so in an issue.
   `tests/*.browser-test.mjs` in a real headless Firefox against its own HTTPS server; it takes about 20 minutes
   and uses the GPU. Source: `test.sh`.
 - After any edit under `lab/`, run `node tests/pwa.test.mjs --write`: it re-stamps the service worker's precache
-  hashes in `lab/sw.js`, or the pwa suite fails. Source: AI_POLICY.md, RELEASING.md.
+  hashes in `lab/sw.js`, or the pwa suite fails. Source: CONTRIBUTING.md, RELEASING.md.
 - The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 843 values, and 987 with the s4a fixture since iteration 008 W — both runs with `--query gastab=0`; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
   `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (843) and the same with
   `--fixture research/release-0.4.0/measure/digest-lock-s4a.json` (987), against a tree served by `tools/gate/server.py`.
@@ -124,7 +124,7 @@ and the code disagree, the code is right; please say so in an issue.
 - `lab/mir/**` (and `lab/fonts/**`) is the adopted MIR interface kit: MIR 1.5.5 plus the doors 1.5.6-alpha.1…17 (`MIR-MANIFEST.json` is the number). The law is THE KIT SENTENCE, CLAUDE.md:6:
   "THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS" — `lab/mir` is written by MIR's `adopt.mjs` alone, a λWAVES need is an additive
   door `1.5.6-alpha.N` made in [MIR](https://github.com/magic-commons/mir) with its `docs/FOR-MIR.md` line, a removal waits for a
-  line, and `node <MIR>/tools/adopt.mjs . --check` says "in step". Source: CLAUDE.md:6, AI_POLICY.md.
+  line, and `node <MIR>/tools/adopt.mjs . --check` says "in step". Source: CLAUDE.md:6, CONTRIBUTING.md.
 - The debug surface is `window.__LW` (`serialize()`, `restore()`, `fieldDigest()`, `readPixels()`, `perf`,
   `governor`, `quality`, `layout`, `report()`). Source: `lab/shell/facade.js` (`createFacade`; `rack.js` adds the late members at their seats).
 - A window's "copy" is one clipboard road: `layout.copyText(id, text)` writes and flashes `copied` on the named

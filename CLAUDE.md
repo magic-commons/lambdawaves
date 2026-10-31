@@ -1,5 +1,5 @@
 # λWAVES
-
+These files are the agents' instruction set (this page, `docs/laws/`, `docs/NOTES-FOR-AGENTS.md`, `docs/ui/`, `docs/FOR-MIR.md`), in their working register; the laws' names in capitals are its index.
 λWAVES is a WebGPU quantum-orbital lab, a PWA in vanilla ES modules: hydrogen's 140 states, the atoms, the molecules and their volumes,
 drawn by one ray-marched field, played by one clock, modulated, arranged on a timeline and filmed. Its UI kit is MIR, vendored in `lab/mir/**`.
 This page is the two pages every agent reads whole: the standing constraints, the gates, and the index of `docs/laws/` (read only the file you need).

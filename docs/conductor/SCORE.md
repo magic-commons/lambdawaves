@@ -1,4 +1,4 @@
-# THE SCORE — λWAVES' conductor grammar, v1 (026)
+# The score — λWAVES' conductor grammar, version 1
 
 A SCORE is one JSON file in **bars, beats and the targets' own units**. `tools/conduct.mjs <score.json>` applies it in the lab
 (`__LW.conduct.apply(score)`, the module `tools/conduct-score.js`) through the app's live doors into a project saved as

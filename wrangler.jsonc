@@ -22,7 +22,7 @@
   // never automatically, and never just because time passed.
   "compatibility_date": "2026-09-05",
 
-  // WAVE 68 · RETIRE THE STAGING ORIGIN, and this is the same hazard the whole OWN_ORIGIN argument is
+  // RETIRE THE STAGING ORIGIN. This is the same hazard the whole OWN_ORIGIN argument is
   // built around, one level up. With no key here the default is TRUE, and attaching a custom domain does
   // NOT turn it off — so after DEPLOY.md step 10 there would be TWO live origins, each with its own
   // ROOT-SCOPED, permanently-installed service worker, its own localStorage, and (because the manifest
@@ -44,8 +44,8 @@
   // from a clean machine — DEPLOY.md step 10 no longer needs the dashboard. The zone must be on this account.
   "routes": [{ "pattern": "lambdawaves.magic-commons.com", "custom_domain": true }],
 
-  // THE EXPERIMENTAL COPY (2026-09-11) — NOT DEPLOYED since 2026-09-12: the public dev worker was deleted at Josh's
-  // request; a dev URL needs Cloudflare Access in front first (RELEASING.md). `npx wrangler deploy --env dev` publishes the same dist/ as a second
+  // THE EXPERIMENTAL COPY (2026-09-11) — NOT DEPLOYED since 2026-09-12: the public dev worker was deleted;
+  // a dev URL needs Cloudflare Access in front first (RELEASING.md). `npx wrangler deploy --env dev` publishes the same dist/ as a second
   // Worker with its own name and address, so the dev branch can be played on real devices without touching
   // the release. Everything not named here is inherited from the top level.
   "env": {

@@ -118,7 +118,7 @@ rep tools/rack-deps.mjs "wrote research/release-0.5.2/RACK-DEPS.md and research/
 rep CLAUDE.md "\`research/iteration-0NN/\` each iteration's PLAN and BUILD notes" "the iteration notes in the vault (\`$VAULT_NOTES/research/iteration-0NN/\`)"
 rep CLAUDE.md "\`research/iteration-0NN/PLAN.md\` (the iteration in flight" "\`$VAULT_NOTES/research/iteration-0NN/PLAN.md\` (the iteration in flight"
 rep CLAUDE.md "\`REPORT.md\` (the history)" "\`docs/WAVES.md\` and the tag \`$TAG\` (the history)"
-after CLAUDE.md "These files are the agents' instruction set" "$LEGEND"
+rep CLAUDE.md "the laws' names in capitals are its index." "the laws' names in capitals are its index. $LEGEND"   # same line: CLAUDE.md:6 stays the kit sentence
 after docs/NOTES-FOR-AGENTS.md "# " "
 $LEGEND"
 rep .gitignore "# papers 2026-10-24:" "# The research record is archived (tag $TAG); research/ is a local folder for the tools' shots and scores.
