@@ -28,8 +28,8 @@ import { RM, animate, pointerFrame, tiltPictures, enterTiles, develop, swapLine,
 import * as V from './volumes.js';
 import { keepData, keepSection, installed, safariTab } from './library.js';
 
-/* 030 THE TIP JAR: the donation link, written by tools/tip-qr.py together with img/tip-qr.svg (its picture). Empty: no card, no sheet. */
-const TIP_URL = '';
+/* 030 THE TIP JAR: the donation link, written by tools/tip-qr.py together with img/menu/tip-qr.svg (its picture). Empty: no card, no sheet. */
+const TIP_URL = 'https://ko-fi.com/magiccommons';
 
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
@@ -542,24 +542,25 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
           await V.remove(v.id); await paint(); return;
         }
         const go = () => { if (pick) pick.click(); else run(null); };
-        if (TIP_URL && !tipAsked) { tipAsked = true; tipSheet(go, !pick); return; }   // 030 THE TIP JAR: asked once a session; both answers go on
+        if (TIP_URL && (pick || !tipAsked)) { if (!pick) tipAsked = true; tipSheet(go, !pick); return; }   // 030 THE TIP JAR: a network install is asked once a session; a file volume every press (its file is the tip's thank-you)
         go();
       });
       paint(); return { paint, run };
     }
     /* 030 THE TIP JAR: the colorful QR (img/tip-qr.svg) in a turning ring — a card on the shelf, and once a session a sheet before an install
-       with ♥ TIP and NO THANKS. Both continue: nothing is withheld. A file volume's chooser waits for its own press after ♥ TIP (the new
-       tab took the click's gesture); NO THANKS, Escape or a press outside opens it at once. */
+       with ♥ TIP and NO THANKS; both continue. A file volume (OPEN FILE…) asks on every press: its file is the tip jar's thank-you (Josh
+       10-31, B), so the words are THE FILE IS A THANK-YOU · ♥ TIP · I HAVE THE FILE, and its chooser opens on I HAVE THE FILE, Escape or a
+       press outside (after ♥ TIP it waits for its own press: the new tab took the gesture). The Drive link is never in the app. */
     let tipAsked = false;
-    const tipArt = (host) => { const f = el('span', 'mm-tip-art', host), img = el('img', '', f); img.src = 'img/tip-qr.svg'; img.alt = 'QR code: the tip jar'; img.width = img.height = 196; img.decoding = 'async'; return f; };
+    const tipArt = (host) => { const f = el('span', 'mm-tip-art', host), img = el('img', '', f); img.src = 'img/menu/tip-qr.svg'; img.alt = 'QR code: the tip jar'; img.width = img.height = 196; img.decoding = 'async'; return f; };
     const tipLink = (a) => { a.href = TIP_URL; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
     function tipCard() { const c = tipLink(el('a', 'mm-vol mm-tip', shelfEl)); c.title = 'Everything here is free. A tip keeps it growing.'; tipArt(c); el('span', 'mm-tip-word', c, '♥ TIP JAR'); }
     function tipSheet(go, follow) {
       const back = el('div', 'mm-tip-back', root), s = el('div', 'mm-tip-sheet glass', back); s.dataset.mirSurface = 'menu';
       s.setAttribute('role', 'dialog'); s.setAttribute('aria-modal', 'true'); s.setAttribute('aria-label', 'tip jar');
-      tipArt(s); el('span', 'mm-tip-free', s, 'FREE EITHER WAY');
-      const row = el('div', 'mm-tip-row', s), yes = tipLink(el('a', 'mm-tip-yes', row, '♥ TIP')), no = el('button', 'mm-tip-no', row, 'NO THANKS'); no.type = 'button';
-      yes.title = 'Opens the tip jar in a new tab; the install goes on'; no.title = 'Go on without a tip';
+      tipArt(s); el('span', 'mm-tip-free', s, follow ? 'FREE EITHER WAY' : 'THE FILE IS A THANK-YOU');   // Josh 10-31 (B): a file volume comes with the tip jar's thank-you message
+      const row = el('div', 'mm-tip-row', s), yes = tipLink(el('a', 'mm-tip-yes', row, '♥ TIP')), no = el('button', 'mm-tip-no', row, follow ? 'NO THANKS' : 'I HAVE THE FILE'); no.type = 'button';
+      yes.title = follow ? 'Opens the tip jar in a new tab; the install goes on' : 'Opens the tip jar; its thank-you message has the file'; no.title = follow ? 'Go on without a tip' : 'Open the file you have';
       const key = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(true); } };
       const done = (cont) => { window.removeEventListener('keydown', key, true); back.remove(); if (cont) go(); };
       yes.addEventListener('click', () => done(follow)); no.addEventListener('click', () => done(true));
@@ -571,7 +572,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
          no caption under a hover (it repeated the card) */
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
       el('b', 'mm-vol-num', o, volName(v)); o.title = [v.title, v.blurb].filter(Boolean).join(' — ');
-      if (v.wip) { const w = el('span', 'mm-vol-wip', o, 'WIP'); w.title = 'Still being filled: installs now, and grows'; }   // iteration 014 C4 (pack.mjs --wip)
+      if (v.wip || v.drawing) {   // iteration 014 C4 (pack.mjs --wip); 030: a volume whose pictures are still being drawn (build-deploy's `drawing`)
+        const w = el('span', 'mm-vol-wip', o); icon(w, 'cone'); el('span', '', w, 'WIP');
+        w.title = 'Under construction: ' + [v.wip && 'still filling', v.drawing && 'pictures coming'].filter(Boolean).join('; ');
+      }
       /* iteration 015 M5 · a volume on the shelf before its first molecule (pack.mjs --wip --next: the next volume, still filling) says FILLING:
          nothing to install or open yet */
       if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; o.title = volName(v) + ' is being filled'; el('span', 'mm-vol-meta', o, 'FILLING'); return; }

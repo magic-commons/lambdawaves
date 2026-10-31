@@ -413,6 +413,10 @@ const ALLOW = [
      unfurler is a crawler on another machine with no base URL to resolve against, so a relative og:image is
      simply dropped; this page never fetches it, and D1 above proves that by construction (a <meta content=>
      matches none of the twelve loading constructs).  It is pinned to the ONE tag, not to the origin. */
+  /* 030 THE TIP JAR · judged: the donation link is a plain <a target="_blank" rel="noopener noreferrer"> the reader clicks (the shelf card
+     and the sheet's ♥ TIP), never a load; it is pinned to the ONE constant tools/tip-qr.py writes, and to Ko-fi's https origin. */
+  [(f) => f.rel === 'picker.js' && /^https:\/\/ko-fi\.com\/[A-Za-z0-9_]+$/.test(f.url) && f.src.includes(`\nconst TIP_URL = '${f.url}';\n`),
+    'the tip jar link (TIP_URL): a plain <a target="_blank"> the reader clicks, never a load (tools/tip-qr.py writes it with its QR)'],
   [(f) => f.rel === 'index.html' && new RegExp('<meta property="og:image" content="' + f.url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '">').test(f.src),
     'the og:image link-preview URL: metadata a crawler reads, never a resource this page loads (§A2 and build-deploy §V3 pin it)'],
 ];

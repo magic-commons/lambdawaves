@@ -23,6 +23,7 @@ const n16 = (inner) => '<g transform="scale(1.5)" fill="none" stroke="currentCol
 
 const ICONS = {
   /* ── the Picker, the bar, FOLDERS (lab/img/icons/ until 021, each redrawn at 1.9) ── */
+  cone: p('M4 20.5h16') + p('M10 4h4l4.2 16.5H5.8Z') + p('M8.3 10.5h7.4') + p('M7.1 15.5h9.8'),   // 030: a volume under construction (WIP)
   arrowLeft: p('M15.5 4.5 8 12l7.5 7.5'),                                       // was 3.5 wide
   arrowRight: p('M8.5 4.5 16 12l-7.5 7.5'),
   atom: dot(12, 12, 1.5) + p('M3 12a9 3.5 0 1 0 18 0 9 3.5 0 1 0-18 0Z') + p('M5.64 5.64a9 3.5 45 1 0 12.72 12.72 9 3.5 45 1 0-12.72-12.72Z') +

@@ -245,7 +245,9 @@ if (SHELF) {
   for (const id of SHIP) if (!shelf || !Array.isArray(shelf.volumes) || !shelf.volumes.some((v) => v && v.id === id)) bad.push(`--ship ${id} is not on the shelf`);
   if (bad.length) { console.error(`--shelf ${SHELF}: ${bad.join('; ')} (pack it with --archive, or name the volume with --ship)`); process.exit(2); }
   mkdirSync(path.join(DIST, at('volumes')), { recursive: true });
-  for (const v of shelf.volumes) {
+  for (const v of shelf.volumes) {   // 030: a catalogue beside the shelf with rows that have no picture marks its volume `drawing` (the card's WIP)
+    const cat = path.join(srcDir, v.id, 'index.json');
+    if (existsSync(cat)) { const rows = (JSON.parse(readFileSync(cat, 'utf8')).rows || []); const bare = rows.filter((r) => !r.thumb).length; if (bare) { v.drawing = true; console.log(`  shelf    ${v.id}: ${bare} of ${rows.length} molecules have no picture yet → WIP`); } }
     if (!SHIP.has(v.id)) { delete v.index; continue; }                       // an archive volume keeps indexSha256: installFile checks the edition by it
     const src = path.join(srcDir, v.id), dst = path.join(DIST, at('volumes/' + v.id));
     if (!(path.resolve(dst) + path.sep).startsWith(path.resolve(DIST) + path.sep)) { console.error(`--ship ${v.id}: the destination leaves dist/`); process.exit(2); }
