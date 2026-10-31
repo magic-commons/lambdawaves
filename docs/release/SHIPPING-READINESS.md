@@ -11,8 +11,9 @@
 - **The gate.** `./test.sh node` runs every node suite (`tests/*.test.mjs`, pwa last) plus `state-scopes --check` and `hints-census
   --check`; the browser gate runs every `tests/*.browser-test.mjs`. The release-day list with today's numbers is in
   [`RELEASING.md`](RELEASING.md).
-- **The deploy tooling.** Wrangler 4.156.0 is locked; `npm audit` reads 0 in the repository and 0 in `tools/platform/electron`
-  (Electron 44.10.0). `node tools/build-deploy.mjs` passes §V1–§V5.
+- **The deploy tooling.** Wrangler 4.156.0 is locked; `npm audit` reads 0 in the repository; in `tools/platform/electron`
+  (Electron 44.10.0) it reads 0 high and 5 moderate (glob and minimatch under the build-time `@electron/packager` 20.3.0; the only
+  offered fix is a major downgrade). `node tools/build-deploy.mjs` passes §V1–§V5.
 - **The remote.** `origin` is github.com/magic-commons/lambdawaves (public); `origin/main` stands at `28fe4457` (2026-10-04). The
   release tags since `v0.5.3` exist locally only. Two workflows: `gate.yml` (`npm test` on push and pull request; the README badge) and
   `verify.yml` (`./test.sh node`, the deploy build, `changelog --check`, the Wrangler dry run). Neither has run on this tree.

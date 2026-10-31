@@ -1,0 +1,21 @@
+{
+  "entry": [
+    "lab/main.js",
+    "lab/gpu-boot.js",
+    "lab/sw.js",
+    "lab/mathworker.js",
+    "tools/**/*.{mjs,js,cjs}",
+    "tests/**/*.{mjs,js}"
+  ],
+  "project": [
+    "lab/**/*.{js,mjs}",
+    "tools/**/*.{mjs,js,cjs}",
+    "tests/**/*.{mjs,js}"
+  ],
+  "ignore": [
+    "lab/vendor/**",
+    "lab/mir/shell/vendor/**",
+    "lab/volumes/**"
+  ],
+  "includeEntryExports": false
+}

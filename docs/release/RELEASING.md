@@ -25,20 +25,27 @@ before `npx wrangler deploy --env dev`; `wrangler.jsonc` keeps that environment.
 
 ## Release-day checks
 
-Run on the release commit; each must read as below before the tag.
+Run on the release commit; each must read as below before the tag. The right-hand column is what each read on 2026-10-30
+(the 0.9.9 tree before the beta cut, the Linux workstation with the RTX 3070).
 
 ```bash
-./test.sh node                                     # every node suite + state-scopes --check + hints-census --check: EXIT 0
-./test.sh browser                                  # the browser suites (a machine with a GPU, Firefox and geckodriver)
-npx --no-install knip                              # the deliberate keeps only, 0 unused files
-npx --no-install dependency-cruiser --no-config --include-only '^lab' --output-type json lab   # 0 circular edges in lab/
-npm audit && (cd tools/platform/electron && npm audit)                                       # 0 in both packages
-node tools/build-deploy.mjs --quiet                # dist/ assembled and verified: rc 0
-node tools/changelog.mjs --check                   # CHANGELOG, CITATION.cff and BUILD_LINE in step: rc 0
-# THE LOCK on a served tree (tools/gate/server.py), both fixtures: 0 changed leaves
-nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --query gastab=0
-nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --fixture tests/fixtures/digest-lock-s4a.json
+./test.sh node                                     # 116 node suites (pwa last) + state-scopes --check + hints-census --check: EXIT 0
+./test.sh browser                                  # 41 browser suites (a machine with a GPU, Firefox and geckodriver)
+npx --yes knip@6.43.0 --config tools/knip.json     # app (lab/ less lab/mir): 14 unused exports, all deliberate keeps; 0 unused app files
+npx --no-install dependency-cruiser --no-config --include-only '^lab' --output-type json lab   # 0 circular edges outside lab/mir (the kit's own: 37)
+npm audit                                          # 0 vulnerabilities
+(cd tools/platform/electron && npm audit)          # 5 moderate (glob, minimatch under @electron/packager 20.3.0); 0 high
+node tools/build-deploy.mjs --quiet                # rc 0: dist/ 1,740 files, 29.59 MiB
+node tools/changelog.mjs --check                   # rc 0: CHANGELOG, CITATION.cff and BUILD_LINE (0.9.9-alpha) in step
+# THE LOCK on a served tree (python3 tools/gate/server.py . <p> &), both fixtures: 0 readback differences
+nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --query gastab=0                                            # 843 · 0
+nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --query gastab=0 --fixture tests/fixtures/digest-lock-s4a.json # 987 · 0
 ```
+
+The browser suites by area (one server, `nice -n 10`, one browser at a time) are listed in `CLAUDE.md` § THE GATES; on 2026-10-30
+`molecular-names`, `menubar`, `start` and `lw-facade` were run green, the rest were last run by the rows that changed their areas.
+The two Electron advisories are fixed upstream only by a major downgrade of `@electron/packager` (`npm audit fix --force` → 18.4.4);
+the packager runs at build time and does not ship.
 
 ## Cutting a release (dev → main)
 
