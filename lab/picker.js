@@ -292,7 +292,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* ── THE DECK: pages sized to the space (bigger tiles AND more columns: the tile from the height, the columns from the width), ‹ ›
      beside them, dots under (a page count past sixteen pages); a page's tiles are made when it is the page or its neighbour ── */
   const decks = [];
-  function deck(host) {
+  function deck(host, room = 10) {   // room: the desktop gap between tiles (029 Q: a volume's deck breathes at 16)
     const wrap = el('div', 'mm-pager', host), pagesEl = el('div', 'mm-pages', wrap), foot = el('div', 'mm-dots', host);
     const arrow = (dir) => { const b = el('button', 'mm-arrow ' + (dir < 0 ? 'mm-prev' : 'mm-next'), wrap); b.type = 'button';
       b.setAttribute('aria-label', dir < 0 ? 'previous page' : 'next page'); icon(b, dir < 0 ? 'arrow-left' : 'arrow-right'); b.addEventListener('click', () => pageTo(page + dir)); return b; };
@@ -313,7 +313,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       } else { foot.dataset.mode = 'count'; foot.textContent = (page + 1) + ' / ' + pages.length; }
     }
     function size() {
-      const narrow = innerWidth < 700, gap = narrow ? 6 : 10;
+      const narrow = innerWidth < 700, gap = narrow ? 6 : room;
       let above = 0; for (const c of host.children) { if (c === wrap) break; if (!c.hidden) above += c.offsetHeight + 12; }
       /* iteration 012 L2: on a desktop the deck keeps off the racks behind the Picker (a rack's width and 20 px a side, Josh: "not overlap the
          blurred racks too much" on a 16:9 screen); the ATOMIC table is not a deck and keeps its size */
@@ -492,7 +492,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        ‹ (back to the shelf) · the kit's stepper ‹ VOL. I › (its size on its hover) · the count · the tags on one line that scrolls sideways
        (the wheel turns it) · the search · SHOW LABELS (iteration 012 L1: INSTALL / REMOVE live on the shelf's card only) — and the deck below
        measures its tile from what is left */
-    const vhead = el('div', 'mm-vhead', view), vdeck = deck(view);
+    const vhead = el('div', 'mm-vhead', view), vdeck = deck(view, 16);
     let woke = false, cur = null, vols = [], mols = [], byId = new Map(), on = new Set(), query = '', tagsEl = null, countEl = null, vq = null, sortBtns = [];
     /* iteration 014 D1 · THE SORT: NAME (A–Z → Z–A → as-is) and MASS (heavy first → light first → as-is), one at a time; as-is is the index's own
        order and the buttons unpressed; kept for the Picker's life, never saved */
@@ -599,11 +599,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     /* the tags: built once a volume and lit in place (the strip keeps where it was scrolled); two or more intersect, ALL clears them */
     function paintTags() {
-      /* iteration 012 L2 · 014 C3: THREE rows in one sideways strip; each tag in its count's order goes to the row that is shortest so far, so
+      /* iteration 012 L2 · 014 C3 · 029 Q: TWO rows in one sideways strip under its visible scrollbar; each tag in its count's order goes to the row that is shortest so far, so
          every row reads most-common first and they end together.  The chips are the index's words: `tags` (what it is) and `geo` (its shape,
          catalogue/structure_tags.py THE SHAPE WORDS — linear · planar · strained · macrocycle · spiro · bridged · fused · polycyclic · …) */
       tagsEl.textContent = ''; const n = new Map(); for (const m of mols) for (const t of wordsOf(m)) n.set(t, (n.get(t) || 0) + 1);
-      const rows = [0, 1, 2].map(() => el('div', 'mm-tagrow', tagsEl)), len = [0, 0, 0];
+      const rows = [0, 1].map(() => el('div', 'mm-tagrow', tagsEl)), len = [0, 0];
       const chipOf = (id, label, count) => { const r = len.indexOf(Math.min(...len)); len[r] += String(label).length + String(count).length + 4; const b = el('button', 'mm-tag', rows[r], label); b.type = 'button'; b.dataset.tag = id; el('i', '', b, count.toLocaleString('en'));
         b.addEventListener('click', () => { if (id === '') on.clear(); else if (on.has(id)) on.delete(id); else on.add(id); markTags(); filter(); }); };
       chipOf('', 'all', mols.length);
