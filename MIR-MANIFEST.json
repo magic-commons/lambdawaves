@@ -1,8 +1,8 @@
 {
   "kit": "MIR",
-  "version": "1.5.6-alpha.20",
+  "version": "1.5.5",
   "line": "1.5",
-  "commit": "27d4f1ea0667",
+  "commit": "3051dafb3ef4",
   "files": {
     "lab/fonts/LWTitle-title.woff2": "8069abf19624158c",
     "lab/fonts/Roboto-OFL.txt": "061402327a96aadb",
@@ -262,8 +262,8 @@
     "lab/mir/timeline/timeline.css": "981aac836f2eba38",
     "lab/mir/timeline/view.js": "938f864a972f9af5",
     "lab/mir/timeline/window.js": "1b5b3f6ca05dae1b",
-    "lab/mir/tokens.json": "13762b77af5ea4c6",
-    "lab/mir/version.js": "37ad45bf8eff1a9f",
+    "lab/mir/tokens.json": "540e281a8f806a4f",
+    "lab/mir/version.js": "3badd819e8fc9a36",
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
     "lab/mir/window/rail.js": "60d28f8f5c584dea",

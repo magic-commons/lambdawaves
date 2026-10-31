@@ -341,7 +341,7 @@ const PRECACHE = [
   ['./mir/timeline/timeline.css',                                   '981aac836f2e'],
   ['./mir/timeline/view.js',                                        '938f864a972f'],
   ['./mir/timeline/window.js',                                      '1b5b3f6ca05d'],
-  ['./mir/version.js',                                              '37ad45bf8eff'],
+  ['./mir/version.js',                                              '3badd819e8fc'],
   ['./mir/window-activity.js',                                      '8eb6cefdf972'],
   ['./mir/window/dock.js',                                          '6b678fe06223'],
   ['./mir/window/rail.js',                                          '60d28f8f5c58'],

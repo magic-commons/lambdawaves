@@ -15,7 +15,10 @@ const ACCEPTED = {
   /* 021 K4 · KIT DAY: MIR 1.5.5, the first shipped 1.5 — the λWAVES lift (alpha.25–33 built here under the retired trickle-down rule,
      folded home and cut as kit commit a7fba3995839, tag v1.5.5), adopted by MIR's tools/adopt.mjs.  From here the kit sentence (CLAUDE.md:6):
      lab/mir is written by adopt.mjs alone, a λWAVES need is an additive door 1.5.6-alpha.N, and each adoption pins its row here. */
-  '1.5.5': 'f7c96a12a28cc07cf5c4e981e5f79903e9e8f62fe7aaaaec0f35004a4538ebb7',
+  /* 031 · THE KIT IS 1.5.5, LITERALLY (Josh 2026-10-31: "Call this version of MIR 1.5.5"): the twenty doors alpha.1–20 fold into the 1.5.5 cut
+     of 2026-10-31 (kit commit 3051daf, tag v1.5.5; the 10-27 lift is tag v1.5.5-lift, its manifest sha f7c96a12a28cc07cf5c4e981e5f79903e9e8f62fe7aaaaec0f35004a4538ebb7).
+     A new door continues from 1.5.6-alpha.21. */
+  '1.5.5': 'e622ad104cd7832bd802c3f362490a8cdf21565017e0f2f0947f1ec672f1de9d',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

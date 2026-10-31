@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 031
+
+THE KIT IS 1.5.5, LITERALLY (Josh 2026-10-31, "Call this version of MIR 1.5.5"): the twenty doors of 021–029 (1.5.6-alpha.1…20) are cut into MIR 1.5.5 at kit commit 3051daf (tag `v1.5.5` in `~/Documents/MIR`, branch `kit-1.5.5`; the 10-27 lift is `v1.5.5-lift`); λWAVES, and BASINS after it, adopt `1.5.5`. The clone road is unchanged; a new door is numbered from 1.5.6-alpha.21. The sibling adoptions of 027 (NEBULA-REDUX, BUBBLDYNE at alpha.17) stand; BASINS' adoption is the 031 work (`~/Documents/DATABASE/CLAUDE/MIR/LAMBDAWAVES MIR SPEC 1.5.5 FOR BASINS 2026-10-31.md`).
+
 ## The laws of 022
 
 A POPUP WEARS THE SKIN (022 P): every popup list is `.glass[data-mir-surface="menu"]` and takes its material from the skin's tokens and `--surface-menu-floor` (lab/mir/css/skin.css:29: TINTED .94 · REFRACTIVE .72 · SOLID 1); no native `<select>` anywhere (the kit's `select()`/`listPane`, a row's `pic`); λWAVES writes no menu alpha (`#lwMenu`, the Picker page, is a page).
