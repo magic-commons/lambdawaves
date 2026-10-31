@@ -640,6 +640,8 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-vol-meta { font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: 999px; font-variant-numeric: tabular-nums; transition: color 120ms; }
 #lwMenu .mm-install:hover, #lwMenu .mm-install:focus-visible { color: var(--acc); }
+#lwMenu .mm-install-alt { font-size: 10px; letter-spacing: .2em; opacity: .55; padding: 2px 8px; margin-top: -8px; transition: opacity 120ms, color 120ms; }   /* 030: a site volume's .lwv from disk */
+#lwMenu .mm-install-alt:hover, #lwMenu .mm-install-alt:focus-visible { opacity: 1; color: var(--acc); } #lwMenu .mm-install-alt[hidden] { display: none; }
 #lwMenu .mm-ring-host { position: relative; width: 30px; height: 30px; flex: none; }
 #lwMenu .mm-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 #lwMenu .mm-ring circle { fill: none; stroke-width: 6; stroke-linecap: butt; }

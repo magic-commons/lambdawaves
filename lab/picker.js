@@ -516,12 +516,18 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost), ico = icon(ringHost, 'download'), word = el('span', 'mm-install-word', b);
       const fromFile = !v.index, size = fromFile ? v.archive.bytes : v.bytes, pick = fromFile ? el('input', '', host) : null;
       if (pick) { pick.type = 'file'; pick.accept = '.lwv'; pick.hidden = true; pick.addEventListener('change', () => { const f = pick.files && pick.files[0]; pick.value = ''; if (f) run(f); }); }
+      /* 030 (Josh 10-31: "it's making me download the thing even if it's on the system"): a volume that installs from the site and also has an
+         archive takes its .lwv from disk too — OPEN FILE… under INSTALL (and a drop on the card); installFile checks every byte against the shelf. */
+      const alt = !fromFile && v.archive ? el('button', 'mm-install-alt', host, 'OPEN FILE…') : null, altPick = alt ? el('input', '', host) : null;
+      if (alt) { alt.type = 'button'; alt.title = 'Have the .lwv? Open it instead of downloading';
+        altPick.type = 'file'; altPick.accept = '.lwv'; altPick.hidden = true; altPick.addEventListener('change', () => { const f = altPick.files && altPick.files[0]; altPick.value = ''; if (f) run(f); });
+        alt.addEventListener('click', (e) => { e.stopPropagation(); if (!ctl) altPick.click(); }); }
       let ctl = null; const arm = armer(b, () => paint());
       const paint = async () => {
         const s = await V.installStatus(v.id).catch(() => ({ state: 'absent', n: 0, N: v.count || 0 }));
         const est = fromFile && s.state !== 'installed' ? await navigator.storage?.estimate?.().catch(() => null) : null;
         const tight = est && est.quota && est.quota - (est.usage || 0) < size ? ' · TOO BIG FOR THIS DEVICE' : '';
-        b.dataset.state = s.state; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle'); eye(ico, s.state === 'installed');
+        b.dataset.state = s.state; if (alt) alt.hidden = s.state === 'installed'; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle'); eye(ico, s.state === 'installed');
         word.textContent = s.state === 'installed' ? 'REMOVE' + (size ? ' · ' + fmtBytes(size) : '') : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
           : (fromFile ? 'OPEN FILE…' : 'INSTALL') + (size ? ' · ' + fmtBytes(size) : '')) + tight;
       };
@@ -583,7 +589,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (meta) el('span', 'mm-vol-meta', o, meta);
       o.addEventListener('click', () => enter(v));
       const ins = installer(c, v);
-      if (!v.index) {   // the card takes a drop of its .lwv
+      if (v.archive) {   // the card takes a drop of its .lwv (030: every volume with an archive, not only a file volume)
         const files = (e) => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
         c.addEventListener('dragover', (e) => { if (files(e)) { e.preventDefault(); c.classList.add('drop'); } });
         c.addEventListener('dragleave', () => c.classList.remove('drop'));
