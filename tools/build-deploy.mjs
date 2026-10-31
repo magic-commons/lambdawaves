@@ -371,6 +371,15 @@ H.push('# served as a download instead of a page.  .webmanifest must arrive as a
 H.push('# the browser will not offer to install the app.  .md is typed text/plain so a reader gets the build');
 H.push('# log in a tab rather than in their downloads folder.');
 for (const [rel, type] of typed) { H.push(''); H.push('/' + rel); H.push('  Content-Type: ' + type); }
+/* THE WIRE IS THE BUILD (030 V, finding F1).  Cloudflare's JavaScript Detections appends a per-request <script> before </body> of every
+   HTML response, has NO switch on the Free plan (its docs: it cannot be disabled; Bot Fight Mode off does not remove it), and sw.js then
+   rejects index.html at install — for every visitor.  A response that says `no-transform` is one an intermediary must not modify, and
+   Cloudflare honours it: the beacon is not injected.  Sent on the page alone (19 KB; everything else keeps the edge's compression).
+   tools/release/live-check.mjs proves it after each deploy. */
+for (const page of ['/', '/index.html']) {
+  H.push(''); H.push(page);
+  H.push('  Cache-Control: public, max-age=0, must-revalidate, no-transform');   // Workers merges this with /*'s value (the same directives twice): valid, and no-transform holds
+}
 H.push('');
 writeFileSync(path.join(DIST, '_headers'), H.join('\n'));
 console.log(`wrote dist/_headers — 1 site-wide rule + ${typed.length} content-type rules`);

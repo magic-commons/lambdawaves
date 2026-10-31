@@ -23,7 +23,9 @@ node tools/release/live-check.mjs # THE WIRE IS THE BUILD: the live index.html a
 The fourth command exists because of a finding (030 V): a zone feature that rewrites responses — Cloudflare's JavaScript Detections and
 Bot Fight Mode (a per-request `<script>` before `</body>`), Rocket Loader, Email Obfuscation, Web Analytics — makes the live page differ
 from the build, and `sw.js` then refuses the install for every visitor, silently. Keep every one of them OFF for this hostname; the check
-names the first differing line when one is on.
+names the first differing line when one is on. JavaScript Detections has NO switch on the Free plan (Cloudflare's docs: it cannot be
+disabled; Bot Fight Mode off does not remove it), so the build sends `Cache-Control: … no-transform` on `/` and `/index.html` alone — a
+response Cloudflare must not modify — and the beacon is never injected; every other file keeps the edge's compression.
 
 The first command is not optional and it is not a formality: `sw.js` derives its **cache name** from its
 own precache hashes, so a stale entry means the name does not move when the bytes do and every returning

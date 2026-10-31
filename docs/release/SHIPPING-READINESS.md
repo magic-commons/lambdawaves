@@ -23,8 +23,11 @@
   unlimited, so no traffic can produce a bill. The build's §V7 holds the plan's 20,000-file / 25 MiB budget: 15,674 files ship today.
 - **The library.** VOL. I (6,927 molecules) and the filling VOL. III travel with the site as files, so INSTALL and the single-molecule
   fetch work; VOL. II is its 5.76 GB archive, handed out from the maintainer's Drive and opened in PICKER › LIBRARY (`docs/VOLUMES-HOSTING.md`).
-- **Hardening (030).** Every response carries a Content-Security-Policy (SECURITY.md); both workflows pin their actions by hash with read-only
-  permissions; install scripts are off; `main` is protected (required checks, no force-push); Dependabot alerts and secret scanning are on.
+- **Hardening (030).** Every response carries a Content-Security-Policy and HSTS (SECURITY.md); both workflows pin their actions by hash with
+  read-only permissions; install scripts are off; `main` and `dev` are protected (required checks, no force-push); Dependabot and secret
+  scanning are on; private vulnerability reporting is on. The outside-eye review (REVIEW-030, in the vault) found that Cloudflare's
+  JavaScript Detections had rewritten the live page since the first deploy, so no visitor's service worker had ever installed; the page now
+  ships `no-transform` and `tools/release/live-check.mjs` reads PASS: the live bytes are the build's.
 
 ## Release blockers
 
