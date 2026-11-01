@@ -54,6 +54,7 @@ export const RECORDS = Object.freeze([
   row('mir.pointer', P, 'kit', false, 'kit · MIR OPTIONS › MOTION › POINTER'),
   row('mir.render.calib', P, 'kit', false, 'kit · recorder: this device’s ms a frame'),
   row('lw.keyboard.position.v1', W, 'v 1 (name)', false, 'kit · the KEYBOARD window’s place'),
+  row('lw.csb.side', W, '—', true, 'shell/modulation.js modDodge: the side the CONTROL SURFACE keeps (top | bottom, 032 T13)'),
 ]);
 export const FAMILIES = Object.freeze(Object.fromEntries(RECORDS.map((r) => [r.key, r])));
 /** the retired notebook keys (021 R4): read once at boot into the session part, then removed */

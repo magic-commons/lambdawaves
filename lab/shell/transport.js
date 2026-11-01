@@ -1,10 +1,10 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
+import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createTransport(app) {
-  const { dom, ui, reg, clock, appPlay, sturm, rates, isPhone } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
+  const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
   const armSubs = new Set();   // the kit's bar hears THE POWER (setModArm) through its mod seam's onArm
   /* ── transport strip (§25) ─────────────────────────────────────────────── */
@@ -52,9 +52,9 @@ export function createTransport(app) {
        under the kit's 'csb' drawing name, so the docked card keeps the kit's CONTROL SURFACE title. */
     const CSB = Object.assign([{ group: 'csb-play', items: ['play'] },
       { group: 'csb-side csb-left', items: [{ group: 'csb-col csb-tempo', items: ['app:rate', 'tempo'] }, { group: 'csb-col csb-mod', items: ['power', 'expand'] },
-        { group: 'csb-ico', items: ['rewind', 'openers', 'door', 'dock'] }] },
+        { group: 'csb-ico', items: ['app:begin', 'app:home', 'openers', 'door'] }] },   // 032 T14: ⏮ (bar 1) then ↺ (t → 0), each an action's seat, over TIMELINE · the door
       { group: 'csb-mid', items: ['app:chooser', { group: 'csb-row csb-lib', items: ['app:modes', 'app:folders'] }] },
-      { group: 'csb-side csb-right csb-ico', items: ['app:search', 'app:finder', 'app:fav', 'app:rack', 'app:folds', 'app:nodes', 'app:info', 'app:theme', 'app:gear'] },
+      { group: 'csb-side csb-right csb-ico', items: ['app:search', 'app:finder', 'app:fav', 'app:rack', 'app:folds', 'app:nodes', 'app:info', 'app:theme', 'app:gear', 'dock'] },   // 032 T14: the dock chip takes the right grid's tenth cell (the left 2 × 2 is ⏮ ↺ over TIMELINE · the door), so the bar keeps 674 px and its height
       'panel'], { name: 'csb', title: 'CONTROL SURFACE' });
     /* 021 I1 · THE SEATS READ THE REGISTRY (lab/actions.js): `seat(id)` takes its word (`word()` where it changes, else the label; its hint the action's short `hint`, 022 H1), its icon, its
        light (a toggle's get()) and its key hint (data-key-action) from the action, and a press runs the action — FOLDS, NODES, INFORMATIONAL, THEME
@@ -65,31 +65,32 @@ export function createTransport(app) {
       b.addEventListener('click', () => { A.run(id); paint(); }); b.addEventListener('pointerenter', paint); b.addEventListener('focus', paint); seats.set(id, paint); paint(); return b; };
     A.onState((id) => { const p = seats.get(id); if (p) p(); });
     const gear = seat('gui', 'csb-gear'), folders = seat('folders', 'csb-folders'), finder = seat('windowPicker', 'csb-finder'), theme = seat('theme', 'csb-theme');   // call 11: THEME the theme only (lab.css swaps sun ↔ moon)
-    const info = seat('info.all', 'csb-info'), folds = seat('folds', 'csb-folds'), nodes = seat('nodes', 'csb-nodes');   // E3 · 020 T2: INFORMATIONAL, FOLDS, NODES (lit while its window is open)
+    const info = seat('info.all', 'csb-info'), folds = seat('folds', 'csb-folds'), nodes = seat('nodes', 'csb-nodes');
+    const begin = seat('timeline.beginning', 'csb-begin'), zero = seat('home', 'csb-zero');   // 032 T14: the kit's one 'rewind' seat (t → 0) became two   // E3 · 020 T2: INFORMATIONAL, FOLDS, NODES (lit while its window is open)
     theme.append(glyphEl('moon', 'gly gly-moon'), glyphEl('sun', 'gly gly-sun'));   // csb.css shows the one the theme names (body[data-theme])
     infoPrefs().subscribe(() => A.notify('info.all')); requestAnimationFrame(() => A.notify('folds'));
     const chooser = document.querySelector('.dev[data-id="chem"] .mol-pick');
     const byId = (id) => document.getElementById(id);
     const search = createCsbSearch(app, { bar: () => T });   // A2 · THE MINIATURE PICKER (lab/csb-search.js)
     const bar = createBar({ layout: CSB, root: T, host: dom.stage, seats: 'thin',   // 021 K4: λWAVES' thin seats are a kit door since MIR 1.5.5
-      nodes: { rate: ui.rateKnob.root, gear, modes: byId('lwMode'), chooser, search: search.root, folders, finder, info, theme, folds, nodes, rack: byId('rackToggle'), fav: byId('rackFav') },
+      nodes: { rate: ui.rateKnob.root, gear, modes: byId('lwMode'), chooser, search: search.root, folders, finder, info, theme, folds, nodes, begin, home: zero, rack: byId('rackToggle'), fav: byId('rackFav') },
       openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
       rack: () => app.sh.rk, door: 'none', powerWord: 'MOD', seatMenu: false, opener: false,
       macros: { face: 'knob', onAdd: () => { if (app.state.modHost.model.addMacro(null) && app.state.modView) app.state.modView.rebuild(); app.hNote(); } },   // 022 C2: MACROS 1–8 as the kit's knob bank; an empty slot adds one
       freeWidth: () => (app.sh.rackCardWidth ? app.sh.rackCardWidth() : 262), freeHost: () => app.host.floats,   // A8: the FREE window is one rack card wide and wears the card's drawing
-      /* iteration 014 A4 · THE SEATS: the dock chip cycles RACK → STAGE → FREE (Josh's answer 1: the STAGE at boot); a phone keeps rack and stage.
-         The rack seat is λWAVES' TRANSPORT card at its remembered slot (rack-wiring.js), so the kit docks through it */
-      places: () => (isPhone() ? ['rack', 'stage'] : ['rack', 'stage', 'free']),
-      onDock: (v) => { const rk = app.sh.rk; if (!rk) return; if (v) rk.open('transport', { index: app.sh.layout.dockIndex }); else rk.close('transport'); } });
+      /* iteration 014 A4 · THE SEATS; 032 C1 (Josh: "three forms → two"): the dock chip swaps RACK ↔ STAGE (↙ / ↗, the kit's placeGlyph), the STAGE at boot;
+         FREE left the cycle — the card popped out of the rack is the one-card look (csb.css, the kit's `bare` pop).  The rack seat is λWAVES' TRANSPORT
+         card at its remembered slot (rack-wiring.js), so the kit docks through it; a card already open (an open slot with no bar) takes the bar at once */
+      places: ['rack', 'stage'],
+      onDock: (v) => { const rk = app.sh.rk, w = app.sh.wTr; if (!rk) return; if (v && w && !w.root.classList.contains('closed')) transportDock(rk).open({ body: w.body });
+        else if (v) rk.open('transport', { index: app.sh.layout.dockIndex }); else rk.close('transport'); } });
     /* the rack's ☆ list opens beside its button, wherever the bar sits (it is the stage's, never the bar's: the bar clips) */
     for (const [b, l] of [['rackFav', 'rackFavList']]) { const btnEl = byId(b), list = byId(l); if (!btnEl || !list) continue;
       btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const r = btnEl.getBoundingClientRect(), h = list.offsetHeight, w = list.offsetWidth, up = r.top - h - 8 >= 8;
         list.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2))) + 'px'; list.style.right = 'auto';
         list.style.top = Math.round(up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) + 'px'; })); }
-    { const pc = bar.root.querySelector('.csb-play'); if (pc) pc.dataset.mirSurface = 'chip'; }   // E2: PLAY's chip wears the kit's material outside the bar
     ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
-    { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0 · ψ\'s time home; beat and playhead stay'; rst.setAttribute('aria-label', 'back to t = 0'); } }   // 021 R3: the hint says what it moves
     /* A8 · the door wears the modulation window's own icon (Josh: "a sine wave icon instead of the MIR 3x3 square logo"; 021 V2: the table's
        `modulation`, an SVG); the turning mark is the kit's unplaced logoButton now */
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window'; setGlyph(door, 'modulation');
@@ -101,7 +102,7 @@ export function createTransport(app) {
     if (P) {
       P.dataset.mirSurface = 'well'; P.classList.add('csb-surface');
       for (const [k, t] of [['tr', 'TRANSPORT'], ['mac', 'MACROS'], ['fav', 'FAVOURITES'], ['met', 'METERS']]) sec[k] = section({ title: t, parent: P, cls: 'csb-sec csb-sec-' + k });
-      const home = seat('home', 'csb-home'); chip(home, 'rewind', 'back to t = 0'); el('span', 'csb-steps', sec.tr.body).append(home, sm, sp, jmp);
+      const home = seat('home', 'csb-home'); chip(home, 'reload', 'back to t = 0');   // 032 T14: ↺, as the bar's seat el('span', 'csb-steps', sec.tr.body).append(home, sm, sp, jmp);
       mt.bpm = readout({ label: 'BPM', value: '—', cls: 'csb-bpm' }); mt.beat = lamp({ parent: mt.bpm.root, cls: 'mir-lamp csb-beat', title: 'the beat' });
       sec.tr.body.append(ui.periodRo.root, mt.bpm.root);
       const tiles = P.querySelector('.tempo-grid'); if (tiles) { sec.tr.body.append(...tiles.children); tiles.parentElement.remove(); }   // the kit's tiles, one strip

@@ -72,6 +72,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `mir.pointer` | PREFERENCE | kit | no | kit · MIR OPTIONS › MOTION › POINTER |
 | `mir.render.calib` | PREFERENCE | kit | no | kit · recorder: this device’s ms a frame |
 | `lw.keyboard.position.v1` | WORKSPACE | v 1 (name) | no | kit · the KEYBOARD window’s place |
+| `lw.csb.side` | WORKSPACE | — | yes | shell/modulation.js modDodge: the side the CONTROL SURFACE keeps (top \| bottom, 032 T13) |
 
 <!-- state-scopes:end -->
 

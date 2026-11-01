@@ -3,7 +3,7 @@
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../tier.js'; import { setGlyph } from '../mir/glyph.js';
 import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
-import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout, el, hint } from '../mir/kit.js';
+import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout, el, hint, label } from '../mir/kit.js';
 export function createKeys(app) {
   const { dom, ui, clock, appPlay, mat, settingsStore } = app, { schedule } = app.loop, { floats, rack, rackL } = app.host;
   const { devById, layout, readSettings, rk, setModArm } = app.sh, { wState } = app.w, { occlusion } = app.ctl;
@@ -72,7 +72,8 @@ export function createKeys(app) {
     const tlRender = el('button', 'tbtn tl-render'); tlRender.type = 'button'; tlRender.dataset.keyAction = 'render.timeline';
     setGlyph(tlRender, 'film', { label: 'render this range' }); hint(tlRender, 'render this range'); tlRender.addEventListener('click', () => app.sh.ACTIONS.run('render.timeline'));
     app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
-      mod: { host: app.state.modHost, registry: app.state.modHost.registry, armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
+      mod: { host: app.state.modHost, registry: app.state.modHost.registry, get view() { return app.state.modView; },   // 032 T20: view.api.armFor → the clip menu's ROUTE NEW PARAMETER…
+        armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
         isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => layout.modulation && layout.modulation.toggle(), persist: () => ui.saveNative && ui.saveNative(),   // A5: the work bar's door and tempo
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, audio: false,
@@ -85,6 +86,9 @@ export function createKeys(app) {
          scrub's start): LIVE every move, LIGHT one in three, RELEASE when the hand lets go */
       scrubLevel: () => { const g = mirGui(); return g ? g.sampling().scrub : 'live'; } });
     { const d = app.state.tl.root.querySelector('.tl-transport .mod-exp'); if (d) setGlyph(d, 'modulation'); }   // 021 V2: the work bar's door wears the modulation window's own icon (A9)
+    /* 032 T8 · MOD ON THE TIMELINE'S POWER (Josh: "MOD word on the timeline's toggle; the power icon stays on the modulation window"): the work bar's
+       power seat wears the kit's word face — modPower({ word }), as the CSB's — dressed here as the door is (the timeline's transport takes no powerWord) */
+    { const p = app.state.tl.root.querySelector('.tl-transport .mir-mod-power'); if (p) { p.dataset.face = 'word'; label(p, 'MOD'); } }
     /* 021 R3 · TWO ⏮, EACH SAYS WHAT IT MOVES: the work bar's sends the modulation beat and the TIMELINE playhead to bar 1 and leaves ψ's t
        (the main bar's ⏮ moves t); one position spanning both is a kit door for 1.5.6 (docs/FOR-MIR.md) */
     { const h = app.state.tl.root.querySelector('.transport-home'); if (h) { h.title = 'beat → bar 1 · the TIMELINE playhead to the start'; h.setAttribute('aria-label', 'timeline back to bar 1'); } }

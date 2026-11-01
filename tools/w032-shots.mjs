@@ -30,5 +30,36 @@ try {
     info.knobs = await g.ev(`return ['atomSizeK', 'stickK'].map((k) => { const n = document.querySelector('.dev[data-id="observer"]'); return [...n.querySelectorAll('.k')].filter((x) => /SIZE|RADIUS/.test(x.textContent)).map((x) => x.textContent.trim() + (x.classList.contains('disabled') ? ' (off)' : '')); })[0];`);
     info.wave2 = await shot('wave');
   }
+  if (scene === 'bar') {
+    const chip = () => g.ev(`const b = document.querySelector('#transport .dock-btn'), t = document.getElementById('transport'), r = t.getBoundingClientRect();
+      return { gly: b && b.dataset.gly, title: b && b.title, place: t.dataset.place, docked: t.classList.contains('docked'), rect: [r.left, r.top, r.width, r.height].map(Math.round),
+        seats: [...t.querySelectorAll('.csb-ico [data-key-action], .csb-ico .tr-open, .csb-ico .dock-btn, .csb-ico .mod-exp')].map((e) => (e.dataset.keyAction || e.className.split(' ')[0]) + ':' + (e.dataset.gly || '')).join(' ') };`);
+    info.stage = await chip(); info.play = await g.ev(`const p = document.querySelector('#transport .csb-play'), s = getComputedStyle(p); return [p.dataset.mirSurface || '', s.padding, s.backgroundColor, s.borderTopWidth];`);
+    info.stageShot = await shot('stage');
+    await g.ev(`__LW.timeline.open(); return 1;`); await wait(1500);
+    info.work = await g.ev(`const p = document.querySelector('.mir-timeline .tl-transport .mir-mod-power'), r = p.getBoundingClientRect(); return [p.dataset.face, p.textContent, Math.round(r.width) + '×' + Math.round(r.height)];`);
+    info.workRect = await rect('.mir-timeline .tl-transport');
+    info.workShot = await shot('work');
+    await g.ev(`__LW.timeline.close(); return 1;`); await wait(800);
+    await g.ev(`document.querySelector('#transport .dock-btn').click(); return 1;`); await wait(1200);
+    info.rack = await chip(); info.rackShot = await shot('rack');
+    await g.ev(`const h = document.querySelector('.dev[data-id="transport"] > .dev-head'); h.tabIndex = h.tabIndex < 0 ? 0 : h.tabIndex; h.focus(); return document.activeElement === h;`);
+    await g.press('\uE007'); await wait(1200);
+    info.popped = await g.ev(`const d = document.querySelector('.dev[data-id="transport"]'), r = d.getBoundingClientRect(), h = d.querySelector('.dev-head'); return { floating: d.classList.contains('floating'), bare: d.hasAttribute('data-bare'), rect: [r.left, r.top, r.width, r.height].map(Math.round), head: getComputedStyle(h).position };`);
+    info.poppedShot = await shot('popped');
+    /* C1 · the × road: close the card, then swap from the bar — never an empty slot, never a bar "docked" in a closed card */
+    const card = `(() => { const d = document.querySelector('.dev[data-id="transport"]'), t = document.getElementById('transport'); return { closed: d.classList.contains('closed'), hasBar: d.contains(t), docked: t.classList.contains('docked'), place: t.dataset.place }; })()`;
+    await g.tap('.dev[data-id="transport"] .dev-close'); await wait(900); info.afterX = await g.ev(`return ${card};`);
+    await g.ev(`document.querySelector('#transport .dock-btn').click(); return 1;`); await wait(1200); info.afterSwap = await g.ev(`return ${card};`);
+    await g.ev(`document.querySelector('#transport .dock-btn').click(); return 1;`); await wait(1200); info.backToStage = await g.ev(`return ${card};`);
+  }
+  if (scene === 'side') {   // T13: the bar keeps the side it landed on
+    const st = `(() => { const t = document.getElementById('transport'); return { top: t.classList.contains('at-top'), y: Math.round(t.getBoundingClientRect().top), saved: localStorage.getItem('lw.csb.side') }; })()`;
+    info.boot = await g.ev(`return ${st};`);
+    await g.ev(`__LW.timeline.open(); return 1;`); await wait(1800); info.tlOpen = await g.ev(`return ${st};`);
+    await g.ev(`__LW.timeline.close(); return 1;`); await wait(1500); info.tlClosed = await g.ev(`return ${st};`);
+    await g.nav(); await g.waitFor('window.__LW?.ready', 400, 100); await wait(1500); info.reload = await g.ev(`return ${st};`);
+    await g.ev(`localStorage.removeItem('lw.csb.side'); return 1;`);
+  }
   for (const [k, v] of Object.entries({ scene, ...info, errors: (await g.errors()).errs })) console.log(k, JSON.stringify(v));
 } finally { await g.close(); }

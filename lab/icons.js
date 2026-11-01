@@ -55,6 +55,7 @@ const ICONS = {
   trash: p('M3.5 6.5h17') + p('M9 6.5V4.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 4.5v2') + p('M5.5 6.5l1 13a2 2 0 0 0 2 1.5h7a2 2 0 0 0 2-1.5l1-13') + p('M10 10.5v6.5') + p('M14 10.5v6.5'),
   windowPlus: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/>' + p('M3 8.5h18M12 11.5v6M9 14.5h6'),   // the FINDER
   repeat: p('M19.6 13.4A7.7 7.7 0 1 1 17 6.4') + p('M17.6 2.6 17 6.6l-4-.5'),
+  reload: p('M4.4 13.4A7.7 7.7 0 1 0 7 6.4') + p('M6.4 2.6 7 6.6l4-.5') + dot(12, 13.5, 1.6),   // 032 T14: ↺, ψ's time back to t = 0 (the CSB's seat beside ⏮; `repeat` mirrored, a dot for the zero)
   /* 022 H1 · THE ESP BAR'S SIDE: the free stage with the bar on its edge (INFORMATIONAL › SIDE wears the side it is on, no word) */
   sideRight: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="15" y="7" width="3" height="10" rx="1" fill="currentColor"/>',
   sideLeft: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="6" y="7" width="3" height="10" rx="1" fill="currentColor"/>',

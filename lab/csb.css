@@ -4,7 +4,7 @@
 /* ── THE CONTROL SURFACE (iteration 014 A1 · A8; 018 E2 · E4: λWAVES' own layout array under the kit's data-layout="csb", lab/shell/transport.js).
    ON THE STAGE: PLAY floats outside the bar's left edge (a round chip of its own); three tracks, the two sides equal (--csb-side: the left block's width) so
    MOLECULES' chooser sits dead centre over LIBRARY · MOLECULAR · HYDROGEN · FOLDERS; LEFT = RATE over the typed BPM pill, MOD over EXPAND, then a
-   2 × 2 of ⏮ TIMELINE / the door, the dock; RIGHT = a 5-wide grid SEARCH FINDER ♥ ◧ FOLDS / NODES INFORMATIONAL THEME ⚙ (020 T2).  Every seat one 36-px box, one
+   2 × 2 of ⏮ ↺ / TIMELINE the door (032 T14); RIGHT = a 5-wide grid SEARCH FINDER ♥ ◧ FOLDS / NODES INFORMATIONAL THEME ⚙ the dock (020 T2; 032).  Every seat one 36-px box, one
    20-px icon.  IN A RACK CARD (docked, or FREE one card wide): the same order wrapping — PLAY · RATE · BPM · MOD · EXPAND, the chooser, the modes
    + FOLDERS, then the thirteen icons, centred. ── */
 #transport[data-layout="csb"] { --csb-side: 212px; display: grid; grid-template-columns: minmax(var(--csb-side), 1fr) auto minmax(var(--csb-side), 1fr); grid-template-areas: "left mid right" "panel panel panel"; grid-template-rows: auto auto; align-items: center; column-gap: 14px; row-gap: 0; overflow: visible; }
@@ -22,7 +22,7 @@
 #transport[data-layout="csb"] .csb-side { display: flex; align-items: center; gap: 8px; }
 #transport[data-layout="csb"] .csb-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 #transport[data-layout="csb"] .csb-ico { display: grid; grid-template-columns: repeat(var(--csb-cols, 2), 36px); grid-auto-rows: 36px; gap: 4px; }
-#transport[data-layout="csb"] .csb-right { --csb-cols: 5; }   /* 020 T2: nine seats, two rows of five (196 px, inside the 212-px side track: the bar keeps its 674 px and its height) */
+#transport[data-layout="csb"] .csb-right { --csb-cols: 5; }   /* 020 T2: nine seats, two rows of five (196 px, inside the 212-px side track: the bar keeps its 674 px and its height); 032 T14: the dock chip is the tenth */
 #transport[data-layout="csb"] .tr-openers { display: contents; }
 #transport[data-layout="csb"] .tr-open.has-glyph .tr-word { display: none; }
 #transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row, .csb-ico) > * { order: 0; flex-shrink: 0; }
@@ -37,9 +37,9 @@
    the theme shows one (body[data-theme]) */
 body[data-theme="light"] #transport .csb-theme > .gly-moon, body:not([data-theme="light"]) #transport .csb-theme > .gly-sun { display: none; }
 /* PLAY: a round chip floating outside the bar's left edge, level with the bar's own rows (the panel never moves it) */
-#transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; border-radius: 50%; padding: 4px; box-shadow: none; }   /* 020 T1: the chip is the seat's glass; the relief is the button's alone */
-#transport.mini[data-layout="csb"] > .csb-play { position: absolute; right: calc(100% + 12px); bottom: 11px; grid-area: auto; }
-#transport.mini[data-layout="csb"].at-top > .csb-play { top: 11px; bottom: auto; }
+#transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; border-radius: 50%; padding: 0; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }   /* 032 C4 (Josh: "PLAY's outer stroke"): no chip around the disc — the 56-px disc stands alone; the kit's :focus-visible ring is the keyboard's */
+#transport.mini[data-layout="csb"] > .csb-play { position: absolute; right: calc(100% + 16px); bottom: 15px; grid-area: auto; }   /* 032 C4: the disc where it stood inside its 4-px chip */
+#transport.mini[data-layout="csb"].at-top > .csb-play { top: 15px; bottom: auto; }
 /* 020 T1 · PLAY IS A BUTTON (Josh: "it must feel like a button"); 023 B3 (Josh: "a weird outline and glow over the play pause button … the cool
    animation for clicking, click-holding, and releasing"): the kit chip's motion (window.css .mir-chip) on the raised disc — hover a lighter face
    and 6 % larger (--chip-hover-scale), press sinks to 92 % (--chip-press-scale) under the trig's press face, release eases back on

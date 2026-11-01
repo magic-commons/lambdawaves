@@ -245,7 +245,9 @@ export function createRackWiring(app) {
   windowActivity.track(wTr);
   /* iteration 014 A0 · the kit's bar docks HERE: the card is λWAVES' (its slot, its fold, `card: true`), the move is the kit's (transportDock's hooks) */
   const barDock = () => transportDock(rk);
-  rk.register({ id: 'transport', el: wTr, title: 'CONTROL SURFACE', glyph: WINDOW_GLYPH.transport, card: true, onFold: () => saveSettings(),   // C3: an app card (its own buttons; in neither + nor WINDOW)
+  /* 032 C2 · THE BARE POP (MIR 1.5.6-alpha.28): popped out of the rack the card draws no title bar — its rail chip and × at its top corner, its empty glass
+     drags it — and the bar inside keeps the card's one-card 7-column drawing (csb.css); the × closes through rk.close, so onClose (and the bar's undock) runs */
+  rk.register({ id: 'transport', el: wTr, title: 'CONTROL SURFACE', glyph: WINDOW_GLYPH.transport, card: true, bare: true, onFold: () => saveSettings(),   // C3: an app card (its own buttons; in neither + nor WINDOW)
     onOpen: () => {
       layout.seatTransport();
       wTr.root.classList.remove('folded'); wTr.body.hidden = false;

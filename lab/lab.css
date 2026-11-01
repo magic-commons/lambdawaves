@@ -579,7 +579,7 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
 
 /* ═══ WAVE 81 · THE PLAYHEAD'S OTHER SEAT, AND THE TUNNEL BETWEEN THEM ════════════════════════
  * The pill has always lived at the bottom.  When the modulation plugin is dragged over that seat,
- * rack.js (`modDodge`) sends it to the top instead — and the move is a TUNNEL: it leaves through the
+ * lab/shell/modulation.js (`modDodge`; it lived in rack.js until 0.5.2) sends it to the top instead — and remembers the side (032 T13) — and the move is a TUNNEL: it leaves through the
  * edge it is on and arrives through the opposite one, so the two halves read as one continuous
  * travel rather than a jump.  Both halves are `forwards`, so the pill holds the frame it lands on
  * until the script clears the animation.

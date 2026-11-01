@@ -56,7 +56,9 @@ export function createActions(app) {
     { id: 'fullscreen', icon: 'expand', short: 'fullscreen', label: 'full screen (the browser) / back', keys: ['KeyF'], kind: 'toggle', get: fsOn, run: fullscreen, gesture: true },
     { id: 'notebook', icon: 'notebook', short: 'notebook', label: 'notebook (and its ABOUT face)', keys: ['KeyJ'], kind: 'toggle', get: () => !!L().notebook.isOpen, run: (a) => (a && a.md !== undefined ? ran('notebook')(a) : L().notebook.toggle()), surface: true },
     /* wave 106: the key IS the bar's ⏮ (t → 0 through THE ONE SEEK, 021 R3) */
-    { id: 'home', icon: 'rewind', group: T, short: 'zero', label: 'time to zero', keys: ['Home'], run: () => appPlay.seek(0), surface: true },
+    { id: 'home', icon: 'reload', group: T, short: 'zero', label: 'time to zero', hint: 't → 0 · the beat stays', keys: ['Home'], run: () => appPlay.seek(0), surface: true },   // 032 T14: ↺ (⏮ is bar 1)
+    /* 032 T14 · ⏮ IS BAR 1: the TIMELINE's playhead (the modulation beat) to the start, the window open or not; ψ's t stays (↺ moves it) */
+    { id: 'timeline.beginning', icon: 'rewind', group: T, short: 'bar 1', label: 'the playhead to bar 1', hint: 'to bar 1 · ψ’s t stays', run: () => { if (app.state.tl) app.state.tl.controller.beginning(); sch(TIER.PRESENT); }, surface: true },
     { id: 'stepBack', icon: 'dirPrev', group: T, short: 'step back', label: 'step time back (shift: fine)', keys: ['ArrowLeft'], run: (a) => { clock.step(-S().transport.stepDt() * F(a)); sch(TIER.EVOLVE); }, surface: true },
     { id: 'stepFwd', icon: 'dirNext', group: T, short: 'step fwd', label: 'step time forward (shift: fine)', keys: ['ArrowRight'], run: (a) => { clock.step(S().transport.stepDt() * F(a)); sch(TIER.EVOLVE); }, surface: true },
     ...(ASK_ENABLED ? [{ id: 'ask', group: T, short: 'ask Gemma', label: 'ask Gemma — the transport strip becomes the type box', keys: ['Slash'], exact: true, run: () => S().transport.openAsk() }] : []),   // iteration 011 Q6: only under ASK_ENABLED (createKeyTable's `keep`)
