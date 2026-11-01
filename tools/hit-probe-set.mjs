@@ -23,10 +23,10 @@ const PW = path.join(os.homedir(), '.cache/ms-playwright/chromium-1243/chrome-li
 if (!process.env.CHROMIUM && fs.existsSync(PW)) process.env.CHROMIUM = PW;
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const GRID = Number(opt('--grid', 9)), STEP = Number(opt('--step', 4)), PRESS = Number(opt('--press', 12)), JSON_OUT = opt('--json', null);
-const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8823}/lab/?sw=0&warn=0&starter=home`;
+const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8823}/lab/?sw=0&warn=0&starter=home&menu=0`;   // menu=0: the Picker opens at boot (iteration 012) and would cover every scene
 const POSE = 'JSON.stringify([__LW.obs.yaw, __LW.obs.pitch, __LW.obs.dist, __LW.obs.shift])';
 const MOD = `__LW.layout.modulation.expand(); for (let i = 0; i < 3; i++) __LW.mod.addSource('lfo');`;
-const SHUT = '__LW.layout.modulation.collapse();';   // the first-run modulation window is open over the middle of the stage: every other scene shuts it
+const SHUT = '__LW.layout.modulation.collapse(); __LW.sw.closeOffer();';   // 032: the update popup is put away too   // the first-run modulation window is open over the middle of the stage: every other scene shuts it
 const FLOAT = SHUT + ` __LW.layout.popOut('shadow', { x: 640, y: 180, w: 300 });`;
 /* [name, selector, the scene's setup through __LW] — the C9 row's list: the modulation window open, a floated card, the chip rail,
    the keyboard window, the notebook, the sheet, the offer, FOLDERS */
@@ -41,7 +41,7 @@ const SCENES = [
   ['the keyboard window', '[data-mir-window="keyboard"]', SHUT + ' __LW.keymap.open();'],
   ['the notebook', '[data-mir-window="notebook"]', SHUT + ' __LW.layout.notebook.open();'],
   ['the sheet', '#sheet', SHUT + " document.getElementById('sheet').hidden = false;"],
-  ['the offer', '#offer', SHUT + " const sw = __LW.sw; sw.state = 'ready'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'hit-probe' }; sw.offer();"],
+  ['the offer (032: the update popup)', '.mir-dialog[data-kind="notice"]', SHUT + " const sw = __LW.sw; sw.state = 'ready'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'hit-probe' }; sw.offer();"],
   ['FOLDERS (0.5.0 C6: the kit window; the notebook\'s PROJECTS face left)', '[data-mir-window="folders"]', SHUT + " __LW.layout.notebook.open('projects');"],
   ['its chip rail', '[data-mir-rail="folders"]', SHUT + " __LW.layout.notebook.open('projects');"],
   ['the TIMELINE, docked at the foot (0.5.0 C7b: the window is clear; its ruler, lanes and work bar are panes)', '[data-mir-window="timeline"]', SHUT + ' __LW.timeline.open();'],

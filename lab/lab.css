@@ -272,22 +272,9 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 #sheet table { width: 100%; margin-top: 4px; border-collapse: collapse; font-size: var(--fs-tiny); line-height: 1.35; }
 #sheet th, #sheet td { padding: 2px 8px 2px 0; text-align: left; vertical-align: top; }
 #sheet th { font-weight: var(--w-bold); letter-spacing: var(--tr-wider); color: var(--acc); }
-/* WAVE 133 · THE OFFER'S PANE (lab/sw-client.js): the sheet's glass and typography, on the stage's centre under the badge row,
-   with a caret pointing up at the build badge — no colour, material, animation or transition of its own.  The caret is a 10 px
-   square in the pane's own background and border, turned 45° and clipped to its upper half so only the point shows above the
-   pane's edge.  Its x is MEASURED (sw-client.js aim(): the badge's centre, on show and on resize) because the badge is not at
-   the stage's centre — the row is offset, it can wrap, STATUS TAGS can put badges beside it.  Centring the pane on the badge
-   instead put it over the + and ☆ column below 1392 px, so the pane keeps the stage's centre and the caret moves. */
-#offer { position: absolute; left: 50%; transform: translateX(-50%); top: 40px; z-index: var(--z-veil); width: min(420px, calc(100% - 32px));
-  padding: var(--sp-4) var(--sp-5); border-radius: var(--card-r); font-family: var(--font-sans); font-size: var(--fs-base); line-height: 1.5; color: var(--fg-soft); }
-#offer::before { content: ''; position: absolute; left: var(--caret-x, 50%); top: -6px; width: 10px; height: 10px; transform: translateX(-50%) rotate(45deg);
-  background: inherit; border-top: inherit; border-left: inherit; clip-path: polygon(0 0, 100% 0, 0 100%); pointer-events: none; }
-#offer h3 { margin: 0 0 6px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--acc); }
-#offer p { margin: 0 0 8px; }
-#offer b { color: var(--fg); }
-#offer .offer-row { display: flex; gap: var(--sp-2); }
-body.phone #offer { top: 76px; }
-body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE takes the badge it points at, so it takes the pane */
+/* 032 · THE OFFER IS A POPUP (lab/sw-client.js offer()): the kit's notice, the warning's look; λWAVES' icon above the title, smaller
+   than the warning's picture, in the icon's own rounded square */
+.mir-notice-art.lw-update-art { --warn-art: clamp(96px, 18vmin, 148px); border-radius: 22%; }
 /* ── transport strip (the master logical transport, §25) ───────────────── */
 #transport { position: absolute; left: var(--sp-4); right: var(--sp-4); bottom: var(--sp-4); z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-2);
   height: 56px; padding: 0 var(--sp-3); border-radius: var(--r-lg); }

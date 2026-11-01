@@ -3,11 +3,11 @@
  * repair road.  A seam out of rack.js boot() (optimization 2026-09-24 · N7 seam 5, AUDIT-E §6); five closure edges,
  * handed in: `buildBadge` (the fifth badge, whose press is the offer), `setStatus` (SETTINGS' status line),
  * `getProjects` (a take asks before discarding an unsaved project), and since wave 133 `untouched` (rack.js' one
- * definition of a session a reload loses nothing from) and `host` (#stage, where the offer's pane lives).  The object
+ * definition of a session a reload loses nothing from); since 032 the offer is the kit's popup, so it needs no host.  The object
  * it returns IS LW.sw — main.js arms it, gates replace its reload() — so it is created once, where the block stood. */
-import { el, trig } from './mir/kit.js';
+import { openDialog } from './mir/shell/dialog.js';
 
-export function createSwClient({ buildBadge, setStatus, getProjects, untouched, host }) {
+export function createSwClient({ buildBadge, setStatus, getProjects, untouched }) {
   /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF (board #56) ─────────────────────────────────────────
    * lab/sw.js precaches the whole lab and then WAITS: it never calls skipWaiting() by itself, never claims
    * a client, and has no timer.  The ONE thing that can end a session's build is a press, and this is it.
@@ -34,46 +34,23 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
    * page hides (nobody is watching then, so the clock does not count).  Every
    * other session is OFFERED it — the badge (never hidden by STATUS TAGS) and a pane under it that says what
    * to press, what is kept and what is lost — and keeps its work until a press.  A press on unsaved work asks
-   * first, as UPDATE APP always did (it used to ask only in the beforeunload guard, AFTER the swap). */
-  let pane = null, onHide = null, lead = null, update = null, quietTake = false;
-  const PANE_TEXT = [
-    'A newer λWAVES is installed and waiting. Press <b>UPDATE</b> — or the badge above — to reload into it. It takes a few seconds.',
-    '<b>KEPT:</b> saved projects, settings, keys, the notebook. <b>LOST:</b> unsaved changes and the undo list — save first.',
-    '<b>LATER</b> keeps the badge; ABOUT › UPDATE APP works any time.',
-  ];
-  /* iteration 028 R-03: a press refused because other windows are open — the first line says so, and UPDATE becomes UPDATE ALL */
-  const busyText = (n) => '<b>' + n + ' OTHER WINDOW' + (n > 1 ? 'S ARE' : ' IS') + '</b> open on this build. <b>UPDATE ALL</b> takes the new build in '
-    + (n > 1 ? 'them' : 'it') + ' too — a window holding no work reloads with this one, a window holding work is told to reload — or close '
-    + (n > 1 ? 'them' : 'it') + ' first.';
-  /* the pane is built here, once, hidden — like #sheet it exists from boot, so rack.js' occlusion burst and its
-     observer treat it exactly as they treat #sheet — and offer() only shows it */
-  if (host) {
-    pane = el('section', 'glass', host); pane.id = 'offer'; pane.hidden = true;
-    pane.setAttribute('role', 'region'); pane.setAttribute('aria-label', 'a new build is ready');   // not a live region: wave 62's ceiling is spoken for
-    el('h3', '', pane, 'A NEW BUILD IS READY');
-    for (const html of PANE_TEXT) el('p', '', pane).innerHTML = html;
-    lead = pane.querySelector('p');
-    const row = el('div', 'offer-row', pane);
-    update = trig({ label: 'UPDATE', onFire: () => swClient.accept(swClient.others ? { force: true } : undefined) });
-    row.appendChild(update.root);
-    /* LATER is the reader's answer, so it also disarms the take-on-hide: the badge stays, and the next take is a press or
-       the next launch — not a reload behind their back the moment they switch away (measured: t = 137 → LATER → hidden
-       0.9 s later → taken, reloaded to t = 0) */
-    row.appendChild(trig({ label: 'LATER', onFire: () => { pane.hidden = true;
-      if (onHide) { document.removeEventListener('visibilitychange', onHide); onHide = null; } } }).root);
-  }
-  const hidePane = () => { if (pane) pane.hidden = true; };
-  /* THE CARET IS MEASURED, NOT COMPUTED: the badge's centre minus the pane's left edge, read when the pane is shown and again
-     on a resize or a body-class change (STATUS TAGS) while it is up — wherever the row puts the badge (first in it: lab.css `order: -1`), wrapped or not. */
-  const aim = () => {
-    const b = buildBadge();
-    if (!pane || pane.hidden || !b) return;
-    const br = b.getBoundingClientRect(), pr = pane.getBoundingClientRect();
-    const x = br.left + br.width / 2 - pr.left - pane.clientLeft;
-    pane.style.setProperty('--caret-x', Math.round(Math.max(12, Math.min(pane.clientWidth - 12, x))) + 'px');   // kept on the pane's edge
-  };
-  addEventListener('resize', aim, { passive: true });
-  new MutationObserver(aim).observe(document.body, { attributes: true, attributeFilter: ['class'] });   // STATUS TAGS (body.no-badges) moves the badge in its row
+   * first, as UPDATE APP always did (it used to ask only in the beforeunload guard, AFTER the swap).
+   *
+   * ── 032 · THE OFFER IS A POPUP (Josh 11-01: "a full popup … similar to the photosensitivity warning that says an update is
+   * available with a reload page button") ──────────────────────────────────────────────────────────────────
+   * The pane under the badge became the kit's notice (mir/shell/dialog.js, the warning's own look): λWAVES' icon, UPDATE
+   * AVAILABLE, what is kept and lost, RELOAD PAGE (RELOAD ALL when other windows are open) and LATER. Escape or a press outside is
+   * LATER. A "no" to the unsaved-project question puts the popup back. The badge stays the second road to the same press. */
+  let onHide = null, quietTake = false, dlg = null;
+  const ART = './img/icon.svg';
+  const BODY = 'A newer λWAVES is ready. Reload the page to start using it; it takes a few seconds. Saved projects, settings and the notebook are kept; unsaved changes are lost, so save first.';
+  /* iteration 028 R-03: a press refused because other windows are open — the popup says so, and RELOAD PAGE becomes RELOAD ALL */
+  const busyText = (n) => n + ' other window' + (n > 1 ? 's are' : ' is') + ' open on this build. RELOAD ALL reloads ' + (n > 1 ? 'them' : 'it')
+    + ' too (a window holding work is told to reload instead), or close ' + (n > 1 ? 'them' : 'it') + ' first.';
+  /** LATER (or Escape, or a press outside): the badge stays, and it also disarms the take-on-hide — the next take is a press or the next
+      launch, not a reload behind the reader's back the moment they switch away (measured: t = 137 → LATER → hidden 0.9 s later → taken) */
+  const later = () => { if (onHide) { document.removeEventListener('visibilitychange', onHide); onHide = null; } };
+  const hidePane = () => { if (dlg) { const d = dlg; dlg = null; d.close('gone'); } };
   const swClient = {
     state: 'idle',                       // idle → ready (a build is waiting) → taking | replaced | refreshing | failed
     asked: false,                        // did THIS document ask for the swap?
@@ -113,15 +90,28 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       }
       return true;
     },
-    /** the visible offer: the badge, SETTINGS' status line, and the pane — the pane at most once per waiting build */
+    /** the visible offer: the badge, SETTINGS' status line, and the popup — the popup at most once per waiting build */
     offer() {
       swClient.say('A NEW BUILD IS READY · UPDATE', 'a new build is ready');
       const build = (swClient.pending && swClient.pending.build) || '';
-      if (!pane || swClient.offered === build) return false;
-      lead.innerHTML = swClient.others ? busyText(swClient.others) : PANE_TEXT[0]; update.setLabel(swClient.others ? 'UPDATE ALL' : 'UPDATE');
-      swClient.offered = build; pane.hidden = false; aim();
+      if (swClient.offered === build) return false;
+      swClient.offered = build; hidePane();
+      const art = document.createElement('img'); art.className = 'mir-notice-art lw-update-art'; art.src = ART; art.alt = ''; art.draggable = false;
+      const others = swClient.others;
+      const d = dlg = openDialog({ title: 'UPDATE AVAILABLE', body: others ? busyText(others) : BODY, kind: 'notice', mark: art,
+        actions: [{ label: others ? 'RELOAD ALL' : 'RELOAD PAGE', kind: 'primary', value: 'reload' }, { label: 'LATER', value: 'later' }] });
+      d.result.then((v) => {
+        if (v === 'gone') return;                          // put away by the page (a take began, the build was replaced, another offer)
+        if (dlg === d) dlg = null;
+        if (v !== 'reload') { later(); return; }
+        if (!swClient.accept(others ? { force: true } : undefined) && swClient.state === 'ready') { swClient.offered = null; swClient.offer(); }   // a "no" to the unsaved question: the offer stands
+      });
       return true;
     },
+    /** the popup put away by the page (a gate's reset) */
+    closeOffer() { hidePane(); },
+    /** the popup on show (its root), or null — none, leaving, or waiting behind another dialog */
+    get offering() { return (dlg && dlg.root) || null; },
     /** the offer, pressed (the badge, UPDATE) — or, with { quiet: true }, taken for an untouched session, or with { force: true }
      *  UPDATE ALL (the user's yes for every open window) */
     accept(opt) {

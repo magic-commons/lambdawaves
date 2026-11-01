@@ -144,8 +144,8 @@ and the code disagree, the code is right; please say so in an issue.
 - Projects and settings live in the browser's storage for one origin (host and port). A snapshot served on another
   port starts fresh and cannot touch the projects of the copy on 8700. Source: `lab/settings-store.js` (`SETTINGS_KEY` and the
   FAMILIES table).
-- The installed app is cache-first and changes build through the offer (the build badge and its pane, never hidden by
-  STATUS TAGS), a quiet take for an untouched session (`rack.js` `untouched`), or ABOUT › UPDATE APP; `?sw=0` declines
+- The installed app is cache-first and changes build through the offer (the build badge, never hidden by STATUS TAGS, and since 032 the
+  UPDATE AVAILABLE popup — the kit's notice, RELOAD PAGE · LATER, Escape is LATER), a quiet take for an untouched session (`rack.js` `untouched`), or ABOUT › UPDATE APP; `?sw=0` declines
   the service worker for development. Source: `lab/main.js`, `lab/sw.js`, `lab/sw-client.js`, `tests/pwa.test.mjs`,
   `tests/offer.browser-test.mjs`.
 

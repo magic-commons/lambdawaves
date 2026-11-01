@@ -85,7 +85,7 @@ boot awaits the choice. A driver, a link, `?preset=` or `?view=` start on
 start a human one (`tests/start.browser-test.mjs`); CDP tools add
 `&starter=home`. STATUS TAGS off hides the four ψ-badges, never the build offer;
 an untouched session (ring origin boot/link/resume) takes a waiting build itself
-(`lab/sw-client.js`, `rack.js` `untouched`), any other session only on a press.
+(`lab/sw-client.js`, `rack.js` `untouched`), any other session only on a press — since 032 the press is THE UPDATE POPUP (the kit's notice, the photosensitivity warning's look: λWAVES' icon, UPDATE AVAILABLE, RELOAD PAGE · LATER, RELOAD ALL when other windows are open; Escape or a press outside is LATER; a no to the unsaved question puts it back) or the badge.
 The banner is MIR's
 `installBanner`, the veil MIR's `bootVeil`, and the wake lock follows THE play.
 

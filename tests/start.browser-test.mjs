@@ -24,8 +24,8 @@ const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n));
   window.__lab = () => ({ view: __LW.mat.view, playing: __LW.clock.playing, rows: __LW.history.entries().map((e) => e.label), dirty: __LW.projects.dirty,
     armed: __LW.session.armed(), session: !!__LW.session.read(), errors: __e.slice() });
   window.__offer = () => { const sw = __LW.sw; let took = null; sw.state = 'idle'; sw.asked = false; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'start-' + Date.now() };
-    sw.buildReady((o) => { took = o || {}; }); const r = { taken: !!took, quiet: !!(took && took.alone), pane: !document.getElementById('offer').hidden };
-    sw.state = 'idle'; sw.pending = null; sw.offered = null; document.getElementById('offer').hidden = true; return r; };
+    sw.buildReady((o) => { took = o || {}; }); const r = { taken: !!took, quiet: !!(took && took.alone), pane: !!__LW.sw.offering };
+    sw.state = 'idle'; sw.pending = null; sw.offered = null; sw.closeOffer(); return r; };
   return 1;`;
 let n = 0;
 const pass = (m) => console.log('PASS ' + ++n + ' ' + m);

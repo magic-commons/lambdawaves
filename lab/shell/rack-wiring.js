@@ -358,7 +358,7 @@ export function createRackWiring(app) {
      between their parts are UI, not picture) and the app's own panes.  A press there never reaches the stage.  0.5.0 C3: the kit's rack
      hands in its columns (less their shadow gutter) and its float layer (C9's open item). */
   bindStageGestures(dom.canvas, {
-    ui: uiSpace({ rack: rk, extra:() => ['transport', 'notebook', 'sheet', 'offer', 'rackFavList'].map((id) => document.getElementById(id))   // 0.5.3 M4: a faded, hidden or
+    ui: uiSpace({ rack: rk, extra:() => ['transport', 'notebook', 'sheet', 'rackFavList'].map((id) => document.getElementById(id))   // 0.5.3 M4: a faded, hidden or
       .map((el) => { const s = el && getComputedStyle(el); return s && +s.opacity > 0 && s.visibility !== 'hidden' && s.pointerEvents !== 'none' ? paintedRect(el) : null; }) }),   // click-through pane is no UI space
     camera, travel: camTravel, law: CAM,
     getDistance: () => obs.dist, zoomAt, pan: panBy, orbitBy, resetView,

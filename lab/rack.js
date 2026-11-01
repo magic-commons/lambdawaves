@@ -842,8 +842,7 @@ export async function boot(dom) {
       && (ignorePlaying || (!clock.playing && !clock.t));
   };
   const swClient = createSwClient({ buildBadge: () => badges.build,
-    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects, untouched,
-    host: dom.badges.parentElement });
+    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects, untouched });
 
   /* ── THE BOW: ctrl+drag draws it, release fires, releasing CTRL first cancels ── */
   const { bowStart, bowMove, bowRelease, orbitOfShell, kepShell, keplerTurn, keplerDragToPoint, keplerDragTo, keplerRowSync, gas, gasReadout, gasTableOn, launchPacket, enterBox, coherentBounce,

@@ -62,14 +62,14 @@ export function createInk(app) {
     for (const el of [mw, rail]) occlusion.watch(el, { attributes: true, attributeFilter: ['hidden'] });
     app.state.modView.onGeometry(dirty);
     occlusion.register('floats', () => rects([...floats.children].filter((d) => d.classList.contains('dev') && shown(d)).flatMap(panes)));
-    occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'offer', 'rackFavList'].map((id) => document.getElementById(id))));
+    occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'rackFavList'].map((id) => document.getElementById(id))));
     occlusion.register('keymap', () => rects([document.querySelector('[data-mir-window="keyboard"]'), ...document.querySelectorAll('[data-mir-rail="keyboard"] .mir-chip')]));   // C3: the kit's window and its rail
     occlusion.register('rack', () => rects([rack, rackL].flatMap((rk) => rk && rackShown(rk) ? [...rk.children] : []).filter((d) => d.classList.contains('dev') && !d.classList.contains('closed')).flatMap(panes)),
       { standIn: () => [rack, rackL].filter((rk) => rk && rackShown(rk)).map((rk) => paintedRect(rk)) });   // past the block's 32 the two columns stand in for their cards
     for (const el of [floats, rack, rackL]) occlusion.watch(el, { childList: true });
     /* A paused field has no periodic frame to notice a source card sliding under the run's clip. */
     if (floats) floats.addEventListener('scroll', dirty, { capture: true, passive: true });
-    for (const id of ['notebook', 'transport', 'sheet', 'offer', 'rackFavList']) occlusion.watch(document.getElementById(id), { attributes: true, attributeFilter: ['style', 'hidden', 'class'] });
+    for (const id of ['notebook', 'transport', 'sheet', 'rackFavList']) occlusion.watch(document.getElementById(id), { attributes: true, attributeFilter: ['style', 'hidden', 'class'] });
     new MutationObserver(dirty).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     for (const rk of [rack, rackL]) if (rk) rk.addEventListener('scroll', dirty, { passive: true });
     window.addEventListener('resize', dirty, { passive: true });
