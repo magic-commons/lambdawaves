@@ -60,6 +60,12 @@ body.phone .mir-rack { --rack-shadow-gutter: 0px; }
 /* a window carried in a rack, and its header as a keyboard handle */
 .mir-rack .dev-head:focus-visible, .mir-rack-floats .dev-head:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 .mir-rack > .dev.dragging, .mir-rack-floats > .dev.dragging { opacity: 1; }   /* the carried pane keeps its blur (see the law) */
+/* BARE (1.5.6-alpha.28, λWAVES 032 C2): popped off the rack, a card registered { bare: true } draws no title bar — its pop and
+   rail chips and its × stay, seated at its top corner over the body; its empty glass is the handle (rack.js).  Compact keeps its head. */
+.dev.floating[data-bare]:not(.compact) > .dev-head { position: absolute; top: 0; inset-inline-end: 0; z-index: 1; height: auto; padding: var(--sp-1); background: none; border: 0; grid-template-columns: auto; }
+.dev.floating[data-bare]:not(.compact) > .dev-head::before,
+.dev.floating[data-bare]:not(.compact) > .dev-head > :is(.dev-id, .dev-stat),
+.dev.floating[data-bare]:not(.compact) > .dev-head .dev-util > :is(.dev-power, .dev-fold) { display: none; }
 
 /* ── HIDDEN: slide out, then stop painting (the visibility waits for the slide) ───────────────────────────── */
 body.rack-hidden:not(.rack-peek-right) .mir-rack[data-side="right"],

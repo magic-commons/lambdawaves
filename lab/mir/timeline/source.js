@@ -7,6 +7,10 @@ export const TIMELINE_MAX_SOURCE_POINTS = 256;
 // v1 previously accepted 1024 sources × 32 points. Keep that entire legacy
 // arrangement capacity while allowing longer individual Timeline sources.
 export const TIMELINE_MAX_TOTAL_POINTS = 32768;
+/* 1.5.6-alpha.21 · a curve's optional `steps`: how many equal bands of a banded target (registry `options`, a toggle's two)
+   its 0..1 was drawn for — an integer 2 … TIMELINE_MAX_STEPS, else none (null). */
+export const TIMELINE_MAX_STEPS = 4096;
+export const timelineSteps = (n) => (Number.isInteger(n) && n >= 2 && n <= TIMELINE_MAX_STEPS ? n : null);
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 
 // Refuse an invalid/oversized whole source. Never truncate hidden automation.

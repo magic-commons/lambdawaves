@@ -479,10 +479,14 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
     toggle() { if (P.open) api.close(); else api.open(); },
     isOpen: () => P.open,
     rect: () => (box ? { ...box } : null),
-    /** place(rect | pos, { animate }) — the host puts the window somewhere: it floats there */
+    /** place(rect | pos, { animate }) — the host puts the window somewhere: it floats there.  A size alone ({ width, height }
+     *  with no x / y) keeps the window's seat and its dock (1.5.6-alpha.24: it wrote NaN into x and y and undocked it) */
     place(t, { animate = false } = {}) {
       if (t) {
-        P.dock = null; P.x = Math.round(t.left ?? t.x); P.y = Math.round(t.top ?? t.y);
+        const x = t.left ?? t.x, y = t.top ?? t.y, at = Number.isFinite(x) || Number.isFinite(y);
+        if (at) P.dock = null;
+        if (Number.isFinite(x)) P.x = Math.round(x);
+        if (Number.isFinite(y)) P.y = Math.round(y);
         if (t.width || t.w) P.w = Math.max(min.w, Math.round(t.width || t.w));
         if (t.height || t.h) P.h = Math.max(min.h, Math.round(t.height || t.h));
       }

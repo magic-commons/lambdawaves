@@ -6,7 +6,12 @@
 import { TIMELINE_TAB_HEIGHT, TIMELINE_POINT_RADIUS, TIMELINE_TENSION_RADIUS, timelineLaneHeight, timelineTabPath, createClipCoordinates } from './geometry.js';
 import { createTimelinePlot } from './curve-view.js';
 import { clipKind } from './kinds.js';
+import { timelineSteps } from './source.js';
+import { timelineExtent } from './model.js';
 import { el, svgNode as svg, label, ariaLabel } from '../kit.js';
+import { glyphSvg } from '../glyph.js';
+import { t } from '../core/i18n.js';
+const BAND_MIN=4;   // px: an event clip draws its band hairlines only while they stand at least this far apart
 const clamp=(n,lo,hi)=>Math.min(hi,Math.max(lo,n));
 // Beat ticks never hide: alpha ramps with zoom (full at 12px, half at 8px) instead of cutting off
 // below a px threshold. Exported so tools/test-timeline-ticks.mjs proves the same law paint() paints.
@@ -20,7 +25,7 @@ export function tickLaw(px,dpr=1){
 export const ticks=(positions,px,dpr=1)=>positions.length?'linear-gradient(90deg,transparent '+positions.map(n=>{
   const x=Math.round(n*px*dpr)/dpr;return `${x}px,var(--tl-beat-tick) ${x}px ${x+1}px,var(--tl-beat-bevel) ${x+1}px ${x+2}px,transparent ${x+2}px`;
 }).join(',transparent ')+')':'linear-gradient(transparent,transparent)';
-export function createTimelineView(surface,{pixels,onClipMenu}) {
+export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null}) {
   const shell=el('div','tl-view',surface),ruler=el('div','tl-ruler glass',shell),ink=el('div','tl-ruler-ink',ruler);
   ariaLabel(ruler,'Scrub the timeline playhead');
   const viewport=el('div','tl-viewport',shell),content=el('div','tl-content',viewport),rows=el('div','tl-rows',content);
@@ -55,13 +60,17 @@ export function createTimelineView(surface,{pixels,onClipMenu}) {
       kind.paint?.(s,curve,c,{px,height,geometry,tint:curve.color,block});}
     else{const plot=createTimelinePlot(c,curve,px,height);s=svg('svg',{viewBox:`0 0 ${plot.geometry.width} ${height}`,preserveAspectRatio:'none','data-clip':c.id},block);ariaLabel(s,'{name} · automation curve',{name:curve.name});
       svg('path',{d:plot.fill,class:'tl-fill'},s);svg('path',{d:plot.path,class:'tl-curve',fill:'none','vector-effect':'non-scaling-stroke'},s);
+      // AN EVENT CLIP (1.5.6-alpha.24): a curve drawn for n bands shows them, hairlines at k/n (under the curve)
+      const n=timelineSteps(curve.steps);if(n&&height/n>=BAND_MIN)for(let k=1;k<n;k++){const y=height*(1-k/n);svg('line',{x1:0,x2:plot.geometry.width,y1:y,y2:y,class:'tl-band','vector-effect':'non-scaling-stroke'},s);}
       for(const p of plot.points)svg('circle',{cx:p.x,cy:p.y,r:TIMELINE_POINT_RADIUS,class:'tl-point','data-point':p.i},s);
       for(const p of plot.handles)svg('circle',{cx:p.x,cy:p.y,r:TIMELINE_TENSION_RADIUS,class:'tl-tension','data-handle':p.i},s);}
     // Full-height edges complement the tab grips. Gesture hit testing gives
     // curve points/tensions priority even when they sit under an edge zone.
     for(const edge of ['left','right']){const grip=el('button','tl-edge tl-edge-'+edge,block);grip.type='button';grip.dataset.trim=edge;if(edge==='left'){ariaLabel(grip,'Resize the clip from its left edge');grip.title='Pull curve start; keep right edge fixed';}else{ariaLabel(grip,'Resize the clip from its right edge');grip.title='Reveal or trim curve end';}}
+    // ⚠: the large centred warning an event clip wears while its target offers another number of bands (paintSelection)
+    const warn=timelineSteps(curve.steps)?el('span','tl-warn',block):null;if(warn){warn.innerHTML=glyphSvg('warn','gly gly-warn',24);warn.setAttribute('role','img');}
     title.classList.toggle('narrow',w<72);title.classList.toggle('micro',w<28);block.classList.toggle('narrow',w<28);
-    const entry={title,block,svg:s,key};clipNodes.set(c.id,entry);return entry;
+    const entry={title,block,svg:s,key,warn};clipNodes.set(c.id,entry);return entry;
   }
   function paint(){
     if(!doc)return;
@@ -70,7 +79,7 @@ export function createTimelineView(surface,{pixels,onClipMenu}) {
     const radius=Number.isFinite(configuredRadius)?configuredRadius:parseFloat(material.getPropertyValue('--r-md'))||12;
     const beatTicks=ticks(Array.from({length:doc.meter-1},(_,i)=>i+1),px,dpr),subTicks=ticks(Array.from({length:doc.meter},(_,i)=>i+.5),px,dpr);
     height=timelineLaneHeight(viewport.clientHeight,doc.lanes.length,0);
-    const extent=Math.max(width,64*px,...doc.clips.map(c=>(c.start+c.duration+4)*px));content.style.width=extent+'px';rows.style.width=width+'px';rows.style.left=x+'px';
+    const extent=Math.max(width,64*px,((timelineExtent(doc.clips,{unmuted:false})?.end??-4)+4)*px);content.style.width=extent+'px';rows.style.width=width+'px';rows.style.left=x+'px';
     rows.style.setProperty('--tl-lane-height',height+'px');rows.style.setProperty('--tl-grid-origin',-x+'px');
     const keep=new Set(),laneIds=new Set(doc.lanes.map(l=>l.id));
     for(const[id,n]of laneNodes)if(!laneIds.has(id)){n.root.remove();laneNodes.delete(id);}
@@ -101,7 +110,9 @@ export function createTimelineView(surface,{pixels,onClipMenu}) {
       // A kind that fires rather than drives (drives:false, the pattern) is never dormant for want of a target.
       n.block.classList.toggle('dormant',kind?.drives!==false&&!hasTarget(curve.targetId));
       const held=surface.dataset.dragClip===id;for(const node of [n.title,n.block])node.classList.toggle('held',held);
-      for(const p of n.svg.querySelectorAll('.tl-point'))p.classList.toggle('selected',pointSelection?.curveId===curve.id&&pointSelection.indices.has(+p.dataset.point));}
+      for(const p of n.svg.querySelectorAll('.tl-point'))p.classList.toggle('selected',pointSelection?.curveId===curve.id&&pointSelection.indices.has(+p.dataset.point));
+      if(n.warn){const want=stepsOf(curve.targetId),off=!!want&&want!==curve.steps;n.block.classList.toggle('steps-off',off);
+        if(off&&n.warn.dataset.want!==String(want)){n.warn.dataset.want=String(want);ariaLabel(n.warn,'Drawn for {m} choices; the target now has {n}. Edit a point to redraw it for {n}.',{m:curve.steps,n:want});n.warn.title=t('Drawn for {m} choices; the target now has {n}. Edit a point to redraw it for {n}.',{m:curve.steps,n:want});}}}
   }
   return {shell,ruler,viewport,content,rows,head,tail,marquee,status,setDocument,paint,paintSelection,getClip,getCurve,
     height:()=>height,plot:id=>clipNodes.get(id)?.svg,

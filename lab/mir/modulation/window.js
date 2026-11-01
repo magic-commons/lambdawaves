@@ -40,7 +40,7 @@ import { createModWindow, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          buildGhost, buildAudioSheet, COPY } from './modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
          pointsEqual, PRESET_LABEL } from './curve.js';
-import { svgPoint, curveHit, curveAction, pointDrag, pointAddValue, tensionDelta,
+import { svgPoint, curveHit, curveAction, pointDrag, pointAddValue, tensionDelta, fineGear,
          editablePresetForWave } from './curve-gesture.js';
 import { createRail, seatRail, seatOn, roomFor, SIDES } from '../window/rail.js';
 import { createDockGuide } from '../window/dock.js';
@@ -1169,6 +1169,18 @@ export function createModulation(host, port) {
     }
     return ok ? ok.dataset.param : null;
   }
+  /* armFor({ onPick(targetId), label, onEnd }) → end() — THE ARMING WITHOUT A MACRO (1.5.6-alpha.26, λWAVES 032 T20): every
+     routable control is lit as a macro's armed grip lights them; a tap on one calls onPick(its id) instead of routing; a tap
+     elsewhere, Escape or end() ends it (onEnd).  A timeline clip's ROUTE NEW PARAMETER… arms through it. */
+  function armFor({ onPick, label = '', onEnd = null } = {}) {
+    if (typeof onPick !== 'function') return () => {};
+    if (armed) endArm();
+    armed = { macroId: null, grip: null, mode: 'armed', over: null, onPick, onEnd };
+    targetsOn(true);
+    status(t('ROUTE {name}: tap a lit control, Escape cancels', { name: label || '—' }), '');   // tr: ROUTE: the clip waits for a tap on a control to drive it
+    const me = armed;
+    return () => { if (armed === me) { endArm(); status('', ''); } };
+  }
   function startArm(macroId, e, grip) {
     if (armed) endArm();
     armed = { macroId, grip, pid: e.pointerId, mode: 'press', x0: e.clientX, y0: e.clientY, over: null,
@@ -1179,9 +1191,10 @@ export function createModulation(host, port) {
   function endArm() {
     if (!armed) return;
     if (armed.over) armed.over.classList.remove('is-over');
-    armed.grip.classList.remove('m2armed');
-    const wasDrag = armed.mode === 'drag';
+    if (armed.grip) armed.grip.classList.remove('m2armed');
+    const wasDrag = armed.mode === 'drag', onEnd = armed.onEnd;
     armed = null; drops = [];
+    if (onEnd) { try { onEnd(); } catch (err) { (globalThis.reportError || console.error)(err); } }
     if (wasDrag) glow.end();
     targetsOn(false); hideGhost();
   }
@@ -1259,7 +1272,8 @@ export function createModulation(host, port) {
     const tid = k && k.dataset.param;
     if (tid && registry.has(tid)) {
       e.preventDefault(); e.stopPropagation();
-      const mid = armed.macroId; endArm(); dropOn(mid, tid);
+      const mid = armed.macroId, pick = armed.onPick; endArm();
+      if (pick) pick(tid); else dropOn(mid, tid);
       return;
     }
     if (e.target.closest && e.target.closest('.m2grip')) return;   // the grip's own handler answers
@@ -2284,7 +2298,12 @@ export function createModulation(host, port) {
     points = normalizeTimelinePoints(points);
     if (!points || !(beats > 0)) return warn(t('This device has no shape to send'));
     const d = registry.describe().find((x) => x.id === targetId);
-    return done(add('curve', { points, color: hexInk(rec) }, { duration: beats, targetId, name: (d && d.label) || targetId }), s.kind === 'env' ? t('the envelope') : t('one cycle'), beats);
+    const id = add('curve', { points, color: hexInk(rec) }, { duration: beats, targetId, name: (d && d.label) || targetId });
+    /* THE SEND DISARMS (1.5.6-alpha.27, λWAVES 032 T26): the shape now lives on the timeline, so the device is bypassed (its
+       power off, its settings kept; the hand turns it back on).  A pattern send keeps its ENV on: the clip fires through it. */
+    if (id && s.on) { M.setSource(s.id, { on: false }); clock.recomputeRunning(); apply(); sync(); }
+    const msg = done(id, s.kind === 'env' ? t('the envelope') : t('one cycle'), beats);
+    return id ? t('{sent} · the device is bypassed', { sent: msg }) : msg;
   }
 
 
@@ -2512,7 +2531,7 @@ export function createModulation(host, port) {
   function wireEditor(rec) {
     const s = rec.s, g = rec.g, svg = g.svg;
     let pid = null, mode = null, idx = -1, key = null, y0 = 0, base = 0;
-    let anchor = { x: 0, y: 0 };
+    let anchor = { x: 0, y: 0 }, gear = null;   // gear: the Shift fine gear of this drag (curve-gesture fineGear, 1.5.6-alpha.23)
     let down = { key: null, t: 0, v: 0 };            // the LATCH: the stage, its seconds, and where the finger took it
 
     const local = (e) => svgPoint(svg, e);
@@ -2605,6 +2624,7 @@ export function createModulation(host, port) {
       key = mode === 'point' && s.kind === 'env' ? envMapOf(s).keys[idx] : null;
       down = { key, t: q0.t, v: key ? s[key] : 0 };
       y0 = p.y;
+      gear = mode === 'handle' ? fineGear(p) : fineGear({ x: q0.t, y: q0.v });
       if (mode === 'handle') base = g.pts[idx].tension;
       if (mode === 'handle' && s.kind === 'env') key = envMapOf(s).tens[idx];
       rec.drag = { kind: mode, index: idx };               // the readout's held state, same frame
@@ -2614,7 +2634,7 @@ export function createModulation(host, port) {
       if (pid !== e.pointerId) return;
       const p = local(e), q = uv(p);
       if (mode === 'point') {
-        const locked = pointDrag(anchor, { x: q.t, y: q.v }, e);
+        const locked = pointDrag(anchor, { x: q.t, y: q.v }, e, gear);
         if (s.kind === 'env') { if (envMove(e.ctrlKey ? down.t : locked.x, locked.y)) syncKnobs(rec); }
         else M.curveEdit(s.id, 'move', { index: idx, t: locked.x, v: locked.y });
         apply();
@@ -2627,7 +2647,7 @@ export function createModulation(host, port) {
         /* UP RAISES THE CURVE, whichever way the segment runs. */
         const a = g.pts[idx], b = g.pts[idx + 1];
         const sgn = b.v < a.v ? -1 : 1;
-        const tau = Math.max(-1, Math.min(1, base + sgn * tensionDelta(y0, p.y, e) / TENSION_PX));
+        const tau = Math.max(-1, Math.min(1, base + sgn * tensionDelta(y0, p.y, e, gear) / TENSION_PX));
         writeTension(idx, tau);
       }
     });
@@ -2644,7 +2664,7 @@ export function createModulation(host, port) {
       say(rec, t('tension reset'));
     });
     svg.addEventListener('contextmenu', (e) => e.preventDefault());
-    ariaLabel(svg, 'Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it; left-drag a tension handle to bend it; Ctrl makes tension fine; right-click or double-click a tension handle resets it; Alt-click a point deletes it.');
+    ariaLabel(svg, 'Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it (Shift is fine, Ctrl locks its time); left-drag a tension handle to bend it (Shift is fine); right-click or double-click a tension handle resets it; Alt-click a point deletes it.');
   }
 
   // Each meter is both an input-level display and a response-range editor.
@@ -3387,7 +3407,9 @@ export function createModulation(host, port) {
     dead: () => M.dormantRoutes().map((r) => ({ id: r.id, macro: r.macroId, target: r.targetId })),
     performance: () => ({ calls: paintCalls, paints: paintRuns, ms: paintMs, averageMs: paintRuns ? paintMs / paintRuns : 0 }),
     /** → TL for one device (the PATTERN row menu's SEND TO TIMELINE): the sentence said, or null (refused out loud) */
-    sendToTimeline: (id) => { const s = M.sourceOf(id); return s ? sendToTimeline(s) : null; }
+    sendToTimeline: (id) => { const s = M.sourceOf(id); return s ? sendToTimeline(s) : null; },
+    /** armFor({ onPick(targetId), label, onEnd }) → end(): the routing's arming with no macro (1.5.6-alpha.26) */
+    armFor
   };
 
 

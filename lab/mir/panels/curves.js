@@ -7,8 +7,8 @@
  * tension).  It is NOT the modulation window's curve editor, which is welded to a device's record: this one edits a plain list of points.
  *
  *   the plot      a square well: a quarter grid, the diagonal as the neutral curve, the app's histogram behind it when it hands one
- *   the hand      a press on the plot ADDS a point there and drags it · a press on a point drags it (Shift keeps its value, Ctrl its place)
- *                 · DRAG IT OUT of the plot, or DOUBLE-TAP it, to remove it (Alt-click too) · drag a ring to bend its segment (Ctrl fine),
+ *   the hand      a press on the plot ADDS a point there and drags it · a press on a point drags it (Shift is fine, ⅛; Ctrl keeps its place)
+ *                 · DRAG IT OUT of the plot, or DOUBLE-TAP it, to remove it (Alt-click too) · drag a ring to bend its segment (Shift fine),
  *                 double-tap a ring to straighten it · the two ends move only up and down and are never removed
  *   the keys      + / − pick the next / previous point · arrows move it (1/100; Shift ⅛ of that; Page ten) · Delete removes it ·
  *                 Enter adds one halfway to the next · Escape lets go (a drag in progress goes back)
@@ -33,7 +33,7 @@ import { setAttr } from '../core/perf.js';
 import { registerProjectPart } from '../core/project.js';
 import { handWrite } from '../modulation/registry.js';
 import { evaluate, normalizePoints, addPoint, removePoint, movePoint, setTension } from '../modulation/curve.js';
-import { svgPoint, curveHit, pointDrag, tensionDelta } from '../modulation/curve-gesture.js';
+import { svgPoint, curveHit, pointDrag, tensionDelta, fineGear } from '../modulation/curve-gesture.js';
 import { pictureFilter } from './picture-filter.js';
 import { TAP } from '../controls/gesture.js';           // the kit's one double-tap: 300 ms and 14 px (Josh, 2026-10-07, call 20)
 
@@ -153,13 +153,13 @@ export function curveEditor(o = {}) {
       return;
     }
     if (hit.kind === 'handle' && twice) { commit(setTension(pts, hit.i, 0)); return; }   // a double-tap on a ring straightens it
-    if (hit.kind === 'point') { sel = hit.i; drag = { kind: 'point', id: e.pointerId, i: hit.i, start: P, pts0: pts, pts, out: false, moved: false }; }
-    else if (hit.kind === 'handle') { drag = { kind: 'tension', id: e.pointerId, i: hit.i, y0: P.y, t0: pts[hit.i].tension || 0, pts0: pts, pts }; }
+    if (hit.kind === 'point') { sel = hit.i; drag = { kind: 'point', id: e.pointerId, i: hit.i, start: P, pts0: pts, pts, out: false, moved: false, gear: fineGear(P) }; }
+    else if (hit.kind === 'handle') { drag = { kind: 'tension', id: e.pointerId, i: hit.i, y0: P.y, t0: pts[hit.i].tension || 0, pts0: pts, pts, gear: fineGear(P) }; }
     else {                                                                  // Photoshop: a press on the plot adds a point there, and drags it
       const r = addPoint(pts, clamp01(P.x / W), clamp01(1 - P.y / W), 0);
       if (r.index < 0) return;                                              // full (curve.js's rail: 32 points)
       sel = r.index; last = { at: 0, kind: null, i: -1 };                  // a press that made a point is not the first half of a double-tap on it
-      drag = { kind: 'point', id: e.pointerId, i: r.index, start: { x: X(r.points[r.index].t), y: Y(r.points[r.index].v) }, pts0: pts, pts: r.points, out: false, moved: true };
+      drag = { kind: 'point', id: e.pointerId, i: r.index, start: { x: X(r.points[r.index].t), y: Y(r.points[r.index].v) }, pts0: pts, pts: r.points, out: false, moved: true, gear: fineGear(P) };
       o.set(r.points, true);
     }
     try { svg.setPointerCapture(e.pointerId); } catch (_) { /* a pointer already gone */ }
@@ -170,7 +170,7 @@ export function curveEditor(o = {}) {
     if (!drag || e.pointerId !== drag.id) return;
     const P = svgPoint(svg, e);
     if (drag.kind === 'point') {
-      const q = pointDrag(drag.start, P, e), cur = drag.pts, end = isEnd(cur, drag.i);
+      const q = pointDrag(drag.start, P, e, drag.gear), cur = drag.pts, end = isEnd(cur, drag.i);
       const r = svg.getBoundingClientRect();
       const out = !end && (e.clientX < r.left - OUT_PX || e.clientX > r.right + OUT_PX || e.clientY < r.top - OUT_PX || e.clientY > r.bottom + OUT_PX);
       if (out !== drag.out) { drag.out = out; o.set(pointsNow(), true); }
@@ -182,7 +182,7 @@ export function curveEditor(o = {}) {
         o.set(next, true);
       }
     } else {
-      const d = tensionDelta(drag.y0, P.y, e) / (W / 2);                   // down drops the segment (positive tension), up lifts it; Ctrl is fine
+      const d = tensionDelta(drag.y0, P.y, e, drag.gear) / (W / 2);        // down drops the segment (positive tension), up lifts it; Shift is fine
       drag.pts = setTension(drag.pts0, drag.i, Math.max(-1, Math.min(1, drag.t0 + d)));
       o.set(drag.pts, true);
     }

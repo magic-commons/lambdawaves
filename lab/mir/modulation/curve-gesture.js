@@ -1,14 +1,17 @@
-/* MIR 1.4.3 — the curve editor's pointer law.
+/* MIR 1.4.3 — the curve editor's pointer law (1.5.6-alpha.23: THE HANDS, λWAVES 032 T7).
  *
  * This is FL Studio's envelope-editor workflow, not a look-alike inferred from
- * the drawing:
+ * the drawing, with the kit's ONE MODIFIER TABLE (Shift selects and fines; Ctrl
+ * shapes and locks time; Alt bypasses and deletes):
  *   right-drag empty space  add a point and place it
  *   Shift + right-click     add at the curve's current value
- *   left-drag a point       move it (Shift locks value, Ctrl locks time)
- *   left-drag a handle      change tension (Ctrl is fine adjustment)
+ *   left-drag a point       move it (Shift is fine, ⅛; Ctrl locks time)
+ *   left-drag a handle      change tension (Shift is fine, ⅛)
  *   right-click a handle    reset tension
  *   double-click a handle   reset tension
  *   Alt-left-click a point  delete it
+ * (Before alpha.23: Shift locked a point's value and Ctrl was the tension's fine
+ * key.  The value lock is retired; Ctrl keeps the time lock.)
  *
  * Source: Image-Line's Automation Clips and Fruity Envelope Controller manuals.
  * A host owns its model writes and painting, but it must ask this module what a
@@ -19,8 +22,10 @@ export const CURVE_GESTURES = Object.freeze({
   add: 'right-drag empty space',
   addAtLevel: 'Shift + right-click empty space',
   move: 'left-drag point',
+  fineMove: 'Shift + left-drag point',
+  lockTime: 'Ctrl + left-drag point',
   tension: 'left-drag tension handle',
-  fineTension: 'Ctrl + left-drag tension handle',
+  fineTension: 'Shift + left-drag tension handle',
   resetTension: 'right-click tension handle',
   resetTensionDouble: 'double-click tension handle',
   deletePoint: 'Alt + left-click point'
@@ -80,11 +85,31 @@ export function curveAction(event, hit) {
   return null;                         // a plain left click on empty curve is inert
 }
 
-/** FL's point-axis locks: Shift locks the vertical value; Ctrl locks time. */
-export function pointDrag(start, current, event) {
+/** THE FINE GEAR (1.5.6-alpha.23): ⅛, MIR's established fine ratio (the knobs' Shift). */
+export const CURVE_FINE = 8;
+
+/** fineGear(origin) → { step(current, event) → the geared pointer }: made at pointer-down with the pointer's own
+ * position (in the coordinates the host will pass); each step moves the geared pointer by the pointer's motion since
+ * the last step, ⅛ of it while Shift is held.  Shift pressed or released mid-drag never jumps the point. */
+export function fineGear(origin) {
+  let last = { x: num(origin && origin.x, 0), y: num(origin && origin.y, 0) }, pos = { ...last };
   return {
-    x: event.ctrlKey ? start.x : current.x,
-    y: event.shiftKey ? start.y : current.y
+    step(current, event) {
+      const k = event && event.shiftKey ? 1 / CURVE_FINE : 1, x = num(current.x, last.x), y = num(current.y, last.y);
+      pos = { x: pos.x + (x - last.x) * k, y: pos.y + (y - last.y) * k }; last = { x, y };
+      return { ...pos };
+    },
+    at: () => ({ ...pos })
+  };
+}
+
+/** A point's drag: Ctrl locks its time (x stays at the anchor's).  Shift is the fine gear: with a `gear`
+ * (fineGear at pointer-down) the pointer runs at ⅛ while Shift is held; without one the position is the pointer's. */
+export function pointDrag(start, current, event, gear) {
+  const p = gear ? gear.step(current, event) : current;
+  return {
+    x: event.ctrlKey ? start.x : p.x,
+    y: p.y
   };
 }
 
@@ -94,10 +119,12 @@ export function pointAddValue(event, pointerValue, curveValue) {
   return event.shiftKey && Number.isFinite(curveValue) ? curveValue : pointerValue;
 }
 
-/** Ctrl is the handle's fine modifier.  Eight-to-one is MIR's established
- * fine gear, now reached by FL's key rather than the generic knob's Shift. */
-export function tensionDelta(startY, currentY, event) {
-  return (currentY - startY) / (event.ctrlKey ? 8 : 1);
+/** The handle's travel since the press.  Shift is the fine gear (⅛, the knobs' key; Ctrl was until
+ * 1.5.6-alpha.23).  With a `gear` (fineGear at pointer-down, origin y = startY) the travel is geared step by
+ * step, so Shift mid-drag never jumps; without one the whole travel is divided while Shift is held. */
+export function tensionDelta(startY, currentY, event, gear) {
+  if (gear) return gear.step({ x: 0, y: currentY }, event).y - startY;
+  return (currentY - startY) / (event.shiftKey ? CURVE_FINE : 1);
 }
 
 /** Deterministic analytic LFOs can become editable without asking the user to

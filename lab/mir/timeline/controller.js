@@ -3,25 +3,36 @@
  * the true play while Modulation will now have a power button": this is that play, and the scrub that holds the clock.
  *
  *   createTransportController({ mod, onChange, onRefusedPlay, now, scrubLevel, busy }) → { play(on), toggle, seek(beat),
- *     scrub(beat, { snap, alt, shift }), beginning, beginScrub, endScrub({ cancel }), isScrubbing, handBeat, subscribe(fn)
- *     → off, setModulation(on), toggleModulation, state(), dispose }
+ *     scrub(beat, { snap, alt, snapped }), beginning, beginScrub, endScrub({ cancel }), isScrubbing, handBeat, subscribe(fn)
+ *     → off, setModulation(on), toggleModulation, state(), loop(), loopFrom(source), dispose }
  *   mod          installModulation's result (mir/modulation/bind.js): its play is the clock's, its arm is the power
  *   scrubLevel() 'live' | 'light' | 'release' — how often a scrub really seeks (BASINS: prefs.scrubLevel); default 'live'
  *   busy()       true while a recorder owns the clock (BASINS: its video and deterministic clocks); a scrub is refused then
  *
  * THE LAWS (BASINS'):
- *   THE HAND LEADS.  Free by default, Shift snaps to the grid, Alt always bypasses it.  The level, read once per gesture,
+ *   THE HAND LEADS.  Free by default, `snapped` snaps to the grid (the editor's Ctrl, 1.5.6-alpha.23; `shift` is still
+ *   read when `snapped` is not given, the BASINS spelling), Alt always bypasses it.  The level, read once per gesture,
  *   decides how often the engine actually seeks; handBeat() is always the latest commanded beat, so the playhead follows it.
  *   THE GATE.  beginScrub() takes the realtime pump (host.clock.suspendRealtime): time stands still under the hand while
  *   the transport keeps its play state; endScrub lands the model on the hand's beat at every level (a cancel rewinds to
- *   where the gesture began) and gives the pump back.  No second clock. */
+ *   where the gesture began) and gives the pump back.  No second clock.
+ *   THE LOOP (1.5.6-alpha.25, λWAVES 032 T1).  loop() → { start, end } | null: the ruler's range, else the ACTIVE range, else
+ *   the clips' extent (unmuted), else null (free run) — loopFrom({ range, active, extent }) hands it those three readers
+ *   (createTimeline does) and seats it on the clock (host.clock.setLoop): a playing tick that passes the end lands on the
+ *   start; a seek, a scrub and a film never loop. */
 import { snapTimelineBeat } from './geometry.js';
 
 const SCRUB_LEVELS = ['live', 'light', 'release'];
 export function createTransportController({ mod, onChange = () => {}, onRefusedPlay = () => {}, now = () => performance.now() / 1000,
   scrubLevel = () => 'live', busy = () => false }) {
   const clock = mod.host.clock;
-  let disposed = false, scrub = null;
+  let disposed = false, scrub = null, loopSource = null;
+  const span = (r) => (r && Number.isFinite(r.start) && Number.isFinite(r.end) && r.end > r.start ? { start: Math.max(0, r.start), end: r.end } : null);
+  function loop() {
+    if (!loopSource) return null;
+    for (const read of [loopSource.range, loopSource.active, loopSource.extent]) { const r = typeof read === 'function' ? span(read()) : null; if (r) return r; }
+    return null;
+  }
   const listeners = new Set();
   clock.setExactResume?.(true);
   const changed = (value, reason = 'transport') => { onChange(); for (const fn of listeners) fn(reason); return value; };
@@ -40,7 +51,7 @@ export function createTransportController({ mod, onChange = () => {}, onRefusedP
 
   function seek(beat) { if (disposed) return modelBeat(); return changed(clock.seek(beat), 'seek'); }
   function scrubTo(beat, mods = {}) {
-    const b = snapTimelineBeat(beat, mods.shift ? mods.snap : 0, !!mods.alt);
+    const b = snapTimelineBeat(beat, (mods.snapped ?? mods.shift) ? mods.snap : 0, !!mods.alt);
     if (!scrub) return seek(b);
     scrub.hand = b; changed(b, 'scrub');
     if (scrub.level === 'release') return b;
@@ -79,7 +90,10 @@ export function createTransportController({ mod, onChange = () => {}, onRefusedP
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     setModulation,
     toggleModulation: () => setModulation(!mod.armed()),
+    loop,
+    /** loopFrom({ range, active, extent } | null) — the loop's three readers, seated on the clock (null: free run) */
+    loopFrom(source) { loopSource = source || null; clock.setLoop?.(loopSource ? loop : null); return loop(); },
     state: () => ({ playing: clock.isPlaying(), running: clock.isRunning(), modulation: mod.armed(), beat: mod.host.model.transport.beats }),
-    dispose() { if (disposed) return; endScrub(); play(false); disposed = true; listeners.clear(); }
+    dispose() { if (disposed) return; endScrub(); play(false); if (loopSource) clock.setLoop?.(null); disposed = true; listeners.clear(); }
   });
 }

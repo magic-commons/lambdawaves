@@ -28,7 +28,7 @@
   --tl-bar-pad: 4px 8px;
   --tl-bar-pad-corner: calc(var(--touch) - 4px);              /* the bar runs under the resize corner and keeps its last button clear (fix 5) */
   --tl-bar-size: 9px;
-  --tl-action-h: 34px;                                         /* a tool button is the transport's work seat (fix 8): 34 × 34, radius 8 */
+  --tl-action-h: 36px;                                         /* a tool button: the CSB's 36 (1.5.6-alpha.24; BASINS' fix 8 was 34); the four tools are round discs of it */
   --tl-action-pad: 4px 8px;
   --tl-action-r: 8px;
   --tl-action-size: 9px;
@@ -40,6 +40,12 @@
   --tl-chevron-w: 1.5px;
   --tl-icon: 16px;
   --tl-icon-min: 32px;
+  --tl-pill-r: 10px;                                           /* SNAP: a typed pill, as the BPM pill (1.5.6-alpha.24): its corner, its two sizes */
+  --tl-pill-num-size: 13px;
+  --tl-pill-word-size: 8px;
+  --tl-pill-face: hsl(var(--glass-tint) / 1);                  /* it stands proud, as the BPM pill's face */
+  --tl-sel-w: 2;                                               /* a selection's stroke: the tab's rim and a chosen point (T16) */
+  --tl-warn-size: 28px;                                        /* ⚠ on an event clip drawn for another number of bands (T23) */
   --tl-ruler-h: 32px;
   --tl-measure-size: 9px;
   --tl-measure-top: 5px;
@@ -132,12 +138,17 @@
   --tl-tail-ink: color-mix(in srgb, var(--acc2) 22%, transparent);
 }
 .mir-timeline .tl-marquee { --tl-marquee-edge: color-mix(in srgb, var(--acc2) 65%, currentColor); --tl-marquee-fill: color-mix(in srgb, var(--acc2) 12%, transparent); }
-.mir-timeline .tl-range { --tl-range-fill: color-mix(in srgb, currentColor 12%, transparent); }
+.mir-timeline .tl-range { --tl-range-fill: color-mix(in srgb, var(--acc2) 22%, transparent); --tl-range-edge: color-mix(in srgb, var(--acc2) 60%, transparent); }   /* the ruler's range, a strong time wash (T16) */
 .mir-timeline .tl-active { --tl-active-fill: color-mix(in srgb, var(--acc2) 9%, transparent); --tl-active-edge: color-mix(in srgb, var(--acc2) 35%, transparent); }   /* THE ACTIVE RANGE: a faint accent-B band (time) */
-.mir-timeline :is(.tl-clip, .tl-clip-title) { --tl-curve-ink: color-mix(in srgb, var(--tl-clip-tint) 65%, var(--fg)); }   /* the curve and its tab read one ink */
+.mir-timeline :is(.tl-clip, .tl-clip-title) { --tl-curve-ink: color-mix(in srgb, var(--tl-clip-tint) 80%, var(--fg)); }   /* the curve and its tab read one ink (T10: 65 → 80 %) */
+.mir-timeline .tl-clip-title.selected { --tl-curve-ink: color-mix(in srgb, var(--acc2) 85%, var(--fg)); }   /* a chosen clip's tab in accent B (T16) */
+.mir-timeline .tl-clip.selected { --tl-sel-outline: 2px solid var(--acc); }                                  /* … and its body ringed in the accent */
+.mir-timeline .tl-band { --tl-band-ink: color-mix(in srgb, var(--tl-curve-ink) 42%, transparent); }          /* an event clip's band hairlines */
+.mir-timeline .tl-warn { --tl-warn-ink: var(--warn); --tl-warn-lift: drop-shadow(0 1px 2px hsl(0 0% 0% / .5)); }
+.mir-timeline .tl-setting { --tl-pill-rim: var(--glass-hairline); }
 .mir-timeline .tl-tab-base { --tl-tab-base-fill: color-mix(in srgb, hsl(var(--glass-tint) / 1) 25%, var(--tl-tick-bevel-ink)); }
 .mir-timeline .tl-tab-grad-top { --tl-tab-top: color-mix(in srgb, white var(--tl-tab-shoulder-mix), var(--tl-curve-ink)); }
-.mir-timeline :is(.tl-clip-title.selected .tl-tab-rim) { --tl-rim-selected: color-mix(in srgb, currentColor 32%, transparent); }
+.mir-timeline :is(.tl-clip-title.selected .tl-tab-rim) { --tl-rim-selected: var(--acc); }   /* T16: the chosen tab's rim, 2 px in the accent */
 .mir-timeline :is(.tl-clip-title:is(:hover, .held) .tl-tab-rim) { --tl-rim-held: color-mix(in srgb, currentColor 48%, transparent); }
 .mir-timeline .tl-edge:focus-visible { --tl-edge-focus: 1px solid var(--acc2); }
 .mir-timeline .tl-pane { --tl-beat-tick: color-mix(in srgb, currentColor 16%, transparent); --tl-beat-bevel: color-mix(in srgb, var(--tl-tick-bevel-ink) 8%, transparent); --tl-beat-height: 4px; }
@@ -188,8 +199,19 @@
 .mir-win.mir-timeline .tl-toolbar .trig:not(.on) { color: var(--ink-key); }   /* BASINS: the bar's words are the key ink (.86), as the transport's */
 .mir-win.mir-timeline .tl-action.tl-icon { display: inline-flex; align-items: center; justify-content: center; min-width: var(--tl-icon-min); }
 .mir-win.mir-timeline .tl-action.tl-icon svg { width: var(--tl-icon); height: var(--tl-icon); display: block; flex: none; }
+/* ONE SEAT LAW FOR THE BAR (1.5.6-alpha.24, T15): EDIT · SELECT · SCRUB · SLICE are round discs of one size; every button of the
+   bar moves as the kit's chips do (THE CHIPS' MOTION, 1.5.6-alpha.9): hover 6 % larger, a press sinks to 92 % */
+.mir-win.mir-timeline button.tl-action.tl-tool { width: var(--tl-action-h); min-width: var(--tl-action-h); padding: 0; border-radius: 50%; }
+.mir-win.mir-timeline .tl-toolbar button.tl-action { transition: transform var(--motion-micro) var(--ease-out); }
+@media (hover: hover) { .mir-win.mir-timeline .tl-toolbar button.tl-action:hover { transform: scale(var(--chip-hover-scale)); } }
+.mir-win.mir-timeline .tl-toolbar button.tl-action:active { transform: scale(var(--chip-press-scale)); }
 .mir-win.mir-timeline .tl-toolbar > .tl-folded { display: none; }   /* folded behind ⋯ (after the icon rule: it wins the tie) */
 .mir-timeline .tl-setting { display: flex; align-items: center; gap: var(--tl-bar-gap); padding: var(--tl-action-pad); height: var(--tl-setting-h); box-sizing: border-box; border-radius: var(--tl-action-r); white-space: nowrap; }
+/* SNAP IS A TYPED PILL (T15): the BPM pill's face — proud, a hairline, the value in accent B (a grid of time) and its word small after it */
+.mir-win.mir-timeline .tl-toolbar .tl-setting { height: var(--tl-action-h); padding: 0 2px 0 6px; border: var(--glass-border) solid var(--tl-pill-rim); border-radius: var(--tl-pill-r);
+  background: var(--tl-pill-face); box-shadow: var(--relief-raise, var(--neu-raise)); }
+.mir-win.mir-timeline .tl-toolbar .tl-setting-word { order: 2; font: var(--w-bold) var(--tl-pill-word-size) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-key, var(--dim)); }
+.mir-win.mir-timeline .tl-toolbar .tl-setting .mir-step-name { background: transparent; box-shadow: none; font: var(--w-bold) var(--tl-pill-num-size) / 1 var(--font-num); color: var(--acc2); }
 .mir-timeline .tl-select-wrap { position: relative; display: inline-flex; align-items: center; flex: none; }
 /* THE KIT'S OWN CHOOSERS, never a native select (Josh, 2026-10-07, call 19): the scope is a SEGMENT at the tools' height (its
    track 34 px: 28 px segments in the well's 2 px), and SNAP a compact STEPPER whose name wears the select's well and chevron —
@@ -231,7 +253,7 @@
     var(--tl-subdivision-ink) var(--tl-grid-origin) 100% / var(--tl-measure) 2px repeat-x;
 }
 .mir-timeline .tl-pane.subdivisions::after { --tl-subdivision-ink: var(--tl-subdivision-pattern); }
-.mir-timeline .tl-range { position: absolute; top: 0; height: var(--tl-ruler-h); background: var(--tl-range-fill); pointer-events: none; }
+.mir-timeline .tl-range { position: absolute; top: 0; height: var(--tl-ruler-h); box-sizing: border-box; background: var(--tl-range-fill); border-inline: 1px solid var(--tl-range-edge); pointer-events: none; }
 .mir-timeline .tl-active { position: absolute; top: 0; height: var(--tl-ruler-h); box-sizing: border-box; background: var(--tl-active-fill); border-inline: 1px solid var(--tl-active-edge); pointer-events: none; }
 
 /* ── THE CLIPS: the curve alone (the body never highlights the track; all feedback is the curve and the tab) ── */
@@ -240,14 +262,20 @@
 .mir-timeline .tl-clip.dormant { outline: 1px dashed currentColor; outline-offset: -2px; opacity: .5; }
 .mir-timeline .tl-clip svg { display: block; width: 100%; height: 100%; overflow: hidden; touch-action: none; }
 .mir-timeline .tl-step-mode .tl-clip svg, .mir-timeline .tl-step-mode :is(.tl-point, .tl-tension) { cursor: crosshair; }
-.mir-timeline .tl-fill { fill: var(--tl-clip-tint); opacity: .15; stroke: none; pointer-events: none; transition: opacity var(--tl-fade) var(--tl-ease); }
-.mir-timeline .tl-clip:is(.selected, :hover, .held) .tl-fill { opacity: .20; }
+.mir-timeline .tl-fill { fill: var(--tl-clip-tint); opacity: .28; stroke: none; pointer-events: none; transition: opacity var(--tl-fade) var(--tl-ease); }   /* T10: .15 → .28 */
+.mir-timeline .tl-clip:is(:hover, .held) .tl-fill { opacity: .32; }
+.mir-timeline .tl-clip.selected .tl-fill { opacity: .36; }                                                     /* T16 */
+.mir-timeline .tl-clip.selected { outline: var(--tl-sel-outline); outline-offset: -2px; }
+.mir-timeline .tl-band { stroke: var(--tl-band-ink); stroke-width: 1; stroke-dasharray: 2 3; pointer-events: none; }
+.mir-timeline .tl-warn { display: none; position: absolute; left: 50%; top: 50%; width: var(--tl-warn-size); height: var(--tl-warn-size); transform: translate(-50%, -50%); color: var(--tl-warn-ink); filter: var(--tl-warn-lift); pointer-events: none; z-index: 1; }
+.mir-timeline .tl-warn svg { display: block; width: 100%; height: 100%; }
+.mir-timeline .tl-clip.steps-off .tl-warn { display: block; }
 .mir-timeline .tl-clip:is(.selected, :hover, .held) .tl-curve { filter: brightness(1.25); }
 .mir-timeline .tl-curve { stroke: var(--tl-curve-ink); stroke-width: var(--tl-curve-w); stroke-linecap: round; stroke-linejoin: round; }
 .mir-timeline :is(.tl-point, .tl-tension) { transform-box: fill-box; transform-origin: center; transition: transform var(--tl-quick) var(--tl-ease); }
 .mir-timeline :is(.tl-point, .tl-tension):hover { transform: scale(var(--tl-point-hover)); }
 .mir-timeline .tl-point { fill: var(--tl-curve-ink); stroke: none; cursor: move; }
-.mir-timeline .tl-point.selected { stroke: var(--fg); stroke-width: var(--tl-tension-w); r: 7; }
+.mir-timeline .tl-point.selected { stroke: var(--acc); stroke-width: var(--tl-sel-w); r: 6; }   /* T16 · T11: accent 2 px, r 7 → 6 */
 .mir-timeline .tl-tension { fill: var(--glass-well); stroke: var(--tl-curve-ink); stroke-width: var(--tl-tension-w); cursor: ns-resize; }
 .mir-timeline .tl-clip-title { position: absolute; top: 0; height: var(--tl-tab-height); display: flex; align-items: center; gap: 2px; cursor: grab; touch-action: none; font-size: var(--tl-tab-name-size);
   min-width: 0; padding: 1px 2px 0; box-sizing: border-box; isolation: isolate; -webkit-user-select: none; user-select: none; }
@@ -259,10 +287,9 @@
 .mir-timeline .tl-tab-grad-foot { stop-color: var(--tl-curve-ink); }
 .mir-timeline .tl-tab-rim-top { stop-color: var(--tl-rim-light); }
 .mir-timeline .tl-tab-rim-foot { stop-color: var(--tl-rim-shade); }
-.mir-timeline .tl-tab-tint { opacity: .92; transition: opacity var(--tl-tab-t) var(--tl-ease-spring); }
+.mir-timeline .tl-tab-tint { opacity: 1; transition: opacity var(--tl-tab-t) var(--tl-ease-spring); }   /* T10: .92 → 1 */
 .mir-timeline .tl-tab-rim { fill: none; stroke-width: 1; transition: stroke var(--tl-tab-t) var(--tl-ease); }
-.mir-timeline .tl-clip-title.selected .tl-tab-tint { opacity: .96; }
-.mir-timeline .tl-clip-title.selected .tl-tab-rim { stroke: var(--tl-rim-selected); }
+.mir-timeline .tl-clip-title.selected .tl-tab-rim { stroke: var(--tl-rim-selected); stroke-width: var(--tl-sel-w); }
 .mir-timeline .tl-clip-title:is(:hover, .held) .tl-tab-tint { opacity: 1; }
 .mir-timeline .tl-clip-title:is(:hover, .held) .tl-tab-rim { stroke: var(--tl-rim-held); }
 .mir-timeline .tl-clip-title.held { z-index: 2; cursor: grabbing; }

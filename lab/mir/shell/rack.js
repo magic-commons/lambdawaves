@@ -69,6 +69,8 @@ export const RACK = Object.freeze({
 const RACK_ID = { left: 'rackL', right: 'rack' };
 /* what a header press must leave alone: its own buttons and anything a hand edits */
 const PRESSABLE = 'button, input, select, textarea, a[href], label, [role="button"], [contenteditable="true"]';
+/* what a BARE floating card's empty glass is not (1.5.6-alpha.28): a control, as window/window.js reads it */
+const CONTROLS = PRESSABLE + ', [role="slider"], [role="switch"], [role="tab"], [tabindex]:not([tabindex="-1"]), .k, .fd, .sw, .seg, .trig, canvas, video';
 
 /* ── the pure part ─────────────────────────────────────────────────────────────────────────────────────────── */
 const mid = (b) => b.top + b.height / 2;
@@ -482,13 +484,19 @@ export function createRack({ host = globalThis.document && document.body, sides 
     root.addEventListener('click', (e) => {
       if (passing) return;
       const b = e.target.closest && e.target.closest('button'); if (!b || !root.contains(b)) return;
-      if (w.spec.card && !b.classList.contains('dev-fold')) return;   // an app card keeps its own buttons
+      /* an app card keeps its own buttons — but its × closes through the rack (1.5.6-alpha.28), so its onClose runs: the kit
+         device's own close only marked it closed, and a later close(id) found it closed and returned (λWAVES' empty slot) */
+      if (w.spec.card && !b.classList.contains('dev-fold') && !b.classList.contains('dev-close')) return;
       if (b.classList.contains('dev-close')) { e.stopPropagation(); close(id); }
       else if (b.classList.contains('dev-fold')) { e.stopPropagation(); fold(id); }
       else if (b.classList.contains('dev-pop')) { e.stopPropagation(); toggleFloat(id); }
       else if (b.classList.contains('dev-rail')) { e.stopPropagation(); setCompact(id, !root.classList.contains('compact')); }
     }, { capture: true, signal: life.signal });
     head.addEventListener('dblclick', (e) => { if (e.target.closest(PRESSABLE)) return; e.stopImmediatePropagation(); fold(id); }, { capture: true, signal: life.signal });
+    /* BARE (1.5.6-alpha.28): popped off the rack, the card draws no title bar (rack.css) — its chips and × stay — and its empty
+       glass is the handle the title bar was */
+    if (w.spec.bare) { root.dataset.bare = '';
+      root.addEventListener('pointerdown', (e) => { if (root.classList.contains('floating') && !head.contains(e.target) && !e.target.closest(CONTROLS)) headDown(e); }, on); }
     root.addEventListener('pointerdown', () => { if (root.classList.contains('floating')) raiseFloat(root); }, { capture: true, signal: life.signal });
     popFace(root); railFace(root);
     w.api = {
@@ -1080,7 +1088,10 @@ export function createRack({ host = globalThis.document && document.body, sides 
    *  { el }: a window the app ALREADY BUILT (device()'s result or its .dev) is taken over in place, never rebuilt;
    *  { closed: true } with it starts it closed.  { eager: true }: built now (closed until the layout or `open` opens it).
    *  { card: true } with { el }: an app card that is not a window (BASINS' transport card): it keeps its place in the
-   *  order and in saved layouts, drags and folds with the rest, and is in neither the + list nor the WINDOW menu. */
+   *  order and in saved layouts, drags and folds with the rest, and is in neither the + list nor the WINDOW menu; its ×
+   *  closes through the rack, so its onClose runs (1.5.6-alpha.28).
+   *  { bare: true }: popped off the rack (floating), the card draws no title bar — the pop and rail chips and the × stay,
+   *  and its empty glass drags it (1.5.6-alpha.28). */
   function register(spec) {
     if (!spec || typeof spec.id !== 'string' || reg.has(spec.id)) throw new Error('rack.register: a new string id is required');
     /* an adopted window's home is the rack it is standing in, unless the app says otherwise */

@@ -504,7 +504,11 @@ const GLYPHS = {
     '<rect x="2" y="2" width="7" height="7" stroke-dasharray="1.5 1.5"/><rect x="6" y="6" width="8" height="8" stroke-dasharray="1.5 1.5"/></g>',
   scrub:
     '<g transform="scale(1.5)" fill="none" stroke="currentColor" stroke-width="1.267" stroke-linecap="round" stroke-linejoin="round">' +
-    '<path d="m5 5-3 3 3 3"/><path d="M8 2v12" stroke-dasharray="1 1.5"/><path d="m11 5 3 3-3 3"/></g>'
+    '<path d="m5 5-3 3 3 3"/><path d="M8 2v12" stroke-dasharray="1 1.5"/><path d="m11 5 3 3-3 3"/></g>',
+  /* 1.5.6-alpha.24 (λWAVES 032 T15): the timeline's SLICE tool — a blade across the cut it makes (the cut's two ticks) */
+  slice:
+    '<path ' + STROKE + ' d="M12 3.4v3.4M12 17.2v3.4"/>' +
+    '<path ' + STROKE + ' d="M5.6 18.4 L16.6 7.4 Q18.7 5.3 19.2 8 L19.5 9.6 L8.4 20.7 Z"/>'
 };
 
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);

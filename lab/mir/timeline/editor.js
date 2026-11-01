@@ -19,6 +19,10 @@
  *     onDrop, slice, tool, setTool, gesture, paintHead, selected, selection, workLane, setWorkLane, locate, removeLane,
  *     addLane, close, dispose, keysLive(), and the key table's verbs (act: see keys.js)
  *
+ * THE HANDS (1.5.6-alpha.23, λWAVES 032): ONE MODIFIER TABLE — Shift selects and fines (the ruler's range, the marquee, a
+ * clip's toggle, ⅛ on a point, a tension or a stretch); Ctrl shapes (the ruler's zoom, a clip's clone and stretch, a point's
+ * time lock); Alt bypasses Snap and deletes a point.  The EDIT tool's click on empty lane space stamps the clip last pressed
+ * (THE PENCIL: its curve, shared).  The words are shortcuts.js TIMELINE_POINTER.
  * THE LAWS (BASINS', unchanged): one musical-to-pixel mapping (geometry.js) for drawing, hit tests and edits; a gesture is
  * one model transaction (begin … commit, or cancel on Escape, a lost capture, a blur, a hidden page or a hidden interface); a drag's last
  * pointer sample is flushed before its commit; the nearest lane is resolved from content coordinates, never from
@@ -27,8 +31,9 @@
  * CHANGED FOR THE KIT: words through label / ariaLabel / t (nothing is found by its words); the keyboard is the app's one
  * key table (keys.js timelineActions: this file only exposes the verbs); toasts through `say`; the frame coalescer is
  * core/frame.js; the popups are the house's menu pane; BASINS' CURVE_VIEW numbers live in geometry.js. */
-import { svgPoint, curveHit, curveAction, pointDrag, pointAddValue, tensionDelta } from '../modulation/curve-gesture.js';
+import { svgPoint, curveHit, curveAction, pointDrag, pointAddValue, tensionDelta, fineGear } from '../modulation/curve-gesture.js';
 import { el, label, ariaLabel, seg, stepper, number } from '../kit.js';
+import { confirmDialog } from '../shell/dialog.js';
 import { glyphSvg } from '../glyph.js';
 import { frame } from '../core/frame.js';
 import { isField } from '../core/pointer.js';
@@ -50,18 +55,18 @@ const bounded=(n,lo=0,hi=1)=>Math.min(hi,Math.max(lo,n));
 const editable=target=>isField(target,true);   // every input counts: the clip menu's colour well keeps its keys
 /* a word: an English key (translated, kept on the node for a language change) or [key, vars]; { raw } is data, shown as it is */
 const word=(node,w)=>{if(w&&typeof w==='object'&&!Array.isArray(w)){node.textContent=w.raw;return node;}if(Array.isArray(w))return label(node,w[0],w[1]),node;label(node,w);return node;};
-export const SNAPS=[[4,'MEASURE'],[1,'QUARTER'],[.5,'EIGHTH'],[.25,'SIXTEENTH'],[0,'OFF']];   // tr: the timeline's snap grid
+export const SNAPS=[[4,'1'],[1,'1/4'],[.5,'1/8'],[.25,'1/16'],[0,'OFF']];   // tr: the timeline's snap grid as note fractions: 1 a bar, 1/4 a beat, 1/8, 1/16 (1.5.6-alpha.24: was MEASURE · QUARTER · EIGHTH · SIXTEENTH)
 export const TOOLS=[['edit','EDIT'],['select','SELECT'],['scrub','SCRUB'],['slice','SLICE']];   // tr: the timeline's tools
 const SCOPES=[['clips','CLIPS'],['points','POINTS']];   // what a selection picks: whole clips or curve points
 const FOLD_SLACK=6;   // px: a folded tool comes back to the bar only with this much room to spare (a bar at the edge never flickers)
-export const SWATCHES=['#a7adb8','#ed8d91','#e2b579','#a9c987','#7bbfc8','#96a8df','#be9bdd'];   // BASINS' seven clip tints (data: a clip's colour is saved)
+export const SWATCHES=['#a7adb8','#f8858b','#e9b368','#a5cb7b','#6cc1cc','#92a7e9','#c297e6'];   // BASINS' seven clip tints, the six hues 20 % more chroma in oklch, same lightness and hue (1.5.6-alpha.24, T10; data: a clip's colour is saved, so a clip keeps the tint it was given)
 
 export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say=()=>{},audio=null,keys=null}) {
   /* the chord the app's table holds for a timeline action, in the user's platform ('' when none): never typed here */
   const chordOf=id=>{const k=typeof keys==='function'?keys():keys;return k&&k.get&&k.get('timeline.'+id)?k.menuKey('timeline.'+id):'';};
   const withKey=(node,id)=>{const c=id&&chordOf(id);if(c)el('span','tl-key',node).textContent=' · '+c;return node;};
   let doc=model.state(),selectedLane=doc.lanes[0].id,selected=null,selection=new Set(),pointSelection=null;
-  let px=20,snap=1,range=null,confirmation=null,menu=null,drag=null,lastTap=null,clipboard=null;
+  let px=20,snap=1,range=null,menu=null,drag=null,lastTap=null,clipboard=null,lastClip=null;   // lastClip: THE PENCIL's memory, the clip last pressed
   let stepMode=false,slideMode=false,drawTension=0,tool='edit',scope='clips',workLane='top';
   const dropHandlers=new Set();
   const transportBeat=()=>mod.host.model.transport.beats;
@@ -109,15 +114,18 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(!worklane.getClientRects().length)return;   // the lane is hidden or the window is closed: nothing to measure
     const bar=getComputedStyle(toolbar),lane=getComputedStyle(worklane),num=v=>parseFloat(v)||0,gap=num(bar.columnGap);
     let room=worklane.clientWidth;if(lane.flexDirection!=='column')room-=transportHost.getBoundingClientRect().width+num(lane.columnGap);
-    for(const f of fold)if(!f.node.classList.contains('tl-folded'))widths.set(f.node,f.node.getBoundingClientRect().width);
-    let need=num(bar.paddingLeft)+num(bar.paddingRight)+num(bar.borderLeftWidth)+num(bar.borderRightWidth)+moreButton.getBoundingClientRect().width,k=0;
+    // layout widths (offsetWidth), never the painted box: a hovered or pressed button is scaled (THE CHIPS' MOTION) and must not fold the bar
+    for(const f of fold)if(!f.node.classList.contains('tl-folded'))widths.set(f.node,f.node.offsetWidth);
+    let need=num(bar.paddingLeft)+num(bar.paddingRight)+num(bar.borderLeftWidth)+num(bar.borderRightWidth)+moreButton.offsetWidth,k=0;
     for(;k<fold.length;k++){need+=(widths.get(fold[k].node)||0)+gap;if(need>room-(k>=shown?FOLD_SLACK:0)+.5)break;}
     if(k!==shown)frame.write(()=>foldAt(k));
   }
   function foldAt(k){shown=k;fold.forEach((f,i)=>f.node.classList.toggle('tl-folded',i>=k));moreButton.dataset.folded=String(fold.length-k);if(menu?.dataset.pop==='more')closeMenu();}
   const fitObserver=new ResizeObserver(()=>{if(fitBooked)return;fitBooked=true;frame.read(()=>{fitBooked=false;fit();});});
   for(const n of [worklane,transportHost,moreButton,...fold.map(f=>f.node)])fitObserver.observe(n);
-  const view=createTimelineView(surface,{pixels:()=>px,onClipMenu(e,c,curve){finish(null,true);clipMenu(e.clientX,e.clientY,c,curve);}});
+  /* THE EVENT TARGET (1.5.6-alpha.24): how many bands a target has now (registry describe(id).steps: its options, a toggle's two) */
+  const stepsOf=id=>mod.registry.has(id)?mod.registry.describe(id).steps??null:null;
+  const view=createTimelineView(surface,{pixels:()=>px,stepsOf,onClipMenu(e,c,curve){finish(null,true);clipMenu(e.clientX,e.clientY,c,curve);}});
   const {viewport,status}=view;
   const headPaint=createTimelinePlayhead({head:view.head,tail:view.tail,controller,clock:{beats:transportBeat,playing:()=>mod.host.clock.isPlaying(),bpm:()=>mod.host.model.transport.bpm},visible:()=>win.isOpen()&&!document.hidden&&!document.body.classList.contains('ui-hidden'),pixels:()=>px,scroll:()=>viewport.scrollLeft});
   const snapBeat=(beat,e)=>snapTimelineBeat(beat,snap,!!e?.altKey),closeMenu=()=>{menu?.remove();menu=null;};
@@ -140,11 +148,11 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   // SLICE: every listed clip spanning the beat cuts there as one undo; the halves join (Insert) or become (the tool) the selection.
   function sliceAt(ids,beat,keep=false){finish(null,true);const cuts=sliceClips(model,ids,beat);if(!cuts){const r=model.lastRefusal;say(r?t(r.why,r.vars):t('Nothing sliced: the cut must fall inside a clip.'));return null;}
     selection=new Set([...(keep?selection:[]),...cuts.flatMap(c=>[c.left,c.right])]);selected=cuts[0].right;pointSelection=null;paintSelection();return cuts;}
-  function markActive(){const end=Math.max(0,...doc.clips.map(c=>c.start+c.duration)),next=range?{...range}:end>0?{start:0,end}:null,now=activeRange();
+  function markActive(){const end=model.extent({unmuted:false})?.end??0,next=range?{...range}:end>0?{start:0,end}:null,now=activeRange();
     if(!next){say(t('Nothing to mark: drag a time range on the strip or add clips.'));return;}
     setActiveRange(now&&Math.abs(now.start-next.start)<1e-9&&Math.abs(now.end-next.end)<1e-9?null:next);}
-  function zoomSelection(){finish(null,true);const clips=doc.clips.filter(c=>selection.has(c.id)),chosen=clips.length?clips:doc.clips;
-    const bounds=clips.length||!range?chosen.length?{start:Math.min(...chosen.map(c=>c.start)),end:Math.max(...chosen.map(c=>c.start+c.duration))}:null:range;if(!bounds)return;
+  function zoomSelection(){finish(null,true);const clips=doc.clips.filter(c=>selection.has(c.id));
+    const bounds=clips.length?{start:Math.min(...clips.map(c=>c.start)),end:Math.max(...clips.map(c=>c.start+c.duration))}:range||model.extent({unmuted:false});if(!bounds)return;
     px=bounded((viewport.clientWidth-40)/Math.max(.0625,bounds.end-bounds.start),8,100);paint();viewport.scrollLeft=Math.max(0,bounds.start*px-20);paint();}
   function duplicateSelection(){const ids=model.duplicateClips([...selection]);if(!ids){const r=model.lastRefusal;say(r?t(r.why,r.vars):t('No copies made: select clips with room in the arrangement.'));return;}selection=new Set(ids);selected=ids[0];pointSelection=null;paintSelection();}
   function copySelection(cut=false){const value=model.copyClips([...selection]);if(!value)return;clipboard=value;if(cut){model.deleteClips([...selection]);selection.clear();selected=null;}paintSelection();}
@@ -205,8 +213,9 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     const kind=clipKind(curve),drives=!kind||kind.drives!==false;
     pop(x,y,{raw:curve.name},[
       ['TITLE / COLOR',()=>editIdentity(x,y,curve),'identity'],
-      [c.mute?'UNMUTE':'MUTE',()=>model.updateClip(c.id,{mute:!c.mute}),'mute'],
+      [c.mute?'ENABLE CLIP':'DISABLE CLIP',()=>model.updateClip(c.id,{mute:!c.mute}),'mute'],   // T25: the MUTE row's words (clip.mute, the row id unchanged)
       ['DUPLICATE',()=>{selectOnly(c.id);duplicateSelection();},'duplicate'],
+      ...(drives&&typeof mod.view?.api?.armFor==='function'?[['ROUTE NEW PARAMETER…',()=>routeClip(c.id,curve),'route']]:[]),   // T20: arm the controls, the tap re-targets the clip
       ...(drives?[['OUTPUT RANGE',()=>{pop(x,y,'NORMALIZED MIN / MAX',[],'range');const num=(o)=>{const n=number({min:0,max:1,step:.01,...o});n.root.classList.add('tl-value-num');menu.appendChild(n.root);return n;};const lo=num({aria:'Output minimum',value:curve.min}),hi=num({aria:'Output maximum',value:curve.max});button(menu,'APPLY',()=>{for(const n of [lo,hi])if(n.editing)n.close(true);model.updateCurve(curve.id,{min:lo.get(),max:hi.get()});closeMenu();}).dataset.tlAction='apply';},'output-range']]:[]),   // the kit's number fields (call 19)
       ...(kind?[]:[['ADD MIDPOINT',()=>{const beat=c.offset+c.duration*c.scale/2;model.addPoint(curve.id,beat,evaluateTimelineSource(curve,beat));},'add-midpoint']]),
       ['STRETCH ×2',()=>model.updateClip(c.id,{duration:c.duration*2,scale:c.scale/2}),'stretch'],
@@ -215,13 +224,26 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     ],'clip');
   }
 
-  function cancelConfirm(){confirmation?.remove();confirmation=null;}
-  function removeLane(){cancelConfirm();const lane=doc.lanes.at(-1),result=model.removeLane(lane.id);if(!result.confirm)return;
-    confirmation=el('div','tl-confirm glass',document.body);confirmation.dataset.mirSurface='menu';confirmation.setAttribute('role','alertdialog');ariaLabel(confirmation,'Remove clips?');label(el('div','tl-confirm-text',confirmation),'Remove clips? {n} in {lane}',{n:result.count,lane:result.name});
-    ariaLabel(button(confirmation,{raw:'×'},cancelConfirm,'tl-cancel'),'Cancel removing the lane');const yes=button(confirmation,'YES, DELETE',()=>{if(doc.lanes.at(-1)?.id===lane.id)model.removeLane(lane.id,true);cancelConfirm();},'tl-delete');
-    const chip=win.rail?.chip?.('removeLane'),r=chip?chip.getBoundingClientRect():{right:innerWidth/2,top:innerHeight/2},box=confirmation.getBoundingClientRect();confirmation.style.left=bounded(r.right+8,8,innerWidth-box.width-8)+'px';confirmation.style.top=bounded(r.top,8,innerHeight-box.height-8)+'px';yes.focus();}
-  function createClip(targetId){finish(null,true);if(!mod.registry.has(targetId))return null;const beat=transportBeat(),desc=mod.registry.describeOne(targetId);
-    const id=model.create({targetId,name:desc.label,value:mod.registry.readNorm(targetId),start:range?range.start:Math.floor(beat/doc.meter)*doc.meter,duration:range?range.end-range.start:doc.meter,laneId:selectedLane});if(!id){say(t('This time range is occupied in every lane. Add a lane or choose another range.'));return null;}selectOnly(id);win.open();paint();viewport.scrollLeft=Math.max(0,view.getClip(id).start*px-20);return id;}
+  /* THE LANE ASK (T9, 1.5.6-alpha.24): a lane with clips asks through the kit's confirmDialog (danger) before it goes; the
+     rail's chip removes the bottom lane, a lane's own menu (right-click its empty space) that lane.  → Promise<boolean> */
+  async function removeLane(laneId=doc.lanes.at(-1)?.id){const result=model.removeLane(laneId);if(result.ok||!result.confirm)return !!result.ok;
+    const yes=await confirmDialog(tn(result.count,'Remove {n} clip in {lane}?','Remove {n} clips in {lane}?',{n:result.count,lane:result.name}),{yes:'REMOVE LANE',danger:true});
+    return !!(yes&&doc.lanes.some(l=>l.id===laneId)&&model.removeLane(laneId,true)?.ok);}
+  function laneMenu(x,y,laneId){const lane=doc.lanes.find(l=>l.id===laneId);if(!lane)return;
+    pop(x,y,{raw:lane.name},[['ADD LANE',()=>model.addLane(),'add-lane'],...(doc.lanes.length>1?[['REMOVE LANE',()=>removeLane(laneId),'remove-lane']]:[])],'lane');}
+  /* ROUTE NEW PARAMETER… (T20, 1.5.6-alpha.26): the modulation window's arming with no macro — every routable control lights;
+     the one tapped becomes the clip's target (its curve copied first when other clips share it); Escape or a tap elsewhere ends it */
+  function routeClip(clipId,curve){say(t('Tap a lit control to route {clip} to it; Escape cancels.',{clip:curve.name}));
+    mod.view.api.armFor({label:curve.name,onPick(tid){const d=mod.registry.has(tid)?mod.registry.describe(tid):null,was=view.getClip(clipId)?.curveId;
+      const to=model.retarget(clipId,tid,{name:d?.label||tid});if(!to){say(t('No room for another curve: remove a curve first.'));return;}
+      say(to===was?t('{clip} now drives {target}',{clip:curve.name,target:d?.label||tid}):t('{clip} now drives {target} (its own copy: the other clips keep {old})',{clip:curve.name,target:d?.label||tid,old:curve.targetId}));}});}
+  /* an EVENT clip's bands follow its target: a point edit on a curve drawn for another count takes the target's count (⚠ clears) */
+  function syncSteps(curveId){const c=doc.curves.find(x=>x.id===curveId);if(!c||!c.steps)return;const want=stepsOf(c.targetId);if(want&&want!==c.steps)model.updateCurve(curveId,{steps:want});}
+  /* createClip(targetId): a curve clip at the playhead's bar (or over the ruler's range); on a BANDED target (registry options,
+     a toggle) it is an EVENT clip — a HOLD source at the band now in force, remembering the target's band count (steps) */
+  function createClip(targetId){finish(null,true);if(!mod.registry.has(targetId))return null;const beat=transportBeat(),desc=mod.registry.describe(targetId),value=mod.registry.readNorm(targetId);
+    const source=desc.steps?{steps:desc.steps,points:[{t:0,v:value,tension:0,segment:'hold'},{t:1,v:value,tension:0}]}:null;
+    const id=model.create({targetId,name:desc.label,value,source,start:range?range.start:Math.floor(beat/doc.meter)*doc.meter,duration:range?range.end-range.start:doc.meter,laneId:selectedLane});if(!id){say(t('This time range is occupied in every lane. Add a lane or choose another range.'));return null;}selectOnly(id);win.open();paint();viewport.scrollLeft=Math.max(0,view.getClip(id).start*px-20);return id;}
   // THE KIND SEAM: the beat and lane under a client point, and a clip of any kind through the model's one create path.
   function at(clientX,clientY){const w=view.world({clientX,clientY}),beat=Math.max(0,w.x/px);return{beat,snapped:snapBeat(beat),laneId:doc.lanes[nearestTimelineLane(w.y,doc.lanes.length,view.height())].id};}
   function addClip(kind,source={},{start,duration,laneId,targetId,name,select=true}={}){finish(null,true);
@@ -241,13 +263,13 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   function drawStep(position,shiftKey){const{clip:c,curve,previous}=drag,grid=(snap||.0625)*c.scale;const samples=timelineStepSamples(previous,position,{step:grid,origin:c.offset-c.start*c.scale,min:c.offset,max:c.offset+c.duration*c.scale}),result=samples&&model.drawPoints(curve.id,samples,{hold:shiftKey,tension:drawTension});if((!samples||result?.full)&&!drag.warned){drag.warned=true;say(t('Curve point limit reached. Use a wider Snap grid or remove points.'));}drag.previous=position;}
   const updates=coalesce(e=>{
     if(!drag)return;drag.last=e;if(Math.hypot(e.x-drag.x,e.y-drag.y)>6)drag.moved=true;
-    // A Shift press on the strip picks its axis at 6px: horizontal stays a scrub/range, vertical becomes a zoom (up = in).
-    if(drag.shift&&!drag.axis&&drag.moved){drag.axis=Math.abs(e.y-drag.y)>Math.abs(e.x-drag.x)?'y':'x';
+    // A Ctrl press on the strip picks its axis at 6px: horizontal stays a (snapped) scrub, vertical becomes a zoom (up = in).
+    if(drag.pick&&!drag.axis&&drag.moved){drag.axis=Math.abs(e.y-drag.y)>Math.abs(e.x-drag.x)?'y':'x';
       if(drag.axis==='y'){if(drag.kind==='scrub')controller.endScrub({cancel:true});range=drag.oldRange;view.setRange(range);drag.kind='zoom';surface.dataset.gesture='zoom';}}
     if(drag.kind==='zoom'){zoomAt(drag.px0*Math.exp((drag.y-e.y)*.01),drag.anchor,drag.anchorBeat);return;}
     const pos=view.world(e);
     if(drag.kind==='pan'){viewport.scrollLeft=drag.scrollX-(e.x-drag.x);viewport.scrollTop=drag.scrollY-(e.y-drag.y);return;}
-    if(drag.kind==='scrub'){controller.scrub(pos.x/px,{snap,alt:!!e.altKey,shift:!!e.shiftKey});return;}
+    if(drag.kind==='scrub'){controller.scrub(pos.x/px,{snap,alt:!!e.altKey,snapped:!!(e.ctrlKey||e.metaKey)});return;}
     if(drag.kind==='range'){const beat=snapBeat(pos.x/px,e),start=Math.min(beat,drag.startBeat),end=Math.max(beat,drag.startBeat);range=end-start>=.0625?{start:drag.addRange?Math.min(start,drag.addRange.start):start,end:drag.addRange?Math.max(end,drag.addRange.end):end}:null;view.setRange(range);paint();return;}
     if(drag.kind==='select'){
       const rect=selectionRect(drag.startWorld,pos);Object.assign(view.marquee.style,{display:'block',left:rect.left+'px',top:rect.top+'px',width:rect.right-rect.left+'px',height:rect.bottom-rect.top+'px'});
@@ -269,14 +291,18 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       model.moveClips(drag.ids,{beatDelta:beat-anchor.start,laneDelta:lane-anchorLane,originals:drag.originals});return;
     }
     if(drag.kind==='trim'){const delta=timelineResizeDelta(c,drag.edge,(pos.x-drag.startWorld.x)/px,snap,e.altKey);model.updateClip(c.id,resizeTimelineClip(c,drag.edge,delta,e.altKey?.0625:(snap||.0625)));return;}
+    // THE STRETCH (T17): the edge moves and the curve keeps its shape (model.stretchClip); Shift is ⅛ and free of Snap (T18).
+    if(drag.kind==='stretch'){const free=e.altKey||e.shiftKey,o=drag.original,g=drag.gear.step(pos,e),d=timelineResizeDelta(o,drag.edge,(g.x-drag.startWorld.x)/px,snap,free);
+      model.stretchClip(c.id,drag.edge==='right'?'end':'start',Math.max(free?.0625:(snap||.0625),drag.edge==='right'?o.duration+d:o.duration-d),{original:o});return;}
     const plot=view.plot(c.id);if(!plot)return;const rect=plot.getBoundingClientRect(),{width,height}=plot.viewBox.baseVal,geometry=createClipCoordinates(c,curve.length,px,height),x=(e.x-rect.left)/rect.width*width,y=(e.y-rect.top)/rect.height*height;
     if(drag.kind==='step'){drawStep({beat:geometry.sourceBeatAtX(bounded(x,0,width)),value:bounded(geometry.valueAtY(y))},e.shiftKey);return;}
     if(drag.kind==='point'||drag.kind==='points'){
-      const anchor={x:geometry.xAtSourceBeat(drag.pointBeat),y:geometry.yAtValue(drag.pointValue)},p=pointDrag(anchor,{x,y},e),beat=e.ctrlKey?drag.pointBeat:geometry.sourceBeatAtWorldBeat(snapBeat(geometry.worldBeatAtX(p.x),e)),value=bounded(geometry.valueAtY(p.y));
+      // Shift is the fine gear (⅛, and free of Snap: a fine time is never rounded to the grid); Ctrl locks the time.
+      const anchor={x:geometry.xAtSourceBeat(drag.pointBeat),y:geometry.yAtValue(drag.pointValue)},p=pointDrag(anchor,{x,y},e,drag.gear),beat=e.ctrlKey||e.metaKey?drag.pointBeat:geometry.sourceBeatAtWorldBeat(snapBeat(geometry.worldBeatAtX(p.x),{altKey:e.altKey||e.shiftKey})),value=bounded(geometry.valueAtY(p.y));
       if(drag.kind==='points'){model.movePoints(curve.id,drag.indices,beat-drag.pointBeat,value-drag.pointValue,{slide:slideMode,original:curve});}
       else{const moved=model.movePoint(curve.id,drag.index,Math.max(0,beat),value,{slide:slideMode});if(moved?.index>=0)drag.index=moved.index;}return;
     }
-    if(drag.kind==='tension'){const a=curve.points[drag.index],b=curve.points[drag.index+1],sign=b.v<a.v?-1:1;drawTension=bounded(drag.tension+sign*tensionDelta(drag.y,e.y,e)/TIMELINE_TENSION_TRAVEL,-1,1);model.setTension(curve.id,drag.index,drawTension);}
+    if(drag.kind==='tension'){const a=curve.points[drag.index],b=curve.points[drag.index+1],sign=b.v<a.v?-1:1;drawTension=bounded(drag.tension+sign*tensionDelta(drag.y,e.y,e,drag.gear)/TIMELINE_TENSION_TRAVEL,-1,1);model.setTension(curve.id,drag.index,drawTension);}
   });
   function finish(e,cancel=false,rewind=false){
     if(!drag||e&&e.pointerId!==drag.pointerId)return;updates.flush();if(!drag)return;const held=drag;drag=null;delete surface.dataset.gesture;delete surface.dataset.dragClip;view.marquee.style.display='none';
@@ -286,7 +312,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(held.kind==='zoom'&&cancel)zoomAt(held.px0,held.anchor,held.anchorBeat);
     // A SELECT-tool tap on the strip (no drag, no Shift) clears the range and seeks there, as a ruler click does in FL.
     if(held.kind==='range'&&!cancel&&held.tap&&!held.moved&&!held.addRange){range=null;view.setRange(null);controller.seek(held.startBeat);view.paint();}
-    if(held.author){if(cancel){model.cancel();selection=held.selectionBefore||selection;reconcile();}else model.commit();}
+    if(held.author){if(cancel){model.cancel();selection=held.selectionBefore||selection;reconcile();}else{if(held.curve&&['point','points','tension','step'].includes(held.kind))syncSteps(held.curve.id);model.commit();}}
     if(held.kind==='select'){
       if(cancel){selection=held.oldClips;pointSelection=held.oldPoints;selected=held.activeBefore;}
       else if(!held.moved&&held.clickedClip&&scope==='clips'){const id=held.clickedClip;selection=held.additive?new Set(held.oldClips):new Set();if(held.additive&&selection.has(id))selection.delete(id);else selection.add(id);selected=selection.values().next().value||null;}
@@ -300,71 +326,95 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(pointSelection?.curveId!==curve.id)pointSelection={clipId:c.id,curveId:curve.id,indices:new Set()};
     if(additive){if(pointSelection.indices.has(index))pointSelection.indices.delete(index);else pointSelection.indices.add(index);}else if(!pointSelection.indices.has(index))pointSelection.indices=new Set([index]);
     if(!pointSelection.indices.has(index)){e.preventDefault();paintSelection();return;}
-    const p=curve.points[index];begin(e,{kind:'points',clip:c,curve,index,indices:[...pointSelection.indices],pointBeat:p.t*curve.length,pointValue:p.v},true);paintSelection();
+    const p=curve.points[index],plot=view.plot(c.id);begin(e,{kind:'points',clip:c,curve,index,indices:[...pointSelection.indices],pointBeat:p.t*curve.length,pointValue:p.v,gear:plot&&fineGear(svgPoint(plot,e))},true);paintSelection();
   }
   listen(surface,'pointerdown',e=>{
     if(drag)return;const target=e.target;if(target.closest('select,input,.tl-action,.tl-scope-seg,.tl-setting,.tl-clip-more,.tl-transport-host'))return;
     if(surface.contains(target)){surface.focus({preventScroll:true});}
-    closeMenu();cancelConfirm();
+    closeMenu();
     if(e.button===1){begin(e,{kind:'pan',scrollX:viewport.scrollLeft,scrollY:viewport.scrollTop});return;}
     const handle=target.closest('.tl-clip-title'),lane=target.closest('[data-lane]');if(lane)selectedLane=lane.dataset.lane;
     const plot=target.closest('svg[data-clip]')||(!handle&&lane&&[...lane.querySelectorAll('svg[data-clip]')].find(n=>{const r=n.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;}));
-    const clip=view.getClip((handle||plot||target.closest('.tl-clip'))?.dataset.clip),curve=view.getCurve(clip?.curveId),kind=clipKind(curve),cmd=e.ctrlKey||e.metaKey;
+    const clip=view.getClip((handle||plot||target.closest('.tl-clip'))?.dataset.clip),curve=view.getCurve(clip?.curveId),kind=clipKind(curve),cmd=e.ctrlKey||e.metaKey,shift=e.shiftKey;
     if(e.button===0&&target.closest('.tl-ruler')){
-      // THE STRIP: Ctrl, or the SELECT tool (touch needs no Ctrl), drags a range; else it scrubs. Shift's vertical drag zooms instead.
-      // The zoom holds the pressed beat itself, so a scroll clamped while the arrangement is narrow never drifts it.
-      const anchor=e.clientX-viewport.getBoundingClientRect().left,strip={shift:e.shiftKey&&!cmd,px0:px,anchor,anchorBeat:(viewport.scrollLeft+anchor)/px,oldRange:range};
-      if(cmd||tool==='select'){begin(e,{kind:'range',startBeat:snapBeat(view.world(e).x/px,e),addRange:e.shiftKey?range:null,tap:!cmd,...strip});}
-      else if(controller.beginScrub()){begin(e,{kind:'scrub',...strip});range=null;view.setRange(null);controller.scrub(view.world(e).x/px,{snap,alt:!!e.altKey,shift:!!e.shiftKey});paint();}else say(t('The renderer currently owns the clock.'));return;
+      // THE STRIP (THE HANDS): Shift drags a time range, Ctrl+Shift extends it; the SELECT tool's plain drag is a range too (touch
+      // needs no key; a tap seeks); Ctrl picks its axis at 6 px — vertical zooms about the pointer's beat (up = in), horizontal
+      // scrubs snapped to SNAP; a plain drag scrubs free; Alt always bypasses Snap.  The zoom holds the pressed beat itself, so a
+      // scroll clamped while the arrangement is narrow never drifts it.
+      const anchor=e.clientX-viewport.getBoundingClientRect().left,pick=cmd&&!shift,strip={pick,px0:px,anchor,anchorBeat:(viewport.scrollLeft+anchor)/px,oldRange:range};
+      if(!pick&&(shift||tool==='select')){begin(e,{kind:'range',startBeat:snapBeat(view.world(e).x/px,e),addRange:shift&&cmd?range:null,tap:!shift,...strip});}
+      else if(controller.beginScrub()){begin(e,{kind:'scrub',...strip});range=null;view.setRange(null);controller.scrub(view.world(e).x/px,{snap,alt:!!e.altKey,snapped:cmd});paint();}else say(t('The renderer currently owns the clock.'));return;
     }
-    if(e.button===0&&tool==='scrub'){if(controller.beginScrub()){begin(e,{kind:'scrub'});controller.scrub(view.world(e).x/px,{snap,alt:!!e.altKey,shift:!!e.shiftKey});}return;}
+    if(e.button===0&&tool==='scrub'){if(controller.beginScrub()){begin(e,{kind:'scrub'});controller.scrub(view.world(e).x/px,{snap,alt:!!e.altKey,snapped:cmd});}return;}
     // THE SLICE TOOL (C): a click on a clip, tab or body, cuts it at the pointer's beat (Snap applies, Alt bypasses).
     if(e.button===0&&tool==='slice'){e.preventDefault();if(clip)sliceAt([clip.id],snapBeat(view.world(e).x/px,e));return;}
+    // THE PENCIL remembers the clip last pressed (T6): an EDIT click on empty lane space stamps it (stamp(), below).
+    if(clip&&curve)lastClip={curveId:curve.id,duration:clip.duration,offset:clip.offset,scale:clip.scale,followSourceEnd:!!clip.followSourceEnd,kind:curve.kind||'curve'};
     let hit=null,pos=null,geometry=null;
     if(plot&&!kind){pos=svgPoint(plot,e);const{width,height}=plot.viewBox.baseVal,p=createTimelinePlot(clip,curve,px,height),r=plot.getBoundingClientRect();geometry=p.geometry;hit=curveHit({x:e.clientX,y:e.clientY},p.points.map(p=>({...p,x:r.left+p.x/width*r.width,y:r.top+p.y/height*r.height})),p.handles.map(p=>({...p,x:r.left+p.x/width*r.width,y:r.top+p.y/height*r.height})),TIMELINE_CURVE_GRAB);}
-    const edge=target.closest('.tl-edge');
-    // A kind without points has no curve gestures: its body handles like its tab (move, Shift-copy, right-delete).
+    const edge=target.closest('.tl-edge'),trimZone=target.closest('[data-trim]');
+    // A kind without points has no curve gestures: its body handles like its tab (move, Ctrl-copy, right-delete).
     const grab=handle||(kind?plot||target.closest('.tl-clip'):null);
-    if(e.button===0&&edge&&clip&&tool==='edit'&&!cmd&&!hit?.kind){selectOnly(clip.id);begin(e,{kind:'trim',edge:edge.dataset.trim,clip,curve},true);paintSelection();return;}
-    if(e.button===0&&(tool==='select'||cmd&&!(plot&&hit?.kind))){
-      if(scope==='points'&&clip){if(pointSelection?.curveId!==curve.id){selected=clip.id;selection=new Set([clip.id]);pointSelection={clipId:clip.id,curveId:curve.id,indices:new Set()};}if(hit?.kind==='point'){beginPointGroup(e,clip,curve,hit.i,cmd||e.shiftKey);return;}}
-      begin(e,{kind:'select',baseClips:cmd&&e.shiftKey||!cmd&&e.shiftKey?new Set(selection):new Set(),basePoints:e.shiftKey?new Set(pointSelection?.indices||[]):new Set(),oldClips:new Set(selection),oldPoints:pointSelection?{...pointSelection,indices:new Set(pointSelection.indices)}:null,clickedClip:clip?.id,additive:cmd||e.shiftKey});return;
+    // AN EDGE: a plain drag trims; Ctrl stretches (the shape keeps); Ctrl+Shift stretches at ⅛.  Shift alone selects (below).
+    const stretchFrom=(edgeName)=>{selectOnly(clip.id);begin(e,{kind:'stretch',edge:edgeName,clip,curve,original:{start:clip.start,duration:clip.duration,scale:clip.scale},gear:fineGear(view.world(e))},true);paintSelection();};
+    if(e.button===0&&edge&&clip&&tool==='edit'&&!hit?.kind&&(cmd||!shift)){if(cmd){stretchFrom(edge.dataset.trim);return;}selectOnly(clip.id);begin(e,{kind:'trim',edge:edge.dataset.trim,clip,curve},true);paintSelection();return;}
+    // SHIFT SELECTS: on empty space a drag is the marquee (Ctrl+Shift adds to the selection), a click on a clip toggles it; the
+    // SELECT tool's plain drag is the same marquee (and its Shift adds).  A Shift press on a point or a handle is the fine gear.
+    if(e.button===0&&(tool==='select'||shift&&!(plot&&hit?.kind)&&!(cmd&&trimZone))){
+      if(scope==='points'&&clip){if(pointSelection?.curveId!==curve.id){selected=clip.id;selection=new Set([clip.id]);pointSelection={clipId:clip.id,curveId:curve.id,indices:new Set()};}if(hit?.kind==='point'){beginPointGroup(e,clip,curve,hit.i,shift);return;}}
+      const adds=shift&&(cmd||tool==='select');
+      begin(e,{kind:'select',baseClips:adds?new Set(selection):new Set(),basePoints:adds?new Set(pointSelection?.indices||[]):new Set(),oldClips:new Set(selection),oldPoints:pointSelection?{...pointSelection,indices:new Set(pointSelection.indices)}:null,clickedClip:clip?.id,additive:shift});return;
     }
     if(grab){
       // RIGHT-CLICK DELETE: down on a tab deletes its clip at once; holding the button and crossing
       // other tabs deletes each of those too, the whole sweep as one undo transaction (begin here,
       // commit/cancel in finish()). The MIR plot curve law and the tab's ⋯ menu are untouched.
       if(e.button===2){e.preventDefault();lastTap=null;closeMenu();begin(e,{kind:'delete',clip,curve},true);if(doc.clips.some(x=>x.id===clip.id))model.deleteClip(clip.id);return;}if(e.button!==0)return;
-      if(!selection.has(clip.id))selectOnly(clip.id);else selected=clip.id;const trim=target.closest('[data-trim]');begin(e,{kind:trim?'trim':'move',edge:trim?.dataset.trim,copy:e.shiftKey&&!trim,clip,curve,ids:[...selection],originals:doc.clips.filter(c=>selection.has(c.id))},true);paintSelection();return;
+      if(cmd&&trimZone){stretchFrom(trimZone.dataset.trim);return;}
+      // CTRL CLONES (call 1): a Ctrl-drag on a title (or a kind's body) duplicates the selection while moving it.
+      if(!selection.has(clip.id))selectOnly(clip.id);else selected=clip.id;begin(e,{kind:trimZone?'trim':'move',edge:trimZone?.dataset.trim,copy:cmd&&!trimZone,clip,curve,ids:[...selection],originals:doc.clips.filter(c=>selection.has(c.id))},true);paintSelection();return;
     }
     if(plot&&!kind){
       selected=clip.id;if(!selection.has(clip.id))selection=new Set([clip.id]);const action=curveAction(e,hit);
+      // CTRL CLONES from the body too: a Ctrl-drag where no point or handle is under the pointer (Ctrl on a point locks its time).
+      if(cmd&&e.button===0&&!hit?.kind){begin(e,{kind:'move',copy:true,clip,curve,ids:[...selection],originals:doc.clips.filter(c=>selection.has(c.id))},true);paintSelection();return;}
       if(stepMode&&tool==='edit'&&e.button===0&&!e.altKey){const position={beat:geometry.sourceBeatAtX(bounded(pos.x,0,geometry.width)),value:bounded(geometry.valueAtY(pos.y))};pointSelection=null;begin(e,{kind:'step',clip,curve,previous:position},true);drawStep(position,e.shiftKey);return;}
       if(action==='point-menu'){e.preventDefault();lastTap=null;fieldMenu(e.clientX,e.clientY,curve,hit.i,clip);return;}
-      if(action==='remove-point'){e.preventDefault();pointSelection=null;model.removePoint(curve.id,hit.i);return;}
-      if(action==='reset-tension'){e.preventDefault();drawTension=0;model.setTension(curve.id,hit.i,0);return;}
+      if(action==='remove-point'){e.preventDefault();pointSelection=null;model.begin();model.removePoint(curve.id,hit.i);syncSteps(curve.id);model.commit();return;}
+      if(action==='reset-tension'){e.preventDefault();drawTension=0;model.begin();model.setTension(curve.id,hit.i,0);syncSteps(curve.id);model.commit();return;}
       if(!action){paintSelection();return;}
       if(action==='move-point'&&pointSelection?.curveId===curve.id&&pointSelection.indices.has(hit.i)&&pointSelection.indices.size>1){beginPointGroup(e,clip,curve,hit.i);return;}
-      pointSelection=null;let index=hit.i,edited=curve;begin(e,{kind:action==='move-tension'?'tension':'point',added:action==='add-point',clip,curve,index,tension:curve.points[hit.i]?.tension||0},true);
+      // THE FINE GEAR (Shift, ⅛): a tension's in client px, a point's in the plot's own coordinates
+      pointSelection=null;let index=hit.i,edited=curve;begin(e,{kind:action==='move-tension'?'tension':'point',added:action==='add-point',clip,curve,index,tension:curve.points[hit.i]?.tension||0,gear:action==='move-tension'?fineGear({x:e.clientX,y:e.clientY}):fineGear(pos)},true);
       if(action==='add-point'){const beat=Math.max(0,geometry.sourceBeatAtWorldBeat(snapBeat(geometry.worldBeatAtX(pos.x),e))),value=pointAddValue(e,bounded(geometry.valueAtY(pos.y)),evaluateTimelineSource(curve,beat)),added=model.addPoint(curve.id,beat,value,0);if(!added||added.index<0){finish(null,true);return;}index=added.index;edited=added.source;}
       const p=edited.points[index];Object.assign(drag,{curve:edited,index,pointBeat:p.t*edited.length,pointValue:p.v});paintSelection();return;
     }
+    if(e.button===2&&lane&&!clip){e.preventDefault();laneMenu(e.clientX,e.clientY,lane.dataset.lane);return;}   // a lane's own menu: ADD LANE · REMOVE LANE (T9)
+    if(e.button===0&&tool==='edit'&&lane&&!clip&&!shift&&!cmd&&stamp(e,lane.dataset.lane))return;
     if(e.button===0){selection.clear();pointSelection=null;selected=null;}paintSelection();
   });
+  /* THE PENCIL STAMP (T6): a new clip of the clip last pressed (its curve SHARED, as FL's pencil places the last clip; MAKE
+     UNIQUE detaches it; its length, offset and scale), at the snapped beat on the lane under the pointer; the press then
+     moves it like a title drag, the placement and the move one undo.  Nothing remembered, or its curve gone: false. */
+  function stamp(e,laneId){if(!lastClip||!doc.curves.some(c=>c.id===lastClip.curveId))return false;
+    begin(e,{kind:'move',added:true,copy:false,clip:null,curve:view.getCurve(lastClip.curveId),ids:[],originals:[]},true);
+    const id=model.placeClip(lastClip.curveId,{laneId,start:snapBeat(Math.max(0,view.world(e).x/px),e),duration:lastClip.duration,offset:lastClip.offset,scale:lastClip.scale,followSourceEnd:lastClip.followSourceEnd});
+    const c=id&&doc.clips.find(x=>x.id===id);if(!c){finish(null,true);const r=model.lastRefusal;say(r?t(r.why,r.vars):t('No clip placed: the arrangement is full.'));return true;}
+    Object.assign(drag,{clip:c,ids:[id],originals:[c]});surface.dataset.dragClip=id;selectOnly(id);return true;}
   // DROPS: a registered handler (an audio file, a pattern row) gets the files and the beat/lane under the drop; the first true wins.
   listen(viewport,'dragover',e=>{if(!dropHandlers.size)return;e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect='copy';});
   listen(viewport,'drop',e=>{if(!dropHandlers.size)return;e.preventDefault();const where=at(e.clientX,e.clientY),files=[...(e.dataTransfer?.files||[])];for(const fn of dropHandlers)if(fn({event:e,files,dataTransfer:e.dataTransfer,...where}))break;});
   listen(surface,'contextmenu',e=>e.preventDefault());listen(surface,'auxclick',e=>{if(e.button===1)e.preventDefault();});listen(surface,'lostpointercapture',e=>finish(e,true));
   listen(document,'pointermove',e=>{if(drag&&e.pointerId===drag.pointerId){e.preventDefault();updates.post(pointer(e));}},{passive:false});listen(document,'pointerup',e=>finish(e));listen(document,'pointercancel',e=>finish(e,true));
-  listen(document,'pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!surface.contains(e.target))closeMenu();if(confirmation&&!confirmation.contains(e.target)&&!win.rail?.el?.contains(e.target))cancelConfirm();});
+  listen(document,'pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!surface.contains(e.target))closeMenu();});
   /* ESCAPE is not a table action (the kit keeps it): it only ends what is in flight.  HIDE needs no key of its own here:
      whatever key the table gives it, the interface going out of paint (body.ui-hidden) ends it (hiddenObserver below) */
-  listen(document,'keydown',e=>{if(e.code==='Escape'){closeMenu();cancelConfirm();finish(null,true,true);}});
-  listen(document,'visibilitychange',()=>{if(document.hidden){closeMenu();cancelConfirm();finish(null,true);headPaint.reset();}});listen(globalThis,'blur',()=>{closeMenu();cancelConfirm();finish(null,true);});
+  listen(document,'keydown',e=>{if(e.code==='Escape'){closeMenu();finish(null,true,true);}});
+  listen(document,'visibilitychange',()=>{if(document.hidden){closeMenu();finish(null,true);headPaint.reset();}});listen(globalThis,'blur',()=>{closeMenu();finish(null,true);});
   listen(view.shell,'wheel',e=>{if(!(e.ctrlKey||e.metaKey)||!e.deltaY)return;e.preventDefault();e.stopPropagation();const anchor=bounded(e.clientX-viewport.getBoundingClientRect().left,0,viewport.clientWidth),delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?viewport.clientHeight:1);zoom(Math.exp(-bounded(delta,-120,120)*.003),anchor);},{passive:false});
-  const viewportPaint=coalesce(()=>{paint();if(drag?.last&&['select','point','points','move','trim'].includes(drag.kind))updates.post(drag.last);});
+  const viewportPaint=coalesce(()=>{paint();if(drag?.last&&['select','point','points','move','trim','stretch'].includes(drag.kind))updates.post(drag.last);});
   listen(viewport,'scroll',()=>viewportPaint.post(),{passive:true});const observer=new ResizeObserver(()=>viewportPaint.post());observer.observe(viewport);
-  const hiddenObserver=new MutationObserver(()=>{if(document.body.classList.contains('ui-hidden')){closeMenu();cancelConfirm();finish(null,true);headPaint.reset();}else if(win.isOpen())viewportPaint.post();});hiddenObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
+  const hiddenObserver=new MutationObserver(()=>{if(document.body.classList.contains('ui-hidden')){closeMenu();finish(null,true);headPaint.reset();}else if(win.isOpen())viewportPaint.post();});hiddenObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
   const unsubscribe=model.subscribe(()=>{doc=model.state();view.setDocument(doc);view.setActive(activeRange());reconcile();if(win.isOpen()&&!document.body.classList.contains('ui-hidden'))paint();present();});
   const resetSubscription=model.beforeReplace(()=>{closeMenu();finish(null,true);selection.clear();pointSelection=null;selected=null;range=null;view.setRange(null);});
   const transportSubscription=controller.subscribe(reason=>{if(['seek','scrub','scrub-end'].includes(reason))headPaint.reset();else headPaint.paint();});
@@ -398,12 +448,15 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     range:()=>range?{...range}:null,activeRange,setActiveRange,onDrop(fn){dropHandlers.add(fn);return()=>dropHandlers.delete(fn);},
     slice:(ids,beat)=>sliceAt(ids,beat,true),tool:()=>tool,setTool(name){finish(null,true);if(toolButtons.has(name))setTool(name);},gesture:()=>drag?{kind:drag.kind,clip:drag.clip?.id??null,curve:drag.curve?.id??null,index:drag.index??null,edge:drag.edge??null}:null,paintHead:()=>headPaint.paint(),selected:()=>selected,selection:()=>({clips:[...selection],points:pointSelection?[...pointSelection.indices]:[]}),workLane:()=>workLane,setWorkLane,
     snap:()=>snap,setSnap(v){snap=Number(v)||0;snapStep.set(snap);},scope:()=>scope,
+    /** THE PENCIL's memory: the clip last pressed ({ curveId, duration, offset, scale, followSourceEnd, kind }), or null */
+    lastClip:()=>lastClip?{...lastClip}:null,
     /** how many of the bar's tools are folded behind MORE (the bar keeps one line; they fold from its end) */
     folded:()=>fold.length-shown,
     /** the timeline's keys are live: the window is open and the focus is in the surface, not in a field or the transport */
     keysLive:()=>win.isOpen()&&!!document.activeElement&&surface.contains(document.activeElement)&&!editable(document.activeElement)&&!transportHost.contains(document.activeElement),
     locate(id){finish(null,true);const curve=doc.curves.find(c=>c.targetId===id),clip=doc.clips.find(c=>c.curveId===curve?.id);win.open();if(clip){selectOnly(clip.id);selectedLane=clip.laneId;paint();viewport.scrollLeft=Math.max(0,clip.start*px-20);}},
-    removeLane(){finish(null,true);removeLane();},addLane(){finish(null,true);return model.addLane();},close(){closeMenu();cancelConfirm();finish(null,true);headPaint.reset();},
+    /** removeLane(laneId = the bottom lane) → Promise<boolean>: a lane with clips asks first (confirmDialog) */
+    removeLane(laneId){finish(null,true);return removeLane(laneId);},addLane(){finish(null,true);return model.addLane();},close(){closeMenu();finish(null,true);headPaint.reset();},
     dispose(){api.close();events.abort();observer.disconnect();fitObserver.disconnect();hiddenObserver.disconnect();viewportPaint.cancel();updates.cancel();unsubscribe();resetSubscription();transportSubscription();surface.remove();}};
   view.setDocument(doc);setTool('edit');setWorkLane('top');paint();return api;
 }

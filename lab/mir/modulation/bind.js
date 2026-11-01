@@ -144,7 +144,7 @@ export function installModulation(o) {
 
   const spec = (p) => ({
     id: p.id, label: p.label, unit: p.unit || '', group: p.group || p.id.split('.')[0], hint: p.hint || '',
-    min: p.min, max: p.max, step: Number.isFinite(p.step) ? p.step : 0, map: p.map || 'linear', def: p.def,
+    min: p.min, max: p.max, step: Number.isFinite(p.step) ? p.step : 0, map: p.map || 'linear', def: p.def, ...(p.options ? { options: p.options } : {}),
     get: () => p.get(),
     set: (value) => { if (!rebasing) p.set(value); if (present) present(); },
   });

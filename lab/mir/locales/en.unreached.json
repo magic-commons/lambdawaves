@@ -97,7 +97,7 @@
  },
  {
   "file": "mir/glyph.js",
-  "line": 626,
+  "line": 630,
   "why": "fragment",
   "text": " — known: "
  },
@@ -175,7 +175,7 @@
  },
  {
   "file": "mir/modulation/window.js",
-  "line": 1852,
+  "line": 1866,
   "why": "fragment",
   "text": " failed to build"
  },

@@ -80,6 +80,9 @@ export function nextPlace(list, current) {
   return L[(i + 1) % L.length];
 }
 const PLACE_GLYPH = { rack: 'dock', stage: 'barsBottom', free: 'popOut' };
+/** placeGlyph(list, place) — the glyph the dock chip wears for `place` in a cycle: with no FREE in the list, leaving the
+ *  rack for the stage IS the pop-out (↗; the rack's ↙), as a card's own pop chip draws it (1.5.6-alpha.28, λWAVES 032 C3) */
+export const placeGlyph = (list, place) => (place === 'stage' && Array.isArray(list) && !list.includes('free') ? 'popOut' : PLACE_GLYPH[place]);
 const PLACE_WORD = { rack: phrase('Dock the bar into the rack'), stage: phrase('Put the bar on the stage'), free: phrase('Float the bar in its own window') };
 /** tempoDirection(bar, panelHeight, viewHeight) — BASINS positionTempo: below while the room under the bar holds the
  *  panel and a 16 px margin, or while there is at least as much room below as above; else above */
@@ -809,6 +812,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   const dockTo = (v) => { if (onDock) return onDock(v); const R = rackOf(); if (!R) return; if (v) R.open(DOCK_ID, { index: 0 }); else R.close(DOCK_ID); };
   /** setPlace('rack' | 'stage' | 'free') — where the one bar sits; the chip's cycle and the app's own verbs come here */
   function setPlace(p) {
+    if (p === 'free' && placeList() && !placeList().includes('free')) p = 'stage';   // a cycle without FREE has none (1.5.6-alpha.28)
     if (p === 'rack') { free = false; if (!docked) dockTo(true); if (!docked) seatBar(); }
     else if (p === 'free') { free = true; if (docked) dockTo(false); if (docked) free = false; else seatBar(); }
     else { free = false; if (docked) dockTo(false); else seatBar(); }
@@ -819,7 +823,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   function faceChip() {
     if (!dockB || !placeList()) return;
     const n = nextPlace(placeList(), placement);
-    setGlyph(dockB, PLACE_GLYPH[n], { label: PLACE_WORD[n] }); dockB.title = PLACE_WORD[n]; dockB.dataset.next = n;
+    setGlyph(dockB, placeGlyph(placeList(), n), { label: PLACE_WORD[n] }); dockB.title = PLACE_WORD[n]; dockB.dataset.next = n;
   }
   const barFace = (on) => { setAttr(bar, 'data-bar', on ? 'work' : 'float'); for (const b of bar.querySelectorAll(BAR_SEATS)) b.classList.toggle('trig', on); };
   barFace(placement === 'work');
@@ -961,6 +965,9 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     const d = dockOf(R, layout && layout.title);
     d.open = (api) => { api.body.appendChild(bar); setDocked(true); };
     d.close = () => setDocked(false);
+    /* EVERY CLOSE ROAD UNDOCKS (1.5.6-alpha.28): whatever closes the card the bar stands in — the rack, the kit device's own ×,
+       an app's verb — says so with devclose, and the bar leaves it for the stage (or the work lane) */
+    doc.addEventListener('devclose', (e) => { if (docked && e.target && e.target.contains && e.target.contains(bar)) setDocked(false); }, on);
     if (R.isOpen && R.isOpen(DOCK_ID)) { const api = R.window(DOCK_ID); if (api) d.open(api); }
   }
   if (dockB) dockB.addEventListener('click', () => {

@@ -8,8 +8,8 @@ export const TIMELINE_TENSION_TRAVEL = 114;
 export const TIMELINE_ROW_GAP = 2; // Together: 20 px of negative space between panes.
 // Timeline's own point/tension radii: bigger than the shared modulation-window CURVE_VIEW
 // (app/curve-view.js), which stays untouched for the modulation window.
-export const TIMELINE_POINT_RADIUS = 6;
-export const TIMELINE_TENSION_RADIUS = 5;
+export const TIMELINE_POINT_RADIUS = 5;     // 1.5.6-alpha.24 (λWAVES 032 T11): 6 → 5, the tension 5 → 4; the grab (TIMELINE_CURVE_GRAB) stays 20
+export const TIMELINE_TENSION_RADIUS = 4;
 export function timelineLaneHeight(viewportHeight, laneCount, rulerHeight = 32) {
   return Math.max(48, (viewportHeight - rulerHeight - laneCount * TIMELINE_TAB_HEIGHT - (laneCount - 1) * TIMELINE_ROW_GAP) / laneCount);
 }

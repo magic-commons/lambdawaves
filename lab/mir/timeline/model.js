@@ -5,14 +5,20 @@
  *     addLane, removeLane, create, updateClip, updateCurve, addPoint, movePoint, movePoints, removePoints, drawPoints,
  *     removePoint, setTension, setSegment, deleteClip, deleteClips, copyClips, pasteClips, duplicateClips, moveClips,
  *     duplicate, makeUnique, value(targetId, beat), setActive, activeClips(beat, kind?), needsClock(has), signature,
- *     rederive(patches), lastRefusal }
- *   value(targetId, beat) is the automation the modulation clock samples (host.clock.setAutomation({ value })): the
- *   latest-starting unmuted clip under the beat wins, as a 0..1 value scaled into the curve's OUTPUT RANGE.
+ *     rederive(patches), lastRefusal, extent({ unmuted }), stretchClip(id, edge, duration, { original }),
+ *     placeClip(curveId, { laneId, start, duration, offset, scale }), retarget(clipId, targetId, { name }) }
+ *   value(targetId, beat) is the automation the modulation clock samples (host.clock.setAutomation({ value })).
+ *   THE ARRANGEMENT'S LAW (1.5.6-alpha.21, λWAVES 032 T12): of the unmuted clips under the beat on one target, the
+ *   HIGHEST LANE wins (its index in `lanes`, 0 the top), then the EARLIEST start, then the lower id; its 0..1 value is
+ *   scaled into the curve's OUTPUT RANGE.  (Before: the latest-starting clip won and lanes played no part.)
+ *   A plain curve may carry `steps` (an integer ≥ 2, optional; an older file has none and opens unchanged): how many
+ *   bands of a banded target (registry `options`, or a toggle) its 0..1 was drawn for.  A kind's own `steps` (a
+ *   pattern's step row) is the kind's and untouched.
  *   Its own 64-row snapshot undo stays (an app with the kit's one history routes it there: timeline/history.js). */
 import { clipKind, isKindCurve } from './kinds.js';
 import './pattern-kind.js';                 // the kit's two kinds are registered before any model restores a project
 import { audioBudgetAdding } from './audio-kind.js';   // registers the audio kind, and holds the one budget every way of making an audio clip answers to
-import { normalizeTimelinePoints, evaluateTimelineSource, addTimelinePoint, moveTimelinePoint, slideTimelinePoint, moveTimelinePoints, removeTimelinePoints, drawTimelinePoints, removeTimelinePoint, setTimelineTension, setTimelineSegment, TIMELINE_MAX_TOTAL_POINTS } from './source.js';
+import { normalizeTimelinePoints, evaluateTimelineSource, addTimelinePoint, moveTimelinePoint, slideTimelinePoint, moveTimelinePoints, removeTimelinePoints, drawTimelinePoints, removeTimelinePoint, setTimelineTension, setTimelineSegment, timelineSteps, TIMELINE_MAX_TOTAL_POINTS } from './source.js';
 const clone = v => JSON.parse(JSON.stringify(v));
 const finite = (n, d = 0) => Number.isFinite(n) ? n : d;
 const clamp = n => Math.max(0, Math.min(1, finite(n)));
@@ -26,8 +32,8 @@ export function createTimelineModel() {
   const listeners = new Set(), resetListeners = new Set(), undo = [], redo = [];
   const encoder = new TextEncoder();
   let historyBytes = 0;
-  let byTarget = new Map();
-  const index = () => { byTarget = new Map(); const curves = new Map(data.curves.map(c=>[c.id,c]));
+  let byTarget = new Map(), laneRank = new Map();
+  const index = () => { byTarget = new Map(); laneRank = new Map(data.lanes.map((l,i)=>[l.id,i])); const curves = new Map(data.curves.map(c=>[c.id,c]));
     for (const clip of data.clips) { const curve=curves.get(clip.curveId); if (!curve) continue; if (!byTarget.has(curve.targetId)) byTarget.set(curve.targetId,[]); byTarget.get(curve.targetId).push({clip,curve}); } };
   // The index holds live clip/source references. Field edits keep those
   // identities; only structural edits or snapshot replacement rebuild it.
@@ -108,7 +114,7 @@ export function createTimelineModel() {
           next.meter = [1,2,3,4,5,6,7,8,12].includes(next.meter) ? next.meter : 4;
           if (next.active != null && !(Number.isFinite(next.active.start) && Number.isFinite(next.active.end) && next.active.end > next.active.start && next.active.start >= 0)) delete next.active;
           next.seq = Math.max(4,Math.floor(finite(next.seq,4)), ...[...next.lanes,...next.curves,...next.clips].map(c=>Number(c.id.match(/\d+$/)?.[0])||0));
-          for (const c of next.curves) { c.targetId = remap(c.targetId) || c.targetId; c.name = String(c.name || c.targetId).slice(0,80); c.color = color(c.color); c.points = isKindCurve(c) ? (Array.isArray(c.points) ? normalizeTimelinePoints(c.points) || [] : []) : normalizeTimelinePoints(c.points); c.min = clamp(c.min ?? 0); c.max = clamp(c.max ?? 1); }
+          for (const c of next.curves) { c.targetId = remap(c.targetId) || c.targetId; c.name = String(c.name || c.targetId).slice(0,80); c.color = color(c.color); c.points = isKindCurve(c) ? (Array.isArray(c.points) ? normalizeTimelinePoints(c.points) || [] : []) : normalizeTimelinePoints(c.points); c.min = clamp(c.min ?? 0); c.max = clamp(c.max ?? 1); if (!isKindCurve(c) && c.steps != null && !timelineSteps(c.steps)) delete c.steps; }
         } catch (_) { return false; }
       }
       for(const fn of resetListeners)fn();
@@ -132,6 +138,7 @@ export function createTimelineModel() {
       if (!lane || data.curves.length >= 1024 || data.clips.length >= 4096 || data.curves.reduce((n,c)=>n+c.points.length,0)+2 > TIMELINE_MAX_TOTAL_POINTS) return null;
       return edit(d => { const curve = { id: id('curve'), targetId, name: name || targetId, color: DEFAULT_TIMELINE_COLOR, length: duration, min: 0, max: 1,
         points: [{t:0,v:clamp(value),tension:0},{t:1,v:clamp(value),tension:0}] , ...(source || {}), ...(isKindCurve(source) && !Array.isArray(source.points) ? { points: [] } : {}), length: duration };
+        if (!isKindCurve(curve) && curve.steps != null && !timelineSteps(curve.steps)) delete curve.steps;   // a kind's own `steps` (a pattern's row) is its own
         const clip = { id: id('clip'), curveId: curve.id, laneId: lane.id, start, duration, offset: 0, scale: 1, mute: false, followSourceEnd: true };
         d.curves.push(curve); d.clips.push(clip); return clip.id; });
     },
@@ -144,8 +151,10 @@ export function createTimelineModel() {
       const points=patch.points==null?c.points:normalizeTimelinePoints(patch.points);
       // Source length and normalized points must be updated atomically. A raw
       // length-only patch would silently stretch all authored musical times.
-      if(!points || !fitsPoints(curveId,points) || patch.length!=null && (!patch.points || !Number.isFinite(patch.length) || patch.length<c.length)) return false;
+      const steps=!isKindCurve(c)&&Object.hasOwn(patch,'steps'),badSteps=steps&&patch.steps!=null&&!timelineSteps(patch.steps);
+      if(!points || badSteps || !fitsPoints(curveId,points) || patch.length!=null && (!patch.points || !Number.isFinite(patch.length) || patch.length<c.length)) return false;
       if(patch.points)applySource(c,points,patch.length??c.length);
+      if(steps){if(patch.steps==null)delete c.steps;else c.steps=patch.steps;}
       if(patch.name!=null)c.name=String(patch.name).slice(0,80);
       if(patch.color!=null)c.color=color(patch.color);
       if(patch.min!=null)c.min=clamp(patch.min);if(patch.max!=null)c.max=clamp(patch.max);return true; }, false); },
@@ -183,7 +192,8 @@ export function createTimelineModel() {
         const c=e?.clip,curve=e?.curve,points=isKindCurve(curve)?(clipKind(curve)?.validate?.(curve)?(Array.isArray(curve.points)?curve.points:[]):null):normalizeTimelinePoints(curve?.points),index=lane+e?.laneOffset;
         if(!c||!curve||!points||!Number.isInteger(e.laneOffset)||e.laneOffset<0||index>=data.lanes.length||typeof curve.targetId!=='string'||!curve.targetId||
           ![curve.length,c.start,c.duration,c.offset,c.scale].every(Number.isFinite)||curve.length<=0||c.duration<=0||c.offset<0||c.scale<=0||!Number.isFinite(start+c.start-bundle.start)||start+c.start-bundle.start<0)return null;
-        prepared.push({clip:{...clone(c),start:start+c.start-bundle.start,laneId:data.lanes[index].id},curve:{...clone(curve),points}});
+        const copy={...clone(curve),points};if(!isKindCurve(copy)&&copy.steps!=null&&!timelineSteps(copy.steps))delete copy.steps;
+        prepared.push({clip:{...clone(c),start:start+c.start-bundle.start,laneId:data.lanes[index].id},curve:copy});
       }
       if(refuseAudio(prepared.map(e=>e.curve)))return null;
       if(data.clips.length+prepared.length>4096||data.curves.length+prepared.length>1024||data.curves.reduce((n,c)=>n+c.points.length,0)+prepared.reduce((n,e)=>n+e.curve.points.length,0)>TIMELINE_MAX_TOTAL_POINTS)return null;
@@ -207,22 +217,61 @@ export function createTimelineModel() {
       if(unique && (d.curves.length>=1024 || d.curves.reduce((n,x)=>n+x.points.length,0)+original.points.length>TIMELINE_MAX_TOTAL_POINTS))return null;
       const copy={...c,id:id('clip'),start:c.start+c.duration};
       if(unique){const curve={...clone(d.curves.find(x=>x.id===c.curveId)),id:id('curve')};d.curves.push(curve);copy.curveId=curve.id;}d.clips.push(copy);return copy.id;}); },
+    /** placeClip(curveId, { laneId, start, duration, offset, scale, followSourceEnd }) — THE PENCIL STAMP (1.5.6-alpha.23,
+     *  λWAVES 032 T6): a new clip on an EXISTING curve, a shared instance as a duplicate is (makeUnique detaches it), on
+     *  any lane at any start (an overlap is the arrangement's law).  → its id, or null: no such curve or lane, a bad
+     *  number, the 4096-clip ceiling, the audio budget (lastRefusal says why). */
+    placeClip(curveId, { laneId, start, duration, offset = 0, scale = 1, followSourceEnd = false } = {}) {
+      refusal = null; const curve = data.curves.find(c => c.id === curveId);
+      if (!curve || !data.lanes.some(l => l.id === laneId) || ![start, duration, offset, scale].every(Number.isFinite) || start < 0 || duration <= 0 || offset < 0 || scale <= 0 || data.clips.length >= 4096) return null;
+      if (refuseAudio([curve])) return null;
+      return edit(d => { const clip = { id: id('clip'), curveId, laneId, start, duration, offset, scale, mute: false, followSourceEnd: !!followSourceEnd }; d.clips.push(clip); return clip.id; });
+    },
+    /** retarget(clipId, targetId, { name }) — THE ROUTE FROM A CLIP (1.5.6-alpha.26, λWAVES 032 T20): the clip's curve drives
+     *  another target; a curve other clips share is copied first (as makeUnique), so they keep theirs.  One undo; → the
+     *  curve id the clip now plays, or null (no clip, no target, the curve budget). */
+    retarget(clipId, targetId, { name } = {}) {
+      if (typeof targetId !== 'string' || !targetId) return null;
+      return edit(d => { const c = d.clips.find(x => x.id === clipId); if (!c) return null; let curve = d.curves.find(x => x.id === c.curveId);
+        if (d.clips.some(x => x !== c && x.curveId === curve.id)) {
+          if (d.curves.length >= 1024 || d.curves.reduce((n, x) => n + x.points.length, 0) + curve.points.length > TIMELINE_MAX_TOTAL_POINTS) return null;
+          curve = { ...clone(curve), id: id('curve') }; d.curves.push(curve); c.curveId = curve.id; }
+        curve.targetId = targetId; if (name != null) curve.name = String(name).slice(0, 80); return curve.id; });
+    },
     makeUnique(clipId) { return edit(d=>{const c=d.clips.find(c=>c.id===clipId);if(!c)return false;
       if(d.clips.filter(x=>x.curveId===c.curveId).length===1)return true;
       const original=d.curves.find(x=>x.id===c.curveId);
       if(d.curves.length>=1024 || d.curves.reduce((n,x)=>n+x.points.length,0)+original.points.length>TIMELINE_MAX_TOTAL_POINTS)return false;
       const curve={...clone(original),id:id('curve')};d.curves.push(curve);c.curveId=curve.id;cleanCurves();return true;}); },
     value(targetId, beat) {
-      let winner = null;
+      // THE ARRANGEMENT'S LAW: the highest lane (lanes[0] is the top), then the earliest start, then the lower id.
+      let winner = null, rank = Infinity;
       for (const {clip,curve} of byTarget.get(targetId) || []) {
         if (clip.mute || beat < clip.start || beat >= clip.start+clip.duration) continue;
-        if (!winner || clip.start > winner.clip.start || (clip.start === winner.clip.start && clip.id.localeCompare(winner.clip.id,undefined,{numeric:true}) > 0)) winner={clip,curve};
+        const lane = laneRank.get(clip.laneId) ?? Infinity;
+        if (!winner || lane < rank || (lane === rank && (clip.start < winner.clip.start || (clip.start === winner.clip.start && clip.id.localeCompare(winner.clip.id,undefined,{numeric:true}) < 0)))) { winner={clip,curve}; rank=lane; }
       }
       if (!winner) return null;
       const {clip,curve}=winner;
       const sourceBeat=(beat-clip.start)*clip.scale+clip.offset;
       const kind=clipKind(curve); if(kind){const v=kind.value?kind.value(curve,clip,sourceBeat):null; return Number.isFinite(v)?curve.min+(curve.max-curve.min)*v:null;}
       return curve.min+(curve.max-curve.min)*evaluateTimelineSource(curve,sourceBeat);
+    },
+    /** extent({ unmuted = true }) → { start, end } over the clips (the first start … the last end; muted clips too with
+     *  unmuted: false), or null with none: the arrangement's span (THE LOOP's fallback, FIT, ACTIVE). */
+    extent(options) { return timelineExtent(data.clips, options); },
+    /** stretchClip(id, 'start' | 'end', duration, { original }) — THE STRETCH (λWAVES 032 T17): the clip takes `duration`
+     *  and its scale changes with it so the source's shape keeps (the source span duration · scale is held: scale' =
+     *  scale · oldDuration / newDuration, since a clip reads source beat (beat − start) · scale + offset); the start edge
+     *  moves `start` too (the end stays; never before beat 0).  `original` is a pointer-down snapshot ({ start, duration,
+     *  scale }), so a drag reversed half-way lands exactly where it began.  One transaction, as updateClip. */
+    stretchClip(clipId, edge, duration, { original } = {}) {
+      if ((edge !== 'start' && edge !== 'end') || !Number.isFinite(duration) || duration <= 0) return false;
+      return edit(d => { const c = d.clips.find(c => c.id === clipId); if (!c) return false;
+        const o = original && [original.start, original.duration, original.scale].every(Number.isFinite) && original.duration > 0 && original.scale > 0 ? original : c;
+        const end = o.start + o.duration, next = edge === 'start' ? Math.min(duration, end) : duration, scale = o.scale * o.duration / next;
+        if (!(next > 0) || !(scale > 0) || !Number.isFinite(scale)) return false;
+        c.start = edge === 'start' ? Math.max(0, end - next) : o.start; c.duration = next; c.scale = scale; c.followSourceEnd = false; return true; }, false);
     },
     setActive(r) { return edit(d => { if (r && Number.isFinite(r.start) && Number.isFinite(r.end) && r.end > r.start) d.active = { start: Math.max(0, r.start), end: r.end }; else delete d.active; return !!d.active; }); },
     activeClips(beat, kind = null) { const out=[]; const curves=new Map(data.curves.map(c=>[c.id,c])); for(const clip of data.clips){ if(clip.mute||beat<clip.start||beat>=clip.start+clip.duration)continue; const curve=curves.get(clip.curveId); if(!curve||(kind&&(curve.kind||'curve')!==kind))continue; out.push({clip,curve}); } return out; },
@@ -238,6 +287,14 @@ export function createTimelineModel() {
     signature: () => JSON.stringify(data)
   };
   return api;
+}
+
+/** timelineExtent(clips, { unmuted = true }) → { start, end } | null: the first start … the last end (model.extent's law; the
+ *  view sizes its content by it, muted clips included) */
+export function timelineExtent(clips, { unmuted = true } = {}) {
+  let start = Infinity, end = -Infinity;
+  for (const c of clips) { if (unmuted && c.mute) continue; if (c.start < start) start = c.start; if (c.start + c.duration > end) end = c.start + c.duration; }
+  return end > start ? { start, end } : null;
 }
 
 export function isTimelineSnapshot(input) { return input == null || createTimelineModel().restore(input); }

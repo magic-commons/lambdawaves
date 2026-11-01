@@ -9,7 +9,7 @@
  *   createTimeline(host, port) → tl
  *     host    the element the window and its rail go in (the app's float layer)
  *     port    { model, mod, controller?, present?, say?, dock?, store?, size?, min?, keys?, transport?, audio?, id?, title?,
- *               remap? }  (docs/TIMELINE.md: the port)
+ *               remap?, loop? }  (docs/TIMELINE.md: the port; loop: false keeps the clock free-running, 1.5.6-alpha.25)
  *   tl: { win, root, rail, editor, model, controller, transport, open, close, toggle, isOpen, paintHead, presentation,
  *         restore, shortcuts(x, y), destroy }
  *
@@ -30,6 +30,8 @@ import { installTimelineKnobs } from './knobs.js';
 import { createTimelineCursor } from './cursor.js';
 import { createReadoutLayer } from './readout.js';
 import { openTimelineShortcuts, timelineActions } from './shortcuts.js';
+import { TIMELINE_TAB_HEIGHT, TIMELINE_ROW_GAP } from './geometry.js';
+const LANE_FIT = 48;   // px: FIT's lane, the least a lane pane is drawn (geometry.js timelineLaneHeight, --tl-lane-min)
 
 /* BASINS' timeline-mounted transport: play, power, the BPM pill, the app's own readout (BASINS' 10ⁿ depth), to-start; then
    send-to-rack (only with a rack) and the logo door */
@@ -62,7 +64,7 @@ export function createTimeline(host, port) {
         press: (state) => { workLane = state; if (editor) editor.setWorkLane(state); writeShape(win.state()); } },
       { name: 'addLane', kind: 'action', label: 'Add automation lane', glyph: 'plus', press: () => editor && editor.addLane() },
       { name: 'removeLane', kind: 'action', label: 'Remove bottom automation lane', text: '−', press: () => editor && editor.removeLane() },
-      { name: 'resetSize', kind: 'action', label: 'Reset window size', glyph: 'compact', press: (s, w) => w.place({ width: size.w, height: size.h }) },
+      { name: 'resetSize', kind: 'action', label: 'FIT', glyph: 'compact', press: () => fit() },   // FIT (1.5.6-alpha.24, T5): the chip keeps its name
     ],
     onOpen: () => { if (editor) editor.paint(); seatBar(); showReadout(true); if (transport) transport.sync(); if (port.onWindow) port.onWindow(true); present(); },
     onClose: () => { if (editor) editor.close(); seatBar(); showReadout(false); if (port.onWindow) port.onWindow(false); present(); },
@@ -73,6 +75,13 @@ export function createTimeline(host, port) {
   editor = buildTimelineEditor({ body: win.body, root: win.root, rail: win.rail, isOpen: win.isOpen, open: win.open }, { model, mod, controller, present, say, audio: port.audio || null,
     keys: () => (tl && tl.keys) || port.keys || null });   // the table's chords beside ⋯'s rows (bind.js sets tl.keys: the app's, or the timeline's own)
   editor.setWorkLane(workLane);
+  /* FIT (T5): the whole arrangement across (ZOOM ALL: the clips' extent) and the height that shows every lane, no taller than
+     the window's default (TIMELINE_SIZE) nor shorter than its least; the window keeps its seat and its dock (win.resize) */
+  function fit() { editor.act.zoomAll(); const r = win.rect(); if (!r) return;
+    const n = model.state().lanes.length, lanes = n * (LANE_FIT + TIMELINE_TAB_HEIGHT) + (n - 1) * TIMELINE_ROW_GAP;
+    win.resize({ h: Math.min(size.h, Math.max(min.h, r.height - editor.view.viewport.clientHeight + lanes)) }); }
+  /* THE LOOP (1.5.6-alpha.25): the ruler's range › the ACTIVE range › the clips' extent › free run, on the kit's controller */
+  if (port.loop !== false && typeof controller.loopFrom === 'function') controller.loopFrom({ range: () => editor.range(), active: () => editor.activeRange(), extent: () => model.extent() });
 
   /* THE ONE PLAY, in the work bar: the kit's transport in BASINS' timeline form */
   const clock = {
@@ -114,7 +123,7 @@ export function createTimeline(host, port) {
   editor.onShortcuts = shortcuts;
 
   const tl = {
-    win, root: win.root, rail: win.rail, editor, model, controller, transport, actions,
+    win, root: win.root, rail: win.rail, editor, model, controller, transport, actions, fit,
     open: () => win.open(), close: () => win.close(), toggle: () => win.toggle(), isOpen: () => win.isOpen(),
     /** paint the playhead: call it from the app's present (BASINS shell.js) or hand it to installModulation's tick */
     paintHead: () => editor.paintHead(),

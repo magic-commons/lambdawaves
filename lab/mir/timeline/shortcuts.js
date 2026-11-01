@@ -64,27 +64,33 @@ export function timelineActions(get) {
   return rows;
 }
 
-// Pointer and touch gestures, from BASINS docs/TIMELINE-PLAYHEAD-SELECTION-2026-10-01.md §2 and the MIR curve law.
+// Pointer and touch gestures, from BASINS docs/TIMELINE-PLAYHEAD-SELECTION-2026-10-01.md §2 and the MIR curve law; THE HANDS
+// (1.5.6-alpha.23, λWAVES 032): one modifier table — Shift selects and fines, Ctrl shapes, Alt bypasses Snap and deletes.
 export const TIMELINE_POINTER = [   // tr: the timeline's pointer gestures: the gesture, what it does, its FL Studio counterpart
   { label: 'Middle button, hold + drag', hint: 'Pan time and tracks', t: 'FL — Middle-Mouse-Click pans' },
-  { label: 'Ctrl/Cmd + drag (empty)', hint: 'Rectangle-select clips or points', t: 'FL — Ctrl+drag selects' },
+  { label: 'Shift + drag (empty)', hint: 'Rectangle-select clips or points', t: 'adapted — FL’s Ctrl+drag; in MIR Shift selects' },
   { label: 'Ctrl/Cmd + Shift + drag', hint: 'Add to the rectangle selection', t: 'FL — Ctrl+Shift+drag adds' },
-  { label: 'Ctrl/Cmd + click a clip', hint: 'Toggle it in the selection', t: 'FL — Ctrl+click toggles' },
-  { label: 'Shift + drag a title', hint: 'Duplicate the selection while moving it', t: 'FL — Shift-drag clones' },
-  { label: 'Ctrl/Cmd + drag the ruler', hint: 'Select a time range; + Shift extends it', t: 'adapted — FL selects by dragging the bar-ruler' },
-  { label: 'Select tool: drag the ruler', hint: 'Select a time range (no Ctrl, so touch can); a tap seeks', t: 'FL — dragging the bar-ruler selects time' },
-  { label: 'Shift + vertical drag on the ruler', hint: 'Zoom time around the pointer’s beat (up = in)', t: 'BASINS — a touch-friendly zoom; a horizontal Shift-drag still snaps the scrub' },
+  { label: 'Shift + click a clip', hint: 'Toggle it in the selection', t: 'adapted — FL’s Ctrl+click toggles' },
+  { label: 'Ctrl/Cmd + drag a clip', hint: 'Duplicate the selection while moving it (title or body)', t: 'adapted — FL’s Shift-drag clones; in MIR Ctrl shapes' },
+  { label: 'Drag a clip’s edge', hint: 'Trim it: the curve keeps its beats', t: 'FL — drag a clip’s edge' },
+  { label: 'Ctrl/Cmd + drag a clip’s edge', hint: 'Stretch it: the curve keeps its shape', t: 'MIR — length and speed change together' },
+  { label: 'Ctrl/Cmd + Shift + drag a clip’s edge', hint: 'Stretch it finely (⅛, free of Snap)', t: 'MIR — Shift is the fine gear' },
+  { label: 'Edit tool: click empty lane space', hint: 'Place the clip last pressed there (the same curve, shared)', t: 'FL — the pencil places the last clip; MAKE UNIQUE detaches it' },
+  { label: 'Shift + drag the ruler', hint: 'Select a time range; + Ctrl/Cmd extends it', t: 'adapted — FL selects by dragging the bar-ruler' },
+  { label: 'Select tool: drag the ruler', hint: 'Select a time range (no key, so touch can); a tap seeks', t: 'FL — dragging the bar-ruler selects time' },
+  { label: 'Drag the ruler', hint: 'Scrub: the playhead follows the hand, free of Snap', t: 'BASINS — the hand leads' },
+  { label: 'Ctrl/Cmd + vertical drag on the ruler', hint: 'Zoom time around the pointer’s beat (up = in)', t: 'BASINS — a touch-friendly zoom; a horizontal Ctrl-drag scrubs on Snap' },
   { label: 'Hold a knob', hint: 'Create a timeline clip from it, or locate its clips', t: 'BASINS' },
   { label: 'ACTIVE (toolbar)', hint: 'Mark the ruler’s range, or the whole arrangement, as the active range; again to clear', t: 'BASINS — the range the record window renders' },
   { label: 'Slice tool: click a clip', hint: 'Cut it at the pointer’s beat (Snap applies, Alt bypasses)', t: 'FL — the Slice tool cuts at the click' },
-  { label: 'Drag a pattern / audio clip body', hint: 'Move it (Shift copies, right-button deletes); it has no points', t: 'FL — pattern clips move from their body' },
+  { label: 'Drag a pattern / audio clip body', hint: 'Move it (Ctrl copies, right-button deletes); it has no points', t: 'FL — pattern clips move from their body' },
   { label: 'Right-drag empty clip space', hint: 'Add and place a point', t: 'FL — Right-Click + drag adds a point' },
   { label: 'Shift + right-click a clip', hint: 'Add a point that preserves its current value', t: 'FL — Shift+Right-Click is non-destructive add' },
   { label: 'Left-drag a point or tension handle', hint: 'Move it', t: 'FL — drag a node or a tension handle' },
-  { label: 'Ctrl (held) while dragging tension', hint: 'Fine-tune the tension', t: 'FL — Ctrl allows fine adjustment' },
+  { label: 'Shift (held) while dragging a point or tension', hint: 'Fine-tune it (⅛; a point’s time is free of Snap)', t: 'adapted — FL fines tension with Ctrl; Shift is MIR’s fine gear' },
+  { label: 'Ctrl/Cmd (held) while moving a point', hint: 'Lock its time', t: 'FL — Ctrl locks horizontal' },
   { label: 'Right-click a tension handle', hint: 'Reset it', t: 'BASINS — FL’s right-click opens a Delete menu instead' },
   { label: 'Alt + left-click a point', hint: 'Delete it', t: 'adapted — FL’s manual names Right-Alt+click specifically' },
-  { label: 'Shift / Ctrl while moving a point', hint: 'Lock its value / time', t: 'FL — Shift locks vertical, Ctrl locks horizontal' },
   { label: 'Alt (held)', hint: 'Bypass Snap for the gesture in progress', t: 'FL — Alt temporarily sets snap to none' },
 ];
 export const TIMELINE_FIXED = [   // tr: keys the timeline keeps outside the key table: the key, what it does, a note

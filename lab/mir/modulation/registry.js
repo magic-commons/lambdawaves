@@ -116,6 +116,22 @@ const clamp01 = (u) => (u < 0 ? 0 : u > 1 ? 1 : u);
 const frac = (v) => v - Math.floor(v);
 const finite = (v) => typeof v === 'number' && Number.isFinite(v);
 
+/** an integer target's bands (1.5.6-alpha.22): its `options` read now — the integers inside [min, max] — or null */
+function bandsOf(s) {
+  if (!s.options) return null;
+  let o; try { o = typeof s.options === 'function' ? s.options() : s.options; } catch (_) { return null; }
+  if (!Array.isArray(o)) return null;
+  const l = o.filter((x) => Number.isInteger(x) && x >= s.min && x <= s.max);
+  return l.length ? l : null;
+}
+/** the entry of a list nearest v (ties to the earlier entry); a non-number is the first entry */
+function nearest(l, v) {
+  if (!finite(v)) return l[0];
+  let best = l[0];
+  for (const x of l) if (Math.abs(x - v) < Math.abs(best - v)) best = x;
+  return best;
+}
+
 /** grid snapping shared by every map that was given a `step` */
 function onGrid(v, min, max, step) {
   if (!(step > 0)) return clamp(v, min, max);
@@ -161,15 +177,23 @@ const MAPS = {
   },
 
   /* The integer map is the `step: 1` knob.  Everything it stores is on the grid, so
-     its round trip is not "to 1e-12" but exact. */
+     its round trip is not "to 1e-12" but exact.
+     1.5.6-alpha.22 · THE EVENT TARGET: given `options` (an array, or a function returning one, of the
+     values a segmented control offers, on the target's own range — λWAVES' visible STYLE ids), the unit
+     line is cut into n EQUAL BANDS, FL's law: u selects options[min(n − 1, floor(u · n))]; toNorm of an
+     option is its band's CENTRE (k + 0.5) / n; snap is the nearest option (ties to the earlier).  With
+     the full range as the options, an older point stored at k / (max − min) still lands on k.  No
+     options (or none valid): the grid snap above, unchanged. */
   integer: {
     fault: (s) => (!Number.isInteger(s.min) || !Number.isInteger(s.max)
         ? 'integer needs integer min and max'
       : !(s.min < s.max) ? 'integer needs min < max'
       : !Number.isInteger(s.step) || s.step < 1 ? 'integer needs an integer step >= 1' : null),
-    snap: (v, s) => onGrid(Math.round(v), s.min, s.max, s.step),
-    toNorm: (v, s) => (v <= s.min ? 0 : v >= s.max ? 1 : (v - s.min) / (s.max - s.min)),
-    fromNorm: (u, s) => (u <= 0 ? s.min : u >= 1 ? s.max : s.min + u * (s.max - s.min))
+    snap: (v, s) => { const l = bandsOf(s); return l ? nearest(l, Number(v)) : onGrid(Math.round(v), s.min, s.max, s.step); },
+    toNorm: (v, s) => { const l = bandsOf(s); if (l) { const k = l.indexOf(nearest(l, v)); return (k + 0.5) / l.length; }
+      return v <= s.min ? 0 : v >= s.max ? 1 : (v - s.min) / (s.max - s.min); },
+    fromNorm: (u, s) => { const l = bandsOf(s); if (l) return l[u > 0 ? Math.min(l.length - 1, Math.floor(u * l.length)) : 0];
+      return u <= 0 ? s.min : u >= 1 ? s.max : s.min + u * (s.max - s.min); }
   },
 
   /* The bipolar map is a signed range with a detent.  It is NOT "linear over a range
@@ -257,8 +281,9 @@ export function createRegistry(opts) {
 
   /**
    * register(id, spec) — spec:
-   *   { label, unit, min, max, step, map, get, set, group, def, hint, fire? }
+   *   { label, unit, min, max, step, map, get, set, group, def, hint, fire?, options? }
    * map 'trigger' | 'toggle' (1.5.6-alpha.2): min/max/step are the unit line whatever is passed, and fire(on) is the act (above)
+   * map 'integer' with `options` (1.5.6-alpha.22): an array or `() => array` of the values offered — the unit line in equal bands
    * `map` defaults to 'linear'.  `get` and `set` are the Card's adapters: `get` is
    * read ONCE at first registration to seed the base (this is the fix for the other
    * project's "get is required, stored, and never called"), and `set` is the only way
@@ -297,6 +322,7 @@ export function createRegistry(opts) {
     r.wrap = map === 'wrap';
     r.get = s.get; r.set = s.set;
     r.fire = EVENT.has(map) && typeof s.fire === 'function' ? s.fire : null;
+    r.options = map === 'integer' && (typeof s.options === 'function' || Array.isArray(s.options)) ? s.options : null;
     r.def = finite(s.def) ? snapOf(r, s.def) : null;
 
     if (old) {
@@ -332,8 +358,12 @@ export function createRegistry(opts) {
   }
 
   function describeOne(r) {
-    return { id: r.id, label: r.label, unit: r.unit, group: r.group, map: r.map,
-             min: r.min, max: r.max, step: r.step, def: r.def, wrap: r.wrap };
+    const d = { id: r.id, label: r.label, unit: r.unit, group: r.group, map: r.map,
+                min: r.min, max: r.max, step: r.step, def: r.def, wrap: r.wrap };
+    /* a banded target (1.5.6-alpha.22) says its bands: the options read now and their count; a toggle is two */
+    const l = r.map === 'integer' ? bandsOf(r) : null;
+    if (l) { d.options = l; d.steps = l.length; } else if (r.map === 'toggle') d.steps = 2;
+    return d;
   }
 
   /* ── base vs modulated ─────────────────────────────────────────────────────────
@@ -424,7 +454,7 @@ export function createRegistry(opts) {
     register, unregister,
     has: (id) => byId.has(String(id)),
     list: () => order.map((r) => r.id),
-    describe: () => order.map(describeOne),
+    describe: (id) => (id === undefined ? order.map(describeOne) : describeOne(rec(String(id)))),   // describe(id): one row (1.5.6-alpha.22)
     describeOne: (id) => describeOne(rec(String(id))),
     count: () => order.length,
     roots: () => roots.slice(),
