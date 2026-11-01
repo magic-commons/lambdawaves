@@ -120,7 +120,7 @@ export function laneCurve(lane, { total, describe, toNorm }) {
   const clips = [];
   if (rep !== undefined) for (let b = s; b < e - 1e-9 && clips.length < 4096; b += rep) clips.push([b, Math.min(rep, e - b)]);
   else clips.push([s, e - s]);
-  return { targetId: id, name: lane.name || D.label || id, length, points, clips, clamps };
+  return { targetId: id, name: lane.name || D.label || id, length, points, clips, clamps, ...(D.map === 'integer' && D.steps ? { steps: D.steps } : {}) };   // 032: an EVENT lane remembers its bands
 }
 
 /** pulses(beats, total) → the 0 → 1 → 0 points of an action's trigger lane: high for PULSE beats at each beat listed */
@@ -142,7 +142,7 @@ export function timelineDoc(score, total, { describe, toNorm, resolve = (x) => x
   const place = (c, label) => {
     if (lanes.length >= 32) { refused.push({ key: label, why: 'the timeline holds 32 lanes' }); return; }
     if (c.clips.some(([a, d]) => covered(c.targetId, a, a + d))) { refused.push({ key: label, why: c.targetId + ' is already driven there (an audio band or another lane): one clip covers a target at a beat' }); return; }
-    const lane = { id: nid('lane'), name: String(c.name).slice(0, 80) }, curve = { id: nid('curve'), targetId: c.targetId, name: String(c.name).slice(0, 80), color: '#a7adb8', length: c.length, min: 0, max: 1, points: c.points };
+    const lane = { id: nid('lane'), name: String(c.name).slice(0, 80) }, curve = { id: nid('curve'), targetId: c.targetId, name: String(c.name).slice(0, 80), color: '#a7adb8', length: c.length, min: 0, max: 1, points: c.points, ...(c.steps ? { steps: c.steps } : {}) };
     lanes.push(lane); curves.push(curve);
     for (const [a, d] of c.clips) { clips.push({ id: nid('clip'), curveId: curve.id, laneId: lane.id, start: a, duration: d, offset: 0, scale: 1, mute: false, followSourceEnd: false }); hold(c.targetId, a, a + d); }
     applied.push(label);

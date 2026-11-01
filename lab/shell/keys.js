@@ -89,6 +89,12 @@ export function createKeys(app) {
     /* 032 T8 · MOD ON THE TIMELINE'S POWER (Josh: "MOD word on the timeline's toggle; the power icon stays on the modulation window"): the work bar's
        power seat wears the kit's word face — modPower({ word }), as the CSB's — dressed here as the door is (the timeline's transport takes no powerWord) */
     { const p = app.state.tl.root.querySelector('.tl-transport .mir-mod-power'); if (p) { p.dataset.face = 'word'; label(p, 'MOD'); } }
+    /* 032 T24 · A HEAVY SWITCH HOLDS THE PLAY (Josh: "heavy switches pause real-time playback"): while the timeline plays and the busy count is up (a
+       solve, a basis — busyWrap brackets every worker call), the realtime pump is held through the scrub's own door (host.clock.suspendRealtime), so the
+       arrangement waits for the picture instead of running ahead of it; released on the count's zero.  A film steps frame-exact and already owns the
+       pump (suspendRealtime answers null then): untouched */
+    { let release = null; const C = app.state.modHost.clock, now = () => performance.now() / 1000;
+      app.ctl.busy.onHold = (on) => { if (on && !release && C.isPlaying()) release = C.suspendRealtime(now()); else if (!on && release) { release(now()); release = null; } }; }
     /* 021 R3 · TWO ⏮, EACH SAYS WHAT IT MOVES: the work bar's sends the modulation beat and the TIMELINE playhead to bar 1 and leaves ψ's t
        (the main bar's ⏮ moves t); one position spanning both is a kit door for 1.5.6 (docs/FOR-MIR.md) */
     { const h = app.state.tl.root.querySelector('.transport-home'); if (h) { h.title = 'beat → bar 1 · the TIMELINE playhead to the start'; h.setAttribute('aria-label', 'timeline back to bar 1'); } }

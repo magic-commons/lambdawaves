@@ -6,7 +6,7 @@
  * boot()'s callers bump (setElement, a project open) and LW.busy reads.  The pointermove listener is registered
  * here, at the moment boot() calls createBusyMark — where the block used to register it. */
 export function createBusyMark({ paintMarks, markBusy }) {
-  const busy = { n: 0, until: 0, shown: false, x: -200, y: -200, host: null, moves: 0, timer: 0 };
+  const busy = { n: 0, until: 0, shown: false, x: -200, y: -200, host: null, moves: 0, timer: 0, held: false, onHold: null };   // 032 T24: onHold(on) on the count's 0 ↔ > 0 edges
   function busyHost() {
     if (busy.host) return busy.host;
     const h = document.getElementById('busyMark'); if (!h) return null;
@@ -15,6 +15,7 @@ export function createBusyMark({ paintMarks, markBusy }) {
     busy.host = h; return h;
   }
   function busySync() {
+    if ((busy.n > 0) !== busy.held) { busy.held = busy.n > 0; if (busy.onHold) busy.onHold(busy.held); }   // the heavy work's edges (a solve, a basis): the timeline's hold
     const want = busy.n > 0 || performance.now() < busy.until;
     if (want === busy.shown) return;
     busy.shown = want;

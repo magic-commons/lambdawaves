@@ -39,7 +39,7 @@ export function createActions(app) {
   const fullscreen = () => { if (!document.fullscreenElement && fsOn()) { W().wState.setStatus('the browser’s full screen (F11) is the browser’s: F11 leaves it', 'warn'); return; } W().toggleFullscreen(); };
   const IP = infoPrefs(), infoKeys = INFO_ROWS.filter((r) => r.type === 'bool').map((r) => r.key); let infoKept = null;
   /* 022 P2 · the rows a CONTEXT MENU runs (lab/context-menus.js hands the pressed element as `{ el }`; a key acts on the focus) */
-  const at = (a) => (a && a.el) || document.activeElement || document.body, knobAt = (a) => at(a).closest && at(a).closest('.k'), tileAt = (a) => at(a).closest && at(a).closest('.mm-tile');
+  const at = (a) => (a && a.el) || document.activeElement || document.body, eventAt = (a) => { const t = at(a); return t.closest ? t.closest('[data-event]') : null; }, knobAt = (a) => at(a).closest && at(a).closest('.k'), tileAt = (a) => at(a).closest && at(a).closest('.mm-tile');
   const said = (ok, what) => W().wState.setStatus(ok ? what + ' copied' : 'the clipboard refused the copy', ok ? 'live' : 'warn');
   const copyOut = (text, what) => { if (!text) return false; copyText(String(text)).then((ok) => said(ok, what)); return true; };
   const wordOf = (k, a) => { const t = tileAt(a); if (t) return k === 'name' ? (t.getAttribute('aria-label') || '').split(' — ')[0] : (t.querySelector('.mm-lbl, .mm-sym') || {}).textContent;
@@ -169,12 +169,22 @@ export function createActions(app) {
     ...[['name', 'COPY the name'], ['formula', 'COPY the formula']].map(([k, label]) => ({ id: 'copy.' + k, group: PJ, short: 'copy ' + k, label, surface: true, undo: 'none', run: (a) => copyOut(wordOf(k, a), 'the ' + k) })),
     ...['reset', 'copy', 'paste', 'fine'].map((v) => ({ id: 'knob.' + v, group: CA, short: 'knob ' + v, label: 'KNOB › ' + v.toUpperCase() + (v === 'fine' ? ' — half the drag gain' : ''), surface: true, undo: v === 'copy' || v === 'fine' ? 'none' : 'row',
       ...(v === 'fine' ? { kind: 'toggle', get: () => { const k = knobAt(); return !!(k && k.mirKnob && k.mirKnob.fine()); } } : {}), run: (a) => knobAct(knobAt(a), v) })),
-    { id: 'knob.copyId', group: CA, short: 'copy id', label: 'COPY the control’s id (its modulation target)', hint: 'COPY the control’s id', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-param], [data-key-action], [data-fav]');
-      return c ? copyOut(c.dataset.param || c.dataset.keyAction || c.dataset.fav, 'the id') : false; } },
+    { id: 'knob.copyId', group: CA, short: 'copy id', label: 'COPY the control’s id (its modulation target)', hint: 'COPY the control’s id', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-param], [data-key-action], [data-fav], [data-event]');
+      return c ? copyOut(c.dataset.param || c.dataset.keyAction || c.dataset.fav || c.dataset.event, 'the id') : false; } },   // 032 W3: an event target's id too
     { id: 'knob.route', group: CA, short: 'route', label: 'ROUTE the selected macro (or a new one) onto the knob', hint: 'ROUTE a macro onto the knob', surface: true, run: (a) => { const k = knobAt(a), id = k && k.dataset.param, M = S().LW && S().LW.mod;
       if (!id || !M) return false; const v = app.state.modView, m = (v && v.api.selected && v.api.selected()) || M.addMacro(); return !!M.route(m, id); } },
     { id: 'control.reset', group: CA, short: 'reset', label: 'RESET the control to its default', surface: true, run: (a) => { const c = at(a).closest && at(a).closest('[data-param]'), R = app.state.modHost && app.state.modHost.registry, id = c && c.dataset.param;
       const d = id && R && R.has(id) ? R.describeOne(id) : null; if (!d || d.def === null || d.def === undefined) return false; R.setBase(id, d.def); return true; } },
+    /* 032 W3 · THE EVENTS (T23): a segmented row, a switch or the 140 grid that names a target (`data-event`, lab/shell/modulation.js) makes an EVENT
+       clip on it — the kit's step clip at the band in force, its bands remembered (MIR 1.5.6-alpha.24, `createClip`) — and COPY VALUE puts the pressed
+       option's band centre where a point's PASTE VALUE reads it (the timeline editor's `copiedValue`) */
+    { id: 'event.create', icon: 'lanes', group: CA, short: 'create event', label: 'CREATE EVENT — a step clip of the control on the TIMELINE', hint: 'CREATE EVENT — a step clip', surface: true, run: (a) => {
+      const e = eventAt(a), tl = app.state.tl, R = app.state.modHost && app.state.modHost.registry; if (!e || !tl || !R || !R.has(e.dataset.event)) return false; return !!tl.editor.createClip(e.dataset.event); } },
+    { id: 'event.copy', group: CA, short: 'copy value', label: 'COPY VALUE — the option, for a point’s PASTE VALUE', hint: 'COPY VALUE for PASTE VALUE', surface: true, undo: 'none', run: (a) => {
+      const e = eventAt(a), tl = app.state.tl, R = app.state.modHost && app.state.modHost.registry, id = e && e.dataset.event; if (!id || !tl || !R || !R.has(id)) return false;
+      const d = R.describe(id), b = at(a).closest('[data-v], .pk-c'), sw = at(a).closest('.sw');
+      const u = b ? R.toNorm(id, +(b.dataset.v ?? b.dataset.a)) : d.map === 'toggle' ? (sw && sw.getAttribute('aria-pressed') === 'true' ? 0.75 : 0.25) : R.readNorm(id);   // a toggle's two bands' centres (an action's base is 0, never its state)
+      if (!Number.isFinite(u)) return false; tl.editor.copiedValue = u; W().wState.setStatus('value copied · ' + d.label, 'live'); return true; } },
     { id: 'control.learn', group: CA, short: 'learn', label: 'LEARN a key, MIDI or a route for the control (the MAPPING)', hint: 'LEARN a key, MIDI or a route', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-key-action]');
       if (!c || !api.mapping) return false; L().keymap.open('MAPPING'); api.mapping.learn(c.dataset.keyAction); return true; } },
     ...[['open', 'OPEN the tile', (t) => t.click()], ['isomers', 'its ISOMERS', (t) => t.querySelector('.mm-iso') && t.click()],
@@ -191,6 +201,10 @@ export function createActions(app) {
     { id: 'invert', icon: 'invertColors', group: V, short: 'invert', label: 'INVERT the cloud — ink, not light', kind: 'toggle', get: () => !!mat.invert, run: () => S().LW.setInvert(!mat.invert), surface: true },
     ...[['captions', 'STAGE CAPTIONS', 'capSw'], ['formula', 'STAGE FORMULA', 'molFormulaSw'], ['labels', 'ATOM LABELS', 'atomLabelsSw']].map(([k, label, h]) =>
       ({ id: 'view.' + k, icon: { formula: 'informational', labels: 'labels' }[k], group: V, short: label.toLowerCase(), label: label + ' on / off', kind: 'toggle', get: () => !!(ui[h] && ui[h].get()), run: () => tap(ui[h]), surface: true })),
+    /* 032 W3: SETTINGS › DISPLAY's FRAME and AXIS as rows (a toggle each: `action.view.frame` · `action.view.axis` are their EVENT targets); the switch's own
+       press still cycles the frame's look (BOX · LATTICE · DOTS) — these turn it on or off */
+    { id: 'view.frame', group: V, short: 'frame', label: 'FRAME — the field boundary on / off', hint: 'FRAME on / off', kind: 'toggle', get: () => mat.frame !== false, run: () => S().LW.setFrame(mat.frame === false), surface: true },
+    { id: 'view.axis', group: V, short: 'axis', label: 'AXIS — the x, y, z axes on / off', hint: 'AXIS on / off', kind: 'toggle', get: () => mat.axis !== false, run: () => S().LW.setAxis(mat.axis === false), surface: true },
     ...[['badges', 'STATUS TAGS'], ['hints', 'CONTROL HINTS']].map(([k, label]) => ({ id: 'view.' + k, group: V, short: label.toLowerCase(), label: label + ' on / off', kind: 'toggle', get: () => !!look().get(k), run: () => look().set({ [k]: !look().get(k) }), surface: true })),
     { id: 'settings.playLock', group: SE, short: 'playback lock', label: 'PLAYBACK LOCK — CLOCK LOCKED: every frame one cadence step', hint: 'PLAYBACK LOCK — one step a frame', kind: 'toggle', get: () => !!app.ctl.fieldRate.lock, surface: true,
       run: () => { const R = app.ctl.fieldRate; R.lock = !R.lock; if (ui.showPlayback) ui.showPlayback(); S().saveSettings(); } },

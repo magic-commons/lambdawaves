@@ -61,5 +61,28 @@ try {
     await g.nav(); await g.waitFor('window.__LW?.ready', 400, 100); await wait(1500); info.reload = await g.ev(`return ${st};`);
     await g.ev(`localStorage.removeItem('lw.csb.side'); return 1;`);
   }
+  if (scene === 'event') {   // T23: CREATE EVENT on WAVE's STYLE (the control menu), its bands; MOLECULES off → ⚠; COPY VALUE; T24's hold
+    info.solved = (await molecule('H2O')).ok;
+    await g.ev(`__LW.layout.reveal('observer'); const d = document.querySelector('.dev[data-id="observer"]'); if (d.classList.contains('folded')) __LW.run('window.observer.fold'); return 1;`); await wait(1200);
+    const menu = (sel, row) => g.ev(`const b = document.querySelector(${JSON.stringify(sel)}), r = b.getBoundingClientRect();
+      b.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.left + 5, clientY: r.top + 5, button: 2 }));
+      await new Promise((ok) => setTimeout(ok, 400)); const rows = [...document.querySelectorAll('.mir-ctx [data-id]')].map((x) => x.dataset.id + (x.getAttribute('aria-disabled') === 'true' || x.disabled ? '(off)' : ''));
+      const it = document.querySelector('.mir-ctx [data-id="' + ${JSON.stringify(row)} + '"]'); if (it) it.click(); return rows;`);
+    info.menuRows = await menu('.dev[data-id="observer"] [data-key-action="style"] .seg-b[data-v="6"]', 'event.copy');
+    info.copied = await g.ev(`return __LW.timeline.editor.copiedValue;`);
+    await menu('.dev[data-id="observer"] [data-key-action="style"] .seg-b[data-v="6"]', 'event.create'); await wait(1500);
+    info.clip = await g.ev(`const T = __LW.timeline.model.state(), c = T.curves.find((x) => x.targetId === 'material.style'); return c ? { steps: c.steps, points: c.points.map((p) => +p.v.toFixed(4)) + '', segs: document.querySelectorAll('.tl-band').length, warn: document.querySelectorAll('.tl-clip.steps-off, .steps-off').length } : null;`);
+    info.eventShot = await shot('clip');
+    await g.ev(`__LW.chem.setOn(false); return 1;`); await wait(1800);
+    info.after = await g.ev(`return { steps: __LW.mod.registry.describe('material.style').steps, warn: document.querySelectorAll('.steps-off').length };`);
+    info.warnShot = await shot('warn');
+    /* T24: the realtime pump held while busy during play, released at zero */
+    info.hold = await g.ev(`const C = __LW.mod.host.clock; __LW.mod.play && __LW.mod.play(); await new Promise((r) => setTimeout(r, 300)); const b = __LW.busy; b.begin(); const held = C.isRealtimeSuspended(); b.end(); const after = C.isRealtimeSuspended(); return { playing: C.isPlaying(), held, after };`);
+  }
+  if (scene === 'demo') {   // the older STYLE lane of WATER ESP, re-read on the open road
+    await g.ev(`__LW.projects.demo('water-esp'); return 1;`); await g.waitFor('window.__LW.chem.on && window.__LW.chem.solution()', 600, 200); await wait(1500);
+    info.lane = await g.ev(`const c = __LW.timeline.model.state().curves.find((x) => x.targetId === 'material.style'), R = __LW.mod.registry; return c ? { steps: c.steps, values: c.points.map((p) => R.fromNorm('material.style', p.v)) } : null;`);
+    info.status = await g.ev(`return __LW.projects.status;`);
+  }
   for (const [k, v] of Object.entries({ scene, ...info, errors: (await g.errors()).errs })) console.log(k, JSON.stringify(v));
 } finally { await g.close(); }

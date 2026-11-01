@@ -4,7 +4,7 @@
  * serialize / restore / save / copyJSON are registered on app.sh for the modules that read them (the links, the history, STATE). */
 import { availability } from './settings.js';   // 022 E1 · AVAILABILITY IS ONE LAW
 import { TIER } from '../tier.js';
-import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, quatFromYawPitch, waveView, drawStyle, liftAtomStyle } from '../field.js';
+import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, quatFromYawPitch, waveView, drawStyle, liftAtomStyle } from '../field.js'; import { liftBands } from './modulation.js';
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
 import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS, N6, narrow, widen } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
@@ -349,7 +349,7 @@ export function createPersist(app) {
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
         if (modWas) app.state.modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)
         if (pr.modwin && app.state.modView) app.state.modView.restore(pr.modwin);
-        if (!hist && app.state.tl) app.state.tl.model.restore(pr.timeline || null);           // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own
+        if (!hist && app.state.tl) app.state.tl.model.restore(liftBands(pr.timeline, app.state.modHost && app.state.modHost.registry) || null);   // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own; 032 W3: an older banded curve re-read
       }
       schedule(TIER.REBUILD); wState.setStatus(said || 'restored', said ? 'warn' : 'live');
       return true;

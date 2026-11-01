@@ -50,7 +50,7 @@ export function createMaterial(app) {
       onChange: (v) => { mat.style = STYLE[drawStyle(v)]; styleSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
     rd.appendChild(ui.styleSeg.root).dataset.keyAction = 'style';
     /** 032 O1: the styles the seg offers now, in its order, with their words — the STYLE menus (the stage's, VIEW's) and the STYLE target's bands */
-    ui.styleList = () => ui.styleSeg.spec.options.filter((o) => { const b = ui.styleSeg.button(o.id); return b && !b.hidden; }).map((o) => [o.id, ui.styleSeg.button(o.id).textContent]);
+    ui.styleList = () => ui.styleSeg.spec.options.filter((o) => o.id !== 'esp' || !availability('wave.style.esp', app).hide).map((o) => [o.id, ui.styleSeg.button(o.id).textContent]);   // the law, not the DOM: a restore asks before the seg repaints
     /* 2026-09-10 (Josh): ISO, GRAIN and KNEE sit directly under EXPOSURE, SOFT and HUE — one six-knob
        material row above STYLE — instead of a second row below the style seg. */
     ui.isoK = knob({ label: 'ISO', reverse: true, min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
@@ -145,7 +145,7 @@ export function createMaterial(app) {
       modeMute(ui.spaceSeg, 'p', p);
       if (!p.on && app.state.space === 'p') { app.state.space = 'x'; ui.spaceSeg.set('x'); schedule(TIER.REBUILD); }
       modeMute(ui.viewSeg, 'imag', A('wave.view.imag'));
-      { const b = ui.styleSeg.button('esp'); if (b) b.hidden = A('wave.style.esp').hide; }   // 032 O1: ESP the one MOLECULES-only style
+      { const b = ui.styleSeg.button('esp'), hide = A('wave.style.esp').hide; if (b && b.hidden !== hide) { b.hidden = hide; if (app.state.tl) app.state.tl.editor.paint(); } }   // 032 O1: ESP the one MOLECULES-only style; W3: STYLE's bands moved, an EVENT clip drawn for the other count shows ⚠ now
       const esp = A('wave.esp').hide; for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = esp;
       if (ui.espBarRow) ui.espBarRow.hidden = A('info.espBar').hide;   // 018 B10: INFORMATIONAL's ESP BAR · SIDE · PAD   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
     }
