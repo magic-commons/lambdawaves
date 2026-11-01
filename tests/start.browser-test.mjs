@@ -50,7 +50,7 @@ try {
   assert.equal((await g.waitFor(`document.querySelector('${NOTICE}') && window.__LW && __LW.history`, 300, 100)).ok, 1, 'no notice with the lab behind it');
   const s1 = await g.ev(`await __w(300); const v0 = __LW.mat.view; return { ...__screen(), v0 };`);
   assert.deepEqual([s1.notice, s1.opener, s1.front, s1.ready, s1.warned], [true, false, false, false, false], 'the notice, alone, before the choice: ' + JSON.stringify(s1));
-  assert.match(String(s1.art), /img\/warning-sign\.png$/); assert.ok(s1.artW > 100, 'the sign did not load');
+  assert.match(String(s1.art), /img\/warning-sign\.webp$/);   // 032: lossless WebP, the same visible pixels (20 KB off the precache) assert.ok(s1.artW > 100, 'the sign did not load');
   await g.press('v'); await g.press('c');
   const s1k = await g.ev(`await __w(200); return { view: __LW.mat.view, playing: __LW.clock.playing, notice: !!document.querySelector('${NOTICE}') };`);
   assert.deepEqual(s1k, { view: s1.v0, playing: false, notice: true }, 'a key reached the lab under the notice');

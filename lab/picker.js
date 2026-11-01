@@ -5,14 +5,14 @@
  * beside them) and LIBRARY — the one place for what is kept: THE VOLUMES (lab/volumes.js: VOL. I, VOL. II … — each a card that installs
  * with one press; inside a volume ONE head row — the volume's stepper, the count, its plain tags (two intersect), a search, INSTALL — over
  * its molecules; a one-atom entry opens the ATOM), a card per catalogue section that keeps files (THE SECTION INSTALL, iteration 008 P's,
- * moved out of the MOLECULAR deck) and THIS DEVICE's use.  Iteration 012 L1 (Josh: "too much text … concise and not repetitive"): a card
+ * moved out of the MOLECULAR deck; 032: gone — every one of those molecules is MOLECULAR's) and THIS DEVICE's use.  Iteration 012 L1 (Josh: "too much text … concise and not repetitive"): a card
  * says its count and its install (the size rides in INSTALL / REMOVE), a remove is armed for 600 ms, SHOW LABELS sits under the tabs.  The pictures are tools/menu-thumbs.mjs' and each
  * volume's own (t/<id>.webp).  A hover or a focus moves ONLY the picture (lab/picker-fx.js: the spring tilt and a zoom — no background,
  * no tint), writes the name under the tile, and swaps the large caption at the foot.  A press goes there: ATOMS mode and the element
  * (goAtom), MOLECULES mode and the molecule (chem.pick), or a volume's molecule (chem.openVolume).  THE WAY BACK is instant: the DOM is
  * built once and only shown or hidden — the home button (the iris opens from it), L (keys.js `menu`), WINDOW › PICKER; Escape leaves.
  * Under the logo (iteration 012 L2): RETURN HOME (the lab), FOLDERS (the projects and the demos) and THE HUE ring (a dial that turns the
- * molecules' pictures round the colour wheel).  The Picker opens at boot once the photosensitivity notice is accepted,
+ * molecules' pictures round the colour wheel), THEME (032) and LOOK.  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
 import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
 import { el, chip, mathPlain, stepper } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
@@ -24,12 +24,15 @@ import { valenceOf } from './valence.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { BASIS } from './hydrogen.js';
 import { L_LETTERS } from './names.js';
-import { RM, animate, pointerFrame, tiltPictures, enterTiles, develop, swapLine, installRing, clamp } from './picker-fx.js';
+import { RM, still, animate, pointerFrame, tiltPictures, holoCards, enterTiles, develop, swapLine, installRing, clamp } from './picker-fx.js';
 import * as V from './volumes.js';
-import { keepData, keepSection, installed, safariTab } from './library.js';
+import { keepData, installed, safariTab } from './library.js';
 
 /* 030 THE TIP JAR: the donation link, written by tools/tip-qr.py together with img/menu/tip-qr.svg (its picture). Empty: no card, no sheet. */
 const TIP_URL = 'https://ko-fi.com/magiccommons';
+/* 032 THE PORTRAIT SHELF: the volumes that have a hero and in which themes ('dark light'), written by tools/volume-heroes.mjs with its files
+   (img/menu/vol/<id>.<theme>.mp4 and the still .webp). A volume not named here wears the λWAVES palette. */
+const HEROES = {};
 
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
@@ -140,6 +143,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   navBtn('folders', 'Folders — your projects and the demos', () => (root.dataset.sec === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
+  /* 032 (Josh 11-01: "a light and dark toggle in the picker in between the hue knob and thumbnail switcher"): THEME, the action's own
+     (lab/actions.js `theme`, the transport's sun ↔ moon) — the sun in LIGHT, the moon in DARK (skin.css) */
+  const themeB = el('button', 'mm-navb mm-themeb', nav); themeB.type = 'button'; themeB.title = 'Light or dark — the theme'; themeB.setAttribute('aria-label', themeB.title);
+  icon(themeB, 'sun').classList.add('gly-sun'); icon(themeB, 'moon').classList.add('gly-moon'); themeB.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
   const lookB = el('button', 'mm-navb mm-lookb', nav); lookB.type = 'button'; lookB.setAttribute('aria-haspopup', 'true'); lookB.setAttribute('aria-expanded', 'false');
   const lookG = el('b', 'mm-lookg', lookB);
   const scroller = el('div', 'mm-scroll', root), caption = el('div', 'mm-caption', root);
@@ -369,7 +376,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   });
   const movePill = (b) => { pill.style.setProperty('--px', b.offsetLeft - 10 + 'px'); pill.style.setProperty('--pw', b.offsetWidth + 20 + 'px'); };
   pointerFrame(root, (p) => { for (const { b } of sections) { const r = b.getBoundingClientRect(); b.style.setProperty('--approach', p ? clamp((76 - Math.hypot(p.x - r.left - r.width / 2, p.y - r.top - r.height / 2)) / 58).toFixed(3) : '0'); } });
-  tiltPictures(root);
+  tiltPictures(root); holoCards(root);   // 032: the cards' album-art light (a volume's portrait, the tip jar's QR)
 
   /* ── ATOMIC: 118 squares on the 18-column table, the f rows under it ── */
   const table = el('div', 'mm-table', sections[0].sec);
@@ -407,11 +414,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      SECTIONS' order (lab/molecules.js), within a section the dropdown's order (its groups); no heading tile — a heading broke the picture grid,
      so the section rides in the caption's line under a hover instead.  A record-only molecule not yet on this device keeps its picture and
      wears the kit's download glyph (row V's law, the card's glyph); its press opens it, which fetches that one record (chemview's record road).
-     A one-atom entry is never listed here: an atom is the ATOMIC table's.  THE SECTION INSTALL (iteration 008 P) lives in the LIBRARY below. ── */
+     A one-atom entry is never listed here: an atom is the ATOMIC table's.  032 (Josh 11-01: "merge all of those to the default molecule
+     library … the volumes are the main display"): ORGANIC · BIO · LATTICE · HEAVY are this deck's like every section — THE SECTION INSTALL's
+     cards left the LIBRARY; a record downloads on its first press and stays (library.js fetchRecord); MOLECULES' KEEP still keeps a section. ── */
   const GROUP_AT = new Map([...GROUPS, RECORD_GROUP].map((g, i) => [g.id, i])), rank = (p) => (GROUP_AT.has(p.group) ? GROUP_AT.get(p.group) : GROUP_AT.size);
   const secRows = (sec) => CHEM_PRESETS.filter((p) => p.section === sec && !atomZ(p.formula)).sort((a, b) => rank(a) - rank(b));
   const secs = new Map(SECTIONS.map((sec) => { const rows = secRows(sec), recs = rows.flatMap((p) => Object.values(p.records || {}));
-    return [sec, { sec, rows, recs, bytes: recs.reduce((t, r) => t + r.bytes, 0), n: 0, busy: false, stop: false, arm: 0, view: null }]; }));
+    return [sec, { rows, recs }]; }));
   const have = new Map(), away = new Map();   // a record's hash → on this device; a deck tile's molecule → its glyph and caption
   const dlRec = (m) => (m.recordOnly && m.records && m.records['sto-3g']) || null;   // the record a press must fetch (chemview's own test)
   function paintAway(m) {
@@ -428,61 +437,20 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (!m.disabled && dlRec(m)) { const g = el('i', 'mm-dl', t); icon(g, 'download'); g.title = 'not on this device'; g.hidden = true; away.set(m.id, { t, g, info }); paintAway(m); }
   });
 
-  /* ── THE SECTION INSTALL (iteration 008 P; in the LIBRARY since iteration 011 Q4): a card per catalogue section with records — its name, its
-     count, its bytes, "n here", and the install: the lamp lit when every record of the section is on this device, the press installs them all
-     (persist() asked once; `n / N · CANCEL` and the ring while it runs, a press then stops after the record in hand) or, pressed twice, removes
-     them.  The records' road is library.js keepSection (chemview's too: each record checked against its sha-256 name), and MOLECULES' lamps
-     are re-read after (chem.records()). ── */
-  const cardLine = (S) => `${S.rows.length} molecules`;   // iteration 012 L1: the size rides in the install word, the count of files kept is the ring
   /** the install's eye: DOWNLOAD while there is something to fetch, TRASH once it is all here (iteration 012 L2, I1's icons) */
   const eye = (i, here) => setGlyph(i, here ? 'trash' : 'download');
-  function paintSec(S) {
-    const v = S.view; if (!v || !v.b.isConnected) return;
-    const N = S.recs.length, all = N > 0 && S.n === N;
-    v.meta.textContent = cardLine(S); if (S.busy) return;
-    v.b.dataset.state = all ? 'installed' : S.n ? 'partial' : 'absent'; v.b.setAttribute('aria-pressed', String(all)); v.ring.set(N ? S.n / N : 0, all ? 'done' : 'idle'); eye(v.ico, all);
-    v.word.textContent = all ? 'REMOVE · ' + fmtBytes(S.bytes) : S.n ? `${S.n} / ${N} · INSTALL` : 'INSTALL · ' + fmtBytes(S.bytes);
-  }
-  /* the store read each time the MOLECULAR deck or the LIBRARY comes into view (the card, a press or the browser may have changed it) */
+  /* the store read each time the MOLECULAR deck or the LIBRARY comes into view (a press, MOLECULES or the browser may have changed it) */
   async function readStore() {
     for (const S of secs.values()) for (const r of S.recs) have.set(r.hash, await installed(r.hash).catch(() => false));
-    for (const S of secs.values()) { if (!S.busy) S.n = S.recs.filter((r) => have.get(r.hash)).length; paintSec(S); for (const m of S.rows) paintAway(m); }
+    for (const S of secs.values()) for (const m of S.rows) paintAway(m);
     library.paintDevice();
   }
-  async function pressSec(S) {
-    if (S.busy) { S.stop = true; return; }   // a press while installing: stop after the record in hand
-    if (S.n === S.recs.length) {             // two presses remove: no window.confirm (the volume's law)
-      if (!S.view.arm.take()) { S.view.arm.arm(); S.view.word.textContent = 'REMOVE ' + S.sec + '? PRESS AGAIN'; return; }
-      await keepSection(S.recs, false);
-    } else {
-      S.busy = true; S.stop = false; S.view.b.dataset.state = 'busy'; S.view.ring.set(0, 'busy'); S.view.word.textContent = `0 / ${S.recs.length} · CANCEL`;
-      await keepSection(S.recs, true, { stop: () => S.stop, onStep: (k, n) => { const w = S.view; if (w && w.b.isConnected) { w.ring.set(k / n, 'busy'); w.word.textContent = `${k} / ${n} · CANCEL`; } } });
-      S.busy = false;
-    }
-    await readStore();
-    if (app.state.chem && app.state.chem.records) app.state.chem.records().catch(() => {});   // MOLECULES' lamps and its download glyph read the store again
-    if (!S.stop && S.n && S.n < S.recs.length) say({ name: S.sec, sub: `${S.n} of ${S.recs.length} on this device — the rest did not download (offline?)` });
-  }
-  function secCard(S, host) {
-    const c = el('div', 'mm-vol mm-scard', host); c.dataset.section = S.sec; c.setAttribute('role', 'group'); c.setAttribute('aria-label', S.sec + ' — ' + cardLine(S));
-    const h = el('div', 'mm-vol-open', c); el('b', 'mm-scard-n', h, S.sec); const meta = el('span', 'mm-vol-meta', h, cardLine(S));
-    if (safariTab()) return;   // a Safari tab is offered nothing to keep (chemview's own rule)
-    const b = el('button', 'mm-install mm-sinstall', c); b.type = 'button'; b.title = `Keep ${S.sec}: press to install, twice to remove`;
-    const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost), ico = icon(ringHost, 'download'), word = el('span', 'mm-install-word', b);
-    S.view = { b, ring, ico, word, meta, arm: armer(b, () => paintSec(S)) }; paintSec(S);
-    b.addEventListener('click', (e) => { e.stopPropagation(); pressSec(S); });
-  }
-
   /* ── LIBRARY: the shelf of volumes; a volume's molecules by their tags ── */
   const library = (() => {
-    const sec = sections[2].sec, shelfEl = el('div', 'mm-shelf', sec), catEl = el('div', 'mm-cat', sec), devEl = el('div', 'mm-dev', sec), view = el('div', 'mm-volview', sec); view.hidden = true;
-    /* iteration 011 Q4: under the shelf, a card per catalogue section that keeps files (THE SECTION INSTALL) and THIS DEVICE (the store's use
-       and quota; iteration 012 L1 cut the heading, the kept counts and the persisted line); both stand aside while a volume is open */
-    catEl.hidden = devEl.hidden = true;
-    function paintCat() {
-      catEl.textContent = '';
-      const row = el('div', 'mm-cat-row', catEl); for (const S of secs.values()) if (S.recs.length) secCard(S, row);
-    }
+    const sec = sections[2].sec, shelfEl = el('div', 'mm-shelf', sec), devEl = el('div', 'mm-dev', sec), view = el('div', 'mm-volview', sec); view.hidden = true;
+    /* iteration 011 Q4: under the shelf, THIS DEVICE (the store's use and quota; iteration 012 L1 cut the heading, the kept counts and the
+       persisted line); it stands aside while a volume is open */
+    devEl.hidden = true;
     async function paintDevice() {
       if (!woke) return;
       const i = await storageInfo().catch(() => null), size = (b) => (b ? fmtBytes(b) : '0 kB');
@@ -553,12 +521,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       });
       paint(); return { paint, run };
     }
-    /* 030 THE TIP JAR: the colorful QR (img/tip-qr.svg) in a turning ring — a card on the shelf, and once a session a sheet before an install
+    /* 030 THE TIP JAR: the colorful QR (img/menu/tip-qr.svg; 032: λWAVES' teal, violet and lilac, no outer glow, THE CARD'S LIGHT on a hover) in a turning ring — a card on the shelf, and once a session a sheet before an install
        with ♥ TIP and NO THANKS; both continue. A file volume (OPEN FILE…) asks on every press: its file is the tip jar's thank-you (Josh
        10-31, B), so the words are THE FILE IS A THANK-YOU · ♥ TIP · I HAVE THE FILE, and its chooser opens on I HAVE THE FILE, Escape or a
        press outside (after ♥ TIP it waits for its own press: the new tab took the gesture). The Drive link is never in the app. */
     let tipAsked = false;
-    const tipArt = (host) => { const f = el('span', 'mm-tip-art', host), img = el('img', '', f); img.src = 'img/menu/tip-qr.svg'; img.alt = 'QR code: the tip jar'; img.width = img.height = 196; img.decoding = 'async'; return f; };
+    const tipArt = (host) => { const f = el('span', 'mm-tip-art mm-holo', host); el('span', 'mm-halo', f); const lit = el('span', 'mm-lit', f), img = el('img', '', lit); el('span', 'mm-foil', lit); el('span', 'mm-rim', f);   // 032: the album art's light
+      img.src = 'img/menu/tip-qr.svg'; img.alt = 'QR code: the tip jar'; img.width = img.height = 196; img.decoding = 'async'; img.draggable = false; return f; };
     const tipLink = (a) => { a.href = TIP_URL; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
     function tipCard() { const c = tipLink(el('a', 'mm-vol mm-tip', shelfEl)); c.title = 'Everything here is free. A tip keeps it growing.'; tipArt(c); el('span', 'mm-tip-word', c, '♥ TIP JAR'); }
     function tipSheet(go, follow) {
@@ -573,20 +542,50 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       back.addEventListener('click', (e) => { if (e.target === back) done(true); });
       window.addEventListener('keydown', key, true); no.focus();
     }
-    function card(v) {
-      /* iteration 012 L1: the numeral, the count and the bases — the title and the blurb are the hover's (title), the size the install's, and
-         no caption under a hover (it repeated the card) */
-      const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
-      el('b', 'mm-vol-num', o, volName(v)); o.title = [v.title, v.blurb].filter(Boolean).join(' — ');
+    /* 032 THE PORTRAIT SHELF (Josh 11-01: "portrait oriented cards with images … 9:16 … the 'Vol. X' text towards the center bottom … a hero
+       animation for each one that activates during mouseover … light mode and dark mode versions"): the card is album art — a 9:16 `.mm-holo`
+       (THE CARD'S LIGHT, picker-fx.js) whose picture is the volume's still in the theme in use and, while the mouse is on it (or a key's focus),
+       its hero, fetched on the first hover and paused on leaving; a volume HEROES does not name wears the λWAVES palette (skin.css).  The
+       numeral and its count sit at the art's foot, the WIP cone at its head, the install under the card (iteration 012 L1's words). */
+    const HERO = './img/menu/vol/', theme = () => (document.body.dataset.theme === 'light' ? 'light' : 'dark');
+    function heroArt(art, id) {
+      const has = (HEROES[id] || '').split(' ').filter(Boolean), pick = (th) => (has.includes(th) ? th : has[0]);
+      if (!has.length) { art.classList.add('mm-art-plain'); return null; }
+      for (const th of ['dark', 'light']) {   // both stills, the CSS shows the theme's (a lazy picture it hides is never asked for)
+        const i = el('img', 'mm-art-still', art); i.alt = ''; i.dataset.theme = th; i.decoding = 'async'; i.loading = 'lazy'; i.draggable = false;
+        i.addEventListener('load', () => keepData(i.src), { once: true }); i.src = HERO + id + '.' + pick(th) + '.webp';
+      }
+      let vid = null, want = false;
+      return {
+        play() {
+          if (still()) return; want = true;
+          if (!vid) { vid = el('video', 'mm-art-hero', art); vid.muted = vid.defaultMuted = vid.loop = vid.playsInline = true; vid.preload = 'auto'; vid.tabIndex = -1; vid.setAttribute('aria-hidden', 'true');
+            vid.addEventListener('playing', () => { if (want) vid.classList.add('on'); }); vid.addEventListener('error', () => { vid.remove(); vid = null; }, { once: true }); }   // no hero: the still stays
+          const src = HERO + id + '.' + pick(theme()) + '.mp4'; if (vid.getAttribute('src') !== src) vid.src = src;
+          const r = vid.play(); if (r && r.catch) r.catch(() => {});
+        },
+        stop() { want = false; if (vid) { vid.pause(); vid.classList.remove('on'); } },
+      };
+    }
+    const heroes = new Set(), rest = () => { for (const h of heroes) h.stop(); };   // a volume opened or the Picker closed: every hero rests
+    function card(v, k) {
+      const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
+      o.title = [v.title, v.blurb].filter(Boolean).join(' — '); o.style.setProperty('--k', String(k));
+      el('span', 'mm-halo', o); const art = el('span', 'mm-lit', o); el('span', 'mm-rim', o);
+      const hero = heroArt(art, v.id); el('span', 'mm-foil', art);
       if (v.wip || v.drawing) {   // iteration 014 C4 (pack.mjs --wip); 030: a volume whose pictures are still being drawn (build-deploy's `drawing`)
-        const w = el('span', 'mm-vol-wip', o); icon(w, 'cone'); el('span', '', w, 'WIP');
+        const w = el('span', 'mm-vol-wip', art); icon(w, 'cone'); el('span', '', w, 'WIP');
         w.title = 'Under construction: ' + [v.wip && 'still filling', v.drawing && 'pictures coming'].filter(Boolean).join('; ');
       }
+      const foot = el('span', 'mm-art-foot', art); el('b', 'mm-vol-num', foot, volName(v));
       /* iteration 015 M5 · a volume on the shelf before its first molecule (pack.mjs --wip --next: the next volume, still filling) says FILLING:
          nothing to install or open yet */
-      if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; o.title = volName(v) + ' is being filled'; el('span', 'mm-vol-meta', o, 'FILLING'); return; }
+      if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; o.title = volName(v) + ' is being filled'; el('span', 'mm-vol-meta', foot, 'FILLING'); return; }
       const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
-      if (meta) el('span', 'mm-vol-meta', o, meta);
+      if (meta) el('span', 'mm-vol-meta', foot, meta);
+      if (hero) { heroes.add(hero);
+        o.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hero.play(); }); o.addEventListener('pointerleave', hero.stop);
+        o.addEventListener('focus', () => { if (o.matches(':focus-visible')) hero.play(); }); o.addEventListener('blur', hero.stop); }
       o.addEventListener('click', () => enter(v));
       const ins = installer(c, v);
       if (v.archive) {   // the card takes a drop of its .lwv (030: every volume with an archive, not only a file volume)
@@ -597,19 +596,19 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       }
     }
     async function paintShelf() {
-      shelfEl.textContent = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume');
+      shelfEl.textContent = ''; shelfEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume');
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'LIBRARY');
         el('span', '', e, 'No volume is published yet.');
         return;
       }
-      vols = s.volumes; for (const v of s.volumes) card(v);
+      heroes.clear(); vols = s.volumes; s.volumes.forEach(card);
       if (TIP_URL) tipCard();   // 030 THE TIP JAR: the last card on the shelf
       enterTiles([...shelfEl.children]);
     }
     async function enter(v) {
-      cur = v; on.clear(); query = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = ''; root.classList.add('in-volume');   // the head's SHOW LABELS stands for the one under the tabs
+      rest(); cur = v; on.clear(); query = ''; shelfEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = ''; root.classList.add('in-volume');   // the head's SHOW LABELS stands for the one under the tabs
       const back = el('button', 'mm-back', vhead); back.type = 'button'; icon(back, 'arrow-left'); back.setAttribute('aria-label', 'back to the volumes'); back.title = 'back to the volumes'; back.addEventListener('click', () => paintShelf());
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
       const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).filter((x) => x.count || x.index || x.archive).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
@@ -688,7 +687,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       vdeck.set(list, (m, host) => { const t = molTile(host, m, true); t.dataset.iso = m.id; return t; });
       enterTiles(vdeck.tiles);   // iteration 012 L2: a tag or a search deals the page in (animate() stands down under reduced motion)
     }
-    return { wake() { if (!woke) { woke = true; paintCat(); paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); } };
+    return { wake() { if (!woke) { woke = true; paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); }, rest };
   })();
 
   /* ── the tab under the reader's eye ── */
@@ -757,7 +756,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; closeDrop(); showDecks(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; closeDrop(); showDecks(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = () => (root.hidden ? open() : close());
   const escape = () => (drop.hidden ? close() : closeDrop(true));   // M1: Escape puts THE LOOK DROP away first
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });

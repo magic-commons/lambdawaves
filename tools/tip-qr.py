@@ -6,7 +6,8 @@
 
 Needs the `qrcode` package at tool time only (any Python that has it; the app ships the SVG, never a QR library). The code is level Q
 (25 % of it can be lost), so the heart over its centre and the round dots still scan; the dots are dark (each stop of the gradient is
-under 0.2 relative luminance) on white, with the standard four-module quiet zone. After a run: node tests/pwa.test.mjs --write.
+under 0.2 relative luminance) on white, with the standard four-module quiet zone. 032: the colours are λWAVES' own — the brand's
+deep teal, violet and lilac ink (the logo's #59baa5 / #ebb0f2 darkened to scan), the heart the lilac between them. After a run: node tests/pwa.test.mjs --write.
 """
 import re, sys
 from pathlib import Path
@@ -55,11 +56,11 @@ heart = (f'M{cx} {cy + 2.6 * s} C{cx - 4.2 * s} {cy - .2 * s} {cx - 2.6 * s} {cy
 svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}" shape-rendering="geometricPrecision">'
        f'<!-- tools/tip-qr.py · version {qr.version} · level Q (the link itself lives in TIP_URL alone) -->'
        f'<defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="{q}" y1="{q}" x2="{size - q}" y2="{size - q}">'   # one sweep across the code, not one per dot
-       '<stop offset="0" stop-color="#d1146a"/><stop offset=".5" stop-color="#6d28d9"/><stop offset="1" stop-color="#0e7490"/>'
+       '<stop offset="0" stop-color="#0f7c6e"/><stop offset=".5" stop-color="#5b4bc4"/><stop offset="1" stop-color="#a52eab"/>'
        '</linearGradient></defs>'
        f'<rect width="{size}" height="{size}" rx="{q}" fill="#fff"/>'
        f'<path d="{"".join(parts)}" stroke="url(#g)" stroke-width=".92" stroke-linecap="round"/>{"".join(eyes)}'
-       f'<path d="{heart}" fill="#ff4f9a"/>'
+       f'<path d="{heart}" fill="#c75fd0"/>'
        '</svg>\n')
 
 if out:

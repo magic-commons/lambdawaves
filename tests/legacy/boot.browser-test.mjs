@@ -1625,7 +1625,7 @@ try {
       && chT.title === 'PHOTOSENSITIVITY WARNING'
       && chT.body === 'This app displays rapid strobing effects and changing colors. If you have a history of photosensitive epilepsy or seizures, do not continue.'
       && chT.btn === 'CONTINUE'
-      && chT.sign === './img/warning-sign.png'
+      && chT.sign === './img/warning-sign.webp'
       && chT.down === true && chT.remembered1 === true && chT.needed1 === false
       && chT.row === 1 && chT.needed2 === true
       && chT.themeNow === chT.theme0 && chT.errs === 0, chT);
@@ -3002,7 +3002,7 @@ try {
       return R;
     } catch (e) { return { err: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { err: 'no result' };
   judge('B81 THE WARNING\'S "!" IS A CUTOUT, NOT AN OVERLAY (wave 53, Josh, board #41: knocked out of the image-filled caution triangle so what is behind shows through it, as in the MANDELBROT reference). 0.5.0 C6b: the sign is the old SVG composite — the triangle clip and the luminance mask that cuts the stroke and the dot — rendered once into lab/img/warning-sign.png, the kit notice\'s `art`. Proved in the picture\'s own pixels: the centre of the stroke, the centre of the dot and a point outside the triangle are fully transparent, the triangle either side of the stroke fully opaque; dismiss() puts the kit\'s pane down',
-    !cutT.err && cutT.src === './img/warning-sign.png' && cutT.w === 480 && cutT.h === 424
+    !cutT.err && cutT.src === './img/warning-sign.webp' && cutT.w === 480 && cutT.h === 424
       && cutT.stem === 0 && cutT.dot === 0 && cutT.outside === 0 && cutT.fillL === 255 && cutT.fillR === 255
       && cutT.down === true && cutT.errs === 0, cutT);
 

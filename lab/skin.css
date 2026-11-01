@@ -624,20 +624,35 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-cap-s { flex-basis: 100%; font-style: normal; font-size: clamp(12px, 1.25vw, 16px); letter-spacing: .12em; opacity: .65; }
 #lwMenu .mm-cap-m { font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: clamp(16px, 1.7vw, 22px); letter-spacing: .02em; opacity: .8; }   /* an element's subshell, 3d² */
 /* LIBRARY: the shelf of volumes (the numeral huge in LW Title), the install ring (R7), a volume's tags, its group line, its deck */
-#lwMenu .mm-shelf { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: stretch; max-width: 1240px; }
+#lwMenu .mm-shelf { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: flex-start; max-width: 1240px; }
 #lwMenu .mm-shelf[hidden], #lwMenu .mm-volview[hidden] { display: none; }
 #lwMenu .mm-empty { display: grid; gap: 12px; justify-items: center; text-align: center; max-width: 600px; }
 #lwMenu .mm-empty b { font-family: 'LW Title', var(--font-ui); font-size: clamp(44px, 7vw, 104px); font-weight: 400; letter-spacing: .04em; line-height: 1; }
 #lwMenu .mm-empty span { font-size: 14px; line-height: 1.6; opacity: .7; }
-#lwMenu .mm-vol { display: grid; gap: 16px; justify-items: center; width: min(400px, 86vw); padding: 28px 22px 22px; border-radius: 18px; background: color-mix(in srgb, var(--fg) 5%, transparent); }
-#lwMenu .mm-vol.drop { outline: 2px dashed var(--acc); outline-offset: 4px; }
-#lwMenu .mm-vol-open { display: grid; gap: 7px; justify-items: center; text-align: center; }
-#lwMenu .mm-vol-num { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(52px, 6.4vw, 96px); line-height: .95; letter-spacing: .02em; white-space: nowrap; transition: color 160ms; }
+/* 032 THE PORTRAIT SHELF (picker.js card): a volume is album art — 9:16 as tall as the page allows, its still for the theme in use (the hero
+   over it on a hover, faded in once it plays), or the λWAVES palette (teal · lilac · violet, placed by the card's --k) until it has one; the
+   numeral and its count on the theme's ground at the foot, the WIP cone at the head, the install under the card */
+#lwMenu .mm-vol { --vol-h: clamp(300px, calc(100dvh - 400px), 540px); display: grid; gap: 14px; justify-items: center; border-radius: 18px; }
+#lwMenu .mm-vol.drop { outline: 2px dashed var(--acc); outline-offset: 6px; }
+#lwMenu .mm-vol-open { position: relative; display: block; height: var(--vol-h); aspect-ratio: 9 / 16; border-radius: 18px; }
+#lwMenu .mm-lit { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; isolation: isolate; background: hsl(var(--glass-tint)); }
+#lwMenu .mm-art-plain { --a: #59baa5; --b: #ebb0f2; --c: #9b83e8; background-color: #0b1424;
+  background-image: radial-gradient(95% 55% at calc(20% + var(--k, 0) * 30%) 16%, color-mix(in srgb, var(--a) 72%, transparent), transparent 72%),
+    radial-gradient(100% 60% at calc(85% - var(--k, 0) * 25%) 60%, color-mix(in srgb, var(--b) 60%, transparent), transparent 72%),
+    radial-gradient(80% 45% at 40% 96%, color-mix(in srgb, var(--c) 58%, transparent), transparent 76%); }
+body[data-theme="light"] #lwMenu .mm-art-plain { --a: #59baa5; --b: #e9a6f0; --c: #b4a2f0; background-color: #f2f5f9; }
+#lwMenu :is(.mm-art-still, .mm-art-hero) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([data-theme="light"]) #lwMenu .mm-art-still[data-theme="light"] { display: none; }
+#lwMenu .mm-art-hero { z-index: 1; opacity: 0; transition: opacity 280ms ease; } #lwMenu .mm-art-hero.on { opacity: 1; }
+#lwMenu .mm-art-foot { position: absolute; inset: auto 0 0; z-index: 5; display: grid; gap: 6px; justify-items: center; padding: 64px 10px 24px;
+  background: linear-gradient(to top, hsl(var(--glass-tint) / .8), hsl(var(--glass-tint) / .38) 55%, transparent); }
+#lwMenu .mm-vol-num { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(30px, calc(var(--vol-h) * .095), 52px); line-height: .95; letter-spacing: .02em; white-space: nowrap; transition: color 160ms; }
 #lwMenu .mm-vol-open:hover .mm-vol-num, #lwMenu .mm-vol-open:focus-visible .mm-vol-num { color: var(--acc); }
-#lwMenu .mm-vol-wip { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .22em; padding: 3px 9px 3px 7px; border-radius: 999px; color: #f2b01e; background: color-mix(in srgb, #f2b01e 15%, transparent); }
+#lwMenu .mm-vol-wip { position: absolute; top: 14px; left: 50%; translate: -50% 0; z-index: 5; display: inline-flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .22em; padding: 3px 9px 3px 7px; border-radius: 999px; color: #f2b01e;
+  background: color-mix(in srgb, #f2b01e 15%, hsl(var(--glass-tint) / .82)); }
 #lwMenu .mm-vol-wip .mm-ico { width: 14px; height: 14px; }   /* 030: the cone — under construction, amber like a site sign */   /* iteration 014 C4: a volume still filling */
 #lwMenu .mm-vol.filling .mm-vol-open { cursor: default; } #lwMenu .mm-vol.filling .mm-vol-num { opacity: .55; } #lwMenu .mm-vol.filling .mm-vol-open:hover .mm-vol-num { color: inherit; }   /* iteration 015 M5: VOL. II · WIP, FILLING */
-#lwMenu .mm-vol-meta { font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; }
+#lwMenu .mm-vol-meta { font-size: 12px; letter-spacing: .08em; opacity: .7; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: 999px; font-variant-numeric: tabular-nums; transition: color 120ms; }
 #lwMenu .mm-install:hover, #lwMenu .mm-install:focus-visible { color: var(--acc); }
 #lwMenu .mm-install-alt { font-size: 10px; letter-spacing: .2em; opacity: .55; padding: 2px 8px; margin-top: -8px; transition: opacity 120ms, color 120ms; }   /* 030: a site volume's .lwv from disk */
@@ -682,16 +697,9 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-isox { font-size: 18px; letter-spacing: 0; }
 #lwMenu .mm-isogrid { display: grid; grid-template-columns: repeat(min(var(--n, 1), var(--cols, 8)), var(--t, 150px)); grid-auto-rows: var(--t, 150px); gap: var(--gap, 10px); justify-content: center; }
 #lwMenu .mm-isogrid .mm-tile.here { outline: 1px solid color-mix(in srgb, var(--acc) 60%, transparent); outline-offset: 2px; }
-/* … and the LIBRARY owns what is kept: under the shelf, RECORDS (a card per catalogue section in the volume card's look — THE SECTION INSTALL,
-   iteration 008 P's ring · lamp · word, once the deck's heading tile) and THIS DEVICE */
-#lwMenu .mm-cat { display: grid; gap: 14px; justify-items: center; max-width: 1240px; margin-top: 10px; }
-#lwMenu .mm-cat[hidden], #lwMenu .mm-dev[hidden] { display: none; }
+/* … and under the shelf THIS DEVICE (032: the RECORDS cards left — every section's molecules are the MOLECULAR deck's) */
+#lwMenu .mm-dev[hidden] { display: none; }
 #lwMenu .mm-dev b { font-weight: 400; font-size: 11px; letter-spacing: .22em; opacity: .55; }
-#lwMenu .mm-cat-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-#lwMenu .mm-scard { width: 220px; gap: 12px; padding: 22px 16px 16px; box-sizing: border-box; } #lwMenu .mm-scard .mm-vol-meta { white-space: pre-line; line-height: 1.5; }
-#lwMenu .mm-scard-n { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(30px, 2.8vw, 44px); line-height: 1; letter-spacing: .04em; white-space: nowrap; }
-#lwMenu .mm-sinstall { position: relative; max-width: 100%; gap: 8px; padding: 2px 6px 2px 2px; font-size: 11px; letter-spacing: .14em; text-align: left; line-height: 1.35; }   /* the armed REMOVE … ? PRESS AGAIN wraps inside the card */
-#lwMenu .mm-sinstall .mm-ring-host { width: 24px; height: 24px; }
 #lwMenu .mm-dev { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 16px; max-width: 1000px; text-align: center; font-size: 12px; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-dev span { opacity: .6; }
 #lwMenu .mm-ph { position: absolute; inset: 0; display: grid; place-items: center; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: calc(var(--t) * .17); opacity: .75; transition: scale 280ms var(--ease); }
@@ -700,7 +708,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
   #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
   #lwMenu .mm-tabs { gap: 14px; } #lwMenu .mm-tab { font-size: 12px; letter-spacing: .08em; } #lwMenu .mm-tab .mm-ico { display: none; }
   #lwMenu .mm-prev { right: auto; left: 2px; } #lwMenu .mm-next { left: auto; right: 2px; } #lwMenu .mm-caption { min-height: 76px; }
-  #lwMenu .mm-cat-row { gap: 10px; } #lwMenu .mm-scard { width: calc(50vw - 26px); padding: 16px 10px 12px; } #lwMenu .mm-scard-n { font-size: 26px; } }
+  #lwMenu .mm-shelf { gap: 16px; } #lwMenu .mm-vol { --vol-h: min(clamp(300px, calc(100dvh - 400px), 540px), calc((100vw - 56px) * 8 / 9)); } }   /* 032: two portraits a row */
 @media (prefers-reduced-motion: reduce) {
   #lwMenu { clip-path: none; transition: none; } #lwMenu .mm-pic, #lwMenu .mm-pill, #lwMenu .mm-under, #lwMenu .mm-ring-ink, #lwMenu .mm-arrow, #lwMenu .mm-arrow .mm-ico { transition: none; }
   #lwMenu .mm-pic[data-tilt] { transform: none; } #lwMenu .mm-arrow { scale: 1 !important; } }
@@ -930,18 +938,17 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .dev .reg-morph.fit > .sw, .dev .mol-mrow.fit > .sw { grid-column: span 2; }
 
 /* 030 THE TIP JAR: a colorful QR in a turning conic ring — a card on the shelf, and once a session a sheet before an install (♥ TIP · NO
-   THANKS; both go on). The QR's own picture is tools/tip-qr.py's. The sheet is the kit's glass on no dark layer. */
+   THANKS; both go on). The QR's own picture is tools/tip-qr.py's. The sheet is the kit's glass on no dark layer. 032 (Josh 11-01): the ring
+   is λWAVES' palette (the theme's: the bright teal · lilac · violet in DARK, their inks in LIGHT), the outer glow is gone, and a hover is THE
+   CARD'S LIGHT below instead of the tilt-and-turn. */
 @property --tip-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes mm-tip-spin { to { --tip-a: 360deg; } }
 @keyframes mm-tip-in { from { opacity: 0; transform: translateY(10px) scale(.95); } }
-#lwMenu .mm-tip { text-decoration: none; color: inherit; align-content: center; }
-#lwMenu .mm-tip-art { position: relative; display: block; width: 172px; aspect-ratio: 1; padding: 7px; border-radius: 30px; isolation: isolate; transition: transform 320ms cubic-bezier(.3, 1.6, .5, 1); }
-#lwMenu .mm-tip-art::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; animation: mm-tip-spin 10s linear infinite;
-  background: conic-gradient(from var(--tip-a), #ff4fa3, #ffb347, #ffe66d, #5ce1a5, #4fc3ff, #8b5cf6, #ff4fa3); }
-#lwMenu .mm-tip-art::after { content: ''; position: absolute; inset: -10px; z-index: -2; border-radius: 40px; opacity: .45; filter: blur(18px); animation: mm-tip-spin 10s linear infinite;
-  background: conic-gradient(from var(--tip-a), #ff4fa3, #ffb347, #ffe66d, #5ce1a5, #4fc3ff, #8b5cf6, #ff4fa3); }
-#lwMenu .mm-tip-art img { display: block; width: 100%; height: 100%; border-radius: 24px; background: #fff; }
-#lwMenu .mm-tip:hover .mm-tip-art, #lwMenu .mm-tip:focus-visible .mm-tip-art { transform: scale(1.05) rotate(-3deg); }
+#lwMenu .mm-tip { text-decoration: none; color: inherit; align-self: center; padding: 8px; }
+#lwMenu .mm-tip-art { display: block; width: 172px; aspect-ratio: 1; border-radius: 30px; }
+#lwMenu .mm-tip-art .mm-lit { padding: 7px; box-sizing: border-box; animation: mm-tip-spin 10s linear infinite;
+  background: conic-gradient(from var(--tip-a), var(--hl-1), var(--hl-2), var(--hl-3), var(--hl-4), var(--hl-1)); }
+#lwMenu .mm-tip-art img { position: relative; display: block; width: 100%; height: 100%; border-radius: 24px; background: #fff; }
 #lwMenu .mm-tip-word { font-size: 11px; letter-spacing: .24em; opacity: .75; transition: color 160ms, opacity 160ms; }
 #lwMenu .mm-tip:hover .mm-tip-word, #lwMenu .mm-tip:focus-visible .mm-tip-word { color: var(--acc); opacity: 1; }
 #lwMenu .mm-tip-back { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; }
@@ -950,8 +957,50 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 #lwMenu .mm-tip-free { font-size: 10px; letter-spacing: .26em; opacity: .6; }
 #lwMenu .mm-tip-row { display: flex; gap: 10px; }
 #lwMenu .mm-tip-yes, #lwMenu .mm-tip-no { font-size: 11px; letter-spacing: .18em; padding: 9px 18px; border-radius: 999px; color: inherit; text-decoration: none; transition: transform 160ms, color 120ms; }
-#lwMenu .mm-tip-yes { color: #fff; background: linear-gradient(120deg, #ff4fa3, #8b5cf6 55%, #4fc3ff); }
+#lwMenu .mm-tip-yes { color: #fff; background: linear-gradient(120deg, #168878, #5b4bc4 55%, #a52eab); }
 #lwMenu .mm-tip-no { background: color-mix(in srgb, var(--fg) 8%, transparent); }
 #lwMenu .mm-tip-yes:hover, #lwMenu .mm-tip-yes:focus-visible { transform: scale(1.06); }
 #lwMenu .mm-tip-no:hover, #lwMenu .mm-tip-no:focus-visible { color: var(--acc); }
-@media (prefers-reduced-motion: reduce) { #lwMenu .mm-tip-art::before, #lwMenu .mm-tip-art::after, #lwMenu .mm-tip-sheet { animation: none; } #lwMenu .mm-tip-art { transition: none; } }
+
+/* 032 THE CARD'S LIGHT (picker-fx.js holoCards; SynchroSpectre's effects.css and visual-materials.css, their numbers): a `.mm-holo` shell
+   tilts on its spring; over its art (.mm-lit) the cursor glow (::after) and the edge glow (::before, the nearest edge lit through a disc at
+   the pointer), the foil sheen (.mm-foil: a band of the palette sliding with the pointer, its angle the pointer's); around it the
+   holographic rim (.mm-rim: the conic palette, sharp, near the pointer) and its halo (.mm-halo: the same ring blurred and grained), both
+   waking before the pointer arrives.  The palette is λWAVES' and the blends are the theme's: light adds in DARK, burns and softens in LIGHT. */
+#lwMenu { --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 2.4 -.6'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url%28%23n%29'/%3E%3C/svg%3E"); }
+#lwMenu .mm-holo { --hl-1: #59baa5; --hl-2: #76dcca; --hl-3: #ebb0f2; --hl-4: #9b83e8; --hl-5: #f5d1fa; --tint: 118, 220, 202;
+  --holo: conic-gradient(from var(--holo-angle, 20deg), var(--hl-1), var(--hl-2), var(--hl-4), var(--hl-3), var(--hl-5), var(--hl-1));
+  position: relative; transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); }
+body[data-theme="light"] #lwMenu .mm-holo { --hl-1: #168878; --hl-2: #59baa5; --hl-3: #a52eab; --hl-4: #6b4fc8; --hl-5: #ebb0f2; --tint: 22, 136, 120; }
+#lwMenu .mm-holo[data-tilt] { will-change: transform; }
+#lwMenu .mm-holo .mm-lit::after { content: ''; position: absolute; inset: 0; z-index: 6; pointer-events: none; border-radius: inherit;
+  background: radial-gradient(circle 440px at var(--mx, 50%) var(--my, 50%), rgba(var(--tint), .15), rgba(var(--tint), .045) 48%, transparent 96%);
+  mix-blend-mode: screen; mix-blend-mode: plus-lighter; opacity: var(--pointer-on, 0); transition: opacity .3s ease; }
+#lwMenu .mm-holo .mm-lit::before { content: ''; position: absolute; inset: 0; z-index: 7; pointer-events: none; border-radius: inherit; filter: saturate(1.65);
+  box-shadow: inset 0 0 2px 1px rgba(var(--tint), .65), inset 0 0 28px 4px rgba(var(--tint), .5);
+  -webkit-mask-image: radial-gradient(circle 300px at var(--mx, 50%) var(--my, 50%), #000 10%, transparent 100%); mask-image: radial-gradient(circle 300px at var(--mx, 50%) var(--my, 50%), #000 10%, transparent 100%);
+  mix-blend-mode: color-dodge; opacity: calc(var(--pointer-on, 0) * var(--edge-strength, 0)); transition: opacity .18s ease; }
+body[data-theme="light"] #lwMenu .mm-holo .mm-lit::before { mix-blend-mode: color-burn; }
+#lwMenu .mm-foil { position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: inherit; opacity: calc(var(--pointer-on, 0) * .34); mix-blend-mode: screen; transition: opacity .22s ease;
+  background: linear-gradient(var(--holo-angle, 30deg), transparent 34%, color-mix(in srgb, var(--hl-3) 30%, transparent) 43%, var(--hl-2) 49%, color-mix(in srgb, var(--hl-3) 45%, transparent) 52%, transparent 59%) var(--mx, 50%) var(--my, 50%) / 240% 240%;
+  -webkit-mask: var(--grain) 0 0 / 160px repeat; mask: var(--grain) 0 0 / 160px repeat; }
+body[data-theme="light"] #lwMenu .mm-foil { mix-blend-mode: soft-light; opacity: calc(var(--pointer-on, 0) * .48); }
+#lwMenu .mm-holo :is(.mm-halo, .mm-rim) { position: absolute; pointer-events: none; opacity: calc(var(--glow-active, 0) * (.18 + .82 * var(--border-activation, 0))); transition: opacity .16s ease; }
+#lwMenu .mm-halo { inset: -76px; z-index: -1; filter: blur(28px) saturate(1.8); -webkit-mask: var(--grain) 0 0 / 160px repeat; mask: var(--grain) 0 0 / 160px repeat; }
+body[data-theme="light"] #lwMenu .mm-halo { filter: blur(26px) saturate(1.4); opacity: calc(.75 * var(--glow-active, 0) * (.18 + .82 * var(--border-activation, 0))); }
+#lwMenu .mm-rim { inset: -3px; z-index: 8; border-radius: 21px; filter: drop-shadow(0 0 3px var(--hl-2)) drop-shadow(0 0 8px var(--hl-3)); }
+#lwMenu .mm-tip-art .mm-rim { border-radius: 33px; }
+/* the ring: the palette in a padded box less its content (exclude), and only near the pointer (intersect) */
+#lwMenu .mm-halo::before, #lwMenu .mm-rim::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 3px; background: var(--holo);
+  -webkit-mask: radial-gradient(circle 90px at calc(var(--glow-x, 50%) + 3px) calc(var(--glow-y, 50%) + 3px), #000 10%, transparent 100%), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: radial-gradient(circle 90px at calc(var(--glow-x, 50%) + 3px) calc(var(--glow-y, 50%) + 3px), #000 10%, transparent 100%), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor; mask-composite: intersect, exclude; }
+#lwMenu .mm-halo::before { inset: 56px; border-radius: 38px; padding: 20px;
+  -webkit-mask: radial-gradient(circle 260px at calc(var(--glow-x, 50%) + 20px) calc(var(--glow-y, 50%) + 20px), #000 6%, #000b 40%, transparent 100%), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: radial-gradient(circle 260px at calc(var(--glow-x, 50%) + 20px) calc(var(--glow-y, 50%) + 20px), #000 6%, #000b 40%, transparent 100%), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor; mask-composite: intersect, exclude; }
+/* THEME in the Picker's head: the glyph the theme names, as the transport's (csb.css) */
+body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="light"]) #lwMenu .mm-themeb .gly-sun { display: none; }
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-tip-art .mm-lit, #lwMenu .mm-tip-sheet { animation: none; } #lwMenu .mm-holo { transform: none; } #lwMenu .mm-art-hero { display: none; } }
+:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu :is(.mm-tip-art .mm-lit, .mm-tip-sheet) { animation: none; }
+:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-holo { transform: none; }

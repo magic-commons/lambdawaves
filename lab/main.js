@@ -33,7 +33,7 @@ const warning = (() => {
     needed(o) { const q = new URLSearchParams(o && o.query !== undefined ? o.query : location.search);
       return (o && o.driver !== undefined ? o.driver : navigator.webdriver === true) && q.get('opener') !== '1' ? q.get('warn') === '1' : !warned.getItem(); },
     show() { if (open) return false; open = true; document.body.classList.add('lw-notice');   // iteration 012 L3: the notice on the Picker's own ground, no pane (lab.css)
-      photosensitivityNotice({ key: 'warned', storage: warned, force: true, art: './img/warning-sign.png', alt: 'Caution triangle filled with a λWAVES orbital, the exclamation mark knocked out of it' }).then(accept);
+      photosensitivityNotice({ key: 'warned', storage: warned, force: true, art: './img/warning-sign.webp', alt: 'Caution triangle filled with a λWAVES orbital, the exclamation mark knocked out of it' }).then(accept);
       return true; },
     dismiss() { if (!open) return false; accept(); press(40); return true; },
     onAccept(fn) { if (open) accepted.push(fn); else fn(); return true; },
