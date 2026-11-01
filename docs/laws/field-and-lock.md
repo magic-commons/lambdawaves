@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 032
+
+THE ATOMS ARE KNOBS (032 O1, Josh 11-01: "sticks by RADIUS > 0, balls by SIZE > 0 in every style"): under MOLECULES, WAVE's SIZE > 0 draws the atoms and RADIUS > 0 the bonds inside ANY style — `field.js` `atomsOver` is the nearer of the two on the ray, the march stops there and the hit is its ground (`back`, `tEnd`; DUST the same) — and ESP keeps its sticks alone (an untouched RADIUS reads STICK_R there, `stickROf`). SIZE and RADIUS default 0 (`atomSizeOf`), so no picture moved and THE LOCK reads 843 · 0 and 987 · 0 (no leaf sets atoms). BALLS (9) and STICKS (10) left the STYLE seg (nine styles: CLOUD SOLID SIGNED DUST SHELL SHELL ± ADD BANDS ESP; GRAIN joined DUST in 008 G); the ids stay reserved, never renumbered. An older project, link or `LW.setStyle('balls' | 'sticks')` opens as SHELL (GLASS, 6) with SIZE (100 %) or RADIUS (STICK_R) raised when the file never set it — `liftAtomStyle`, on persist's open road (said once: "BALLS and STICKS are SIZE and RADIUS now: opened as SHELL") and the facade; the conductor's `balls` / `sticks` are SHELL with the knob raised. `STYLE_READS`: SIZE in every style but ESP, RADIUS in every one; the stage's and VIEW's STYLE menus list the seg's visible set (`ui.styleList`). The rack's field tick sets the atoms while MOLECULES is on and ESP is drawn or SIZE or RADIUS is above 0, else none.
+
 ## The laws of 021
 
 THE LOCK (`tools/perf/digest-lock.mjs`, the fixtures) is never re-baked: a leaf that moved is re-captured BY NAME and said in the BUILD note. Through 021 it reads 843 · 0 (`--check --query gastab=0`) and 987 · 0 (the same with `--fixture tests/fixtures/digest-lock-s4a.json`) on this machine. THE momentum@128 `repeat` leaf may flip under a second GPU client (028 R-22: a headless browser or a recorder holding the card): re-run the lock once ALONE before reporting it; the DIFF line names the second digest beside the leaf. 843 · 0 and 987 · 0 stay the law.

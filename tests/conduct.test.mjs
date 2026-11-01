@@ -26,7 +26,7 @@ assert.equal(readScore({ conduct: 1, tempo: { bpm: 5 } }).score, null);
 /* the register's index is BASIS's, for all 140 */
 for (const [id, i] of BASIS_INDEX) assert.equal(modeIndex(id), i, id);
 assert.equal(modeIndex('h:2:2:0'), -1); assert.deepEqual(modeOf(['h:2:1:1', 2, Math.PI / 2]).re.toFixed(9), (0).toFixed(9)); assert.equal(modeOf('h:9:0:0'), null);
-assert.equal(indexOf('material.style', 'shell'), 6); assert.equal(indexOf('material.view', 'imag'), 3); assert.ok(Number.isNaN(indexOf('palette.index', 'nope')));
+assert.equal(indexOf('material.style', 'shell'), 6); assert.equal(indexOf('material.style', 'sticks'), 6, '032 O1: STICKS is RADIUS > 0 on glass'); assert.equal(indexOf('material.view', 'imag'), 3); assert.ok(Number.isNaN(indexOf('palette.index', 'nope')));
 
 /* linear in the unit, a log map normalised by the registry; a value off range is clamped and said */
 { const c = laneCurve({ target: 'material.gamma', points: [[0, 0.5], [8, 2.4], [8, 9]] }, { total: 8, describe, toNorm });
@@ -36,8 +36,8 @@ assert.equal(indexOf('material.style', 'shell'), 6); assert.equal(indexOf('mater
   assert.equal(laneCurve({ target: 'nope', points: [[0, 1]] }, { total: 8, describe, toNorm }).why, 'no such target "nope"'); }
 
 /* step HOLDS until the next point (a 2-bar test: CLOUD, then SHELL at bar 2) */
-{ const { at } = play({ conduct: 1, bars: 2, lanes: [{ target: 'material.style', shape: 'step', points: [[0, 'cloud'], [4, 'glass'], [6, 'sticks']] }] });
-  for (const [b, w] of [[0, 0], [3.99, 0], [4, 6], [5.5, 6], [5.999, 6], [6, 10], [7.9, 10]]) assert.equal(at('material.style', b), w, 'step at beat ' + b); }
+{ const { at } = play({ conduct: 1, bars: 2, lanes: [{ target: 'material.style', shape: 'step', points: [[0, 'cloud'], [4, 'glass'], [6, 'esp']] }] });
+  for (const [b, w] of [[0, 0], [3.99, 0], [4, 6], [5.5, 6], [5.999, 6], [6, 11], [7.9, 11]]) assert.equal(at('material.style', b), w, 'step at beat ' + b); }
 
 /* repeat: N clips of one short curve across the span; points relative to the span's start */
 { const { M, at } = play({ conduct: 1, bars: 4, lanes: [{ target: 'material.gamma', span: [4, 12], repeat: 2, points: [[0, 0.5], [1, 2.4], [2, 0.5]] }] });

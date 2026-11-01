@@ -10,7 +10,7 @@ import { holdTap } from './mir/kit.js';
 import { VIEW_NAMES, drawStyle } from './field.js';
 
 export function createContextMenus(app) {
-  const A = app.sh.ACTIONS, mat = app.mat;
+  const A = app.sh.ACTIONS, mat = app.mat, ui = app.ui;
   setMenuEscape((close) => A.escape.push(close));                     // the menus are layers of THE ESCAPE STACK
   const keyOf = (id) => { try { const k = app.sh.kt.keyText(id); return k && k !== '—' ? '\t' + k : ''; } catch (_) { return ''; } };
   /** row(id, word?, o?) — an action as a menu entry: its word (the label's head), its key, ✓ from get(), its icon; o.args run it with arguments,
@@ -30,20 +30,24 @@ export function createContextMenus(app) {
   /* ── THE MENUS (RESEARCH-U §1's table) ── */
   const VIEWS = [['density', 'ρ  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']];
   const stage = () => [sub('VIEW', () => radio('view', 'view', VIEWS, () => VIEW_NAMES[mat.view])),
-    sub('STYLE', () => radio('style', 'style', ['cloud', 'solid', 'signed', 'dust', 'bands'].map((v) => [v, v.toUpperCase()]), () => drawStyle(mat.style))),
+    sub('STYLE', () => radio('style', 'style', ui.styleList(), () => drawStyle(mat.style))),   // 032 O1: the seg's own visible set (it listed five)
     row('palette', 'PALETTE'), row('camReset', 'CAMERA HOME'), row('camera.flip', 'FLIP'), row('camera.lock', 'LOCK'), null, row('copy.picture', 'COPY PICTURE'), row('hide', 'HIDE THE INTERFACE')];
   const title = (id) => [row(`window.${id}.fold`, 'FOLD'), row(`window.${id}.float`, 'FLOAT'), row(`window.${id}.side`, win(id).side === 'right' ? 'TO THE LEFT RACK' : 'TO THE RIGHT RACK'),
     row(`window.${id}.reset`, 'RESET PLACE'), row(`window.${id}.solo`, 'SOLO'), row('notes', 'WINDOW HELP'), null, row(`window.${id}.close`, 'CLOSE')];
   const favRows = (el) => { const f = el.closest('[data-fav]'), F = app.sh.csb; return f && F ? F.rowsFor(f.dataset.fav).map((r) => [r.label, r.run]) : []; };   // ADD TO / REMOVE FROM the CONTROL SURFACE
+  /* 032 W3 · CREATE EVENT and COPY VALUE (T23): on a control that names a target (`data-event`) — COPY VALUE on one option (a seg's button, a grid
+     state) or a switch */
+  const evOff = (el) => { const e = el.closest('[data-event]'), R = app.state.modHost && app.state.modHost.registry; return !e || !R || !R.has(e.dataset.event) || !app.state.tl; };
+  const events = (el) => [row('event.create', 'CREATE EVENT', { off: evOff(el) }), row('event.copy', 'COPY VALUE', { off: evOff(el) || !(pressed || el).closest('[data-v], .pk-c, .sw') })];   // the pressed button, not its row
   const control = (el) => [row('control.reset', 'RESET', { off: !el.closest('[data-param]') }), row('control.learn', 'LEARN…', { off: !el.closest('[data-key-action]') }),
-    ...favRows(el), row('knob.copyId', 'COPY ID', { off: !el.closest('[data-param], [data-key-action], [data-fav]') })];
+    ...events(el), ...favRows(el), row('knob.copyId', 'COPY ID', { off: !el.closest('[data-param], [data-key-action], [data-fav], [data-event]') })];
   const bar = () => [row('dock', 'DOCK'), row('csb.expand', 'EXPAND'), sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get())),
     row('folds', A.get('folds') && A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'MINIMIZE ALL', { on: () => undefined }), row('modArm', 'MOD'), row('gui', 'MIR OPTIONS'), null, row('hide', 'HIDE THE INTERFACE')];
   const tile = (el) => [row('picker.open', 'OPEN'), row('picker.isomers', 'ISOMERS', { off: !el.querySelector('.mm-iso') }), row('picker.keep', 'KEEP ON THIS DEVICE', { off: !el.querySelector('img[data-vol]') }), null,
     row('copy.name', 'COPY NAME'), row('copy.formula', 'COPY FORMULA')];
   const looks = () => [...document.querySelectorAll('#lwMenu .mm-lk')].map((b) => [b.dataset.look, (b.getAttribute('aria-label') || b.title || b.dataset.look).split(' · ')[0]]);
   const pickerPage = () => [sub('LOOK', () => radio('picker.look', 'look', looks(), () => A.get('picker.look').get())), row('csb.search', 'SEARCH'), row('folders', 'FOLDERS'), row('open', 'OPEN…')];
-  const lanes = () => [row('state.clear', 'CLEAR'), row('state.normalize', 'NORMALIZE'), row('preset.next', 'NEXT PRESET'), row('preset.prev', 'PREVIOUS PRESET'), null, row('copy.latex', 'COPY LaTeX'), row('spectrum.solo', 'SOLO SPECTRUM')];
+  const lanes = (el) => [row('state.clear', 'CLEAR'), row('state.normalize', 'NORMALIZE'), row('preset.next', 'NEXT PRESET'), ...events(el), null, row('copy.latex', 'COPY LaTeX'), row('spectrum.solo', 'SOLO SPECTRUM')];   // 032 W3: the 140 grid's EVENT (state.index); PREVIOUS PRESET left (≤ 8 rows), the stepper keeps it
   const notebook = () => [row('notebook', 'NOTEBOOK'), row('notebook.copy', 'COPY TEXT'), row('copy.link', 'COPY LINK'), row('copy.latex', 'COPY LaTeX'), row('export.json', 'EXPORT .json')];
   const finder = (el) => { const id = el.dataset.win, w = win(id); return [w.open ? row(`window.${id}.close`, 'CLOSE') : row(`window.${id}.open`, 'OPEN'), row(`window.${id}.fold`, 'FOLD', { off: !w.open }),
     row(`window.${id}.float`, 'FLOAT', { off: !w.open }), row('notes', 'WINDOW HELP')]; };
@@ -69,7 +73,7 @@ export function createContextMenus(app) {
     if (c('.mir-transport')) return bar();
     if ((e = c('.dev .sw, .dev .segw, .dev .trig'))) return control(e);
     if ((e = c('.dev[data-id] > .dev-head'))) return title(e.parentElement.dataset.id);
-    if (c(LANES)) return lanes();
+    if ((e = c(LANES))) return lanes(e);
     if (t === app.dom.canvas || t.matches('#stage, #stage > canvas')) return wordsAt(x, y) ? words() : stage();   // the stage, or its words
     return null;
   }

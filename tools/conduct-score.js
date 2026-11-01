@@ -16,7 +16,7 @@ export const SCORE_KEYS = ['conduct', 'name', 'title', 'notes', 'tempo', 'bars',
 export const METERS = [1, 2, 3, 4, 5, 6, 7, 8, 12];
 export const BANDS = ['level', 'low', 'mid', 'high'];
 export const PULSE = 1 / 8;   // a trigger's high, in beats
-const STYLE_ALIAS = { shell: 'glass', 'shell±': 'glassSigned', shellsigned: 'glassSigned', add: 'additive' };
+const STYLE_ALIAS = { shell: 'glass', 'shell±': 'glassSigned', shellsigned: 'glassSigned', add: 'additive', balls: 'glass', sticks: 'glass' };   // 032 O1: BALLS and STICKS are SIZE / RADIUS > 0 on glass
 const clamp01 = (u) => (u < 0 ? 0 : u > 1 ? 1 : u);
 const num = (v) => typeof v === 'number' && Number.isFinite(v);
 
@@ -120,7 +120,7 @@ export function laneCurve(lane, { total, describe, toNorm }) {
   const clips = [];
   if (rep !== undefined) for (let b = s; b < e - 1e-9 && clips.length < 4096; b += rep) clips.push([b, Math.min(rep, e - b)]);
   else clips.push([s, e - s]);
-  return { targetId: id, name: lane.name || D.label || id, length, points, clips, clamps };
+  return { targetId: id, name: lane.name || D.label || id, length, points, clips, clamps, ...(D.map === 'integer' && D.steps ? { steps: D.steps } : {}) };   // 032: an EVENT lane remembers its bands
 }
 
 /** pulses(beats, total) → the 0 → 1 → 0 points of an action's trigger lane: high for PULSE beats at each beat listed */
@@ -142,7 +142,7 @@ export function timelineDoc(score, total, { describe, toNorm, resolve = (x) => x
   const place = (c, label) => {
     if (lanes.length >= 32) { refused.push({ key: label, why: 'the timeline holds 32 lanes' }); return; }
     if (c.clips.some(([a, d]) => covered(c.targetId, a, a + d))) { refused.push({ key: label, why: c.targetId + ' is already driven there (an audio band or another lane): one clip covers a target at a beat' }); return; }
-    const lane = { id: nid('lane'), name: String(c.name).slice(0, 80) }, curve = { id: nid('curve'), targetId: c.targetId, name: String(c.name).slice(0, 80), color: '#a7adb8', length: c.length, min: 0, max: 1, points: c.points };
+    const lane = { id: nid('lane'), name: String(c.name).slice(0, 80) }, curve = { id: nid('curve'), targetId: c.targetId, name: String(c.name).slice(0, 80), color: '#a7adb8', length: c.length, min: 0, max: 1, points: c.points, ...(c.steps ? { steps: c.steps } : {}) };
     lanes.push(lane); curves.push(curve);
     for (const [a, d] of c.clips) { clips.push({ id: nid('clip'), curveId: curve.id, laneId: lane.id, start: a, duration: d, offset: 0, scale: 1, mute: false, followSourceEnd: false }); hold(c.targetId, a, a + d); }
     applied.push(label);
@@ -210,7 +210,9 @@ export async function apply(LW, input) {
   /* look: PALETTE by id or number, its switch, the STYLE and VIEW on their targets (a molecules-only STYLE stands down while MOLECULES is off), the knobs */
   if (look.palette !== undefined) await step('look.palette', () => { const i = indexOf('palette.index', look.palette); return num(i) && PALETTES[i] ? (LW.setPalette(PALETTES[i].id), true) : 'no palette "' + look.palette + '"'; });
   if (look.paletteOn !== undefined) await step('look.paletteOn', () => { LW.palette.setOn(!!look.paletteOn); return true; });
-  if (look.style !== undefined) await step('look.style', () => { const i = indexOf('material.style', look.style); if (!num(i)) return 'no style "' + look.style + '"'; put('material.style', i);
+  if (look.style !== undefined) await step('look.style', () => { const w = num(look.style) ? STYLE_NAMES[look.style] : String(look.style).trim().toLowerCase();
+    if (w === 'balls' || w === 'sticks') { LW.setStyle(w); rep.notes.push('look.style ' + w + ': ' + (w === 'balls' ? 'SIZE' : 'RADIUS') + ' > 0 on glass (032)'); return LW.mat.style === STYLE_NAMES.indexOf('glass') || 'glass stands down here'; }   // the facade's lift: SHELL with the knob raised
+    const i = indexOf('material.style', look.style); if (!num(i)) return 'no style "' + look.style + '"'; put('material.style', i);
     return LW.mat.style === i || (STYLE_NAMES[i] === 'grain' && STYLE_NAMES[LW.mat.style] === 'dust') ? true : STYLE_NAMES[i] + ' stands down here (a MOLECULES style with MOLECULES off)'; });
   if (look.view !== undefined) await step('look.view', () => { const i = indexOf('material.view', look.view), chem = LW.chem && LW.chem.on;
     return num(i) && !chem ? put('material.view', i) : verb('view', { id: String(num(look.view) ? WAVE_VIEWS[look.view] : look.view) }); });   // a MOLECULES view (esp, orbital…) on the verb's road

@@ -1,6 +1,23 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
 import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js';
+/** 032 W3 · AN OLDER CURVE ON A BANDED TARGET (the project open road, shell/persist.js): a curve drawn before its target had `options` carries no
+ *  `steps` and meant the old integer line — k at k / (max − min) — so each point is read back as that integer (an older GRAIN as DUST, BALLS or
+ *  STICKS as SHELL), seated at the centre of its option's band, and the curve remembers the count (WATER ESP's, STAR LOOP's and BENZENE π's STYLE
+ *  lanes); a curve with `steps`, a kind (pattern, audio) or a plain target is untouched (the conductor writes `steps` on a banded lane).  Pure. */
+export function liftBands(doc, registry) {
+  if (!doc || !Array.isArray(doc.curves) || !registry) return doc;
+  const lift = (id, k) => (id !== 'material.style' ? k : k === STYLE.balls || k === STYLE.sticks ? STYLE.glass : STYLE[drawStyle(k)]);
+  let moved = false;
+  const curves = doc.curves.map((c) => {
+    if (!c || c.steps || c.kind || !Array.isArray(c.points) || !registry.has(c.targetId)) return c;
+    const d = registry.describe(c.targetId); if (d.map !== 'integer' || !d.steps) return c;
+    const lo = Number.isFinite(c.min) ? c.min : 0, hi = Number.isFinite(c.max) ? c.max : 1; moved = true;
+    return { ...c, min: 0, max: 1, steps: d.steps, points: c.points.map((p) => { const u = lo + (hi - lo) * Math.max(0, Math.min(1, Number(p.v) || 0));
+      return { ...p, v: registry.toNorm(c.targetId, lift(c.targetId, d.min + Math.round(u * (d.max - d.min)))) }; }) };
+  });
+  return moved ? { ...doc, curves } : doc;
+}
 export function createModSeam(app) {
   const { ui, hNote, clock, obs, mat, settingsStore, reg, rates, dom } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
@@ -26,6 +43,10 @@ export function createModSeam(app) {
        means anything — and an un-modulated yaw is never quietly re-based by the sync above. */
     const sameCycle = (a, b, L) => Math.abs(((a - b) % L + L + L / 2) % L - L / 2) < 1e-9;
     const camOut = (id, v) => { setKnob(app.state.camKnobs[id], v); cameraPort.notify(); schedule(TIER.PRESENT); };   // C1 (A8's open item 3): a route's write is a notice
+    /* 032 W3: an event target's set is its seg's own road — the option `id` as a hand's press takes it (onChange), refused while its button is hidden
+       or greyed, nothing while it is the one held */
+    const segRoad = (g, id) => { const b = g && g.button(id); if (!b || b.hidden || b.disabled || g.get() === id) return; g.set(id); if (g.spec && g.spec.onChange) g.spec.onChange(id); };
+    const SLICE_MODES = ['off', 'clip', 'slab'];   // mat.slice.mode 0 · 1 · 2 (CLIP's ON switch and its CLIP | SLAB)
     const defs = [
       /* 0.5.0 C1 · the six saved observer.* routes keep their ids, maps and ranges, and stay HERE (the registry's road writes the pose
          raw; the panel registers none of them).  Their dials are the CAMERA panel's (camKnobs: the sphere's two arcs, ZOOM, FOV, the
@@ -163,18 +184,45 @@ export function createModSeam(app) {
          its seg's own road (the seg's set, no stage word) and stands down where a press could not land: a MOLECULES-only STYLE's button is
          hidden while MOLECULES is off, a muted VIEW's is disabled.  PALETTE is PALETTE's select, in the kit's PRESETS order; a value equal
          to the live one writes nothing (a project's base never re-selects over its own stops). */
+      /* 032 W3 · THE EVENT TARGETS (T23, MIR 1.5.6-alpha.22): a segmented row or a switch that offers CREATE EVENT is an `integer` row with `options`
+         (the unit line in equal bands, one an option, read when asked — STYLE's are the seg's visible styles, so an EVENT clip drawn for nine wears ⚠
+         under hydrogen's eight) or a toggle; `seg` names its control (stamped below: `data-event`, each button `data-v`) and a set takes its own road */
       { id: 'material.style', label: 'STYLE', map: 'integer', min: 0, max: STYLE_NAMES.length - 1, step: 1, group: 'material', knob: () => null,
-        hint: 'WAVE STYLE by number: 0 CLOUD … 11 ESP',
+        options: () => (ui.styleList ? ui.styleList().map(([s]) => STYLE[s]) : null), seg: () => ui.styleSeg, of: (s) => STYLE[s],
+        hint: 'WAVE STYLE, in the seg’s order (its visible styles)',
         get: () => mat.style | 0,
         set: (v) => { const s = drawStyle(STYLE_NAMES[v | 0]), b = ui.styleSeg && ui.styleSeg.button(s); if (!b || b.hidden || mat.style === STYLE[s]) return; mat.style = STYLE[s]; ui.styleSeg.set(s); schedule(TIER.PRESENT); } },
       { id: 'material.view', label: 'VIEW', map: 'integer', min: 0, max: WAVE_VIEWS.length - 1, step: 1, group: 'material', knob: () => null,
+        options: WAVE_VIEWS.map((_, i) => i), seg: () => ui.viewSeg, of: (w) => WAVE_VIEWS.indexOf(w),
         hint: 'the observable by number: 0 ρ · 1 phase · 2 Re · 3 Im',
         get: () => WAVE_VIEWS.indexOf(waveView(mat.view) || 'density'),
         set: (v) => { const w = WAVE_VIEWS[v | 0], b = ui.viewSeg && ui.viewSeg.button(w); if (!b || b.hidden || b.disabled || mat.view === VIEW[w]) return; mat.view = VIEW[w]; ui.viewSeg.set(w); schedule(TIER.PRESENT); } },
-      { id: 'palette.index', label: 'PALETTE', map: 'integer', min: 0, max: PALETTES.length - 1, step: 1, group: 'material', knob: () => null,
+      { id: 'palette.index', label: 'PALETTE', map: 'integer', min: 0, max: PALETTES.length - 1, step: 1, group: 'material', knob: () => null, options: PALETTES.map((_, i) => i),
         hint: 'the palette by number, in the PALETTE menu order',
         get: () => { const P = app.state.palette, i = P ? PALETTES.findIndex((q) => q.id === P.id) : -1; return i >= 0 ? i : NaN; },
         set: (v) => { const P = app.state.palette, q = PALETTES[v | 0]; if (P && q && P.id !== q.id) P.select(q.id); } },
+      { id: 'material.space', label: 'SPACE', map: 'integer', min: 0, max: 1, step: 1, group: 'material', knob: () => null, options: [0, 1], seg: () => ui.spaceSeg, of: (w) => (w === 'p' ? 1 : 0),
+        hint: 'WAVE SPACE: 0 POSITION · 1 MOMENTUM',
+        get: () => (app.state.space === 'p' ? 1 : 0), set: (v) => segRoad(ui.spaceSeg, v >= 1 ? 'p' : 'x') },
+      { id: 'material.slice.mode', label: 'CLIP', map: 'integer', min: 0, max: 2, step: 1, group: 'material', knob: () => null, options: [0, 1, 2],
+        seg: () => ui.sliceModeSeg && ui.sliceModeSeg.kind, also: () => ui.sliceModeSeg, of: (w) => SLICE_MODES.indexOf(w),   // the ON switch and its CLIP | SLAB
+        hint: 'CLIP: 0 OFF · 1 CLIP · 2 SLAB',
+        get: () => (mat.slice ? mat.slice.mode | 0 : 0),
+        set: (v) => { const w = SLICE_MODES[v | 0], S = ui.sliceModeSeg; if (!w || !S || !mat.slice || S.get() === w) return; S.set(w); mat.slice.mode = v | 0; schedule(TIER.PRESENT); } },
+      { id: 'state.scale', label: 'SCALE', map: 'integer', min: 0, max: 1, step: 1, group: 'state', knob: () => null, options: [0, 1], seg: () => ui.scaleSeg, of: (w) => (w === 'sturmian' ? 1 : 0),
+        hint: 'SPECTRUM SCALE: 0 HYDROGEN 1/n · 1 STURMIAN λ',
+        get: () => (ui.scaleSeg && ui.scaleSeg.get() === 'sturmian' ? 1 : 0), set: (v) => segRoad(ui.scaleSeg, v >= 1 ? 'sturmian' : 'hydrogen') },
+      /* the register's hand on the 140 grid: a value is the register as that one state (hydrogen; a molecule's register is its own) — the grid's road
+         (CLEAR, then the state's press, then the hand's quiet normalisation); a value it already holds writes nothing.  It is the TIMELINE's alone: it
+         writes only the value a clip on it says at this beat — a base, a restore, a route or a film's frozen look (its stale 0 while the register holds
+         many states) never empties the register */
+      { id: 'state.index', label: 'STATE', map: 'integer', min: 0, max: BASIS.length - 1, step: 1, group: 'state', knob: () => null, options: BASIS.map((_, i) => i),
+        seg: () => document.querySelector('.dev[data-id="spectrum"] .picker'),
+        hint: 'the register as one of the 140 states',
+        get: () => { const p = reg.populated(); return p.length === 1 ? p[0] : NaN; },
+        set: (v) => { const k = v | 0, p = reg.populated(), H = app.state.modHost, tl = app.state.tl; if ((app.state.chem && app.state.chem.on) || !(k >= 0 && k < BASIS.length) || (p.length === 1 && p[0] === k) || !H || !tl) return;
+          const u = tl.model.value('state.index', H.model.transport.beats); if (!Number.isFinite(u) || H.registry.fromNorm('state.index', u) !== k) return;   // a clip says k here, or nothing moves
+          api.clear(); api.toggleMode(k); api.settle(); } },
 
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
         hint: 'Set the A–B transition rate',
@@ -185,7 +233,12 @@ export function createModSeam(app) {
        CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
        sphere arcs, so they are drop targets now, like every observer.* dial. */
-    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes', 'action', 'palette']);   // 021 I2: `action.<id>`, the registry's acts (lab/mapping.js)   // 026 A1: `palette.index`   // 019 N2: NODES' knobs, `nodes.<node>.<knob>` (lab/nodes.js, the runtime door)
+    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes', 'action', 'palette']);
+    /* 032 W3: each event target's control says its target (`data-event`) and each of its buttons its value (`data-v`) — CREATE EVENT and COPY VALUE
+       (lab/actions.js, the control menu) read them; SETTINGS' FRAME · AXIS and INFORMATIONAL's switches name their `action.<id>` toggles */
+    for (const d of defs) for (const c of [d.seg && d.seg(), d.also && d.also()]) { const r = c && (c.root || c); if (!r || !r.dataset) continue; r.dataset.event = d.id;
+      if (c.spec && d.of) for (const o of c.spec.options) { const b = c.button(o.id); if (b) b.dataset.v = String(d.of(o.id)); } }
+    for (const [id, c] of [['view.frame', ui.frameSw], ['view.axis', ui.axisSw], ['view.captions', ui.capSw], ['view.formula', ui.molFormulaSw], ['view.labels', ui.atomLabelsSw]]) if (c && c.root) c.root.dataset.event = 'action.' + id;   // 021 I2: `action.<id>`, the registry's acts (lab/mapping.js)   // 026 A1: `palette.index`   // 019 N2: NODES' knobs, `nodes.<node>.<knob>` (lab/nodes.js, the runtime door)
     app.state.restampParams = mod.stamp;
     /* iteration 007 O (ADR-0001) · chem.orbital's RANGE IS THE MOLECULE'S: every landing re-registers it by id (the kit keeps the base and
        the routes; a lane's 0..1 curve spans the new molecule), hands the base the landing's orbital (the HOMO, or the index a file named),
@@ -199,6 +252,14 @@ export function createModSeam(app) {
         mod.stamp(); if (app.state.modView) app.state.modView.rebuild(); }); }
 
     let trSeat = 'bottom', trMoving = false, dodgeAgain = 0;
+    /* 032 T13 · THE BAR REMEMBERS ITS SIDE (Josh: "the CSB dodges the timeline and the modulation window; remembers its side"): the side it last landed
+       on is kept — nothing open, a window that leaves it free: it stays; only a window on its side sends it across (TIMELINE + MODULATION docked
+       below → above, and the reverse) — and that side is the WORKSPACE record `lw.csb.side` (lab/settings-store.js), seated at boot without the tunnel.
+       A narrow stage (≤ 860 px) seats it on top whatever the record says, and never writes it */
+    const SIDE = 'lw.csb.side', narrowNow = () => matchMedia('(max-width: 860px)').matches;
+    const sideSave = (v) => { try { localStorage.setItem(SIDE, v); } catch (_) {} };
+    { let v = null; try { v = localStorage.getItem(SIDE); } catch (_) {} const t = document.getElementById('transport');
+      if (v === 'top' && !narrowNow()) { trSeat = 'top'; if (t) t.classList.add('at-top'); } }
     function seatRect(where, w, h) {
       const vw = window.innerWidth, vh = window.innerHeight;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
@@ -252,14 +313,15 @@ export function createModSeam(app) {
          When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
          the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
          (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
-      if (!rs.length && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) { blocked = false; under(false); return; }
+      if (!rs.length && (trSeat === 'top' || !narrowNow())) { blocked = false; under(false); return; }   // 032 T13: nothing to dodge, the bar stays on its side
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
       if (narrowRack) trSeat = 'top';
+      const other = trSeat === 'top' ? 'bottom' : 'top';
       const want = narrowRack ? 'top'
-                 : free('bottom', w, h) ? 'bottom'
-                 : free('top', w, h) ? 'top' : trSeat;
+                 : free(trSeat, w, h) ? trSeat                      // 032 T13: its own side while it is free
+                 : free(other, w, h) ? other : trSeat;
       blocked = !free(want, w, h); under(blocked);
       if (want === trSeat) return;
       trMoving = true;
@@ -271,7 +333,7 @@ export function createModSeam(app) {
         if (arrived) return;                                    // the event and the belt may BOTH fire
         arrived = true;
         t.removeEventListener('animationend', arrive);
-        trSeat = want;
+        trSeat = want; if (!narrowNow()) sideSave(want);             // 032 T13: the side it landed on is the one it keeps
         t.classList.toggle('at-top', want === 'top');
         t.style.animation = arriving + ' 160ms cubic-bezier(.23,1,.32,1) forwards';
         let ended = false;

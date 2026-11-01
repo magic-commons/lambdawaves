@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 032
+
+THE NEW ROWS (032): `timeline.beginning` (⏮, the playhead to bar 1 — the CSB's seat), `home` now wears λWAVES' `reload` (↺, t → 0); `event.create` and `event.copy` (CREATE EVENT and COPY VALUE, in a control's menu and the 140 grid's — they act on the pressed control's `data-event`); `view.frame` and `view.axis` (FRAME and AXIS on / off, toggles, their `action.*` targets an EVENT's); COPY ID reads an event target's id too. The STYLE menus (the stage's and VIEW's) list WAVE's visible styles (`ui.styleList`), not five.
+
 ## The laws of 022
 
 ONE MENU DOOR (022 P): every context menu is the kit's `contextMenu` (lab/mir/shell/menubar.js:145) over action ids, mounted by `createContextMenus` (lab/context-menus.js:12); a right-click, the ContextMenu key, Shift+F10 and a still hold (`TAP.hold` 500 ms, `TAP.slop` 8 px, `onContext` lab/mir/kit.js:179) are one gesture, and a surface with a menu never shows the browser's. A knob's menu is the kit's `knobMenu` (menubar.js:190: RESET · COPY · PASTE · FINE · ROUTES › · CLIP ›, λWAVES' rows at its foot); SPECTRUM's grid keeps right = REMOVE and opens on the keys and the hold; every menu is a layer of the Escape stack.

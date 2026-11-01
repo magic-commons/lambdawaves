@@ -3,7 +3,7 @@
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../tier.js'; import { setGlyph } from '../mir/glyph.js';
 import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
-import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout, el, hint } from '../mir/kit.js';
+import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout, el, hint, label } from '../mir/kit.js'; import { formatSeconds } from '../mir/timeline/time-format.js';
 export function createKeys(app) {
   const { dom, ui, clock, appPlay, mat, settingsStore } = app, { schedule } = app.loop, { floats, rack, rackL } = app.host;
   const { devById, layout, readSettings, rk, setModArm } = app.sh, { wState } = app.w, { occlusion } = app.ctl;
@@ -65,18 +65,23 @@ export function createKeys(app) {
        present; `set` writes only a changed string). */
     const tlRo = readout({ label: 't', value: '0.00', cls: 'time' }); let tlWall = 0;
     const compact = (v, at, d) => (Math.abs(v) < at ? v.toFixed(d) : v.toExponential(d).replace('e+', 'e'));   // the stage strip's clockText form (A9: with the lap)
+    /* 032 T4 · THE PLAYLIST'S TIME (Josh: "a playlist time 0:00 beside t ="): the playhead's beat as m:ss.d at the tempo in force (the kit's
+       formatSeconds), its own readout beside t in t's face, painted with it — t is ψ's time, TIME the arrangement's */
+    const tlSec = readout({ label: 'TIME', value: '0:00.0', cls: 'time tl-clock' }), M = app.state.modHost.model;
     ui.tlTime = { root: tlRo.root, paint(now) { const on = clock.playing; if (on && now - tlWall < 200) return; tlWall = now; const t = clock.t, lap = Math.floor(t / clock.window);
-      tlRo.set(compact(t, 1e5, 2) + (lap ? '  (' + compact(lap, 1e4, 1) + ')' : ''), on ? 'live' : ''); } };
+      tlRo.set(compact(t, 1e5, 2) + (lap ? '  (' + compact(lap, 1e4, 1) + ')' : ''), on ? 'live' : '');
+      const T = M.transport; tlSec.set(formatSeconds((T.beats || 0) * 60 / (T.bpm || 120), true), on ? 'live' : ''); } };
     /* 025 C2 · THE TIMELINE'S DOOR: a RENDER chip on the work bar (the rail takes no app chip — its chips are fixed when the window is made —
        so it rides the bar's own `app:` seat, as the t readout does): the RENDER card in front on SELECTION when one is marked, else ACTIVE */
     const tlRender = el('button', 'tbtn tl-render'); tlRender.type = 'button'; tlRender.dataset.keyAction = 'render.timeline';
     setGlyph(tlRender, 'film', { label: 'render this range' }); hint(tlRender, 'render this range'); tlRender.addEventListener('click', () => app.sh.ACTIONS.run('render.timeline'));
     app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
-      mod: { host: app.state.modHost, registry: app.state.modHost.registry, armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
+      mod: { host: app.state.modHost, registry: app.state.modHost.registry, get view() { return app.state.modView; },   // 032 T20: view.api.armFor → the clip menu's ROUTE NEW PARAMETER…
+        armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
         isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => layout.modulation && layout.modulation.toggle(), persist: () => ui.saveNative && ui.saveNative(),   // A5: the work bar's door and tempo
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, audio: false,
-      transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:readout', 'rewind', 'app:render'] }, 'door'], nodes: { readout: tlRo.root, render: tlRender }, seats: 'thin',
+      transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:readout', 'app:clock', 'rewind', 'app:render'] }, 'door'], nodes: { readout: tlRo.root, clock: tlSec.root, render: tlRender }, seats: 'thin',
         door: 'none',   // 021 V2: dressed below with the table's `modulation` (an SVG, no mask)
         onSwitch: () => { app.state.tl.close(); layout.modulation.expand(); } },   // 015 T5: the timeline's door SWAPS to the modulation window, as that window's switch swaps back   // A9: the modulation window's own icon, no MIR logo (Josh 10-22)
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
@@ -85,6 +90,16 @@ export function createKeys(app) {
          scrub's start): LIVE every move, LIGHT one in three, RELEASE when the hand lets go */
       scrubLevel: () => { const g = mirGui(); return g ? g.sampling().scrub : 'live'; } });
     { const d = app.state.tl.root.querySelector('.tl-transport .mod-exp'); if (d) setGlyph(d, 'modulation'); }   // 021 V2: the work bar's door wears the modulation window's own icon (A9)
+    /* 032 T8 · MOD ON THE TIMELINE'S POWER (Josh: "MOD word on the timeline's toggle; the power icon stays on the modulation window"): the work bar's
+       power seat wears the kit's word face — modPower({ word }), as the CSB's — dressed here as the door is (the timeline's transport takes no powerWord) */
+    { const p = app.state.tl.root.querySelector('.tl-transport .mir-mod-power'); if (p) { p.dataset.face = 'word'; label(p, 'MOD'); } }
+    /* 032 T24 · A HEAVY SWITCH HOLDS THE PLAY (Josh: "heavy switches pause real-time playback"): while the timeline plays and the busy count is up (a
+       solve, a basis — busyWrap brackets every worker call), the realtime pump is held through the scrub's own door (host.clock.suspendRealtime), so the
+       arrangement waits for the picture instead of running ahead of it; released on the count's zero.  A film steps frame-exact and already owns the
+       pump (suspendRealtime answers null then): untouched */
+    { let release = null; const C = app.state.modHost.clock, now = () => performance.now() / 1000;
+      const filming = () => !!(app.state.capApi && app.state.capApi.busy) || C.isRealtimeSuspended() || C.isStepping();   // a film (or a scrub) owns the clock: never held
+      app.ctl.busy.onHold = (on) => { if (on && !release && C.isPlaying() && !filming()) release = C.suspendRealtime(now()); else if (!on && release) { release(now()); release = null; } }; }
     /* 021 R3 · TWO ⏮, EACH SAYS WHAT IT MOVES: the work bar's sends the modulation beat and the TIMELINE playhead to bar 1 and leaves ψ's t
        (the main bar's ⏮ moves t); one position spanning both is a kit door for 1.5.6 (docs/FOR-MIR.md) */
     { const h = app.state.tl.root.querySelector('.transport-home'); if (h) { h.title = 'beat → bar 1 · the TIMELINE playhead to the start'; h.setAttribute('aria-label', 'timeline back to bar 1'); } }

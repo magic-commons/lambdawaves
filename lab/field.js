@@ -37,6 +37,18 @@ export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust'
 /** iteration 014 B: THE THREE VIEWS (APPENDED: 9 BALLS, 10 STICKS, 11 ESP) draw the MOLECULE, not the volume — the atoms setAtoms gave (an older
  *  build opens a saved 9–11 as CLOUD; with no atoms set the shader draws them as CLOUD) */
 export const ATOM_STYLES = Object.freeze([9, 10, 11]);
+/** 032 O1 · THE ATOMS ARE KNOBS (Josh: "sticks by RADIUS > 0, balls by SIZE > 0 in every style"): BALLS (9) and STICKS (10) left the STYLE seg (the ids
+ *  stay reserved, never renumbered).  liftAtomStyle(m) opens an older one as GLASS (SHELL) with SIZE (balls) or RADIUS (sticks) raised to the look it
+ *  had (100 % CPK, STICK_R) when the file never set it — the format's open road (persist, a link, LW.setStyle); → true when it lifted */
+export function liftAtomStyle(m) {
+  const s = m ? m.style | 0 : -1; if (s !== STYLE.balls && s !== STYLE.sticks) return false;
+  if (s === STYLE.balls && !(m.atomSize > 0)) m.atomSize = 1;
+  if (s === STYLE.sticks && !(m.stickR > 0)) m.stickR = STICK_R;
+  m.style = STYLE.glass; return true;
+}
+/** the SIZE and RADIUS a material draws with (032 O1): an absent key is 0 (nothing drawn), but ESP's sticks keep their old default (STICK_R) */
+export const atomSizeOf = (m) => (Number.isFinite(m.atomSize) ? m.atomSize : 0);
+export const stickROf = (m) => (Number.isFinite(m.stickR) ? m.stickR : (m.style | 0) === STYLE.esp ? STICK_R : 0);
 /** a saved or named style (an index or a name) → the style it opens as: GRAIN → DUST, an unknown one → CLOUD */
 export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] : String(v); return n === 'grain' ? 'dust' : STYLE[n] === undefined ? 'cloud' : n; }
 /** THE KNEE's default (008 Q, Josh 10-19: "somewhat opaque but slightly see-through"): 3, a soft shoulder — measured at EXPOSURE 1, the
@@ -747,6 +759,13 @@ fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -
   if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
   return vec4<f32>(c, best);
 }
+/* 032 O1 · THE ATOMS OVER ANY STYLE: SIZE > 0 the balls, RADIUS > 0 the sticks — the nearer of the two on the ray (t = 1e30: none) */
+fn atomsOver(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32) -> vec4<f32> {
+  var m = vec4<f32>(0.0, 0.0, 0.0, 1e30);
+  if (V.p7.z > 0.0) { m = ballsOrSticks(ro, rd, t0, tf, false); }
+  if (V.p7.w > 0.0) { let k = ballsOrSticks(ro, rd, t0, tf, true); if (k.w < m.w) { m = k; } }
+  return m;
+}
 /* THE SURFACES' distance: SAS = min_A |p − R_A| − (r_A + probe); SES = −k·ln Σ e^{−(|p − R_A| − r_A)/k}, k = 0.3·probe (1-Lipschitz: sphere-traceable) */
 fn surfDist(p: vec3<f32>, ses: bool) -> f32 {
   let nA = u32(V.p7.x); let pr = V.p8.y;
@@ -890,15 +909,18 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   let rhoMax = max(bitcast<f32>(stats[0]), 1e-30);
   let ampMax = sqrt(rhoMax);
   let refMax = max(bitcast<f32>(stats[1]), 1e-30);
+  /* 032 O1 · THE ATOMS COMPOSITE: with MOLECULES' atoms set, SIZE > 0 (balls) or RADIUS > 0 (sticks) draws them under every style but ESP (its own
+     sticks): the march stops at the nearest hit, which is its ground.  None set (hydrogen, THE LOCK) or both 0: back = bg, tEnd = tf — the old picture */
+  var back = bg; var tEnd = tf;
+  if (style != 11u && V.p7.x > 0.5 && (V.p7.z > 0.0 || V.p7.w > 0.0)) { let m = atomsOver(ro, rd, t0, tf); if (m.w < 1e30) { back = m.rgb; tEnd = m.w; } }
   if (style == 2u || style == 5u) {                               // DUST (a retired GRAIN, 2, draws as DUST)
-    let d = dustPixel(ro, rd, t0, tf, half, mode, soft, rhoMax, ampMax, refMax, pxA);
-    var od = pow(max(d.rgb + bg * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
+    let d = dustPixel(ro, rd, t0, tEnd, half, mode, soft, rhoMax, ampMax, refMax, pxA);
+    var od = pow(max(d.rgb + back * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     od = select(od, bg, od != od);
     return vec4<f32>(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
   }
-  if (style >= 9u && style <= 11u && V.p7.x > 0.5) {                // iteration 014 B: BALLS · STICKS · ESP draw the atoms (none set: the march below, as CLOUD)
-    var oc = bg;
-    if (style == 11u) { oc = espPixel(ro, rd, t0, tf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w))); } else { let m = ballsOrSticks(ro, rd, t0, tf, style == 10u); oc = select(bg, m.rgb, m.w < 1e30); }
+  if (style == 11u && V.p7.x > 0.5) {                               // iteration 014 B: ESP draws the map over its sticks (none set: the march below, as CLOUD); 032 O1: BALLS · STICKS are the composite above
+    let oc = espPixel(ro, rd, t0, tf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
     var om = pow(max(oc, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     om = select(om, bg, om != om);
     return vec4<f32>(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
@@ -909,7 +931,7 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   var t = t0 + ds * hash(in.pos.xy + vec2<f32>(V.p0.w));
   let stepN = ds / (2.0 * half);        // step as a fraction of the box
   for (var i = 0u; i < 512u; i++) {
-    if (f32(i) >= steps || t > tf) { break; }
+    if (f32(i) >= steps || t > tEnd) { break; }
     let p = ro + rd * t;
     let uvw = (p + vec3<f32>(half)) / (2.0 * half);
     var s = textureSampleLevel(psiTex, samp, uvw, 0.0).rg;
@@ -1037,7 +1059,7 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
     t += ds;
   }
   let bgBlend = select(1.0 - alpha, max(0.0, 1.0 - max(col.r, max(col.g, col.b))), style == 7u);
-  var o = pow(max(col + bg * bgBlend, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));   // output gamma (a SURFACE control)
+  var o = pow(max(col + back * bgBlend, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));   // output gamma (a SURFACE control); 032 O1: the atoms' hit is the ground
   o = select(o, bg, o != o);                                                                          // a NaN anywhere on the ray would paint the pixel black on Metal: show the stage instead
   /* DITHER (wave 54).  The LAST thing that happens to the colour, AFTER the gamma, because the quantiser it
      defeats is the 8-bit swapchain and nothing else — dithering in linear light would be dithering the wrong
@@ -1775,7 +1797,7 @@ export async function createField(canvas, opts = {}) {
     const snLen = Math.hypot(sn[0], sn[1], sn[2]) || 1;
     v[36]=sn[0]/snLen; v[37]=sn[1]/snLen; v[38]=sn[2]/snLen;
     v[39]=mat.finish==='glass'?1:mat.finish==='matte'?2:0;
-    const asz = Number.isFinite(mat.atomSize) ? mat.atomSize : 1, srad = Number.isFinite(mat.stickR) ? mat.stickR : STICK_R, prb = Number.isFinite(mat.probe) ? mat.probe : PROBE_R;   // iteration 014 B: absent keys read the defaults
+    const asz = atomSizeOf(mat), srad = stickROf(mat), prb = Number.isFinite(mat.probe) ? mat.probe : PROBE_R;   // iteration 014 B: absent keys read the defaults (032 O1: SIZE and RADIUS 0, ESP's sticks STICK_R)
     v[44] = atomsN; v[45] = bondsN; v[46] = asz; v[47] = srad;
     v[48] = ESP_SURF.indexOf(mat.espSurf) < 0 ? 0 : ESP_SURF.indexOf(mat.espSurf); v[49] = prb; v[50] = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE; v[51] = palSpan;
     v[52] = phi.half; v[53] = phi.M; v[54] = phi.ok ? 1 : 0; v[55] = (mat.iso === undefined ? 0.06 : mat.iso) / 30;
