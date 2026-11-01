@@ -36,8 +36,9 @@ try {
         seats: [...t.querySelectorAll('.csb-ico [data-key-action], .csb-ico .tr-open, .csb-ico .dock-btn, .csb-ico .mod-exp')].map((e) => (e.dataset.keyAction || e.className.split(' ')[0]) + ':' + (e.dataset.gly || '')).join(' ') };`);
     info.stage = await chip(); info.play = await g.ev(`const p = document.querySelector('#transport .csb-play'), s = getComputedStyle(p); return [p.dataset.mirSurface || '', s.padding, s.backgroundColor, s.borderTopWidth];`);
     info.stageShot = await shot('stage');
-    await g.ev(`__LW.timeline.open(); return 1;`); await wait(1500);
-    info.work = await g.ev(`const p = document.querySelector('.mir-timeline .tl-transport .mir-mod-power'), r = p.getBoundingClientRect(); return [p.dataset.face, p.textContent, Math.round(r.width) + '×' + Math.round(r.height)];`);
+    await g.ev(`__LW.timeline.open(); __LW.timeline.controller.seek(17); __LW.clock.t = 12.34; return 1;`); await wait(1500);
+    info.time = await g.ev(`return [...document.querySelectorAll('.mir-timeline .tl-transport .ro.time')].map((e) => e.textContent.trim());`);
+    info.work =await g.ev(`const p = document.querySelector('.mir-timeline .tl-transport .mir-mod-power'), r = p.getBoundingClientRect(); return [p.dataset.face, p.textContent, Math.round(r.width) + '×' + Math.round(r.height)];`);
     info.workRect = await rect('.mir-timeline .tl-transport');
     info.workShot = await shot('work');
     await g.ev(`__LW.timeline.close(); return 1;`); await wait(800);
@@ -77,6 +78,11 @@ try {
     info.after = await g.ev(`return { steps: __LW.mod.registry.describe('material.style').steps, warn: document.querySelectorAll('.steps-off').length };`);
     info.warnShot = await shot('warn');
     /* T24: the realtime pump held while busy during play, released at zero */
+    /* state.index: an EVENT clip on the 140 grid says state 5 at its start → the register is that one state; off the clip nothing moves it */
+    info.index = await g.ev(`const tl = __LW.timeline, R = __LW.mod.registry, before = __LW.reg.populated().slice(); const id = tl.editor.createClip('state.index');
+      const c = tl.model.state().clips.find((x) => x.id === id), u = R.toNorm('state.index', 5); tl.model.updateCurve(c.curveId, { points: [{ t: 0, v: u, tension: 0, segment: 'hold' }, { t: 1, v: u, tension: 0 }] });
+      tl.controller.seek(c.start + 0.5); __LW.mod.host.clock.applyAll(true); await new Promise((r) => setTimeout(r, 400));
+      return { before, steps: tl.model.state().curves.find((x) => x.id === c.curveId).steps, after: __LW.reg.populated().slice() };`);
     info.hold = await g.ev(`const C = __LW.mod.host.clock; __LW.mod.play && __LW.mod.play(); await new Promise((r) => setTimeout(r, 300)); const b = __LW.busy; b.begin(); const held = C.isRealtimeSuspended(); b.end(); const after = C.isRealtimeSuspended(); return { playing: C.isPlaying(), held, after };`);
   }
   if (scene === 'demo') {   // the older STYLE lane of WATER ESP, re-read on the open road

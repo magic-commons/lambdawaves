@@ -213,12 +213,15 @@ export function createModSeam(app) {
         hint: 'SPECTRUM SCALE: 0 HYDROGEN 1/n · 1 STURMIAN λ',
         get: () => (ui.scaleSeg && ui.scaleSeg.get() === 'sturmian' ? 1 : 0), set: (v) => segRoad(ui.scaleSeg, v >= 1 ? 'sturmian' : 'hydrogen') },
       /* the register's hand on the 140 grid: a value is the register as that one state (hydrogen; a molecule's register is its own) — the grid's road
-         (CLEAR, then the state's press, then the hand's quiet normalisation); a value it already holds writes nothing */
+         (CLEAR, then the state's press, then the hand's quiet normalisation); a value it already holds writes nothing.  It is the TIMELINE's alone: it
+         writes only the value a clip on it says at this beat — a base, a restore, a route or a film's frozen look (its stale 0 while the register holds
+         many states) never empties the register */
       { id: 'state.index', label: 'STATE', map: 'integer', min: 0, max: BASIS.length - 1, step: 1, group: 'state', knob: () => null, options: BASIS.map((_, i) => i),
         seg: () => document.querySelector('.dev[data-id="spectrum"] .picker'),
         hint: 'the register as one of the 140 states',
         get: () => { const p = reg.populated(); return p.length === 1 ? p[0] : NaN; },
-        set: (v) => { const k = v | 0, p = reg.populated(); if ((app.state.chem && app.state.chem.on) || !(k >= 0 && k < BASIS.length) || (p.length === 1 && p[0] === k)) return;
+        set: (v) => { const k = v | 0, p = reg.populated(), H = app.state.modHost, tl = app.state.tl; if ((app.state.chem && app.state.chem.on) || !(k >= 0 && k < BASIS.length) || (p.length === 1 && p[0] === k) || !H || !tl) return;
+          const u = tl.model.value('state.index', H.model.transport.beats); if (!Number.isFinite(u) || H.registry.fromNorm('state.index', u) !== k) return;   // a clip says k here, or nothing moves
           api.clear(); api.toggleMode(k); api.settle(); } },
 
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,

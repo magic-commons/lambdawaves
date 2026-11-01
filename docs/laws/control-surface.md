@@ -2,6 +2,16 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 032
+
+THE TWO SEATS (032 T14): the CSB's left 2 × 2 is ⏮ ↺ over TIMELINE · the door — ⏮ the registry row `timeline.beginning` (the TIMELINE's playhead to bar 1, the window open or not; ψ's t stays) and ↺ the `home` row (t → 0; the beat stays), each an action seat (`data-key-action`, its icon: the kit's `rewind`, λWAVES' `reload`); the dock chip took the right grid's tenth cell, so the bar keeps 674 × 92 on the stage and the rack card's tools are 7 + 7. The expander's ↺ is the same `home`.
+
+TWO PLACES (032 C1 · C2 · C3): the dock chip swaps RACK ↔ STAGE (`places: ['rack', 'stage']`; ↙ to the rack, ↗ to the stage, the kit's `placeGlyph`); FREE left the cycle (a saved FREE opens on the stage). The card registers `bare: true` (MIR 1.5.6-alpha.28): popped out of the rack it draws no title bar — its rail chip and × at the corner, its glass drags it — and the bar inside keeps the card's 7-column drawing. Every close road undocks the bar (the kit's × through `rk.close`, `devclose`); a card already open takes the bar at once (`onDock`), so there is never an empty slot or a bar docked in a closed card.
+
+THE BAR REMEMBERS ITS SIDE (032 T13): `modDodge` keeps the side the bar last landed on — nothing open, or its own side free: it stays; only a window on its side (TIMELINE + MODULATION docked below → above, and the reverse) sends it across — and the side is the WORKSPACE record `lw.csb.side`, seated at boot without the tunnel; a narrow stage (≤ 860 px) seats it on top and never writes it.
+
+PLAY IS A DISC (032 C4): `.csb-play` is no chip — no surface, no padding, no glass — the 56-px raised disc stands alone where it stood; the kit's `:focus-visible` ring is the keyboard's.
+
 ## The laws of 021
 
 THE OWNER SHEETS (021 G6): `lab/csb.css` (THE CONTROL SURFACE) and `lab/keymap.css` (THE KEYBOARD WINDOW) load right after lab.css, unlayered; λWAVES' values over the kit's transport are `--xport-*` tokens on `#transport` there, and skin.css holds no copy of a kit transport rule.
