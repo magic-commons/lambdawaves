@@ -56,8 +56,12 @@ assert.equal(indexOf('material.style', 'shell'), 6); assert.equal(indexOf('mater
 { const p = pulses([2, 6], 8); assert.equal(p.length, 6); const { M } = play({ conduct: 1, bars: 2, triggers: [{ action: 'preset.next', at: [2, 6] }] });
   assert.equal(M.value('action.preset.next', 1.9), 0); assert.equal(M.value('action.preset.next', 2), 1); assert.equal(M.value('action.preset.next', 2 + PULSE / 2), 1); assert.equal(M.value('action.preset.next', 2 + PULSE), 0); }
 
-/* ONE CLIP COVERS A TARGET AT A BEAT: a band's target refuses a lane; two lanes over one span refuse the second */
-{ const { out } = play({ conduct: 1, bars: 2, lanes: [{ target: 'material.exposure', points: [[0, 1]] }, { target: 'material.gamma', points: [[0, 1]] }, { target: 'material.gamma', span: [2, 4], points: [[0, 2]] }] },
-    { bandTargets: ['material.exposure'] });
-  assert.deepEqual(out.report.refused.map((r) => r.key), ['lanes[0] material.exposure', 'lanes[2] material.gamma']); assert.equal(out.bandLanes.length, 1); assert.equal(out.doc.active.end, 8); }
-console.log('GREEN conduct: schema, mode index, linear/log/clamp, step holds, repeat = clips, smooth, wrapped yaw across seams, trigger pulses, one clip per target');
+/* A BAND OWNS ITS TARGET; THE HIGHEST LANE WINS (032): a band's target refuses a lane; two lanes over one span are both placed, the overlap is a note,
+   and the earlier entry (the higher lane) plays where they meet; a lane's mute places its clips disabled */
+{ const { out, M } = play({ conduct: 1, bars: 2, lanes: [{ target: 'material.exposure', points: [[0, 1]] }, { target: 'material.gamma', points: [[0, 1]] }, { target: 'material.gamma', span: [2, 4], points: [[0, 2]] },
+    { target: 'observer.yaw', points: [[0, 1]], mute: true }] }, { bandTargets: ['material.exposure'] });
+  assert.deepEqual(out.report.refused.map((r) => r.key), ['lanes[0] material.exposure']); assert.equal(out.bandLanes.length, 1); assert.equal(out.doc.active.end, 8);
+  assert.equal(out.report.notes.length, 1); assert.match(out.report.notes[0], /lanes\[2\] material\.gamma overlaps lanes\[1\] material\.gamma/);
+  assert.equal(M.value('material.gamma', 3), M.value('material.gamma', 1), 'the higher lane (the earlier entry) plays where the two meet');
+  assert.ok(out.doc.clips.filter((c) => c.mute).length === 1 && out.report.applied.some((a) => a.endsWith('(disabled)')), 'a muted lane is placed disabled'); }
+console.log('GREEN conduct: schema, mode index, linear/log/clamp, step holds, repeat = clips, smooth, wrapped yaw across seams, trigger pulses, a band owns its target, the highest lane wins, mute');

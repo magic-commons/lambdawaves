@@ -132,24 +132,28 @@ export function pulses(at, total) {
 }
 
 /** timelineDoc(score, total, { describe, toNorm, resolve(id) → id, bandTargets }) → { doc, report: { lanes, refused, clamps }, bandLanes }
- *  ONE CLIP COVERS A TARGET AT A BEAT: a lane on a target an audio band drives, or over another lane's clips on the same target, is refused */
+ *  A BAND OWNS ITS TARGET: a lane on a target an audio band drives is refused.  THE HIGHEST LANE WINS (032, the kit's alpha.21): two lanes on one
+ *  target may overlap — the earlier `lanes[]` entry is the higher lane in the timeline and plays where they meet; the overlap is said in notes, never refused.
+ *  A lane's `mute: true` places its clips disabled (DISABLE CLIP: kept for the curve, never played). */
 export function timelineDoc(score, total, { describe, toNorm, resolve = (x) => x, bandTargets = [] }) {
   let seq = 0; const nid = (k) => k + (++seq);
-  const lanes = [], curves = [], clips = [], refused = [], clamps = [], cover = new Map(), applied = [];
+  const lanes = [], curves = [], clips = [], refused = [], clamps = [], cover = new Map(), applied = [], notes = [], laneCover = new Map();
   const covered = (t, a, b) => (cover.get(t) || []).some(([x, y]) => a < y - 1e-9 && b > x + 1e-9), hold = (t, a, b) => { if (!cover.has(t)) cover.set(t, []); cover.get(t).push([a, b]); };
   const [r0, r1] = score.render.range;
   for (const t of bandTargets) hold(t, r0, r1);
   const place = (c, label) => {
     if (lanes.length >= 32) { refused.push({ key: label, why: 'the timeline holds 32 lanes' }); return; }
-    if (c.clips.some(([a, d]) => covered(c.targetId, a, a + d))) { refused.push({ key: label, why: c.targetId + ' is already driven there (an audio band or another lane): one clip covers a target at a beat' }); return; }
+    if (c.clips.some(([a, d]) => covered(c.targetId, a, a + d))) { refused.push({ key: label, why: c.targetId + ' is an audio band\'s there: a band owns its target over the render range' }); return; }
+    const over = (laneCover.get(c.targetId) || []).filter(([x, y, who]) => c.clips.some(([a, d]) => a < y - 1e-9 && a + d > x + 1e-9)).map(([, , who]) => who);
+    if (over.length) notes.push(label + ' overlaps ' + [...new Set(over)].join(', ') + ' on ' + c.targetId + ': the higher lane (the earlier entry) plays where they meet (032)');
     const lane = { id: nid('lane'), name: String(c.name).slice(0, 80) }, curve = { id: nid('curve'), targetId: c.targetId, name: String(c.name).slice(0, 80), color: '#a7adb8', length: c.length, min: 0, max: 1, points: c.points, ...(c.steps ? { steps: c.steps } : {}) };
     lanes.push(lane); curves.push(curve);
-    for (const [a, d] of c.clips) { clips.push({ id: nid('clip'), curveId: curve.id, laneId: lane.id, start: a, duration: d, offset: 0, scale: 1, mute: false, followSourceEnd: false }); hold(c.targetId, a, a + d); }
-    applied.push(label);
+    for (const [a, d] of c.clips) { clips.push({ id: nid('clip'), curveId: curve.id, laneId: lane.id, start: a, duration: d, offset: 0, scale: 1, mute: c.mute === true, followSourceEnd: false }); if (!laneCover.has(c.targetId)) laneCover.set(c.targetId, []); laneCover.get(c.targetId).push([a, a + d, label]); }
+    applied.push(label + (c.mute === true ? ' (disabled)' : ''));
   };
   score.lanes.forEach((L, i) => {
     const label = 'lanes[' + i + '] ' + ((L && L.target) || '?'), c = laneCurve({ ...L, target: L && resolve(L.target) }, { total, describe, toNorm });
-    if (c.why) refused.push({ key: label, why: c.why }); else { clamps.push(...c.clamps); place(c, label); }
+    if (c.why) refused.push({ key: label, why: c.why }); else { clamps.push(...c.clamps); place({ ...c, mute: L.mute === true }, label); }
   });
   const byAction = new Map();
   for (const T of score.triggers) { const a = T && String(T.action || ''); const id = a.startsWith('action.') ? a : 'action.' + a;
@@ -158,7 +162,7 @@ export function timelineDoc(score, total, { describe, toNorm, resolve = (x) => x
   for (const [id, at] of byAction) place({ targetId: id, name: id, length: total, points: pulses(at, total), clips: [[0, total]] }, 'triggers ' + id);
   const bandLanes = bandTargets.map(() => { if (lanes.length >= 32) return null; const l = { id: nid('lane'), name: 'AUDIO' }; lanes.push(l); return l.id; });
   while (lanes.length < 4) lanes.push({ id: nid('lane'), name: 'LANE ' + (lanes.length + 1) });
-  return { doc: { v: 1, seq, meter: score.tempo.meter, lanes, curves, clips, active: { start: r0, end: r1 } }, report: { applied, refused, clamps }, bandLanes };
+  return { doc: { v: 1, seq, meter: score.tempo.meter, lanes, curves, clips, active: { start: r0, end: r1 } }, report: { applied, refused, clamps, notes }, bandLanes };
 }
 
 /* ── THE LIVE HALF (the page) ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -257,7 +261,7 @@ export async function apply(LW, input) {
   const bandSpec = bands.map(([b, x]) => { const o = typeof x === 'string' ? { target: x } : { ...(x || {}) }; return { band: b, ...o, target: resolve(o.target) }; }).filter((o) => { if (R.has(o.target)) return true; say('audio.bands.' + o.band, 'no such target "' + o.target + '"'); return false; });
   const describe = (id) => (R.has(id) ? R.describeOne(id) : null), toNorm = (id, v) => R.toNorm(id, v);
   const built = timelineDoc(S, total, { describe, toNorm, resolve, bandTargets: bandSpec.map((o) => o.target) });
-  rep.applied.push(...built.report.applied); rep.refused.push(...built.report.refused); rep.clamps.push(...built.report.clamps);
+  rep.applied.push(...built.report.applied); rep.refused.push(...built.report.refused); rep.clamps.push(...built.report.clamps); rep.notes.push(...built.report.notes);
   if (!tl.model.restore(built.doc)) say('lanes', 'the timeline refused the arrangement');
   rep.keep = false;
   if (bandSpec.length) await step('audio', async () => {

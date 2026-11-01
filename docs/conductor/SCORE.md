@@ -8,8 +8,21 @@ The target table is [TARGETS.md](TARGETS.md) (generated: `tools/conduct-targets.
 **THE SCORE THINKS IN BARS.** Every time is a beat on the ruler at the score's tempo (a bar = `meter` beats). An effect lands on a divisor of
 the bar (¼ · ½ · 1 · 2 · 4 bars). Seconds appear once: `audio.offset`, the point in the file that plays at beat 0.
 
-**ONE CLIP COVERS A TARGET AT A BEAT.** An audio band drives its target over the whole render range, so a lane never also names that
-target; two lanes on one target never overlap. The conductor refuses the later one by name and skips it.
+**A BAND OWNS ITS TARGET; THE HIGHEST LANE WINS.** An audio band drives its target over the whole render range, so a lane never also names
+that target (the conductor refuses it by name). Two lanes on one target MAY overlap (032): the earlier entry in `lanes` is the higher lane in
+the timeline and plays where they meet, then the earlier start — the app's own law (`model.value`, kit 1.5.6-alpha.21); the overlap is said
+in the report's `notes`. A lane with `"mute": true` is placed DISABLED (its curve kept, never played; the timeline's DISABLE CLIP row).
+
+**AN EVENT IS A STEP LANE ON A BANDED TARGET** (032). A target with a `bands` column in TARGETS.md (`material.style`, `material.view`,
+`material.space`, `material.slice.mode`, `state.scale`, `state.index`, `palette.index`; the toggles `action.view.frame` / `action.view.axis`)
+cuts its 0…1 into that many equal bands; a `"shape": "step"` lane whose points are the option names or numbers is the event (`[[0, "cloud"], [4, "glass"]]`),
+and the conductor writes the lane's `steps`, so the clip draws its bands and wears ⚠ in the app if the option count later changes. `state.index`
+plays only from a clip (a hand never writes it); `balls` / `sticks` are not styles any more — as `look.style` they open SHELL with SIZE 100 % or
+RADIUS 0.38 and say so; in a lane they mean `glass`.
+
+**THE LIVE PLAY LOOPS, A FILM DOES NOT.** In the app the timeline loops while it plays (the ruler's range, else ACTIVE, else the clips' extent);
+a bounce renders `render.range` once. A device sent to the timeline from the modulation window is disarmed (THE ARRANGEMENT WINS WHERE IT PLAYS:
+under a clip a device's routes on that target stand aside); a score names no devices, so nothing to say there.
 
 ## The keys (in the order they are applied)
 
@@ -45,7 +58,7 @@ target; two lanes on one target never overlap. The conductor refuses the later o
 | `render` | `{ fps, size, format, nodes, chrome, range, audio, caption }` | `{ 30, "1080p", "mp4", "on", "labels", [0, bars·meter], on when a KEEP clip exists }` | the RENDER card's fields; fps 24 · 30 · 48 · 60; size `current` · `1080p` · `1440p` · `2160p`; format `mp4` \| `png`; `range` [startBeat, endBeat] is TIMELINE · ACTIVE |
 
 ### A lane
-`{ "target": id, "points": [[beat, value, tension?], …], "shape": "linear" | "smooth" | "step", "span": [s, e], "repeat": N, "norm": false, "name": "…" }`
+`{ "target": id, "points": [[beat, value, tension?], …], "shape": "linear" | "smooth" | "step", "span": [s, e], "repeat": N, "norm": false, "name": "…", "mute": false }`
 - **points** are ABSOLUTE beats from 0 — or, with `span`, RELATIVE to `s`. A value is in the target's unit (TARGETS.md: map · min · max)
   and is clamped (and said) when off its range; `"norm": true` takes 0…1 instead. A STYLE, VIEW or PALETTE point may be its name (`"glass"`).
 - **shape**: `linear` (the default); `smooth` eases in and out on every segment whose point carries no tension; `step` holds each value

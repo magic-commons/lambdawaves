@@ -154,3 +154,9 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
   λWAVES does it app-side today (`lab/look.js`: the frost row's `run` overridden in `createLook`'s schema map, `ctx.hold`).
 - Open, for 1.6 (029 M6 §2): QUALITY BALANCED as "hold while moving" would keep a theme's glass at rest for the same cost as lite (4.22 vs
   4.33 ms measured). A change to an existing enum's meaning, so a line, never a door.
+
+## 032 (2026-11-01, TIMELINE REDUX — the eight doors 1.5.6-alpha.21 … 28 are DONE on kit-032; what is left)
+- **`timeline/window.js` `transport.powerWord`** (λWAVES 032 W2): the timeline's work-bar transport takes no `powerWord`, so λWAVES relabels the kit's power button to MOD after install; a passthrough to `createTransport({ powerWord })` would let the work bar say it once.
+- Open edge (λWAVES 032 W3, app-side today): with a heavy solve running while the timeline plays, RENDER is refused ("Finish scrubbing before rendering") until the solve lands — the busy hold rides the scrub gate's door; a `hold(reason)` of its own on the clock would let the film start and wait.
+- Pre-existing at 1.5.5 (not 032's): `tests/parity5.browser.mjs` (FROST TEXT LIGHT, 8/9), `render.browser.mjs` (the motionUi.paint-throws case, 64/65), `widgets.browser.mjs` (1 of 47) fail at 3051daf and at kit-032's tip alike.
+
