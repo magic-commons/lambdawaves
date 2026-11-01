@@ -380,7 +380,7 @@ const PRECACHE = [
   ['./particles.js',                                                '31e2ef4555ce'],
   ['./period.js',                                                   'f95fecca589e'],
   ['./picker-fx.js',                                                '4233fe629128'],
-  ['./picker.js',                                                   '696e5693915e'],
+  ['./picker.js',                                                   'e6fa9ac6553a'],
   ['./project-store.js',                                            '22a3b1177f0c'],
   ['./projects.js',                                                 'a0615ea52761'],
   ['./qho.js',                                                      'c0dfa6e21c94'],
