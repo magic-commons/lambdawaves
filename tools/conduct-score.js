@@ -16,7 +16,7 @@ export const SCORE_KEYS = ['conduct', 'name', 'title', 'notes', 'tempo', 'bars',
 export const METERS = [1, 2, 3, 4, 5, 6, 7, 8, 12];
 export const BANDS = ['level', 'low', 'mid', 'high'];
 export const PULSE = 1 / 8;   // a trigger's high, in beats
-const STYLE_ALIAS = { shell: 'glass', 'shell±': 'glassSigned', shellsigned: 'glassSigned', add: 'additive' };
+const STYLE_ALIAS = { shell: 'glass', 'shell±': 'glassSigned', shellsigned: 'glassSigned', add: 'additive', balls: 'glass', sticks: 'glass' };   // 032 O1: BALLS and STICKS are SIZE / RADIUS > 0 on glass
 const clamp01 = (u) => (u < 0 ? 0 : u > 1 ? 1 : u);
 const num = (v) => typeof v === 'number' && Number.isFinite(v);
 
@@ -210,7 +210,9 @@ export async function apply(LW, input) {
   /* look: PALETTE by id or number, its switch, the STYLE and VIEW on their targets (a molecules-only STYLE stands down while MOLECULES is off), the knobs */
   if (look.palette !== undefined) await step('look.palette', () => { const i = indexOf('palette.index', look.palette); return num(i) && PALETTES[i] ? (LW.setPalette(PALETTES[i].id), true) : 'no palette "' + look.palette + '"'; });
   if (look.paletteOn !== undefined) await step('look.paletteOn', () => { LW.palette.setOn(!!look.paletteOn); return true; });
-  if (look.style !== undefined) await step('look.style', () => { const i = indexOf('material.style', look.style); if (!num(i)) return 'no style "' + look.style + '"'; put('material.style', i);
+  if (look.style !== undefined) await step('look.style', () => { const w = num(look.style) ? STYLE_NAMES[look.style] : String(look.style).trim().toLowerCase();
+    if (w === 'balls' || w === 'sticks') { LW.setStyle(w); rep.notes.push('look.style ' + w + ': ' + (w === 'balls' ? 'SIZE' : 'RADIUS') + ' > 0 on glass (032)'); return LW.mat.style === STYLE_NAMES.indexOf('glass') || 'glass stands down here'; }   // the facade's lift: SHELL with the knob raised
+    const i = indexOf('material.style', look.style); if (!num(i)) return 'no style "' + look.style + '"'; put('material.style', i);
     return LW.mat.style === i || (STYLE_NAMES[i] === 'grain' && STYLE_NAMES[LW.mat.style] === 'dust') ? true : STYLE_NAMES[i] + ' stands down here (a MOLECULES style with MOLECULES off)'; });
   if (look.view !== undefined) await step('look.view', () => { const i = indexOf('material.view', look.view), chem = LW.chem && LW.chem.on;
     return num(i) && !chem ? put('material.view', i) : verb('view', { id: String(num(look.view) ? WAVE_VIEWS[look.view] : look.view) }); });   // a MOLECULES view (esp, orbital…) on the verb's road

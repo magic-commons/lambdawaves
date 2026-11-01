@@ -10,7 +10,7 @@ import { holdTap } from './mir/kit.js';
 import { VIEW_NAMES, drawStyle } from './field.js';
 
 export function createContextMenus(app) {
-  const A = app.sh.ACTIONS, mat = app.mat;
+  const A = app.sh.ACTIONS, mat = app.mat, ui = app.ui;
   setMenuEscape((close) => A.escape.push(close));                     // the menus are layers of THE ESCAPE STACK
   const keyOf = (id) => { try { const k = app.sh.kt.keyText(id); return k && k !== '—' ? '\t' + k : ''; } catch (_) { return ''; } };
   /** row(id, word?, o?) — an action as a menu entry: its word (the label's head), its key, ✓ from get(), its icon; o.args run it with arguments,
@@ -30,7 +30,7 @@ export function createContextMenus(app) {
   /* ── THE MENUS (RESEARCH-U §1's table) ── */
   const VIEWS = [['density', 'ρ  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']];
   const stage = () => [sub('VIEW', () => radio('view', 'view', VIEWS, () => VIEW_NAMES[mat.view])),
-    sub('STYLE', () => radio('style', 'style', ['cloud', 'solid', 'signed', 'dust', 'bands'].map((v) => [v, v.toUpperCase()]), () => drawStyle(mat.style))),
+    sub('STYLE', () => radio('style', 'style', ui.styleList(), () => drawStyle(mat.style))),   // 032 O1: the seg's own visible set (it listed five)
     row('palette', 'PALETTE'), row('camReset', 'CAMERA HOME'), row('camera.flip', 'FLIP'), row('camera.lock', 'LOCK'), null, row('copy.picture', 'COPY PICTURE'), row('hide', 'HIDE THE INTERFACE')];
   const title = (id) => [row(`window.${id}.fold`, 'FOLD'), row(`window.${id}.float`, 'FLOAT'), row(`window.${id}.side`, win(id).side === 'right' ? 'TO THE LEFT RACK' : 'TO THE RIGHT RACK'),
     row(`window.${id}.reset`, 'RESET PLACE'), row(`window.${id}.solo`, 'SOLO'), row('notes', 'WINDOW HELP'), null, row(`window.${id}.close`, 'CLOSE')];

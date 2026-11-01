@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
+import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
@@ -46,11 +46,11 @@ export function createMaterial(app) {
       { id: 'glassSigned', label: 'SHELL ±', title: 'SIGNED lobes as a translucent shell' },   // iteration 010 X7 (STYLE 8)
       { id:'additive',label:'ADD',title:'Additive emission through the field' },
       { id: 'bands', label: 'BANDS', title: 'One level surface per octave of the density, anchored at ISO' },
-      { id: 'balls', label: 'BALLS', title: 'Space-filling CPK balls, no sticks' },   // iteration 014 B1 (STYLE 9)
-      { id: 'sticks', label: 'STICKS', title: '3D sticks, each half in its atom’s colour' },                // B2 (STYLE 10)
-      { id: 'esp', label: 'ESP', title: 'ESP map on the surface (red −, blue +)' }],   // B3 (STYLE 11)
+      { id: 'esp', label: 'ESP', title: 'ESP map on the surface (red −, blue +)' }],   // B3 (STYLE 11); 032 O1: BALLS (9) and STICKS (10) are SIZE and RADIUS > 0 now (the ids reserved)
       onChange: (v) => { mat.style = STYLE[drawStyle(v)]; styleSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
     rd.appendChild(ui.styleSeg.root).dataset.keyAction = 'style';
+    /** 032 O1: the styles the seg offers now, in its order, with their words — the STYLE menus (the stage's, VIEW's) and the STYLE target's bands */
+    ui.styleList = () => ui.styleSeg.spec.options.filter((o) => { const b = ui.styleSeg.button(o.id); return b && !b.hidden; }).map((o) => [o.id, ui.styleSeg.button(o.id).textContent]);
     /* 2026-09-10 (Josh): ISO, GRAIN and KNEE sit directly under EXPOSURE, SOFT and HUE — one six-knob
        material row above STYLE — instead of a second row below the style seg. */
     ui.isoK = knob({ label: 'ISO', reverse: true, min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
@@ -60,8 +60,10 @@ export function createMaterial(app) {
        never moved).  The keys are written into `mat` only by a hand, so a project that never touched them serialises as before. */
     /* 020 S4: a.u. with fewer decimals the larger it is (RANGE reaches 50): 0.100 · 2.50 · 37.5 — the knob and the ESP bar's numbers */
     const auN = (v) => { const a = Math.abs(v); return a.toFixed(a >= 10 ? 1 : a >= 1 ? 2 : 3); }, pctF = (v) => Math.round(v * 100) + '%', au = (v) => '±' + auN(v);
-    ui.atomSizeK = knob({ label: 'SIZE', min: 0.2, max: 1.5, value: 1, fmt: pctF, title: 'Ball radius × van der Waals (100 % = CPK)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
-    ui.stickK = knob({ label: 'RADIUS', min: 0.1, max: 1.2, value: STICK_R, log: true, fmt: (v) => v.toFixed(2), title: 'STICKS (and the sticks inside ESP): the stick radius in bohr', onInput: (v) => { mat.stickR = v; schedule(TIER.PRESENT); } });
+    /* 032 O1 · THE ATOMS ARE KNOBS: SIZE > 0 draws the atoms and RADIUS > 0 the bonds under any style (field.js atomsOver; ESP keeps its sticks only),
+       both 0 by default so no picture moved; an older BALLS / STICKS opens as SHELL with its knob raised (field.js liftAtomStyle) */
+    ui.atomSizeK = knob({ label: 'SIZE', min: 0, max: 1.5, value: 0, fmt: pctF, title: 'SIZE > 0 draws the atoms (× van der Waals)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
+    ui.stickK = knob({ label: 'RADIUS', min: 0, max: 1.2, value: 0, fmt: (v) => v.toFixed(2), title: 'RADIUS > 0 draws the bonds (bohr)', onInput: (v) => { mat.stickR = v; schedule(TIER.PRESENT); } });
     ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'Probe radius in bohr (2.65 = water)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
     ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 50, value: ESP_RANGE, log: true, fmt: au, title: 'ESP colour span ±RANGE Eh/e', onInput: (v) => { mat.espRange = v; styleSync(); schedule(TIER.PRESENT); } });
     ui.espSurfSeg = seg({ aria: 'potential surface', value: 'iso', options: [
@@ -118,7 +120,7 @@ export function createMaterial(app) {
        hidden, so no seat moves; a route on a greyed knob keeps running (its window wears W8's ACCENT B dot) */
     const S_ = STYLE, VOL = [S_.cloud, S_.solid, S_.signed, S_.bands, S_.dust, S_.glass, S_.glassSigned];
     const STYLE_READS = { isoK: [S_.solid, S_.signed, S_.bands, S_.glass, S_.glassSigned, S_.esp], kneeK: VOL, softK: [S_.cloud, S_.bands, S_.dust, S_.additive, S_.esp], grainK: [S_.dust],
-      atomSizeK: [S_.balls], stickK: [S_.sticks, S_.esp], espBareSw: [S_.esp], probeK: [S_.esp], espRangeK: [S_.esp], espSurfSeg: [S_.esp], espLiveSw: [S_.esp] };
+      atomSizeK: [...VOL, S_.additive], stickK: [...VOL, S_.additive, S_.esp], espBareSw: [S_.esp], probeK: [S_.esp], espRangeK: [S_.esp], espSurfSeg: [S_.esp], espLiveSw: [S_.esp] };   // 032 O1: SIZE in every style but ESP (its sticks alone), RADIUS in every one
     /* the kit's muted look on the three shapes: a knob's own setDisabled, a switch's button, a seg's buttons */
     const mute = (c, off, why) => { if (c.setDisabled) c.setDisabled(off); else { c.root.classList.toggle('disabled', off); c.root.setAttribute('aria-disabled', String(off));
       for (const b of c.root.matches('button') ? [c.root] : c.root.querySelectorAll('button')) b.disabled = off; }
@@ -143,13 +145,14 @@ export function createMaterial(app) {
       modeMute(ui.spaceSeg, 'p', p);
       if (!p.on && app.state.space === 'p') { app.state.space = 'x'; ui.spaceSeg.set('x'); schedule(TIER.REBUILD); }
       modeMute(ui.viewSeg, 'imag', A('wave.view.imag'));
-      for (const id of ['balls', 'sticks', 'esp']) { const b = ui.styleSeg.button(id); if (b) b.hidden = A('wave.style.' + id).hide; }
+      { const b = ui.styleSeg.button('esp'); if (b) b.hidden = A('wave.style.esp').hide; }   // 032 O1: ESP the one MOLECULES-only style
       const esp = A('wave.esp').hide; for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = esp;
       if (ui.espBarRow) ui.espBarRow.hidden = A('info.espBar').hide;   // 018 B10: INFORMATIONAL's ESP BAR · SIDE · PAD   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
     }
     ui.availSync = modeSync;
     function styleSync() {
       const st = mat.style | 0, esp = st === STYLE.esp, surf = mat.espSurf || 'iso';
+      if (!Number.isFinite(mat.stickR)) ui.stickK.set(stickROf(mat));   // 032 O1: an untouched RADIUS reads 0, or ESP's own sticks
       const styleName = (ui.styleSeg.button(drawStyle(st)) || {}).textContent || 'this STYLE';
       for (const [k, on] of Object.entries(STYLE_READS)) { const styleOff = !on.includes(st);
         mute(ui[k], styleOff || (esp && ((k === 'probeK' && surf === 'iso') || ((k === 'isoK' || k === 'softK') && surf !== 'iso'))), styleOff ? 'off in ' + styleName : 'off with ' + surf.toUpperCase()); }
@@ -163,15 +166,15 @@ export function createMaterial(app) {
     }
     /* a restore: the knobs from `mat` (an absent key is the default and leaves `mat`), then the rows and the bar */
     ui.styleSync = (pm) => {
-      if (pm) for (const k of ['atomSize', 'stickR', 'probe', 'espRange', 'espSurf', 'espLive', 'espBare']) if (!(k in pm)) delete mat[k];
+      if (pm) { const q = { ...pm }; liftAtomStyle(q); for (const k of ['atomSize', 'stickR', 'probe', 'espRange', 'espSurf', 'espLive', 'espBare']) if (!(k in q)) delete mat[k]; }   // 032 O1: the keys a lifted BALLS / STICKS gained stay
       delete mat.espPal;   // iteration 015 W2: USE PALETTE is gone — PALETTE ON paints the map — so an older file's key leaves on every road in
-      ui.atomSizeK.set(Number.isFinite(mat.atomSize) ? mat.atomSize : 1); ui.stickK.set(Number.isFinite(mat.stickR) ? mat.stickR : STICK_R); ui.probeK.set(Number.isFinite(mat.probe) ? mat.probe : PROBE_R);
+      ui.atomSizeK.set(atomSizeOf(mat)); ui.stickK.set(stickROf(mat)); ui.probeK.set(Number.isFinite(mat.probe) ? mat.probe : PROBE_R);
       ui.espRangeK.set(Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE); ui.espSurfSeg.set(mat.espSurf || 'iso'); ui.espLiveSw.set(!!mat.espLive); ui.espBareSw.set(!!mat.espBare);
       styleSync();
     };
     { const set0 = ui.styleSeg.set; ui.styleSeg.set = (v) => { set0(v); styleSync(); }; }   // LW.setStyle and a restore set mat.style first
     styleSync();   // the first paint: the boot's style shows only its own controls
-    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are. ESP spans ±RANGE through a signed log, and beyond it the colour holds; LIVE solves φ again while the density moves, at most once a second — off, once per molecule, basis and VIEW.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
+    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are. Under MOLECULES, SIZE &gt; 0 draws the atoms and RADIUS &gt; 0 the bonds inside any style. ESP spans ±RANGE through a signed log, and beyond it the colour holds; LIVE solves φ again while the density moves, at most once a second — off, once per molecule, basis and VIEW.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
 
     const gs = group(wClip.body, 'observer only');
     const r3 = el('div', 'row fit', gs);   // 022 F2: ON · CLIP | SLAB · POS · THICK, one fit row

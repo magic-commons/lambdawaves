@@ -19,7 +19,7 @@ export const MODE = Object.freeze({ spectrum: 'hydrogen', equalizer: 'hydrogen',
    false greys the control in its seat with `why` before its hint (016 V1: greyed, never moved); `hide` takes a molecule's row out under
    hydrogen (018 B1).  WAVE's styleSync applies it (windows/material.js `ui.availSync`); the operator, the scale, the mode, a restore and the
    facade ask it, never a rule of their own */
-const MOLECULE_ROWS = new Set(['wave.style.balls', 'wave.style.sticks', 'wave.style.esp', 'wave.esp', 'info.espBar']);
+const MOLECULE_ROWS = new Set(['wave.style.esp', 'wave.esp', 'info.espBar']);   // 032 O1: BALLS and STICKS left the seg (SIZE and RADIUS > 0)
 const ON = Object.freeze({ on: true, why: '', hide: false });
 export function availability(control, app) {
   const mol = !!(app.state.chem && app.state.chem.on);

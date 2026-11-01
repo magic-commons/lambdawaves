@@ -100,7 +100,7 @@ export function createNotebook(app) {
           item('mapping', 'KEYBOARD & MAPPING…'), item('settings', 'SETTINGS…', { icon: 'settings' })],
         VIEW: () => [sub('MODE', () => radio('mode', 'mode', [['hydrogen', 'HYDROGEN'], ['molecules', 'MOLECULES']], () => (A.get('mode').get() ? 'molecules' : 'hydrogen')), 'atom'),
           sub('OBSERVABLE', () => radio('view', 'view', [['density', 'ρ = |ψ|²  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']], () => VIEW_NAMES[mat.view])),
-          sub('STYLE', () => radio('style', 'style', ['cloud', 'solid', 'signed', 'dust', 'bands'].map((v) => [v, v.toUpperCase()]), () => drawStyle(mat.style))),
+          sub('STYLE', () => radio('style', 'style', ui.styleList(), () => drawStyle(mat.style))),   // 032 O1: WAVE's visible styles, its words
           item('invert', 'INVERT the cloud — ink, not light'),
           sub('STAGE', () => [item('view.captions', 'CAPTIONS'), item('view.formula', 'FORMULA'), item('view.labels', 'ATOM LABELS'), item('ballStick', 'BALL AND STICK')]),
           sub('INTERFACE', () => [item('view.badges', 'STATUS TAGS'), item('view.hints', 'CONTROL HINTS'), item('notes', 'WINDOW HELP'), null, item('hide', 'HIDE the interface')]),
