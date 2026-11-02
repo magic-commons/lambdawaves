@@ -95,6 +95,7 @@ function req(method, path, body) {
 export async function newSession(opts = {}) {
   const args = opts.headless === false ? [] : ['-headless'];
   if (opts.width) args.push('-width', String(opts.width), '-height', String(opts.height || 900));
+  if (opts.profile) args.push('-profile', String(opts.profile));   // 033 THE UPGRADE RIG: a PERSISTENT profile (geckodriver uses the directory in place), so a second launch finds the first's worker, caches and stores
   const caps = {
     capabilities: {
       alwaysMatch: {

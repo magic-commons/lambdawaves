@@ -842,7 +842,10 @@ export async function boot(dom) {
       && (ignorePlaying || (!clock.playing && !clock.t));
   };
   const swClient = createSwClient({ buildBadge: () => badges.build,
-    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects, untouched });
+    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects, untouched,
+    extra: () => { const ms = app.state.molSession, c = app.state.chem; return [   // 033 COPY DIAGNOSTICS: the app's own lines
+      'mode ' + (ms && ms.selected ? ms.selected : 'hydrogen') + (c && c.on && c.volume ? ' · volume ' + c.volume.volume + ' ' + c.volume.id : '') + ' · t ' + clock.t.toFixed(2),
+      'history ' + (app.state.history ? app.state.history.entries().map((r) => r.label).join(' › ') : '—') + (layout.projects && layout.projects.dirty ? ' · DIRTY' : '') ]; } });
 
   /* ── THE BOW: ctrl+drag draws it, release fires, releasing CTRL first cancels ── */
   const { bowStart, bowMove, bowRelease, orbitOfShell, kepShell, keplerTurn, keplerDragToPoint, keplerDragTo, keplerRowSync, gas, gasReadout, gasTableOn, launchPacket, enterBox, coherentBounce,

@@ -73,6 +73,8 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `mir.render.calib` | PREFERENCE | kit | no | kit · recorder: this device’s ms a frame |
 | `lw.keyboard.position.v1` | WORKSPACE | v 1 (name) | no | kit · the KEYBOARD window’s place |
 | `lw.csb.side` | WORKSPACE | — | yes | shell/modulation.js modDodge: the side the CONTROL SURFACE keeps (top \| bottom, 032 T13) |
+| `lw.repair` | PREFERENCE | flag | no | sw-client.js REPAIR (033): sessionStorage, not localStorage — 1 after the cache is cleared, 2 after the reinstall activated, removed at the verdict; one tab, one repair |
+| `lw.mixed` | PREFERENCE | flag | no | sw-client.js mixed() (033): sessionStorage — the page build a MIXED BUILD reloaded for once, so a reload loop is impossible |
 
 <!-- state-scopes:end -->
 

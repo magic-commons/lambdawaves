@@ -35,7 +35,7 @@
 const PRECACHE = [
   ['./ab-patch.json',                                               '5dd0e71d78bf'],
   ['./absorb.js',                                                   '3b0857195bfa'],
-  ['./actions.js',                                                  'd3d4f39c50b5'],
+  ['./actions.js',                                                  '932c00ebd125'],
   ['./angular-nodes.js',                                            'a4c221d5dc48'],
   ['./ask.js',                                                      '6e716ccee7ea'],
   ['./atoms.js',                                                    'fc4e09341bd1'],
@@ -44,6 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '628d7346cc22'],
+  ['./build-id.js',                                                 '9159ae022ba3'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '41922d244a06'],
@@ -121,14 +122,14 @@ const PRECACHE = [
   ['./img/icon.svg',                                                'e59093ac4a71'],
   ['./img/lambdawaves-logo.svg',                                    'fc49b1e62e10'],
   ['./img/warning-sign.webp',                                       '65d3a6dd47a8'],
-  ['./index.html',                                                  'feb9d19e1f72'],
+  ['./index.html',                                                  '1dcc55c867a5'],
   ['./informational.js',                                            '2ee9b2f3099e'],
   ['./kepler.js',                                                   'f8fb43706f76'],
   ['./keplerview.js',                                               '023792d43cfa'],
   ['./key-table.js',                                                '15c5cf530686'],
   ['./keymap.css',                                                  '35f7d7050b4f'],
   ['./kick.js',                                                     '5c17a0cbc2d7'],
-  ['./lab.css',                                                     '54b59d53d1a4'],
+  ['./lab.css',                                                     '217199afdbc1'],
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
   ['./latex-state.js',                                              'd4dc21205611'],
@@ -139,7 +140,7 @@ const PRECACHE = [
   ['./library.json',                                                '0a3531a7c866'],
   ['./linalg.js',                                                   'da2367cdcb97'],
   ['./look.js',                                                     '89d95fc0b5c5'],
-  ['./main.js',                                                     '65cc232b98ce'],
+  ['./main.js',                                                     '2ac70cdbb7ed'],
   ['./manifest.webmanifest',                                        '3c7086f9dfa8'],
   ['./mapping.js',                                                  'af6824a8f2df'],
   ['./mathworker.js',                                               '24e51f82f922'],
@@ -384,7 +385,7 @@ const PRECACHE = [
   ['./project-store.js',                                            '22a3b1177f0c'],
   ['./projects.js',                                                 'a0615ea52761'],
   ['./qho.js',                                                      'c0dfa6e21c94'],
-  ['./rack.js',                                                     'e5e0c1ba0181'],
+  ['./rack.js',                                                     '54921460ed71'],
   ['./radiation.js',                                                '678be6f37657'],
   ['./radiationview.js',                                            'abb61c437b49'],
   ['./register-morph.js',                                           'cf0e273be934'],
@@ -396,7 +397,7 @@ const PRECACHE = [
   ['./rpa-inspector.js',                                            'baf1eaa062e7'],
   ['./scf.js',                                                      '76359349f917'],
   ['./separable.js',                                                'e99b6c67ebd5'],
-  ['./settings-store.js',                                           '8f3d14b705ba'],
+  ['./settings-store.js',                                           'c6e6f3cadbbe'],
   ['./shadowview.js',                                               'ad101af8b299'],
   ['./shell/controller.js',                                         '63181d01432f'],
   ['./shell/facade.js',                                             '3bd047931564'],
@@ -405,7 +406,7 @@ const PRECACHE = [
   ['./shell/keys.js',                                               'c11b18b21885'],
   ['./shell/links.js',                                              '8e3bc790dcd4'],
   ['./shell/modulation.js',                                         '4066ad3e6d62'],
-  ['./shell/notebook.js',                                           '6bf8d0550dcb'],
+  ['./shell/notebook.js',                                           '1dba43cdc9c5'],
   ['./shell/persist.js',                                            'fd1853f8133e'],
   ['./shell/rack-wiring.js',                                        'db6083904a2b'],
   ['./shell/settings.js',                                           'ed2af6f2b1f4'],
@@ -424,7 +425,7 @@ const PRECACHE = [
   ['./status.js',                                                   'da2e112c115c'],
   ['./sturmian.js',                                                 '9865f0c8c247'],
   ['./sturmianreg.js',                                              'e9f1d20c0ec0'],
-  ['./sw-client.js',                                                '10e79a3a4fc4'],
+  ['./sw-client.js',                                                '56c28a945d96'],
   ['./tier.js',                                                     '8a0b625a5b35'],
   ['./user-presets.js',                                             '3808f2602145'],
   ['./valence.js',                                                  '3b4e39e5b9b0'],
@@ -525,6 +526,9 @@ function digest(s) {
 const PREFIX = 'lw-lab-';
 const BUILD  = digest(PRECACHE.map(([u, h]) => u + '@' + h).join('\n'));
 const CACHE  = PREFIX + BUILD;
+/* 033 THE UPDATER · THE PAGE KNOWS ITS BUILD: the same digest WITHOUT ./build-id.js, which lab/build-id.js carries as BUILD_ID (written by
+   `pwa --write`).  Answered in every message below, so a page can compare the build it was loaded from with the build its controller serves. */
+const PAGE_BUILD = digest(PRECACHE.filter(([u]) => u !== './build-id.js').map(([u, h]) => u + '@' + h).join('\n'));
 
 const BASE  = self.location.href;                              // …/lab/sw.js — or …/sw.js at an origin root
 const SCOPE = new URL('./', BASE).pathname;                    // '/lab/' on the dev server, '/' deployed
@@ -550,7 +554,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     const already = new Set((await cache.keys()).map((r) => new URL(r.url).pathname));
-    await Promise.all(PRECACHE.map(async ([url, rev]) => {
+    /* 033 · A FAILURE SAYS WHY: the first entry that rejects the install is announced to every window (the page shows the sentence,
+       COPY DIAGNOSTICS carries it) before the throw that makes this worker redundant.  For a day of 032 the badge said UPDATE FAILED and nothing else. */
+    try { await Promise.all(PRECACHE.map(async ([url, rev]) => {
       const href = new URL(url, BASE).href;
       if (already.has(new URL(href).pathname)) return;          // a re-install of the same build is free
       /* 032 (Sos, 2026-11-02): THE WIRE'S FORM OF A NAME.  Workers Static Assets answers a path with a literal `+` (vendor/bse/6-31+g-star-v1.json)
@@ -564,10 +570,10 @@ self.addEventListener('install', (event) => {
       const got = [...new Uint8Array(await crypto.subtle.digest('SHA-256', body))].slice(0, 6).map((b) => b.toString(16).padStart(2, '0')).join('');
       if (got !== rev) throw new Error('precache ' + url + ' → bytes ' + got + ', recorded ' + rev);
       await cache.put(new Request(href), new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers }));
-    }));
+    })); } catch (e) { await announce({ type: 'LW_SW_INSTALL_FAILED', build: BUILD, page: PAGE_BUILD, why: String(e && e.message || e) }); throw e; }
     /* THE SIGNAL (§5): if a worker is already live, this install is an UPDATE and the sessions running on
        the old build are told — while they keep running on it. A first install announces nothing. */
-    if (self.registration && self.registration.active) await announce({ type: 'LW_SW_WAITING', build: BUILD, files: PRECACHE.length });
+    if (self.registration && self.registration.active) await announce({ type: 'LW_SW_WAITING', build: BUILD, page: PAGE_BUILD, files: PRECACHE.length });
   })());
 });
 
@@ -590,7 +596,7 @@ self.addEventListener('activate', (event) => {
       const dc = await caches.open(DATA_CACHE);
       await Promise.all((await dc.keys()).filter((r) => SWEEP.some((d) => new URL(r.url).pathname.startsWith(SCOPE + d))).map((r) => dc.delete(r)));
     }
-    await announce({ type: 'LW_SW_ACTIVE', build: BUILD, files: PRECACHE.length });
+    await announce({ type: 'LW_SW_ACTIVE', build: BUILD, page: PAGE_BUILD, files: PRECACHE.length });
   })());
 });
 
@@ -659,7 +665,7 @@ self.addEventListener('message', (event) => {
   const d = event.data || {};
   if (d.type === 'LW_SW_SKIP_WAITING') { const p = takeover(event, d); if (event.waitUntil) event.waitUntil(p); return; }
   if (d.type === 'LW_SW_HELLO') {
-    const msg = { type: 'LW_SW_BUILD', build: BUILD, files: PRECACHE.length, cache: CACHE };
+    const msg = { type: 'LW_SW_BUILD', build: BUILD, page: PAGE_BUILD, files: PRECACHE.length, cache: CACHE };
     const port = event.ports && event.ports[0];
     if (port) port.postMessage(msg);
     else if (event.source && event.source.postMessage) event.source.postMessage(msg);
@@ -685,4 +691,4 @@ async function announce(msg) {
 }
 
 /* Read by tests/pwa.test.mjs, which loads this file for real and drives the handlers above. */
-self.LW_SW = { PREFIX, BUILD, CACHE, PRECACHE, NEVER_PRECACHE, NEVER_CACHE_AT_RUNTIME, SCOPE, INDEX, ENTRY, BY_PATH, DATA, DATA_CACHE, digest };
+self.LW_SW = { PREFIX, BUILD, PAGE_BUILD, CACHE, PRECACHE, NEVER_PRECACHE, NEVER_CACHE_AT_RUNTIME, SCOPE, INDEX, ENTRY, BY_PATH, DATA, DATA_CACHE, digest };

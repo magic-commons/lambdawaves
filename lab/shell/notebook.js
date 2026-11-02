@@ -118,7 +118,7 @@ export function createNotebook(app) {
           ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k);
             return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['none', null, true]]; }))],   // 021 V2: each window its one glyph
         HELP: () => [item('about', 'ABOUT λWAVES'), item('guiAbout', 'ABOUT MIR'), item('help', 'KEYBOARD SHORTCUTS…'),
-          item('photosensitivity', 'PHOTOSENSITIVITY WARNING…', { hint: 'show the photosensitivity notice now and next load' }), null, item('update', 'UPDATE APP', { hint: 'check for a new build, rebuild the offline cache, and reload' })],
+          item('photosensitivity', 'PHOTOSENSITIVITY WARNING…', { hint: 'show the photosensitivity notice now and next load' }), null, item('update', 'UPDATE APP', { hint: 'check for a new build, rebuild the offline cache, and reload' }), item('diagnostics', 'COPY DIAGNOSTICS', { hint: 'the build, the worker, the stores and the last errors' })],
       };
       /* 0.5.0 C3 · THE BAR IS THE KIT'S createMenubar (its port of this app's bar: the disclosure, 400 ms hover hide, the placement,
          Escape → the wordmark, the phone crossing, a row that throws still closes it).  N1's hand-back stays app glue: the kit closes the

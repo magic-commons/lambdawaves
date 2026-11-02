@@ -117,6 +117,7 @@ function installLayer(LW) {
     try { reg = await navigator.serviceWorker.register('./sw.js', { scope: './' }); }
     catch (e) { sw.mode = 'failed'; sw.error = String(e && e.message || e); return; }
     sw.registration = reg; sw.mode = 'registered';
+    if (sw.repairBoot) sw.repairBoot(reg);                                   // 033 REPAIR: the second reload of the repair road, and its verdict
 
     /** OFFER a waiting worker to the interface.  Nothing here takes it; accept() does — on a press, or quietly
         (`alone`) for an untouched session.  ONCE PER WORKER (wave 133): `reg.waiting`, the install's statechange and §3's

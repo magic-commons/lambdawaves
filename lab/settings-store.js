@@ -55,6 +55,8 @@ export const RECORDS = Object.freeze([
   row('mir.render.calib', P, 'kit', false, 'kit · recorder: this device’s ms a frame'),
   row('lw.keyboard.position.v1', W, 'v 1 (name)', false, 'kit · the KEYBOARD window’s place'),
   row('lw.csb.side', W, '—', true, 'shell/modulation.js modDodge: the side the CONTROL SURFACE keeps (top | bottom, 032 T13)'),
+  row('lw.repair', P, 'flag', false, 'sw-client.js REPAIR (033): sessionStorage, not localStorage — 1 after the cache is cleared, 2 after the reinstall activated, removed at the verdict; one tab, one repair'),
+  row('lw.mixed', P, 'flag', false, 'sw-client.js mixed() (033): sessionStorage — the page build a MIXED BUILD reloaded for once, so a reload loop is impossible'),
 ]);
 export const FAMILIES = Object.freeze(Object.fromEntries(RECORDS.map((r) => [r.key, r])));
 /** the retired notebook keys (021 R4): read once at boot into the session part, then removed */

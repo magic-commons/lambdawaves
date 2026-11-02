@@ -126,6 +126,7 @@ export function createActions(app) {
     { id: 'about', icon: 'about', short: 'about', label: 'ABOUT λWAVES — the notebook’s ABOUT face', run: () => L().notebook.open('about'), surface: true },
     { id: 'photosensitivity', icon: 'warn', label: 'PHOTOSENSITIVITY WARNING — show the notice now and on the next load', hint: 'Show the photosensitivity notice', run: () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } } },
     { id: 'update', icon: 'download', label: 'UPDATE APP — check for a new build, rebuild the offline cache, and reload', hint: 'UPDATE APP — check for a new build', run: () => H().swClient.refresh() },
+    { id: 'diagnostics', icon: 'informational', label: 'COPY DIAGNOSTICS — the build, the worker, the stores and the last errors, as text', hint: 'COPY DIAGNOSTICS — the build and the stores as text', run: () => H().swClient.copyDiagnostics() },   // 033 THE UPDATER
     { id: 'keys.reset', label: 'RESET the key bindings', run: () => app.hooks.keys.reset() },
     { id: 'csb.search', group: CS, short: 'search', label: 'search the molecules (the CONTROL SURFACE\'s pill)', hint: 'Search the molecules', keys: ['Mod+KeyK'], run: () => { const s = S().transport && S().transport.search; if (s) s.open(); }, surface: true },   // iteration 014 A8
     /* WAVE 65 · R-K1: the MOD arm is Ctrl+Space (the real Control: ⌘Space is Spotlight); its run() follows the one clock's POWER */

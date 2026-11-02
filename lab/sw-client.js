@@ -6,8 +6,19 @@
  * definition of a session a reload loses nothing from); since 032 the offer is the kit's popup, so it needs no host.  The object
  * it returns IS LW.sw — main.js arms it, gates replace its reload() — so it is created once, where the block stood. */
 import { openDialog } from './mir/shell/dialog.js';
+import { BUILD_ID } from './build-id.js';   // 033 THE UPDATER: the page's own build (pwa --write)
 
-export function createSwClient({ buildBadge, setStatus, getProjects, untouched }) {
+/* 033 THE UPDATER (Claude Sos, 2026-11-02; the plan: research/iteration-033/PLAN.md).  Four laws joined this file:
+ *   THE PAGE KNOWS ITS BUILD — BUILD_ID (lab/build-id.js) against the controller's `page` in LW_SW_BUILD: a MIXED BUILD is said on the badge
+ *     and in ABOUT, reloaded once by an untouched page (sessionStorage lw.mixed keeps it to once), offered to a touched one.
+ *   A FAILURE SAYS WHY — LW_SW_INSTALL_FAILED carries the entry and the reason the install was refused; the badge, SETTINGS' status and
+ *     the diagnostics say the sentence (for a day of 032 UPDATE FAILED said nothing while Cloudflare 307ed one precached file).
+ *   REPAIR TOUCHES THE BUILD, NEVER THE DATA — refresh() ends in a verified state: the registration and the lw-lab-* caches go, the page
+ *     reloads (sessionStorage lw.repair = 1), waits for the fresh install to activate, reloads once more (= 2) and says REPAIRED;
+ *     lw-data-v1, lw-vol-*, localStorage and the session are never touched.
+ *   THE STATE CAN BE SEEN — diagnostics(): one text of the builds, the controller, every cache, every record, the volumes, the app's
+ *     own lines (`extra`), the last errors; COPY DIAGNOSTICS puts it on the clipboard and shows it. */
+export function createSwClient({ buildBadge, setStatus, getProjects, untouched, extra = null }) {
   /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF (board #56) ─────────────────────────────────────────
    * lab/sw.js precaches the whole lab and then WAITS: it never calls skipWaiting() by itself, never claims
    * a client, and has no timer.  The ONE thing that can end a session's build is a press, and this is it.
@@ -42,6 +53,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched }
    * AVAILABLE, what is kept and lost, RELOAD PAGE (RELOAD ALL when other windows are open) and LATER. Escape or a press outside is
    * LATER. A "no" to the unsaved-project question puts the popup back. The badge stays the second road to the same press. */
   let onHide = null, quietTake = false, dlg = null;
+  const brief = (why) => { const w = String(why || '').replace(/^precache \.\//, '').replace(/\s+/g, ' '); return w.length > 72 ? w.slice(0, 69) + '…' : w; };   // 033: the badge's share of a reason
   const ART = './img/icon.svg';
   const BODY = 'A newer λWAVES is ready. Reload the page to start using it; it takes a few seconds. Saved projects, settings and the notebook are kept; unsaved changes are lost, so save first.';
   /* iteration 028 R-03: a press refused because other windows are open — the popup says so, and RELOAD PAGE becomes RELOAD ALL */
@@ -53,6 +65,8 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched }
   const hidePane = () => { if (dlg) { const d = dlg; dlg = null; d.close('gone'); } };
   const swClient = {
     state: 'idle',                       // idle → ready (a build is waiting) → taking | replaced | refreshing | failed
+    page: BUILD_ID, workerPage: null,    // 033: the build this page was loaded from, and the build its controller serves (LW_SW_BUILD)
+    failure: null,                       // 033: the last LW_SW_INSTALL_FAILED sentence
     asked: false,                        // did THIS document ask for the swap?
     reloads: 0,
     build: null, cache: null, files: 0,
@@ -67,7 +81,32 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched }
       const b = buildBadge();
       if (b) { b.hidden = false; b.lastChild.textContent = badge; }
       setStatus(status);                                   // …and a second place to find it, for a browser with STATUS TAGS off (SETTINGS' status line)
+      swClient.paintBuild();
       return badge;
+    },
+    /** 033 · ABOUT's build line: the page's build, the worker's, the install's state — one sentence, rewritten on every event */
+    paintBuild() {
+      const n = document.querySelector('.ab-build'); if (!n) return;
+      const ctl = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+      const w = swClient.workerPage;
+      const state = swClient.failure ? 'INSTALL FAILED: ' + swClient.failure
+        : swClient.state === 'mixed' ? 'MIXED BUILD — reload'
+        : ctl && w && w !== BUILD_ID ? 'MIXED BUILD — reload'
+        : ctl ? 'offline ready' + (swClient.files ? ' · ' + swClient.files + ' files' : '')
+        : swClient.mode === 'automation' || swClient.mode === 'declined' ? 'worker off (' + swClient.mode + ')'
+        : swClient.mode === 'unsupported' ? 'no service worker in this browser'
+        : 'first launch — offline from the next launch';
+      const text = 'build ' + BUILD_ID + (w ? ' · worker ' + w : '') + ' · ' + state;
+      if (n.textContent !== text) n.textContent = text;
+    },
+    /** 033 · THE PAGE KNOWS ITS BUILD: the controller named a different page build — this document is a MIXED BUILD */
+    mixed() {
+      if (swClient.state === 'taking' || swClient.state === 'refreshing' || swClient.state === 'mixed') return false;
+      swClient.state = 'mixed';
+      swClient.say('MIXED BUILD · RELOAD', 'this page is not the build the worker serves: reload');
+      let once = null; try { once = sessionStorage.getItem('lw.mixed'); } catch (_) {}
+      if (!once && untouched && untouched(false)) { try { sessionStorage.setItem('lw.mixed', BUILD_ID); } catch (_) {} swClient.reload(); return true; }
+      return false;
     },
     /** A build is waiting.  An untouched session takes it quietly; one that is only playing (or whose clock moved) is offered it
      *  and takes it when the page next hides; any other session is offered it and keeps its work until a press. */
@@ -173,14 +212,65 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched }
         }
         if (discardApproved) projects.markClean();
         swClient.asked = true;
-        swClient.say('CACHE CLEARED · RELOADING…', 'cache cleared; reloading');
+        try { sessionStorage.setItem('lw.repair', '1'); } catch (_) {}   // 033: the repair road continues after the reload (repairBoot)
+        swClient.say('REPAIR · CACHE CLEARED · RELOADING…', 'repair: the build cache cleared; reloading (your volumes, projects and settings are untouched)');
         swClient.reload();
         return true;
       } catch (e) {
         swClient.error = String(e && e.message || e); swClient.state = 'failed';
-        swClient.say('UPDATE FAILED · TRY AGAIN', 'update failed: ' + swClient.error);
+        swClient.say('UPDATE FAILED · ' + brief(swClient.error) + ' · TRY AGAIN', 'update failed: ' + swClient.error);
         return false;
       }
+    },
+    /** 033 REPAIR, after the reload (main.js, once the registration exists): lw.repair = 1 → wait for the fresh install to activate, then
+     *  reload once more as 2 → say REPAIRED (the page is controlled by a verified build) or why not. */
+    repairBoot(reg) {
+      let flag = null; try { flag = sessionStorage.getItem('lw.repair'); } catch (_) {}
+      if (!flag) return 'none';
+      const done = () => { try { sessionStorage.removeItem('lw.repair'); } catch (_) {} };
+      if (flag === '2') {
+        done();
+        if (navigator.serviceWorker.controller) swClient.say('REPAIRED · THIS BUILD IS INSTALLED', 'repaired: the build is installed and serves this page');
+        else swClient.say('REPAIR DID NOT TAKE · TRY AGAIN', 'repair: the page is still uncontrolled after the reinstall');
+        return flag;
+      }
+      const again = () => { try { sessionStorage.setItem('lw.repair', '2'); } catch (_) {} swClient.asked = true; swClient.say('REPAIR · INSTALLED · RELOADING…', 'repair: the build installed; reloading once more'); swClient.reload(); };
+      const w = reg.installing || reg.waiting;
+      if (!w && reg.active && reg.active.state === 'activated') { again(); return flag; }
+      if (w) w.addEventListener('statechange', () => {
+        if (w.state === 'activated') again();
+        else if (w.state === 'redundant') { done(); swClient.say('REPAIR FAILED · ' + brief(swClient.failure || 'the install was refused') + ' · TRY AGAIN', 'repair failed: ' + (swClient.failure || 'the install was refused')); }
+      });
+      else { done(); swClient.say('REPAIR DID NOT START · TRY AGAIN', 'repair: no worker is installing'); }
+      return flag;
+    },
+    /** 033 · THE STATE CAN BE SEEN: one text — the builds, the controller, the registration, storage, every cache, every record, the
+     *  volumes, the app's lines, the last errors, the browser. */
+    async diagnostics() {
+      const L = [], MB = (b) => (b / 1048576).toFixed(1) + ' MiB';
+      L.push('λWAVES DIAGNOSTICS · ' + new Date().toISOString() + ' · ' + location.origin + location.pathname);
+      L.push('page build ' + BUILD_ID + ' · worker ' + (swClient.workerPage || '—') + (swClient.build ? ' · cache build ' + swClient.build : '') + (swClient.files ? ' · ' + swClient.files + ' files' : ''));
+      const ctl = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+      L.push('controller ' + (ctl ? 'yes' : 'NO (first launch, a hard reload, or no install)') + ' · mode ' + swClient.mode + ' · state ' + swClient.state + (swClient.failure ? ' · last install failure: ' + swClient.failure : '') + (swClient.error ? ' · error: ' + swClient.error : ''));
+      try { const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration('./'); L.push('registration ' + (reg ? ['active', 'waiting', 'installing'].map((k) => k + ' ' + (reg[k] ? reg[k].state : '—')).join(' · ') : 'none')); } catch (e) { L.push('registration: ' + String(e && e.message || e)); }
+      try { const est = await navigator.storage.estimate(); const p = navigator.storage.persisted ? await navigator.storage.persisted() : null; L.push('storage ' + MB(est.usage || 0) + ' of ' + MB(est.quota || 0) + (p === null ? '' : ' · persisted ' + p)); } catch (_) {}
+      try { for (const n of (await caches.keys()).sort()) { const c = await caches.open(n); L.push('cache ' + n + ' · ' + (await c.keys()).length + ' entries'); } } catch (e) { L.push('caches: ' + String(e && e.message || e)); }
+      try { const V = await import('./volumes.js'); const sh = await V.shelf(); for (const v of (sh && sh.volumes) || []) { const st = await V.installStatus(v.id).catch(() => null); L.push('volume ' + v.id + ' VOL. ' + v.numeral + ' · ' + (st ? st.state + ' ' + st.n + '/' + st.N : '?')); } } catch (e) { L.push('volumes: ' + String(e && e.message || e)); }
+      try { const ls = localStorage, keys = Array.from({ length: ls.length }, (_, i) => ls.key(i)).filter((k) => /^(lambdawaves\.|lw\.|mir\.)/.test(k)).sort(); for (const k of keys) L.push('record ' + k + ' · ' + (ls.getItem(k) || '').length + ' chars'); } catch (e) { L.push('records: ' + String(e && e.message || e)); }
+      try { const raw = localStorage.getItem('lambdawaves.q0.session'); if (raw) { const o = JSON.parse(raw); L.push('session · v ' + o.v + ' · ' + raw.length + ' chars · keys ' + Object.keys(o).join(' ') + (o.parts ? ' · parts ' + Object.keys(o.parts).join(' ') : '')); } } catch (_) {}
+      try { if (extra) for (const line of extra() || []) L.push(line); } catch (e) { L.push('app: ' + String(e && e.message || e)); }
+      const errs = (globalThis.__e || []); L.push('errors ' + (errs.length ? errs.length + ' · ' + errs.slice(-8).join(' | ') : 'none'));
+      L.push('browser ' + navigator.userAgent + ' · ' + screen.width + '×' + screen.height + ' @' + devicePixelRatio + (navigator.webdriver ? ' · webdriver' : ''));
+      return L.join('\n');
+    },
+    /** COPY DIAGNOSTICS (HELP › COPY DIAGNOSTICS, the registry row `diagnostics`): the text to the clipboard, and shown, so it can be pasted into a report */
+    async copyDiagnostics() {
+      const t = await swClient.diagnostics();
+      let copied = false; try { await navigator.clipboard.writeText(t); copied = true; } catch (_) {}
+      const pre = document.createElement('pre'); pre.className = 'lw-diag'; pre.textContent = t;
+      const d = openDialog({ title: copied ? 'DIAGNOSTICS COPIED' : 'DIAGNOSTICS', body: pre, kind: 'notice', actions: [{ label: 'COPY', kind: 'primary', value: 'copy' }, { label: 'CLOSE', value: 'close' }] });
+      d.result.then(async (v) => { if (v === 'copy') { try { await navigator.clipboard.writeText(t); setStatus('diagnostics copied'); } catch (_) { setStatus('the clipboard refused: select the text and copy it'); } } });
+      return t;
     },
     /** the controller under this document changed: the document that asked reloads; one that did not reloads at once when it
      *  holds no work (its lazy imports now reach the new build), and otherwise is told to — its work is never thrown away unasked */
@@ -201,8 +291,17 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched }
         if (!quietTake) { swClient.others = Math.max(1, (d.windows || 2) - 1); swClient.offered = null; }
         swClient.offer(); return 'busy';
       }
+      if (d.type === 'LW_SW_INSTALL_FAILED') {                                   // 033: the reason, kept and said
+        swClient.failure = d.why || 'the install was refused'; swClient.error = swClient.failure;
+        if (swClient.state !== 'taking' && swClient.state !== 'refreshing') swClient.state = 'failed';
+        swClient.say('UPDATE FAILED · ' + brief(swClient.failure) + ' · TRY AGAIN', 'update failed: ' + swClient.failure);
+        return 'failed';
+      }
       if (d.type === 'LW_SW_ACTIVE' || d.type === 'LW_SW_BUILD') {
-        swClient.build = d.build; swClient.files = d.files || 0; if (d.cache) swClient.cache = d.cache;
+        swClient.build = d.build; swClient.files = d.files || 0; if (d.cache) swClient.cache = d.cache; if (d.page) swClient.workerPage = d.page;
+        if (d.type === 'LW_SW_BUILD' && d.page && d.page !== BUILD_ID && navigator.serviceWorker && navigator.serviceWorker.controller) swClient.mixed();   // the controller's answer to HELLO
+        else if (d.type === 'LW_SW_ACTIVE' && !(navigator.serviceWorker && navigator.serviceWorker.controller) && swClient.state === 'idle') setStatus('installed: offline from the next launch');
+        swClient.paintBuild();
         return d.type === 'LW_SW_BUILD' ? 'build' : 'active';
       }
       return null;

@@ -63,7 +63,7 @@ export async function open(url, opts = {}) {
   let s;
   try {
     s = await drv.newSession({ headless: opts.headless === false ? false : true,   // a benchmark may ask for a HEADED Firefox on the session display (the real compositor)
-      width: opts.width || 1300, height: opts.height || 850, prefs: opts.prefs });   // prefs are ADDITIVE (drv.mjs); a benchmark passes privacy.reduceTimerPrecision:false
+      width: opts.width || 1300, height: opts.height || 850, prefs: opts.prefs, profile: opts.profile });   // 033: `profile` — a persistent profile directory (the upgrade rig)   // prefs are ADDITIVE (drv.mjs); a benchmark passes privacy.reduceTimerPrecision:false
     await drv.setTO(s, { script: opts.script || 600000, pageLoad: 120000 });
     await drv.go(s, url);
   } catch (error) {
@@ -166,7 +166,7 @@ export async function open(url, opts = {}) {
 
   /** RE-NAVIGATION IS NOT A DEFECT — three gates died on "Document was
       unloaded" because they held a script handle across a real navigation. */
-  const nav = async (u) => { await drv.go(s, u || url); await waitFor('window.__M4'); };
+  const nav = async (u, o = {}) => { await drv.go(s, u || url); if (o.wait !== false) await waitFor('window.__M4'); };   // 033: { wait: false } for a page that is not the lab (about:blank, a flush)
 
   /* R1 (2026-08-27) found this reading a FALLBACK on every gate: __M0.problems is
      an ARRAY on the shipping build, so calling it threw and the catch printed [].

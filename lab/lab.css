@@ -143,6 +143,10 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .ab-team { color: var(--fg); }
 .ab-made { text-align: center; }
 .ab-fine { margin: 1px 0; font-size: 10.5px; color: var(--dim); }
+
+/* 033 THE UPDATER · ABOUT's build line (sw-client.js paintBuild) and the diagnostics' text (COPY DIAGNOSTICS) */
+.ab-build { font-variant-numeric: tabular-nums; letter-spacing: .02em; opacity: .85; word-break: break-word; }
+.lw-diag { white-space: pre-wrap; word-break: break-word; font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; max-height: min(52vh, 420px); overflow: auto; margin: 0; text-align: left; user-select: text; }
 .ab-fine code { font-family: var(--font-mono); }
 .nb-aboutface a { color: var(--acc); }
 .ab-rule { width: 60%; height: 1px; background: hsl(0 0% 50% / .25); margin: 8px 0; }
