@@ -23,6 +23,9 @@ const ACCEPTED = {
      wins, extent, stretch, a curve's steps), the event target (banded options), the timeline's hands (Shift selects and fines, Ctrl shapes), the loop,
      the work lane's face, the route from a clip, the send disarms, the card's × and the bare pop. The cut to a named number is Josh's. */
   '1.5.6-alpha.28': '01d16927392f7f8735d70545e34a4cae605f27057dcdf144b6159ebdb0b1cc11',
+  /* 032 · MIR 1.5.6 CUT (Josh 2026-11-01, "Cut the kit as 1.5.6 and push it"): the eight doors as 1.5.6 — kit commit cdf20ae, tag v1.5.6, branch kit-1.5.6 on
+     github.com/magic-commons/mir. A new door continues from 1.5.7-alpha.1. */
+  '1.5.6': 'de0ac92dda7ab61901efb41c0e6aa4a81b972e60398d769c2ff780b3a344a6c3',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
