@@ -28,7 +28,7 @@ const setRect = (s, width, height) => new Promise((res, rej) => {
 });
 const TEXT = {
   title: 'UPDATE AVAILABLE',
-  body: 'A newer λWAVES is ready. Reload the page to start using it; it takes a few seconds. Saved projects, settings and the notebook are kept; unsaved changes are lost, so save first.',
+  body: 'A newer λWAVES is ready. Reload the page to start using it; it takes a few seconds. Saved projects, settings, the notebook and your installed volumes are kept; unsaved changes are lost, so save first.',
   buttons: ['RELOAD PAGE', 'LATER'],
 };
 /* the page-side helpers: what the pane and the five badges show, a hit-test at a centre, and a wait for the ring to be quiet */
@@ -161,7 +161,7 @@ try {
 
   /* ── 5 · a dirty project asks first; no is no, yes marks it clean and takes.  033: the question is the kit's dialog (UPDATE WITHOUT
         SAVING? · KEEP WORKING | UPDATE ANYWAY), never window.confirm — the upgrade rig found a take dying on the native alert ── */
-  const d0 = await g.ev(`window.__ask = () => [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/.test(d.textContent)) || null;
+  const d0 = await g.ev(`window.__ask = () => [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/.test(d.textContent) && d.isConnected && !d.hidden && getComputedStyle(d).opacity !== '0') || null;   // a closed dialog leaves by presence(): a moment of fade, then removed
     window.__answer = (re) => { const a = __ask(); const b = a && [...a.querySelectorAll('button')].find((x) => re.test(x.textContent)); if (b) b.click(); return !!b; };
     return { dirty: __LW.projects.dirty, shown: __pane().shown };`);
   assert.equal(d0.dirty, true, 'the edit left the project clean — scene 5 would prove nothing'); assert.equal(d0.shown, true);
@@ -174,7 +174,7 @@ try {
   assert.deepEqual(s5a, { asked: false, taken: null, state: 'ready', dirty: true, shown: true });
   t = await g.tap('#lwOffer .mir-dialog-actions .trig:first-child'); assert.equal(t.ok, 1, 'RELOAD PAGE not pressable the second time: ' + JSON.stringify(t));
   await g.ev(`await new Promise((q) => setTimeout(q, 150)); return __answer(/UPDATE ANYWAY/);`);
-  const s5b = await g.ev(`await new Promise((q) => setTimeout(q, 100)); return { asked: !!__ask(), taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown, errors: __e.slice() };`);
+  const s5b = await g.ev(`await new Promise((q) => setTimeout(q, 500)); return { asked: !!__ask(), taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown, errors: __e.slice() };`);
   assert.equal(s5b.asked, false); assert.ok(s5b.taken && !s5b.taken.alone, 'yes did not take: ' + JSON.stringify(s5b)); assert.equal(s5b.state, 'taking');
   assert.equal(s5b.dirty, false, 'yes must mark the project clean before the take'); assert.equal(s5b.shown, false);
   assert.deepEqual(s5b.errors, []);

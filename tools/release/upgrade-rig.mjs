@@ -62,18 +62,19 @@ const launch = (url) => open(url, { width: 1400, height: 900, script: 240000, pr
 let molIds = [];
 try { const idx = JSON.parse(readFileSync(path.join(NEW, 'lab', 'volumes', VOL, 'index.json'), 'utf8')); molIds = idx.molecules.slice(0, 2).map((m) => m.id); } catch (_) {}
 
+let g = null;   // the open browser, closed in `finally` whatever happens (a crash mid-run left a geckodriver on the port once)
 try {
   console.log(`UPGRADE RIG · old ${OLD}\n             new ${NEW}\n             profile ${PROFILE} · port ${PORT} · volume ${molIds.length ? VOL + ' (' + molIds.join(', ') + ')' : 'none'}`);
 
   /* ═══ A · THE OLD BUILD ═══ */
   await serve(OLD);
-  let g = await launch(URL0);
+  g = await launch(URL0);
   let s = await waitState(g, (x) => x.ready, 240, 500);
   check(s && s.ready, 'A0 the old build boots', s && s.errs);
   s = await waitState(g, (x) => x.reg && x.reg.active === 'activated', 120, 500);
   check(s && s.reg && s.reg.active === 'activated', 'A1 first launch: the worker installs and activates', s && { controller: s.controller, caches: s.caches });
   check(s && !s.controller, 'A1b first launch runs uncontrolled (THE ONE LAW: no claim)', s && { controller: s.controller });
-  await g.nav('about:blank', { wait: false }); await sleep(600); await g.close();
+  await g.nav('about:blank', { wait: false }); await sleep(600); await g.close(); g = null;
 
   g = await launch(URL0 + '&menu=1');
   s = await waitState(g, (x) => x.ready && x.controller && x.sw && x.sw.cache, 240, 500);
@@ -94,7 +95,7 @@ try {
   }
   await snap(g, 'A-old-build');
   await g.nav('about:blank', { wait: false }); await sleep(800);      // pagehide: the session part flushes
-  await g.close();
+  await g.close(); g = null;
 
   /* ═══ B · THE NEW BUILD, SAME ORIGIN, SAME PROFILE ═══ */
   await serve(NEW);
@@ -117,9 +118,9 @@ try {
       const b = root && [...root.querySelectorAll('button')].find((x) => /RELOAD/.test(x.textContent)); if (b) { b.click(); how = b.textContent.trim(); }
       else { const pane = document.querySelector('#lwOffer'); const u = pane && [...pane.querySelectorAll('button')].find((x) => /UPDATE/.test(x.textContent)); if (u) { u.click(); how = 'pane ' + u.textContent.trim(); } else { const r = await __LW.sw.accept(); how = r ? 'accept()' : 'accept() refused'; } }
       await new Promise((q) => setTimeout(q, 400));
-      const ask = [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/i.test(d.textContent)); if (ask) { const y = [...ask.querySelectorAll('button')].find((x) => /UPDATE|YES|RELOAD/i.test(x.textContent)); if (y) { y.click(); how += ' + the kit\'s question: ' + y.textContent.trim(); } }
-      return how; })()`);
-    check(pressed && !/refused/.test(pressed), 'B3 RELOAD PAGE is pressed', pressed);
+      const ask = [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/i.test(d.textContent)); if (ask) { const y = [...ask.querySelectorAll('button')].find((x) => /UPDATE|YES|RELOAD/i.test(x.textContent)); if (y) { y.click(); how += ' + the kit question: ' + y.textContent.trim(); } }
+      return how; })()`).catch((e) => (/unloaded|no such window|context/i.test(String(e && e.message || e)) ? 'pressed — the page reloaded under the press (the take landed)' : { E: String(e && e.message || e).slice(0, 200) }));
+    check(pressed && !pressed.E && !/refused/.test(pressed), 'B3 RELOAD PAGE is pressed', pressed);
   }
   s = await waitState(g, (x) => x.ready && x.newApp && x.controller && x.sw && x.sw.cache && x.sw.cache !== oldCache, 240, 500);
   check(s && s.newApp && s.controller && s.sw.cache !== oldCache, 'B4 the NEW build is in control after the reload', s && { cache: s.sw && s.sw.cache, state: s.sw && s.sw.state, reg: s.reg });
@@ -152,10 +153,11 @@ try {
   const labs2 = (s && s.caches || []).filter((n) => n.startsWith('lw-lab-'));
   check(labs2.length === 1 && (s && s.caches || []).includes('lw-vol-' + VOL), 'C3 after REPAIR: one build cache, the volume untouched', { caches: s && s.caches });
   await snap(g, 'C-repaired');
-  await g.nav('about:blank', { wait: false }); await sleep(400); await g.close();
+  await g.nav('about:blank', { wait: false }); await sleep(400); await g.close(); g = null;
 } catch (e) {
   check(false, 'the rig itself', String(e && e.stack || e));
 } finally {
+  try { if (g) await g.close(); } catch (_) {}
   stopGate();
   if (!KEEP && !arg('profile')) rmSync(PROFILE, { recursive: true, force: true });
 }
