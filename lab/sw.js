@@ -553,7 +553,12 @@ self.addEventListener('install', (event) => {
     await Promise.all(PRECACHE.map(async ([url, rev]) => {
       const href = new URL(url, BASE).href;
       if (already.has(new URL(href).pathname)) return;          // a re-install of the same build is free
-      const res = await fetch(new Request(href + (href.includes('?') ? '&' : '?') + '__rev=' + rev, { cache: 'reload' }));
+      /* 032 (Sos, 2026-11-02): THE WIRE'S FORM OF A NAME.  Workers Static Assets answers a path with a literal `+` (vendor/bse/6-31+g-star-v1.json)
+         with a 307 to its percent-encoded form, and a redirected body rejects the install below — so every build since the 032 deploy failed to
+         install (UPDATE FAILED · TRY AGAIN) while the old worker kept serving.  The install asks for the encoded name; the cache key stays `href`,
+         the plain name the page requests (§5 serve() matches it by pathname).  tools/release/live-check.mjs now sweeps every entry this way. */
+      const wire = href.replace(/\+/g, '%2B');
+      const res = await fetch(new Request(wire + (wire.includes('?') ? '&' : '?') + '__rev=' + rev, { cache: 'reload' }));
       if (!res || !res.ok || res.redirected) throw new Error('precache ' + url + ' → ' + (res && (res.redirected ? 'redirected' : res.status)));
       const body = await res.arrayBuffer();
       const got = [...new Uint8Array(await crypto.subtle.digest('SHA-256', body))].slice(0, 6).map((b) => b.toString(16).padStart(2, '0')).join('');

@@ -545,7 +545,7 @@ function loadWorker(mount = '/lab/', tamper = null) {   // tamper(rel, response)
     const req = typeof input === 'string' ? new Request(input) : input;
     const u = new URL(req.url);
     state.fetched.push({ url: req.url, cache: req.cache });
-    const rel = u.pathname.startsWith(mount) ? u.pathname.slice(mount.length) : u.pathname.replace(/^\//, '');
+    const rel = decodeURIComponent(u.pathname.startsWith(mount) ? u.pathname.slice(mount.length) : u.pathname.replace(/^\//, ''));   // 032: the install asks for the wire's form (`+` → %2B); the server decodes it, so does the stub
     if (!rel || !existsSync(path.join(LAB, rel)) || statSync(path.join(LAB, rel)).isDirectory()) return new Response('', { status: 404 });
     const res = new Response(read(rel), { status: 200 });
     return tamper ? tamper(rel, res) : res;
@@ -597,7 +597,7 @@ assert.equal(SW.fetched.length, pc.length, 'sw.js: install fetched the wrong num
 for (const f of SW.fetched) {
   assert.equal(f.cache, 'reload', `sw.js: ${f.url} was fetched without cache:'reload' — a proxy could hand back yesterday's bytes`);
   const rev = new URL(f.url).searchParams.get('__rev');
-  const rel = new URL(f.url).pathname.replace(/^\/lab\//, '');   // this arm is the /lab/ worker; the root mount is exercised by E4b
+  const rel = decodeURIComponent(new URL(f.url).pathname.replace(/^\/lab\//, ''));   // this arm is the /lab/ worker; the root mount is exercised by E4b (032: the wire's form, decoded)
   assert.equal(rev, revOf(rel), `sw.js: ${rel} was busted with __rev=${rev}, its content hash is ${revOf(rel)}`);
 }
 

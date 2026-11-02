@@ -33,6 +33,28 @@ for (const [url, file] of [['/', 'index.html'], ['/sw.js', 'sw.js']]) {
     if (a[i] !== b[i]) { shown++; console.log(`      line ${i + 1}  build: ${(a[i] || '').slice(0, 100)}\n                live:  ${(b[i] || '').slice(0, 100)}`); }
   }
 }
+/* 032 (2026-11-02): THE INSTALL'S OWN SWEEP.  The two files above can match while the install still fails: sw.js §3 fetches EVERY precache entry
+   with ?__rev=<hash> and rejects a redirect or a body whose sha-256 does not begin with the recorded 12 hex.  On 2026-11-02 one entry
+   (vendor/bse/6-31+g-star-v1.json) answered a 307 to its %2B form and every visitor's update failed.  So the sweep is here: each entry, as the
+   worker asks for it (the wire form, `+` → %2B), status, redirect, digest.  ~420 requests, twelve at a time. */
+{
+  const swSrc = readFileSync(path.join(ROOT, 'dist', 'sw.js'), 'utf8'), m = swSrc.match(/PRECACHE = \[([\s\S]*?)\n\];/);
+  const rows = m ? [...m[1].matchAll(/\['\.\/([^']+)',\s*'([0-9a-f]{12})'\]/g)].map((x) => [x[1], x[2]]) : [];
+  const wrong = [], queue = rows.slice();
+  const one = async ([rel, rev]) => {
+    const wire = ORIGIN + '/' + rel.replace(/\+/g, '%2B') + '?__rev=' + rev;
+    try {
+      const res = await fetch(wire, { headers: { 'user-agent': UA, 'cache-control': 'no-cache' }, redirect: 'manual' });
+      if (!res.ok || res.redirected || res.type === 'opaqueredirect') { wrong.push(`${rel} → HTTP ${res.status}${res.headers.get('location') ? ' → ' + res.headers.get('location') : ''}`); return; }
+      const got = sha(Buffer.from(await res.arrayBuffer()));
+      if (got !== rev) wrong.push(`${rel} → bytes ${got}, recorded ${rev}`);
+    } catch (e) { wrong.push(`${rel} → ${e && e.message}`); }
+  };
+  await Promise.all(Array.from({ length: 12 }, async () => { while (queue.length) await one(queue.shift()); }));
+  if (!rows.length) { console.log('FAIL  the precache list could not be read from dist/sw.js'); bad++; }
+  else if (!wrong.length) console.log(`PASS  every precache entry (${rows.length}) answers 200, unredirected, with its recorded digest — the install will take`);
+  else { bad++; console.log(`FAIL  ${wrong.length} of ${rows.length} precache entries would reject the install:`); for (const w of wrong.slice(0, 12)) console.log('      ' + w); }
+}
 if (bad) {
   console.log('\nThe live bytes are not the build\'s: sw.js will refuse to install (its ONE LAW: a precached body that does not digest to its recorded');
   console.log('hash rejects the install), so no visitor gets the offline app.  A <script> before </body> that is not in the build is Cloudflare rewriting');
