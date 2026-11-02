@@ -4,7 +4,7 @@
 outside this tree: real-device acceptance (iPad, phone, installed PWA update) and the Cloudflare login, deployment and DNS — the
 maintainer's steps below. Run `npm ci --ignore-scripts` to install the pinned Wrangler toolchain before using the `npx` commands.
 
-λWAVES is a static application on **Cloudflare Workers + Static Assets**. Shipping it is **three commands
+λWAVES is a static application on **Cloudflare Workers + Static Assets**. Shipping it is **six commands
 and a login**, in this order, **with no edit to `lab/` in between** — the repo is actively worked on, and a
 build from ten minutes ago is not the build you are shipping.
 
@@ -12,12 +12,16 @@ build from ten minutes ago is not the build you are shipping.
 unlimited, and the build's §V7 holds the free plan's 20,000-file / 25 MiB budget. Nothing here can produce a bill; keep it so.
 
 ```
-node tests/pwa.test.mjs --write   # re-hash lab/ into sw.js §1 — REQUIRED after any lab/ edit
+node tests/pwa.test.mjs --write   # re-hash lab/ into sw.js §1 and write lab/build-id.js — REQUIRED after any lab/ edit
+node tools/release/upgrade-rig.mjs --old <the build that is live> --new . --volume vol-3
+                                  # THE UPGRADE RIG (033): the live build used, then this one at the same origin in the same profile — the
+                                  # offer, the take, the reload, the old cache collected, the volume kept, REPAIR; `git worktree add` the live tag
 node tools/build-deploy.mjs --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-3
                                   # assemble dist/ with the shelf and the volumes that travel as files (../VOLUMES-HOSTING.md), prove it
 npx wrangler deploy --dry-run     # compiles and checks, uploads nothing, costs nothing
 npx wrangler deploy               # publish exactly that
-node tools/release/live-check.mjs # THE WIRE IS THE BUILD: the live index.html and sw.js are byte for byte dist/'s, or no one installs
+node tools/release/live-check.mjs # THE WIRE IS THE BUILD: index.html and sw.js byte for byte, and EVERY precache entry as the install asks for it
+                                  # (status, no redirect, the digest) — the 032 deploy failed every visitor's install on one 307 until this swept
 ```
 
 The fourth command exists because of a finding (030 V): a zone feature that rewrites responses — Cloudflare's JavaScript Detections and
