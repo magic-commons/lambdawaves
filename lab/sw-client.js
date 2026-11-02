@@ -5,7 +5,7 @@
  * `getProjects` (a take asks before discarding an unsaved project), and since wave 133 `untouched` (rack.js' one
  * definition of a session a reload loses nothing from); since 032 the offer is the kit's popup, so it needs no host.  The object
  * it returns IS LW.sw — main.js arms it, gates replace its reload() — so it is created once, where the block stood. */
-import { openDialog } from './mir/shell/dialog.js';
+import { openDialog, confirmDialog } from './mir/shell/dialog.js';
 import { BUILD_ID } from './build-id.js';   // 033 THE UPDATER: the page's own build (pwa --write)
 
 /* 033 THE UPDATER (Claude Sos, 2026-11-02; the plan: research/iteration-033/PLAN.md).  Four laws joined this file:
@@ -55,7 +55,8 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
   let onHide = null, quietTake = false, dlg = null;
   const brief = (why) => { const w = String(why || '').replace(/^precache \.\//, '').replace(/\s+/g, ' '); return w.length > 72 ? w.slice(0, 69) + '…' : w; };   // 033: the badge's share of a reason
   const ART = './img/icon.svg';
-  const BODY = 'A newer λWAVES is ready. Reload the page to start using it; it takes a few seconds. Saved projects, settings and the notebook are kept; unsaved changes are lost, so save first.';
+  const UNSAVED = 'Your unsaved project changes will be lost. Save first, or go on without them.';
+  const BODY = 'A newer λWAVES is ready. Reload the page to start using it; it takes a few seconds. Saved projects, settings, the notebook and your installed volumes are kept; unsaved changes are lost, so save first.';
   /* iteration 028 R-03: a press refused because other windows are open — the popup says so, and RELOAD PAGE becomes RELOAD ALL */
   const busyText = (n) => n + ' other window' + (n > 1 ? 's are' : ' is') + ' open on this build. RELOAD ALL reloads ' + (n > 1 ? 'them' : 'it')
     + ' too (a window holding work is told to reload instead), or close ' + (n > 1 ? 'them' : 'it') + ' first.';
@@ -143,7 +144,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
         if (v === 'gone') return;                          // put away by the page (a take began, the build was replaced, another offer)
         if (dlg === d) dlg = null;
         if (v !== 'reload') { later(); return; }
-        if (!swClient.accept(others ? { force: true } : undefined) && swClient.state === 'ready') { swClient.offered = null; swClient.offer(); }   // a "no" to the unsaved question: the offer stands
+        Promise.resolve(swClient.accept(others ? { force: true } : undefined)).then((ok) => { if (!ok && swClient.state === 'ready') { swClient.offered = null; swClient.offer(); } });   // a "no" to the unsaved question: the offer stands
       });
       return true;
     },
@@ -159,16 +160,21 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       if (swClient.state === 'replaced') { swClient.reload(); return true; }
       if (swClient.state !== 'ready' || !swClient.take) return false;
       const quiet = !!(opt && opt.quiet), projects = getProjects();
+      const go = () => {
+        swClient.asked = true; swClient.state = 'taking'; quietTake = quiet;
+        swClient.say('TAKING THE NEW BUILD…', 'taking the new build');
+        hidePane();
+        try { swClient.take(quiet ? { alone: true } : opt && opt.force ? { force: true } : {}); } catch (e) { swClient.error = String(e && e.message || e); return false; }
+        return true;
+      };
       if (projects && projects.dirty) {
         if (quiet) return false;                           // cannot happen — untouched() includes !dirty — but the guard stays
-        if (!window.confirm('UPDATE APP WITHOUT SAVING?\nYour unsaved project changes will be lost.')) return false;
-        projects.markClean();
+        /* 033: the question is the kit's dialog, never a native confirm — an alert over the app, which headless Firefox (and a
+           distracted hand) answers with cancel; the upgrade rig found the take dying on it.  → a Promise<boolean> on this road only */
+        return confirmDialog(UNSAVED, { title: 'UPDATE WITHOUT SAVING?', yes: 'UPDATE ANYWAY', no: 'KEEP WORKING', danger: true })
+          .then((ok) => { if (!ok || swClient.state !== 'ready') return false; projects.markClean(); return go(); });
       }
-      swClient.asked = true; swClient.state = 'taking'; quietTake = quiet;
-      swClient.say('TAKING THE NEW BUILD…', 'taking the new build');
-      hidePane();
-      try { swClient.take(quiet ? { alone: true } : opt && opt.force ? { force: true } : {}); } catch (e) { swClient.error = String(e && e.message || e); return false; }
-      return true;
+      return go();
     },
     /** Explicit repair path from ABOUT > UPDATE APP. First ask the registration for a new worker. If
      *  one installs, take it through the normal safe handoff. If the server has the same worker, remove
@@ -179,7 +185,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       let discardApproved = false;
       const projects = getProjects();
       if (projects && projects.dirty) {
-        if (!window.confirm('UPDATE APP WITHOUT SAVING?\nYour unsaved project changes will be lost.')) return false;
+        if (!(await confirmDialog(UNSAVED, { title: 'REPAIR WITHOUT SAVING?', yes: 'REPAIR ANYWAY', no: 'KEEP WORKING', danger: true }))) return false;   // 033: the kit's dialog
         discardApproved = true;
       }
       swClient.state = 'refreshing';

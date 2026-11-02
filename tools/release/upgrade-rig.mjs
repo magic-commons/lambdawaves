@@ -53,7 +53,7 @@ const STATE = `return (async () => { const reg = await navigator.serviceWorker.g
     newApp: !!(window.__LW && __LW.mod && __LW.mod.registry && __LW.mod.registry.has && __LW.mod.registry.has('state.index')),
     selected: ms && ms.selected, mol: (window.__LW && __LW.chem && __LW.chem.volume && (__LW.chem.volume.id || __LW.chem.volume.name)) || (ms && ms.molecule && (ms.molecule.id || ms.molecule.name)) || null, chemOn: !!(window.__LW && __LW.chem && __LW.chem.on),
     chem: chem ? { loading: chem.classList.contains('loading'), busy: chem.getAttribute('aria-busy'), closed: chem.classList.contains('closed') } : null,
-    busy: window.__LW && __LW.busy ? __LW.busy.count : null, errs: (window.__e || []).slice(-4).map(String) }; })()`;
+    busy: window.__LW && __LW.busy ? __LW.busy.count : null, badge: (() => { const b = document.querySelector('#badges > .badge.build'); return b && !b.hidden ? b.textContent : ''; })(), errs: (window.__e || []).slice(-4).map(String) }; })()`;
 const snap = async (g, name) => { try { const b = await g.snap(); writeFileSync(path.join(SHOTS, `upgrade-${++shot}-${name}.b64`), typeof b === 'string' ? b : b.toString('base64')); } catch (_) {} };
 const waitState = async (g, pred, tries = 120, gap = 500) => { let s = null; for (let i = 0; i < tries; i++) { try { s = await g.ev(STATE); if (s && !s.E && pred(s)) return s; } catch (_) {} await sleep(gap); } return s; };
 const launch = (url) => open(url, { width: 1400, height: 900, script: 240000, profile: PROFILE });
@@ -99,6 +99,11 @@ try {
   /* ═══ B · THE NEW BUILD, SAME ORIGIN, SAME PROFILE ═══ */
   await serve(NEW);
   g = await launch(URL0);
+  s = await waitState(g, (x) => x.ready, 240, 500);
+  if (!process.argv.includes('--quiet')) {   // a TOUCHED session (a history row): the new build must be OFFERED and pressed, never taken under the reader
+    const t = await g.ev(`return (async () => { const r = await __LW.verbs.run([{ verb: 'molecule', args: { id: 'H2O' } }], { who: 'UPGRADE RIG' }); return { refused: r.refused, rows: __LW.history ? __LW.history.entries().length : null }; })()`).catch((e) => ({ E: String(e) }));
+    console.log('      (B0 the session is touched before the new worker installs: ' + J(t) + ')');
+  }
   s = await waitState(g, (x) => x.ready && x.sw && x.sw.cache, 240, 500);
   const onOld = s && s.controller && s.sw.cache === oldCache && !s.newApp, tookQuietly = s && s.controller && s.newApp && s.sw.cache !== oldCache;
   check(onOld || tookQuietly, 'B1 a returning visitor boots on the OLD build from its cache (the law) while the new worker installs' + (tookQuietly ? ' — taken quietly before the first read (an untouched session)' : ''), s && { cache: s.sw.cache, newApp: s.newApp, reg: s.reg });
@@ -107,8 +112,14 @@ try {
   check(offered || quiet, 'B2 the new build installs and is offered (or taken quietly for an untouched session)', s && { offered, quiet, reg: s.reg, sw: s.sw, errs: s.errs });
   if (offered) {
     await snap(g, 'B-offer');
-    const pressed = await g.ev(`return (() => { const root = __LW.sw.offering; const b = root && [...root.querySelectorAll('button')].find((x) => /RELOAD/.test(x.textContent)); if (b) { b.click(); return b.textContent.trim(); } return __LW.sw.accept() ? 'accept()' : 'no press'; })()`);
-    check(pressed && pressed !== 'no press', 'B3 RELOAD PAGE is pressed', pressed);
+    const pressed = await g.ev(`return (async () => { window.confirm = () => true;   // an older build asks UPDATE APP WITHOUT SAVING? natively (033 made it the kit's dialog): the rig says yes
+      const root = __LW.sw.offering; let how = null;
+      const b = root && [...root.querySelectorAll('button')].find((x) => /RELOAD/.test(x.textContent)); if (b) { b.click(); how = b.textContent.trim(); }
+      else { const pane = document.querySelector('#lwOffer'); const u = pane && [...pane.querySelectorAll('button')].find((x) => /UPDATE/.test(x.textContent)); if (u) { u.click(); how = 'pane ' + u.textContent.trim(); } else { const r = await __LW.sw.accept(); how = r ? 'accept()' : 'accept() refused'; } }
+      await new Promise((q) => setTimeout(q, 400));
+      const ask = [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/i.test(d.textContent)); if (ask) { const y = [...ask.querySelectorAll('button')].find((x) => /UPDATE|YES|RELOAD/i.test(x.textContent)); if (y) { y.click(); how += ' + the kit\'s question: ' + y.textContent.trim(); } }
+      return how; })()`);
+    check(pressed && !/refused/.test(pressed), 'B3 RELOAD PAGE is pressed', pressed);
   }
   s = await waitState(g, (x) => x.ready && x.newApp && x.controller && x.sw && x.sw.cache && x.sw.cache !== oldCache, 240, 500);
   check(s && s.newApp && s.controller && s.sw.cache !== oldCache, 'B4 the NEW build is in control after the reload', s && { cache: s.sw && s.sw.cache, state: s.sw && s.sw.state, reg: s.reg });
@@ -129,6 +140,18 @@ try {
   }
   check(s && !(s.errs || []).length, 'B9 no page errors', s && s.errs);
   await snap(g, 'B-new-build');
+  /* ═══ C · THE STATE CAN BE SEEN, THEN REPAIR ═══ */
+  const diag = await g.ev(`return (async () => { const t = await __LW.sw.diagnostics(); return { lines: t.split(String.fromCharCode(10)).length, head: t.split(String.fromCharCode(10)).slice(0, 3), page: __LW.sw.page, worker: __LW.sw.workerPage, about: (document.querySelector('.ab-build') || {}).textContent || null }; })()`).catch((e) => ({ E: String(e) }));
+  check(diag && diag.lines >= 8 && diag.page && diag.worker === diag.page && /offline ready/.test(diag.about || ''), 'C1 diagnostics read, the page build equals the worker\'s, ABOUT says offline ready', diag);
+  const rep = await g.ev(`return (async () => { window.confirm = () => true; const p = __LW.sw.refresh(); await new Promise((q) => setTimeout(q, 400));
+      const ask = [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/i.test(d.textContent)); if (ask) { const y = [...ask.querySelectorAll('button')].find((x) => /UPDATE|YES|REPAIR/i.test(x.textContent)); if (y) y.click(); }
+      const r = await Promise.race([p, new Promise((q) => setTimeout(() => q('reloading'), 8000))]); return { started: r, state: __LW.sw.state }; })()`).catch((e) => ({ E: String(e && e.message || e).slice(0, 160) }));
+  console.log('      (C2 REPAIR pressed: ' + J(rep) + ')');
+  s = await waitState(g, (x) => x.ready && x.controller && x.newApp && x.sw && x.sw.cache && /REPAIRED/.test(x.badge || ''), 240, 500);
+  check(s && s.controller && /REPAIRED/.test(s.badge || ''), 'C2 REPAIR ends controlled by a verified build and says REPAIRED', s && { badge: s.badge, cache: s.sw && s.sw.cache, caches: s.caches, reg: s.reg });
+  const labs2 = (s && s.caches || []).filter((n) => n.startsWith('lw-lab-'));
+  check(labs2.length === 1 && (s && s.caches || []).includes('lw-vol-' + VOL), 'C3 after REPAIR: one build cache, the volume untouched', { caches: s && s.caches });
+  await snap(g, 'C-repaired');
   await g.nav('about:blank', { wait: false }); await sleep(400); await g.close();
 } catch (e) {
   check(false, 'the rig itself', String(e && e.stack || e));

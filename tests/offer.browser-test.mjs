@@ -159,23 +159,26 @@ try {
   assert.equal(s4.state, 'ready'); assert.equal(s4.pane.shown, true); assert.equal(s4.offered, 'offer-test-second-build');
   pass(`a touched session (${s4.rows} ring rows, depth ${s4.depth}) is offered — the pane up for build ${s4.offered} — and take is not called`);
 
-  /* ── 5 · a dirty project asks first; no is no, yes marks it clean and takes ── */
-  const d0 = await g.ev(`window.__confirms = 0; window.__confirmSaved = window.confirm; window.confirm = () => { window.__confirms++; return false; };
+  /* ── 5 · a dirty project asks first; no is no, yes marks it clean and takes.  033: the question is the kit's dialog (UPDATE WITHOUT
+        SAVING? · KEEP WORKING | UPDATE ANYWAY), never window.confirm — the upgrade rig found a take dying on the native alert ── */
+  const d0 = await g.ev(`window.__ask = () => [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/.test(d.textContent)) || null;
+    window.__answer = (re) => { const a = __ask(); const b = a && [...a.querySelectorAll('button')].find((x) => re.test(x.textContent)); if (b) b.click(); return !!b; };
     return { dirty: __LW.projects.dirty, shown: __pane().shown };`);
   assert.equal(d0.dirty, true, 'the edit left the project clean — scene 5 would prove nothing'); assert.equal(d0.shown, true);
   await g.ev('await new Promise((q) => setTimeout(q, 400)); __pane(); return 1;');
   t = await g.tap('#lwOffer .mir-dialog-actions .trig:first-child'); assert.equal(t.ok, 1, 'RELOAD PAGE not pressable: ' + JSON.stringify(t));
-  const s5a = await g.ev(`await new Promise((q) => setTimeout(q, 50)); return { confirms: window.__confirms, taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown };`);
-  assert.deepEqual(s5a, { confirms: 1, taken: null, state: 'ready', dirty: true, shown: true });
-  await g.ev(`window.confirm = () => { window.__confirms++; return true; }; return 1;`);
-  await g.ev('await new Promise((q) => setTimeout(q, 400)); __pane(); return 1;');
+  const s5q = await g.ev(`await new Promise((q) => setTimeout(q, 150)); const a = __ask(); return { asked: !!a, title: a ? (a.querySelector('h1, h2, .mir-dialog-title') || a).textContent.trim().slice(0, 40) : null, taken: window.__taken ?? null, state: __LW.sw.state };`);
+  assert.ok(s5q.asked, 'the kit\'s question did not appear: ' + JSON.stringify(s5q)); assert.equal(s5q.taken, null); assert.equal(s5q.state, 'ready');
+  await g.ev(`return __answer(/KEEP WORKING/);`);
+  const s5a = await g.ev(`await new Promise((q) => setTimeout(q, 400)); __pane(); return { asked: !!__ask(), taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown };`);
+  assert.deepEqual(s5a, { asked: false, taken: null, state: 'ready', dirty: true, shown: true });
   t = await g.tap('#lwOffer .mir-dialog-actions .trig:first-child'); assert.equal(t.ok, 1, 'RELOAD PAGE not pressable the second time: ' + JSON.stringify(t));
-  const s5b = await g.ev(`await new Promise((q) => setTimeout(q, 50)); const out = { confirms: window.__confirms, taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown, errors: __e.slice() };
-    window.confirm = window.__confirmSaved; return out;`);
-  assert.equal(s5b.confirms, 2); assert.ok(s5b.taken && !s5b.taken.alone); assert.equal(s5b.state, 'taking');
+  await g.ev(`await new Promise((q) => setTimeout(q, 150)); return __answer(/UPDATE ANYWAY/);`);
+  const s5b = await g.ev(`await new Promise((q) => setTimeout(q, 100)); return { asked: !!__ask(), taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown, errors: __e.slice() };`);
+  assert.equal(s5b.asked, false); assert.ok(s5b.taken && !s5b.taken.alone, 'yes did not take: ' + JSON.stringify(s5b)); assert.equal(s5b.state, 'taking');
   assert.equal(s5b.dirty, false, 'yes must mark the project clean before the take'); assert.equal(s5b.shown, false);
   assert.deepEqual(s5b.errors, []);
-  pass(`a dirty project asks before the swap: "no" left take uncalled, state ready, the project dirty and the popup back up; "yes" marked it clean and took it as a press (${s5b.confirms} confirms)`);
+  pass(`a dirty project asks before the swap, in the kit's dialog: KEEP WORKING left take uncalled, state ready, the project dirty and the popup back up; UPDATE ANYWAY marked it clean and took it as a press`);
   const linkHref = await g.ev(`return __LW.link.mint().href;`);   // for scene 13: a real boot at a link
   const linkB = await g.ev(`__LW.mat.exposure = 1.9; return __LW.link.mint().href;`);   // for scene 16: a second link to paste over it
   assert.equal(typeof linkB, 'string', 'no second link minted: ' + JSON.stringify(linkB));
