@@ -1033,6 +1033,7 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
    entrance (none under reduced motion).  The strip's names slide out to the right of each mark on a fine hover, a key's focus or a tap (.open),
    in the app's own type; under reduced motion they show without the slide.  A phone shrinks the corners and opens the names on a tap only. */
 #lwMenu .mm-face { padding-block: 76px; }
+body.menu-open #menubar { visibility: hidden; }   /* a phone lifts the kit's bar into the top layer (a popover), over the menu and its corners; the desktop's lies under it */
 #lwMenu .mm-corner { position: absolute; z-index: 4; display: flex; align-items: center; }
 #lwMenu .mm-tr { top: 18px; right: 20px; gap: 6px; }
 #lwMenu .mm-tr .mm-navb { width: 36px; height: 36px; opacity: .7; } #lwMenu .mm-tr .mm-navb .mm-ico { width: 20px; height: 20px; }
@@ -1054,7 +1055,7 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 @media (hover: hover) and (pointer: fine) and (min-width: 701px) { #lwMenu .mm-credits:hover .mm-cr-name { grid-template-columns: 1fr; opacity: 1; } #lwMenu .mm-credits:hover .mm-cr-name > span > * { translate: 0 0; } }
 #lwMenu .mm-face.in .mm-corner { animation: mm-rise 620ms var(--ease) 560ms both; }
 @media (max-width: 700px) {
-  #lwMenu .mm-face { padding-block: 60px; }
+  #lwMenu .mm-face { padding-block: 60px; } #lwMenu .mm-face-logo { height: min(clamp(84px, 17vh, 184px), calc((100vw - 32px) * 124 / 447)); }   /* the logo (447 × 124) never wider than the phone */
   #lwMenu .mm-tr { top: 12px; right: 12px; gap: 2px; } #lwMenu .mm-tr .mm-navb { width: 32px; height: 32px; } #lwMenu .mm-tr .mm-navb .mm-ico { width: 18px; height: 18px; }
   #lwMenu .mm-br { right: 16px; bottom: 16px; } #lwMenu .mm-mir { height: 18px; }
   #lwMenu .mm-credits { left: 16px; bottom: 16px; height: 18px; gap: 10px; } #lwMenu .mm-cr-mark { width: 18px; height: 18px; }
