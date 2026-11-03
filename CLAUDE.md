@@ -77,7 +77,7 @@ A law a gate enforces is cited by its gate, not restated: THE LOCK (the field's 
 - MOLECULES, the mode, the chem worker, the volumes and their pipeline → `chemistry.md`
 - the register, the paint gesture, SPECTRUM, ATOMS, n = 7, the scale, emission, the physics of 005 → `register-and-systems.md`
 - the stage text, captions, INFORMATIONAL, THE HEAD, the ESP bar, the furniture law → `stage-words.md`
-- the Picker, the decks, the library's words and installs, the looks → `picker.md`
+- THE MAIN MENU (the face, the tutorial deck and its heroes), the Picker's decks, the library's words and installs, the looks → `picker.md`
 - the field, WAVE's styles, ESP, PLAYBACK LOCK, THE LOCK's leaves → `field-and-lock.md`
 - the modulation port and window, the clock, curves, the flash guard → `modulation-and-timeline.md`
 - RENDER, the recorder, the time law → `film.md`

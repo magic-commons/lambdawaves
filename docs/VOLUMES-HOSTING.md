@@ -35,7 +35,7 @@ instead of a custom domain). `tools/build-deploy.mjs` §V7 THE FREE PLAN refuses
 
 ## What the reader does
 
-Download the `.lwv`. Then open PICKER › LIBRARY, find the volume's card and press **OPEN FILE…** (or drop the file on the card).
+Download the `.lwv`. Then open the MAIN MENU › LIBRARY, scroll down to EXPANSIONS, find the volume's card and press **OPEN FILE…** (or drop the file on the card).
 The ring shows progress by bytes. Every file in the archive is checked against its sha-256 before the app keeps it. If the reader
 stops part-way, opening the same file again resumes. Once installed, the file on disk can be deleted, and **INSTALLED · REMOVE**
 frees the space.

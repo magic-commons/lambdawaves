@@ -1,4 +1,6 @@
-/* lab/picker.js — THE PICKER (iteration 004, Josh 2026-10-17; iteration 003's MAIN MENU): λWAVES' front page, over the stage.  Three
+/* lab/picker.js — THE MAIN MENU (034, Josh 11-02: "It's time to finally make it a 'Main Menu'"; the file keeps the Picker's name, its ids
+ * `menu` / `picker.*` and its hooks `mm-*`): THE LANDING FACE (the logo large, TUTORIAL · LIBRARY, ENTER THE LAB), THE TUTORIAL DECK and
+ * the decks below, which were THE PICKER (iteration 004, Josh 2026-10-17; iteration 003's MAIN MENU): λWAVES' front page, over the stage.  Three
  * sections in one vertical snap — ATOMIC (the periodic table: each live element H–Kr its own picture, exactly what a press opens, seen
  * from the corner; the elements past Kr their valence subshell's), MOLECULAR (MOLECULES ONLY since iteration 011 Q4: every molecule of
  * the catalogue in its sections' order, one not yet on this device wearing the kit's download glyph; the pages sized to the screen, ‹ ›
@@ -818,7 +820,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     /* iteration 017 W1 (Josh 2026-10-26: "When clicking on the 140 orbital table … and playing with 'WAVE' it doesn't seem to work like it used to"):
        the pick is the label at phase 0 with the rate and window it always had; WAVE (SPACE · OBSERVABLE · DRAW) stays the reader's — the LOOK is the
        thumbnails' style only (no `view` here, so loadPreset leaves the OBSERVABLE alone) */
-    app.ctl.loadPreset({ id: b.id, label: name, note: 'hydrogen · one label, from the Picker', modes: [{ n: b.n, l: b.l, m: b.m, amp: 1, phase: 0 }],
+    app.ctl.loadPreset({ id: b.id, label: name, note: 'hydrogen · one label, from the main menu', modes: [{ n: b.n, l: b.l, m: b.m, amp: 1, phase: 0 }],
       visual: { rate: 4, window: 4 * Math.PI * b.n * b.n } }, { hand: true });
   }
   function goAtom(Z) {
@@ -873,7 +875,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
   let escDrop = null; const layer = () => { if (escDrop) escDrop(); escDrop = app.sh.ACTIONS.escape.push(() => { escDrop = null; escape(); if (!root.hidden) layer(); }, { alive: () => !root.hidden }); };
   /* the home button by the title: the kit's grid glyph */
-  const home = el('button', 'lw-home', document.body); home.id = 'lwHome'; home.type = 'button'; chip(home, 'gallery', 'Picker'); home.title = 'Picker (L)';
+  const home = el('button', 'lw-home', document.body); home.id = 'lwHome'; home.type = 'button'; chip(home, 'gallery', 'Main menu'); home.title = 'Main menu (L)';
   home.addEventListener('click', toggle);
   /** iteration 014 A2 · a suggestion's tile is the Picker's own tile (its picture, its formula, the hue in use) and its press the Picker's road */
   const suggestTile = (host, r) => {
