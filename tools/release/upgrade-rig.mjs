@@ -82,7 +82,7 @@ try {
   const oldCache = s && s.sw && s.sw.cache, oldPage = (s && s.page) || null;   // 034: the old build's page build (null before 033), the 'new app' marker is any other page build
   if (molIds.length) {
     const inst = await g.ev(`return (async () => { const t = [...document.querySelectorAll('.mm-tab')].find((b) => /LIBRARY/.test(b.textContent)); if (t) t.click(); await new Promise((r) => setTimeout(r, 500));
-      const sec = document.querySelector('.mm-sec.mm-library') || document; const size = (t) => { const m = /([0-9.]+) *(KB|MB|GB)/i.exec(t);   // no \d inside a template literal: it reads as a plain d return m ? parseFloat(m[1]) * ({ kb: 1e3, mb: 1e6, gb: 1e9 })[m[2].toLowerCase()] : Infinity; };
+      const sec = document.querySelector('.mm-sec.mm-library') || document; const size = (t) => { const m = /([0-9.]+) *(KB|MB|GB)/i.exec(t); return m ? parseFloat(m[1]) * ({ kb: 1e3, mb: 1e6, gb: 1e9 })[m[2].toLowerCase()] : Infinity; };
       const btn = [...sec.querySelectorAll('button')].filter((b) => /^INSTALL/.test(b.textContent.trim())).sort((a, b) => size(a.textContent) - size(b.textContent))[0];   // 034: the smallest volume (VOL. III) on either shelf layout
       if (!btn) return { found: false, buttons: [...sec.querySelectorAll('button')].map((b) => b.textContent.trim().slice(0, 24)).filter((t) => /INSTALL|REMOVE|RESUME/.test(t)) };
       const word = btn.textContent.trim(); btn.click(); return { found: true, word }; })()`);
