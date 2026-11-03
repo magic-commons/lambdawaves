@@ -1008,7 +1008,7 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-holo { transform: none; }
 
 /* 034 M1 · THE LANDING FACE (picker.js showFace): over the decks, which stay laid out under it, hidden and inert — the logo large, the two
-   doors (album art in THE CARD'S LIGHT, the palette art, the word in LW Title) and ENTER THE LAB, quiet.  Its entrance: the logo drops, the
+   doors (album art in THE CARD'S LIGHT, the palette art, the word in LW Title) and CONTINUE, quiet (035: it read ENTER THE LAB).  Its entrance: the logo drops, the
    doors rise in turn, then the way to the lab; reduced motion shows the end state.  On a phone the doors are two portraits side by side. */
 #lwMenu .mm-face { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(28px, 6vh, 64px); padding: 24px 16px; box-sizing: border-box; }
 #lwMenu .mm-face[hidden] { display: none; }
@@ -1028,6 +1028,41 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 @media (max-width: 700px) { #lwMenu .mm-door { width: calc(50vw - 28px); aspect-ratio: 3 / 4; } #lwMenu .mm-doors { gap: 16px; } }
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-face.in :is(.mm-face-logo, .mm-door, .mm-face-lab) { animation: none; } }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-face.in :is(.mm-face-logo, .mm-door, .mm-face-lab) { animation: none; }
+/* 035 G2 · THE CORNERS of the face (picker.js): top right THEME and ⚙, bottom right the MIR wordmark, bottom left THE CREDITS STRIP — inset
+   18–24 px in a band the face's column keeps clear (its padding), so a corner never meets the doors or CONTINUE; they arrive last in the
+   entrance (none under reduced motion).  The strip's names slide out to the right of each mark on a fine hover, a key's focus or a tap (.open),
+   in the app's own type; under reduced motion they show without the slide.  A phone shrinks the corners and opens the names on a tap only. */
+#lwMenu .mm-face { padding-block: 76px; }
+#lwMenu .mm-corner { position: absolute; z-index: 4; display: flex; align-items: center; }
+#lwMenu .mm-tr { top: 18px; right: 20px; gap: 6px; }
+#lwMenu .mm-tr .mm-navb { width: 36px; height: 36px; opacity: .7; } #lwMenu .mm-tr .mm-navb .mm-ico { width: 20px; height: 20px; }
+#lwMenu .mm-br { right: 24px; bottom: 22px; }
+#lwMenu .mm-mir { display: block; height: 24px; width: auto; }
+body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-theme="light"]) #lwMenu .mm-mir[data-theme="light"] { display: none; }
+#lwMenu .mm-credits { left: 24px; bottom: 22px; height: 24px; gap: 14px; color: var(--fg); opacity: .78; cursor: default; transition: opacity 140ms; }
+#lwMenu .mm-credits:is(:hover, :focus-visible, .open) { opacity: 1; }
+#lwMenu .mm-cr { display: flex; align-items: center; }
+#lwMenu .mm-cr-mark { display: block; flex: none; width: 24px; height: 24px; }
+#lwMenu .mm-cr-ink { background: currentColor; -webkit-mask: url('img/ai/openai-blossom.svg') center / 125% no-repeat; mask: url('img/ai/openai-blossom.svg') center / 125% no-repeat; }
+#lwMenu .mm-cr-name { display: grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns 380ms var(--ease), opacity 240ms ease; }
+#lwMenu .mm-cr-name > span { display: grid; min-width: 0; overflow: hidden; white-space: nowrap; text-align: left; font-family: var(--font-ui); line-height: 1; }
+#lwMenu .mm-cr-name > span > * { padding-left: 8px; translate: -6px 0; transition: translate 380ms var(--ease); }
+#lwMenu .mm-cr-name b { font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+#lwMenu .mm-cr-name small { margin-top: 3px; font-size: 8px; letter-spacing: .2em; opacity: .6; }
+#lwMenu .mm-cr:nth-child(2) :is(.mm-cr-name, .mm-cr-name > span > *) { transition-delay: 50ms; } #lwMenu .mm-cr:nth-child(3) :is(.mm-cr-name, .mm-cr-name > span > *) { transition-delay: 100ms; }
+#lwMenu .mm-credits:is(:focus-visible, .open) .mm-cr-name { grid-template-columns: 1fr; opacity: 1; } #lwMenu .mm-credits:is(:focus-visible, .open) .mm-cr-name > span > * { translate: 0 0; }
+@media (hover: hover) and (pointer: fine) and (min-width: 701px) { #lwMenu .mm-credits:hover .mm-cr-name { grid-template-columns: 1fr; opacity: 1; } #lwMenu .mm-credits:hover .mm-cr-name > span > * { translate: 0 0; } }
+#lwMenu .mm-face.in .mm-corner { animation: mm-rise 620ms var(--ease) 560ms both; }
+@media (max-width: 700px) {
+  #lwMenu .mm-face { padding-block: 60px; }
+  #lwMenu .mm-tr { top: 12px; right: 12px; gap: 2px; } #lwMenu .mm-tr .mm-navb { width: 32px; height: 32px; } #lwMenu .mm-tr .mm-navb .mm-ico { width: 18px; height: 18px; }
+  #lwMenu .mm-br { right: 16px; bottom: 16px; } #lwMenu .mm-mir { height: 18px; }
+  #lwMenu .mm-credits { left: 16px; bottom: 16px; height: 18px; gap: 10px; } #lwMenu .mm-cr-mark { width: 18px; height: 18px; }
+  #lwMenu .mm-cr-name b { font-size: 11px; } #lwMenu .mm-cr-name small { font-size: 7px; margin-top: 2px; } #lwMenu .mm-cr-name > span > * { padding-left: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-face.in .mm-corner { animation: none; } #lwMenu :is(.mm-cr-name, .mm-cr-name > span > *) { transition: none; translate: none; } }
+:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-face.in .mm-corner { animation: none; }
+:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu :is(.mm-cr-name, .mm-cr-name > span > *) { transition: none; translate: none; }
 /* 034 M3 · THE TUTORIAL DECK (picker.js showTutorial): in the decks' seat, a grid of 9:16 cards as many across as fit off the racks (two on a
    phone), each the volume card's album art (its still, its hero, THE CARD'S LIGHT), its number and title at the art's foot, the caption under
    it; the head keeps the logo, ← and THEME */

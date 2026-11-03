@@ -189,6 +189,25 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const w = el('span', 'mm-door-word', lit); icon(w, glyph); el('b', '', w, word); b.addEventListener('click', go); return b; };
   const doorBtns = [door('tutorial', 'TUTORIAL', 'film', 0, () => showTutorial()), door('library', 'LIBRARY', 'library', 1, () => showDecks('molecular'))];
   const labB = el('button', 'mm-face-lab', face, 'CONTINUE'); labB.type = 'button'; labB.title = 'Continue to the lab'; labB.addEventListener('click', () => close());   // 035 G1: was ENTER THE LAB
+  /* 035 G2 · THE CORNERS (Josh 11-03: "a Light/Dark Toggle and a settings … reveal", "the MIR logo … Kinda small in the bottom right", "3 Icon
+     Logos of Claude, OpenAI's Emblem, and Gemini's Star … During mouseover, It expands towards the right to show the names"): the face's own —
+     top right THEME (the action's: the sun in LIGHT, the moon in DARK) and ⚙ (THE SHEET, G3); bottom right the MIR wordmark (both themes'
+     files in the page, the CSS shows the theme's); bottom left THE CREDITS STRIP, the three marks at the wordmark's height whose names slide
+     out on a hover, a key's focus or a tap (no links: ABOUT carries the words) */
+  const faceTop = el('div', 'mm-corner mm-tr', face);
+  const faceTheme = el('button', 'mm-navb mm-themeb', faceTop); faceTheme.type = 'button'; faceTheme.title = 'Light or dark — the theme'; faceTheme.setAttribute('aria-label', faceTheme.title);
+  icon(faceTheme, 'sun').classList.add('gly-sun'); icon(faceTheme, 'moon').classList.add('gly-moon'); faceTheme.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
+  { const mir = el('div', 'mm-corner mm-br', face);
+    for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
+  { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');
+    for (const [ai, name, by] of [['claude', 'Claude', 'ANTHROPIC'], ['openai', 'GPT', 'OpenAI'], ['gemini', 'Gemini', 'GOOGLE']]) {
+      const c = el('span', 'mm-cr', credits); c.dataset.ai = ai;
+      if (ai === 'claude') icon(c, 'claudeMark').classList.add('mm-cr-mark');   // drawn (lab/icons.js): the site holds only the wordmark
+      else if (ai === 'openai') el('i', 'mm-cr-mark mm-cr-ink', c);             // the blossom as a mask over the ink (skin.css)
+      else { const i = el('img', 'mm-cr-mark', c); i.alt = ''; i.decoding = 'async'; i.draggable = false; i.src = './img/ai/gemini.svg'; }   // its own gradient
+      const t = el('span', '', el('span', 'mm-cr-name', c)); el('b', '', t, name); el('small', '', t, by);
+    }
+    credits.addEventListener('click', () => credits.classList.toggle('open')); }   // a tap shows the names (touch), a second puts them away
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
   /* 032 (Josh 11-01: "a light and dark toggle in the picker in between the hue knob and thumbnail switcher"): THEME, the action's own
