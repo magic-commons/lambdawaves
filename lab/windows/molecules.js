@@ -97,7 +97,10 @@ export function createMolecules(app) {
   const derived = (fill) => { const P = app.sh.layout && app.sh.layout.projects, d = P ? P.folders.dirty() : null;
     if (app.state.history) app.state.history.absorb(fill); else fill();
     if (d && d.known && !d.dirty) P.markClean(); };
-  app.state.chem = createChem(wChem.body, { say, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more, modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): a hand on a ROUTED dial moves its base   // 0.4.0 S0: the MORE fold; folded on every first run since iteration 001
+  /* 034 F5 · while a load is up, ESC is its emergency stop: a layer of THE ESCAPE STACK (lab/actions.js), put away when the load ends */
+  const chemLoading = cardLoading(wChem, 'chem'); let escStop = null;
+  const loading = (v) => { chemLoading(v); if (v && !escStop) escStop = app.sh.ACTIONS.escape.push(() => { escStop = null; if (app.state.chem) app.state.chem.halt(); }, { fields: true }); else if (!v && escStop) { escStop(); escStop = null; } };
+  app.state.chem = createChem(wChem.body, { say, active: () => canPresent(wChem), loading, stopWorker: () => solveChem.reset && solveChem.reset(), moreOpen: FIRST_RUN.more, modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): a hand on a ROUTED dial moves its base   // 0.4.0 S0: the MORE fold; folded on every first run since iteration 001
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, plane: () => app.w.slice,
     modBase: (id, v) => { const H = app.state.modHost; if (H && H.registry.has(id)) H.registry.setBase(id, v); },   // iteration 007 O: an UNROUTED hand on the ORBITAL is its base at once (syncBases runs only while the modulation clock does)   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },

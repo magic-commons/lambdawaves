@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '628d7346cc22'],
-  ['./build-id.js',                                                 '0d86b59295df'],
+  ['./build-id.js',                                                 '858f890cce65'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '41922d244a06'],
@@ -54,7 +54,7 @@ const PRECACHE = [
   ['./capture.js',                                                  'fafbd45b1f41'],
   ['./catalogue.js',                                                '2318a16ded86'],
   ['./central.js',                                                  '897cbc4eef50'],
-  ['./chemview.js',                                                 '982bcf70cd88'],
+  ['./chemview.js',                                                 '4f42fe1d64ee'],
   ['./chord-audio.js',                                              '015d0dd91a07'],
   ['./clock.js',                                                    '35e6b0ac22aa'],
   ['./context-menus.js',                                            'ebca1fd3a3f2'],
@@ -446,13 +446,13 @@ const PRECACHE = [
   ['./windows/gas.js',                                              '22e025085bb1'],
   ['./windows/kepler.js',                                           '504329788c91'],
   ['./windows/material.js',                                         '0e972e828c98'],
-  ['./windows/molecules.js',                                        'ebb3bd4be0ad'],
+  ['./windows/molecules.js',                                        '144d0b331cc3'],
   ['./windows/readouts.js',                                         '7a787c901a51'],
   ['./windows/settings-card.js',                                    '965a2a24a015'],
   ['./windows/spectrum.js',                                         '94f92699f720'],
   ['./windows/static-field.js',                                     '3c2a3cf1ac89'],
   ['./windows/transition.js',                                       'fae1b23a47fc'],
-  ['./worker-pool.js',                                              'f31d5675dcae'],
+  ['./worker-pool.js',                                              '2a50d7f93218'],
 ];
 
 /* ── 1b. DATA — THE ONE PRECACHE EXEMPTION (0.4.0 S4a · PLAN B2) ──────────────────────────────────────────────────

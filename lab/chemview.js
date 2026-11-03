@@ -92,6 +92,8 @@ export function createChem(host, api) {
      molecule a project falls back to; `volKeep` the last opened (an undo re-opens it unread); `volWant` a project's, opened on the next solve;
      `holds` the catalogue ids an INSTALLED volume carries */
   let volRef = null, volKeep = null, volWant = null, volSeq = 0, catPreset = preset, holds = new Map();
+  let loadingNow = '';   // 034 F5: what is loading (a name), '' when nothing is — ESC's stop reads it
+  const loading = (v, what) => { loadingNow = v ? String(what || loadingNow || 'the load') : ''; if (api.loading) api.loading(!!v); };
   const volName = (v) => `${String(v.name).toUpperCase()} · VOL. ${v.numeral}`;
   const rungRec = () => volRef.lwm.header.rungs[basis].record;
   function chemCharge(id) { return volRef && id === volRef.key ? volRef.charge : moleculeCharge(id); }   // the card's own: shadows the module's export with a volume molecule's
@@ -580,7 +582,7 @@ export function createChem(host, api) {
     if (!force && sol && sol.key === key) { refresh(); if (back) status(back, 'warn'); return Promise.resolve(sol); }
     if (!force && pending && pending.key === key) return back ? pending.p.then((r) => { status(back, 'warn'); return r; }) : pending.p;   // …and one IN FLIGHT is the same answer
     setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null; if (vibOn) setVib(false);
-    if (!force && k0 && (k0.roots || k0.model)) { k0.seq = ++solveSeq; if (api.loading) api.loading(false); if (api.derived) api.derived(() => land(k0)); else land(k0); return Promise.resolve(sol); }   // 0.7.3 K2: a kept solve of this molecule (METHOD back) lands again, no worker call
+    if (!force && k0 && (k0.roots || k0.model)) { k0.seq = ++solveSeq; loading(false); if (api.derived) api.derived(() => land(k0)); else land(k0); return Promise.resolve(sol); }   // 0.7.3 K2: a kept solve of this molecule (METHOD back) lands again, no worker call
     const atoms = chemAtoms(preset), charge = chemCharge(preset);
     /* TWO STAGES, ONE SEQUENCE NUMBER.  The ground state lands first — the molecule appears on the field, the
        ORBITALS register gets its ladder, the readouts fill — and the spectrum follows, because it is the roots
@@ -593,7 +595,7 @@ export function createChem(host, api) {
       : method === 'lda' ? `solving ${P.name} by RKS LDA… ${P.nAO} AOs, ${P.nElectrons} electrons on a ${(atoms.length * 22650).toLocaleString('en')}-point grid`
       : basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
       : `solving ${P.name} in 6-31+G*… ${big.nAO} Cartesian AOs, ${P.nElectrons} electrons — up to a few seconds at the 46-AO cap`, 'warn');
-    if (api.loading) api.loading(true);
+    loading(true, P.name);
     /* THE RECORD ROAD (0.4.0 S4a · PLAN B2).  A molecule whose record this device holds opens from it — the worker's chem.open,
        zero solver calls, chem.ground's own reply — and so does one past the cap (DOWNLOAD: fetched, checked against its sha-256
        name and kept) or one a project or link names (`wantRef`: the exact record when this device still holds it, else the
@@ -648,7 +650,7 @@ export function createChem(host, api) {
         refresh(); return r;
       });
     }).catch((e) => { if (seq === solveSeq) { sol = null; status('solve failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
-      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq && api.loading) api.loading(false); });
+      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq) loading(false); });
     pending = { key, p: task };
     return task;
   }
@@ -658,7 +660,7 @@ export function createChem(host, api) {
     const seq0 = ++volSeq, same = (v) => v && v.volume === volId && v.id === molId;
     let v = same(volRef) ? volRef : same(volKeep) ? volKeep : null;
     if (!v) {
-      status(`opening ${molId} from ${volId}…`, 'warn'); if (api.loading) api.loading(true);
+      status(`opening ${molId} from ${volId}…`, 'warn'); loading(true, molId);
       let idx = null, m = null;
       try {
         idx = await V.index(volId); m = idx.molecules.find((x) => x.id === molId);
@@ -670,7 +672,7 @@ export function createChem(host, api) {
           atoms: H.geometry.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z })), geometry: H.geometry.source || '', rungs: Object.keys(H.rungs),
           why: { ...(H.skipped || {}), ...(H.failed || {}) }, sub: [...(m.tags || []), m.pg].filter(Boolean).join(' · '), sha256: m.sha256 || null, bytes: buf.byteLength, from, bonds: H.geometry.bonds || H.meta.bonds || m.bonds || null };
       } catch (e) {
-        if (seq0 === volSeq) { if (api.loading) api.loading(false);
+        if (seq0 === volSeq) { loading(false);
           status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the PICKER's LIBRARY`, 'warn'); }
         return null;
       }
@@ -698,7 +700,7 @@ export function createChem(host, api) {
     setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null; if (vibOn) setVib(false);
     const seq = ++solveSeq, lib = rungRecord(v.lwm, basis), m = { op: 'chem.open', lib, hash: lib.ground.hash, basis };
     status(`opening ${volName(v)} at ${BASIS_LABEL[basis]} from its record… ${lib.ground.nAO} AOs, ${lib.ground.electrons} electrons`, 'warn');
-    if (api.loading) api.loading(true);
+    loading(true, volName(v));
     const task = Promise.all([call(m, () => here(basis).then((W) => { try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } })), loadMS()]).then(([r]) => {
       if (seq !== solveSeq) return null;
       if (!r || r.refused || r.error || !Number.isFinite(r.energy)) { sol = null; status(`${volName(v)} at ${BASIS_LABEL[basis]} did not open: ` + ((r && (r.refused || r.error)) || 'no answer'), 'warn'); refresh(); tell(); notify(); return null; }
@@ -713,9 +715,24 @@ export function createChem(host, api) {
       if (api.derived) api.derived(fill); else fill();
       return r;
     }).catch((e) => { if (seq === solveSeq) { sol = null; status('open failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
-      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq && api.loading) api.loading(false); });
+      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq) loading(false); });
     pending = { key, p: task };
     return task;
+  }
+  /** 034 F5 · ESC = THE EMERGENCY STOP (Josh: "If loading something takes too long … let 'Esc' be the emergency stop that just cancels the
+      request stably"): the load in flight is forgotten — its replies fall to the seq law, `pending` is cleared (the same pick asks afresh), the
+      busy mark drops, the MOLECULE picker goes back to the molecule on screen, and a worker job still running is ended by the pool's reset (a
+      fresh worker for the next job, its one life unspent).  What landed before stays on screen. */
+  function halt() {
+    if (!loadingNow) return false;
+    const what = loadingNow;
+    solveSeq++; volSeq++; pending = null; loading(false);
+    if (api.stopWorker) api.stopWorker();
+    if (sol) { const [p, b] = sol.key.split('|'); if (volKeep && p === volKeep.key) volRef = volKeep; else if (volRef && volRef.key !== p) volRef = null;
+      preset = p; if (b && b !== basis) { basis = b; bSeg.set(b); } fillSel(); mSeg.set(preset); paintBasis(); }
+    else mSel.selectedIndex = -1;
+    status('STOPPED · ' + what, 'warn'); tell();
+    return true;
   }
   function methodsVol() { const b = mthS.button('lda'); mthS.button('uhf').style.display = 'none'; mthS.button('rhf').textContent = 'RHF'; b.disabled = true; b.title = b.dataset.help = VOL; mthS.set('rhf'); }
   const stem = (k) => k.replace(/\|(uhf|lda)$/, '');   // a solve's key without its METHOD: the molecule, basis, charge and H₂'s stretch
@@ -1491,7 +1508,8 @@ export function createChem(host, api) {
     /** 0.7.3 K2 · METHOD from outside (the verb, __LW.chem): the seg's own road, a hand press; → the solve, or null where it is not offered */
     setMethod(v) { const b = mthS.button(v); if (!b || b.disabled || b.style.display === 'none') return Promise.resolve(null); if (v === method) return solve(preset); mthS.set(v); method = v; return solve(preset).then((r) => { if (r && api.hand) api.hand(preset); return r; }); }, get method() { return method; },
     /** VIEW from outside (a verb, the register's ON, a stroke on the ladder): toView, above */
-    setView: toView,
+    setView: toView, halt,   // 034 F5: ESC's emergency stop (`stop` is RUN's, below)
+    get loading() { return loadingNow; },
     get view() { return view; }, get delta() { return delta; }, setDelta,
     /** iteration 008 U · the card's two seats the register fills: the ON row (its ORBITAL | STATES seg) and the panes under it */
     slots: { top: rTop, register: regHost },
