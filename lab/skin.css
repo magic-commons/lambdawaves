@@ -1030,11 +1030,11 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-face.in :is(.mm-face-logo, .mm-door, .mm-face-lab) { animation: none; }
 /* 034 M3 · THE TUTORIAL DECK (picker.js showTutorial): in the decks' seat, a grid of 9:16 cards as many across as fit off the racks (two on a
    phone), each the volume card's album art (its still, its hero, THE CARD'S LIGHT), its number and title at the art's foot, the caption under
-   it; the head keeps the logo, ⌂ and THEME */
+   it; the head keeps the logo, ← and THEME */
 #lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; padding: 6px 24px 32px; box-sizing: border-box; }
 #lwMenu .mm-tut[hidden] { display: none; }
-#lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="home"], .mm-themeb)) { display: none; }
-#lwMenu[data-sec="tutorial"] .mm-navb[data-nav="home"] { opacity: 1; }
+#lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="back"], .mm-themeb)) { display: none; }   /* 035 G1: the tutorial's way back is ← */
+#lwMenu[data-sec="tutorial"] .mm-navb[data-nav="back"] { opacity: 1; }
 #lwMenu .mm-tut-head { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 0 0 20px; color: var(--acc); font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; }
 #lwMenu .mm-tut-head b { font-weight: 400; } #lwMenu .mm-tut-head .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 28px 18px; width: min(1500px, 100%); margin: 0 auto; }

@@ -1,5 +1,5 @@
 /* lab/picker.js — THE MAIN MENU (034, Josh 11-02: "It's time to finally make it a 'Main Menu'"; the file keeps the Picker's name, its ids
- * `menu` / `picker.*` and its hooks `mm-*`): THE LANDING FACE (the logo large, TUTORIAL · LIBRARY, ENTER THE LAB), THE TUTORIAL DECK and
+ * `menu` / `picker.*` and its hooks `mm-*`): THE LANDING FACE (the logo large, TUTORIAL · LIBRARY, CONTINUE), THE TUTORIAL DECK and
  * the decks below, which were THE PICKER (iteration 004, Josh 2026-10-17; iteration 003's MAIN MENU): λWAVES' front page, over the stage.  Three
  * sections in one vertical snap — ATOMIC (the periodic table: each live element H–Kr its own picture, exactly what a press opens, seen
  * from the corner; the elements past Kr their valence subshell's), MOLECULAR (MOLECULES ONLY since iteration 011 Q4: every molecule of
@@ -178,14 +178,17 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const tabs = el('div', 'mm-tabs', top), pill = el('i', 'mm-pill', tabs);
   const nav = el('div', 'mm-nav', top);
   const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
-  navBtn('home', 'Main menu — tutorial and library', () => showFace()).dataset.nav = 'home';   // 034 M1: ⌂ is the face; ENTER THE LAB is on it
+  /* 035 G1 (Josh 11-03: "a back arrow instead of a home arrow; home icon in library takes you to the lab"): ← is the face (the tutorial's
+     one way back, the decks' and the folders' first), ⌂ enters the lab as CONTINUE does */
+  navBtn('back', 'Main menu', () => showFace()).dataset.nav = 'back';
+  navBtn('home', 'Continue to the lab', () => close()).dataset.nav = 'home';
   navBtn('folders', 'Folders — your projects and the demos', () => (at === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
   /* the face's two doors (album art in THE CARD'S LIGHT, the λWAVES palette) and the way into the lab */
   const door = (id, word, glyph, k, go) => { const b = el('button', 'mm-door mm-holo', doors); b.type = 'button'; b.dataset.door = id; b.setAttribute('aria-label', word); b.style.setProperty('--k', String(k)); b.style.setProperty('--i', String(k));
     el('span', 'mm-halo', b); const lit = el('span', 'mm-lit mm-art-plain', b); el('span', 'mm-foil', lit); el('span', 'mm-rim', b);
     const w = el('span', 'mm-door-word', lit); icon(w, glyph); el('b', '', w, word); b.addEventListener('click', go); return b; };
   const doorBtns = [door('tutorial', 'TUTORIAL', 'film', 0, () => showTutorial()), door('library', 'LIBRARY', 'library', 1, () => showDecks('molecular'))];
-  const labB = el('button', 'mm-face-lab', face, 'ENTER THE LAB'); labB.type = 'button'; labB.addEventListener('click', () => close());
+  const labB = el('button', 'mm-face-lab', face, 'CONTINUE'); labB.type = 'button'; labB.title = 'Continue to the lab'; labB.addEventListener('click', () => close());   // 035 G1: was ENTER THE LAB
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
   /* 032 (Josh 11-01: "a light and dark toggle in the picker in between the hue knob and thumbnail switcher"): THEME, the action's own
