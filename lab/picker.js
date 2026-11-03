@@ -37,6 +37,31 @@ const HEROES = { 'vol-1': 'dark light' };
    themes its hero has files in (img/menu/tut/<id>.<theme>.mp4 and the still .webp; a theme not named shows the other's), written by
    tools/tutorial-heroes.mjs, one row a line */
 const TUTORIAL = [
+  { id: 'tut-hero-1', title: 'HERO 1', caption: '', themes: 'light' },
+  { id: 'tut-hero-2', title: 'HERO 2', caption: '', themes: 'light' },
+  { id: 'tut-hero-3', title: 'HERO 3', caption: '', themes: 'light' },
+  { id: 'tut-hero-4', title: 'HERO 4', caption: '', themes: 'light' },
+  { id: 'tut-hero-5', title: 'HERO 5', caption: '', themes: 'light' },
+  { id: 'tut-hero-6', title: 'HERO 6', caption: '', themes: 'light' },
+  { id: 'tut-impulse', title: 'IMPULSE', caption: '', themes: 'light' },
+  { id: 'tut-lfo', title: 'LFO', caption: '', themes: 'dark' },
+  { id: 'tut-macros', title: 'MACROS', caption: '', themes: 'dark' },
+  { id: 'tut-molecules', title: 'MOLECULES', caption: '', themes: 'dark' },
+  { id: 'tut-notebook', title: 'NOTEBOOK', caption: '', themes: 'dark' },
+  { id: 'tut-palette', title: 'PALETTE', caption: '', themes: 'light' },
+  { id: 'tut-projects', title: 'PROJECTS', caption: '', themes: 'dark' },
+  { id: 'tut-spectrum', title: 'SPECTRUM', caption: '', themes: 'light' },
+  { id: 'tut-themes', title: 'THEMES AND CUSTOMS', caption: '', themes: 'light' },
+  { id: 'tut-wave', title: 'WAVE', caption: '', themes: 'light' },
+  { id: 'tut-wave-2', title: 'WAVE 2', caption: '', themes: 'light' },
+  { id: 'tut-audio', title: 'AUDIO', caption: '', themes: 'dark' },
+  { id: 'tut-env', title: 'ENV', caption: '', themes: 'dark' },
+  { id: 'tut-mod-hero-1', title: 'MOD HERO 1', caption: '', themes: 'dark' },
+  { id: 'tut-mod-hero-2', title: 'MOD HERO 2', caption: '', themes: 'dark' },
+  { id: 'tut-mod-hero-3', title: 'MOD HERO 3', caption: '', themes: 'dark' },
+  { id: 'tut-mod-hero-4', title: 'MOD HERO 4', caption: '', themes: 'dark' },
+  { id: 'tut-mod-hero-5', title: 'MOD HERO 5', caption: '', themes: 'dark' },
+  { id: 'tut-mod-hero-6', title: 'MOD HERO 6', caption: '', themes: 'dark' },
 ];
 
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
