@@ -291,6 +291,10 @@ export function createNotebook(app) {
         titleAfterSave(name) { if (titleIn.value !== 'NOTEBOOK') return false; titleIn.value = name; return true; } });
       addEventListener('beforeunload', (e) => {
         if (!projects.dirty) return;
+        /* 034 F8 (Josh: "'Repair - Installed - Reloading' seems to be stuck … the firefox warning"): REPAIR asked already (its own dialog,
+           sw-client.js refresh) — its reloads never meet the browser's leave-page prompt */
+        let repair = null; try { repair = sessionStorage.getItem('lw.repair'); } catch (_) {}
+        if (repair) return;
         e.preventDefault(); e.returnValue = '';
       });
       /* FOLDERS lives in #floats: its pane and its rail's chips are painted glass (CLAUDE.md's mask law); a move dirties the block

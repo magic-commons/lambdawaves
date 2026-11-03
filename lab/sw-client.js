@@ -75,6 +75,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
     take: null,
     checks: 0,                           // the reader's count (main.js): update checks asked on a return to the foreground
     offered: null,                       // the build digest the pane was shown for ('' when the worker named none) — once per waiting build
+    repairWaits: false,                  // 034 F8: REPAIR's fresh install waits for another window (repairBoot) — the offer says so
     others: 0,                           // the other windows the worker counted when it refused a press (LW_SW_BUSY); UPDATE then says UPDATE ALL
     /** the one seam a gate replaces — nothing else in the lab reloads the page */
     reload() { location.reload(); },
@@ -132,7 +133,8 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
     },
     /** the visible offer: the badge, SETTINGS' status line, and the popup — the popup at most once per waiting build */
     offer() {
-      swClient.say('A NEW BUILD IS READY · UPDATE', 'a new build is ready');
+      if (swClient.repairWaits) swClient.say('REPAIR · WAITING FOR THE OTHER WINDOW', 'repair: the build installed and waits for the other λWAVES window — reload all, or close it');   // 034 F8
+      else swClient.say('A NEW BUILD IS READY · UPDATE', 'a new build is ready');
       const build = (swClient.pending && swClient.pending.build) || '';
       if (swClient.offered === build) return false;
       swClient.offered = build; hidePane();
@@ -243,10 +245,17 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       const again = () => { try { sessionStorage.setItem('lw.repair', '2'); } catch (_) {} swClient.asked = true; swClient.say('REPAIR · INSTALLED · RELOADING…', 'repair: the build installed; reloading once more'); swClient.reload(); };
       const w = reg.installing || reg.waiting;
       if (!w && reg.active && reg.active.state === 'activated') { again(); return flag; }
-      if (w) w.addEventListener('statechange', () => {
+      /* 034 F8 · a fresh build installed while another λWAVES window still holds the old one WAITS (the one law: no skipWaiting) — it gets
+         the normal offer road (a quiet take, else RELOAD / RELOAD ALL) and the badge says why, never a silence */
+      const waits = () => {
+        if (w.state !== 'installed' || !reg.active || reg.active === w || swClient.repairWaits) return;
+        swClient.repairWaits = true; swClient.buildReady((o) => w.postMessage({ type: 'LW_SW_SKIP_WAITING', ...o }));
+      };
+      if (w) { w.addEventListener('statechange', () => {
         if (w.state === 'activated') again();
         else if (w.state === 'redundant') { done(); swClient.say('REPAIR FAILED · ' + brief(swClient.failure || 'the install was refused') + ' · TRY AGAIN', 'repair failed: ' + (swClient.failure || 'the install was refused')); }
-      });
+        else waits();
+      }); waits(); }
       else { done(); swClient.say('REPAIR DID NOT START · TRY AGAIN', 'repair: no worker is installing'); }
       return flag;
     },
