@@ -272,7 +272,7 @@ export function createChem(host, api) {
     header();
   }
   /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
-  function handPick(id) { near = true; pivotHand = true;   // 034 F2b: the hand's molecule takes the pivot const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app)
+  function handPick(id) { near = true; pivotHand = true; const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app); 034 F2b: the hand's molecule takes the pivot
     const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
@@ -471,7 +471,7 @@ export function createChem(host, api) {
   const kapKnob = knob({ label: '<m>κ</m>', min: 1e-4, max: 1e-2, value: 1e-3, log: true, title: 'δ-kick strength κ: smaller is more linear',
     fmt: (v) => v.toExponential(1), onInput: (v) => { if (api.modHand && api.modHand('chem.kick', v)) return; kappa = v; } });   // iteration 007 (MIR check B2): routed, the hand moves the base
   r2.appendChild(kapKnob.root);
-  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂), then field-free propagation', onFire: () => { kick(); } }); r2.appendChild(kickT.root); kickT.root.dataset.keyAction = 'chem.kick';   // 021 I1: the action presses it
+  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂), then field-free propagation', onFire: () => { kick(); if (api.strike) api.strike(Math.sqrt(kappa / 1e-3)); } }); r2.appendChild(kickT.root); kickT.root.dataset.keyAction = 'chem.kick';   // 021 I1: the action presses it; 034 I: a hand's KICK strikes the register too
   /* iteration 008 U · Δρ, the VIEW that left the seg: the induced density against the reference stored at the kick, over whatever VIEW the card draws */
   const deltaSw = sw({ label: 'Δρ', value: false, title: 'ΔD since the kick, signed', onChange: (v) => { setDelta(v); } });
   r2.appendChild(deltaSw.root);

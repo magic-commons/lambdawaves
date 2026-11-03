@@ -257,6 +257,35 @@ export function createOrbitals(host, api) {
     sel.clear(); for (const [i, k] of ks.entries()) sel.set(k, { amp: Math.sqrt(1 / ks.length), phase: P[2] ? P[2][i] : 0 }); selected = ks[0];
     touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
   }
+  /* 034 I · THE IMPULSE ON A MOLECULE (Josh: "an impulse can immediately switch the mode to 'mixed' orbitals and depending on how hard it strikes,
+     it could determine if the lower orbitals light up or the higher ones … higher orbitals as high frequencies"; docs/laws/chemistry.md, the laws
+     of 034).  A sudden boost e^{ik·x} on an electron in the HOMO raises its mean energy by k²/2 and spreads it by k·p_rms (exact for one electron:
+     ⟨H⟩ − E₀ = k²/2, Var H = k²⟨p_x²⟩), so a strike of strength F sets an energy window over the ladder — centre ε_HOMO + k²/2, width σ = k·p_rms,
+     k = F·√gap (one strike lifts the mean to mid-gap), p_rms² = ⅔|ε_HOMO| (the virial's T ≈ −ε) — and the register takes exp(−(ε_j − centre)²/2σ²)
+     over the orbitals in hand, normalised, every phase 0 at the strike (then its own e^{−iε_j t}).  Strikes within RING_MS compound: e^{ik₁x}e^{ik₂x}
+     = e^{i(k₁+k₂)x}.  Soft: the HOMO and the levels just under it; hard: the window climbs into the virtuals.  A hand's road: VIEW MIX follows. */
+  const RING_MS = 1600; let strikeAt = -Infinity, strikeF = 0, strikeVer = -1;
+  function strike(F) {
+    if (!sol || !(F > 0)) return null;
+    const wall = performance.now();
+    if (wall - strikeAt < RING_MS && version === strikeVer) F += strikeF;
+    const h = sol.nocc - 1, eH = sol.eps[h], gap = sol.nocc < sol.nAO ? sol.eps[sol.nocc] - eH : Math.max(0.1, Math.abs(eH) / 2);
+    const k = F * Math.sqrt(Math.max(gap, 1e-3)), centre = eH + k * k / 2, sigma = Math.max(1e-3, k * Math.sqrt(2 * Math.abs(eH) / 3));
+    const lit = []; let best = -1, bestD = Infinity;
+    for (let j = 0; j < sol.nAO; j++) { if (!carried(j)) continue; const d = sol.eps[j] - centre, a = Math.exp(-d * d / (2 * sigma * sigma)); if (a > 0.02) lit.push([j, a]); if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = j; } }
+    if (!lit.length && best >= 0) lit.push([best, 1]);
+    if (!lit.length) return null;
+    const s = Math.sqrt(lit.reduce((q, [, a]) => q + a * a, 0)), t = now();
+    sel.clear(); for (const [j, a] of lit) sel.set(j, { amp: a / s, phase: ((sol.eps[j] * t) % TAU + TAU) % TAU });
+    selected = lit.reduce((m, x) => (x[1] > m[1] ? x : m))[0];
+    touch(); rebuild(); paint(); refresh(); api.repaint();
+    strikeAt = wall; strikeF = F; strikeVer = version;
+    const lo = lit[0][0], hi = lit[lit.length - 1][0];
+    status(`IMPULSE · F ${F.toFixed(2)} · ε ${centre.toFixed(3)} ± ${sigma.toFixed(3)} Eh · ${lit.length} orbital${lit.length > 1 ? 's' : ''} (${label(lo)}${hi !== lo ? ' … ' + label(hi) : ''})`, 'ok');
+    if (api.stroked) api.stroked('orbital');
+    if (api.pop) api.pop('IMPULSE · ' + (lit.length > 1 ? lit.length + ' orbitals · ' : '') + frontierOf(selected));
+    return { F, k, centre, sigma, lit: lit.map(([j]) => j) };
+  }
   function setAmp(k, v) { const c = sel.get(k); if (!c) return; c.amp = Math.max(0, Math.min(1, v)); touch(); paint(); refresh(); api.repaint(); }
   function setPhase(k, v) { const c = sel.get(k); if (!c) return; c.phase = ((v % TAU) + TAU) % TAU; touch(); paint(); refresh(); api.repaint(); }
 
@@ -643,7 +672,7 @@ export function createOrbitals(host, api) {
     get dials() { return !rowsEl.hidden; }, setDials,
     solution() { return sol; },
     setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; },
-    select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, store: (w) => !!M.store(w), setMorph: (v, s) => M.set(v, s),
+    select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, strike, store: (w) => !!M.store(w), setMorph: (v, s) => M.set(v, s),
     get morphOn() { return M.on; }, get morph() { return M.s; },
     knobs: { morph: () => M.knob },                                   // ADR-0002: the dial the `reg.omorph` row stamps and the TIMELINE lanes
     /** the modulator's road (a route, a TIMELINE lane): store the position; the picture moves only while MORPH plays */
