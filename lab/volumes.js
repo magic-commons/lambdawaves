@@ -275,7 +275,7 @@ export function installMolecule(volId, molId, { onProgress = null, signal = null
   const asked = persistOnce().catch(() => null);   // the iPad law: asked on the press, inside the gesture, never awaited here
   const job = (async () => {
     const { v, m } = await molecule(volId, molId);
-    if (!v.index) return { ok: false, why: volLabel(v) + ' installs from its file (the PICKER\'s LIBRARY: OPEN FILE…)' };
+    if (!v.index) return { ok: false, why: volLabel(v) + ' installs from its file (the main menu\'s EXPANSIONS: OPEN FILE…)' };
     const c = await store(volId, true);
     if (!c) return { ok: false, why: 'this browser has no Cache Storage' };
     const shas = await keptShas(c);

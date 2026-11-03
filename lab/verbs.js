@@ -25,7 +25,7 @@ export const VERBS = [
       if (a.view) c.setView(a.view);   // after the pick's solve (and the basis's, and the method's)
       const r = a.orbital === undefined ? null : orb(c, a.orbital); return typeof r === 'string' ? r : { own: true };
     } },
-  { id: 'volume', args: { volume: 'string', id: 'string', basis: '?enum ' + Object.keys(BASIS_LABEL).join('|') }, doc: "open a VOLUME's molecule (the PICKER's LIBRARY: volume vol-1, id aspirin) on its record — no solve — and switch MOLECULES on; basis one of its rungs (the lowest by default)",
+  { id: 'volume', args: { volume: 'string', id: 'string', basis: '?enum ' + Object.keys(BASIS_LABEL).join('|') }, doc: "open a VOLUME's molecule (the main menu's EXPANSIONS: volume vol-1, id aspirin) on its record — no solve — and switch MOLECULES on; basis one of its rungs (the lowest by default)",
     async run(app, a) { const c = app.state.chem; if (!(await c.openVolume(a.volume, a.id, a.basis || null))) return `${a.id} in ${a.volume} did not open — ${c.state().status}`;
       const v = c.volume; return { fade: mdText(`${v.name} · VOL. ${v.numeral} · ${BASIS_LABEL[v.basis]}`) }; } },
   { id: 'vibrate', args: { on: 'bool', mode: '?number', amp: '?number', breathe: '?bool' }, doc: "MOLECULES' VIBRATE: the nuclei breathe in one normal mode (mode: its place in the MODE list from 0; amp 0…4 in Q₀, past 2 not harmonic); breathe: true presses BREATHE — RATE so one breath takes a second (\"make water breathe\")",

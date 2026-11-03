@@ -369,7 +369,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
 
   /* ── the sections and the tabs (R9: the sliding pill, the approach accent) ── */
-  const sections = [['atomic', 'ATOMIC'], ['molecular', 'MOLECULAR'], ['library', 'LIBRARY']].map(([id, label]) => {
+  /* 034 M2 (Josh 11-02: "Rename 'Library' section of the picker to be 'Expansions'"): the third deck reads EXPANSIONS; its id, its icon and its
+     CSS hooks stay `library`, and the CSB's seat still reads LIBRARY */
+  const sections = [['atomic', 'ATOMIC'], ['molecular', 'MOLECULAR'], ['library', 'EXPANSIONS']].map(([id, label]) => {
     const sec = el('section', 'mm-sec mm-' + id, scroller), b = el('button', 'mm-tab', tabs); b.type = 'button'; icon(b, id); el('span', '', b, label);   // iteration 012 L2: I1's icon left of the word
     b.addEventListener('click', () => { showDecks(); if (id === 'library' && current.id === 'library') library.home(); sec.scrollIntoView({ behavior: RM.matches ? 'auto' : 'smooth', block: 'start' }); });
     return { id, sec, b };
@@ -599,7 +601,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       shelfEl.textContent = ''; shelfEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume');
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
-        const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'LIBRARY');
+        const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'EXPANSIONS');
         el('span', '', e, 'No volume is published yet.');
         return;
       }
