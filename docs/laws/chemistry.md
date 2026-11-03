@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 033
+
+THE WORKER'S ROAD HAS NO JSON MODULE (033, Claude Sos, 2026-11-02): nothing the maths worker imports (`lab/mathworker.js` and its graph — `rhf-molecule.js`, `dft-grid.js`, `lattice-model.js`, …) is a JSON module import (`with { type: 'json' }`); a table ships as a JS module (`lab/lebedev-302.js`, `lab/ab-patch.js`, `export default`, written by their tools). Firefox refuses a JSON module import inside a dedicated worker when the server sends `X-Content-Type-Options: nosniff`, and the live edge has sent it since 030 H — so from the 032 deploy the worker never started and every chemistry call (a molecule, a basis, an orbital) waited forever, for every visitor, while the page's own import of the same graph passed and every gate here passed. THE GATE WEARS THE LIVE HEADERS (`tools/gate/server.py`: nosniff and the CSP by default; `LW_EXTRA_HEADERS` replaces them), so a proof that passes here is a proof under the edge's rules.
+
 ## The laws of 021
 
 ONE MODE (021 R5): a window's mode is `MODE` in `shell/settings.js` (hydrogen | molecules | both); `moleculeMode` iterates it; field decisions read `molSession.selected`; the HYDROGEN button is `#lwMode [data-id="hydrogen"]`.
