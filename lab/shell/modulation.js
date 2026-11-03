@@ -252,14 +252,12 @@ export function createModSeam(app) {
         mod.stamp(); if (app.state.modView) app.state.modView.rebuild(); }); }
 
     let trSeat = 'bottom', trMoving = false, dodgeAgain = 0;
-    /* 032 T13 · THE BAR REMEMBERS ITS SIDE (Josh: "the CSB dodges the timeline and the modulation window; remembers its side"): the side it last landed
-       on is kept — nothing open, a window that leaves it free: it stays; only a window on its side sends it across (TIMELINE + MODULATION docked
-       below → above, and the reverse) — and that side is the WORKSPACE record `lw.csb.side` (lab/settings-store.js), seated at boot without the tunnel.
-       A narrow stage (≤ 860 px) seats it on top whatever the record says, and never writes it */
-    const SIDE = 'lw.csb.side', narrowNow = () => matchMedia('(max-width: 860px)').matches;
-    const sideSave = (v) => { try { localStorage.setItem(SIDE, v); } catch (_) {} };
-    { let v = null; try { v = localStorage.getItem(SIDE); } catch (_) {} const t = document.getElementById('transport');
-      if (v === 'top' && !narrowNow()) { trSeat = 'top'; if (t) t.classList.add('at-top'); } }
+    /* 034 F3 · THE BAR'S HOME IS THE BOTTOM (Josh 11-02: "CSB seems stuck to the top … I would prefer it towards the bottom"): a wide stage seats it
+       at the bottom while the bottom is free, on top only while a window holds the bottom (TIMELINE + MODULATION docked below), and back at the
+       bottom the moment the bottom frees; a narrow stage (≤ 860 px) seats it on top.  032 T13 kept the side a DODGE landed on (`lw.csb.side`), which
+       is what stuck it on top: a dodge's landing is never a choice, so the record is retired and a stored one removed at boot */
+    const narrowNow = () => matchMedia('(max-width: 860px)').matches;
+    try { localStorage.removeItem('lw.csb.side'); } catch (_) {}
     function seatRect(where, w, h) {
       const vw = window.innerWidth, vh = window.innerHeight;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
@@ -313,15 +311,14 @@ export function createModSeam(app) {
          When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
          the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
          (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
-      if (!rs.length && (trSeat === 'top' || !narrowNow())) { blocked = false; under(false); return; }   // 032 T13: nothing to dodge, the bar stays on its side
+      if (!rs.length && trSeat === (narrowNow() ? 'top' : 'bottom')) { blocked = false; under(false); return; }   // 034 F3: nothing to dodge and the bar at home
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
       if (narrowRack) trSeat = 'top';
-      const other = trSeat === 'top' ? 'bottom' : 'top';
       const want = narrowRack ? 'top'
-                 : free(trSeat, w, h) ? trSeat                      // 032 T13: its own side while it is free
-                 : free(other, w, h) ? other : trSeat;
+                 : free('bottom', w, h) ? 'bottom'                 // 034 F3: home while the bottom is free
+                 : free('top', w, h) ? 'top' : trSeat;
       blocked = !free(want, w, h); under(blocked);
       if (want === trSeat) return;
       trMoving = true;
@@ -333,7 +330,7 @@ export function createModSeam(app) {
         if (arrived) return;                                    // the event and the belt may BOTH fire
         arrived = true;
         t.removeEventListener('animationend', arrive);
-        trSeat = want; if (!narrowNow()) sideSave(want);             // 032 T13: the side it landed on is the one it keeps
+        trSeat = want;
         t.classList.toggle('at-top', want === 'top');
         t.style.animation = arriving + ' 160ms cubic-bezier(.23,1,.32,1) forwards';
         let ended = false;

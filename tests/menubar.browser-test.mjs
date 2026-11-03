@@ -185,7 +185,7 @@ try {
       const r = await __row('WINDOW', 'OTHER › INFORMATIONAL'); await new Promise((q) => setTimeout(q, 50)); R.info = ok(r) && !d.classList.contains('closed') && s.nextElementSibling === d; d.classList.add('closed'); }
     { document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); const r = await __row('WINDOW', 'INFO › WIGNER'); R.raise = ok(r) && !document.querySelector('.dev[data-id="wigner"]').classList.contains('closed'); document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); }   // ATOMS is a hidden LEGACY window since 2026-10
     /* HELP (021 I3: ABOUT renamed; SETTINGS is EDIT's alone) */
-    { const r = await __row('HELP', 'ABOUT λWAVES'); R.about = ok(r) && __LW.layout.notebook.isOpen && __LW.layout.notebook.face === 'about'; __LW.layout.notebook.close(); }
+    { const r = await __row('HELP', 'ABOUT λWAVES'); R.about = ok(r) && __LW.layout.about.isOpen && __LW.layout.about.face === 'lw'; __LW.layout.about.close(); }   // 034 N1: ABOUT is its own window
     { const r = await __row('HELP', 'KEYBOARD SHORTCUTS'); R.keymap = ok(r) && __LW.keymap.isOpen && document.querySelector('[data-mir-window="keyboard"]').contains(document.activeElement); __LW.keymap.close(); }
     { let reloaded = 0; const rl = __LW.sw.reload; __LW.sw.reload = () => { reloaded++; }; const r = await __row('HELP', 'UPDATE APP'); for (let i = 0; i < 40 && !reloaded; i++) await new Promise((q) => setTimeout(q, 50)); __LW.sw.reload = rl; __LW.sw.state = 'idle'; R.update = ok(r) && reloaded === 1; }
     /* FILE (the project rows) */

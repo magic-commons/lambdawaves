@@ -66,13 +66,14 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `lambdawaves.q0.projects.window` | WORKSPACE | kit | no | projects.js FOLDERS (kit localPrefs): place, size, rail, sort |
 | `lambdawaves.q0.notebook` | PROJECT | RETIRED | no | read once into the session part (021 R4; with .title, .subtitle) |
 | `lambdawaves.q0.library` | LIBRARY | — | no | library.js: persist() asked |
+| `mir.notes` | LIBRARY | kit shelf | no | kit · notes/shelf.js: the notebook’s NEW NOTE · OPEN NOTE shelf, apart from every project (034 N3) |
 | `mir.transport` | PREFERENCE | v 2 | no | kit · transport seat store (bar seat and place) |
 | `mir.transport.free` | WORKSPACE | kit | no | kit · the transport’s FREE window rect |
 | `mir.tier` | PREFERENCE | kit | no | kit · MIR OPTIONS QUALITY · AUTO reading |
 | `mir.pointer` | PREFERENCE | kit | no | kit · MIR OPTIONS › MOTION › POINTER |
 | `mir.render.calib` | PREFERENCE | kit | no | kit · recorder: this device’s ms a frame |
 | `lw.keyboard.position.v1` | WORKSPACE | v 1 (name) | no | kit · the KEYBOARD window’s place |
-| `lw.csb.side` | WORKSPACE | — | yes | shell/modulation.js modDodge: the side the CONTROL SURFACE keeps (top \| bottom, 032 T13) |
+| `lw.csb.side` | WORKSPACE | RETIRED | yes | shell/modulation.js: removed at boot (034 F3 — the bar’s home is the bottom; 032 T13 kept a dodge’s landing) |
 | `lw.repair` | PREFERENCE | flag | no | sw-client.js REPAIR (033): sessionStorage, not localStorage — 1 after the cache is cleared, 2 after the reinstall activated, removed at the verdict; one tab, one repair |
 | `lw.mixed` | PREFERENCE | flag | no | sw-client.js mixed() (033): sessionStorage — the page build a MIXED BUILD reloaded for once, so a reload loop is impossible |
 

@@ -35,7 +35,15 @@ export function createWorkerPool({ busyWrap, spawn }) {
     const call = (msg, transfer, onLate) => busyWrap(raw(msg, transfer, onLate));   // wave 48: every worker job is a BUSY job
     /* WAVE 54 · PARKING is bookkeeping, not a job: it never raises the busy mark and it is never counted as work */
     const idleStat = () => ({ parked: wantedParked, busyMs: 0, jobs: 0, parks: 0, resumes: 0, held: 0, parkedMs: 0, idle: true });
-    return { label, get ok() { return !failed; }, get answered() { return answered; }, get started() { return !!w; }, get starts() { return starts; }, call, raw,
+    /* 034 F5 · ESC'S EMERGENCY STOP: every job in flight answers { error: 'stopped' } at once (its busy mark drops with it) and the worker is
+       ended; the next job builds a fresh one (ensure).  Unlike fail() it spends no life and refuses nothing; an idle worker is left alone */
+    const reset = () => {
+      if (!w || (!waiting.size && !late.size)) return false;
+      for (const p of waiting.values()) { clearTimeout(p.timer); p.res({ error: 'stopped' }); } waiting.clear();
+      for (const f of late.values()) f({ error: 'stopped' }); late.clear();
+      try { w.terminate(); } catch (_) {} w = null; return true;
+    };
+    return { label, get ok() { return !failed; }, get answered() { return answered; }, get started() { return !!w; }, get starts() { return starts; }, call, raw, reset,
       park: () => { wantedParked = true; return w ? raw({ op: 'park' }) : Promise.resolve(idleStat()); },
       resume: () => { wantedParked = false; return w ? raw({ op: 'resume' }) : Promise.resolve(idleStat()); },
       stat: () => w ? raw({ op: 'stat' }) : Promise.resolve(idleStat()) };
@@ -61,5 +69,6 @@ export function createWorkerPool({ busyWrap, spawn }) {
     if (!chemW.ok && !chemW.answered) return local(fallback);
     return chemW.call(msg).then((r) => r && !r.error ? pluck(r) : chemW.answered ? refuse(r) : local(fallback));
   };
+  solveChem.reset = chemW.reset;   // 034 F5: ESC's stop reaches the chem worker through the road the card already holds (app.ctl stays its shape)
   return { makeWorker, maths, scan, cards, chemW, solveCard, solveChem };
 }

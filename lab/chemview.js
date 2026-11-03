@@ -26,7 +26,7 @@
 import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint, ariaLabel, mathPlain, arcRing } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js';
 import { rackPager } from './pager.js'; import { select as listSelect } from './mir/controls/select.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
-import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
+import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS, setPivot } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
 import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
@@ -62,6 +62,9 @@ const RESTART_EVERY = 0;
 const LDA_E = { H2O: -74.73204101826778, C6H6: -227.26271535054755, N2: -107.14784546338231, CH4: -39.61684762933404, NH3: -55.29017963855679, HF: -98.24584098961836, CO2: -184.5641630932059, C2H4: -76.85777172746918 };
 /* iteration 004 V2 · A VOLUME'S MOLECULE (lab/volumes.js, THE VOLUME FORMAT v1): its ladder is its record — every rung opens through chem.open, no solve */
 const VOL = 'a volume molecule is its record; the live roads are the catalogue’s', LIVE = new Set(['sto-3g', '6-31+g-star']);
+/* 034 F2c (Josh: "Buckyball seems like the most broken molecule"): a FRONTIER record (C₆₀: ε and a few whole columns of C, no D) says what stands
+   down in one line instead of leaving KICK, RUN, TDA and VIBRATE pressable and their rows empty; nothing else is promised */
+const FRONT = 'ORBITALS ONLY · DENSITY BY FACTOR · no spectrum — a frontier record carries ε and its columns of C, no density matrix: KICK, RUN, TDA, the drive and VIBRATE stand down', FRONT_HINT = 'stands down: a frontier record has no density matrix';
 const LDA_RT = 'RT stands down under RKS LDA: its operators (the TDHF Fock build) are RHF\'s', LDA_TDA = 'TDA and the register stand down under RKS LDA: their operators are RHF\'s', LDA_VIB = 'VIBRATE stands down under RKS LDA: its modes and dD/dQ are RHF\'s';
 
 export function createChem(host, api) {
@@ -84,7 +87,7 @@ export function createChem(host, api) {
      value wins, applied at most once per STEP_MS (O-BUILD measured a rebuild at 40 ms median, 104 ms worst — far under the cap, so the cap
      is the whole rule).  An LFO at 20 Hz steps at the cap; a lane at 0.5 Hz steps every orbital it crosses. */
   const STEP_MS = 334;   // ≤ 3 steps a second: THE PHOTOSENSITIVITY LAW's 3 flashes a second (the flash guard does not see chem.orbital); the builder's 120 ms allowed 8.3 (Yan at the merge, 10-18)
-  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, clamped = null;
+  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, clamped = null, stepParked = false;
   let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
@@ -92,6 +95,15 @@ export function createChem(host, api) {
      molecule a project falls back to; `volKeep` the last opened (an undo re-opens it unread); `volWant` a project's, opened on the next solve;
      `holds` the catalogue ids an INSTALLED volume carries */
   let volRef = null, volKeep = null, volWant = null, volSeq = 0, catPreset = preset, holds = new Map();
+  /* 034 F2b · THE HAND DECIDES THE PIVOT: a molecule a HAND picked (the MOLECULE picker, the Picker, the chooser, a link, a volume) turns
+     the camera about its nuclei's centroid (field.js setPivot), and so do its later landings (a basis, a method, a stretch); a landing no
+     hand asked for (a restore, a project, an undo, a gate's solve; a verb picks by the hand) puts the pivot home, and MOLECULES OFF puts it home (hydrogen sits at
+     the origin).  The box, the data, the records and every solve keep the catalogue's frame */
+  let pivotHand = false, pivotFor = null;
+  const centroidOf = (A) => { let x = 0, y = 0, z = 0; for (const a of A) { x += a.x; y += a.y; z += a.z; } const n = A.length || 1; return [x / n, y / n, z / n]; };
+  const pivotTo = () => { if (sol && on && pivotFor === preset) setPivot(centroidOf(chemAtoms(preset))); else setPivot(null); };
+  let loadingNow = '';   // 034 F5: what is loading (a name), '' when nothing is — ESC's stop reads it
+  const loading = (v, what) => { loadingNow = v ? String(what || loadingNow || 'the load') : ''; if (api.loading) api.loading(!!v); };
   const volName = (v) => `${String(v.name).toUpperCase()} · VOL. ${v.numeral}`;
   const rungRec = () => volRef.lwm.header.rungs[basis].record;
   function chemCharge(id) { return volRef && id === volRef.key ? volRef.charge : moleculeCharge(id); }   // the card's own: shadows the module's export with a volume molecule's
@@ -260,7 +272,7 @@ export function createChem(host, api) {
     header();
   }
   /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
-  function handPick(id) { near = true; const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app)
+  function handPick(id) { near = true; pivotHand = true; const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app); 034 F2b: the hand's molecule takes the pivot
     const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
@@ -459,7 +471,7 @@ export function createChem(host, api) {
   const kapKnob = knob({ label: '<m>κ</m>', min: 1e-4, max: 1e-2, value: 1e-3, log: true, title: 'δ-kick strength κ: smaller is more linear',
     fmt: (v) => v.toExponential(1), onInput: (v) => { if (api.modHand && api.modHand('chem.kick', v)) return; kappa = v; } });   // iteration 007 (MIR check B2): routed, the hand moves the base
   r2.appendChild(kapKnob.root);
-  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂), then field-free propagation', onFire: () => { kick(); } }); r2.appendChild(kickT.root); kickT.root.dataset.keyAction = 'chem.kick';   // 021 I1: the action presses it
+  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂), then field-free propagation', onFire: () => { kick(); if (api.strike) api.strike(Math.sqrt(kappa / 1e-3)); } }); r2.appendChild(kickT.root); kickT.root.dataset.keyAction = 'chem.kick';   // 021 I1: the action presses it; 034 I: a hand's KICK strikes the register too
   /* iteration 008 U · Δρ, the VIEW that left the seg: the induced density against the reference stored at the kick, over whatever VIEW the card draws */
   const deltaSw = sw({ label: 'Δρ', value: false, title: 'ΔD since the kick, signed', onChange: (v) => { setDelta(v); } });
   r2.appendChild(deltaSw.root);
@@ -580,7 +592,7 @@ export function createChem(host, api) {
     if (!force && sol && sol.key === key) { refresh(); if (back) status(back, 'warn'); return Promise.resolve(sol); }
     if (!force && pending && pending.key === key) return back ? pending.p.then((r) => { status(back, 'warn'); return r; }) : pending.p;   // …and one IN FLIGHT is the same answer
     setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null; if (vibOn) setVib(false);
-    if (!force && k0 && (k0.roots || k0.model)) { k0.seq = ++solveSeq; if (api.loading) api.loading(false); if (api.derived) api.derived(() => land(k0)); else land(k0); return Promise.resolve(sol); }   // 0.7.3 K2: a kept solve of this molecule (METHOD back) lands again, no worker call
+    if (!force && k0 && (k0.roots || k0.model)) { k0.seq = ++solveSeq; loading(false); if (api.derived) api.derived(() => land(k0)); else land(k0); return Promise.resolve(sol); }   // 0.7.3 K2: a kept solve of this molecule (METHOD back) lands again, no worker call
     const atoms = chemAtoms(preset), charge = chemCharge(preset);
     /* TWO STAGES, ONE SEQUENCE NUMBER.  The ground state lands first — the molecule appears on the field, the
        ORBITALS register gets its ladder, the readouts fill — and the spectrum follows, because it is the roots
@@ -593,7 +605,7 @@ export function createChem(host, api) {
       : method === 'lda' ? `solving ${P.name} by RKS LDA… ${P.nAO} AOs, ${P.nElectrons} electrons on a ${(atoms.length * 22650).toLocaleString('en')}-point grid`
       : basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
       : `solving ${P.name} in 6-31+G*… ${big.nAO} Cartesian AOs, ${P.nElectrons} electrons — up to a few seconds at the 46-AO cap`, 'warn');
-    if (api.loading) api.loading(true);
+    loading(true, P.name);
     /* THE RECORD ROAD (0.4.0 S4a · PLAN B2).  A molecule whose record this device holds opens from it — the worker's chem.open,
        zero solver calls, chem.ground's own reply — and so does one past the cap (DOWNLOAD: fetched, checked against its sha-256
        name and kept) or one a project or link names (`wantRef`: the exact record when this device still holds it, else the
@@ -648,17 +660,18 @@ export function createChem(host, api) {
         refresh(); return r;
       });
     }).catch((e) => { if (seq === solveSeq) { sol = null; status('solve failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
-      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq && api.loading) api.loading(false); });
+      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq) loading(false); });
     pending = { key, p: task };
     return task;
   }
   /* ── V2 · A VOLUME'S MOLECULE: the .lwm (lab/volumes.js, sha-256 checked) parsed once, each rung opened by THE RECORD ROAD's chem.open with its
      ground.hash under the same `seq` law.  `network: false` is a project's road (installed only, else the sentence, no solve) ── */
   async function openVolume(volId, molId, want = null, { hand = true, network = true, on: turnOn = true, sha = null } = {}) {
+    if (hand) pivotHand = true;   // 034 F2b
     const seq0 = ++volSeq, same = (v) => v && v.volume === volId && v.id === molId;
     let v = same(volRef) ? volRef : same(volKeep) ? volKeep : null;
     if (!v) {
-      status(`opening ${molId} from ${volId}…`, 'warn'); if (api.loading) api.loading(true);
+      status(`opening ${molId} from ${volId}…`, 'warn'); loading(true, molId);
       let idx = null, m = null;
       try {
         idx = await V.index(volId); m = idx.molecules.find((x) => x.id === molId);
@@ -670,7 +683,7 @@ export function createChem(host, api) {
           atoms: H.geometry.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z })), geometry: H.geometry.source || '', rungs: Object.keys(H.rungs),
           why: { ...(H.skipped || {}), ...(H.failed || {}) }, sub: [...(m.tags || []), m.pg].filter(Boolean).join(' · '), sha256: m.sha256 || null, bytes: buf.byteLength, from, bonds: H.geometry.bonds || H.meta.bonds || m.bonds || null };
       } catch (e) {
-        if (seq0 === volSeq) { if (api.loading) api.loading(false);
+        if (seq0 === volSeq) { loading(false);
           status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the PICKER's LIBRARY`, 'warn'); }
         return null;
       }
@@ -698,7 +711,7 @@ export function createChem(host, api) {
     setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null; if (vibOn) setVib(false);
     const seq = ++solveSeq, lib = rungRecord(v.lwm, basis), m = { op: 'chem.open', lib, hash: lib.ground.hash, basis };
     status(`opening ${volName(v)} at ${BASIS_LABEL[basis]} from its record… ${lib.ground.nAO} AOs, ${lib.ground.electrons} electrons`, 'warn');
-    if (api.loading) api.loading(true);
+    loading(true, volName(v));
     const task = Promise.all([call(m, () => here(basis).then((W) => { try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } })), loadMS()]).then(([r]) => {
       if (seq !== solveSeq) return null;
       if (!r || r.refused || r.error || !Number.isFinite(r.energy)) { sol = null; status(`${volName(v)} at ${BASIS_LABEL[basis]} did not open: ` + ((r && (r.refused || r.error)) || 'no answer'), 'warn'); refresh(); tell(); notify(); return null; }
@@ -713,9 +726,24 @@ export function createChem(host, api) {
       if (api.derived) api.derived(fill); else fill();
       return r;
     }).catch((e) => { if (seq === solveSeq) { sol = null; status('open failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
-      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq && api.loading) api.loading(false); });
+      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq) loading(false); });
     pending = { key, p: task };
     return task;
+  }
+  /** 034 F5 · ESC = THE EMERGENCY STOP (Josh: "If loading something takes too long … let 'Esc' be the emergency stop that just cancels the
+      request stably"): the load in flight is forgotten — its replies fall to the seq law, `pending` is cleared (the same pick asks afresh), the
+      busy mark drops, the MOLECULE picker goes back to the molecule on screen, and a worker job still running is ended by the pool's reset (a
+      fresh worker for the next job, its one life unspent).  What landed before stays on screen. */
+  function halt() {
+    if (!loadingNow) return false;
+    const what = loadingNow;
+    solveSeq++; volSeq++; pending = null; loading(false);
+    if (api.stopWorker) api.stopWorker();
+    if (sol) { const [p, b] = sol.key.split('|'); if (volKeep && p === volKeep.key) volRef = volKeep; else if (volRef && volRef.key !== p) volRef = null;
+      preset = p; if (b && b !== basis) { basis = b; bSeg.set(b); } fillSel(); mSeg.set(preset); paintBasis(); }
+    else mSel.selectedIndex = -1;
+    status('STOPPED · ' + what, 'warn'); tell();
+    return true;
   }
   function methodsVol() { const b = mthS.button('lda'); mthS.button('uhf').style.display = 'none'; mthS.button('rhf').textContent = 'RHF'; b.disabled = true; b.title = b.dataset.help = VOL; mthS.set('rhf'); }
   const stem = (k) => k.replace(/\|(uhf|lda)$/, '');   // a solve's key without its METHOD: the molecule, basis, charge and H₂'s stretch
@@ -731,6 +759,7 @@ export function createChem(host, api) {
   function framed(r) { let R = 0; for (const a of chemAtoms(preset)) R = Math.max(R, Math.hypot(a.x, a.y, a.z)); if (Number.isFinite(r.half)) r.half = Math.max(r.half, FRAME * (R + 3)); }
   function land(r) {
     framed(r);
+    pivotFor = pivotHand || pivotFor === preset ? preset : null; pivotHand = false;   // 034 F2b
     kept = new Map([...kept].filter(([k]) => stem(k) === stem(r.key))); kept.set(r.key, r);
     sol = r; mBuf = oBuf = dBuf = dRef = vibSh = null; fieldHash = null;
     const named = keyed(r.names, pendingKey), [lo, hi] = span(), P = pendingOrbital;
@@ -738,8 +767,11 @@ export function createChem(host, api) {
        on the nearest orbital the molecule holds, and STATE says so (modulation.js reads `clamped`); a step still in flight is the old molecule's */
     orbital = handK = named ? named.k : Number.isFinite(P) ? Math.min(hi, Math.max(lo, Math.round(P))) : r.nocc;
     clamped = !named && Number.isFinite(P) && orbital !== P ? { asked: P, lo, hi, k: orbital, key: r.key } : null;
+    const parked = stepParked ? stepWant : null; stepParked = false;
     pendingOrbital = pendingKey = null; clearTimeout(stepTimer); stepTimer = 0; stepWant = null;
-    rebuildOrbKnob(); standDown(); pushField(); refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
+    rebuildOrbKnob(); standDown(); pivotTo(); pushField();
+    if (Number.isFinite(parked)) { stepWant = parked; stepApply(); }   // 034 F2a: the lane's last write, once, on the new molecule's span
+    refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
   }
   /* Δ LDA−RHF: the pair [LDA, RHF] of this molecule when both are kept; asked for in VIEW (a project, a verb) with one missing, the other is solved quietly */
   const pair = () => { const s = sol && stem(sol.key), L = s && kept.get(s + '|lda'), R = s && kept.get(s); return L && R && L.D && R.D ? [L, R] : null; };
@@ -766,8 +798,9 @@ export function createChem(host, api) {
   /* 0.7.1 · AN OPEN SHELL STANDS THE CLOSED-SHELL ROADS DOWN: KICK, RUN, FLOW, PULSE, TDA and VIBRATE take the kit's disabled look and say why (the worker refuses them too); 0.7.3: so does RKS LDA, each with its sentence */
   const OPEN = 'open shell (UHF): the real-time run, TDA, the drive and the register are closed-shell roads in this cut', openNote = el('div', 'note', more); openNote.hidden = true; more.insertBefore(openNote, r2);
   let stood = '';                                                         // a closed shell never touches a control's help
-  function standDown() { const o = sol.volume ? VOL : !sol.model ? '' : uhf() ? OPEN : 'RKS LDA: the real-time run, TDA, the drive, the register and VIBRATE stand down — their operators are RHF\'s'; if (o === stood) return; stood = o; openNote.hidden = !o; openNote.textContent = o; if (o) { setRun(false); if (flowOn) setFlow(false); if (vibOn) setVib(false); }
-    for (const b of [kickT.root, runSw.root, flowSw.root, tdaSw.root, vibSw.root, ...pSeg.root.querySelectorAll('button')]) { b.dataset.help0 ??= b.dataset.help || b.title || ''; b.disabled = !!o; b.title = b.dataset.help = !o ? b.dataset.help0 : sol.volume ? VOL : uhf() ? OPEN : b === tdaSw.root ? LDA_TDA : b === vibSw.root ? LDA_VIB : LDA_RT; } }
+  const frontier = () => !!(sol && sol.cols && !sol.D);   // 034 F2c
+  function standDown() { const o = sol.volume ? VOL : frontier() ? FRONT : !sol.model ? '' : uhf() ? OPEN : 'RKS LDA: the real-time run, TDA, the drive, the register and VIBRATE stand down — their operators are RHF\'s'; if (o === stood) return; stood = o; openNote.hidden = !o; openNote.textContent = o; if (o) { setRun(false); if (flowOn) setFlow(false); if (vibOn) setVib(false); }
+    for (const b of [kickT.root, runSw.root, flowSw.root, tdaSw.root, vibSw.root, ...pSeg.root.querySelectorAll('button')]) { b.dataset.help0 ??= b.dataset.help || b.title || ''; b.disabled = !!o; b.title = b.dataset.help = !o ? b.dataset.help0 : sol.volume ? VOL : frontier() ? FRONT_HINT : uhf() ? OPEN : b === tdaSw.root ? LDA_TDA : b === vibSw.root ? LDA_VIB : LDA_RT; } }
   function rebuildOrbKnob() {
     views();
     const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
@@ -789,7 +822,12 @@ export function createChem(host, api) {
     if (wait <= 0) stepApply(); else stepTimer = setTimeout(stepApply, wait);
   }
   function stepApply() {
-    stepTimer = 0; const v = stepWant; stepWant = null;
+    stepTimer = 0;
+    /* 034 F2a (Josh: "When orbital knob in molecules is a clip on the timeline, switching to another molecule breaks it"): while the NEXT
+       molecule solves, a lane's write waits for it — the old dial is not stepped on the old molecule's range — and the last one is applied
+       once on the landing (land), on the new molecule's span; the re-registration's applyAll follows it there */
+    if (pending && !(sol && sol.key === pending.key)) { stepParked = true; return; }
+    const v = stepWant; stepWant = null;
     if (!Number.isFinite(v) || !sol || (!stepHeld && !Number.isFinite(handK))) return;   // the registry writing back a not-chosen orbital's placeholder base chooses nothing
     const [lo, hi] = span(), k = Math.min(hi, Math.max(lo, Math.round(v)));
     if (stepHeld && orbKnob.show) orbKnob.show(k); else orbKnob.set(k);
@@ -801,7 +839,7 @@ export function createChem(host, api) {
 
   /* ── the real-time run ────────────────────────────────────────────────────────────────────────── */
   function kick() {
-    if (!sol || sol.model || sol.volume) { if (sol) status(sol.volume ? VOL : uhf() ? OPEN : LDA_RT, 'warn'); return Promise.resolve(null); }   // 0.7.1: never a closed-shell RT run of an open shell (0.7.3: nor of an LDA solve)
+    if (!sol || sol.model || sol.volume || frontier()) { if (sol) status(sol.volume ? VOL : frontier() ? FRONT : uhf() ? OPEN : LDA_RT, 'warn'); return Promise.resolve(null); }   // 0.7.1: never a closed-shell RT run of an open shell (0.7.3: nor of an LDA solve)
     const seq = solveSeq;
     /* SYNTHESIS decision 2: the card's MMUT is UNRESTARTED, and 0 is how that is spelled on the wire.  It was
        never sent before, so the engine took its own default of 50 while this window said "unrestarted". */
@@ -1110,7 +1148,7 @@ export function createChem(host, api) {
     status(`${sol.nAO} AOs · ${nel()} electrons` + (sol.model ? ' · ' + sol.model : '')
       + (Number.isFinite(tm.scf) ? ` · ground ${Math.round(tm.scf)} ms` : '')
       + (Number.isFinite(tm.integrals) ? ` (integrals ${Math.round(tm.integrals)} of it)` : '')
-      + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : summed() ? ' · ' + summed() : noSpectrum(sol) ? ' · orbitals only' : sol.model ? (uhf() ? ' · no spectrum (open shell)' : ' · no spectrum (RKS LDA)') : sol.roots ? '' : ' · spectrum pending')
+      + (frontier() ? ' · ORBITALS ONLY · DENSITY BY FACTOR' + (summed() ? ` (${summed()})` : '') + ' · no spectrum' : Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : summed() ? ' · ' + summed() : noSpectrum(sol) ? ' · orbitals only' : sol.model ? (uhf() ? ' · no spectrum (open shell)' : ' · no spectrum (RKS LDA)') : sol.roots ? '' : ' · spectrum pending')
       + (sol.opened ? ` · from its record (${Math.round(sol.opened.bytes / 1024)} KB, ${sol.opened.from === 'device' ? 'on this device' : 'downloaded'}) in ${tm.open} ms, no solver call` + (stored ? ' · ' + stored : '') : '')
       + (sol.note ? ' · ' + sol.note : '') + (view !== 'esp' ? '' : espOn() ? ` · ESP ${esp.N}³ in ${Math.round(esp.ms)} ms` : ' · ESP computing…') + (running ? ' · running' : ''), running ? 'live' : 'ok');
     paint();
@@ -1315,7 +1353,7 @@ export function createChem(host, api) {
   const vibLine = (tail = '') => (vibOn && vib ? `${vib.name[vibK]} ${Math.round(vib.omega[vibK])} cm⁻¹ · ${vib.irrep[vibK]} at ${vibAmp.toFixed(1)} Q₀${tail}` : null);
   const vibLand = () => { const p = pendingVib; pendingVib = null; if (p && sol) { ampKnob.set(Math.min(4, Math.max(0, +p.amp || 0))); setVib(true, p.mode, p.amp); } };
   function setOn(v) {
-    on = !!v; if (onSw.get() !== on) onSw.set(on);
+    on = !!v; if (onSw.get() !== on) onSw.set(on); pivotTo();   // 034 F2b: MOLECULES OFF puts the pivot home, ON brings the hand's back
     if (!on) { setRun(false); if (vibOn) setVib(false); if (S() && fieldHash !== null) { S().drop(); fieldHash = null; } }
     /* the claim is the whole handover: ON asks the session for the field (and it asserts this card's observable
        even before the solve lands, as the old fieldView() call did), OFF lets go and the session restores the
@@ -1491,7 +1529,8 @@ export function createChem(host, api) {
     /** 0.7.3 K2 · METHOD from outside (the verb, __LW.chem): the seg's own road, a hand press; → the solve, or null where it is not offered */
     setMethod(v) { const b = mthS.button(v); if (!b || b.disabled || b.style.display === 'none') return Promise.resolve(null); if (v === method) return solve(preset); mthS.set(v); method = v; return solve(preset).then((r) => { if (r && api.hand) api.hand(preset); return r; }); }, get method() { return method; },
     /** VIEW from outside (a verb, the register's ON, a stroke on the ladder): toView, above */
-    setView: toView,
+    setView: toView, halt,   // 034 F5: ESC's emergency stop (`stop` is RUN's, below)
+    get loading() { return loadingNow; },
     get view() { return view; }, get delta() { return delta; }, setDelta,
     /** iteration 008 U · the card's two seats the register fills: the ON row (its ORBITAL | STATES seg) and the panes under it */
     slots: { top: rTop, register: regHost },

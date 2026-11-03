@@ -54,7 +54,7 @@ export function createActions(app) {
   const ROWS = [
     { id: 'transport.play', icon: 'play', was: 'play', group: T, short: 'play', label: 'play / pause', keys: ['Space'], kind: 'toggle', get: () => !!clock.playing, run: () => S().togglePlay(), surface: true },
     { id: 'fullscreen', icon: 'expand', short: 'fullscreen', label: 'full screen (the browser) / back', keys: ['KeyF'], kind: 'toggle', get: fsOn, run: fullscreen, gesture: true },
-    { id: 'notebook', icon: 'notebook', short: 'notebook', label: 'notebook (and its ABOUT face)', keys: ['KeyJ'], kind: 'toggle', get: () => !!L().notebook.isOpen, run: (a) => (a && a.md !== undefined ? ran('notebook')(a) : L().notebook.toggle()), surface: true },
+    { id: 'notebook', icon: 'notebook', short: 'notebook', label: 'notebook', keys: ['KeyJ'], kind: 'toggle', get: () => !!L().notebook.isOpen, run: (a) => (a && a.md !== undefined ? ran('notebook')(a) : L().notebook.toggle()), surface: true },
     /* wave 106: the key IS the bar's ⏮ (t → 0 through THE ONE SEEK, 021 R3) */
     { id: 'home', icon: 'reload', group: T, short: 'zero', label: 'time to zero', hint: 't → 0 · the beat stays', keys: ['Home'], run: () => appPlay.seek(0), surface: true },   // 032 T14: ↺ (⏮ is bar 1)
     /* 032 T14 · ⏮ IS BAR 1: the TIMELINE's playhead (the modulation beat) to the start, the window open or not; ψ's t stays (↺ moves it) */
@@ -83,7 +83,7 @@ export function createActions(app) {
       .map(([id, w, short, label], i) => ({ id, group: ST, short, label, keys: ['Digit' + (i + 1)], run: () => setWhich(w), surface: true })),
     ...[['turnNeg', '−', 'BracketLeft', -1], ['turnPos', '+', 'BracketRight', 1]].map(([id, w, k, s]) => ({ id, group: ST, short: 'turn ' + w, label: 'turn ψ about the axis, ' + w, keys: [k],
       run: (a) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: s * 0.12 * F(a), t: clock.t }); app.ctl.touchState(); }, surface: true })),
-    { id: 'slap', group: ST, short: 'impulse', label: 'impulse ψ ↦ e^{ik·x}ψ along the axis X · Y · Z picks (k = 0.2, Shift finer); METERS says what it did', hint: 'Impulse e^{ik·x} along the K axis', keys: ['KeyK'], run: (a) => { if (app.hooks.slap) app.hooks.slap(0.2 * F(a), keyState.axis); }, surface: true },
+    { id: 'slap', group: ST, short: 'impulse', label: 'impulse ψ ↦ e^{ik·x}ψ along the axis X · Y · Z picks (k = 0.2, Shift finer); METERS says what it did — with MOLECULES on, a strike on the ORBITAL register (VIEW MIX)', hint: 'Impulse e^{ik·x} along the K axis', keys: ['KeyK'], run: (a) => { const O = app.state.chem && app.state.chem.on && app.state.orbitals; if (O && O.strike) { O.strike(F(a)); return; } if (app.hooks.slap) app.hooks.slap(0.2 * F(a), keyState.axis); }, surface: true },   // 034 I: MOLECULES on → the ORBITAL register's strike
     { id: 'reseed', group: ST, short: 'reseed', label: 'reset the particles', keys: ['Alt+KeyR'], run: () => { W().particles.setOn(true); W().particles.seed(160, reg, clock.t, app.ctl.domain.half); sch(TIER.PRESENT); }, surface: true },   // 021 call 6: Mod+R is the browser's reload
     { id: 'state.normalize', group: ST, short: 'normalize', label: 'NORMALIZE the state', run: () => W().normalizeNow(), surface: true },
     { id: 'state.clear', icon: 'trash', group: ST, short: 'clear', label: 'CLEAR the register', run: () => W().clearRegister(), surface: true },
@@ -121,9 +121,9 @@ export function createActions(app) {
     { id: 'menu', icon: 'picker', short: 'main menu', label: 'the MAIN MENU — open it, or back to the lab', keys: ['KeyL'], kind: 'toggle', get: () => !!(app.state.picker && app.state.picker.shown), run: () => { if (app.state.picker) app.state.picker.toggle(); }, surface: true },   // the id stays 'menu': saved bindings
     { id: 'timeline', icon: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', hint: 'The timeline window', kind: 'toggle', get: () => !!(app.state.tl && app.state.tl.isOpen()), run: () => { if (app.state.tl) app.state.tl.toggle(); }, surface: true },
     { id: 'gui', short: 'mir options', label: 'MIR OPTIONS — the interface’s look (BASINS’ GUI menu)', hint: 'MIR OPTIONS — the interface’s look', icon: 'cogSolid', run: () => { const g = mirGui(); if (g) g.toggle(); }, surface: true },
-    { id: 'guiAbout', icon: 'info', short: 'mir about', label: 'MIR ABOUT — what MIR is', run: () => { const g = mirGui(); if (g) g.toggle('about'); }, surface: true },
+    { id: 'guiAbout', icon: 'info', short: 'mir about', label: 'MIR ABOUT — what MIR is', run: () => L().about.open('mir'), surface: true },   // 034 N1: the ABOUT window's MIR face
     { id: 'mapping', icon: 'keyboard', short: 'mapping', label: 'the MAPPING — a key, a MIDI note or knob, or a modulation route for every action', hint: 'The MAPPING — keys, MIDI, routes', run: () => L().keymap.open('MAPPING') },
-    { id: 'about', icon: 'about', short: 'about', label: 'ABOUT λWAVES — the notebook’s ABOUT face', run: () => L().notebook.open('about'), surface: true },
+    { id: 'about', icon: 'about', short: 'about', label: 'ABOUT λWAVES — its own window', run: () => L().about.open('lw'), surface: true },   // 034 N1
     { id: 'photosensitivity', icon: 'warn', label: 'PHOTOSENSITIVITY WARNING — show the notice now and on the next load', hint: 'Show the photosensitivity notice', run: () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } } },
     { id: 'update', icon: 'download', label: 'UPDATE APP — check for a new build, rebuild the offline cache, and reload', hint: 'UPDATE APP — check for a new build', run: () => H().swClient.refresh() },
     { id: 'diagnostics', icon: 'informational', label: 'COPY DIAGNOSTICS — the build, the worker, the stores and the last errors, as text', hint: 'COPY DIAGNOSTICS — the build and the stores as text', run: () => H().swClient.copyDiagnostics() },   // 033 THE UPDATER
