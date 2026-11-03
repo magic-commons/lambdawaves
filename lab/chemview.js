@@ -97,7 +97,7 @@ export function createChem(host, api) {
   let volRef = null, volKeep = null, volWant = null, volSeq = 0, catPreset = preset, holds = new Map();
   /* 034 F2b · THE HAND DECIDES THE PIVOT: a molecule a HAND picked (the MOLECULE picker, the Picker, the chooser, a link, a volume) turns
      the camera about its nuclei's centroid (field.js setPivot), and so do its later landings (a basis, a method, a stretch); a landing no
-     hand asked for (a verb, a restore, a project, a gate's solve) puts the pivot home, and MOLECULES OFF puts it home (hydrogen sits at
+     hand asked for (a restore, a project, an undo, a gate's solve; a verb picks by the hand) puts the pivot home, and MOLECULES OFF puts it home (hydrogen sits at
      the origin).  The box, the data, the records and every solve keep the catalogue's frame */
   let pivotHand = false, pivotFor = null;
   const centroidOf = (A) => { let x = 0, y = 0, z = 0; for (const a of A) { x += a.x; y += a.y; z += a.z; } const n = A.length || 1; return [x / n, y / n, z / n]; };
