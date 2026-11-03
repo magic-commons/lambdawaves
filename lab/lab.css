@@ -63,7 +63,6 @@ body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* w
 #notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
   border: 1px solid hsl(0 0% 100% / .45); background: transparent; -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%);
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); color: var(--fg); overflow: hidden; }
-#notebook[data-face="about"] { width: 470px; height: 670px; left: calc(50% - 235px); top: max(20px, calc(50% - 335px)); }
 body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
 body[data-theme="dark"] #notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; background: hsl(0 0% 0% / .22); pointer-events: none; }   /* a shade behind the blur on DARK, the glass itself stays clear */
 .nb-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 16px 10px 12px 14px; cursor: grab; user-select: none; touch-action: none; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title") */
@@ -73,9 +72,7 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; color: var(--fg-soft); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; margin-top: 2px; }
 .nb-subtitle:focus { color: var(--acc); }
 .nb-subtitle::placeholder { color: var(--dim); opacity: .6; }
-#notebook[data-face="about"] .nb-titles, #notebook[data-face="projects"] .nb-titles,
-#notebook[data-face="about"] .nb-title, #notebook[data-face="projects"] .nb-title,
-#notebook[data-face="about"] .nb-subtitle, #notebook[data-face="projects"] .nb-subtitle { visibility: hidden; }
+#notebook[data-face="projects"] .nb-titles, #notebook[data-face="projects"] .nb-title, #notebook[data-face="projects"] .nb-subtitle { visibility: hidden; }
 .nb-view { flex: 1 1 auto; min-height: 120px; overflow: auto; padding: 4px 2px; font: 14px/1.6 var(--font-ui); color: var(--fg); }
 .nb-view h1, .nb-view h2, .nb-view h3 { margin: .6em 0 .3em; line-height: 1.2; font-weight: 700; color: var(--fg); }
 .nb-view h1 { font-size: 22px; } .nb-view h2 { font-size: 18px; } .nb-view h3 { font-size: 15px; }
@@ -118,7 +115,6 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 
 .nb-tools { display: flex; gap: 4px; }
 .nb-tools button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); cursor: pointer; font-size: 13px; line-height: 1; }
-.nb-about { font: italic 700 12px Georgia, 'Times New Roman', serif; }
 .nb-tools button:hover { color: var(--acc); }
 .nb-face { display: flex; flex-direction: column; padding: 0 14px 12px; flex: 1 1 auto; min-height: 0; overflow: auto; }   /* the faces fill the glass: the resize handle sizes the notes and the preview */
 .nb-text { flex: 1 1 auto; min-height: 120px; resize: none; border: 0; outline: 0; background: transparent; color: var(--fg); font: 13px/1.5 var(--font-ui); padding: 4px 0; }
@@ -128,6 +124,12 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-foot button { height: 26px; padding: 0 12px; }
 .nb-dump, .ab-home { height: 30px; padding: 0 14px; line-height: 28px; }
 .nb-aboutface { align-items: center; text-align: center; gap: 4px; padding-top: 4px; }
+/* 034 N1 · the ABOUT window (shell/notebook.js): the notebook's button ink, its two faces filling the body */
+.mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); }
+body[data-theme="dark"] .mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
+.mir-win.lw-about > .mir-win-body { display: flex; flex-direction: column; }
+.mir-win.lw-about .nb-face { padding: 0 14px 12px; }
+.lw-about-mir { align-items: stretch; }
 .nb-logo { display: flex; align-items: baseline; gap: 0; font-size: 35px; margin: 6px 0 4px; }
 .nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; margin-right: -.04em; }
 .nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: 700; letter-spacing: .06em; color: var(--fg); }

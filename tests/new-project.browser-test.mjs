@@ -131,15 +131,15 @@ try {
     N.open('projects'); await __w(300);                                                                  /* the alias: FOLDERS, the notebook untouched */
     r.alias = { folders: F.isOpen(), open: N.isOpen };
     r.closedGallery = { pressed: await press(blank), open: N.isOpen, folders: F.isOpen(), current: P.current };   /* a blank tile over a closed notebook */
-    N.open('about'); await __w(100);
-    r.c = { pressed: await press(blank), open: N.isOpen, face: N.face, current: P.current };            /* (c) a blank tile keeps the notebook's face */
+    N.open('notes'); await __w(100);
+    r.c = { pressed: await press(blank), open: N.isOpen, face: N.face, current: P.current };            /* (c) a blank tile keeps the notebook as it is (034 N1: one face, ABOUT left) */
     r.d = { pressed: await press(hello), open: N.isOpen, face: N.face, text: __LW.notebook.text, current: P.current };   /* (d) text opens onto NOTES */
     F.close(); window.confirm = c0; r.errs = __e.slice(); return r;`);
   assert.deepEqual(law, { a: { ok: true, open: false }, closedBlank: { ok: true, open: false }, alias: { folders: true, open: false },
     closedGallery: { pressed: true, open: false, folders: false, current: 'probe/blank' },   // iteration 012 M1: an OPEN from FOLDERS closes FOLDERS
-    c: { pressed: true, open: true, face: 'about', current: 'probe/blank' },
+    c: { pressed: true, open: true, face: 'notes', current: 'probe/blank' },
     d: { pressed: true, open: true, face: 'notes', text: 'hello', current: 'probe/hello' }, errs: [] });
-  console.log('PASS the notebook law: an open never closes the notebook — NEW, a blank project (whitespace only) and a blank FOLDERS tile leave a closed notebook closed and an ABOUT face on ABOUT; a project with text opens onto its NOTES; open(\'projects\') is FOLDERS');
+  console.log('PASS the notebook law: an open never closes the notebook — NEW, a blank project (whitespace only) and a blank FOLDERS tile leave a closed notebook closed and an open one as it is; a project with text opens onto its NOTES; open(\'projects\') is FOLDERS');
 
   /* ── 6 · A NEW THAT CANNOT LAND CHANGES NOTHING: the file unreachable, and a file whose restore throws half-way (M5b) ── */
   const fail = await g.ev(`const P = __LW.layout.projects, f0 = window.fetch;

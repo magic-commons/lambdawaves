@@ -6,6 +6,7 @@ import { renderNotebook } from '../mir/shell/notebook-render.js'; import { camer
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
+import { createWindow } from '../mir/window/window.js'; import { glyphEl } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
 import { MODE } from './settings.js';   // 021 R5: ONE MODE (the FINDER's greys)
 import { NOTEBOOK_KEYS } from '../settings-store.js';   // 021 R4: the notebook's 0.4 keys, read once and retired
 export function createNotebook(app) {
@@ -141,13 +142,13 @@ export function createNotebook(app) {
     installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });
     for (const t of ['devclose', 'devopen']) document.addEventListener(t, () => saveSettings());   // C3: the kit's + opens a window itself
     layout.favMenu = rk.favMenu;   // 0.5.0 C3: the ☆ list is the kit's (createRack chrome); 018 E5: the + list left for the FINDER
-    /* ── THE NOTEBOOK: a free glass over the stage; its ⓘ flips it into the ABOUT face ── */
+    /* ── THE NOTEBOOK: a free glass over the stage (034 N1: ABOUT is its own window, below) ── */
     const nb = document.getElementById('notebook');
     if (nb) {
       const [NB_KEY, NB_TITLE, NB_SUBTITLE] = NOTEBOOK_KEYS;   // 021 R4: RETIRED — read once below, then the session part is the notebook's one record
-      const ta = nb.querySelector('.nb-text'), view = nb.querySelector('.nb-view'), titleIn = nb.querySelector('.nb-title'), subIn = nb.querySelector('.nb-subtitle'), faces = { notes: nb.querySelector('.nb-notes'), about: nb.querySelector('.nb-aboutface') };
+      const ta = nb.querySelector('.nb-text'), view = nb.querySelector('.nb-view'), titleIn = nb.querySelector('.nb-title'), subIn = nb.querySelector('.nb-subtitle'), faces = { notes: nb.querySelector('.nb-notes'), about: document.getElementById('aboutFace') };
       /* the ABOUT face's version line is BUILD_LINE, never hand-written markup: the copy dump reads this same text back out of the face */
-      const abV = nb.querySelector('.ab-version');
+      const abV = faces.about.querySelector('.ab-version');
       if (abV) { const i = BUILD_LINE.indexOf(' · '); abV.textContent = ''; el('span', 'ab-tag', abV, i < 0 ? BUILD_LINE : BUILD_LINE.slice(0, i)); if (i >= 0) abV.appendChild(document.createTextNode(BUILD_LINE.slice(i))); }
       /* 021 R4 · THE NOTEBOOK IS STORED ONCE, in the project part (the session, FOLDERS, a file).  A browser that still holds 0.4's three keys
          boots onto them (a resume then puts the session's back), they leave storage, and the session's next save keeps the text */
@@ -309,43 +310,51 @@ export function createNotebook(app) {
       ta.addEventListener('input', () => { nbStore(); count(); });
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
       const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
-      let abBack = null;   // iteration 018 A6: ABOUT is λWAVES' alone — MIR's ABOUT lives in MIR OPTIONS (its own window)
+      /* ── 034 N1 · ABOUT IS ITS OWN WINDOW (Josh: "Notebook should be it's own window apart from the About page. About page's controls can just
+         simply be the 'x' icon to close and the 'i' icon to toggle between the app's about page and the general MIR about page"): the kit's
+         createWindow in #floats with a title bar — ⓘ and × — whose body is the λWAVES face (index.html #aboutFace) or, on ⓘ, MIR ABOUT's own
+         page lent in place (the kit's gui.aboutPage; MIR OPTIONS' ⓘ takes it back to the kit's window).  Its size is the WORKSPACE abW / abH. ── */
+      const mirFace = el('div', 'nb-face lw-about-mir'); mirFace.hidden = true;
+      const abWin = createWindow({ id: 'about', title: 'ABOUT', host: floats || document.body, chrome: 'close', glyph: 'about', resizable: true, emptyDrag: true,
+        size: { w: ABOUT_DEF_W, h: ABOUT_DEF_H }, min: { w: 320, h: 240 }, body: (b) => { faces.about.hidden = false; b.append(faces.about, mirFace); },
+        persist: { read: () => { const S = readSettings(); return { w: S.abW, h: S.abH }; },
+          write: (sh) => { const S = readSettings(); if (sh && (S.abW !== sh.w || S.abH !== sh.h)) settingsStore.write({ ...S, abW: sh.w, abH: sh.h }); } } });
+      abWin.root.classList.add('lw-about');
+      const abI = el('button', 'mir-win-btn lw-about-i'); abI.type = 'button'; abI.dataset.glyph = 'info'; { const g = glyphEl('info', 'gly gly-info'); if (g) abI.append(g); }
+      abWin.tools.prepend(abI);
+      let abFace = 'lw';
+      const abShow = (f) => {
+        abFace = f === 'mir' ? 'mir' : 'lw'; faces.about.hidden = abFace !== 'lw'; mirFace.hidden = abFace !== 'mir';
+        abI.title = abFace === 'lw' ? 'MIR ABOUT — the kit this app is built on' : 'ABOUT λWAVES — back to the app'; abI.setAttribute('aria-pressed', String(abFace === 'mir'));
+        if (abFace === 'mir') { const g = mirGui(); if (g && g.aboutPage) g.aboutPage(mirFace); }   // lent again each time: the kit's own window may have taken it back
+        const logo = faces.about.querySelector('.nb-logo');
+        /* iteration 016 P5 (Josh: "the new λWAVES logo, much larger; the MIR logo shrunk"): the wordmark lab/img/lambdawaves-logo.svg, large — its word in the
+           ink, its λ and its dot their own colours (the Picker's own road); the title's clone stays the fallback */
+        if (abFace === 'lw' && logo && !logo.children.length) {
+          logo.classList.add('nb-wordmark');
+          fetch('./img/lambdawaves-logo.svg').then((r) => (r.ok ? r.text() : Promise.reject())).then((t) => { logo.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const g = logo.querySelector('svg'); if (g) { g.removeAttribute('width'); g.removeAttribute('height'); g.setAttribute('aria-hidden', 'true'); } })
+            .catch(() => { logo.classList.remove('nb-wordmark'); for (const c of document.getElementById('title').children) if (!c.classList.contains('ms')) logo.appendChild(c.cloneNode(true)); paintMarks(); });
+        }
+        abWin.body.scrollTop = 0;
+      };
+      abI.addEventListener('click', () => abShow(abFace === 'lw' ? 'mir' : 'lw'));
+      occlusion.register('about', () => (abWin.isOpen() ? [paintedRect(abWin.root)] : [])); occlusion.watch(abWin.root, { attributes: true, attributeFilter: ['hidden'] });
+      layout.about = { open(f = 'lw') { abShow(f); abWin.open(); abWin.raise(); return true; }, close() { abWin.close(); }, toggle(f) { if (abWin.isOpen() && (!f || f === abFace)) abWin.close(); else layout.about.open(f || abFace); },
+        get isOpen() { return abWin.isOpen(); }, get face() { return abFace; }, win: abWin };
       const show = (face) => {
         if (face === 'projects') { projects.show(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS' (iteration 004: the front page put away first)
-        nb.hidden = false; faces.notes.hidden = face !== 'notes'; faces.about.hidden = face !== 'about'; nb.dataset.face = face;
+        if (face === 'about') { layout.about.open('lw'); return; }   // 034 N1: ABOUT left the notebook for its own window
+        nb.hidden = false; nb.dataset.face = 'notes';
         const S = readSettings();
-        if (face === 'about') {
-          const w = typeof S.abW === 'number' ? S.abW : ABOUT_DEF_W;
-          const h = typeof S.abH === 'number' ? S.abH : ABOUT_DEF_H;
-          nbResize(w, h);
-          if (!nbMoved) {
-            nb.style.left = 'calc(50% - ' + Math.round(w / 2) + 'px)';
-            nb.style.top = 'max(20px, calc(50% - ' + Math.round(h / 2) + 'px))';
-          }
-          const logo = nb.querySelector('.nb-logo');
-          /* iteration 016 P5 (Josh: "the new λWAVES logo, much larger; the MIR logo shrunk"): the wordmark lab/img/lambdawaves-logo.svg, large — its word in the
-             ink, its λ and its dot their own colours (the Picker's own road); the title's clone stays the fallback */
-          if (logo && !logo.children.length) {
-            logo.classList.add('nb-wordmark');
-            fetch('./img/lambdawaves-logo.svg').then((r) => (r.ok ? r.text() : Promise.reject())).then((t) => { logo.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const g = logo.querySelector('svg'); if (g) { g.removeAttribute('width'); g.removeAttribute('height'); g.setAttribute('aria-hidden', 'true'); } })
-              .catch(() => { logo.classList.remove('nb-wordmark'); for (const c of document.getElementById('title').children) if (!c.classList.contains('ms')) logo.appendChild(c.cloneNode(true)); paintMarks(); });
-          }
-        } else {
-          const w = typeof S.nbW === 'number' ? S.nbW : NOTES_DEF_W;
-          const h = typeof S.nbH === 'number' ? S.nbH : NOTES_DEF_H;
-          nbResize(w, h);
-          if (!nbMoved) {
-            nb.style.left = 'calc(50% - ' + Math.round(w / 2) + 'px)';
-            nb.style.top = '12%';
-          }
+        const w = typeof S.nbW === 'number' ? S.nbW : NOTES_DEF_W;
+        const h = typeof S.nbH === 'number' ? S.nbH : NOTES_DEF_H;
+        nbResize(w, h);
+        if (!nbMoved) {
+          nb.style.left = 'calc(50% - ' + Math.round(w / 2) + 'px)';
+          nb.style.top = '12%';
         }
-        if (face === 'notes') ta.focus();
+        ta.focus();
       };
-      /* the i opens λWAVES ABOUT; pressed again it puts it away — back to the notes when the window was showing them, else the window shuts */
-      nb.querySelector('.nb-about').addEventListener('click', () => {
-        if (nb.hidden || nb.dataset.face !== 'about') { abBack = nb.hidden ? null : nb.dataset.face; show('about'); return; }
-        if (abBack === 'notes') show('notes'); else nb.hidden = true;
-      });
       nb.querySelector('.nb-close').addEventListener('click', () => { nb.hidden = true; });
       nb.querySelector('.nb-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ta.value); } catch (e) {} });
       const dump = nb.querySelector('.nb-dump');
@@ -360,13 +369,8 @@ export function createNotebook(app) {
       function nbSaveSize() {
         const w = Math.round(parseFloat(nb.style.width)), h = Math.round(parseFloat(nb.style.height)); if (!(w > 0 && h > 0)) return;   // W129 · the size it was GIVEN (nbResize, the grip, the CSS resize all write the inline style; captureLayout reads it too), never its layout box: a closed notebook's box is 0 × 0, a phone's is its screen
         const S = readSettings();
-        if (nb.dataset.face === 'about') {
-          if (S.abW === w && S.abH === h) return;
-          settingsStore.write({ ...S, abW: w, abH: h });
-        } else {
-          if (S.nbW === w && S.nbH === h) return;
-          settingsStore.write({ ...S, nbW: w, nbH: h });
-        }
+        if (S.nbW === w && S.nbH === h) return;
+        settingsStore.write({ ...S, nbW: w, nbH: h });
       }
       { const grip = nb.querySelector('.nb-grip');
         if (grip) { let gd = null;
