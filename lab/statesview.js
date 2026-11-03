@@ -80,13 +80,15 @@ export function createStates(host, api) {
   const hideBtn = mk('HIDE', 'Hide or show the lanes');
   /* iteration 008 U · EMPTY <-> FILL ALL (paint-stroke.js fillButton): S₀ alone shows FILL ALL — every state the ladder shows, up to the eight
      lanes, equal and in phase — anything more shows EMPTY.  NORM is gone: a HAND stroke normalises at its end */
+  /* 034 F7 (Josh: "anything that is painted onto the registry switches it to 'mix'"): a HAND's FILL ALL, preset or dial is a stroke — VIEW MIX */
+  const painted = () => { if (api.stroked) api.stroked('states'); };
   const fillB = fillButton(head, { fill: 'S₀ and every state the ladder shows (up to ' + LANE_CAP + ' lanes) on, equal and in phase', empty: 'every state off but S₀' },
-    (empty) => (empty ? fill() : clear()));
+    (empty) => { if (!empty) return clear(); const r = fill(); if (r) painted(); return r; });
 
   const bar = el('div', 'row tight reg-bar', host);
   /* 022 P3: the kit's select (its list the menu pane); a pick runs the preset and the list goes back to PRESET… */
   const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: PRESETS.map((p) => ({ id: p, label: p })), value: null,
-    onChange: (p) => { presetSel.set(null); if (p && preset(p) && api.announce) api.announce(p); } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
+    onChange: (p) => { presetSel.set(null); if (p && preset(p)) { painted(); if (api.announce) api.announce(p); } } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   bar.appendChild(presetSel.root); presetSel.button.title = 'Rule-based presets, for every molecule';
   const brightBtn = el('button', 'trig on', bar); brightBtn.type = 'button'; brightBtn.textContent = 'BRIGHT'; brightBtn.title = 'Bright valence states only, or every state';
   const mrow = el('div', 'row tight fit reg-morph', host);
@@ -525,10 +527,10 @@ export function createStates(host, api) {
         + (ladder.size[key] > 1 ? ` · one of a ${ladder.size[key]}-fold level, canonical gauge (pivot ${ladder.pivot[key].toExponential(1)})` : '');
     id.addEventListener('click', () => { selected = key; paint(); markSel(); });
     const pop = fader({ label: '<m>|b|²</m>', aria: '|b|² ' + label(key), min: 0, max: 1, value: c.amp * c.amp, cls: 'pop', fmt: (v) => v.toFixed(3),
-      onInput: (v) => { if (hand(slotId('amp', key), v)) return; setAmp(key, Math.sqrt(Math.max(0, v))); }, onChange: (v) => { if (hand(slotId('amp', key), v)) return; setAmp(key, Math.sqrt(Math.max(0, v))); } });   // iteration 007 (MIR check B2)
+      onInput: (v) => { painted(); if (hand(slotId('amp', key), v)) return; setAmp(key, Math.sqrt(Math.max(0, v))); }, onChange: (v) => { if (hand(slotId('amp', key), v)) return; setAmp(key, Math.sqrt(Math.max(0, v))); } });   // iteration 007 (MIR check B2)
     root.appendChild(pop.root);
     const ph = knob({ aria: 'phase ' + label(key), min: 0, max: TAU, value: c.phase, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
-      onDelta: (dv) => { const l = lanes.get(key); if (!l) return; const w = ((l.phase + dv) % TAU + TAU) % TAU; if (hand(slotId('ph', key), w)) return; setPhase(key, w); }, onReset: () => { if (hand(slotId('ph', key), 0)) return; setPhase(key, 0); } });
+      onDelta: (dv) => { const l = lanes.get(key); if (!l) return; painted(); const w = ((l.phase + dv) % TAU + TAU) % TAU; if (hand(slotId('ph', key), w)) return; setPhase(key, w); }, onReset: () => { painted(); if (hand(slotId('ph', key), 0)) return; setPhase(key, 0); } });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);
     const mute = el('button', 'sp-b mute', root, 'M'); mute.type = 'button'; mute.title = 'Mute: leave this state out of the FIELD';
     mute.setAttribute('aria-label', 'mute ' + label(key)); mute.setAttribute('aria-pressed', 'false');

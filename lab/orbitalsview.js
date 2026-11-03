@@ -61,8 +61,10 @@ export function createOrbitals(host, api) {
   dialsBtn.setAttribute('aria-expanded', 'false');
   /* iteration 008 U (Josh: "can it become the 'fill all registers' button?") · ONE two-state button: an empty register shows FILL ALL, any
      other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
+  /* 034 F7 (Josh: "anything that is painted onto the registry switches it to 'mix'"): a HAND's FILL ALL, preset or dial is a stroke — VIEW MIX */
+  const painted = () => { if (api.stroked) api.stroked('orbital'); };
   const fillB = fillButton(head, { fill: 'every orbital on, equal and in phase', empty: 'every orbital off' },
-    (empty) => (empty ? fill() : clear()));
+    (empty) => { if (!empty) return clear(); const r = fill(); if (r) painted(); return r; });
   /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
@@ -107,7 +109,7 @@ export function createOrbitals(host, api) {
   const bar = el('div', 'row tight reg-bar', host);
   /* 022 P3: the kit's select (its list the menu pane, never the platform's); a pick runs the preset and the list goes back to PRESET… */
   const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: Object.keys(ORB_PRESETS).map((p) => ({ id: p, label: p })), value: null,
-    onChange: (p) => { presetSel.set(null); if (p && preset(p) && api.announce) api.announce(presetMd(p)); } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
+    onChange: (p) => { presetSel.set(null); if (p && preset(p)) { painted(); if (api.announce) api.announce(presetMd(p)); } } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   bar.appendChild(presetSel.root);
   presetSel.button.title = 'Register preset';
   /* a HAND's preset is announced on the stage (0.4.0 S3 · F2) by its rule and the orbitals the names give it —
@@ -339,10 +341,10 @@ export function createOrbitals(host, api) {
     id.addEventListener('click', () => { selected = k; paint(); markSel(); });
     const amp = knob({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp,
       title: 'Amplitude |c_k| in the register',
-      fmt: (v) => v.toFixed(3), onInput: (v) => setAmp(k, v) });
+      fmt: (v) => v.toFixed(3), onInput: (v) => { setAmp(k, v); painted(); } });
     const ph = knob({ label: '<m>arg c</m>', aria: 'phase ' + label(k), min: 0, max: TAU, value: c.phase, wrap: true,
       title: 'Phase arg c_k at t = 0',
-      fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => setPhase(k, v) });
+      fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => { setPhase(k, v); painted(); } });
     root.appendChild(amp.root); root.appendChild(ph.root);
     const x = el('button', 'sp-x', root, '×'); x.type = 'button';
     x.title = 'Take this orbital out of the register'; x.setAttribute('aria-label', 'remove ' + label(k));
