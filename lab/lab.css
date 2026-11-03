@@ -487,7 +487,13 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 
 
 body.ui-hidden #rackFav, body.ui-hidden #rackFavList,
-body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #menubar, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
+body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #menubar, body.ui-hidden #badges, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
+/* 034 M4 · THE FLAG ALONE (Josh 11-02: "When in auto-hide/reveal UI, the logo switches to JUST the MIR flag"): with the racks hidden
+   (body.rack-hidden: B, ◧) or the whole interface out (body.ui-hidden: H) the title is the MIR flag alone in its seat — the λ and WAVES
+   stand aside, the flag keeps its turn and its busy spin (the loading mark); under H it takes no pointer, as the menubar it opens is out */
+body:is(.rack-hidden, .ui-hidden) #title :is(.lam, .word) { display: none; }
+body:is(.rack-hidden, .ui-hidden) #title .mark { width: 22px; height: 22px; margin-left: 0; }   /* alone, the flag is the logo's size */
+body.ui-hidden #title { pointer-events: none; }
 body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .dyn-c { position: relative; height: 84px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }   /* the well, not a hard black: the light theme has its own (wave 46) */
 .dyn-c canvas { width: 100%; height: 100%; display: block; }
