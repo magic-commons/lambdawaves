@@ -570,17 +570,16 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const heroes = new Set(), rest = () => { for (const h of heroes) h.stop(); };   // a volume opened or the Picker closed: every hero rests
     function card(v, k) {
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
-      o.title = [v.title, v.blurb].filter(Boolean).join(' — '); o.style.setProperty('--k', String(k));
+      o.style.setProperty('--k', String(k));   // 034 F1 (Josh: "Don't show a mouseover hint for the volume libraries … just let the hero videos play"): no title on the card
       el('span', 'mm-halo', o); const art = el('span', 'mm-lit', o); el('span', 'mm-rim', o);
       const hero = heroArt(art, v.id); el('span', 'mm-foil', art);
       if (v.wip || v.drawing) {   // iteration 014 C4 (pack.mjs --wip); 030: a volume whose pictures are still being drawn (build-deploy's `drawing`)
         const w = el('span', 'mm-vol-wip', art); icon(w, 'cone'); el('span', '', w, 'WIP');
-        w.title = 'Under construction: ' + [v.wip && 'still filling', v.drawing && 'pictures coming'].filter(Boolean).join('; ');
       }
       const foot = el('span', 'mm-art-foot', art); el('b', 'mm-vol-num', foot, volName(v));
       /* iteration 015 M5 · a volume on the shelf before its first molecule (pack.mjs --wip --next: the next volume, still filling) says FILLING:
          nothing to install or open yet */
-      if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; o.title = volName(v) + ' is being filled'; el('span', 'mm-vol-meta', foot, 'FILLING'); return; }
+      if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; el('span', 'mm-vol-meta', foot, 'FILLING'); return; }
       const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
       if (meta) el('span', 'mm-vol-meta', foot, meta);
       if (hero) { heroes.add(hero);
