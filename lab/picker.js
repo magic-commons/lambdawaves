@@ -208,6 +208,34 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const t = el('span', '', el('span', 'mm-cr-name', c)); el('b', '', t, name); el('small', '', t, by);
     }
     credits.addEventListener('click', () => credits.classList.toggle('open')); }   // a tap shows the names (touch), a second puts them away
+  /* 035 G3 · THE SHEET (Josh 11-03: "Hitting settings icon will reveal a little slide-over which is a minimalist-CSS version of Settings rack window
+     > Quality, among other things from MIR Options"): ⚙ slides `.mm-sheet` in from the menu's right edge, its head (SETTINGS, ×) over a body that
+     scrolls.  Its rows are the SETTINGS card's (app.hooks.menuSheet, lab/windows/settings-card.js — this module never imports it), built at the
+     first open and painted from the live values at every open.  Escape, ×, a press outside or leaving the face close it; focus goes to its
+     first control and comes back to ⚙. */
+  const gear = el('button', 'mm-navb mm-gear', faceTop); gear.type = 'button'; gear.title = 'Settings — quality and the look'; gear.setAttribute('aria-label', 'Settings');
+  gear.setAttribute('aria-haspopup', 'dialog'); gear.setAttribute('aria-expanded', 'false'); icon(gear, 'settings');
+  const sheet = el('div', 'mm-sheet', root); sheet.hidden = true; sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-label', 'Settings');
+  const sheetHead = el('div', 'mm-sheet-head', sheet); el('b', '', sheetHead, 'SETTINGS');
+  const sheetX = el('button', 'mm-sheet-x', sheetHead); sheetX.type = 'button'; sheetX.setAttribute('aria-label', 'Close the settings'); icon(sheetX, 'close');
+  const sheetBody = el('div', 'mm-sheet-body', sheet);
+  let sheetRows = null, sheetT = 0;
+  const sheetUp = () => !sheet.hidden && !sheet.classList.contains('out');
+  const sheetOutside = (e) => { if (!sheet.contains(e.target) && !gear.contains(e.target)) closeSheet(); };
+  function openSheet() {
+    if (sheetUp() || !app.hooks.menuSheet) return;
+    if (!sheetRows) sheetRows = app.hooks.menuSheet(sheetBody); else sheetRows.paint();
+    clearTimeout(sheetT); sheet.classList.remove('out'); sheet.hidden = false; void sheet.offsetWidth; sheet.classList.add('in');
+    gear.setAttribute('aria-expanded', 'true'); addEventListener('pointerdown', sheetOutside, true);
+    const f = sheetBody.querySelector('[tabindex="0"], .sw'); if (f) f.focus({ preventScroll: true });
+  }
+  function closeSheet(refocus) {
+    if (sheet.hidden) return; removeEventListener('pointerdown', sheetOutside, true); gear.setAttribute('aria-expanded', 'false');
+    sheet.classList.remove('in'); sheet.classList.add('out'); clearTimeout(sheetT);
+    sheetT = setTimeout(() => { sheet.hidden = true; sheet.classList.remove('out'); }, still() ? 0 : 240);
+    if (refocus) gear.focus({ preventScroll: true });
+  }
+  gear.addEventListener('click', () => (sheetUp() ? closeSheet(true) : openSheet())); sheetX.addEventListener('click', () => closeSheet(true));
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
   /* 032 (Josh 11-01: "a light and dark toggle in the picker in between the hue knob and thumbnail switcher"): THEME, the action's own
@@ -230,7 +258,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   let at = 'decks', firstDeal = false;   // firstDeal: a first run's LIBRARY deals MOLECULAR's first page in THE ENTRANCE (iteration 012 L3)
   function showView(name) {
     if (name === at) return false;
-    const was = at; at = name; closeDrop(); restHero();
+    const was = at; at = name; closeDrop(); closeSheet(); restHero();
     face.hidden = name !== 'face'; root.classList.toggle('at-face', name === 'face');
     for (const e of [top, scroller, caption]) e.inert = name === 'face';
     const away = name === 'folders' || name === 'tutorial';
@@ -889,9 +917,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (first) { setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700); setTimeout(() => { root.classList.remove('first'); }, 2600); }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); if (at === 'decks') enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; closeDrop(); restHero(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; closeDrop(); closeSheet(); restHero(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = (o) => (root.hidden ? open(o) : close());
-  const escape = () => (drop.hidden ? close() : closeDrop(true));   // M1: Escape puts THE LOOK DROP away first
+  const escape = () => (!drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : close());   // M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
   /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
   let escDrop = null; const layer = () => { if (escDrop) escDrop(); escDrop = app.sh.ACTIONS.escape.push(() => { escDrop = null; escape(); if (!root.hidden) layer(); }, { alive: () => !root.hidden }); };

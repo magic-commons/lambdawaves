@@ -122,7 +122,9 @@ export function createSettingsCard(app) {
     el('div', 'note', gt).innerHTML = '<b>Gamut.</b> Display P3 is available only when both CSS and the WebGPU canvas support it. CONVERT preserves authored colours; VIVID increases chroma. DITHER reduces visible 8-bit banding.';
     el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Stage, gamma, hue, exposure, and invert affect presentation without changing ψ. The theme, the accents, the glass and the frost are the interface’s look: GUI › MIR OPTIONS.';
     app.hooks.setTheme = (t) => look.set({ theme: t });
+    app.hooks.menuSheet = createMenuSheet;   // 035 G3: the main menu's ⚙ builds its sheet through this (picker.js never imports this module)
   function createFieldQuality() {   // the second seat: FIELD QUALITY
+    const swS = (o) => ({ ...sw(o), spec: o });   // 035 G3: a switch that keeps its options, as seg and knob do (the sheet's second face is made from them)
     const gq = group(ui.set.body, 'FIELD QUALITY');
     const r5 = el('div', 'row', gq);
     ui.gridSeg = seg({ label: '', aria: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³' }, { id: '96', label: '96³' }, { id: '128', label: '128³' }],
@@ -131,10 +133,10 @@ export function createSettingsCard(app) {
     const capSeg = seg({ label: 'FIELD CLOCK cap', value: '0', options: [{ id: '0', label: 'MAX' }, { id: '33', label: '30 Hz' }, { id: '66', label: '15 Hz' }, { id: '200', label: '5 Hz' }],
       onChange: (v) => { fieldRate.capMs = +v; } });
     capSeg.root.title = 'Caps how often ψ is reconstructed; every frame presents';   // 029 M9: the cap skips the CPU reconstruct only (rack.js `due`), never the march or the present
-    r5.appendChild(capSeg.root);
+    r5.appendChild(capSeg.root); ui.capSeg = capSeg;   // 035 G3: the menu sheet's second face reads it
     const r5b = el('div', 'row tight', gq);
-    ui.autoSw = sw({ label: 'AUTO SCALE', value: true, title: 'Adjust canvas resolution to the frame budget', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
-    ui.govSw = sw({ label: 'GOVERNOR', value: true, title: 'Protect the frame rate automatically', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
+    ui.autoSw = swS({ label: 'AUTO SCALE', value: true, title: 'Adjust canvas resolution to the frame budget', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
+    ui.govSw = swS({ label: 'GOVERNOR', value: true, title: 'Protect the frame rate automatically', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
     ui.perfSeg = seg({ label: 'READERS', value: '120', options: [   // 0.4.0 S3: out of METERS, beside the GOVERNOR it works with (029 M7: the label READERS; key `perfMode`, ids unchanged)
       { id: 'full', label: 'FULL', title: 'Update visible readers every frame' },
       { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
@@ -197,15 +199,50 @@ export function createSettingsCard(app) {
     r5c.appendChild(ui.ditherK.root);
     ui.showDither = (k) => { ui.ditherSeg.set(k ? 'ordered' : 'off'); ui.ditherK.setDisabled(!k); if (k) ui.ditherK.set(Math.max(0.25, Math.min(2, k))); };   // the controls repainted from mat.dither (the settings, a lift, LW)
     const r6 = el('div', 'row fit lw-domain', gq);
-    ui.domainAuto = sw({ label: 'DOMAIN AUTO', value: true, onChange: (v) => { domain.auto = v; ui.domainKnob.setDisabled(v); schedule(TIER.REBUILD); } });
+    ui.domainAuto = swS({ label: 'DOMAIN AUTO', value: true, onChange: (v) => { domain.auto = v; ui.domainKnob.setDisabled(v); schedule(TIER.REBUILD); } });
     r6.appendChild(ui.domainAuto.root);
     ui.domainKnob = knob({ label: 'WIDTH', title: 'The domain’s half-width, ± a₀', min: 3, max: 140, value: 7, log: true, fmt: (v) => '±' + v.toFixed(0) + ' a₀', onChange: (v) => { domain.half = v; schedule(TIER.REBUILD); } });
     ui.domainKnob.setDisabled(true);
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
-    ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
+    ui.keepSw = swS({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
     el('div', 'note', gq).innerHTML = '<b>Performance.</b> FIELD CLOCK cap limits how often ψ is reconstructed from the register; the picture still presents every frame, so it saves CPU time, not GPU time. AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE: FULL keeps everything as the look says; SMOOTH, the default, keeps the live glass and every motion and draws the canvas at 85 % while playing (full size at rest, in films and in pictures); BALANCED holds the frost while the picture moves (the look returns at rest); LIGHT also draws the canvas at half size while playing (films and pictures keep their own size). READERS 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH 1 is ±½ output level. KEEP FRAMES updates the playhead every frame and may cost performance.';
     el('div', 'note', gq).innerHTML = '<b>Playback.</b> WALL follows the wall clock. LOCKED steps time by exactly one CADENCE step per frame and holds the render scale, so a recording never sees a skipped or doubled step; a slow frame slows time instead. LATENCY is the time from a knob to the picture.';
+  }
+  /* 035 G3 · THE MENU SHEET's rows (Josh 11-03: "a little slide-over which is a minimalist-CSS version of Settings rack window > Quality, among
+     other things from MIR Options"), built at the main menu's first ⚙ into the sheet's body: a MIR section — THEME · MOTION · PANE · HINTS, the
+     look store's own keys (MIR OPTIONS' rows, gui.js), read back from it — over QUALITY whole as SECOND FACES of SETTINGS › QUALITY's rows (the
+     csb-favs.js road): each kit control made again from the row's own options (`spec`), a change sets the rack's row and runs that row's own
+     handler, then saveSettings; paint() reads every value back from the rack's rows (at each open and after each change), so the two are ONE
+     VALUE WITH TWO FACES and no setter is forked.  A readout's face copies its text.  The switches carry their options as seg and knob do. */
+  function createMenuSheet(host) {
+    const paints = [], paint = () => { for (const p of paints) p(); };
+    const group = (word) => { const g = el('div', 'mm-sh-group', host); el('div', 'mm-sh-h', g, word); return g; };
+    const row = (g, ...cs) => { const r = el('div', 'mm-sh-row' + (cs.length > 1 ? ' two' : ''), g); for (const c of cs) r.appendChild(c.root); return r; };
+    const lookSeg = (key, word, opts, set = (v) => look.set({ [key]: v })) => {
+      const s = seg({ label: word, value: look.get(key), options: opts.map(([id, l, t]) => ({ id, label: l, title: t })), onChange: set });
+      paints.push(() => s.set(look.get(key))); return s; };
+    const gm = group('MIR');
+    row(gm, lookSeg('theme', 'THEME', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM', 'Follow the system']], (v) => app.hooks.setTheme(v)));
+    row(gm, lookSeg('motion', 'MOTION', [['auto', 'AUTO', 'Follow the system'], ['full', 'FULL'], ['reduced', 'REDUCED', 'Fades only: nothing travels'], ['off', 'OFF', 'Nothing animates']]));
+    row(gm, lookSeg('card', 'PANE', [['tinted', 'TINTED', 'The theme tint behind windows: no blur'], ['refractive', 'REFRACTIVE', 'Clear window surfaces: the blur, with a veil'], ['solid', 'SOLID', 'An opaque pane in the tint’s colour']]));
+    { const h = sw({ label: 'HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
+    /** face(orig) — a second face of a rack row: the kit's own control from the row's options, one value between them */
+    const face = (orig) => {
+      if (!orig.spec) {   // a readout: its text, copied
+        const v = (r) => r.querySelector('.ro-val').textContent, f = readout({ label: orig.root.querySelector('.ro-lbl').textContent, value: v(orig.root) });
+        paints.push(() => f.set(v(orig.root))); return f; }
+      const o = orig.spec, make = orig.root.classList.contains('segw') ? seg : orig.root.classList.contains('k') ? knob : sw;
+      const f = make({ ...o, value: orig.get(), onInput: o.onInput && ((v) => { orig.set(v); o.onInput(v); }),
+        onChange: (v) => { orig.set(v); if (o.onChange) o.onChange(v); saveSettings(); paint(); } });
+      paints.push(() => { if (f.get() !== orig.get()) f.set(orig.get()); if (f.setDisabled) { const d = orig.root.classList.contains('disabled'); if (f.root.classList.contains('disabled') !== d) f.setDisabled(d); } });
+      return f;
+    };
+    const gq = group('QUALITY'), Q = (...ks) => row(gq, ...ks.map((k) => face(ui[k])));
+    Q('gridSeg'); Q('capSeg'); Q('autoSw', 'govSw'); Q('perfSeg'); Q('tierSeg'); Q('cadSeg'); Q('clockSeg'); Q('cadenceSeg'); Q('latencyRo'); Q('scaleRo');
+    Q('ditherSeg'); Q('ditherK'); Q('domainAuto', 'domainKnob'); Q('keepSw');
+    paint();
+    return { paint };
   }
   return { createFieldQuality };
 }
