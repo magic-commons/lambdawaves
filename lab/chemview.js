@@ -62,6 +62,9 @@ const RESTART_EVERY = 0;
 const LDA_E = { H2O: -74.73204101826778, C6H6: -227.26271535054755, N2: -107.14784546338231, CH4: -39.61684762933404, NH3: -55.29017963855679, HF: -98.24584098961836, CO2: -184.5641630932059, C2H4: -76.85777172746918 };
 /* iteration 004 V2 · A VOLUME'S MOLECULE (lab/volumes.js, THE VOLUME FORMAT v1): its ladder is its record — every rung opens through chem.open, no solve */
 const VOL = 'a volume molecule is its record; the live roads are the catalogue’s', LIVE = new Set(['sto-3g', '6-31+g-star']);
+/* 034 F2c (Josh: "Buckyball seems like the most broken molecule"): a FRONTIER record (C₆₀: ε and a few whole columns of C, no D) says what stands
+   down in one line instead of leaving KICK, RUN, TDA and VIBRATE pressable and their rows empty; nothing else is promised */
+const FRONT = 'ORBITALS ONLY · DENSITY BY FACTOR · no spectrum — a frontier record carries ε and its columns of C, no density matrix: KICK, RUN, TDA, the drive and VIBRATE stand down', FRONT_HINT = 'stands down: a frontier record has no density matrix';
 const LDA_RT = 'RT stands down under RKS LDA: its operators (the TDHF Fock build) are RHF\'s', LDA_TDA = 'TDA and the register stand down under RKS LDA: their operators are RHF\'s', LDA_VIB = 'VIBRATE stands down under RKS LDA: its modes and dD/dQ are RHF\'s';
 
 export function createChem(host, api) {
@@ -786,8 +789,9 @@ export function createChem(host, api) {
   /* 0.7.1 · AN OPEN SHELL STANDS THE CLOSED-SHELL ROADS DOWN: KICK, RUN, FLOW, PULSE, TDA and VIBRATE take the kit's disabled look and say why (the worker refuses them too); 0.7.3: so does RKS LDA, each with its sentence */
   const OPEN = 'open shell (UHF): the real-time run, TDA, the drive and the register are closed-shell roads in this cut', openNote = el('div', 'note', more); openNote.hidden = true; more.insertBefore(openNote, r2);
   let stood = '';                                                         // a closed shell never touches a control's help
-  function standDown() { const o = sol.volume ? VOL : !sol.model ? '' : uhf() ? OPEN : 'RKS LDA: the real-time run, TDA, the drive, the register and VIBRATE stand down — their operators are RHF\'s'; if (o === stood) return; stood = o; openNote.hidden = !o; openNote.textContent = o; if (o) { setRun(false); if (flowOn) setFlow(false); if (vibOn) setVib(false); }
-    for (const b of [kickT.root, runSw.root, flowSw.root, tdaSw.root, vibSw.root, ...pSeg.root.querySelectorAll('button')]) { b.dataset.help0 ??= b.dataset.help || b.title || ''; b.disabled = !!o; b.title = b.dataset.help = !o ? b.dataset.help0 : sol.volume ? VOL : uhf() ? OPEN : b === tdaSw.root ? LDA_TDA : b === vibSw.root ? LDA_VIB : LDA_RT; } }
+  const frontier = () => !!(sol && sol.cols && !sol.D);   // 034 F2c
+  function standDown() { const o = sol.volume ? VOL : frontier() ? FRONT : !sol.model ? '' : uhf() ? OPEN : 'RKS LDA: the real-time run, TDA, the drive, the register and VIBRATE stand down — their operators are RHF\'s'; if (o === stood) return; stood = o; openNote.hidden = !o; openNote.textContent = o; if (o) { setRun(false); if (flowOn) setFlow(false); if (vibOn) setVib(false); }
+    for (const b of [kickT.root, runSw.root, flowSw.root, tdaSw.root, vibSw.root, ...pSeg.root.querySelectorAll('button')]) { b.dataset.help0 ??= b.dataset.help || b.title || ''; b.disabled = !!o; b.title = b.dataset.help = !o ? b.dataset.help0 : sol.volume ? VOL : frontier() ? FRONT_HINT : uhf() ? OPEN : b === tdaSw.root ? LDA_TDA : b === vibSw.root ? LDA_VIB : LDA_RT; } }
   function rebuildOrbKnob() {
     views();
     const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
@@ -826,7 +830,7 @@ export function createChem(host, api) {
 
   /* ── the real-time run ────────────────────────────────────────────────────────────────────────── */
   function kick() {
-    if (!sol || sol.model || sol.volume) { if (sol) status(sol.volume ? VOL : uhf() ? OPEN : LDA_RT, 'warn'); return Promise.resolve(null); }   // 0.7.1: never a closed-shell RT run of an open shell (0.7.3: nor of an LDA solve)
+    if (!sol || sol.model || sol.volume || frontier()) { if (sol) status(sol.volume ? VOL : frontier() ? FRONT : uhf() ? OPEN : LDA_RT, 'warn'); return Promise.resolve(null); }   // 0.7.1: never a closed-shell RT run of an open shell (0.7.3: nor of an LDA solve)
     const seq = solveSeq;
     /* SYNTHESIS decision 2: the card's MMUT is UNRESTARTED, and 0 is how that is spelled on the wire.  It was
        never sent before, so the engine took its own default of 50 while this window said "unrestarted". */
@@ -1135,7 +1139,7 @@ export function createChem(host, api) {
     status(`${sol.nAO} AOs · ${nel()} electrons` + (sol.model ? ' · ' + sol.model : '')
       + (Number.isFinite(tm.scf) ? ` · ground ${Math.round(tm.scf)} ms` : '')
       + (Number.isFinite(tm.integrals) ? ` (integrals ${Math.round(tm.integrals)} of it)` : '')
-      + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : summed() ? ' · ' + summed() : noSpectrum(sol) ? ' · orbitals only' : sol.model ? (uhf() ? ' · no spectrum (open shell)' : ' · no spectrum (RKS LDA)') : sol.roots ? '' : ' · spectrum pending')
+      + (frontier() ? ' · ORBITALS ONLY · DENSITY BY FACTOR' + (summed() ? ` (${summed()})` : '') + ' · no spectrum' : Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : summed() ? ' · ' + summed() : noSpectrum(sol) ? ' · orbitals only' : sol.model ? (uhf() ? ' · no spectrum (open shell)' : ' · no spectrum (RKS LDA)') : sol.roots ? '' : ' · spectrum pending')
       + (sol.opened ? ` · from its record (${Math.round(sol.opened.bytes / 1024)} KB, ${sol.opened.from === 'device' ? 'on this device' : 'downloaded'}) in ${tm.open} ms, no solver call` + (stored ? ' · ' + stored : '') : '')
       + (sol.note ? ' · ' + sol.note : '') + (view !== 'esp' ? '' : espOn() ? ` · ESP ${esp.N}³ in ${Math.round(esp.ms)} ms` : ' · ESP computing…') + (running ? ' · running' : ''), running ? 'live' : 'ok');
     paint();
