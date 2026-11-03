@@ -26,7 +26,7 @@
 import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint, ariaLabel, mathPlain, arcRing } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js';
 import { rackPager } from './pager.js'; import { select as listSelect } from './mir/controls/select.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
-import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
+import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS, setPivot } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
 import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
@@ -95,6 +95,13 @@ export function createChem(host, api) {
      molecule a project falls back to; `volKeep` the last opened (an undo re-opens it unread); `volWant` a project's, opened on the next solve;
      `holds` the catalogue ids an INSTALLED volume carries */
   let volRef = null, volKeep = null, volWant = null, volSeq = 0, catPreset = preset, holds = new Map();
+  /* 034 F2b · THE HAND DECIDES THE PIVOT: a molecule a HAND picked (the MOLECULE picker, the Picker, the chooser, a link, a volume) turns
+     the camera about its nuclei's centroid (field.js setPivot), and so do its later landings (a basis, a method, a stretch); a landing no
+     hand asked for (a verb, a restore, a project, a gate's solve) puts the pivot home, and MOLECULES OFF puts it home (hydrogen sits at
+     the origin).  The box, the data, the records and every solve keep the catalogue's frame */
+  let pivotHand = false, pivotFor = null;
+  const centroidOf = (A) => { let x = 0, y = 0, z = 0; for (const a of A) { x += a.x; y += a.y; z += a.z; } const n = A.length || 1; return [x / n, y / n, z / n]; };
+  const pivotTo = () => { if (sol && on && pivotFor === preset) setPivot(centroidOf(chemAtoms(preset))); else setPivot(null); };
   let loadingNow = '';   // 034 F5: what is loading (a name), '' when nothing is — ESC's stop reads it
   const loading = (v, what) => { loadingNow = v ? String(what || loadingNow || 'the load') : ''; if (api.loading) api.loading(!!v); };
   const volName = (v) => `${String(v.name).toUpperCase()} · VOL. ${v.numeral}`;
@@ -265,7 +272,7 @@ export function createChem(host, api) {
     header();
   }
   /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
-  function handPick(id) { near = true; const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app)
+  function handPick(id) { near = true; pivotHand = true;   // 034 F2b: the hand's molecule takes the pivot const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app)
     const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
@@ -660,6 +667,7 @@ export function createChem(host, api) {
   /* ── V2 · A VOLUME'S MOLECULE: the .lwm (lab/volumes.js, sha-256 checked) parsed once, each rung opened by THE RECORD ROAD's chem.open with its
      ground.hash under the same `seq` law.  `network: false` is a project's road (installed only, else the sentence, no solve) ── */
   async function openVolume(volId, molId, want = null, { hand = true, network = true, on: turnOn = true, sha = null } = {}) {
+    if (hand) pivotHand = true;   // 034 F2b
     const seq0 = ++volSeq, same = (v) => v && v.volume === volId && v.id === molId;
     let v = same(volRef) ? volRef : same(volKeep) ? volKeep : null;
     if (!v) {
@@ -751,6 +759,7 @@ export function createChem(host, api) {
   function framed(r) { let R = 0; for (const a of chemAtoms(preset)) R = Math.max(R, Math.hypot(a.x, a.y, a.z)); if (Number.isFinite(r.half)) r.half = Math.max(r.half, FRAME * (R + 3)); }
   function land(r) {
     framed(r);
+    pivotFor = pivotHand || pivotFor === preset ? preset : null; pivotHand = false;   // 034 F2b
     kept = new Map([...kept].filter(([k]) => stem(k) === stem(r.key))); kept.set(r.key, r);
     sol = r; mBuf = oBuf = dBuf = dRef = vibSh = null; fieldHash = null;
     const named = keyed(r.names, pendingKey), [lo, hi] = span(), P = pendingOrbital;
@@ -760,7 +769,7 @@ export function createChem(host, api) {
     clamped = !named && Number.isFinite(P) && orbital !== P ? { asked: P, lo, hi, k: orbital, key: r.key } : null;
     const parked = stepParked ? stepWant : null; stepParked = false;
     pendingOrbital = pendingKey = null; clearTimeout(stepTimer); stepTimer = 0; stepWant = null;
-    rebuildOrbKnob(); standDown(); pushField();
+    rebuildOrbKnob(); standDown(); pivotTo(); pushField();
     if (Number.isFinite(parked)) { stepWant = parked; stepApply(); }   // 034 F2a: the lane's last write, once, on the new molecule's span
     refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
   }
@@ -1344,7 +1353,7 @@ export function createChem(host, api) {
   const vibLine = (tail = '') => (vibOn && vib ? `${vib.name[vibK]} ${Math.round(vib.omega[vibK])} cm⁻¹ · ${vib.irrep[vibK]} at ${vibAmp.toFixed(1)} Q₀${tail}` : null);
   const vibLand = () => { const p = pendingVib; pendingVib = null; if (p && sol) { ampKnob.set(Math.min(4, Math.max(0, +p.amp || 0))); setVib(true, p.mode, p.amp); } };
   function setOn(v) {
-    on = !!v; if (onSw.get() !== on) onSw.set(on);
+    on = !!v; if (onSw.get() !== on) onSw.set(on); pivotTo();   // 034 F2b: MOLECULES OFF puts the pivot home, ON brings the hand's back
     if (!on) { setRun(false); if (vibOn) setVib(false); if (S() && fieldHash !== null) { S().drop(); fieldHash = null; } }
     /* the claim is the whole handover: ON asks the session for the field (and it asserts this card's observable
        even before the solve lands, as the old fieldView() call did), OFF lets go and the session restores the

@@ -50,7 +50,7 @@ export function createNotebook(app) {
     app.state.exporter3d = createExporter({
       field: () => field,
       scene: () => {
-        const E = cameraEye(obs, 1), B = E.basis, w = dom.canvas.clientWidth || 1, h = dom.canvas.clientHeight || 1;
+        const E = cameraEye(obs, 1, field.half), B = E.basis, w = dom.canvas.clientWidth || 1, h = dom.canvas.clientHeight || 1;
         const q = app.state.chem && app.state.chem.on && app.state.chem.query ? app.state.chem.query() : null;
         return {
           label: exportLabel(), build: BUILD_LINE, t: clock.t, space: app.state.space, isoFrac: mat.iso,

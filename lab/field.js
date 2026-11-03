@@ -1190,6 +1190,12 @@ export function turnFree(q, dyaw, dpitch) {
  *  toggle (camera-law.js setFlip), never in a project, a link or the digest: off, the basis is the old one, bit for bit. */
 let PARITY = 1;
 export function setParity(on) { PARITY = on ? -1 : 1; }
+/* 034 F2b · THE PIVOT (Josh: "Some other molecules don't seem to be centered"; 35 of 61 sit > 0.3 Å off the box's centre): the camera turns
+   about PIVOT (bohr), the box's centre unless a HAND's molecule moved it to that molecule's centroid (chemview pivotTo) — a session's view,
+   never saved, like PARITY; the box, the data and every solve keep their frame (THE LOCK's chem leaf is H₂O by the API road: the pivot stays home) */
+let PIVOT = [0, 0, 0];
+export function setPivot(p) { PIVOT = Array.isArray(p) && p.length === 3 && p.every(Number.isFinite) ? [+p[0], +p[1], +p[2]] : [0, 0, 0]; return PIVOT; }
+export const cameraPivot = () => PIVOT.slice();
 export function cameraBasis(obs) {
   const B = cameraBasis0(obs);
   if (PARITY < 0) B.right = [-B.right[0], -B.right[1], -B.right[2]];
@@ -1214,9 +1220,9 @@ function cameraBasis0(obs) {
  *  plan chose a lens shift over a target pivot); `shift` = the pivot's place on the frame in NDC (S2), which writeView
  *  (lensShift), toScreen.at and pointerRay apply — the three seats, each one line. */
 const NO_SHIFT = Object.freeze([0, 0]);
-export function cameraEye(obs, half) {
-  const basis = cameraBasis(obs), D = obs.dist * half, d = basis.dir;
-  return { eye: [d[0] * D, d[1] * D, d[2] * D], target: [0, 0, 0], basis, shift: obs.shift || NO_SHIFT, D, tanH: Math.tan((obs.fov || 0.6) / 2) };
+export function cameraEye(obs, half, unit = half) {   // `unit`: the box's half in bohr when `half` is 1 (an eye in half-units, the export's)
+  const basis = cameraBasis(obs), D = obs.dist * half, d = basis.dir, k = half / unit, T = [PIVOT[0] * k, PIVOT[1] * k, PIVOT[2] * k];
+  return { eye: [T[0] + d[0] * D, T[1] + d[1] * D, T[2] + d[2] * D], target: T, basis, shift: obs.shift || NO_SHIFT, D, tanH: Math.tan((obs.fov || 0.6) / 2) };
 }
 /** the 2-D overlays' one road: cameraEye plus `at(x, y, z, out?)` → [px, py, depth] in stage CSS pixels of a W × H
  *  canvas, or null behind the eye, and its inverse `ray(px, py)` → the (unnormalised) direction from the eye through
@@ -1250,7 +1256,7 @@ export function lensShift(E, aspect, lane, at, P) {
  *  camera can ROLL without moving either angle and a (yaw, pitch) key would hand it back a stale bitmap (wave 54) */
 export function cameraKey(obs) {
   const s = obs.shift ? '|' + obs.shift.map((v) => v.toFixed(4)).join(',') : '|0.0000,0.0000';
-  const m = PARITY < 0 ? '|m' : '';   // C2: a flipped view is another picture
+  const m = (PARITY < 0 ? '|m' : '') + (PIVOT[0] || PIVOT[1] || PIVOT[2] ? '|p' + PIVOT.map((v) => v.toFixed(4)).join(',') : '');   // C2: a flipped view is another picture; 034 F2b: so is a moved pivot
   if (obs.mode === 'free' && obs.quat) return 'q' + obs.quat.map((v) => v.toFixed(6)).join(',') + s + m;
   return obs.yaw.toFixed(4) + '|' + obs.pitch.toFixed(4) + s + m;
 }

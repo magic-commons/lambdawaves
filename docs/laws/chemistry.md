@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 034
+
+THE HAND DECIDES THE PIVOT (034 F2b, Josh 11-02: "Some other molecules don't seem to be centered"; 35 of 61 MOLECULES sit > 0.3 Å off the box's centre, the records worse — thymine 3.59 Å): a molecule a HAND picked (the MOLECULE picker, the Picker, the chooser, a link, a volume) turns the camera about its nuclei's centroid — `field.js` `setPivot` (module state beside PARITY, in `cameraKey`, never saved; `cameraEye(obs, half, unit)` puts the eye and the target about it) — and so do its later landings (a basis, a method, a stretch); a landing no hand asked for (a verb, a restore, a project, a gate's `solve`) and MOLECULES OFF put the pivot home. The box, the data, the records and their basis hashes keep the catalogue's frame. Moving the DATA to the centroid was tried first and moved THE LOCK's `states.chem` leaf (H₂O by the API road: digest · integral · maxRho · rp · rpL at 64/96/128, 15 values), so it is the camera that moves.
+
 ## The laws of 033
 
 THE WORKER'S ROAD HAS NO JSON MODULE (033, Claude Sos, 2026-11-02): nothing the maths worker imports (`lab/mathworker.js` and its graph — `rhf-molecule.js`, `dft-grid.js`, `lattice-model.js`, …) is a JSON module import (`with { type: 'json' }`); a table ships as a JS module (`lab/lebedev-302.js`, `lab/ab-patch.js`, `export default`, written by their tools). Firefox refuses a JSON module import inside a dedicated worker when the server sends `X-Content-Type-Options: nosniff`, and the live edge has sent it since 030 H — so from the 032 deploy the worker never started and every chemistry call (a molecule, a basis, an orbital) waited forever, for every visitor, while the page's own import of the same graph passed and every gate here passed. THE GATE WEARS THE LIVE HEADERS (`tools/gate/server.py`: nosniff and the CSP by default; `LW_EXTRA_HEADERS` replaces them), so a proof that passes here is a proof under the edge's rules.
