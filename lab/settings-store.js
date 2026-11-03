@@ -54,7 +54,7 @@ export const RECORDS = Object.freeze([
   row('mir.pointer', P, 'kit', false, 'kit · MIR OPTIONS › MOTION › POINTER'),
   row('mir.render.calib', P, 'kit', false, 'kit · recorder: this device’s ms a frame'),
   row('lw.keyboard.position.v1', W, 'v 1 (name)', false, 'kit · the KEYBOARD window’s place'),
-  row('lw.csb.side', W, '—', true, 'shell/modulation.js modDodge: the side the CONTROL SURFACE keeps (top | bottom, 032 T13)'),
+  row('lw.csb.side', W, 'RETIRED', true, 'shell/modulation.js: removed at boot (034 F3 — the bar’s home is the bottom; 032 T13 kept a dodge’s landing)'),
   row('lw.repair', P, 'flag', false, 'sw-client.js REPAIR (033): sessionStorage, not localStorage — 1 after the cache is cleared, 2 after the reinstall activated, removed at the verdict; one tab, one repair'),
   row('lw.mixed', P, 'flag', false, 'sw-client.js mixed() (033): sessionStorage — the page build a MIXED BUILD reloaded for once, so a reload loop is impossible'),
 ]);
