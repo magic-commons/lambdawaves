@@ -23,7 +23,7 @@ export function createMolecules(app) {
      is `hydrogen` (it was `atoms`, which also named the ATOMS window and the Picker's deck); set('atoms') is still read as HYDROGEN. */
   const modeSeg = (() => {
     const root = el('div', 'lw-stage-btns'); root.id = 'lwMode'; root.setAttribute('role', 'group'); root.setAttribute('aria-label', 'Library and mode');
-    const B = [['library', 'LIBRARY — open the Picker', () => { if (app.state.picker) app.state.picker.toggle(); }],
+    const B = [['library', 'LIBRARY — atoms, molecules, expansions', () => { if (app.state.picker) app.state.picker.toggle({ decks: true }); }],   // 034 M1: the decks, past the main menu's face
       ['molecules', 'MOLECULAR — the molecule and its register, one window', () => { if (app.state.chem) app.state.chem.setOn(true); }],
       ['hydrogen', 'HYDROGEN — the 140 hydrogen states', () => { if (app.state.chem) app.state.chem.setOn(false); }]]
       .map(([id, tip, run]) => { const b = el('button', 'lw-stage-b', root); b.type = 'button'; b.dataset.id = id; b.title = tip; b.setAttribute('aria-label', tip.split(' —')[0]); setGlyph(b, { library: 'library', molecules: 'molecule', hydrogen: 'atom' }[id], { size: 16 }); b.addEventListener('click', run); return b; });

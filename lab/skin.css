@@ -1006,3 +1006,45 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-tip-art .mm-lit, #lwMenu .mm-tip-sheet { animation: none; } #lwMenu .mm-holo { transform: none; } #lwMenu .mm-art-hero { display: none; } }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu :is(.mm-tip-art .mm-lit, .mm-tip-sheet) { animation: none; }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-holo { transform: none; }
+
+/* 034 M1 · THE LANDING FACE (picker.js showFace): over the decks, which stay laid out under it, hidden and inert — the logo large, the two
+   doors (album art in THE CARD'S LIGHT, the palette art, the word in LW Title) and ENTER THE LAB, quiet.  Its entrance: the logo drops, the
+   doors rise in turn, then the way to the lab; reduced motion shows the end state.  On a phone the doors are two portraits side by side. */
+#lwMenu .mm-face { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(28px, 6vh, 64px); padding: 24px 16px; box-sizing: border-box; }
+#lwMenu .mm-face[hidden] { display: none; }
+#lwMenu.at-face > :is(.mm-top, .mm-scroll, .mm-caption) { visibility: hidden; }
+#lwMenu .mm-face-logo { height: clamp(84px, 17vh, 184px); color: var(--fg); } #lwMenu .mm-face-logo svg { height: 100%; width: auto; display: block; }
+#lwMenu .mm-doors { display: flex; gap: clamp(16px, 3vw, 40px); }
+#lwMenu .mm-door { display: block; width: clamp(210px, 21vw, 330px); aspect-ratio: 16 / 10; border-radius: 18px; }
+#lwMenu .mm-door-word { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+#lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
+#lwMenu .mm-door-word .mm-ico { width: 28px; height: 28px; opacity: .75; }
+#lwMenu .mm-door:is(:hover, :focus-visible) .mm-door-word b { color: var(--acc); }
+#lwMenu .mm-face-lab { font-size: 11px; letter-spacing: .22em; padding: 6px 12px; border-radius: 999px; opacity: .45; transition: opacity 140ms, color 140ms; }
+#lwMenu .mm-face-lab:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
+#lwMenu .mm-face.in .mm-face-logo { animation: mm-drop 820ms var(--ease) both; }
+#lwMenu .mm-face.in .mm-door { animation: mm-up 620ms var(--ease) both; animation-delay: calc(220ms + var(--i, 0) * 90ms); }
+#lwMenu .mm-face.in .mm-face-lab { animation: mm-up 620ms var(--ease) 440ms both; }
+@media (max-width: 700px) { #lwMenu .mm-door { width: calc(50vw - 28px); aspect-ratio: 3 / 4; } #lwMenu .mm-doors { gap: 16px; } }
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-face.in :is(.mm-face-logo, .mm-door, .mm-face-lab) { animation: none; } }
+:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-face.in :is(.mm-face-logo, .mm-door, .mm-face-lab) { animation: none; }
+/* 034 M3 · THE TUTORIAL DECK (picker.js showTutorial): in the decks' seat, a grid of 9:16 cards as many across as fit off the racks (two on a
+   phone), each the volume card's album art (its still, its hero, THE CARD'S LIGHT), its number and title at the art's foot, the caption under
+   it; the head keeps the logo, ⌂ and THEME */
+#lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; padding: 6px 24px 32px; box-sizing: border-box; }
+#lwMenu .mm-tut[hidden] { display: none; }
+#lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="home"], .mm-themeb)) { display: none; }
+#lwMenu[data-sec="tutorial"] .mm-navb[data-nav="home"] { opacity: 1; }
+#lwMenu .mm-tut-head { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 0 0 20px; color: var(--acc); font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; }
+#lwMenu .mm-tut-head b { font-weight: 400; } #lwMenu .mm-tut-head .mm-ico { width: 18px; height: 18px; }
+#lwMenu .mm-tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 30px 22px; width: min(1500px, 100%); margin: 0 auto; }
+@media (min-width: 1100px) { #lwMenu .mm-tgrid { width: min(1500px, 100%, calc(100vw - 2 * (var(--rack-w, 300px) + 20px))); } }
+#lwMenu .mm-tcard { display: grid; gap: 10px; align-content: start; }
+#lwMenu .mm-tcard-open { position: relative; display: block; width: 100%; aspect-ratio: 9 / 16; border-radius: 18px; }
+#lwMenu .mm-tcard .mm-art-foot { gap: 5px; padding: 48px 8px 16px; }
+#lwMenu .mm-tnum { font-style: normal; font-size: 10px; letter-spacing: .23em; opacity: .7; font-variant-numeric: tabular-nums; }
+#lwMenu .mm-ttitle { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(17px, 1.4vw, 23px); line-height: 1.05; letter-spacing: .04em; text-align: center; transition: color 160ms; }
+#lwMenu .mm-tcard-open:is(:hover, :focus-visible) .mm-ttitle { color: var(--acc); }
+#lwMenu .mm-tcap { margin: 0; padding: 0 4px; font-size: 12px; line-height: 1.45; text-align: center; opacity: .75; }
+#lwMenu .mm-tcap.soon { font-size: 11px; font-style: italic; letter-spacing: .06em; opacity: .35; }
+@media (max-width: 700px) { #lwMenu .mm-tut { padding: 6px 12px 24px; } #lwMenu .mm-tgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; } }

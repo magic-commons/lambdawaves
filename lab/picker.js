@@ -33,6 +33,11 @@ const TIP_URL = 'https://ko-fi.com/magiccommons';
 /* 032 THE PORTRAIT SHELF: the volumes that have a hero and in which themes ('dark light'), written by tools/volume-heroes.mjs with its files
    (img/menu/vol/<id>.<theme>.mp4 and the still .webp). A volume not named here wears the λWAVES palette. */
 const HEROES = { 'vol-1': 'dark light' };
+/* 034 M3 THE TUTORIAL DECK: one card a row, in this order — its id (`tut-<slug>`), its title, its caption ('' until Josh's words come) and the
+   themes its hero has files in (img/menu/tut/<id>.<theme>.mp4 and the still .webp; a theme not named shows the other's), written by
+   tools/tutorial-heroes.mjs, one row a line */
+const TUTORIAL = [
+];
 
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
@@ -128,10 +133,17 @@ async function suggest(query, n = 6) {
 }
 
 export function createPicker(app, { open: openAtBoot = true } = {}) {
-  const root = el('div', 'lw-menu', document.body); root.id = 'lwMenu'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'the Picker');
+  const root = el('div', 'lw-menu', document.body); root.id = 'lwMenu'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'the main menu');
   const top = el('div', 'mm-top', root);
   const logo = el('div', 'mm-logo', top);
-  fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { logo.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = logo.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } }).catch(() => { logo.textContent = 'λWAVES'; });
+  /* 034 M1 · THE LANDING FACE (Josh 11-02: "When users open up the app, they will be met with the lambdawaves logo in large with two boxes that
+     says, 'Tutorial', and 'Library'"): over the decks, the logo large, TUTORIAL · LIBRARY (two album-art doors in THE CARD'S LIGHT) and the
+     quiet way into the lab.  It is the home: every open lands here (the boot after the notice, ?menu=1, L, WINDOW › MAIN MENU) except the CSB's
+     LIBRARY seat, which opens the decks; the head's ⌂ comes back here.  LIBRARY opens the decks on MOLECULAR (ATOMIC above, EXPANSIONS below),
+     TUTORIAL the hero deck (M3).  While it is up the head, the decks and the caption are kept laid out but hidden and inert. */
+  const face = el('div', 'mm-face', root); face.hidden = true;
+  const faceLogo = el('div', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);
+  fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { for (const host of [logo, faceLogo]) { host.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = host.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } } }).catch(() => { logo.textContent = faceLogo.textContent = 'λWAVES'; });
   /* iteration 015 M1 · THE HEAD (Josh: "Logo (a little bit bigger), Atomic, molecular, etc. Row, and then Home Folder, and Hue. Add a 4th
      button"): the logo, the tabs, then four round buttons — RETURN HOME (the lab), FOLDERS (the projects and the demos), THE HUE ring (a dial
      dressed as a circle: a vertical drag, the wheel or ↑ ↓ turn the molecules' pictures round the colour wheel, a double-click puts it back at
@@ -139,8 +151,14 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const tabs = el('div', 'mm-tabs', top), pill = el('i', 'mm-pill', tabs);
   const nav = el('div', 'mm-nav', top);
   const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
-  navBtn('home', 'Return home — the lab', () => close());
-  navBtn('folders', 'Folders — your projects and the demos', () => (root.dataset.sec === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
+  navBtn('home', 'Main menu — tutorial and library', () => showFace()).dataset.nav = 'home';   // 034 M1: ⌂ is the face; ENTER THE LAB is on it
+  navBtn('folders', 'Folders — your projects and the demos', () => (at === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
+  /* the face's two doors (album art in THE CARD'S LIGHT, the λWAVES palette) and the way into the lab */
+  const door = (id, word, glyph, k, go) => { const b = el('button', 'mm-door mm-holo', doors); b.type = 'button'; b.dataset.door = id; b.setAttribute('aria-label', word); b.style.setProperty('--k', String(k)); b.style.setProperty('--i', String(k));
+    el('span', 'mm-halo', b); const lit = el('span', 'mm-lit mm-art-plain', b); el('span', 'mm-foil', lit); el('span', 'mm-rim', b);
+    const w = el('span', 'mm-door-word', lit); icon(w, glyph); el('b', '', w, word); b.addEventListener('click', go); return b; };
+  const doorBtns = [door('tutorial', 'TUTORIAL', 'film', 0, () => showTutorial()), door('library', 'LIBRARY', 'library', 1, () => showDecks('molecular'))];
+  const labB = el('button', 'mm-face-lab', face, 'ENTER THE LAB'); labB.type = 'button'; labB.addEventListener('click', () => close());
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
   /* 032 (Josh 11-01: "a light and dark toggle in the picker in between the hue knob and thumbnail switcher"): THEME, the action's own
@@ -157,10 +175,37 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      O, WINDOW › FOLDERS and the stage keep the floating window.  A tab returns to the decks. */
   const foldersEl = el('div', 'mm-folders', root); foldersEl.hidden = true; foldersEl.setAttribute('role', 'region'); foldersEl.setAttribute('aria-label', 'Folders');
   let foldersView = null;
+  const tutEl = el('div', 'mm-tut', root); tutEl.hidden = true; tutEl.setAttribute('role', 'region'); tutEl.setAttribute('aria-label', 'Tutorial');
+  /* 034 M1 · THE VIEWS: the face (over the decks, which stay laid out under it), the decks, FOLDERS' gallery and the tutorial (each in the
+     decks' seat); one at a time, one hero playing at most, and leaving a view puts its hero to rest */
+  let at = 'decks', firstDeal = false;   // firstDeal: a first run's LIBRARY deals MOLECULAR's first page in THE ENTRANCE (iteration 012 L3)
+  function showView(name) {
+    if (name === at) return false;
+    const was = at; at = name; closeDrop(); restHero();
+    face.hidden = name !== 'face'; root.classList.toggle('at-face', name === 'face');
+    for (const e of [top, scroller, caption]) e.inert = name === 'face';
+    const away = name === 'folders' || name === 'tutorial';
+    foldersEl.hidden = name !== 'folders'; tutEl.hidden = name !== 'tutorial'; scroller.hidden = caption.hidden = away;
+    if (away) { root.dataset.sec = name; for (const x of sections) x.b.classList.remove('on'); pill.style.setProperty('--pw', '0px'); }
+    else if (was === 'folders' || was === 'tutorial') { const s = current; current = null; show(s); s.sec.scrollIntoView({ block: 'start' }); }
+    return true;
+  }
+  function showFace() {
+    showView('face'); face.classList.remove('in'); void face.offsetWidth; face.classList.add('in');
+    doorBtns[0].focus({ preventScroll: true });
+  }
+  /** the decks, on a section when one is named (the face's LIBRARY: MOLECULAR) */
+  function showDecks(id) {
+    const fromFace = at === 'face'; showView('decks');
+    const s = id && sections.find((x) => x.id === id);
+    if (s) { s.sec.scrollIntoView({ block: 'start' }); show(s); }
+    if (!fromFace) return;
+    for (const [i, e] of [top, scroller].entries()) animate(e, [{ opacity: 0, translate: '0 14px' }], 420, i * 80);
+    if (current.id === 'molecular') { if (firstDeal) { firstDeal = false; entrance(molDeck.tiles); } else enterTiles(molDeck.tiles); }
+  }
   function showFolders() {
     const P = app.sh.layout && app.sh.layout.projects; if (!P) return;
-    closeDrop(); scroller.hidden = caption.hidden = true; foldersEl.hidden = false; root.dataset.sec = 'folders';
-    for (const x of sections) x.b.classList.remove('on'); pill.style.setProperty('--pw', '0px');
+    showView('folders');
     if (!foldersView) {   // sized to the page once, at its first showing: the columns as the decks', the rows from the height
       const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
       const W = Math.min(1500, foldersEl.clientWidth - 48, innerWidth >= 1100 ? innerWidth - 2 * (rackW + 20) : Infinity), H = foldersEl.clientHeight - 150, cols = Math.max(2, Math.min(8, Math.floor(W / 210))), rows = Math.max(1, Math.min(4, Math.floor(H / ((W / cols) * 0.75 + 56))));
@@ -169,7 +214,6 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     P.demosFirst(foldersView); foldersView.paint(); animate(foldersEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
   }
-  function showDecks() { if (foldersEl.hidden) return; foldersEl.hidden = true; scroller.hidden = caption.hidden = false; const s = current; current = null; show(s); }
   caption.setAttribute('aria-live', 'polite');
   /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
   const prefs = readPrefs(), opts = el('div', 'mm-opts', top);
@@ -447,6 +491,66 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     for (const S of secs.values()) for (const m of S.rows) paintAway(m);
     library.paintDevice();
   }
+  /* ── 032 · 034 THE ART OF A CARD: artOf(art, dir, id, themes) puts a card's still in the theme in use into its art (both stills are in the page,
+     the CSS shows the theme's; a lazy picture it hides is never asked for) and answers its hero — { play, stop, toggle } — or null and the
+     λWAVES palette when `themes` names none; a theme the row does not name shows the other's files (one clip serves both).  The hero is fetched
+     on its first play and faded in once it plays; ONE HERO PLAYS AT A TIME in the whole Picker (a play rests the last), never under reduced
+     motion.  bindHero: a fine mouse's hover or a key's focus plays it, leaving rests it. ── */
+  const theme = () => (document.body.dataset.theme === 'light' ? 'light' : 'dark');
+  let liveHero = null; const restHero = () => { if (liveHero) liveHero.stop(); };
+  function artOf(art, dir, id, themes) {
+    const has = (themes || '').split(' ').filter(Boolean), pick = (th) => (has.includes(th) ? th : has[0]);
+    if (!has.length) { art.classList.add('mm-art-plain'); return null; }
+    for (const th of ['dark', 'light']) {
+      const i = el('img', 'mm-art-still', art); i.alt = ''; i.dataset.theme = th; i.decoding = 'async'; i.loading = 'lazy'; i.draggable = false;
+      i.addEventListener('load', () => keepData(i.src), { once: true }); i.src = dir + id + '.' + pick(th) + '.webp';
+    }
+    let vid = null, want = false;
+    const h = {
+      play() {
+        if (still()) return; if (liveHero && liveHero !== h) liveHero.stop(); liveHero = h; want = true;
+        if (!vid) { vid = el('video', 'mm-art-hero', art); vid.muted = vid.defaultMuted = vid.loop = vid.playsInline = true; vid.preload = 'auto'; vid.tabIndex = -1; vid.setAttribute('aria-hidden', 'true');
+          vid.addEventListener('playing', () => { if (want) vid.classList.add('on'); }); vid.addEventListener('error', () => { vid.remove(); vid = null; }, { once: true }); }   // no hero: the still stays
+        const src = dir + id + '.' + pick(theme()) + '.mp4'; if (vid.getAttribute('src') !== src) vid.src = src;
+        const r = vid.play(); if (r && r.catch) r.catch(() => {});
+      },
+      stop() { want = false; if (liveHero === h) liveHero = null; if (vid) { vid.pause(); vid.classList.remove('on'); } },
+      toggle() { if (want) h.stop(); else h.play(); },
+    };
+    return h;
+  }
+  const bindHero = (o, hero) => {
+    o.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hero.play(); }); o.addEventListener('pointerleave', hero.stop);
+    o.addEventListener('focus', () => { if (o.matches(':focus-visible')) hero.play(); }); o.addEventListener('blur', hero.stop);
+  };
+
+  /* ── 034 M3 · THE TUTORIAL DECK (Josh 11-02: "If clicking tutorial, it opens a 'hero' video collection you can scroll through. Kind of like how
+     the current landing page in the magic commons site looks like … although much more packed"): a grid of 9:16 cards in THE CARD'S LIGHT, one
+     per TUTORIAL row in its order, the number and the title at the art's foot and the caption under it ("caption to come" until Josh's words);
+     the hero loops while the mouse is on it or a key's focus (the landing page's player: looping, one at a time), a press plays or pauses it
+     (a touch's way), as many columns as fit off the racks and two on a phone.  Built at its first showing. ── */
+  let tutBuilt = false;
+  function showTutorial() {
+    showView('tutorial');
+    if (!tutBuilt) {
+      tutBuilt = true;
+      const head = el('div', 'mm-tut-head', tutEl); icon(head, 'film'); el('b', '', head, 'TUTORIAL');
+      const grid = el('div', 'mm-tgrid', tutEl);
+      TUTORIAL.forEach((t, k) => {
+        const c = el('div', 'mm-tcard', grid), o = el('button', 'mm-tcard-open mm-holo', c); o.type = 'button'; o.style.setProperty('--k', String(k % 2));
+        const num = String(k + 1).padStart(2, '0'); o.setAttribute('aria-label', num + ' · ' + t.title + (t.caption ? ' — ' + t.caption : ''));   // the words in aria only: no hover hint (034 F1's law)
+        el('span', 'mm-halo', o); const art = el('span', 'mm-lit', o); el('span', 'mm-rim', o);
+        const hero = artOf(art, './img/menu/tut/', t.id, t.themes); el('span', 'mm-foil', art);
+        const foot = el('span', 'mm-art-foot', art); el('i', 'mm-tnum', foot, num); el('b', 'mm-ttitle', foot, t.title);
+        el('p', 'mm-tcap' + (t.caption ? '' : ' soon'), c, t.caption || 'caption to come');
+        if (hero) { bindHero(o, hero); o.addEventListener('click', hero.toggle); }
+      });
+    }
+    animate(tutEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
+    enterTiles([...tutEl.querySelectorAll('.mm-tcard')].slice(0, 12));
+    const f = tutEl.querySelector('.mm-tcard-open'); if (f) f.focus({ preventScroll: true });
+  }
+
   /* ── LIBRARY: the shelf of volumes; a volume's molecules by their tags ── */
   const library = (() => {
     const sec = sections[2].sec, shelfEl = el('div', 'mm-shelf', sec), devEl = el('div', 'mm-dev', sec), view = el('div', 'mm-volview', sec); view.hidden = true;
@@ -549,26 +653,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        (THE CARD'S LIGHT, picker-fx.js) whose picture is the volume's still in the theme in use and, while the mouse is on it (or a key's focus),
        its hero, fetched on the first hover and paused on leaving; a volume HEROES does not name wears the λWAVES palette (skin.css).  The
        numeral and its count sit at the art's foot, the WIP cone at its head, the install under the card (iteration 012 L1's words). */
-    const HERO = './img/menu/vol/', theme = () => (document.body.dataset.theme === 'light' ? 'light' : 'dark');
-    function heroArt(art, id) {
-      const has = (HEROES[id] || '').split(' ').filter(Boolean), pick = (th) => (has.includes(th) ? th : has[0]);
-      if (!has.length) { art.classList.add('mm-art-plain'); return null; }
-      for (const th of ['dark', 'light']) {   // both stills, the CSS shows the theme's (a lazy picture it hides is never asked for)
-        const i = el('img', 'mm-art-still', art); i.alt = ''; i.dataset.theme = th; i.decoding = 'async'; i.loading = 'lazy'; i.draggable = false;
-        i.addEventListener('load', () => keepData(i.src), { once: true }); i.src = HERO + id + '.' + pick(th) + '.webp';
-      }
-      let vid = null, want = false;
-      return {
-        play() {
-          if (still()) return; want = true;
-          if (!vid) { vid = el('video', 'mm-art-hero', art); vid.muted = vid.defaultMuted = vid.loop = vid.playsInline = true; vid.preload = 'auto'; vid.tabIndex = -1; vid.setAttribute('aria-hidden', 'true');
-            vid.addEventListener('playing', () => { if (want) vid.classList.add('on'); }); vid.addEventListener('error', () => { vid.remove(); vid = null; }, { once: true }); }   // no hero: the still stays
-          const src = HERO + id + '.' + pick(theme()) + '.mp4'; if (vid.getAttribute('src') !== src) vid.src = src;
-          const r = vid.play(); if (r && r.catch) r.catch(() => {});
-        },
-        stop() { want = false; if (vid) { vid.pause(); vid.classList.remove('on'); } },
-      };
-    }
+    const HERO = './img/menu/vol/', heroArt = (art, id) => artOf(art, HERO, id, HEROES[id]);
     const heroes = new Set(), rest = () => { for (const h of heroes) h.stop(); };   // a volume opened or the Picker closed: every hero rests
     function card(v, k) {
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
@@ -585,9 +670,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; o.title = volName(v) + ' is being filled'; el('span', 'mm-vol-meta', foot, 'FILLING'); return; }
       const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
       if (meta) el('span', 'mm-vol-meta', foot, meta);
-      if (hero) { heroes.add(hero);
-        o.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hero.play(); }); o.addEventListener('pointerleave', hero.stop);
-        o.addEventListener('focus', () => { if (o.matches(':focus-visible')) hero.play(); }); o.addEventListener('blur', hero.stop); }
+      if (hero) { heroes.add(hero); bindHero(o, hero); }
       o.addEventListener('click', () => enter(v));
       const ins = installer(c, v);
       if (v.archive) {   // the card takes a drop of its .lwv (030: every volume with an archive, not only a file volume)
@@ -739,27 +822,27 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       });
     }
   }
+  /* 034 M1: an open lands on THE LANDING FACE, but `{ decks: true }` (the CSB's LIBRARY seat, api.show) opens the decks where the reader left
+     them.  The decks' first showing sits on MOLECULAR (ATOMIC above, EXPANSIONS below), laid before the face is up so its first page is asked
+     for first.  A first run (the notice's CONTINUE) fades in rather than the iris, and its LIBRARY deals that page in THE ENTRANCE. */
+  let seated = false;
   function open(o) {
     if (!root.hidden) return;
-    const first = !!(o && o.first);
+    const first = !!(o && o.first), toDecks = !!(o && o.decks);
     const r = home.getBoundingClientRect();
     root.style.setProperty('--ox', r.width ? r.left + r.width / 2 + 'px' : '50%'); root.style.setProperty('--oy', r.width ? r.top + r.height / 2 + 'px' : '50%');
-    root.classList.toggle('first', first);
-    if (first) { current = sections[1]; show(current); }   // before the decks are laid, so the MOLECULAR page is the one asked for first
+    root.classList.toggle('first', first); if (first) firstDeal = true;
+    if (!seated) { current = sections[1]; show(current); }
     root.hidden = false; document.body.classList.add('menu-open'); said = null; say(null); ro.observe(scroller); layer();
-    if (first) sections[1].sec.scrollIntoView({ block: 'start' });
+    if (!seated) { seated = true; sections[1].sec.scrollIntoView({ block: 'start' }); }
+    if (toDecks) showView('decks'); else showFace();
     for (const d of decks) d.lay();
     if (current.id !== 'atomic') readStore();
-    if (first) {
-      requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); entrance(molDeck.tiles); });
-      setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700);
-      setTimeout(() => { root.classList.remove('first'); }, 2600);
-      return;
-    }
-    requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
+    if (first) { setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700); setTimeout(() => { root.classList.remove('first'); }, 2600); }
+    requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); if (at === 'decks') enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; closeDrop(); showDecks(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
-  const toggle = () => (root.hidden ? open() : close());
+  function close() { if (root.hidden) return; closeDrop(); restHero(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  const toggle = (o) => (root.hidden ? open(o) : close());
   const escape = () => (drop.hidden ? close() : closeDrop(true));   // M1: Escape puts THE LOOK DROP away first
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
   /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
@@ -775,7 +858,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { i.src = u; }, () => hold(t, i)); }
     return t;
   };
-  const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { const s = sections.find((x) => x.id === id); if (s) { open(); s.sec.scrollIntoView({ block: 'start' }); } }, suggest, suggestTile };
+  const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggest, suggestTile };
   app.state.picker = api;
   if (openAtBoot) open();
   return api;
