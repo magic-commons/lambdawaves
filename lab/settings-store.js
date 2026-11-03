@@ -48,6 +48,7 @@ export const RECORDS = Object.freeze([
   row('lambdawaves.q0.projects.window', W, 'kit', false, 'projects.js FOLDERS (kit localPrefs): place, size, rail, sort'),
   row('lambdawaves.q0.notebook', J, 'RETIRED', false, 'read once into the session part (021 R4; with .title, .subtitle)'),
   row('lambdawaves.q0.library', L, '—', false, 'library.js: persist() asked'),
+  row('mir.notes', L, 'kit shelf', false, 'kit · notes/shelf.js: the notebook’s NEW NOTE · OPEN NOTE shelf, apart from every project (034 N3)'),
   row('mir.transport', P, 'v 2', false, 'kit · transport seat store (bar seat and place)'),
   row('mir.transport.free', W, 'kit', false, 'kit · the transport’s FREE window rect'),
   row('mir.tier', P, 'kit', false, 'kit · MIR OPTIONS QUALITY · AUTO reading'),
