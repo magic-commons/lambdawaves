@@ -1114,3 +1114,15 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 #lwMenu .mm-sh-row .ro-val { padding-left: 6px; font-size: 12px; min-height: 0; } #lwMenu .mm-sh-row .ro-sub { display: none; }
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-sheet { transition: none; } }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-sheet { transition: none; }
+
+/* 035 THE COLLAGE (lab/picker-collage.js): under the face, the canvas of clips (the root's first child) and the veil over it — the menu's
+   ground at ~.68 in the middle and ~.35 at the rim, so the logo, the doors and CONTINUE read on both themes; the canvas (placed, sized and
+   turned by the module: the tilt is its CSS rotate) fades in on its first picture.  The decks, FOLDERS and the tutorial keep the plain
+   ground (both hidden, the video paused). */
+#lwMenu :is(.mm-collage, .mm-veil) { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+#lwMenu .mm-collage { opacity: 0; transition: opacity .8s ease; }
+#lwMenu .mm-collage.on { opacity: 1; }
+#lwMenu .mm-veil { z-index: 1; background: radial-gradient(ellipse 75% 70% at 50% 50%, hsl(var(--glass-tint) / .68), hsl(var(--glass-tint) / .52) 45%, hsl(var(--glass-tint) / .35)); }
+#lwMenu :is(.mm-collage, .mm-veil)[hidden] { display: none; }
+/* while the wall plays the frost has nothing to show (the tiles cover the stage) and its blur would be redrawn every frame: the plain ground */
+body.frost #lwMenu:has(> .mm-collage.on:not([hidden])) { background: hsl(var(--glass-tint) / .985); -webkit-backdrop-filter: none; backdrop-filter: none; }

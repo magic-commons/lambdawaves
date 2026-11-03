@@ -27,6 +27,7 @@ import { getHamiltonian } from './hamiltonian.js';
 import { BASIS } from './hydrogen.js';
 import { L_LETTERS } from './names.js';
 import { RM, still, animate, pointerFrame, tiltPictures, holoCards, enterTiles, develop, swapLine, installRing, clamp } from './picker-fx.js';
+import { createCollage } from './picker-collage.js';   // 035 THE COLLAGE: the face's wall of clips
 import * as V from './volumes.js';
 import { keepData, installed, safariTab } from './library.js';
 
@@ -169,6 +170,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      LIBRARY seat, which opens the decks; the head's ⌂ comes back here.  LIBRARY opens the decks on MOLECULAR (ATOMIC above, EXPANSIONS below),
      TUTORIAL the hero deck (M3).  While it is up the head, the decks and the caption are kept laid out but hidden and inert. */
   const face = el('div', 'mm-face', root); face.hidden = true;
+  /* 035 THE COLLAGE (lab/picker-collage.js): its canvas and veil are the root's first children, behind the face; it runs while the face is shown */
+  const collage = createCollage(root, { theme: () => (document.body.dataset.theme === 'light' ? 'light' : 'dark'), still, lite: () => !!(app.ctl.perf && app.ctl.perf.tier === 'light') });
   const faceLogo = el('div', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);
   fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { for (const host of [logo, faceLogo]) { host.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = host.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } } }).catch(() => { logo.textContent = faceLogo.textContent = 'λWAVES'; });
   /* iteration 015 M1 · THE HEAD (Josh: "Logo (a little bit bigger), Atomic, molecular, etc. Row, and then Home Folder, and Hue. Add a 4th
@@ -257,6 +260,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      decks' seat); one at a time, one hero playing at most, and leaving a view puts its hero to rest */
   let at = 'decks', firstDeal = false;   // firstDeal: a first run's LIBRARY deals MOLECULAR's first page in THE ENTRANCE (iteration 012 L3)
   function showView(name) {
+    collage[name === 'face' ? 'show' : 'hide']();   // 035: the collage under the face alone; the decks, folders and tutorial keep the plain ground
     if (name === at) return false;
     const was = at; at = name; closeDrop(); closeSheet(); restHero();
     face.hidden = name !== 'face'; root.classList.toggle('at-face', name === 'face');
@@ -917,7 +921,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (first) { setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700); setTimeout(() => { root.classList.remove('first'); }, 2600); }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); if (at === 'decks') enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; closeDrop(); closeSheet(); restHero(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = (o) => (root.hidden ? open(o) : close());
   const escape = () => (!drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : close());   // M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
