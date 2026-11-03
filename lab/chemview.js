@@ -684,7 +684,7 @@ export function createChem(host, api) {
           why: { ...(H.skipped || {}), ...(H.failed || {}) }, sub: [...(m.tags || []), m.pg].filter(Boolean).join(' · '), sha256: m.sha256 || null, bytes: buf.byteLength, from, bonds: H.geometry.bonds || H.meta.bonds || m.bonds || null };
       } catch (e) {
         if (seq0 === volSeq) { loading(false);
-          status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the PICKER's LIBRARY`, 'warn'); }
+          status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the MAIN MENU's EXPANSIONS`, 'warn'); }
         return null;
       }
       if (seq0 !== volSeq) return null;                                      // a later pick has moved on while the file was read

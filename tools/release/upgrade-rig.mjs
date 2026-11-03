@@ -50,7 +50,7 @@ const STATE = `return (async () => { const reg = await navigator.serviceWorker.g
     reg: reg ? { active: reg.active && reg.active.state, waiting: reg.waiting && reg.waiting.state, installing: reg.installing && reg.installing.state } : null,
     sw: sw ? { mode: sw.mode, state: sw.state, build: sw.build, cache: sw.cache, error: sw.error, offering: !!sw.offering } : null,
     caches: (await caches.keys().catch(() => [])).sort(),
-    newApp: !!(window.__LW && __LW.mod && __LW.mod.registry && __LW.mod.registry.has && __LW.mod.registry.has('state.index')),
+    page: (window.__LW && __LW.sw && __LW.sw.page) || null,
     selected: ms && ms.selected, mol: (window.__LW && __LW.chem && __LW.chem.volume && (__LW.chem.volume.id || __LW.chem.volume.name)) || (ms && ms.molecule && (ms.molecule.id || ms.molecule.name)) || null, chemOn: !!(window.__LW && __LW.chem && __LW.chem.on),
     chem: chem ? { loading: chem.classList.contains('loading'), busy: chem.getAttribute('aria-busy'), closed: chem.classList.contains('closed') } : null,
     busy: window.__LW && __LW.busy ? __LW.busy.count : null, badge: (() => { const b = document.querySelector('#badges > .badge.build'); return b && !b.hidden ? b.textContent : ''; })(), errs: (window.__e || []).slice(-4).map(String) }; })()`;
@@ -79,10 +79,11 @@ try {
   g = await launch(URL0 + '&menu=1');
   s = await waitState(g, (x) => x.ready && x.controller && x.sw && x.sw.cache, 240, 500);
   check(s && s.controller, 'A2 second launch is controlled by the old worker', s && { cache: s.sw && s.sw.cache, caches: s.caches });
-  const oldCache = s && s.sw && s.sw.cache;
+  const oldCache = s && s.sw && s.sw.cache, oldPage = (s && s.page) || null;   // 034: the old build's page build (null before 033), the 'new app' marker is any other page build
   if (molIds.length) {
     const inst = await g.ev(`return (async () => { const t = [...document.querySelectorAll('.mm-tab')].find((b) => /LIBRARY/.test(b.textContent)); if (t) t.click(); await new Promise((r) => setTimeout(r, 500));
-      const sec = document.querySelector('.mm-sec.mm-library') || document; const btn = [...sec.querySelectorAll('button')].find((b) => /^INSTALL/.test(b.textContent.trim()) && (b.closest('.mm-vol, .mm-vol-row, .mm-shelf') || sec).textContent.includes('${VOL === 'vol-3' ? 'III' : VOL === 'vol-2' ? 'II' : 'I'}'));
+      const sec = document.querySelector('.mm-sec.mm-library') || document; const size = (t) => { const m = /([\d.]+)\s*(KB|MB|GB)/i.exec(t); return m ? parseFloat(m[1]) * ({ kb: 1e3, mb: 1e6, gb: 1e9 })[m[2].toLowerCase()] : Infinity; };
+      const btn = [...sec.querySelectorAll('button')].filter((b) => /^INSTALL/.test(b.textContent.trim())).sort((a, b) => size(a.textContent) - size(b.textContent))[0];   // 034: the smallest volume (VOL. III) on either shelf layout
       if (!btn) return { found: false, buttons: [...sec.querySelectorAll('button')].map((b) => b.textContent.trim().slice(0, 24)).filter((t) => /INSTALL|REMOVE|RESUME/.test(t)) };
       const word = btn.textContent.trim(); btn.click(); return { found: true, word }; })()`);
     check(inst && inst.found, 'A3 the INSTALL press is found', inst);
@@ -106,10 +107,10 @@ try {
     console.log('      (B0 the session is touched before the new worker installs: ' + J(t) + ')');
   }
   s = await waitState(g, (x) => x.ready && x.sw && x.sw.cache, 240, 500);
-  const onOld = s && s.controller && s.sw.cache === oldCache && !s.newApp, tookQuietly = s && s.controller && s.newApp && s.sw.cache !== oldCache;
-  check(onOld || tookQuietly, 'B1 a returning visitor boots on the OLD build from its cache (the law) while the new worker installs' + (tookQuietly ? ' — taken quietly before the first read (an untouched session)' : ''), s && { cache: s.sw.cache, newApp: s.newApp, reg: s.reg });
-  s = await waitState(g, (x) => (x.sw && (x.sw.state === 'ready' || x.sw.offering)) || (x.newApp && x.controller) || (x.reg && x.reg.waiting === 'installed'), 180, 500);
-  const offered = !!(s && s.sw && (s.sw.state === 'ready' || s.sw.offering)), quiet = !!(s && s.newApp && s.controller);
+  const onOld = s && s.controller && s.sw.cache === oldCache && !(s.page && s.page !== oldPage), tookQuietly = s && s.controller && (s.page && s.page !== oldPage) && s.sw.cache !== oldCache;
+  check(onOld || tookQuietly, 'B1 a returning visitor boots on the OLD build from its cache (the law) while the new worker installs' + (tookQuietly ? ' — taken quietly before the first read (an untouched session)' : ''), s && { cache: s.sw.cache, newApp: (s.page && s.page !== oldPage), reg: s.reg });
+  s = await waitState(g, (x) => (x.sw && (x.sw.state === 'ready' || x.sw.offering)) || ((x.page && x.page !== oldPage) && x.controller) || (x.reg && x.reg.waiting === 'installed'), 180, 500);
+  const offered = !!(s && s.sw && (s.sw.state === 'ready' || s.sw.offering)), quiet = !!(s && (s.page && s.page !== oldPage) && s.controller);
   check(offered || quiet, 'B2 the new build installs and is offered (or taken quietly for an untouched session)', s && { offered, quiet, reg: s.reg, sw: s.sw, errs: s.errs });
   if (offered) {
     await snap(g, 'B-offer');
@@ -122,8 +123,8 @@ try {
       return how; })()`).catch((e) => (/unloaded|no such window|context/i.test(String(e && e.message || e)) ? 'pressed — the page reloaded under the press (the take landed)' : { E: String(e && e.message || e).slice(0, 200) }));
     check(pressed && !pressed.E && !/refused/.test(pressed), 'B3 RELOAD PAGE is pressed', pressed);
   }
-  s = await waitState(g, (x) => x.ready && x.newApp && x.controller && x.sw && x.sw.cache && x.sw.cache !== oldCache, 240, 500);
-  check(s && s.newApp && s.controller && s.sw.cache !== oldCache, 'B4 the NEW build is in control after the reload', s && { cache: s.sw && s.sw.cache, state: s.sw && s.sw.state, reg: s.reg });
+  s = await waitState(g, (x) => x.ready && (x.page && x.page !== oldPage) && x.controller && x.sw && x.sw.cache && x.sw.cache !== oldCache, 240, 500);
+  check(s && (s.page && s.page !== oldPage) && s.controller && s.sw.cache !== oldCache, 'B4 the NEW build is in control after the reload', s && { cache: s.sw && s.sw.cache, state: s.sw && s.sw.state, reg: s.reg });
   const labs = (s && s.caches || []).filter((n) => n.startsWith('lw-lab-'));
   check(labs.length === 1 && labs[0] === (s && s.sw && s.sw.cache), 'B5 exactly one build cache remains (the old one collected)', { caches: s && s.caches });
   if (molIds.length) {
@@ -148,7 +149,7 @@ try {
       const ask = [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/i.test(d.textContent)); if (ask) { const y = [...ask.querySelectorAll('button')].find((x) => /UPDATE|YES|REPAIR/i.test(x.textContent)); if (y) y.click(); }
       const r = await Promise.race([p, new Promise((q) => setTimeout(() => q('reloading'), 8000))]); return { started: r, state: __LW.sw.state }; })()`).catch((e) => ({ E: String(e && e.message || e).slice(0, 160) }));
   console.log('      (C2 REPAIR pressed: ' + J(rep) + ')');
-  s = await waitState(g, (x) => x.ready && x.controller && x.newApp && x.sw && x.sw.cache && /REPAIRED/.test(x.badge || ''), 240, 500);
+  s = await waitState(g, (x) => x.ready && x.controller && (x.page && x.page !== oldPage) && x.sw && x.sw.cache && /REPAIRED/.test(x.badge || ''), 240, 500);
   check(s && s.controller && /REPAIRED/.test(s.badge || ''), 'C2 REPAIR ends controlled by a verified build and says REPAIRED', s && { badge: s.badge, cache: s.sw && s.sw.cache, caches: s.caches, reg: s.reg });
   const labs2 = (s && s.caches || []).filter((n) => n.startsWith('lw-lab-'));
   check(labs2.length === 1 && (s && s.caches || []).includes('lw-vol-' + VOL), 'C3 after REPAIR: one build cache, the volume untouched', { caches: s && s.caches });
