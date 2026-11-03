@@ -97,7 +97,10 @@ export function createCollage(root, { theme, still, lite }) {
     for (let ln = 0; ln < nLn(); ln++) for (let al = 0; al < nAl(); al++) {
       const c = cell(ln, al), u = along(ln, al, tau), lap = Math.floor(u / L);
       if (lap !== c.lap) { c.lap = lap; const k = choose(ln, al, at, true); if (k >= 0) take(c, k, at); }   // a wrap re-enters on a new slot
-      else if (beatOf(c.k, at) !== c.j) { c.j = beatOf(c.k, at); if (Math.random() < 0.5) { const k = choose(ln, al, at, true); if (k >= 0 && k !== c.k) take(c, k, at); } }   // its own cut: half the time, a jump
+      else if (beatOf(c.k, at) !== c.j) {   // its own cut: half the time a jump, and always when the lines' sliding has brought its family beside it
+        c.j = beatOf(c.k, at); const f = famOf(c.k, at);
+        if (Math.random() < 0.5 || near(ln, al).some((n) => famOf(n.k, at) === f)) { const k = choose(ln, al, at, true); if (k >= 0 && k !== c.k) take(c, k, at); }
+      }
       const a = mod(u, L) + (mode ? oy : ox), w = ln * P + g[mode ^ 1] + (mode ? ox : oy), x = mode ? w : a, y = mode ? a : w;
       if (x > hx || x + P < -hx || y > hy || y + P < -hy) continue;
       ctx.drawImage(src, (c.k % cols) * t, Math.floor(c.k / cols) * t, t, t, x + GAP / 2, y + GAP / 2, s, s);
