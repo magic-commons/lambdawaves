@@ -84,7 +84,7 @@ export function createChem(host, api) {
      value wins, applied at most once per STEP_MS (O-BUILD measured a rebuild at 40 ms median, 104 ms worst — far under the cap, so the cap
      is the whole rule).  An LFO at 20 Hz steps at the cap; a lane at 0.5 Hz steps every orbital it crosses. */
   const STEP_MS = 334;   // ≤ 3 steps a second: THE PHOTOSENSITIVITY LAW's 3 flashes a second (the flash guard does not see chem.orbital); the builder's 120 ms allowed 8.3 (Yan at the merge, 10-18)
-  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, clamped = null;
+  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, clamped = null, stepParked = false;
   let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
@@ -755,8 +755,11 @@ export function createChem(host, api) {
        on the nearest orbital the molecule holds, and STATE says so (modulation.js reads `clamped`); a step still in flight is the old molecule's */
     orbital = handK = named ? named.k : Number.isFinite(P) ? Math.min(hi, Math.max(lo, Math.round(P))) : r.nocc;
     clamped = !named && Number.isFinite(P) && orbital !== P ? { asked: P, lo, hi, k: orbital, key: r.key } : null;
+    const parked = stepParked ? stepWant : null; stepParked = false;
     pendingOrbital = pendingKey = null; clearTimeout(stepTimer); stepTimer = 0; stepWant = null;
-    rebuildOrbKnob(); standDown(); pushField(); refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
+    rebuildOrbKnob(); standDown(); pushField();
+    if (Number.isFinite(parked)) { stepWant = parked; stepApply(); }   // 034 F2a: the lane's last write, once, on the new molecule's span
+    refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
   }
   /* Δ LDA−RHF: the pair [LDA, RHF] of this molecule when both are kept; asked for in VIEW (a project, a verb) with one missing, the other is solved quietly */
   const pair = () => { const s = sol && stem(sol.key), L = s && kept.get(s + '|lda'), R = s && kept.get(s); return L && R && L.D && R.D ? [L, R] : null; };
@@ -806,7 +809,12 @@ export function createChem(host, api) {
     if (wait <= 0) stepApply(); else stepTimer = setTimeout(stepApply, wait);
   }
   function stepApply() {
-    stepTimer = 0; const v = stepWant; stepWant = null;
+    stepTimer = 0;
+    /* 034 F2a (Josh: "When orbital knob in molecules is a clip on the timeline, switching to another molecule breaks it"): while the NEXT
+       molecule solves, a lane's write waits for it — the old dial is not stepped on the old molecule's range — and the last one is applied
+       once on the landing (land), on the new molecule's span; the re-registration's applyAll follows it there */
+    if (pending && !(sol && sol.key === pending.key)) { stepParked = true; return; }
+    const v = stepWant; stepWant = null;
     if (!Number.isFinite(v) || !sol || (!stepHeld && !Number.isFinite(handK))) return;   // the registry writing back a not-chosen orbital's placeholder base chooses nothing
     const [lo, hi] = span(), k = Math.min(hi, Math.max(lo, Math.round(v)));
     if (stepHeld && orbKnob.show) orbKnob.show(k); else orbKnob.set(k);
