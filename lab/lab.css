@@ -66,7 +66,7 @@ body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* w
 #notebook[data-face="about"] { width: 470px; height: 670px; left: calc(50% - 235px); top: max(20px, calc(50% - 335px)); }
 body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
 body[data-theme="dark"] #notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; background: hsl(0 0% 0% / .22); pointer-events: none; }   /* a shade behind the blur on DARK, the glass itself stays clear */
-.nb-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 8px 8px 6px 14px; cursor: grab; user-select: none; touch-action: none; }
+.nb-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 16px 10px 12px 14px; cursor: grab; user-select: none; touch-action: none; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title") */
 .nb-titles { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
 .nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; color: var(--fg); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; }
 .nb-title:focus { color: var(--acc); }
