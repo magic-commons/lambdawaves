@@ -41,6 +41,16 @@ CERTS = os.environ.get("LW_CERTS") or os.environ.get("MB_CERTS") or os.path.expa
 APP = sys.argv[1] if len(sys.argv) > 1 else ROOT
 PORT = int(sys.argv[2]) if len(sys.argv) > 2 else 8701
 HOST = os.environ.get("LW_HOST", "127.0.0.1")
+import json as _json
+# 033 THE UPDATER · THE GATE WEARS THE LIVE HEADERS.  The edge (tools/build-deploy.mjs _headers, 030 H) sends X-Content-Type-Options: nosniff and
+# a Content-Security-Policy on every file; a gate that sent neither let a JSON module import inside the maths worker pass here and fail live
+# for every visitor (Firefox refuses it under nosniff in a worker).  So the gate sends both by default; LW_EXTRA_HEADERS (a JSON object)
+# replaces the set for an experiment ('{}' for a bare gate).
+LIVE_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'",
+}
+EXTRA_HEADERS = _json.loads(os.environ["LW_EXTRA_HEADERS"]) if os.environ.get("LW_EXTRA_HEADERS") is not None else LIVE_HEADERS
 
 CERT, KEY = os.path.join(CERTS, "cert.pem"), os.path.join(CERTS, "key.pem")
 if not (os.path.exists(CERT) and os.path.exists(KEY)):
@@ -88,7 +98,9 @@ class H(http.server.SimpleHTTPRequestHandler):
         self.send_error(404); return None
     def end_headers(self):
         # no-store, because the whole point of the gate is that it reads the bytes on disk
-        self.send_header("Cache-Control", "no-store"); super().end_headers()
+        self.send_header("Cache-Control", "no-store")
+        for k, v in EXTRA_HEADERS.items(): self.send_header(k, v)   # 033: the live edge's headers (LIVE_HEADERS), or LW_EXTRA_HEADERS
+        super().end_headers()
     def log_message(self, fmt, *a):
         if not self.loopback(): sys.stderr.write("%s %s — %s\n" % (self.client_address[0], self.log_date_time_string(), fmt % a)); sys.stderr.flush()
 

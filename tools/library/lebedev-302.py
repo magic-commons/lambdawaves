@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""tools/library/lebedev-302.py — writes lab/lebedev-302.json: the 302-point Lebedev–Laikov set (order 29; V. I. Lebedev and D. N. Laikov,
+"""tools/library/lebedev-302.py — writes lab/lebedev-302.js: the 302-point Lebedev–Laikov set (order 29; V. I. Lebedev and D. N. Laikov,
 Doklady Mathematics 59, 477 (1999)), x y z w per point with the weights summing to 1, read from PySCF's own table (pyscf.dft.LebedevGrid,
 the transcription of Laikov's C code PySCF's grids use) — so the app's angular grid is the oracle's to the last digit.
 
@@ -17,7 +17,7 @@ g = MakeAngularGrid(302)
 assert g.shape == (302, 4) and abs(g[:, 3].sum() - 1) < 1e-14 and np.abs((g[:, :3] ** 2).sum(1) - 1).max() < 1e-15
 out = {"source": "Lebedev & Laikov 1999, the 302-point set (order 29), from pyscf.dft.LebedevGrid (PySCF %s) by tools/library/lebedev-302.py" % pyscf.__version__,
        "xyzw": [float(v) for v in g.ravel()]}
-with open(os.path.join(ROOT, "lab", "lebedev-302.json"), "w") as f:
-    json.dump(out, f, separators=(",", ":"))
-    f.write("\n")
-print("wrote lab/lebedev-302.json")
+HEAD = "/* lebedev-302.js \u2014 the 302-point Lebedev\u2013Laikov set (order 29), written by tools/library/lebedev-302.py as a JS MODULE (033 THE UPDATER): a JSON module import (with { type: 'json' }) is refused by Firefox inside a worker when the server sends X-Content-Type-Options: nosniff \u2014 the live edge does (030 H), so the maths worker never started and every chemistry call waited forever after the 032 deploy. */\n"   # 033: a JS module, never a JSON module import
+with open(os.path.join(ROOT, "lab", "lebedev-302.js"), "w") as f:
+    f.write(HEAD + "export default " + json.dumps(out, separators=(",", ":")) + ";\n")
+print("wrote lab/lebedev-302.js")

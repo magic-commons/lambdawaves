@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { build, solveLattice, psi0, evolver, split, tunnelT, DEFAULTS } from '../lab/lattice-model.js';
-const AB = JSON.parse(readFileSync(new URL('../lab/ab-patch.json', import.meta.url)));
+const AB = (await import('../lab/ab-patch.js')).default;   // 033: a JS module (never a JSON module import — see lab/ab-patch.js)
 let n = 0; const ok = (name, f) => { f(); n++; console.log('ok', name); };
 /* the transmission by the transfer matrix (ψ = e^{ikn} past the barrier, walked back through ψ_{n−1} = (V_n − E)ψ_n − ψ_{n+1}): independent of the closed form */
 const transfer = (k, V, nb) => { const E = -2 * Math.cos(k), at = (m) => [Math.cos(k * m), Math.sin(k * m)]; let a = at(nb + 1), b = at(nb);

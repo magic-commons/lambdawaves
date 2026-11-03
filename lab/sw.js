@@ -33,7 +33,7 @@
 /* ── 1. THE PRECACHE — every file under lab/ that the running lab actually loads ────────────────────────
  * [url relative to this worker, first 12 hex of the file's sha-256].  GENERATED — see the header. */
 const PRECACHE = [
-  ['./ab-patch.json',                                               '5dd0e71d78bf'],
+  ['./ab-patch.js',                                                 '978460b97609'],
   ['./absorb.js',                                                   '3b0857195bfa'],
   ['./actions.js',                                                  '932c00ebd125'],
   ['./angular-nodes.js',                                            'a4c221d5dc48'],
@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '628d7346cc22'],
-  ['./build-id.js',                                                 'f063cccc17a3'],
+  ['./build-id.js',                                                 '2273f1f3b594'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '41922d244a06'],
@@ -63,7 +63,7 @@ const PRECACHE = [
   ['./csb-search.js',                                               '939a2bd20669'],
   ['./csb.css',                                                     'e94d3046bc68'],
   ['./density.js',                                                  'fb27287c3025'],
-  ['./dft-grid.js',                                                 '4a75ae325355'],
+  ['./dft-grid.js',                                                 '1695b4ae4115'],
   ['./dynamics.js',                                                 '0821063b67a1'],
   ['./edit-domain.js',                                              'f67311da8412'],
   ['./elements.js',                                                 '3fad3eb4c9ff'],
@@ -133,9 +133,9 @@ const PRECACHE = [
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
   ['./latex-state.js',                                              'd4dc21205611'],
-  ['./lattice-model.js',                                            '76daa383bd32'],
+  ['./lattice-model.js',                                            '6d03af1255ca'],
   ['./lattice.js',                                                  '188e45dfce88'],
-  ['./lebedev-302.json',                                            '9b9b2215df5f'],
+  ['./lebedev-302.js',                                              '11bef5009731'],
   ['./library.js',                                                  '62bf4124afdd'],
   ['./library.json',                                                '0a3531a7c866'],
   ['./linalg.js',                                                   'da2367cdcb97'],

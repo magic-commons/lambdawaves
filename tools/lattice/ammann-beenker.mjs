@@ -1,4 +1,4 @@
-/* tools/lattice/ammann-beenker.mjs — THE AB PATCH (0.7.2 L2): writes lab/ab-patch.json, the LATTICE window's AB PATCH preset.
+/* tools/lattice/ammann-beenker.mjs — THE AB PATCH (0.7.2 L2): writes lab/ab-patch.js, the LATTICE window's AB PATCH preset.
  * Cut and project from ℤ⁴: a point n is kept when its perpendicular image P⊥n = Σ nₖ e⊥ₖ (e⊥ₖ = (cos 3kπ/4, sin 3kπ/4)) falls in the
  * octagon P⊥([−½, ½]⁴), centred on 0 — no lattice point lies on its edges (an edge's line is a + b/√2 = ½ + 1/√2, a, b integers), so the
  * set is a true tiling and exactly 8-fold about the origin.  The physical image r = Σ nₖ eₖ (eₖ = (cos kπ/4, sin kπ/4)) is kept inside the
@@ -7,7 +7,7 @@
  * 8-fold orbits by |q| with S ≥ 0.1 are written with |q|, S and the index m — "a patch", never "the quasicrystal".
  *   node tools/lattice/ammann-beenker.mjs [--check] */
 import fs from 'node:fs';
-const OUT = new URL('../../lab/ab-patch.json', import.meta.url), C = Math.cos, S = Math.sin, PI = Math.PI;
+const OUT = new URL('../../lab/ab-patch.js', import.meta.url), C = Math.cos, S = Math.sin, PI = Math.PI;
 const e = [0, 1, 2, 3].map((k) => [C(k * PI / 4), S(k * PI / 4)]), ep = [0, 1, 2, 3].map((k) => [C(3 * k * PI / 4), S(3 * k * PI / 4)]);
 const dot = (n, b) => [n.reduce((s, v, k) => s + v * b[k][0], 0), n.reduce((s, v, k) => s + v * b[k][1], 0)];
 /* the octagon as the zonotope Σ tₖ e⊥ₖ, t ∈ [−½, ½]: |u · ν| ≤ ½ Σⱼ |e⊥ⱼ · ν| for each edge normal ν ⟂ e⊥ₖ */
@@ -27,8 +27,10 @@ for (let a = -5; a <= 5; a++) for (let b = -5; b <= 5; b++) for (let c = -5; c <
   const key = k.toFixed(6) + ':' + Sq(q).toFixed(9); if (!orbit.has(key)) orbit.set(key, { q: k, S: Sq(q), m, at: q }); }
 const peaks = [...orbit.values()].filter((p) => p.S >= 0.1).sort((x, y) => x.q - y.q).slice(0, 6);   // the first six Bragg orbits by |q| with S ≥ 0.1 (below it, the patch's finite-size ripple: every orbit under 7.58 reads S < 0.05)
 const out = JSON.stringify({ note: 'a patch of the Ammann–Beenker tiling by cut and project from Z^4 (tools/lattice/ammann-beenker.mjs): vertices in bond lengths; the first six 8-fold orbits by |q| with S >= 0.1 of S(q) = |sum exp(i q.r)|^2 / N^2, q = pi sum m_k e_k',
-  n: xy.length, edges, xy, peaks }) + '\n';
-if (process.argv.includes('--check')) { const ok = fs.readFileSync(OUT, 'utf8') === out; console.log(ok ? 'lab/ab-patch.json in step' : 'lab/ab-patch.json STALE'); process.exit(ok ? 0 : 1); }
-fs.writeFileSync(OUT, out);
-console.log(`lab/ab-patch.json: ${xy.length} vertices, ${edges} edges, radius ${V[V.length - 1].d.toFixed(4)}; peaks:`);
+  n: xy.length, edges, xy, peaks }) + ';\n';
+const HEAD = "/* ab-patch.js \u2014 THE AB PATCH (0.7.2 L2), the LATTICE window's AB PATCH preset, written by tools/lattice/ammann-beenker.mjs as a JS MODULE (033 THE UPDATER): a JSON module import (with { type: 'json' }) is refused by Firefox inside a worker when the server sends X-Content-Type-Options: nosniff \u2014 the live edge does (030 H), so the maths worker never started and every chemistry call waited forever after the 032 deploy. */\n";   // 033: a JS module, never a JSON module import
+const out2 = HEAD + 'export default ' + out;
+if (process.argv.includes('--check')) { const ok = fs.readFileSync(OUT, 'utf8') === out2; console.log(ok ? 'lab/ab-patch.js in step' : 'lab/ab-patch.js STALE'); process.exit(ok ? 0 : 1); }
+fs.writeFileSync(OUT, out2);
+console.log(`lab/ab-patch.js: ${xy.length} vertices, ${edges} edges, radius ${V[V.length - 1].d.toFixed(4)}; peaks:`);
 for (const p of peaks) console.log(`  |q| ${p.q.toFixed(6)}  S ${p.S.toExponential(6)}  m ${p.m.join(',')}`);

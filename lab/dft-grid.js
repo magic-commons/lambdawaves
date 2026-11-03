@@ -1,7 +1,7 @@
 /* dft-grid.js — the molecular quadrature of RKS LDA (0.7.3 K1), PySCF's grid unpruned: per atom Treutler–Ahlrichs M4 radial points (JCP 102, 346 (1995),
  * ξ per element) × the 302-point Lebedev set (Lebedev & Laikov 1999, order 29: lab/lebedev-302.json), weighted by Becke's 1988 partition (three smoothing
  * iterations, no atomic-size adjustment).  Atomic units, atoms in bohr.  tests/rks.test.mjs holds ∫e^{−r²} = π^{3/2} on it and PySCF's energies through it. */
-import LEB from './lebedev-302.json' with { type: 'json' };
+import LEB from './lebedev-302.js';   // 033: a JS module, never a JSON module import (nosniff + a worker: see lebedev-302.js)
 const XI = [1, 0.8, 0.9, 1.8, 1.4, 1.3, 1.1, 0.9, 0.9, 0.9, 0.9, 1.4, 1.3, 1.3, 1.2, 1.1, 1, 1, 1, 1.5, 1.4, 1.3, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.1, 1.1, 1.1, 1.1, 1, 0.9, 0.9, 0.9, 0.9];   // H–Kr
 
 /** molecularGrid(atoms, { radial = 75, lebedev = 302 }) → { x, y, z, w } (Float64Array each, atom by atom, radial shell by shell) */

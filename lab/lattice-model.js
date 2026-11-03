@@ -2,7 +2,7 @@
  * Peierls phase e^{iΦ/N} on the AB ring), its eigensolve (real → eigSymQL, Hermitian → hermitianEigen), the exact evolution ψ(t) = C e^{−iEt} C†ψ₀
  * and the closed forms the window prints beside what it measures.  J = 1 is the energy unit and 1/J the time unit.  0.8.1 T3: HOFSTADTER (the Peierls phase
  * per bond), the QUANTUM WALK (a map: `walker`, no eigensolve) and the XX SPIN CHAIN (2^N basis states, `spinView` its ⟨σ_z⟩ and half-chain entropy). */
-import { eigSymQL } from './linalg.js'; import { hermitianEigen } from './density.js'; import AB from './ab-patch.json' with { type: 'json' };   // L2: tools/lattice/ammann-beenker.mjs
+import { eigSymQL } from './linalg.js'; import { hermitianEigen } from './density.js'; import AB from './ab-patch.js';   // 033: a JS module, never a JSON module import (see lebedev-302.js)   // L2: tools/lattice/ammann-beenker.mjs
 export const PRESETS = [['chain', 'CHAIN', 'N'], ['ring', 'RING', 'N'], ['square', 'SQUARE', 'L'], ['ssh', 'SSH', 'N J1 J2'], ['anderson', 'ANDERSON', 'N L W seed d seeds'], ['aa', 'AUBRY–ANDRÉ', 'N lam phi'],
   ['ab', 'AB RING', 'N Phi'], ['graphene', 'GRAPHENE', 'rings'], ['benzene', 'HÜCKEL BENZENE', ''], ['tunnel', 'TUNNEL', 'N V nb'], ['patch', 'AB PATCH', ''],
   ['hofstadter', 'HOFSTADTER', 'L fp fq'], ['walk', 'QUANTUM WALK', 'N'], ['spin', 'SPIN CHAIN', 'ns']].map(([id, label, k]) => ({ id, label, knobs: k ? k.split(' ') : [] }));

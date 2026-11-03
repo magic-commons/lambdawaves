@@ -36,7 +36,7 @@ export async function startDriver() {
     { stdio: ['ignore', 'pipe', 'pipe'] });
   let startupError;
   p.once('error', error => { startupError = error; });
-  p.stdout.on('data', () => {});
+  p.stdout.on('data', (d) => { if (process.env.GD_VERBOSE) process.stderr.write(d); });   // 033: Firefox's own console (devtools.console.stdout.content) rides here — a worker's errors show only on this road
   p.stderr.on('data', (d) => { if (process.env.GD_VERBOSE) process.stderr.write(d); });
   try {
     for (let i = 0; i < 100; i++) {
