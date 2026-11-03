@@ -17,6 +17,7 @@ try {
   await new Promise((r) => setTimeout(r, 2500));
   assert.equal((await g.waitFor('window.__LW&&__LW.ready&&document.getElementById("lwMenu")', 300, 100)).ok, 1);
   const p3 = await ev(`const w = (n) => new Promise((r) => setTimeout(r, n)), M = document.getElementById('lwMenu'); if (M.hidden) document.getElementById('lwHome').click(); await w(800);
+    const lib = M.querySelector('.mm-face:not([hidden]) .mm-door[data-door="library"]'); if (lib) { lib.click(); await w(900); }   // 034: an open lands on the face; LIBRARY is the decks
     const tab = (i) => document.querySelectorAll('.mm-tab')[i].click();
     tab(0); await w(900); const atomic = { look: document.querySelector('.mm-lookg').textContent, src: document.querySelector('.mm-el img.mm-pic').getAttribute('src') };
     tab(1); await w(1200); const molecular = { look: document.querySelector('.mm-lookg').textContent, src: document.querySelector('.mm-mol img.mm-pic').getAttribute('src') };
