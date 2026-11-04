@@ -2,6 +2,22 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The law of 036
+
+THE ENVELOPE TRIGGER (036 P6, Josh 2026-11-03: "the event's envelope-trigger feature (I think it's built in Basins) is missing in Lambdawaves,
+Add that feature in"): BASINS' ENV + PATTERN road, vendored in the kit (`lab/mir/pattern/`: window.js · sequencer.js · model.js, BASINS
+`docs/ENV-PATTERN-2026-10-01.md`), installed on THE ONE modulation host by `lab/shell/modulation.js` `installEnvelopeTrigger` (rack.js seats it
+after the history). An ENV face wears PATT: it turns that ENV's step row live and opens the PATTERN window — one row per ENV, a 16th note a step
+(16 · 32 · 64), a step's LED bar its velocity (FL's gestures: left paints, right clears, a vertical drag sets the velocity), docked on its ENV
+device and going with the modulation window (the kit's four laws). THE SEQUENCER rides the host clock's one advance notice (no loop of its own):
+every lit step the beats cross fires its ENV (`M.trigger`), the velocity scaling the ENV's macros; nothing fires while stopped; a film steps the
+same crossings. A PATTERN clip (an ENV's → TL with a live row) under the playhead rules its ENV over the row (THE ARRANGEMENT WINS WHERE IT
+PLAYS). THE ROWS ARE THE PROJECT'S inside λWAVES' one part — `presentation.pattern`, default-absent, restored after the rack (the ENV ids exist)
+and before the arrangement, an open replacing them and NEW clearing them; the kit's own `pattern` part stays off (`project: false`, projects.js'
+ONE PART law); the one undo stack keeps them as their own snapshot domain (a paint is one row), a row edit dirties the project. The window is
+WINDOW › TOOLS › PATTERN (the action `pattern`), its shape the WORKSPACE record `lambdawaves.q0.patternwin`. The conductor writes hits with a
+score's `pattern` key (docs/conductor/SCORE.md § The hits).
+
 ## The laws of 032 (TIMELINE REDUX, MIR 1.5.6-alpha.21 … 28)
 
 THE ARRANGEMENT WINS WHERE IT PLAYS (alpha.21 · alpha.27): two clips on one target — the highest lane, then the earliest start; under a clip its value is the target's (a device's routes on it stand aside; a hand macro still layers); off a clip the device plays as before; →TL bypasses the device it sent. THE LOOP (alpha.25): the timeline loops while it plays — the ruler's range › ACTIVE › the clips' extent › free run; a film never loops (λWAVES passes no controller of its own: the kit's loops). ONE MODIFIER TABLE (alpha.23): Shift selects and fine-tunes (⅛ on curves, tension and knobs), Ctrl shapes (the ruler's vertical drag zooms about the pointer, its horizontal half scrubs snapped; Ctrl on a clip's body clones, on its edge stretches keeping the shape, Ctrl+Shift at ⅛; Ctrl locks a point's time), Alt bypasses Snap and deletes a point; the value lock is gone; the pencil stamps the clip last pressed. THE WORK BAR (032 T8 · T4): its power seat wears MOD (the kit's word face, dressed as its door is; the modulation window keeps the power ring) and beside t a second reader, TIME, the playhead's beat as m:ss.d at the tempo in force (`formatSeconds`), painted with t.

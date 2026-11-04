@@ -2,14 +2,28 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
-## The standing paragraphs
+## The laws of 036
 
-BUTTONS · PAINT (036 P1, Josh 2026-11-03: "a 'Paint' vs 'Buttons' toggle … the original control of a left-click only feature"): the
-ladders' stroke has two modes, one PREFERENCE record `lambdawaves.q0.stroke` { mode } read at each press, its seat `strokeSeg` (a pointing
-hand · a paintbrush) on SPECTRUM's head (in PRESET VISUALS' place) and on the ORBITAL and STATES heads, every seat in step. BUTTONS, the
-default: a left click TOGGLES the item it was pressed and released on (normalised, VIEW MIX, one undo row, as a stroke), a drag sweeps
-nothing, the right button is the context menu's (the grid's CLEAR · NORMALIZE · … · CREATE EVENT). PAINT is THE PAINT GESTURE below.
-WAVE and PALETTE never read it.
+BUTTONS · PAINT (036 P1, Josh 2026-11-03: "a 'Paint' vs 'Buttons' toggle … the original control of a left-click only feature … Same goes for
+switching between atoms and molecules; don't change the wave/palette windows"): the ladders' stroke has two modes, one PREFERENCE record
+`lambdawaves.q0.stroke` { mode } read at each press (`lab/paint-stroke.js` `strokeMode`, `paintStroke`'s `mode` and `isOn`), its seat
+`strokeSeg` — a pointing hand · a paintbrush — on SPECTRUM's head (in PRESET VISUALS' place, the four-column grid kept) and on the ORBITAL
+and STATES heads (SPECTRUM hides under MOLECULES), every seat in step. BUTTONS, the default: a left press released on the item it began on
+TOGGLES it (normalised, VIEW MIX, one undo row, as a stroke), a drag sweeps nothing, the right button is the context menu's (the grid's
+CLEAR · NORMALIZE · NEXT PRESET · CREATE EVENT …). PAINT is THE PAINT GESTURE below. WAVE and PALETTE never read it.
+
+A HAND'S PRESET IS THE REGISTER (036 P1, Josh: "remove the feature 'Preset Visuals' … user's work hard on their wave and then it gets
+overridden"): SPECTRUM's ‹ PRESET ›, the verb `preset`, EMISSION's pair and the Picker's 140 tile load the labels alone (`loadPreset(…, { hand:
+true })`); the view, the rate and the window stay the reader's. A preset's `visual` rides the boot's road alone — `?preset=` (a link is its
+author's whole intent; THE LOCK boots it) and the facade's bare `loadPreset(id)`. PRESET VISUALS and `api.visuals` are gone. The EMISSION
+paragraph's "one period in the window" below is history: a pressed line no longer sets the window.
+
+THE DIAL'S NAME (036 P2, Josh: "use the informational's working font for the orbital text"): SPECTRUM's lane names (`.sp-nm.sp-nl`) are the
+operator's `labelOf` TYPESET — its m a real subscript (`2p₋₁`, `2p₁`, the chips' form) — in STIX Two Math (`--font-math`, the one bundled face
+with every subscript digit; Roboto lacks ₆ ₇ ₈); display only: `labelOf`, the aria names, the badges, the shadow digest, latex-state and the
+verbs keep the plain form.
+
+## The standing paragraphs
 
 THE PAINT GESTURE (`lab/paint-stroke.js`, the PAINT mode) is one law for the ORBITAL and STATES
 ladders and SPECTRUM's state grid: LEFT click adds one, LEFT drag adds every

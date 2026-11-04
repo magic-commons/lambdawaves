@@ -79,7 +79,7 @@ A law a gate enforces is cited by its gate, not restated: THE LOCK (the field's 
 - the stage text, captions, INFORMATIONAL, THE HEAD, the ESP bar, the furniture law → `stage-words.md`
 - THE MAIN MENU (the face, the tutorial deck and its heroes), the Picker's decks, the library's words and installs, the looks → `picker.md`
 - the field, WAVE's styles, ESP, PLAYBACK LOCK, THE LOCK's leaves → `field-and-lock.md`
-- the modulation port and window, the clock, curves, the flash guard → `modulation-and-timeline.md`
+- the modulation port and window, the clock, curves, the flash guard, THE ENVELOPE TRIGGER (ENV + PATTERN) → `modulation-and-timeline.md`
 - RENDER, the recorder, the time law → `film.md`
 - NODES, CURVES, the ids, THE SHADER NODE (`lab/node-shader.js`, DECOHERE on `field.tap`) → `nodes.md`
 - A DEMO OPENS CLEAN (a solve's derived fill keeps the clean mark) → `scopes-and-records.md`; A MAPPED CONTROLLER IS LIVE AT LAUNCH → `control-surface.md`; A SAVED LOOK KEEPS ITS NAME → `look-and-camera.md`
