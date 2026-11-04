@@ -10,8 +10,8 @@
  *                                                    — a second look appends a line: the last line for an id is its verdict
  *   node tools/menu-collage.mjs cut [--in .tmp/collage]     3 THE POOL: λWAVES material of grade ≥ 2 with no UI and no informational (an
  *        atom's letters on its balls are the molecule's own picture: an info-1 whose note says atom/letter/glyph/symbol counts as 0), never a
- *        window the measure called stuttery; a theme under 72 clips admits info 1 (a formula on the stage), then ui 1 (a sliver), only up to 72
- *        (the best grade first, one family at a time), and says so.
+ *        window the measure called stuttery; a theme under 48 clips admits info 1 (a formula on the stage), then ui 1 (a sliver), only up to
+ *        48 (the best grade first, one family at a time), and says so (036: a floor of 72 put a caption on a sixth of the light wall).
  *        Each kept window → pool/<theme>/<id>.mp4 (2.5 s from t, the centre square, 160 × 160, 30 fps — a 60-fps source keeps every second
  *        frame by count, never by its jittered clock; 30 keeps all; another rate goes through fps=30 — H.264 CRF 23, no sound) and
  *        pool/pool.json; prints the counts per theme and family
@@ -43,7 +43,7 @@ import { dirname, join, resolve } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..'), OUT = join(ROOT, 'lab/img/menu/collage');
 const args = process.argv.slice(2), cmd = args[0], at = args.indexOf('--in');
 const IN = resolve(ROOT, at >= 0 ? args[at + 1] : '.tmp/collage'), POOL = join(IN, 'pool');
-const THEMES = ['dark', 'light'], FLOOR = 72, TILE = 160, COLS = 12, ROWS = 7, SLOTS = COLS * ROWS, BEATS = 12, BEAT = 2, FPS = 30, DUR = BEATS * BEAT, GROUP_CAP = 0.25;
+const THEMES = ['dark', 'light'], FLOOR = 48, TILE = 160, COLS = 12, ROWS = 7, SLOTS = COLS * ROWS, BEATS = 12, BEAT = 2, FPS = 30, DUR = BEATS * BEAT, GROUP_CAP = 0.25;
 const BLACK = 'black molecules', BLACK_CAP = 0.08, DARK_LUM = 100, DARK_CAP = 0.12, NODES_DAY = '2026-10-27', LATE_CAP = 0.10, BUDGET = 14.5 * 1048576;
 const fail = (m) => { console.error('menu-collage: ' + m); process.exit(1); };
 const run = promisify(execFile);
