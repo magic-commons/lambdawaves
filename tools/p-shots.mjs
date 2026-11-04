@@ -92,6 +92,12 @@ try {
     out.mirHand = await g.ev(`__LW.layout.about.win.resize({ w: 500, h: 380 }); await new Promise((r) => setTimeout(r, 300)); const s = ${S}; return { rect: ${R}, saved: [s.abW, s.abH] };`);
     const j = await g.ev(`const r = document.querySelector('.lw-about-i').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2];`); await click(j[0], j[1]); await wait(600);
     out.back = await g.ev(`const s = ${S}; return { face: __LW.layout.about.face, rect: ${R}, saved: [s.abW, s.abH] };`);
+  } else if (scene === 'p5') {
+    /* STAR LOOP from DEMOS (the seeded copy refreshed by its new `saved`): the timeline's clips in their curves' colours */
+    out.demo = await g.ev(`window.confirm = () => true; const P = __LW.projects, ok = await P.demo('star-loop'); await new Promise((r) => setTimeout(r, 1500)); await __LW.settle();
+      __LW.timeline.open(); await new Promise((r) => setTimeout(r, 1500));
+      const st = __LW.timeline.model.state(); return { ok, open: __LW.timeline.isOpen(), colours: [...new Set(st.curves.map((c) => c.color))].length, grey: st.curves.filter((c) => c.color === '#a7adb8').length, clips: st.clips.length };`);
+    await shot('036-P5-star-loop-clips', await g.ev(`const r = __LW.timeline.root.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`), 4);
   } else if (scene === 'read') out.r = await g.ev(readFileSync(process.argv[4], 'utf8'));   // a probe's body from a file
   out.errors = (await g.errors()).errs;
 } finally { await g.close(); }

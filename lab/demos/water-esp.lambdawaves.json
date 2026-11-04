@@ -4,7 +4,7 @@
  "path": "DEMOS/WATER ESP",
  "folder": "DEMOS",
  "name": "WATER ESP",
- "saved": "2026-10-29T08:25:20.435Z",
+ "saved": "2026-11-04T06:13:29.995Z",
  "opened": "2026-10-29T08:25:20.435Z",
  "data": {
   "experiment": {
@@ -1198,7 +1198,7 @@
       "id": "curve2",
       "targetId": "observer.yaw",
       "name": "half turn",
-      "color": "#a7adb8",
+      "color": "#ff9e26",
       "length": 16,
       "min": 0,
       "max": 1,
@@ -1219,7 +1219,7 @@
       "id": "curve5",
       "targetId": "material.style",
       "name": "a style per bar",
-      "color": "#a7adb8",
+      "color": "#5f26ff",
       "length": 16,
       "min": 0,
       "max": 1,
