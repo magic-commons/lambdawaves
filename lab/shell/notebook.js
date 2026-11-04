@@ -268,6 +268,18 @@ export function createNotebook(app) {
         },
         signature: () => projectKey(),
       };
+      /* 036 S3 · NEW RESETS THE WINDOWS (Josh: "New projects from now on will reset MIR windows to default, while not messing with preferences"):
+         FOLDERS' NEW and the facade's (one seat: both land here as 'new project') put the rack back to THE DEFAULT LAYOUT (layout.DEFAULT, the
+         boot's first-run arrangement — WORKSPACE keys only, through applyLayout's save), the modulation window's and the TIMELINE's own shape to
+         their first run (closed; the work lane on top, the timeline docked at the foot, its zoom and snap the boot's) and NODES' window shut.
+         The notebook is left as it stands (the notebook law), and no PREFERENCE moves. */
+      function freshWindows() {
+        if (app.state.modView) app.state.modView.restore({});
+        const tl = app.state.tl;
+        if (tl) { tl.restore({ workLane: 'top' }); tl.win.restore({ dock: 'bottom', open: false }); tl.editor.setSnap(1); tl.editor.act.zoomLevel(2); }
+        if (app.sh.LW && app.sh.LW.nodes) app.sh.LW.nodes.close();
+        if (layout.DEFAULT) layout.applyLayout(layout.DEFAULT);
+      }
       /* RENDER's SUBJECT says THIS VIEW's system: an open card is painted again when a project lands or ⓘ points (iteration 004) */
       const renderPaint = () => { const fc = app.state.filmCard; if (fc && !fc.card.root.classList.contains('closed')) fc.view.paint(); };
       const projects = createProjects({ host: floats || document.body, part,
@@ -289,7 +301,7 @@ export function createNotebook(app) {
         /* 0.3.1 · S2 THE NOTEBOOK LAW (PLAN §3.4): a project opens onto its notebook only when the notebook has text — the complete
            notebook, in its scrollable pane.  A blank one (NEW's included) opens nothing and closes nothing.  "Edited" is read off the
            text: no flag.  S3: the ring's bottom row is named for the file. */
-        opened(label) { count(); if (app.state.history) app.state.history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); renderPaint(); },
+        opened(label) { if (label === 'new project') freshWindows(); count(); if (app.state.history) app.state.history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); renderPaint(); },
         titleAfterSave(name) { if (titleIn.value !== 'NOTEBOOK') return false; titleIn.value = name; return true; } });
       addEventListener('beforeunload', (e) => {
         if (!projects.dirty) return;
