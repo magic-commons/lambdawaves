@@ -351,18 +351,18 @@ export function createNotebook(app) {
          createWindow in #floats with a title bar — ⓘ and × — whose body is the λWAVES face (index.html #aboutFace) or, on ⓘ, MIR ABOUT's own
          page lent in place (the kit's gui.aboutPage; MIR OPTIONS' ⓘ takes it back to the kit's window).  Its size is the WORKSPACE abW / abH. ── */
       const mirFace = el('div', 'nb-face lw-about-mir'); mirFace.hidden = true;
+      let abFace = 'lw';   // the face shown: 'lw' (λWAVES) or 'mir' (the kit's page lent) — read by the size road below
       const abWin = createWindow({ id: 'about', title: 'ABOUT', host: floats || document.body, chrome: 'close', glyph: 'about', resizable: true, emptyDrag: true,
         size: { w: ABOUT_DEF_W, h: ABOUT_DEF_H }, min: { w: 320, h: 240 }, body: (b) => { faces.about.hidden = false; b.append(faces.about, mirFace); },
         persist: { read: () => { const S = readSettings(); return { w: S.abW, h: S.abH }; },
-          write: (sh) => { const S = readSettings(); if (sh && (S.abW !== sh.w || S.abH !== sh.h)) settingsStore.write({ ...S, abW: sh.w, abH: sh.h }); } } });
+          write: (sh) => { if (abFace === 'mir') return; const S = readSettings(); if (sh && (S.abW !== sh.w || S.abH !== sh.h)) settingsStore.write({ ...S, abW: sh.w, abH: sh.h }); } } });   // 036 P4: the MIR face's size is never the reader's
       abWin.root.classList.add('lw-about');
       const abI = el('button', 'mir-win-btn lw-about-i'); abI.type = 'button'; abI.dataset.glyph = 'info'; { const g = glyphEl('info', 'gly gly-info'); if (g) abI.append(g); }
       abWin.tools.prepend(abI);
-      let abFace = 'lw';
       const abShow = (f) => {
         abFace = f === 'mir' ? 'mir' : 'lw'; faces.about.hidden = abFace !== 'lw'; mirFace.hidden = abFace !== 'mir';
         abI.title = abFace === 'lw' ? 'MIR ABOUT — the kit this app is built on' : 'ABOUT λWAVES — back to the app'; abI.setAttribute('aria-pressed', String(abFace === 'mir'));
-        if (abFace === 'mir') { const g = mirGui(); if (g && g.aboutPage) g.aboutPage(mirFace); }   // lent again each time: the kit's own window may have taken it back
+        if (abFace === 'mir') { const g = mirGui(), page = g && g.aboutPage ? g.aboutPage(mirFace) : null; if (page && abWatch) abWatch.observe(page); }   // lent again each time: the kit's own window may have taken it back
         const logo = faces.about.querySelector('.nb-logo');
         /* iteration 016 P5 (Josh: "the new λWAVES logo, much larger; the MIR logo shrunk"): the wordmark lab/img/lambdawaves-logo.svg, large — its word in the
            ink, its λ and its dot their own colours (the Picker's own road); the title's clone stays the fallback */
@@ -373,9 +373,29 @@ export function createNotebook(app) {
         }
         abWin.body.scrollTop = 0;
       };
-      abI.addEventListener('click', () => abShow(abFace === 'lw' ? 'mir' : 'lw'));
+      /* 036 P4 · ABOUT'S TWO SIZES (Josh: "switching to MIR have the fitted window … while Lambdawaves window could simply return to whatever was
+         the last window size resize"): the MIR face FITS its page — the kit's fitTo measure (the window's chrome as it stands, the page's natural
+         height, the face's padding, capped by the screen; the width kept; the face itself stretches to the glass, so its children are measured) —
+         and nothing on that face is saved (persist.write above skips: a fit or a hand's resize there never writes abW / abH); the λWAVES face
+         returns to the reader's last size.  Run after the window is open (a closed window has no layout to read). */
+      const abFit = () => {
+        if (!abWin.isOpen()) return;
+        if (abFace === 'lw') { const S = readSettings(); abWin.resize({ w: S.abW || ABOUT_DEF_W, h: S.abH || ABOUT_DEF_H }); return; }
+        const cs = getComputedStyle(mirFace), px = (s, k) => parseFloat(s[k]) || 0;
+        let page = px(cs, 'paddingTop') + px(cs, 'paddingBottom');
+        for (const k of mirFace.children) { const c = getComputedStyle(k); page += k.offsetHeight + px(c, 'marginTop') + px(c, 'marginBottom'); }
+        const p = mirFace.firstElementChild; abAt = p ? [mirFace.offsetWidth, p.offsetHeight] : null;   // the face's width (a scrollbar coming or going is not a resize)
+        const floor = 8 + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--menubar-bottom')) || 0);
+        abWin.resize({ h: Math.min(Math.ceil(abWin.root.offsetHeight - mirFace.offsetHeight + page + 2), innerHeight - floor - 8) });
+      };
+      /* the kit's logo lands after the page shows (a cached one in a microtask): a page whose HEIGHT moved at the width it was fitted at is fitted
+         again, on the next frame; a width that moved is a resize (a hand's, or the screen's) and stands until the face is shown again */
+      let abAt = null;
+      const abWatch = typeof ResizeObserver === 'function' ? new ResizeObserver(([e]) => { const p = e.target, was = abAt;
+        if (abFace === 'mir' && was && mirFace.offsetWidth === was[0] && p.offsetHeight !== was[1]) requestAnimationFrame(abFit); }) : null;
+      abI.addEventListener('click', () => { abShow(abFace === 'lw' ? 'mir' : 'lw'); abFit(); });
       occlusion.register('about', () => (abWin.isOpen() ? [paintedRect(abWin.root)] : [])); occlusion.watch(abWin.root, { attributes: true, attributeFilter: ['hidden'] });
-      layout.about = { open(f = 'lw') { abShow(f); abWin.open(); abWin.raise(); return true; }, close() { abWin.close(); }, toggle(f) { if (abWin.isOpen() && (!f || f === abFace)) abWin.close(); else layout.about.open(f || abFace); },
+      layout.about = { open(f = 'lw') { abShow(f); abWin.open(); abWin.raise(); abFit(); return true; }, close() { abWin.close(); }, toggle(f) { if (abWin.isOpen() && (!f || f === abFace)) abWin.close(); else layout.about.open(f || abFace); },
         get isOpen() { return abWin.isOpen(); }, get face() { return abFace; }, win: abWin };
       const show = (face) => {
         if (face === 'projects') { projects.show(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS' (iteration 004: the front page put away first)

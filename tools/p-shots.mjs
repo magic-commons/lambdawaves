@@ -80,6 +80,18 @@ try {
     const x = await at('.nodes-card[data-node="n3"] .nodes-rm'); await click(x[0], x[1]); await wait(400);
     out.after = await g.ev(`return __LW.nodes.nodes().map((q) => q.id + ':' + q.type + (q.bypass ? ':muted' : ''));`);
     await shot('036-P3-nodes-bar', await rectOf('.nodes-card[data-node="n1"]').then(async (a) => { const b = await rectOf('.nodes-card[data-node="n2"]'); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])]; }), 16);
+  } else if (scene === 'p4') {
+    /* ABOUT: the reader sizes the λWAVES face (520 × 760, saved); ⓘ (a real click) → the MIR face fitted, nothing saved; a resize there is not
+       saved either; ⓘ → back to 520 × 760 */
+    const S = `JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}')`, R = `(() => { const r = __LW.layout.about.win.root.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })()`;
+    out.lw = await g.ev(`__LW.layout.about.open('lw'); await new Promise((r) => setTimeout(r, 400)); __LW.layout.about.win.resize({ w: 520, h: 760 }); await new Promise((r) => setTimeout(r, 300)); const s = ${S}; return { rect: ${R}, saved: [s.abW, s.abH] };`);
+    await shot('036-P4-1-about-lw-sized', await rectOf('.lw-about'), 12);
+    const i = await g.ev(`const r = document.querySelector('.lw-about-i').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2];`); await click(i[0], i[1]); await wait(700);
+    out.mir = await g.ev(`const s = ${S}, b = __LW.layout.about.win.body; return { face: __LW.layout.about.face, rect: ${R}, page: document.querySelector('.lw-about-mir').scrollHeight, scrolls: b.scrollHeight > b.clientHeight + 1, saved: [s.abW, s.abH] };`);
+    await shot('036-P4-2-about-mir-fitted', await rectOf('.lw-about'), 12);
+    out.mirHand = await g.ev(`__LW.layout.about.win.resize({ w: 500, h: 380 }); await new Promise((r) => setTimeout(r, 300)); const s = ${S}; return { rect: ${R}, saved: [s.abW, s.abH] };`);
+    const j = await g.ev(`const r = document.querySelector('.lw-about-i').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2];`); await click(j[0], j[1]); await wait(600);
+    out.back = await g.ev(`const s = ${S}; return { face: __LW.layout.about.face, rect: ${R}, saved: [s.abW, s.abH] };`);
   } else if (scene === 'read') out.r = await g.ev(readFileSync(process.argv[4], 'utf8'));   // a probe's body from a file
   out.errors = (await g.errors()).errs;
 } finally { await g.close(); }
