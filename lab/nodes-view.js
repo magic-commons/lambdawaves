@@ -95,8 +95,9 @@ export function createView(parent, kind, M) {
   };
   label(node('in', 'STAGE IN', false, true, 'in').body, 'the stage picture');
   label(node('out', 'STAGE OUT', true, false, 'out').body, 'the screen');
-  /** a node's card: its bar (the chevron, its icon, the title, the cost mark, × BYPASS, the bin), the PREVIEW strip of a TABLE or MATRIX
-      node, and its body (CURVES, or the type's knobs) */
+  /** a node's card: its bar (the chevron, its icon, the title, the cost mark, ⏻ MUTE (the record's bypass), × REMOVE), the PREVIEW strip of a
+      TABLE or MATRIX node, and its body (CURVES, or the type's knobs).  036 P3 (Josh: "use the 'x' for the real delete and use a power symbol for
+      mute effect"): the kit's `power` (BYPASS ALL's glyph) mutes, the kit's plain `close` × removes */
   function make(q) {
     const t = T[q.type], n = node(q.id, t.label, true, true, q.type, MARK[t.cls]);
     n.c.dataset.type = q.type; n.c.title = t.hint || '';
@@ -105,8 +106,8 @@ export function createView(parent, kind, M) {
     if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip'); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
     const eye = el('button', 'nodes-eye', n.bar); eye.type = 'button'; chip(eye, 'eye', 'VIEW HERE'); eye.addEventListener('click', () => M.setView(q.id));
     const so = el('button', 'nodes-solo', n.bar); so.type = 'button'; chip(so, 'solo', 'SOLO'); so.addEventListener('click', () => M.setSolo(q.id));
-    const x = el('button', 'nodes-x', n.bar); x.type = 'button'; chip(x, 'close', 'BYPASS NODE'); x.addEventListener('click', () => M.setBypass(q.id, !q.bypass));
-    const b = el('button', 'nodes-rm', n.bar); b.type = 'button'; chip(b, 'clear', 'REMOVE NODE'); b.addEventListener('click', () => M.remove(q.id));
+    const x = el('button', 'nodes-x', n.bar); x.type = 'button'; chip(x, 'power', 'MUTE NODE'); x.addEventListener('click', () => M.setBypass(q.id, !q.bypass));
+    const b = el('button', 'nodes-rm', n.bar); b.type = 'button'; chip(b, 'close', 'REMOVE NODE'); b.addEventListener('click', () => M.remove(q.id));
     if (q.type === 'curves') n.view = M.curvesIn(n.body);
     else { n.body.classList.add('nodes-knobs', 'row', 'fit'); n.ctl = nodeBody(n.body, q, t, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) }); }
     if (!over(t)) {                                                   // the foot fold: FADE · MASK · SOFT

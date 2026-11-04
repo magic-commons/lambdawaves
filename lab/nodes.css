@@ -30,7 +30,7 @@
 .nodes-tools button, :is(.nodes-x, .nodes-rm, .nodes-door) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
   background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
 .nodes-x, .nodes-rm { width: 18px; height: 18px; margin-right: -4px; }
-.nodes-x[aria-pressed="true"] { color: var(--acc); }
+.nodes-x[aria-pressed="true"] { color: var(--dim); opacity: .6; }   /* 036 P3: ⏻ MUTE — a muted node's power reads OFF (dim), a live one the bar's ink */
 :is(.nodes-tools button, .nodes-x, .nodes-rm, .nodes-door):is(:hover, :focus-visible) { color: var(--acc); }
 :is(.nodes-tools button, .nodes-x, .nodes-rm, .nodes-door) svg { width: 16px; height: 16px; }
 .nodes-tools, .nodes-door { position: absolute; top: 6px; z-index: 1; }

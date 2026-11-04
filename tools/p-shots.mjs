@@ -71,6 +71,15 @@ try {
     await g.ev(`document.querySelector('.dev[data-id="spectrum"] .sp-rows').scrollIntoView({ block: 'start' }); return 1;`); await wait(300);
     const r = await rectOf('.dev[data-id="spectrum"] .sp-rows'), p = await rectOf('.dev[data-id="spectrum"] .picker');
     await shot('036-P2-labels', [r[0], r[1], r[2], Math.min(p ? p[1] + 160 : r[3], 860)]);
+  } else if (scene === 'p3') {
+    /* NODES' bar: ⏻ MUTE (a real click mutes the second node) · × REMOVE (a real click removes the third) */
+    out.built = await g.ev(`const N = __LW.nodes; N.add('levels'); N.add('vignette'); N.add('posterize'); __LW.run('window.nodes.open'); await new Promise((r) => setTimeout(r, 900));
+      return [...document.querySelectorAll('.nodes-card[data-node^="n"]')].map((c) => [c.dataset.node, c.querySelector('.nodes-x')?.getAttribute('aria-label'), c.querySelector('.nodes-x use, .nodes-x svg')?.outerHTML.length, c.querySelector('.nodes-rm')?.getAttribute('aria-label')]);`);
+    const at = (sel) => g.ev(`const e = document.querySelector(${JSON.stringify(sel)}); const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2];`);
+    const m = await at('.nodes-card[data-node="n2"] .nodes-x'); await click(m[0], m[1]); await wait(400);
+    const x = await at('.nodes-card[data-node="n3"] .nodes-rm'); await click(x[0], x[1]); await wait(400);
+    out.after = await g.ev(`return __LW.nodes.nodes().map((q) => q.id + ':' + q.type + (q.bypass ? ':muted' : ''));`);
+    await shot('036-P3-nodes-bar', await rectOf('.nodes-card[data-node="n1"]').then(async (a) => { const b = await rectOf('.nodes-card[data-node="n2"]'); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])]; }), 16);
   } else if (scene === 'read') out.r = await g.ev(readFileSync(process.argv[4], 'utf8'));   // a probe's body from a file
   out.errors = (await g.errors()).errs;
 } finally { await g.close(); }
