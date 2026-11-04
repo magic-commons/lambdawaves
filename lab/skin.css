@@ -1044,6 +1044,7 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 #lwMenu .mm-credits:is(:hover, :focus-visible, .open) { opacity: 1; }
 #lwMenu .mm-cr { display: flex; align-items: center; }
 #lwMenu .mm-cr-mark { display: block; flex: none; width: 24px; height: 24px; }
+#lwMenu .mm-cr[data-ai="claude"] .mm-cr-mark { color: #d97757; }   /* the second pass: Claude's starburst in Anthropic's terracotta, both themes (OpenAI keeps the ink, Gemini its gradient) */
 #lwMenu .mm-cr-ink { background: currentColor; -webkit-mask: url('img/ai/openai-blossom.svg') center / 125% no-repeat; mask: url('img/ai/openai-blossom.svg') center / 125% no-repeat; }
 #lwMenu .mm-cr-name { display: grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns 380ms var(--ease), opacity 240ms ease; }
 #lwMenu .mm-cr-name > span { display: grid; min-width: 0; overflow: hidden; white-space: nowrap; text-align: left; font-family: var(--font-ui); line-height: 1; }
@@ -1110,6 +1111,7 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 #lwMenu .mm-sh-row.two .k { grid-template-columns: auto minmax(0, 1fr) auto; }
 #lwMenu .mm-sh-row .k > .k-lbl { grid-area: 1 / 1; } #lwMenu .mm-sh-row .k > .k-dial { grid-area: 1 / 3; width: 26px; height: 26px; }
 #lwMenu .mm-sh-row .k > .k-val { grid-area: 1 / 2; justify-self: end; position: static; opacity: 1; transform: none; padding: 0; background: transparent; box-shadow: none; font-size: 11px; }
+#lwMenu .mm-sh-row .k.disabled { opacity: .35; } #lwMenu .mm-sh-row .k.disabled > .k-dial { visibility: hidden; }   /* a dead knob (STRENGTH under DITHER OFF, WIDTH under DOMAIN AUTO) reads dim, its needle never a stray glyph */
 #lwMenu .mm-sh-row .ro { display: grid; grid-template-columns: var(--lab-w) minmax(0, 1fr); align-items: baseline; gap: 0 8px; padding: 0; background: none; border: 0; box-shadow: none; }
 #lwMenu .mm-sh-row .ro-val { padding-left: 6px; font-size: 12px; min-height: 0; } #lwMenu .mm-sh-row .ro-sub { display: none; }
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-sheet { transition: none; } }

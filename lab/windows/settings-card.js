@@ -227,19 +227,20 @@ export function createSettingsCard(app) {
     row(gm, lookSeg('motion', 'MOTION', [['auto', 'AUTO', 'Follow the system'], ['full', 'FULL'], ['reduced', 'REDUCED', 'Fades only: nothing travels'], ['off', 'OFF', 'Nothing animates']]));
     row(gm, lookSeg('card', 'PANE', [['tinted', 'TINTED', 'The theme tint behind windows: no blur'], ['refractive', 'REFRACTIVE', 'Clear window surfaces: the blur, with a veil'], ['solid', 'SOLID', 'An opaque pane in the tint’s colour']]));
     { const h = sw({ label: 'HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
-    /** face(orig) — a second face of a rack row: the kit's own control from the row's options, one value between them */
-    const face = (orig) => {
+    /** face(orig, over) — a second face of a rack row: the kit's own control from the row's options (`over` a word the sheet's row wants), one value between them */
+    const face = (orig, over) => {
       if (!orig.spec) {   // a readout: its text, copied
         const v = (r) => r.querySelector('.ro-val').textContent, f = readout({ label: orig.root.querySelector('.ro-lbl').textContent, value: v(orig.root) });
         paints.push(() => f.set(v(orig.root))); return f; }
       const o = orig.spec, make = orig.root.classList.contains('segw') ? seg : orig.root.classList.contains('k') ? knob : sw;
-      const f = make({ ...o, value: orig.get(), onInput: o.onInput && ((v) => { orig.set(v); o.onInput(v); }),
+      const f = make({ ...o, ...over, value: orig.get(), onInput: o.onInput && ((v) => { orig.set(v); o.onInput(v); }),
         onChange: (v) => { orig.set(v); if (o.onChange) o.onChange(v); saveSettings(); paint(); } });
       paints.push(() => { if (f.get() !== orig.get()) f.set(orig.get()); if (f.setDisabled) { const d = orig.root.classList.contains('disabled'); if (f.root.classList.contains('disabled') !== d) f.setDisabled(d); } });
       return f;
     };
     const gq = group('QUALITY'), Q = (...ks) => row(gq, ...ks.map((k) => face(ui[k])));
-    Q('gridSeg'); Q('capSeg'); Q('autoSw', 'govSw'); Q('perfSeg'); Q('tierSeg'); Q('cadSeg'); Q('clockSeg'); Q('cadenceSeg'); Q('latencyRo'); Q('scaleRo');
+    row(gq, face(ui.gridSeg, { label: 'GRID' }));   // the rack's grid seg is wordless (013 S1: its group head names it); the sheet's row says GRID
+    Q('capSeg'); Q('autoSw', 'govSw'); Q('perfSeg'); Q('tierSeg'); Q('cadSeg'); Q('clockSeg'); Q('cadenceSeg'); Q('latencyRo'); Q('scaleRo');
     Q('ditherSeg'); Q('ditherK'); Q('domainAuto', 'domainKnob'); Q('keepSw');
     paint();
     return { paint };
