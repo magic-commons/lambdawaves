@@ -1127,12 +1127,6 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 #lwMenu .mm-collage.on { opacity: 1; }
 #lwMenu .mm-veil { z-index: 1; background: radial-gradient(ellipse 75% 70% at 50% 50%, hsl(var(--glass-tint) / 0) 32%, hsl(var(--glass-tint) / .1) 55%, hsl(var(--glass-tint) / .3) 78%, hsl(var(--glass-tint) / .5)); }
 #lwMenu :is(.mm-collage, .mm-veil)[hidden] { display: none; }
-/* 036 C4 THE STRIPS: a line's canvas at the atlas' own pixels, placed and scaled from its top-left; the even lines and the odd lines each in a
-   layer of their own that the leg's animation slides */
-#lwMenu :is(.mm-strips, .mm-par) { position: absolute; left: 0; top: 0; }
-#lwMenu .mm-strips[hidden] { display: none; }
-#lwMenu .mm-par { will-change: transform; }
-#lwMenu .mm-par > canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 /* CONTINUE over moving tiles: its type kept, on a soft plate of the ground; THE LOGO's DROP SHADOW (036 C3, Josh: "let the main logo have a
    drop shadow to combat that lessened background effect") — dark under it in both themes; in LIGHT over a halo of the ground (the pale λ
    and the teal dot) and softer */
