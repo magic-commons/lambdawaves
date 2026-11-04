@@ -34,6 +34,7 @@ export const RECORDS = Object.freeze([
   row('lambdawaves.q0.presets', P, 'v 1', false, 'user-presets.js: SPECTRUM’s save glyph'),
   row('lambdawaves.q0.csb', P, 'v 1', true, 'csb-favs.js: the CONTROL SURFACE’s favourites'),
   row('lambdawaves.q0.picker', P, 'v 1', true, 'picker.js: SHOW LABELS, THE HUE, the decks’ looks'),
+  row('lambdawaves.q0.stroke', P, 'v 1', true, 'paint-stroke.js: BUTTONS · PAINT, the ladders’ stroke { mode } (036 P1)'),
   row('lambdawaves.q0.keys', P, 'v 1', true, 'key-table.js: the rebound chords (the kit’s difference)'),
   row('lambdawaves.q0.midi', P, 'v 1', true, 'mapping.js (kit shell/midi.js): the learned notes and CCs { v, map }'),
   row('lambdawaves.q0.render.', P, '—', true, 'film-card.js: the RENDER card’s choices', { prefix: true }),

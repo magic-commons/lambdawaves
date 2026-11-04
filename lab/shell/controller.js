@@ -140,7 +140,6 @@ export async function createController(app) {
   const cRe = new Float64Array(BASIS.length), cIm = new Float64Array(BASIS.length);   // the register's width: 140 since iteration 008 A7
   app.state.pointerHeld = false;       // a gesture is in flight: the expensive per-frame readouts wait it out (see periodNow)
   app.state.keplerDirty = true; app.state.govVersion = -1; app.state.metersWall = 0; app.state.badgesWall = 0;   // wave 45: the KEPLER canvas is drawn only while on (one clearing draw after), the parked readers re-run on an edit, METERS repaints at 10 Hz while playing
-  app.state.applyVisuals = true;
   /* WAVE 52 · W-MODWINDOW.  The modulation host (lab/mir) and its face.  Declared HERE, beside the
      scheduler's own state, because the frame loop drives the modulation clock and must be able to
      guard on it before the window that shows it has been built.  0.5.0 A5: the port is lab/mod-port.js. */
@@ -271,14 +270,17 @@ export async function createController(app) {
     else schedule(TIER.RECONSTRUCT);
   }
   /** a preset into the atom register.  `opt.hand` is the PRESS (SPECTRUM's ‹ PRESET › and its re-pick, iteration 008 S): only a hand's preset is
-   *  announced on the stage (0.4.0 S3 · F2) — the boot, a URL preset, a test, a restore or an undo say nothing */
+   *  announced on the stage (0.4.0 S3 · F2) — the boot, a URL preset, a test, a restore or an undo say nothing.
+   *  036 P1 (Josh: "remove the feature 'Preset Visuals' … user's work hard on their wave and then it gets overridden"): a HAND's preset — the stepper,
+   *  the verb, EMISSION's pair, the Picker's tile — sets the REGISTER only; the preset's view, rate and window ride the boot's road alone (`?preset=`:
+   *  a link is its author's whole intent; THE LOCK boots it) */
   function loadPreset(id, opt) {
     const p = id && typeof id === 'object' ? id : PRESET_BY_ID.get(id); if (!p) return false;   // iteration 015 M3: a preset object too (the Picker's one-label HYDROGEN tile)
-    if (opt && opt.hand && app.state.stageText) app.state.stageText.say('preset', mdText(p.label));   // the label as text: markdown's specials escaped
+    const hand = !!(opt && opt.hand);
+    if (hand && app.state.stageText) app.state.stageText.say('preset', mdText(p.label));   // the label as text: markdown's specials escaped
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
     reg.load(p); appPlay.seek(0, { schedule: false }); app.state.lastNmax = -1;   // 021 R3: THE ONE SEEK (the trail and the playhead with it)
-    if (p.visual) clock.window = p.visual.window;   // iteration 015 S4: a reader's preset (lab/spectrum.js) carries no visuals — it is the labels and that's it
-    if (app.state.applyVisuals && p.visual) { clock.setRate(app.loop.paceRate(p.visual.rate)); if (p.visual.view) { const w = waveView(p.visual.view) || 'density'; mat.view = VIEW[w]; ui.viewSeg.set(w); } ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
+    if (!hand && p.visual) { clock.window = p.visual.window; clock.setRate(app.loop.paceRate(p.visual.rate)); if (p.visual.view) { const w = waveView(p.visual.view) || 'density'; mat.view = VIEW[w]; ui.viewSeg.set(w); } ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
     ui.presetSel.value = typeof id === 'object' ? p.id : id; ui.presetSel.note = p.note;   // M3 hands an object (its own id); S4's USER key is the stepper's value
     setReference();
     app.w.spectrum.select(-1);
@@ -319,11 +321,10 @@ export async function createController(app) {
     },
     clear() { reg.clear(); app.state.refSnapshot = null; touchState(); },
     normalize() { app.w.normalizeNow(); },
-    /* iteration 008 S · SPECTRUM's head and grid (they left STATE): the preset list, a HAND's preset, PRESET VISUALS; FILL ALL (every label at
+    /* iteration 008 S · SPECTRUM's head and grid (they left STATE): the preset list, a HAND's preset (the register only, 036 P1); FILL ALL (every label at
        clock.t, equal and in phase, normalised — the norm the metric in force reads); settle(), the quiet normalisation a hand stroke ends with */
     presets: PRESETS.map((p) => ({ id: p.id, label: p.label })),
     loadPreset(id) { return loadPreset(id, { hand: true }); },
-    get visuals() { return app.state.applyVisuals; }, set visuals(v) { app.state.applyVisuals = !!v; },
     fillAll() { for (let a = 0; a < BASIS.length; a++) reg.set(a, 1, 0, clock.t); reg.normalize(); touchState(); },
     settle() { if (!reg.populated().length) return; reg.normalize(); touchState(); },
     rateOf(a) { return rates[a]; },

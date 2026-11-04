@@ -203,12 +203,13 @@ export function createReadouts(app) {
   rack.appendChild(wEm.root); wEm.root.classList.add('closed');
   const emissionView = createEmission(wEm.body, { reg, clock, palette: () => app.state.palette, repaint() { schedule(TIER.PRESENT); }, status: (t, c) => wEm.setStatus(t, c),
     /* a press: ONE history row named for the line (held across the load, as verbs.js holds a link's), a HAND's preset (THE FADE) — the two labels
-       at equal weight, phase 0, one period in the window — and with DECAY the A ↔ B TRANSITION from the upper label to the lower, played */
+       at equal weight, phase 0 (036 P1: the register only — the view, rate and window stay the reader's) — and with DECAY the A ↔ B TRANSITION
+       from the upper label to the lower, played */
     load(p) {
       const H = app.state.history, was = !!(H && H.holding);
       if (H) { H.hold(p.row); if (was) H.release(); }
       try {
-        const ok = loadPreset({ id: p.id, label: p.label, note: 'EMISSION SPECTRA · the pair that makes the line', modes: p.modes, visual: { rate: Math.max(0.1, Math.min(3000, p.T / 4)), window: p.T, view: 'density' } }, { hand: true });
+        const ok = loadPreset({ id: p.id, label: p.label, note: 'EMISSION SPECTRA · the pair that makes the line', modes: p.modes }, { hand: true });
         if (ok && p.decay && app.hooks.ab) {
           const one = (a) => { const re = new Float64Array(reg.re0.length), im = new Float64Array(reg.re0.length); re[a] = 1; return { re, im }; };
           app.hooks.ab.setStores(one(p.upper), one(p.lower)); app.hooks.ab.set(true);

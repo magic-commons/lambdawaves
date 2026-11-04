@@ -12,8 +12,8 @@
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
-import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw, chip } from './mir/kit.js';
-import { paintStroke, fillButton, levelLine, footLine } from './paint-stroke.js';
+import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, chip } from './mir/kit.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeSeg } from './paint-stroke.js';
 import { PRESET_BY_ID } from './state.js';
 import { createUserPresets } from './user-presets.js';
 
@@ -43,8 +43,8 @@ export function createSpectrum(host, api) {
   const ladder = el('div', 'ladder', host);
   const lcv = el('canvas', '', ladder), lfoot = footLine(lcv);   // 016 R1: the law line, shown on a hover
   /* iteration 008 S · THE PRESET (it left STATE; since iteration 015 S3 seated under the picker, above the HAMILTONIAN): the kit's stepper in PALETTE's preset look over the same list; ← → and a pick
-     load a preset by the hand's road (api.loadPreset: THE FADE announces it), a pick of the preset already shown is RELOAD; VISUALS is STATE's
-     PRESET VISUALS (a preset also sets its view, rate and window).  A register that is no preset reads '—' (the select's blank). */
+     load a preset by the hand's road (api.loadPreset: THE FADE announces it), a pick of the preset already shown is RELOAD; since 036 P1 a hand's
+     preset sets the REGISTER only (PRESET VISUALS went: the view, rate and window are the reader's).  A register that is no preset reads '—'. */
   const pre = el('div', 'row tight sp-preset', host), DASH = { id: '', label: '—', coming: true }, PRE = (api.presets || []).map((p) => ({ id: p.id, label: p.label }));
   /* iteration 015 S4 · SAVE A PRESET (Josh: "add a save orbital (so that it just saves which orbitals were selected and that's it). Do the same
      'User' section appears when a custom preset is saved"): the bare save glyph beside the stepper asks a name in the stepper's own seat (Enter
@@ -74,7 +74,6 @@ export function createSpectrum(host, api) {
       x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
         if (!pane.querySelector('.mir-pick-i[data-id^="' + UK + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
     } });
-  const preVis = sw({ label: 'VISUALS', value: true, title: 'A preset also sets its view, rate and window', onChange: (v) => { api.visuals = v; } });
   const preSave = chip(el('button', 'sp-presave', null), 'saveInto'); preSave.type = 'button'; preSave.setAttribute('aria-label', 'SAVE PRESET');
   preSave.title = 'SAVE · the populated labels as a preset';
   pre.append(preStep.root, preSave);
@@ -102,7 +101,7 @@ export function createSpectrum(host, api) {
   const fillSync = () => fillB.set(!api.reg.populated().length);
   const fillB = fillButton(head, { fill: 'every label on, equal and in phase', empty: 'every label off' },
     () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); fillSync(); });
-  fillB.set(true); fillB.root.addEventListener('pointerenter', fillSync); head.appendChild(preVis.root);
+  fillB.set(true); fillB.root.addEventListener('pointerenter', fillSync); head.appendChild(strokeSeg().root);   // 036 P1: BUTTONS · PAINT in VISUALS' seat
   const info = el('div', 'note', head);
   /* ── WAVE 69 · THE REGISTER'S OWN LAW, LIVE ────────────────────────────────────────────────────
    * `c(t) = e^{−iE t} c(0)` is not a caption here, it is what the evolution IS — one phase per mode,
@@ -163,10 +162,10 @@ export function createSpectrum(host, api) {
   }
   for (let n = 1; n <= NMAX; n++) setShellFold(n, FOLD_DEFAULT.includes(n));
   /* 2026-10 (Josh) · PAINT THE GRID (lab/paint-stroke.js): LEFT adds a state, RIGHT removes it; a drag takes every chip it
-     crosses.  The chips are DOM, so the stroke is sampled every 6 px and asked of elementFromPoint. */
+     crosses.  The chips are DOM, so the stroke is sampled every 6 px and asked of elementFromPoint.  036 P1: under BUTTONS a click toggles one. */
   const chipAt = (p) => { const c = document.elementFromPoint(p.x, p.y), b = c && c.closest ? c.closest('.pk-c') : null; return b && picker.contains(b) ? [+b.dataset.a] : []; };
   /* iteration 008 S · A HAND STROKE NORMALISES AT ITS END (paintStroke's onEnd, inside its pointerup and the undo hold: one row); a modulator never does */
-  paintStroke(picker, { at: chipAt, apply: (as, add) => (api.paintModes ? api.paintModes(as, add) : 0), onEnd: () => { if (api.settle) api.settle(); },
+  paintStroke(picker, { at: chipAt, mode: strokeMode, isOn: (a) => api.reg.populated().includes(a), apply: (as, add) => (api.paintModes ? api.paintModes(as, add) : 0), onEnd: () => { if (api.settle) api.settle(); },
     across: (a, b) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 6), out = []; for (let i = 1; i < n; i++) out.push(...chipAt({ x: a.x + (b.x - a.x) * i / n, y: a.y + (b.y - a.y) * i / n })); return out; } });
   const lanes = new Map();     // index → the lane that IS built and in the DOM
   let selected = -1, lastVersion = -1;

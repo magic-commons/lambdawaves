@@ -19,26 +19,58 @@
  *   ready()        → bool     optional: false ignores the press (nothing to paint yet)
  *   onEnd(add)               optional: the stroke is over and CHANGED something (the applies' n summed > 0) — still inside the
  *                            pointerup, so whatever it does (iteration 008: every ladder normalises here) joins the stroke's one undo row
+ *   mode()         → 'buttons' | 'paint'   036 P1: read at each press (the three ladders hand `strokeMode`); absent = PAINT
+ *   isOn(key)      → bool     036 P1: the item is in the register (BUTTONS' toggle reads it)
+ *
+ * 036 P1 · BUTTONS · PAINT (Josh: "a 'Paint' vs 'Buttons' toggle … the original control of a left-click only feature"): the gesture above is
+ * PAINT; BUTTONS (the default) is the left click alone — a press released on the item it began on TOGGLES it (apply([key], !isOn(key)), then
+ * onEnd, in the same undo row), a drag sweeps nothing, the right button is the context menu's.  The mode is the PREFERENCE record
+ * `lambdawaves.q0.stroke` { mode }; `strokeSeg` is its seat on each ladder's head, every seat in step.
  */
-import { el } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
+import { el, seg } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
+const STROKE_KEY = 'lambdawaves.q0.stroke', MODES = ['buttons', 'paint'], watchers = new Set();
+let mode = null;
+/** the reader's stroke mode now: 'buttons' (the default) or 'paint' */
+export function strokeMode() {
+  if (mode === null) { let r = null; try { r = JSON.parse(localStorage.getItem(STROKE_KEY) || 'null'); } catch (_) {} mode = r && MODES.includes(r.mode) ? r.mode : 'buttons'; }
+  return mode;
+}
+export function setStrokeMode(m) {
+  if (!MODES.includes(m) || m === strokeMode()) return; mode = m;
+  try { localStorage.setItem(STROKE_KEY, JSON.stringify({ mode })); } catch (_) { /* refused: the choice lasts the page */ }
+  for (const f of watchers) f(mode);
+}
+/** watchStroke(fn) — fn(mode) on every change (a surface's hint follows it) */
+export function watchStroke(fn) { watchers.add(fn); fn(strokeMode()); }
+/** strokeSeg() — the BUTTONS · PAINT seat (a pointing hand · a paintbrush) a ladder's head carries */
+export function strokeSeg() {
+  const s = seg({ aria: 'stroke mode', cls: 'sp-stroke', value: strokeMode(), onChange: setStrokeMode, options: [
+    { id: 'buttons', label: '', title: 'BUTTONS · a click toggles one' }, { id: 'paint', label: '', title: 'PAINT · drag adds, right-drag removes' }] });
+  for (const [id, g, w] of [['buttons', 'hand', 'BUTTONS'], ['paint', 'brush', 'PAINT']]) { const b = s.button(id); b.innerHTML = glyphSvg(g, 'gly', 16); b.setAttribute('aria-label', w); }
+  watchStroke((m) => { if (s.get() !== m) s.set(m); });
+  return s;
+}
 export function paintStroke(surface, o) {
   const local = o.local || ((e) => ({ x: e.clientX, y: e.clientY }));
+  const buttons = () => !!o.mode && o.mode() === 'buttons';
   let stroke = null, eatUntil = 0;
   surface.style.touchAction = 'none';                                  // a finger paints here instead of scrolling the rack
-  surface.addEventListener('contextmenu', (e) => e.preventDefault());
+  surface.addEventListener('contextmenu', (e) => { if (!buttons()) e.preventDefault(); });   // BUTTONS: the right button is the context menu's
   surface.addEventListener('pointerdown', (e) => {
     eatUntil = 0;
     if (o.ready && !o.ready()) return;
-    const right = e.pointerType === 'mouse' ? e.button === 2 || (e.button === 0 && e.altKey) : false;
+    const tog = buttons();
+    if (tog && e.pointerType === 'mouse' && e.button !== 0) return;
+    const right = !tog && e.pointerType === 'mouse' ? e.button === 2 || (e.button === 0 && e.altKey) : false;
     if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2) return;
     const p = local(e);
-    stroke = { id: e.pointerId, start: p, last: p, cx: e.clientX, cy: e.clientY, add: !right, moved: false, n: 0 };
+    stroke = { id: e.pointerId, start: p, last: p, cx: e.clientX, cy: e.clientY, add: !right, moved: false, n: 0, tog };
     try { surface.setPointerCapture(e.pointerId); } catch (_) {}
     if (right) e.preventDefault();
   });
   /* capture phase: a live stroke keeps a surface's own hover readers (graphHover's tooltip) out of the way */
   surface.addEventListener('pointermove', (e) => {
-    if (!stroke || e.pointerId !== stroke.id) return;
+    if (!stroke || e.pointerId !== stroke.id || stroke.tog) return;
     const p = local(e);
     if (!stroke.moved) {
       if (Math.hypot(e.clientX - stroke.cx, e.clientY - stroke.cy) < 4) return;
@@ -54,7 +86,8 @@ export function paintStroke(surface, o) {
   const end = (e, tap) => {
     if (!stroke || (e && e.pointerId !== stroke.id)) return;
     const s = stroke; stroke = null; eatUntil = performance.now() + 500;
-    if (tap && !s.moved) { const k = o.at(s.start); if (k.length) s.n += +o.apply(k, s.add) || 0; }
+    if (tap && s.tog) { const up = new Set(o.at(local(e))); for (const k of o.at(s.start)) if (up.has(k)) s.n += +o.apply([k], !(o.isOn && o.isOn(k))) || 0; }   // BUTTONS: released where it began
+    else if (tap && !s.moved) { const k = o.at(s.start); if (k.length) s.n += +o.apply(k, s.add) || 0; }
     if (s.n > 0 && o.onEnd) o.onEnd(s.add);
   };
   surface.addEventListener('pointerup', (e) => end(e, true));

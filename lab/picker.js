@@ -871,10 +871,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (getHamiltonian().id !== 'hydrogen') app.w.switchHamiltonian('hydrogen'); if (app.ui.hamSeg) app.ui.hamSeg.set('hydrogen');
     const name = b.n + L_LETTERS[b.l] + subOf(b.m);
     /* iteration 017 W1 (Josh 2026-10-26: "When clicking on the 140 orbital table … and playing with 'WAVE' it doesn't seem to work like it used to"):
-       the pick is the label at phase 0 with the rate and window it always had; WAVE (SPACE · OBSERVABLE · DRAW) stays the reader's — the LOOK is the
-       thumbnails' style only (no `view` here, so loadPreset leaves the OBSERVABLE alone) */
-    app.ctl.loadPreset({ id: b.id, label: name, note: 'hydrogen · one label, from the main menu', modes: [{ n: b.n, l: b.l, m: b.m, amp: 1, phase: 0 }],
-      visual: { rate: 4, window: 4 * Math.PI * b.n * b.n } }, { hand: true });
+       the pick is the label at phase 0; WAVE (SPACE · OBSERVABLE · DRAW) stays the reader's — the LOOK is the thumbnails' style only.  036 P1: a
+       hand's preset is the register only, so the rate and window stay the reader's too */
+    app.ctl.loadPreset({ id: b.id, label: name, note: 'hydrogen · one label, from the main menu', modes: [{ n: b.n, l: b.l, m: b.m, amp: 1, phase: 0 }] }, { hand: true });
   }
   function goAtom(Z) {
     close(); const C = app.state.chem; if (C && C.on) C.setOn(false);

@@ -4,7 +4,14 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ## The standing paragraphs
 
-THE PAINT GESTURE (`lab/paint-stroke.js`) is one law for the ORBITAL and STATES
+BUTTONS · PAINT (036 P1, Josh 2026-11-03: "a 'Paint' vs 'Buttons' toggle … the original control of a left-click only feature"): the
+ladders' stroke has two modes, one PREFERENCE record `lambdawaves.q0.stroke` { mode } read at each press, its seat `strokeSeg` (a pointing
+hand · a paintbrush) on SPECTRUM's head (in PRESET VISUALS' place) and on the ORBITAL and STATES heads, every seat in step. BUTTONS, the
+default: a left click TOGGLES the item it was pressed and released on (normalised, VIEW MIX, one undo row, as a stroke), a drag sweeps
+nothing, the right button is the context menu's (the grid's CLEAR · NORMALIZE · … · CREATE EVENT). PAINT is THE PAINT GESTURE below.
+WAVE and PALETTE never read it.
+
+THE PAINT GESTURE (`lab/paint-stroke.js`, the PAINT mode) is one law for the ORBITAL and STATES
 ladders and SPECTRUM's state grid: LEFT click adds one, LEFT drag adds every
 item it crosses; RIGHT click removes one, RIGHT drag removes every item it
 crosses (Alt/Option+left = right; a finger = left). A crossed degenerate row is

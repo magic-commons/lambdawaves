@@ -790,7 +790,12 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .lw-field-head > .grp-lbl { flex: 1 1 auto; margin: 0; }
 .native-clean .row > .trig.lw-fold { flex: 0 0 30px; }
 .sp-preset > .mir-step { flex: 1 1 auto; }
-.native-clean .sp-head > .sw { padding: 0 3px; font-size: 9px; min-width: 0; gap: 4px; justify-content: center; }
+/* 036 P1 · BUTTONS · PAINT (paint-stroke.js strokeSeg) in the head seat VISUALS left: two glyph cells, the kit's seg face (its curves/xy precedent) */
+.sp-head > .segw.sp-stroke { min-width: 0; width: 100%; margin: 0; }
+.sp-head > .segw.sp-stroke .seg { display: flex; width: 100%; height: 100%; }
+.sp-head > .segw.sp-stroke .seg-b { flex: 1 1 0; min-width: 0; padding: 0; display: grid; place-items: center; }
+.sp-head > .segw.sp-stroke .gly { width: 16px; height: 16px; }
+.reg-pane .sp-head > .segw.sp-stroke { flex: 1 1 0; width: auto; }
 /* § iteration 015 S4 · SAVE A PRESET (lab/spectrum.js): the bare save glyph in a 26-px seat beside the stepper (no chrome: the mod window's .m2presave
    way), the name asked in the stepper's own seat, and the list's USER / PRESETS headings and each reader's × */
 .dev .row.sp-preset { gap: 4px; flex-wrap: nowrap; }
