@@ -387,6 +387,7 @@ body.transport-under #transport.mini { z-index: var(--z-chrome); }
 .sp-band { width: 4px; height: 100%; border-radius: 7px 0 0 7px; background: var(--nc); }
 .sp-id { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; padding-left: 4px; cursor: pointer; min-height: var(--touch); }
 .sp-name { font-size: var(--fs-lead); color: var(--fg); }
+.sp-name.sp-nl { font-family: var(--font-math); }   /* 036 P2: SPECTRUM's dial names typeset in STIX Two Math (every subscript digit; the 140 tiles' face) */
 .sp-sub { font-size: var(--fs-micro); color: var(--ink-faint); letter-spacing: var(--tr-tight); font-variant-numeric: tabular-nums; }
 .sp-row .fd { height: 40px; }
 .sp-row .k { width: 46px; }

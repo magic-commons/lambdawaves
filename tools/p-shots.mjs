@@ -60,6 +60,17 @@ try {
     out.paint = { stored: await g.ev(`return localStorage.getItem('lambdawaves.q0.stroke');`), sweepAdds: q1 - q0, rightSweepRemoves: q1 - q2 };
     await shot('036-P1-2-head-paint', await rectOf('.dev[data-id="spectrum"] .sp-head'), 30);
     await g.ev(`localStorage.removeItem('lambdawaves.q0.stroke'); return 1;`);
+  } else if (scene === 'p2') {
+    /* the dials beside the chips: 2p_x (2p₋₁ + 2p₁), 3d₊₂ and 7i₋₆ (₆: the digit Roboto lacks) */
+    await float('spectrum', 560, 10, 360); await wait(700);
+    out.names = await g.ev(`__LW.loadPreset('2px'); const d = document.querySelector('.dev[data-id="spectrum"]');
+      for (const t of ['3d₂', '7i₋₆']) { const n = d.querySelector('.pk-n[data-n="7"]'); if (t[0] === '7' && n.classList.contains('folded')) n.querySelector('.pk-nl').click(); const b = [...d.querySelectorAll('.pk-c')].find((x) => x.textContent === t); __LW.api.toggleMode(+b.dataset.a); }
+      __LW.api.settle(); const h = [...d.querySelectorAll('.sp-head .trig')].find((b) => /DIALS/.test(b.textContent)); if (h.getAttribute('aria-expanded') !== 'true') h.click();
+      await new Promise((r) => setTimeout(r, 900));
+      return [...d.querySelectorAll('.sp-row .sp-nl')].map((n) => [n.textContent, getComputedStyle(n).fontFamily.split(',')[0], getComputedStyle(n).fontSize]);`);
+    await g.ev(`document.querySelector('.dev[data-id="spectrum"] .sp-rows').scrollIntoView({ block: 'start' }); return 1;`); await wait(300);
+    const r = await rectOf('.dev[data-id="spectrum"] .sp-rows'), p = await rectOf('.dev[data-id="spectrum"] .picker');
+    await shot('036-P2-labels', [r[0], r[1], r[2], Math.min(p ? p[1] + 160 : r[3], 860)]);
   } else if (scene === 'read') out.r = await g.ev(readFileSync(process.argv[4], 'utf8'));   // a probe's body from a file
   out.errors = (await g.errors()).errs;
 } finally { await g.close(); }

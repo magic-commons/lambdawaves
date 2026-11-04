@@ -213,7 +213,7 @@ export function createSpectrum(host, api) {
     const root = el('div', 'sp-row'); root.style.setProperty('--nc', N_COLOR[s.n]); root.dataset.id = s.id;
     el('div', 'sp-band', root);
     const id = el('div', 'sp-id', root);
-    const nm = el('div', 'sp-name sp-nm', id, labelText(a)); nm.dataset.a = s.index;
+    const nm = el('div', 'sp-name sp-nm sp-nl', id, shownText(a)); nm.dataset.a = s.index;
     const esub = el('div', 'sp-sub sp-e', id, energyText(a)); esub.dataset.a = s.index;   // the operator IN FORCE, never the static basis energy
     id.addEventListener('click', () => api.select(a));
     /* WAVE 62 · A LANE NAMES ITSELF.  `aria` overrides `label` in the kit, which is exactly what these
@@ -245,6 +245,10 @@ export function createSpectrum(host, api) {
       was: { mute: null, solo: null, off: null, sel: null, label: nm.textContent, energy: esub.textContent } };
   }
   const labelText = (a) => api.labelOf ? api.labelOf(BASIS[a]) : BASIS[a].label;
+  /* 036 P2 · THE DIAL'S NAME (Josh: "use the informational's working font for the orbital text"): the lane shows the operator's name TYPESET —
+     its m a real subscript (`2p₋1` → `2p₋₁`, `2p₊1` → `2p₁`, the chips' form) in STIX Two Math (lab.css `.sp-nl`), the one bundled face with every
+     subscript digit; display only — labelOf, the aria names and every other reader keep the plain form */
+  const SUBD = '₀₁₂₃₄₅₆₇₈₉', shownText = (a) => labelText(a).replace(/([₊₋])(\d+)/g, (_, sg, d) => (sg === '₋' ? '₋' : '') + d.replace(/\d/g, (c) => SUBD[+c]));
   const energyText = (a) => { const E = api.energyOf ? api.energyOf(a) : BASIS[a].E; return E === E ? `${E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` : ((api.hamiltonian && api.hamiltonian()) || {}).nan || 'unbound here'; };   // 0.8.0 G1: NaN = a level CENTRAL leaves unbound
   /** one lane's UPDATE: cheap reads, and only the DOM writes whose value moved since the last one */
   function refresh(L, a) {
@@ -259,7 +263,7 @@ export function createSpectrum(host, api) {
     const off = anySolo ? !s : m;                        if (w.off !== off) { w.off = off; L.root.classList.toggle('muted', off); }
     const sel = a === selected;                          if (w.sel !== sel) { w.sel = sel; L.root.classList.toggle('sel', sel); }
     if (L.root.classList.contains('off')) L.root.classList.remove('off');    // nothing here ever sets it; the old rebuild cleared it every pass
-    const lt = labelText(a);                             if (w.label !== lt) { w.label = lt; L.nm.textContent = lt; }
+    const lt = shownText(a);                             if (w.label !== lt) { w.label = lt; L.nm.textContent = lt; }
     const et = energyText(a);                            if (w.energy !== et) { w.energy = et; L.esub.textContent = et; }
   }
   /** a freshly built lane goes before the first ALREADY-BUILT lane that follows it in `want` (else at the end) */
