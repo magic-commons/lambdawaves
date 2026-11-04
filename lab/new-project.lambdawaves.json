@@ -27,23 +27,6 @@
    "damping": 0
   },
   "presentation": {
-   "obs": {
-    "yaw": 0.65,
-    "pitch": 0.38,
-    "dist": 3.3,
-    "fov": 0.6,
-    "mode": "free",
-    "quat": [
-     0.3678512056453586,
-     0.24918324108421966,
-     0.502441516652707,
-     0.7417180901203284
-    ],
-    "shift": [
-     0,
-     0
-    ]
-   },
    "mat": {
     "view": 1,
     "exposure": 1,
@@ -885,9 +868,6 @@
      ],
      "follow": true
     }
-   },
-   "camera": {
-    "autoRotate": false
    },
    "overlays": {
     "vortex": {

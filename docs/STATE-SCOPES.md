@@ -152,7 +152,8 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 - NEW (S2) opens `lab/new-project.lambdawaves.json`, which `tools/new-project.mjs` writes: every PROJECT key at the
   shipped default and nothing else, so it resets the work and leaves the preferences alone. Since 036 S3 it also puts the
   arrangement back to THE DEFAULT LAYOUT (`layout.DEFAULT`) and the modulation window's and the TIMELINE's shape to their
-  first run, through the WORKSPACE road (docs/laws/scopes-and-records.md, THE LAW OF 036). The
+  first run, through the WORKSPACE road (docs/laws/scopes-and-records.md, THE LAW OF 036). Since 036 S5 the file carries no `obs`
+  and no `camera`: NEW keeps the pose, its mode and auto-rotate; a project open still restores its own. The
   unsaved-changes mark (`projectKey()`) ignores the WORKSPACE, the auto-rotate switch, `quality` and its shadow
   `mat.steps` (advice the device clamps), and a bound macro's value (its source's output). The stage counts.
 - THE HISTORY (S3) reads, keys and writes one record, `serialize({ scope: 'edit' })`: the PROJECT keys minus `obs`

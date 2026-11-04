@@ -51,8 +51,9 @@ try {
       const pick = (rt) => ({ id: rt.id, target: rt.targetId, macro: rt.macroId, min: rt.min, max: rt.max });
       const saved = { routes: (P.modulation.routes || []).filter((rt) => /^observer\\./.test(rt.targetId)).map(pick),
         bases: Object.fromEntries(Object.entries(P.modulationBases || {}).filter(([k]) => /^observer\\./.test(k))),
-        pose: { 'observer.yaw': P.obs.yaw, 'observer.pitch': P.obs.pitch, 'observer.dist': P.obs.dist, 'observer.fov': P.obs.fov,
-          'observer.panx': (P.obs.shift || [0, 0])[0], 'observer.pany': (P.obs.shift || [0, 0])[1] } };
+        pose: (() => { const O = P.obs || __LW.obs;   /* 036 S5: NEW's file carries no pose — NEW keeps the live one, so its bases are the live pose's */
+          return { 'observer.yaw': O.yaw, 'observer.pitch': O.pitch, 'observer.dist': O.dist, 'observer.fov': O.fov,
+            'observer.panx': (O.shift || [0, 0])[0], 'observer.pany': (O.shift || [0, 0])[1] }; })() };
       const live = { routes: M.routeList().filter((rt) => /^observer\\./.test(rt.targetId)).map(pick),
         has: Object.fromEntries(ids.map((id) => [id, R.has(id)])),
         law: Object.fromEntries(R.describe().filter((d) => ids.includes(d.id)).map((d) => [d.id, [d.map, d.min, d.max]])),

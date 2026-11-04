@@ -33,21 +33,21 @@ assert.ok(readFileSync(at('../lab/sw.js'), 'utf8').includes("'./new-project.lamb
 const P = parsed.data.presentation;
 for (const k of ['quality', 'layout', 'modwin', 'notebook', 'modulationBases']) assert.equal(k in P, false, 'the empty project carries ' + k);
 assert.deepEqual(Object.keys(P.ui), ['stage'], 'ui carries a PREFERENCE key');
-assert.deepEqual(Object.keys(P.camera), ['autoRotate'], 'camera carries its feel');
+/* 036 S5 (Josh: "The only thing I think I wouldn't change per different projects is the camera's features"): NEW keeps the camera — the pose,
+   its mode and auto-rotate are not in the file at all (a missing key keeps the live value), so the camera's feel cannot ride in it either */
+for (const k of ['obs', 'camera']) assert.equal(k in P, false, 'the empty project carries ' + k + ' (NEW keeps the camera)');
 for (const k of ['bg', 'lightUI', 'stageCustom', 'frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk', 'dither', 'steps'])   // iteration 008 W: DITHER is this display's
   assert.equal(k in P.mat, false, 'mat carries ' + k);
 const PREF = new Set(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'friction', 'spin', 'speed', 'dragGain', 'fling', 'camLock', 'camMode',   // 0.5.3 M6: camLock, the camera's LOCK
   'badges', 'controlHints', 'captions', 'molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'gamut', 'p3Mode', 'warned', 'audioDevice', 'nativeLayout', 'phoneTr', 'phoneRack',
   'auto', 'governor', 'keepFrames', 'perfMode', 'perfTier', 'modCadence', 'modArm', 'clockLink',   // 0.5.0 C4: modArm / modCadence live in the kit's record `lambdawaves.q0.modulation` and clockLink is retired — all three still never ride in a project
   'disconnected', 'accentA', 'accentB', 'vivid', 'hints', 'help']);                        // 0.5.0 C2: the look's names in the kit's `mir.gui` — never in a project either
-/* the bundled demos' own law (tests/first-run.test.mjs, "A BUNDLED DEMO CARRIES NO LOOK"), with its same three lists — the
-   camera block itself is allowed here: the empty project carries auto-rotate, which is PROJECT */
-const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'dragGain', 'fling', 'camLock'],
-  CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];
-assert.deepEqual({ ui: LOOK.filter((k) => k in P.ui), camera: FEEL.filter((k) => k in P.camera), mat: CHROME.filter((k) => k in P.mat) },
-  { ui: [], camera: [], mat: [] }, 'the empty project carries a look');
-/* where a PREFERENCE key has ever ridden in a project: the presentation's top level, ui, camera, mat and obs (S1's list) */
-const leaks = [['', P], ['ui.', P.ui], ['camera.', P.camera], ['mat.', P.mat], ['obs.', P.obs]].flatMap(([at, o]) => Object.keys(o).filter((k) => PREF.has(k)).map((k) => at + k));
+/* the bundled demos' own law (tests/first-run.test.mjs, "A BUNDLED DEMO CARRIES NO LOOK"), with its lists — the camera block is absent (036 S5) */
+const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];
+assert.deepEqual({ ui: LOOK.filter((k) => k in P.ui), mat: CHROME.filter((k) => k in P.mat) },
+  { ui: [], mat: [] }, 'the empty project carries a look');
+/* where a PREFERENCE key has ever ridden in a project: the presentation's top level, ui and mat (S1's list; camera and obs are absent, 036 S5) */
+const leaks = [['', P], ['ui.', P.ui], ['mat.', P.mat]].flatMap(([at, o]) => Object.keys(o).filter((k) => PREF.has(k)).map((k) => at + k));
 assert.deepEqual(leaks, [], 'PREFERENCE keys in the empty project');
 /* 0.4.0 S4a · THE FOURTH CLASS, LIBRARY (docs/STATE-SCOPES.md): an installed record is device content and never rides in a
    project — only its reference { id, hash, nameKey } does, and only for a molecule with a record (H₂O has none) */

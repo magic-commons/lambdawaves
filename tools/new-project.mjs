@@ -7,16 +7,18 @@
  *
  * WHAT IS IN IT.  The export envelope (`lambdawaves: 'project'`, version 1 — lab/project-import.js reads it, and its rules
  * want a `path`) around `data: { experiment, presentation }`, where the presentation carries every PROJECT key at the shipped
- * defaults and NOTHING ELSE: no `quality` (the device's budget stands), no `layout` / `modwin` / `notebook {w, h}` (the
- * WORKSPACE stands — a missing key keeps the live value), no PREFERENCE key (theme, material, accents, camera feel, field
- * chrome — S1 took them out of every project).  The register is EMPTY (decision D3: no modes, no preset).  The modulation is
+ * defaults and NOTHING ELSE: no `quality` (the device's budget stands), no `layout` / `modwin` / `notebook {w, h}` (NEW puts
+ * the WORKSPACE back itself, 036 S3: lab/shell/notebook.js freshWindows), no PREFERENCE key (theme, material, accents, camera
+ * feel, field chrome — S1 took them out of every project), and since 036 S5 no `obs` / `camera` (Josh: "The only thing I think
+ * I wouldn't change per different projects is the camera's features": NEW keeps the pose, its mode and auto-rotate — a missing
+ * key keeps the live value; a project open still brings its own).  The register is EMPTY (decision D3: no modes, no preset).  The modulation is
  * one LFO and one AUDIO device with MACRO 1 named LFO on the LFO and MACRO 2 named AUDIO on the audio device's LEVEL socket,
  * no routes — built through the model's own API below, so a MOD_STATE_V bump or a new source field is caught by --check.
  *
  * WHERE THE DEFAULTS COME FROM — one place, this file, in two kinds:
  *   IMPORTED  the objects rack.js itself builds its boot state from, wherever they are importable in node: the Register
- *             (lab/state.js) and the Clock (lab/clock.js) — rack.js:95 and :101 construct exactly these; the boot pose
- *             CAM.HOME (lab/camera-law.js) and quatFromYawPitch / VIEW / STYLE (lab/field.js) — rack.js:104–105; the
+ *             (lab/state.js) and the Clock (lab/clock.js) — rack.js:95 and :101 construct exactly these; VIEW / STYLE
+ *             (lab/field.js) — rack.js:104–105; the
  *             Hamiltonian table (lab/hamiltonian.js); the palette catalogue and its normalize (lab/mir/palette.js) with
  *             DEFAULT_PALETTE (lab/palette-app.js) — rack.js' PAL_DEF; and the modulation model (lab/mir/modulation/mod.js).
  *   TABLED    everything that lives inside a closure (rack.js boot() or a view factory) and cannot be imported.  Each
@@ -27,8 +29,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Register } from '../lab/state.js';
 import { Clock } from '../lab/clock.js';
-import { CAM } from '../lab/camera-law.js';
-import { quatFromYawPitch, VIEW, STYLE } from '../lab/field.js';
+import { VIEW, STYLE } from '../lab/field.js';
 import { HAMILTONIANS, getZ, getHamiltonian } from '../lab/hamiltonian.js';
 import { PRESET_BY_ID, normalize } from '../lab/mir/palette.js';
 import { DEFAULT_PALETTE } from '../lab/palette-app.js';
@@ -60,7 +61,6 @@ function presentation() {
   const H = getHamiltonian();
   const prism = PRESET_BY_ID.get(DEFAULT_PALETTE);
   return {
-    obs: { yaw: CAM.HOME.yaw, pitch: CAM.HOME.pitch, dist: CAM.HOME.dist, fov: CAM.HOME.fov, mode: 'free', quat: quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch), shift: [...CAM.HOME.shift] },   // rack.js:109; the MODE is the project's (D4's escape hatch); 0.4.0 S2: the lens shift
     /* rack.js:105 minus bg / lightUI / stageCustom and the FIELD_CHROME (S1), plus bow (rack.js:1837) and finish (restore() writes
        'lit' where a file has none).  NOT steps: applyRebuild writes mat.steps from quality.steps — the device's, like quality. */
     mat: { view: VIEW.phase, exposure: 1, softness: 0.7, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, hueShift: 0, paletteOn: false,
@@ -91,7 +91,6 @@ function presentation() {
     sturmian: { on: false, lambda: 1 },                               // rack.js:113
     modulation: modulation(),
     ui: { stage: { mix: 0.04, custom: [0.12, 0.14, 0.18], follow: true } },   // rack.js:531 and :1331
-    camera: { autoRotate: false },                                    // camera-law.js:43
     overlays: { vortex: { on: false, overlay: false }, kepler: false, particles: { on: false, count: 0 }, dials: false },
     ab: { a: null, b: null, omega: 0.05, on: false },                 // rack.js:1763
   };
