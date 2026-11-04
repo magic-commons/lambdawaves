@@ -1,7 +1,8 @@
 // 0.3.1 · S2 THE EMPTY PROJECT, in the real page (research/release-0.3.1/PLAN.md §3, docs/STATE-SCOPES.md).
 // NEW opens lab/new-project.lambdawaves.json through the stored-open road: every PROJECT key comes back to the file's,
-// no PREFERENCE and no WORKSPACE key moves, the notebook opens only with text, linked time runs from the first play, no
-// microphone is asked for, and a NEW that cannot land puts the instrument back as it was.
+// no PREFERENCE key moves, the windows go back to THE DEFAULT LAYOUT (036 S3), the notebook opens only with text, linked time
+// runs from the first play, no microphone is asked for, and a NEW that cannot land puts the instrument back as it was.
+// 036 (Josh 11-03, "Nodes currently don't save into any project"): the graph, its grade and INFORMATIONAL ride in a project (scene 9).
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -19,8 +20,10 @@ try {
     window.__canon = (o) => JSON.stringify(o, (k, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v);
     window.__proj = (S, keys) => { const P = {}; for (const k of keys) P[k] = JSON.parse(JSON.stringify(S.presentation[k] === undefined ? null : S.presentation[k]));
       if (P.mat) delete P.mat.steps; if (P.domain && P.domain.auto) delete P.domain.half; return P; };
-    window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack']) delete o[k]; return JSON.stringify(o); };
+    window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack', 'tlwin']) delete o[k]; return JSON.stringify(o); };   /* 036 S3: NEW resets tlwin too (WORKSPACE) */
     window.__arr = () => { const L = __LW.layout.captureLayout(); return JSON.stringify({ cards: L.cards, docked: L.docked, rackHidden: L.rackHidden, closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id).sort() }); };
+    window.__arrOf = (L) => JSON.stringify({ cards: L.cards, docked: L.docked, rackHidden: L.rackHidden });
+    window.__arr0 = __arr(); window.__def0 = __arrOf(__LW.layout.captureLayout()) === __arrOf(__LW.layout.DEFAULT);   /* 036 S3: a fresh boot stands in THE DEFAULT LAYOUT */
     window.__st = () => __LW.projects.status;   /* 0.5.0 C6: FOLDERS speaks through the kit toast; the facade keeps the last line */
     window.__w = (n) => new Promise((r) => setTimeout(r, n));
     return 1;`);
@@ -68,8 +71,9 @@ try {
     __LW.kepler.setOn(true); __LW.vortex.setOn(true);
     __LW.loadPreset('1s'); __LW.ab.storeA(); __LW.loadPreset('2p+'); __LW.ab.storeB(); __LW.ab.set(true);
     __LW.layout.notebook.open('notes'); const ta = document.querySelector('.nb-text'); ta.value = 'typed into the demo'; ta.dispatchEvent(new Event('input'));
+    __LW.layout.reopen('history'); __LW.layout.modulation.expand();   /* 036 S3: windows moved off THE DEFAULT, the modulation window open */
     __LW.saveSettings(); await __w(50);
-    const before = { ws: __ws(), theme: document.body.dataset.theme, arr: __arr(), abOn: __LW.ab.on, dirty: P.dirty };
+    const before = { ws: __ws(), theme: document.body.dataset.theme, arr: __arr(), abOn: __LW.ab.on, dirty: P.dirty, mod: __LW.layout.modulation.open };
     let gum = 0, asked = 0; const md = navigator.mediaDevices, gum0 = md && md.getUserMedia, c0 = window.confirm;
     if (md) md.getUserMedia = () => { gum++; return Promise.reject(new Error('probe: no microphone')); };
     window.confirm = () => false; const cancelled = P.requestFresh(), cancel = { promise: !!cancelled && typeof cancelled.then === 'function', value: await cancelled, dirty: P.dirty, abOn: __LW.ab.on };   /* Cancel is a Promise too, and changes nothing */
@@ -87,7 +91,8 @@ try {
       nb: { open: __LW.layout.notebook.isOpen, face: __LW.layout.notebook.face, text: __LW.notebook.text, title: __LW.notebook.title, subtitle: __LW.notebook.subtitle, stored: localStorage.getItem('lambdawaves.q0.notebook'),
         empty: __LW.layout.notebook.mode === 'view' ? /empty/.test(document.querySelector('.nb-view').textContent) && !/going on/.test(document.querySelector('.nb-view').textContent) : !!document.querySelector('.nb-text').placeholder },
       ab: { on: __LW.ab.on, A: __LW.ab.A, B: __LW.ab.B, transition: !!__LW.reg.transition },
-      wsSame: __ws() === before.ws, themeSame: document.body.dataset.theme === before.theme, arrSame: __arr() === before.arr,
+      wsSame: __ws() === before.ws, themeSame: document.body.dataset.theme === before.theme, arrMoved: before.arr !== __arr0, arrDefault: __arr() === __arr0, def0: __def0,
+      win: { mod: __LW.layout.modulation.open, tl: (({ open, dock, workLane }) => ({ open, dock, workLane }))(JSON.parse(localStorage.getItem('lambdawaves.q0.settings')).tlwin || {}), nodes: __LW.nodes.win.isOpen() },
       current: P.current, depth: __LW.history.depth, dirty: P.dirty, before, errs: __e.slice() };
     window.__gum = () => gum; window.__gumRestore = () => { if (md) md.getUserMedia = gum0; };
     return out;`);
@@ -98,9 +103,13 @@ try {
   assert.deepEqual(fresh.sources, ['s1:lfo', 's2:audio']); assert.deepEqual(fresh.macros, [['LFO', 's1'], ['AUDIO', 's2:level']]); assert.equal(fresh.routes, 0);
   assert.deepEqual(fresh.nb, { open: true, face: 'notes', text: '', title: 'NOTEBOOK', subtitle: '', stored: null, empty: true }, 'NEW over an open notebook: it stays open on NOTES, emptied, the empty placeholder shown (021 R4: the 0.4 key is retired; the session part holds it)');
   assert.deepEqual(fresh.ab, { on: false, A: null, B: null, transition: false });
-  assert.equal(fresh.wsSame, true, 'a PREFERENCE key moved'); assert.equal(fresh.themeSame, true); assert.equal(fresh.arrSame, true, 'the window arrangement moved');
+  assert.equal(fresh.wsSame, true, 'a PREFERENCE key moved'); assert.equal(fresh.themeSame, true);
+  /* 036 S3 (Josh: "New projects from now on will reset MIR windows to default"): was "the window arrangement moved" — NEW now puts it back to THE DEFAULT LAYOUT */
+  assert.equal(fresh.def0, true, 'a fresh boot does not stand in THE DEFAULT LAYOUT'); assert.equal(fresh.before.mod, true); assert.equal(fresh.arrMoved, true, 'the demo left the windows in THE DEFAULT LAYOUT — nothing to reset');
+  assert.equal(fresh.arrDefault, true, 'NEW did not put the windows back to THE DEFAULT LAYOUT');
+  assert.deepEqual(fresh.win, { mod: false, tl: { open: false, dock: 'bottom', workLane: 'top' }, nodes: false }, 'NEW did not put the modulation window, the TIMELINE and NODES back to their first run');
   assert.equal(fresh.current, null); assert.equal(fresh.depth, 0); assert.equal(fresh.dirty, false); assert.equal(fresh.gum, 0); assert.deepEqual(fresh.errs, []);
-  console.log(`PASS NEW (${fresh.ms.toFixed(1)} ms, fetch + restore): every PROJECT key is the file's, modulation = LFO + AUDIO bound (s1, s2:level), no routes; the open notebook stays open on NOTES, emptied, its empty placeholder shown (the debounced keystrokes did not flush back); A/B off, stores empty; settings minus WORKSPACE, theme and window arrangement byte-identical; nothing current, history depth 0, clean; no getUserMedia`);
+  console.log(`PASS NEW (${fresh.ms.toFixed(1)} ms, fetch + restore): every PROJECT key is the file's, modulation = LFO + AUDIO bound (s1, s2:level), no routes; the open notebook stays open on NOTES, emptied, its empty placeholder shown (the debounced keystrokes did not flush back); A/B off, stores empty; settings minus WORKSPACE and the theme byte-identical; the windows back in THE DEFAULT LAYOUT (a fresh boot's), the modulation window closed, the TIMELINE closed at the foot on its top lane; nothing current, history depth 0, clean; no getUserMedia`);
 
   /* ── 4 · THE ONE CLOCK ON THE GET-GO (0.5.0 C4: LINKED retired, the modulation follows THE play): show the modulation window,
          play the field → the modulation plays and macro LFO moves ── */
@@ -191,6 +200,40 @@ try {
   assert.equal(held.c.folded, true); assert.equal(held.c.ok, true); assert.equal(held.c.after, 0.04, 'NEW after a folded play and a pause left the stage at ' + held.c.after);
   assert.deepEqual(held.errs, []);
   console.log(`PASS a held stage does not outlive its project: with WAVE DANCER's Stage route playing (stage ${held.a.mix.toFixed(4)}), NEW lands 0.04, a stored 0.2 project lands 0.2 (saved with its bases table, and without one), and NEW after a folded play and a pause lands 0.04`);
+
+  /* ── 9 · 036 THE GRAPH, ITS GRADE AND INFORMATIONAL ARE THE PROJECT'S (Josh 11-03: "Nodes currently don't save into any project. Make sure that
+         nodes get saved and that new projects removes all nodes"): two nodes, a macro route on one's knob, a CURVES grade and STAGE FORMULA off, saved;
+         NEW clears them all (the graph empty, the grade flat, the route gone, INFORMATIONAL at its first run); OPEN brings them back — the route on its
+         target, its base the file's; a project saved before 036 (no `nodes`, no nodes.* route) opens on the empty graph ── */
+  const proj = await g.ev(`const P = __LW.layout.projects, N = __LW.nodes, M = __LW.mod.model, R = __LW.mod.registry, c0 = window.confirm; window.confirm = () => true;
+    const formula = () => JSON.parse(localStorage.getItem('lambdawaves.q0.info') || '{}').molFormula, flt = () => getComputedStyle(document.getElementById('field')).filter;
+    await P.requestFresh(); await __LW.settle();
+    const a = N.add('levels'); N.add('vignette'); N.setHas(true); __LW.curves.preset('MASTER', 'S'); N.set(a, 'gamma', 1.7);
+    __LW.mod.route(M.macroList()[0].id, 'nodes.' + a + '.gamma', 0, 1); __LW.run('view.formula'); await __w(400);
+    const built = { types: N.nodes().map((q) => q.type), routes: M.routeList().map((r) => r.targetId), formula: formula(), dirty: P.dirty };
+    const saved = P.save('probe/graph'), F = JSON.parse(localStorage.getItem('lambdawaves.q0.projects')).items['probe/graph'].data.presentation;
+    const file = { nodes: F.nodes && F.nodes.list.map((q) => q.id + ':' + q.type), grade: !!(F.nodes && F.nodes.curves && F.nodes.curves.curves.MASTER), info: F.info,
+      route: F.modulation.routes.map((r) => r.targetId), base: F.modulationBases['nodes.' + a + '.gamma'] };
+    await P.requestFresh(); await __LW.settle(); await __w(300);
+    const cleared = { nodes: N.nodes().length, graph: N.graph(), filter: flt(), routes: M.routeList().length, formula: formula(), dirty: P.dirty };
+    const opened = P.open('probe/graph'); await __LW.settle(); await __w(300);
+    const back = { opened, nodes: N.nodes().map((q) => q.id + ':' + q.type), gamma: N.nodes().find((q) => q.id === a).values.gamma, target: R.has('nodes.' + a + '.gamma'),
+      base: R.baseOf('nodes.' + a + '.gamma'), route: M.routeList().map((r) => r.targetId + (r.dormant ? ' (dormant)' : '')), graded: /^url\\(/.test(flt()), formula: formula(), dirty: P.dirty };
+    /* before 036: the same project as an older build saved it — no graph, its nodes.* routes refused (021's call 3) */
+    const old = JSON.parse(JSON.stringify(__LW.serialize())); delete old.presentation.nodes; delete old.presentation.info;
+    old.presentation.modulation.routes = old.presentation.modulation.routes.filter((r) => !String(r.targetId).startsWith('nodes.'));
+    const pre = P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, path: 'probe/pre036', data: old, notebook: { title: 'pre036', text: '' } }));
+    const preOpened = P.open(pre); await __LW.settle(); await __w(300);
+    const pre036 = { opened: preOpened, nodes: N.nodes().length, filter: flt(), formula: formula(), dirty: P.dirty };
+    window.confirm = c0; return { built, saved, file, cleared, back, pre036, errs: __e.slice() };`);
+  assert.deepEqual(proj.built, { types: ['levels', 'vignette', 'curves'], routes: ['nodes.n1.gamma'], formula: false, dirty: true });
+  assert.equal(proj.saved, true);
+  assert.deepEqual(proj.file, { nodes: ['n1:levels', 'n2:vignette', 'curves:curves'], grade: true, info: { molFormula: false }, route: ['nodes.n1.gamma'], base: 1.7 }, 'the saved project does not carry the graph, its grade, its route, its base and INFORMATIONAL');
+  assert.deepEqual(proj.cleared, { nodes: 0, graph: null, filter: 'none', routes: 0, formula: true, dirty: false }, 'NEW did not clear the graph, the grade, the route and INFORMATIONAL');
+  assert.deepEqual(proj.back, { opened: true, nodes: ['n1:levels', 'n2:vignette', 'curves:curves'], gamma: 1.7, target: true, base: 1.7, route: ['nodes.n1.gamma'], graded: true, formula: false, dirty: false }, 'OPEN did not bring the graph back');
+  assert.deepEqual(proj.pre036, { opened: true, nodes: 0, filter: 'none', formula: true, dirty: false }, 'a project saved before 036 did not open on the empty graph');
+  assert.deepEqual(proj.errs, []);
+  console.log('PASS the graph is the project\'s: LEVELS + VIGNETTE + CURVES (an S grade), a macro route on nodes.n1.gamma (base 1.7) and STAGE FORMULA off are saved in the project; NEW clears them all (no node, no filter, no route, the formula on); OPEN brings them back, the route on its target at the file\'s base, clean; a project saved before 036 opens on the empty graph');
   await g.close(); g = null;
 
   /* ── 8 · ON A TABLET (an iPad UA: grid ceiling 96³) a saved 128³ × 240 project is clamped as it opens, and mat.steps follows the

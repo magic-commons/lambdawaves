@@ -274,7 +274,7 @@ export function createNotebook(app) {
          their first run (closed; the work lane on top, the timeline docked at the foot, its zoom and snap the boot's) and NODES' window shut.
          The notebook is left as it stands (the notebook law), and no PREFERENCE moves. */
       function freshWindows() {
-        if (app.state.modView) app.state.modView.restore({});
+        if (app.state.modView) { const p = app.state.modView.presentation(); app.state.modView.restore({ selectedMacro: p.selectedMacro, selectedSource: p.selectedSource }); }   // the shape home; the selection (a pointer into the rack) kept where NEW's rack still has it
         const tl = app.state.tl;
         if (tl) { tl.restore({ workLane: 'top' }); tl.win.restore({ dock: 'bottom', open: false }); tl.editor.setSnap(1); tl.editor.act.zoomLevel(2); }
         if (app.sh.LW && app.sh.LW.nodes) app.sh.LW.nodes.close();

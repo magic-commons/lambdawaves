@@ -2,7 +2,8 @@
 // 018 D3: re-aimed at NODES (lab/nodes.js), the card that hosts it now; a saved layout's `curves` seat opens `nodes`.
 // 020 X0: the default graph is empty — CURVES is added (setHas) before the grade.
 //   1 shipped closed, in + and WINDOW, saying so in one line · 2 neutral reads `filter: none` · 3 a grade reaches the screen and NOT a picture
-//   4 the card is a painted surface in the frame mask, open and floated · 5 the grade is PREFERENCE: its own record, surviving a reload, untouched by a project open, absent from the project and the undo ring
+//   4 the card is a painted surface in the frame mask, open and floated · 5 the grade is the PROJECT's (036 S1, Josh's word; it was PREFERENCE): in serialize()
+//   inside presentation.nodes, not in the settings blob or the undo ring, its own record the live mirror (surviving a reload), taken away by NEW
 //   6 FORGET takes it away.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
@@ -71,16 +72,22 @@ try {
   assert.equal(folded.masked, true, JSON.stringify(folded));
   console.log('PASS the closed card masks nothing; the open, the floated and the folded card are painted surfaces in the frame mask');
 
-  /* 5 · PREFERENCE */
+  /* 5 · THE PROJECT'S (036 S1: Josh's word reverses 0.5.1's PREFERENCE — "Make sure that nodes get saved and that new projects removes all nodes") */
   const rec = await g.ev(`await __w(400); __LW.saveSettings(); await __w(60);
     const j = () => JSON.stringify(__LW.serialize(), (k, v) => (k === 'at' ? 0 : v)), a = j(); __LW.curves.preset('MASTER', 'LINEAR'); const b = j(); __LW.curves.preset('MASTER', 'S'); await __w(400);
-    return { raw: localStorage.getItem('${KEY}'), inBlob: 'curves' in JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'), same: a === b };`);
+    const G = __LW.serialize().presentation.nodes;
+    return { raw: localStorage.getItem('${KEY}'), inBlob: 'curves' in JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'), same: a === b,
+      inProject: !!(G && G.curves && G.curves.curves.MASTER), inEdit: 'nodes' in __LW.serialize({ scope: 'edit' }).presentation };`);
   assert.ok(rec.raw); const parsed = JSON.parse(rec.raw); assert.equal(parsed.v, 1); assert.ok(parsed.curves.MASTER.length >= 3);
-  assert.equal(rec.inBlob, false); assert.equal(rec.same, true);
+  /* was same === true (the grade never moved serialize()); 036 S1: it is the project's, so a grade change moves the project's bytes */
+  assert.equal(rec.inBlob, false); assert.equal(rec.same, false, 'a grade change did not move serialize()'); assert.equal(rec.inProject, true); assert.equal(rec.inEdit, false);
   await g.ev(`window.confirm = () => true; await __LW.layout.projects.requestFresh();   /* NEW asks first when the project is dirty (the steps above dirty it); the subject here is the grade, so it says yes */ await __w(600); await __LW.settle(); return 1;`);
-  const after = await g.ev(`return { raw: localStorage.getItem('${KEY}'), filter: __filter() };`);
-  assert.equal(after.raw, rec.raw); assert.match(after.filter, /^url\(/);
-  console.log('PASS the grade is PREFERENCE: its own record, not in the settings blob or the project; a project open (NEW) leaves it and the screen as they were');
+  const after = await g.ev(`return { grade: JSON.parse(localStorage.getItem('${KEY}')).curves, filter: __filter(), nodes: __LW.nodes.nodes().length };`);
+  /* was after.raw === rec.raw and the screen still graded (NEW left the PREFERENCE alone); 036 S2: NEW clears the graph and the grade */
+  assert.deepEqual(after, { grade: {}, filter: 'none', nodes: 0 }, 'NEW did not take the grade away');
+  console.log('PASS the grade is the project\'s: in serialize() inside presentation.nodes (not in the settings blob or the undo ring), its own record the live mirror; NEW takes it away, the screen neutral');
+  const regraded = await g.ev(`__LW.nodes.setHas(true); __LW.curves.preset('MASTER', 'S'); await __w(400); return localStorage.getItem('${KEY}');`);
+  rec.raw = regraded;   /* the reload below boots from the mirror the grade left */
   await go(g.s, URL); await g.armErrors(); await ready();
   const back = await g.ev(`return { raw: localStorage.getItem('${KEY}'), pts: __LW.curves.points('MASTER').length, filter: __filter(), closed: document.querySelector('.dev[data-id="nodes"]').classList.contains('closed') };`);
   assert.equal(back.raw, rec.raw); assert.ok(back.pts >= 3); assert.match(back.filter, /^url\(/);

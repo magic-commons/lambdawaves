@@ -3,7 +3,9 @@
  * JSON.stringify(serialize()) and of JSON.stringify(serialize({ scope: 'edit' })) (the undo ring's record) with their sha-256:
  *   1     every STARTER (lab/project-store.js; iteration 009: WAVE DANCER PROTOTYPE), opened by the road both builds have: fetch the
  *         bundled file, projects.importText, projects.open — then paused and settled;
- *   2     the empty project (projects.fresh(), NEW's road);
+ *   2     the empty project (projects.fresh(), NEW's road) FROM A FRESH BOOT — the storage cleared and the lab reloaded first (036: NEW
+ *         keeps the camera and puts the windows back to THE DEFAULT LAYOUT, so NEW over a demo reads the demo's pose and a new arrangement;
+ *         from a fresh boot both are the boot's on any tree, and the reading compares);
  *   3–8   six history snapshots: from that NEW, six hand edits through __LW (preset, stage, style, palette, Hamiltonian, rate),
  *         each flushed into the ring as one row, read where it stands;
  *   9–    every file of tests/fixtures/retired-demos (iteration 010 X6: WATER, N₂ and HELIUM, the probe's molecule readings, and the 008
@@ -15,6 +17,7 @@
 import { readdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { open } from './gate/gatekit.mjs';
+import { go } from './gate/drv.mjs';
 import { STARTERS } from '../lab/project-store.js';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
@@ -54,6 +57,9 @@ try {
     keep(name, r);
   };
   for (const [name, url] of DEMOS) await openFile(name, url);
+  await g.ev('localStorage.clear(); return 1;'); await go(g.s, LAB);   /* 036: a fresh boot under NEW (see 2 above) */
+  if ((await g.waitFor('window.__LW&&__LW.ready', 300, 100)).ok !== 1) throw new Error('the fresh boot never became ready');
+  await g.armErrors(); await g.ev(HELP); await g.ev('return __quiet();');
   const fresh = await g.ev(`const ok = await __LW.projects.fresh(); await __quiet(); return { ok, ...__read() };`);
   if (!fresh || fresh.E || !fresh.ok) throw new Error('NEW failed — ' + JSON.stringify(fresh && fresh.E));
   keep('the empty project', fresh);
