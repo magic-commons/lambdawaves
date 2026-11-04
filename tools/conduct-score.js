@@ -7,7 +7,7 @@
  * the registry's toNorm.  The arrangement is built here as the kit's timeline document (one model lane per score lane, a curve and its
  * clips; a `repeat` is N clips of one short curve; `step` is the source's own HOLD segment) and handed to the model's restore, which
  * validates it whole; the audio bands are then added on the film-obey road (audioClipFromFile → the editor's addClip; the app's timeline
- * installs no audio drop).  The NODES graph is set live and stays out of the saved project (lab/nodes.js: a device record).
+ * installs no audio drop).  The NODES graph is set live and rides in the saved project (036 S1: presentation.nodes, the project's).
  * DOM-free at its top: the pure half (readScore, laneCurve, pulses, timelineDoc, modeIndex) runs in node (tests/conduct.test.mjs). */
 import { STYLE_NAMES, WAVE_VIEWS } from '../lab/field.js';
 import { PRESETS as PALETTES } from '../lab/mir/palette.js';
@@ -246,7 +246,7 @@ export async function apply(LW, input) {
   });
   if (O.vortex !== undefined) await step('overlays.vortex', () => verb('switch', { id: 'locate', on: !!(typeof O.vortex === 'object' ? O.vortex.on : O.vortex) }));
 
-  /* nodes: the graph replaced, in chain order; a node's id is the graph's, so `nodes.<type>.<knob>` (or `<type>#2`) is resolved below */
+  /* nodes: the graph replaced, in chain order (saved with the project since 036); a node's id is the graph's, so `nodes.<type>.<knob>` (or `<type>#2`) is resolved below */
   const placed = new Map();
   if (Array.isArray(S.nodes)) await step('nodes', () => {
     const N = LW.nodes, old = N.nodes().map((q) => q.id); if (old.length) N.remove(old);

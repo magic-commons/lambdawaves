@@ -9,11 +9,6 @@ import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
 import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS, N6, narrow, widen } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
-/** 021 R6 · THIS DEVICE'S OWN CAPTURE: inside `asDevice(fn)` serialize() keeps `nodes.*` routes and lanes (the SESSION, main.js); every other
- *  capture — a project file, FOLDERS, an export, a link — is what leaves the device and refuses them (call 3).  The undo history's edit scope
- *  always keeps them. */
-let deviceCapture = 0;
-export function asDevice(fn) { deviceCapture++; try { return fn(); } finally { deviceCapture--; } }
 /** 028 R-04 · A FILE'S NUMBER IS TAKEN ONLY WHEN IT IS ONE: `v` (a file's obs, mat, quality or domain) with every number `cur` holds
  *  that `v` carries non-finite (null, NaN, 'boom') kept at `cur`'s, one nested object deep and element-wise in a number array; the
  *  rest of `v`, its keys and their order, as it came.  A `domain.half: null` froze the stage and the session kept it. */
@@ -33,7 +28,7 @@ export function createPersist(app) {
   /* 0.3.1 · S3 THE EDIT SCOPE (PLAN §4.1, D6; docs/STATE-SCOPES.md) — what the history reads, keys and writes back: the PROJECT keys
      minus the view, quality, the notebook and the WORKSPACE (no DOM read), and minus what a clock or a modulator moves (experiment.t,
      a bound macro's value, a modulated target's output — its seat keeps the base —, mat.steps, domain.half under AUTO). */
-  const EDIT_SKIP = ['obs', 'quality', 'layout', 'modwin', 'camera', 'notebook'];
+  const EDIT_SKIP = ['obs', 'quality', 'layout', 'modwin', 'camera', 'notebook'];   // 036 S1: and `nodes` (NODES keeps its own ring), which the edit scope never writes
   const shellSeat = (R, n) => R && { get v() { return R[BASIS.findIndex((s) => s.n === n)] ?? 1; },   // 0.6.0 B3a: a shell route's seat writes only a shell that shares one rate — a hand's per-label rates are never flattened
     set v(x) { const sh = BASIS.filter((s) => s.n === n);
       /* iteration 009 DEMOS: a 91-wide record's n = 7 is at 1 by absence (the getter reads it so, X6) — its base seat writes 1 into nothing, so
@@ -94,9 +89,11 @@ export function createPersist(app) {
         ab: ui.ab ? ui.ab.get() : null,
         notebook: !edit && layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
     const T = !edit && app.state.tl ? app.state.tl.model.serialize() : null;
-    if (!edit && !deviceCapture) refuseNodes(S.presentation.modulation, T);
     if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
     { const E = app.state.eq.serialize(); if (E) S.presentation.eq = E; }   // 0.6.0 B2: the BEAT EQUALIZER, PROJECT and default-absent (FLAT writes nothing)
+    /* 036 S1 · THE GRAPH IS THE PROJECT'S (Josh: "Make sure that nodes get saved"): NODES' graph and its CURVES grade, default-absent (the empty
+       graph writes nothing, so NEW and the demos keep their bytes); its `nodes.*` routes, lanes and bases ride with the rack (021's refusal is lifted) */
+    if (!edit) { const G = app.sh.LW && app.sh.LW.nodes ? app.sh.LW.nodes.graph() : null; if (G) S.presentation.nodes = G; }
     if (!edit) return S;
     const pr = S.presentation, R = app.state.modHost && app.state.modHost.registry;
     delete S.experiment.t; delete pr.mat.steps; if (pr.domain.auto) delete pr.domain.half;
@@ -104,18 +101,6 @@ export function createPersist(app) {
     if (R) for (const [id, [o, k, f]] of Object.entries(modSeats(S))) if (o && R.has(id) && R.isModulated(id)) o[k] = f ? f(R.baseOf(id)) : R.baseOf(id);
     for (const k of EDIT_SKIP) delete pr[k];
     return S;
-  }
-  /** 021 R2 · CALL 3: A PROJECT NEVER NAMES THE READER'S GRAPH.  NODES is PREFERENCE (per device), so a `nodes.*` route or TIMELINE curve
-   *  (and its clips) is refused on the way into what leaves this device — a project file (FOLDERS, an export) or a link — one console line
-   *  when the count changes.  R6: the SESSION (asDevice) and the undo history's edit scope keep them, so a NODES route survives a reload. */
-  let refusedSaid = 0;
-  function refuseNodes(M, T) {
-    const isN = (id) => typeof id === 'string' && id.startsWith('nodes.');
-    let n = 0;
-    if (M && Array.isArray(M.routes)) { const keep = M.routes.filter((r) => !isN(r && r.targetId)); n += M.routes.length - keep.length; M.routes = keep; }
-    if (T && Array.isArray(T.curves)) { const gone = new Set(T.curves.filter((c) => isN(c && c.targetId)).map((c) => c.id));
-      if (gone.size) { n += gone.size; T.curves = T.curves.filter((c) => !gone.has(c.id)); T.clips = (T.clips || []).filter((c) => !gone.has(c.curveId)); } }
-    if (n !== refusedSaid) { refusedSaid = n; if (n) console.info('NODES: ' + n + ' route/lane target' + (n === 1 ? '' : 's') + ' on nodes.* left out of the project (the graph is PREFERENCE)'); }
   }
   /** WAVE 63 · THE RACK CARRIES ITS MODEL VERSION, because nothing else on this road did.
    *  `mod.js` stamps `modV` on a PRESET record and `presetApply` refuses a stamp it cannot read —
@@ -160,7 +145,7 @@ export function createPersist(app) {
     const ok = app.state.modHost.model.deserialize(o || null);
     app.state.modHost.targets.sync();
     for (const id of app.state.modHost.registry.list()) {
-      const v = savedBases && !id.startsWith('nodes.') && Number.isFinite(savedBases[id]) ? savedBases[id] : incoming[id];   // 021 R2: a file's nodes.* bases are not the reader's graph
+      const v = savedBases && Number.isFinite(savedBases[id]) ? savedBases[id] : incoming[id];   // 036 S1: a file's nodes.* bases are its own graph's (the graph landed first)
       if (Number.isFinite(v)) app.state.modHost.registry.setBase(id, v);
     }
     app.state.modHost.clock.applyAll(true);
@@ -173,7 +158,8 @@ export function createPersist(app) {
   async function copyJSON() { try { await navigator.clipboard.writeText(JSON.stringify(serialize(), null, 1)); } catch (_) {} }
   /** opt.history (UNDO / REDO, S3): an edit-scope record; the transport stays where it is (the anchor c(0) travels, so the picture
    *  only moves if the coefficients did) and the ring, notebook, view and arrangement are left alone.  opt.project: a file opens at
-   *  t = 0.  Neither clears the history: the road that opened the file does, naming it (boot, link, open · …). */
+   *  t = 0.  Neither clears the history: the road that opened the file does, naming it (boot, link, open · …).  opt.session (036 S1):
+   *  the RESUME — a session written before 036 carries no graph and keeps the one the device record holds. */
   function restore(obj, opt) {
     const hist = !!(opt && opt.history), gone = [], cut = []; let said = '';   // cut: iteration 008 W's views that left WAVE (Re+Im, Δρ), named once below                  // D9: the retired legacy windows this file used, named once below
     if (!hist) app.state.restoreNotice = '';
@@ -345,6 +331,9 @@ export function createPersist(app) {
         }
         /* Restore modulation last. Its base setters now see the final camera, Stage, transport,
            palette and state controls, so no later project step can overwrite a routed hand value. */
+        /* 036 S1 · AN OPEN REPLACES THE GRAPH (the timeline's law): the file's graph lands BEFORE its rack, so its `nodes.*` routes and bases find
+           their targets; a file without one (every project saved before 036, NEW, a link) opens on the empty graph, the grade flat; an UNDO leaves it */
+        if (!hist && !(opt && opt.session && pr.nodes === undefined) && app.sh.LW && app.sh.LW.nodes) app.sh.LW.nodes.load(pr.nodes || null);
         const modWas = hist && pr.modulation !== undefined && app.state.modHost && app.state.modHost.clock.isPlaying();
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
         if (modWas) app.state.modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)

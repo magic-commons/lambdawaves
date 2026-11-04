@@ -899,9 +899,10 @@ export async function boot(dom) {
   rk.register({ id: 'render', el: app.state.filmCard.card, side: 'right', closed: true, title: 'RENDER', glyph: 'render', hint: 'the picture and the film' });
   /* 018 D3 · NODES (lab/nodes.js, call 1): the CURVES card retired into a node graph — STAGE IN → CURVES → STAGE OUT — shown as the MIR window `nodes`
      and the rack card `nodes`, seated where CURVES was (after RENDER, closed; a saved layout's `curves` seat opens `nodes`: settings.js RETIRED_WINDOWS).
-     The grade is still the kit's curves panel over the stage canvas (the SCREEN only, never a picture or a film), PREFERENCE `lambdawaves.q0.curves`;
-     `__LW.curves` is its model, `__LW.nodes` the graph. */
-  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod, field, mat, present: () => schedule(TIER.PRESENT), onWin: () => app.sh.ACTIONS.notify('nodes') });   // 024 S2: field · mat · present for a SHADER node
+     The grade is still the kit's curves panel over the stage canvas, its record `lambdawaves.q0.curves`; `__LW.curves` is its model, `__LW.nodes` the
+     graph.  036 S1: the graph and the grade are the PROJECT's (presentation.nodes) — an edit books the session's save (onEdit) */
+  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod, field, mat, present: () => schedule(TIER.PRESENT), onWin: () => app.sh.ACTIONS.notify('nodes'),
+      onEdit: () => layout.projects && layout.projects.changed() });   // 024 S2: field · mat · present for a SHADER node
     LW.curves = N.model; LW.nodes = N; LW.skeletonArgs = skeletonArgs; }
   // FOLDERS — the FOLDERS card (`projects`), the kit's mountGallery (021 G3: lab/windows/folders.js)
   createFolders(app);

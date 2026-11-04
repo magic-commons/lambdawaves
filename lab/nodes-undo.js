@@ -1,10 +1,11 @@
 /* lab/nodes-undo.js — NODES' OWN UNDO (iteration 020 X1; NODES-FLESH-OUT.md).  A ring of 30 snapshots of the graph (the node list: type,
  * values, bypass, place, name, fold — and the graph's own flags), Ctrl-Z / Ctrl-Shift-Z on the focused ground.  The kit's HISTORY is the
- * project's; the graph is the reader's (PREFERENCE), so it keeps its own ring and never writes a history row.
+ * project's edit scope; the graph is the project's too since 036 S1 but keeps its own ring and never writes a history row.
  *   createUndo(take, put, n = 30) → { mark(), touch(), undo(), redo() }
  *     take()   the state now, as a string;  put(s)  the state put back
  *     mark()   before a discrete edit: the state as it was is one step (an edit that changed nothing leaves no step)
- *     touch()  a knob's move: the first opens a step, 400 ms of quiet closes it — one drag, one step */
+ *     touch()  a knob's move: the first opens a step, 400 ms of quiet closes it — one drag, one step
+ *     clear()  every step gone (036 S1: a project's graph put in place starts the ring afresh) */
 export function createUndo(take, put, n = 30) {
   const back = [], fwd = [];
   let open = 0;
@@ -18,5 +19,6 @@ export function createUndo(take, put, n = 30) {
     touch() { if (!open) push(take()); clearTimeout(open); open = setTimeout(() => { open = 0; }, 400); },
     undo: () => step(back, fwd),
     redo: () => step(fwd, back),
+    clear() { shut(); back.length = fwd.length = 0; },
   };
 }

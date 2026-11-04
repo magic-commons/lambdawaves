@@ -223,8 +223,8 @@ export function createNotebook(app) {
       function modulationBases() {
         if (!app.state.modHost) return null;
         modSyncBases(); // catch paused hand edits; routed targets keep their protected base by contract
-        /* 020 X4: NODES' knobs (`nodes.*`) are the reader's graph (PREFERENCE), not the project's: their bases stay out (a CURVES added is no edit) */
-        return Object.fromEntries(app.state.modHost.registry.list().filter((id) => !id.startsWith('nodes.')).map((id) => [id, app.state.modHost.registry.baseOf(id)]));
+        /* 036 S1: NODES' knobs (`nodes.*`) are the project's graph's, their bases with every other (020 X4 left them out while the graph was PREFERENCE) */
+        return Object.fromEntries(app.state.modHost.registry.list().map((id) => [id, app.state.modHost.registry.baseOf(id)]));
       }
       /* A project stores the HAND values behind every routed control. The live Card values may be
          anywhere in an LFO cycle when Save is pressed; those animated values are presentation for
@@ -260,7 +260,7 @@ export function createNotebook(app) {
       const part = {
         capture: (name) => ({ data: projectSnapshot(), notebook: { title: name && titleIn.value === 'NOTEBOOK' ? name : titleIn.value, subtitle: subIn ? subIn.value : '', text: ta.value } }),
         restore(v, ctx) {
-          if (!v || typeof v !== 'object' || !v.data || app.sh.restore(v.data, { project: true }) !== true) throw new Error('the project did not take');
+          if (!v || typeof v !== 'object' || !v.data || app.sh.restore(v.data, { project: true, session: !!(ctx && ctx.session) }) !== true) throw new Error('the project did not take');   // 036 S1: a RESUME says so (the kit's ctx)
           const n = v.notebook && typeof v.notebook === 'object' ? v.notebook : {};
           ta.value = n.text || ''; titleIn.value = n.title || (ctx && ctx.name) || 'NOTEBOOK'; curPath = null;
           if (subIn) { subIn.value = n.subtitle || ''; subIn.hidden = !subIn.value; }

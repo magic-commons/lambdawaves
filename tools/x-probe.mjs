@@ -91,7 +91,7 @@ const SCENES = {
       return E(`await w(400); return N.nodes().map((q) => q.id + ':' + q.type + (q.bypass ? '×' : '') + ':' + q.values.fade + ':' + q.values.mask);`); };
     return { r018: await back({ v: 1, curves: false, at: { curves: [10, 90] } }), r019: await back({ v: 1, list: [{ id: 'curves', type: 'curves', values: {}, bypass: false, at: null }, { id: 'n2', type: 'posterize', values: { steps: 6 }, bypass: true, at: null }] }) };
   },
-  /* a NODES edit is no project edit (the graph is PREFERENCE): FOLDERS' unsaved mark before and after CURVES and a LEVELS are added */
+  /* 036 S1: a NODES edit IS a project edit (the graph is the project's): FOLDERS' unsaved mark before and after CURVES and a LEVELS are added */
   dirty: `await w(400); const d = () => __LW.layout.projects.dirty, o = { d0: d() }; N.setHas(true); N.set(N.add('levels'), 'gamma', 2); await w(600); o.d1 = d(); return o;`,
   /* X4: what a mask does on the screen — the stage canvas's pixels (the driver's composite) bare, under LEVELS GAMMA 3, and under it masked */
   x4px: async (E) => {

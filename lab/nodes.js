@@ -9,11 +9,13 @@
  * 020 X0 THE CLEAN SLATE: CURVES is a node like any other — × bypasses, the bin removes — at most one (the kit's one curves model, kept alive
  * without a node and restored into the next CURVES), id `curves`.  THE DEFAULT GRAPH IS EMPTY: a first run (no record, no grade) opens
  * STAGE IN → STAGE OUT; a record with `list` opens as saved; 018's one-node record (`curves: false`, `at.curves`) opens with CURVES.
- * Every node knob is a MIR control routed like any other dial (`nodes.<node>.<knob>`, stable).  Records, all PREFERENCE: the grade
- * `lambdawaves.q0.curves`, the reader's curves `.curvePresets`, the graph `.nodes` ({ seq, list: [{ id, type, values, bypass, at, name, fold }],
- * at, pan, zoom, win, off }), the reader's graphs `.nodePresets`.
- *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field, mat, present }) → { model, filter, nodes(), add(type), remove(id),
- *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on) } */
+ * Every node knob is a MIR control routed like any other dial (`nodes.<node>.<knob>`, stable).  036 S1 THE GRAPH IS THE PROJECT'S (Josh: "Nodes
+ * currently don't save into any project"): the graph — `{ v, seq, list: [{ id, type, values, bypass, at, name, fold }], at, curves }`, the CURVES
+ * grade inside it — rides in the project as `presentation.nodes` (graph() / load(); persist.js), and its two device records are the live mirror
+ * a reload boots from: the graph `lambdawaves.q0.nodes` (with the window's own place, pan, zoom, win, off — WORKSPACE) and the grade
+ * `lambdawaves.q0.curves`.  The reader's curves `.curvePresets` and graphs `.nodePresets` stay PREFERENCE.
+ *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field, mat, present, onEdit }) → { model, filter, nodes(), add(type), remove(id),
+ *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on), graph(), load(graph) } */
 import { el, ariaLabel, chip } from './mir/kit.js';
 import { createWindow } from './mir/window/window.js';
 import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
@@ -41,7 +43,7 @@ const SHIPPED = {
   /* 020 X4: POSTER's steps at 85 % (the banding softened, free: a fold), PRINT's contrast in the mid-tones only (a masked run) */
 };
 
-export function createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field = null, mat = {}, present = null, onWin = () => {} }) {
+export function createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field = null, mat = {}, present = null, onWin = () => {}, onEdit = () => {} }) {
   const store = jsonStore('lambdawaves.q0.nodes');
   const rec = () => { const r = store.get(); return r && r.v === 1 ? r : { v: 1 }; };
   const put = (patch) => store.set({ ...rec(), ...patch });
@@ -76,26 +78,30 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      record; else THE DEFAULT GRAPH, which is EMPTY */
   const fresh = (id, type, o = {}) => ({ id, type, bypass: !!o.bypass, at: Array.isArray(o.at) ? o.at : null, name: typeof o.name === 'string' && o.name ? o.name : null, fold: !!o.fold,
     values: { ...homeOf(TYPES[type]), ...(o.values || {}) }, v: 0 });
+  const listOf = (list) => { let one = false;
+    return list.filter((q) => q && /^[a-z][a-z0-9]*$/.test(q.id) && TYPES[q.type] && (q.type !== 'curves' || (!one && (one = true)))).map((q) => fresh(q.type === 'curves' ? 'curves' : q.id, q.type, q)); };
   function load() {
     const r = rec();
     if (!Array.isArray(r.list)) return 'curves' in r || (r.at && r.at.curves) || curvesStore.get() ? [fresh('curves', 'curves', { bypass: r.curves === false, at: (r.at || {}).curves })] : [];
-    let one = false;
-    return r.list.filter((q) => q && /^[a-z][a-z0-9]*$/.test(q.id) && TYPES[q.type] && (q.type !== 'curves' || (!one && (one = true)))).map((q) => fresh(q.type === 'curves' ? 'curves' : q.id, q.type, q));
+    return listOf(r.list);
   }
   nodes = load();
   /* 021 R2 · A NODE'S ID IS PERMANENT: `seq` (in the record) only grows — add, duplicate and a graph take 'n' + (++seq), nothing renumbers,
      so a route or a TIMELINE lane on `nodes.n2.amount` can never wake on another node.  An older record without it starts at its highest n */
-  let seq = Math.max(Number.isInteger(rec().seq) ? rec().seq : 0, ...nodes.map((q) => (/^n(\d+)$/.exec(q.id) || [0, 0])[1] | 0));
+  const seqOf = (s) => Math.max(Number.isInteger(s) ? s : 0, ...nodes.map((q) => (/^n(\d+)$/.exec(q.id) || [0, 0])[1] | 0));
+  let seq = seqOf(rec().seq);
   const nextId = () => 'n' + (++seq);
   const batch = (fn) => (mod && mod.batch ? mod.batch(fn) : fn());   // one modulation-window rebuild per graph change
   const byId = (id) => nodes.find((q) => q.id === id);
   const curvesNode = () => nodes.find((q) => q.type === 'curves');
   const has = () => { const c = curvesNode(); return !!c && !c.bypass; };
   let saving = 0, savingList = 0;
-  const saveList = (now) => { clearTimeout(savingList); const w = () => put({ seq, list: nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold })) }); if (now) w(); else savingList = setTimeout(w, 250); };
+  const rows = () => nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold }));
+  const saveList = (now) => { clearTimeout(savingList); const w = () => put({ seq, list: rows() }); if (now) w(); else savingList = setTimeout(w, 250); };
   onForget(() => { clearTimeout(saving); clearTimeout(savingList); saving = savingList = 0; });
+  const FLAT = { v: 1, amount: 1, curves: {} };   // 036 S1: the grade a project without one opens on (the kit's restore(null) changes nothing)
   model.restore(curvesStore.get());
-  model.onChange(() => { clearTimeout(saving); saving = setTimeout(() => curvesStore.set(model.serialize()), 250); });
+  model.onChange(() => { clearTimeout(saving); saving = setTimeout(() => curvesStore.set(model.serialize()), 250); onEdit(); });
 
   /* MODULATION: every number knob is a target `nodes.<node>.<knob>` through the runtime door (LW.mod.register); a hand on a ROUTED knob moves
      its BASE (the registry's), a modulator's write is PAINTED (show), as every rack dial (mod-port.js) */
@@ -120,7 +126,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     recompile();
     const shown = from === 'mod' && routed(ID(q, k));
     for (const view of views) { view.paint(q, k, v, shown); view.strip(q); }
-    if (from === 'hand') saveList();
+    if (from === 'hand') { saveList(); onEdit(); }
   }
   const hand = (q, k, v) => { undo.touch(); if (routed(ID(q, k))) mod.registry.write(ID(q, k), v); else setValue(q, k, v, 'hand'); };
 
@@ -131,7 +137,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const many = (x) => (Array.isArray(x) ? x : [x]);
 
   /* THE VERBS: add · remove · bypass · a graph · reorder (by the graph's top → bottom) */
-  const changed = (rebuild) => { saveList(true); recompile(); for (const v of views) v.sync(rebuild); };
+  const changed = (rebuild) => { saveList(true); recompile(); for (const v of views) v.sync(rebuild); onEdit(); };   // 036 S1: an edit books the session's save
   function add(type, o) {
     if (!TYPES[type]) return null;
     undo.mark();
@@ -184,6 +190,26 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   }
   batch(() => { for (const q of nodes) enroll(q); });
   recompile();
+  /** 036 S1 · THE GRAPH AS A PROJECT CARRIES IT (`presentation.nodes`): the list, its `seq` (ids never reuse, within the project that names
+   *  them), STAGE IN / OUT's places and the CURVES grade when it is not flat (the view's CHANNEL left out) — null while the graph is THE
+   *  DEFAULT one (empty, the grade flat, no id ever given: a removed node's `seq` still rides, so a dormant route never wakes on a new node),
+   *  so every project without a graph keeps its bytes.  load(graph) puts one in place through the undo's road (one batch, the
+   *  window rebuilt once, every SHADER node from black, NODES' own ring started afresh); null or a file without one is THE DEFAULT GRAPH, empty,
+   *  the grade flat.  The window's place (pan, zoom, win, off) is the device's and stays. */
+  function graph() {
+    const { channel, ...grade } = model.serialize(), flat = grade.amount === 1 && !Object.keys(grade.curves).length, A = rec().at;
+    return nodes.length || !flat || seq ? JSON.parse(JSON.stringify({ v: 1, seq, list: rows(), ...(A && { at: A }), ...(!flat && { curves: grade }) })) : null;
+  }
+  function loadGraph(g) {
+    const o = g && typeof g === 'object' && Array.isArray(g.list) ? g : { list: [] };
+    undo.clear(); flags.view = flags.solo = null;
+    batch(() => { for (const q of nodes) unenroll(q); nodes = listOf(o.list); for (const q of nodes) enroll(q); });
+    seq = seqOf(o.seq);
+    model.restore(o.curves && typeof o.curves === 'object' ? o.curves : FLAT);
+    put({ at: o.at && typeof o.at === 'object' ? o.at : {} });
+    if (gpu) for (const q of nodes) gpu.restart(q.id);
+    changed(true);
+  }
 
   /** one curves view in a node's body: the kit's view over the one model, CHANNEL · PRESET as aria (018 A7), the save glyph and each × (018 D2) */
   function curvesIn(body) {
@@ -232,7 +258,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
   return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, setView: M.setView, setSolo: M.setSolo, setOff, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
-    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, keysAt, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close(),
+    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, keysAt, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close(), graph, load: loadGraph,
     /* 025 B1 · the film's compile: the graph as the stage runs it, a PRIMITIVE's px knobs × k (film px per stage CSS px; DISPLACE's frequency ÷ k), and the
        SHADER host the film bakes its SHADER layers through (render-exact.js frame → lab/film-bake.js) */
     compileAt: (k) => compile(nodes.map((q) => { const T = TYPES[q.type]; if (!T || T.cls !== 'prim' || k === 1) return q;

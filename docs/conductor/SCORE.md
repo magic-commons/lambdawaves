@@ -33,7 +33,7 @@ under a clip a device's routes on that target stand aside); a score names no dev
 | `title`, `notes`, `_…` | text | — | for the reader and the stitch's title; never applied |
 | `tempo` | `{ bpm, meter }` | `{ 120, 4 }` | the transport's BPM (10…999) and the timeline's meter (1–8, 12) |
 | `bars` | number > 0 | `4` | the score's length: `bars · meter` beats |
-| `base` | `null` · `"NEW"` · a stored project path · a repo file path · project text · a URL | `null` (NEW) | the project the score starts from |
+| `base` | `null` · `"NEW"` · a stored project path · a repo file path · project text · a URL | `null` (NEW) | the project the score starts from (036: NEW clears the graph and the windows and keeps the camera — a score that wants a pose says `camera`) |
 | `system.preset` | a preset id (`1s+2pz`, …) | — | SPECTRUM's preset, the hand's road |
 | `system.modes` | `["h:n:l:m", ["h:n:l:m", amp, phase], { id, re, im }, …]` | — | the register, replaced (n ≤ 7) |
 | `system.ab` | `{ a: [modes], b: [modes], omega, on }` | `omega 0.05`, `on true` | the A ↔ B TRANSITION (modes as above) |
@@ -51,7 +51,7 @@ under a clip a device's routes on that target stand aside); a score names no dev
 | `camera` | `{ yaw, pitch, dist (or zoom), fov, panx, pany (or pan: [x, y]), mode, autoRotate }` | `autoRotate false` | the pose (radians; dist 1.2…8; fov 0.25…1.2); a film refuses a moving camera, so AUTO-ROTATE is off unless asked |
 | `overlays.particles` | `{ on, count 20…600, trail 0…120 }` or bool | — | PARTICLES |
 | `overlays.vortex` | bool | — | VORTEX › LOCATE |
-| `nodes` | `[{ type, knobs: { k: v }, bypass }]` | — | the NODES graph REPLACED, in chain order (types: TARGETS.md › nodes); set live, never saved in the project (a device record) |
+| `nodes` | `[{ type, knobs: { k: v }, bypass }]` | — | the NODES graph REPLACED, in chain order (types: TARGETS.md › nodes); set live and saved with the project (036: the graph is the project's) |
 | `lanes` | see below | `[]` | automation lanes |
 | `triggers` | `[{ action, at: [beats] }]` | `[]` | an `action.<id>` pulse (0 → 1 for ⅛ beat → 0) at each beat: `preset.next`, `style`, `view`, `invert`, `reseed`, `chem.vibrate`, … |
 | `audio` | `{ file, offset, keep, bands }` | `keep true` | an audio-reactive arrangement, below |

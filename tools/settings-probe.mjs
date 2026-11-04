@@ -46,7 +46,7 @@ function diff(a, b) {
   }
   return out;
 }
-const bad = (d) => d.filter((x) => x.scope !== 'WORKSPACE' && x.scope !== 'PROJECT');
+const bad = (d) => d.filter((x) => x.scope.split(' + ').some((s) => s !== 'WORKSPACE' && s !== 'PROJECT'));   // 036 S1: NODES' record is PROJECT + WORKSPACE (the graph's mirror and the window's place)
 const g = await open(LAB, { width: 1500, height: 1000, script: 180000 });
 const dump = { lab: LAB, scenes: [] };
 let red = 0;
