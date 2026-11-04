@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The law of 036
+
+NEW IS A NEW PROJECT (036, Josh 2026-11-03: "make sure … that new projects removes all nodes. New projects from now on will reset MIR windows to default, while not messing with preferences"). NEW clears THE GRAPH: its file carries no `presentation.nodes`, so the open's law (nodes.md, THE GRAPH IS THE PROJECT'S) lands the empty graph and the flat grade, NODES' own ring cleared with the history's; the reader's graphs and curves (`.nodePresets`, `.curvePresets`) are never touched.
+
 ## The laws of 021
 
 ONE STORE (021 R4): every stored key is a row of `lab/settings-store.js` RECORDS `{ key, scope, version, forget, owner }`; STATE-SCOPES' records table is generated (`node tools/state-scopes.mjs`, `--check` in the node gate), never hand-written; FORGET wipes the `forget` rows after `onForget` cancels, and `presets`, `palettes`, `curvePresets`, `nodePresets` are `forget: false` (the reader's work, R6); `saveSettings` writes `{ ...S0, ...owned }` minus RETIRED — never a carry list; the notebook lives only in the project part.
