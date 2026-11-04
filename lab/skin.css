@@ -1118,13 +1118,19 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-sheet { transition: none; }
 
 /* 035 THE COLLAGE (lab/picker-collage.js): under the face, the canvas of clips (the root's first child) and the veil over it — the menu's
-   ground at ~.68 in the middle and ~.35 at the rim, so the logo, the doors and CONTINUE read on both themes; the canvas (placed, sized and
-   turned by the module: the tilt is its CSS rotate) fades in on its first picture.  The decks, FOLDERS and the tutorial keep the plain
-   ground (both hidden, the video paused). */
+   ground at ~.68 in the middle and ~.35 at the rim, with a band of ~.7 along the top and the foot (where the corners sit), so the logo, the
+   doors, CONTINUE and the corners read on both themes; the canvas (placed, sized and turned by the module: the tilt is its CSS rotate)
+   fades in on its first picture.  The decks, FOLDERS and the tutorial keep their ground (both hidden, the video paused). */
 #lwMenu :is(.mm-collage, .mm-veil) { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 #lwMenu .mm-collage { opacity: 0; transition: opacity .8s ease; }
 #lwMenu .mm-collage.on { opacity: 1; }
-#lwMenu .mm-veil { z-index: 1; background: radial-gradient(ellipse 75% 70% at 50% 50%, hsl(var(--glass-tint) / .68), hsl(var(--glass-tint) / .52) 45%, hsl(var(--glass-tint) / .35)); }
+#lwMenu .mm-veil { z-index: 1; background:
+  linear-gradient(to bottom, hsl(var(--glass-tint) / .52), hsl(var(--glass-tint) / .52) 120px, hsl(var(--glass-tint) / 0) 220px, hsl(var(--glass-tint) / 0) calc(100% - 220px), hsl(var(--glass-tint) / .52) calc(100% - 120px), hsl(var(--glass-tint) / .52)),
+  radial-gradient(ellipse 75% 70% at 50% 50%, hsl(var(--glass-tint) / .68), hsl(var(--glass-tint) / .52) 45%, hsl(var(--glass-tint) / .35)); }
 #lwMenu :is(.mm-collage, .mm-veil)[hidden] { display: none; }
-/* while the wall plays the frost has nothing to show (the tiles cover the stage) and its blur would be redrawn every frame: the plain ground */
-body.frost #lwMenu:has(> .mm-collage.on:not([hidden])) { background: hsl(var(--glass-tint) / .985); -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* CONTINUE over moving tiles: its type kept, on a soft plate of the ground; in LIGHT the pale λ and the teal dot keep a halo of the ground */
+#lwMenu .mm-face-lab { opacity: .8; background: hsl(var(--glass-tint) / .6); border-radius: 6px; padding: 6px 14px; }
+body[data-theme="light"] #lwMenu .mm-face-logo svg { filter: drop-shadow(0 0 10px hsl(var(--glass-tint) / .95)) drop-shadow(0 0 22px hsl(var(--glass-tint) / .8)); }
+/* the face's ground is plain, the wall or not (a cold load, offline: img/menu is never precached) — under it the frost would show the rack's
+   chips through the corners, and while the wall plays its blur would be redrawn every frame; the decks and the tutorial keep the frost */
+body.frost #lwMenu.at-face { background: hsl(var(--glass-tint) / .985); -webkit-backdrop-filter: none; backdrop-filter: none; }
