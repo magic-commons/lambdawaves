@@ -10,8 +10,8 @@
  * no state outside its root. */
 import { onThemeChange } from './mir/kit.js';
 
-const DIR = './img/menu/collage/', GAP = 6, TURN = 12, DRAW_HZ = 30, NEAR = 3.5;   // TURN: the least seconds between ROWS ↔ COLUMNS; NEAR: no twin
-                                                                                    // within 3 tiles (Chebyshev, half a tile of slack mid-slide)
+const DIR = './img/menu/collage/', TURN = 12, DRAW_HZ = 30, NEAR = 3.5, INSET = 2;   // TURN: the least seconds between ROWS ↔ COLUMNS; NEAR: no twin
+                     // within 3 tiles (Chebyshev, half a tile of slack mid-slide); INSET: atlas px off each side of a slot (x264's cross-slot bleed)
 const mod = (a, n) => ((a % n) + n) % n;
 
 /** createCollage(root, { theme, still, lite }) → { show, hide, setTheme, destroy }: the canvas and the veil become root's first children */
@@ -53,7 +53,7 @@ export function createCollage(root, { theme, still, lite }) {
 
   function layout() {
     W = innerWidth; H = innerHeight; dpr = Math.min(devicePixelRatio || 1, 1.5);
-    P = Math.min(190, Math.max(150, 0.11 * W)); v = P / 6;
+    P = (2 * Math.round((Math.min(190, Math.max(150, 0.11 * W)) * dpr) / 2)) / dpr; v = P / 6;   // NO EDGE (036 C3): the pitch an even count of device px
     const step = P / (2 * v); T = Math.ceil(TURN / step - 1e-9) * step;   // the lattice is tiled each time the lines have slid half a tile apart
     const c = Math.abs(Math.cos(tilt)), s = Math.abs(Math.sin(tilt));
     hx = Math.ceil((W * c + H * s) / 2); hy = Math.ceil((W * s + H * c) / 2);   // the tilted view's half extents: the canvas, turned by CSS (the compositor's
@@ -119,8 +119,8 @@ export function createCollage(root, { theme, still, lite }) {
   }
   function paint(at, src) {
     if (!src || !grid || (src === poster && !poster.naturalWidth)) return;   // a poster not yet decoded draws nothing
-    const sc = src === poster ? 0.5 : 1, t = man.tile * sc, cols = man.cols, L = nAl() * P, s = P - GAP;
-    ctx.setTransform(dpr, 0, 0, dpr, hx * dpr, hy * dpr); ctx.clearRect(-hx, -hy, 2 * hx, 2 * hy);
+    const sc = src === poster ? 0.5 : 1, t = man.tile * sc, e = INSET * sc, cols = man.cols, L = nAl() * P, s = Math.round(P * dpr);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cvs.width, cvs.height); ctx.imageSmoothingQuality = 'medium';
     for (let ln = 0; ln < nLn(); ln++) for (let al = 0; al < nAl(); al++) {
       const c = cell(ln, al), u = along(ln, al, tau), lap = Math.floor(u / L);
       if (lap !== c.lap) { c.lap = lap; const k = choose(ln, al, at, true); if (k >= 0) take(c, k, at); }   // a wrap re-enters on a new slot
@@ -129,7 +129,7 @@ export function createCollage(root, { theme, still, lite }) {
         if (Math.random() < 0.5 || crowded(ln, al, at)) { const k = choose(ln, al, at, true); if (k >= 0 && k !== c.k) take(c, k, at); }
       }
       place(ln, al); if (!inView()) continue;
-      ctx.drawImage(src, (c.k % cols) * t, Math.floor(c.k / cols) * t, t, t, px + GAP / 2, py + GAP / 2, s, s);
+      ctx.drawImage(src, (c.k % cols) * t + e, Math.floor(c.k / cols) * t + e, t - 2 * e, t - 2 * e, Math.round((px + hx) * dpr), Math.round((py + hy) * dpr), s, s);   // a whole device px, abutting
     }
     if (!cvs.classList.contains('on')) cvs.classList.add('on');   // the first picture fades the wall in (a write once, not a frame)
   }
