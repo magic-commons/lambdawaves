@@ -111,6 +111,12 @@ export function infoPrefs() {
   if (marks.length) { infoStore.set(Object.fromEntries(marks.map((k) => [k, blob[k] === true]))); for (const k of marks) delete blob[k]; settings.write(blob); }
   return infoStore;
 }
+/** 036 S4 · INFORMATIONAL IS THE PROJECT'S (Josh: "other things to make sure that reset is … informational"): infoOfProject() → the rows a
+ *  project carries as `presentation.info` — only those off their default, null when none is (default-absent: NEW, the demos and every older
+ *  file carry none); loadInfo(o) puts a project's rows in place, every row it does not name at its default (absent or null: all of them).
+ *  `lambdawaves.q0.info` stays the live record (the controls write it, a reload boots from it). */
+export function infoOfProject() { const I = infoPrefs().all(), o = {}; for (const r of INFO_ROWS) if (I[r.key] !== r.default) o[r.key] = I[r.key]; return Object.keys(o).length ? o : null; }
+export const loadInfo = (o) => infoPrefs().set({ ...Object.fromEntries(INFO_ROWS.map((r) => [r.key, r.default])), ...(o && typeof o === 'object' ? o : {}) });
 /** has this profile met INFORMATIONAL (a record, or a blob that held atomLabels)?  Read at infoPrefs()'s first call */
 export const infoKnown = () => (infoPrefs(), infoSeen);
 /** THE LIST CAP's count line (iteration 011 Q1): `140 levels · 7 shells` — the populated labels and the distinct n among them */

@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The law of 036
+
+INFORMATIONAL IS THE PROJECT'S (036 S4, Josh 2026-11-03: "Also other things to make sure that reset is modulation window, timeline's settings/content, informational and molecules/atomic settings"). Every row of `INFO_ROWS` — the words, the labels, the seat, the ESP bar, the announcements, the cursor, BALL AND STICK, the bonds, the marks, STATUS — rides in the project as `presentation.info`, only the rows off their default (`shell/stage-words.js` `infoOfProject`, default-absent: NEW, the demos and every older file carry none); an open puts them in place through `loadInfo` (a row the file does not name goes to its default), so NEW returns INFORMATIONAL to the first run (the formula and the atom labels ON, the rest OFF); an UNDO leaves it (never a history row); a RESUME of a session written before 036 keeps the record's. A change dirties the project and books the session's save. `lambdawaves.q0.info` stays the live record the controls write and a reload boots from (RECORDS: PROJECT). The Picker's own record (`lambdawaves.q0.picker`: SHOW LABELS, THE HUE) stays PREFERENCE. Where a line below says PREFERENCE of a row of `lambdawaves.q0.info`, this law wins.
+
 ## The standing paragraphs
 
 THE STAGE FORMULA (the INFORMATIONAL window since 0.5.3 M9: its own rack card, `lab/informational.js`, closed on a first run and for a

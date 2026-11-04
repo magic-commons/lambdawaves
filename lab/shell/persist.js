@@ -7,6 +7,7 @@ import { TIER } from '../tier.js';
 import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, quatFromYawPitch, waveView, drawStyle, liftAtomStyle } from '../field.js'; import { liftBands } from './modulation.js';
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
+import { infoOfProject, loadInfo } from './stage-words.js';   // 036 S4: INFORMATIONAL's rows are the project's
 import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS, N6, narrow, widen } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 /** 028 R-04 · A FILE'S NUMBER IS TAKEN ONLY WHEN IT IS ONE: `v` (a file's obs, mat, quality or domain) with every number `cur` holds
@@ -28,7 +29,7 @@ export function createPersist(app) {
   /* 0.3.1 · S3 THE EDIT SCOPE (PLAN §4.1, D6; docs/STATE-SCOPES.md) — what the history reads, keys and writes back: the PROJECT keys
      minus the view, quality, the notebook and the WORKSPACE (no DOM read), and minus what a clock or a modulator moves (experiment.t,
      a bound macro's value, a modulated target's output — its seat keeps the base —, mat.steps, domain.half under AUTO). */
-  const EDIT_SKIP = ['obs', 'quality', 'layout', 'modwin', 'camera', 'notebook'];   // 036 S1: and `nodes` (NODES keeps its own ring), which the edit scope never writes
+  const EDIT_SKIP = ['obs', 'quality', 'layout', 'modwin', 'camera', 'notebook'];   // 036 S1/S4: and `nodes` (NODES keeps its own ring) and `info`, which the edit scope never writes
   const shellSeat = (R, n) => R && { get v() { return R[BASIS.findIndex((s) => s.n === n)] ?? 1; },   // 0.6.0 B3a: a shell route's seat writes only a shell that shares one rate — a hand's per-label rates are never flattened
     set v(x) { const sh = BASIS.filter((s) => s.n === n);
       /* iteration 009 DEMOS: a 91-wide record's n = 7 is at 1 by absence (the getter reads it so, X6) — its base seat writes 1 into nothing, so
@@ -94,6 +95,7 @@ export function createPersist(app) {
     /* 036 S1 · THE GRAPH IS THE PROJECT'S (Josh: "Make sure that nodes get saved"): NODES' graph and its CURVES grade, default-absent (the empty
        graph writes nothing, so NEW and the demos keep their bytes); its `nodes.*` routes, lanes and bases ride with the rack (021's refusal is lifted) */
     if (!edit) { const G = app.sh.LW && app.sh.LW.nodes ? app.sh.LW.nodes.graph() : null; if (G) S.presentation.nodes = G; }
+    if (!edit) { const I = infoOfProject(); if (I) S.presentation.info = I; }   // 036 S4: INFORMATIONAL's rows off their default, default-absent; never an undo row's
     if (!edit) return S;
     const pr = S.presentation, R = app.state.modHost && app.state.modHost.registry;
     delete S.experiment.t; delete pr.mat.steps; if (pr.domain.auto) delete pr.domain.half;
@@ -299,6 +301,7 @@ export function createPersist(app) {
            layout seat is skipped by applyLayout (no such card), nothing throws.  QCD counts as used when its seat was open. */
         if (!hist && pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'qcd' && !c.closed)) gone.push('QCD (QUARKONIUM keeps its parameters)');
         said = [gone.length ? 'retired in 0.5.0: ' + gone.join(' · ') : '', ...cut].filter(Boolean).join(' · '); if (said) app.state.restoreNotice = said;
+        if (!hist && !(opt && opt.session && pr.info === undefined)) loadInfo(pr.info);   // 036 S4: an open replaces INFORMATIONAL's rows (absent: the defaults); a pre-036 session keeps them
         stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = clampLambda(pr.sturmian.lambda); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it

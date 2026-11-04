@@ -27,7 +27,7 @@ import { createReadouts } from './windows/readouts.js'; import { createKeplerSur
 import { registerIcons } from './icons.js';   // 021 V2: THE ICON TABLE, through the kit's registerGlyphs, before any window
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createSkeleton, centroid } from './skeleton.js'; import { moleculeCharge } from './molecules.js';   // iteration 014 B: the atoms ESP and (032 O1) SIZE / RADIUS > 0 draw (field.setAtoms) and the molecule's charge   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
-import { createMolecules } from './windows/molecules.js'; import { createStageWords } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
+import { createMolecules } from './windows/molecules.js'; import { createStageWords, infoPrefs } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
 import { beadOf, covariance } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
 import { getHamiltonian, getZ } from './hamiltonian.js';
@@ -999,8 +999,8 @@ export async function boot(dom) {
   busyHost();                         // the mark is cloned and painted before anything can need it
   markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
   if (layout.projects) { await Promise.race([layout.projects.seed().catch(() => null), new Promise((r) => setTimeout(r, 3000))]); layout.projects.markClean(); }   // 0.5.0 C6: the demos are FOLDERS' starters before the lab says ready (iteration 009: one, WAVE DANCER PROTOTYPE)
-  /* 0.5.0 C6b · THE SESSION hears the one part: the ring's moves and the notebook's input (projects.changed, the part's subscribe) */
-  if (layout.projects) { app.state.history.subscribe(layout.projects.changed); const nbEl = document.getElementById('notebook'); if (nbEl) nbEl.addEventListener('input', layout.projects.changed); }
+  /* 0.5.0 C6b · THE SESSION hears the one part: the ring's moves, the notebook's input and (036 S4) INFORMATIONAL's rows (projects.changed, the part's subscribe) */
+  if (layout.projects) { app.state.history.subscribe(layout.projects.changed); infoPrefs().subscribe(() => layout.projects.changed()); const nbEl = document.getElementById('notebook'); if (nbEl) nbEl.addEventListener('input', layout.projects.changed); }
   /* THE CHOICE (main.js: ?starter=, `boot` for a driven or direct start, and for a human start RESUME when the session holds work, else
      `boot` — iteration 004, no title screen).  `home` and the boot keep the shipped scene and its `boot` / `link` origin; a demo id opens
      its demo (origin `open · NAME`); RESUME puts the session back (origin `resume`).  `home` and a demo forget the session, the boot arms
