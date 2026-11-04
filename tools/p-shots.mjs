@@ -98,6 +98,24 @@ try {
       __LW.timeline.open(); await new Promise((r) => setTimeout(r, 1500));
       const st = __LW.timeline.model.state(); return { ok, open: __LW.timeline.isOpen(), colours: [...new Set(st.curves.map((c) => c.color))].length, grey: st.curves.filter((c) => c.color === '#a7adb8').length, clips: st.clips.length };`);
     await shot('036-P5-star-loop-clips', await g.ev(`const r = __LW.timeline.root.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`), 4);
+  } else if (scene === 'p6') {
+    /* THE ENVELOPE TRIGGER: an ENV (a 5 ms attack, 250 ms decay, no sustain) bound to a macro routed over SOFT, its 16-step row lit on 1 · 5 · 9 · 13,
+       PATT live; play two bars at 120 BPM and read SOFT every 10 ms — the pulses a bar are the rises past half the swing */
+    out.setup = await g.ev(`const L = __LW.mod, M = L.model, P = __LW.layout.pattern; if (!P) return 'no PATTERN';
+      __LW.layout.modulation.expand(); await new Promise((r) => setTimeout(r, 500));
+      const env = L.addSource('env'); M.setSource(env, { a: 0.005, hold: 0, d: 0.25, s: 0, r: 0.05 }); const mac = L.addMacro(); L.bind(mac, env); L.route(mac, 'material.softness', 0, 1);
+      for (const k of [0, 4, 8, 12]) P.model.setStep(env, k, 127); P.model.setLive(env, true); L.clock.setBpm(120); if (!L.armed) L.arm(true);
+      __LW.layout.modulation.expand(); P.show(env); await new Promise((r) => setTimeout(r, 900));
+      window.__env = env; return { env, row: P.model.steps(env).join(''), live: P.model.isLive(env), open: P.open, patt: !!document.querySelector('.m2dev[data-id="' + env + '"] [data-act="patt"], .m2dev[data-id="' + env + '"] .m2patt') };`);
+    await shot('036-P6-pattern-window', await g.ev(`const a = __LW.layout.pattern.win.root.getBoundingClientRect(), d = document.querySelector('.m2dev[data-id="' + window.__env + '"]'), b = d ? d.getBoundingClientRect() : a;
+      return [Math.min(a.left, b.left), Math.min(a.top, b.top), Math.max(a.right, b.right), Math.max(a.bottom, b.bottom)].map(Math.round);`), 14);
+    /* SOFT read on every advance of the modulation clock (each tick's applied value), with the beat it stood on; rises past half the swing, per bar */
+    out.run = await g.ev(`const L = __LW.mod, T = L.model.transport, xs = []; const off = L.host.clock.onAdvance(() => xs.push([T.beats, __LW.mat.softness]));
+      L.play(); await new Promise((r) => setTimeout(r, 4300)); __LW.pause(); off();
+      const lo = Math.min(...xs.map((x) => x[1])), hi = Math.max(...xs.map((x) => x[1])), mid = (lo + hi) / 2; let up = false; const at = [], bars = {};
+      for (const [b, v] of xs) { if (!up && v > mid) { up = true; at.push(+b.toFixed(2)); const k = Math.floor(b / 4 + 1e-6); bars[k] = (bars[k] || 0) + 1; } else if (up && v < mid) up = false; }
+      return { ticks: xs.length, lo: +lo.toFixed(3), hi: +hi.toFixed(3), risesAtBeat: at, perBar: bars, fires: L.model.sourceOf(window.__env).fires, beats: +T.beats.toFixed(2) };`);
+    out.saved = await g.ev(`const S = __LW.serialize(); return S.presentation.pattern || null;`);
   } else if (scene === 'read') out.r = await g.ev(readFileSync(process.argv[4], 'utf8'));   // a probe's body from a file
   out.errors = (await g.errors()).errs;
 } finally { await g.close(); }

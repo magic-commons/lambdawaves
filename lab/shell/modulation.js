@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js';
+import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js';
 /** 032 W3 · AN OLDER CURVE ON A BANDED TARGET (the project open road, shell/persist.js): a curve drawn before its target had `options` carries no
  *  `steps` and meant the old integer line — k at k / (max − min) — so each point is read back as that integer (an older GRAIN as DUST, BALLS or
  *  STICKS as SHELL), seated at the centre of its option's band, and the curve remembers the count (WATER ESP's, STAR LOOP's and BENZENE π's STYLE
@@ -399,4 +399,23 @@ export function createModSeam(app) {
     /* wave 54: the modulation clock's visibility is driven by the ONE authority (setPageHidden), not by a second listener of its own — it still RE-ANCHORS and never jumps */
     if (page.hidden) app.state.modHost.clock.setHidden(true);
   }
+}
+/** 036 P6 · THE ENVELOPE TRIGGER (Josh: "the event's envelope-trigger feature (I think it's built in Basins) is missing in Lambdawaves, Add that
+ *  feature in"): BASINS' ENV + PATTERN road, vendored in the kit (pattern/window.js · sequencer.js · model.js), installed on λWAVES' one modulation
+ *  host.  PATT on every ENV face opens the PATTERN window (one step row per ENV, a 16th a step, FL's channel rack); the sequencer rides the host
+ *  clock's one advance notice and fires each lit step's ENV (its velocity scales the ENV's macros), a PATTERN clip under the playhead ruling its ENV
+ *  (an ENV's → TL sends one).  The rows are the PROJECT's inside λWAVES' one part — `presentation.pattern`, default-absent (shell/persist.js);
+ *  `project: false` keeps the kit's own 'pattern' part out (projects.js' ONE PART law) — undone on the one stack as their own snapshot domain, a
+ *  row edit dirtying the project; the window's shape is the WORKSPACE record `lambdawaves.q0.patternwin`.  rack.js seats it after the history. */
+export function installEnvelopeTrigger(app) {
+  const { layout } = app.sh, H = app.state.history, host = app.state.modHost;
+  if (!host || !app.state.modView) return null;
+  const pat = installPattern({ mount: document.getElementById('floats') || document.getElementById('lab'), project: false, storageKey: 'lambdawaves.q0.patternwin',
+    history: H ? { hold: (n) => H.hold(n), release: () => H.release(), register: (d, io) => H.stack.register(d, io) } : null,
+    dock: { span: dockSpan, guide: () => app.ctl.look.get('dropGuides') },
+    mod: { host, view: app.state.modView, onTick: (fn) => host.clock.onAdvance(() => fn()), open: () => layout.modulation.expand(),
+      timeline: () => (app.state.tl ? { model: app.state.tl.model } : null) } });
+  pat.model.subscribe((why) => { if (why === 'edit' && layout.projects) layout.projects.changed(); });
+  layout.pattern = { model: pat.model, win: pat.win, get open() { return pat.isOpen(); }, show: (envId) => pat.show(envId), close: () => pat.close(), toggle: () => pat.toggle(), rows: () => pat.rows() };
+  return pat;
 }

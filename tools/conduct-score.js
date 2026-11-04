@@ -1,6 +1,6 @@
 /* tools/conduct-score.js — THE CONDUCTOR (026 A2), a PAGE module fetched on demand (device-report.js' road: the lab reaches it by import() and never
  * precaches it — lab/ had 14.9 KB left under the PWA's 8 MiB ceiling and this is 26 KB, and only a driver ever loads it): a SCORE (docs/conductor/SCORE.md — one JSON in bars, beats and the targets' own units) applied
- * through the app's live doors into a project, in the plan's order: base · system · molecule · look · camera · overlays · nodes · tempo ·
+ * through the app's live doors into a project, in the plan's order: base · system · molecule · look · camera · overlays · nodes · pattern · tempo ·
  * lanes · triggers · audio · active · save.  `__LW.conduct.apply(score)` (lab/shell/facade.js) → the report: what was applied, every refusal
  * by name (an unknown target, a molecule that would not solve, a lane on a target an audio band already covers) and every value clamped.
  * THE SCORE THINKS IN BARS: every time is a beat on the ruler (bars · meter); a value is in its target's unit and reaches the curve through
@@ -12,7 +12,7 @@
 import { STYLE_NAMES, WAVE_VIEWS } from '../lab/field.js';
 import { PRESETS as PALETTES } from '../lab/mir/palette.js';
 
-export const SCORE_KEYS = ['conduct', 'name', 'title', 'notes', 'tempo', 'bars', 'base', 'system', 'molecule', 'look', 'camera', 'overlays', 'nodes', 'audio', 'lanes', 'triggers', 'render'];
+export const SCORE_KEYS = ['conduct', 'name', 'title', 'notes', 'tempo', 'bars', 'base', 'system', 'molecule', 'look', 'camera', 'overlays', 'nodes', 'pattern', 'audio', 'lanes', 'triggers', 'render'];
 export const METERS = [1, 2, 3, 4, 5, 6, 7, 8, 12];
 export const BANDS = ['level', 'low', 'mid', 'high'];
 export const PULSE = 1 / 8;   // a trigger's high, in beats
@@ -121,6 +121,15 @@ export function laneCurve(lane, { total, describe, toNorm }) {
   if (rep !== undefined) for (let b = s; b < e - 1e-9 && clips.length < 4096; b += rep) clips.push([b, Math.min(rep, e - b)]);
   else clips.push([s, e - s]);
   return { targetId: id, name: lane.name || D.label || id, length, points, clips, clamps, ...(D.map === 'integer' && D.steps ? { steps: D.steps } : {}) };   // 032: an EVENT lane remembers its bands
+}
+
+/** patternSteps(steps) → { length 16 | 32 | 64, steps: [velocity 0–127] } or null (036 P6): a string — `x` a full hit, `1`…`9` a softer one (n/9 of
+ *  127), `.` or `-` a rest, spaces and `|` ignored — or an array of 0–127 velocities; at most 64 steps, the length the next of 16 · 32 · 64 */
+export function patternSteps(steps) {
+  const v = typeof steps === 'string' ? [...steps.replace(/[\s|]/g, '')].map((c) => (c === 'x' || c === 'X' ? 127 : /[1-9]/.test(c) ? Math.round(+c * 127 / 9) : c === '.' || c === '-' ? 0 : NaN))
+    : Array.isArray(steps) ? steps.map((x) => (num(x) ? Math.round(x) : NaN)) : null;
+  if (!v || !v.length || v.length > 64 || v.some((x) => !(x >= 0 && x <= 127))) return null;
+  return { length: v.length > 32 ? 64 : v.length > 16 ? 32 : 16, steps: v };
 }
 
 /** pulses(beats, total) → the 0 → 1 → 0 points of an action's trigger lane: high for PULSE beats at each beat listed */
@@ -254,6 +263,24 @@ export async function apply(LW, input) {
     return true;
   });
   const resolve = (id) => { const m = /^nodes\.([^.]+)\.(.+)$/.exec(String(id || '')); if (!m || R.has(id)) return id; const [type, k] = m[1].split('#'), ids = placed.get(type) || [], n = ids[(+k || 1) - 1]; return n ? 'nodes.' + n + '.' + m[2] : id; };
+
+  /* pattern (036 P6, THE ENVELOPE TRIGGER): each row an ENV on the rack, a macro bound to it and routed to its target (`depth` of the target's
+     range added at a full hit), and its step row live in the PATTERN window — the hits a 16th each, looping with the bar while the play runs */
+  if (Array.isArray(S.pattern)) await step('pattern', () => {
+    const Pm = LW.layout.pattern && LW.layout.pattern.model, M = LW.mod.model; if (!Pm) return 'no PATTERN window here';
+    LW.mod.host.targets.sync();
+    for (const [i, q] of S.pattern.entries()) {
+      const key = 'pattern ' + (i + 1), target = resolve(q && q.target), st = patternSteps(q && q.steps);
+      if (!R.has(target)) { say(key, 'no such target "' + (q && q.target) + '"'); continue; }
+      if (!st) { say(key, 'steps are a string of x (a hit), 1–9 (softer) and . (a rest), or 0–127 velocities, 64 at most'); continue; }
+      const e = (q && q.env) || {}, env = LW.mod.addSource('env'), mac = LW.mod.addMacro();
+      M.setSource(env, { a: num(e.a) ? e.a : 0.005, hold: num(e.hold) ? e.hold : 0, d: num(e.d) ? e.d : 0.25, s: num(e.s) ? e.s : 0, r: num(e.r) ? e.r : 0.1, ...(q.name ? { label: String(q.name) } : {}) });
+      LW.mod.bind(mac, env); LW.mod.route(mac, target, 0, Math.max(0, Math.min(1, num(q.depth) ? q.depth : 0.5)));
+      Pm.setLength(env, st.length); st.steps.forEach((v, k) => { if (v) Pm.setStep(env, k, v); }); Pm.setLive(env, true);
+      did(key + ' → ' + target + ' (' + st.steps.filter(Boolean).length + ' hits in ' + st.length + ' steps)');
+    }
+    return false;
+  });
 
   /* tempo, then THE ARRANGEMENT (the timeline document, restored whole), then the audio bands on their own lanes */
   await step('tempo', () => { LW.mod.clock.setBpm(S.tempo.bpm); return true; });

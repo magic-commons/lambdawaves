@@ -47,6 +47,7 @@ export const RECORDS = Object.freeze([
   row('lambdawaves.q0.projects', J, 'project-store', false, 'project-store.js: FOLDERS’ library in λWAVES’ form'),
   row('lambdawaves.q0.projects.seeded', J, '—', false, 'projects.js: the starters added once'),
   row('lambdawaves.q0.projects.window', W, 'kit', false, 'projects.js FOLDERS (kit localPrefs): place, size, rail, sort'),
+  row('lambdawaves.q0.patternwin', W, 'v 2 (kit)', true, 'shell/modulation.js installEnvelopeTrigger (kit installPattern store): the PATTERN window’s shape and its withMod (036 P6)'),
   row('lambdawaves.q0.notebook', J, 'RETIRED', false, 'read once into the session part (021 R4; with .title, .subtitle)'),
   row('lambdawaves.q0.library', L, '—', false, 'library.js: persist() asked'),
   row('mir.notes', L, 'kit shelf', false, 'kit · notes/shelf.js: the notebook’s NEW NOTE · OPEN NOTE shelf, apart from every project (034 N3)'),

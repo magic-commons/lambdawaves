@@ -27,7 +27,7 @@ import { createReadouts } from './windows/readouts.js'; import { createKeplerSur
 import { registerIcons } from './icons.js';   // 021 V2: THE ICON TABLE, through the kit's registerGlyphs, before any window
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createSkeleton, centroid } from './skeleton.js'; import { moleculeCharge } from './molecules.js';   // iteration 014 B: the atoms ESP and (032 O1) SIZE / RADIUS > 0 draw (field.setAtoms) and the molecule's charge   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
-import { createMolecules } from './windows/molecules.js'; import { createStageWords, infoPrefs } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
+import { createMolecules } from './windows/molecules.js'; import { createStageWords, infoPrefs } from './shell/stage-words.js'; import { createModSeam, installEnvelopeTrigger } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
 import { beadOf, covariance } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
 import { getHamiltonian, getZ } from './hamiltonian.js';
@@ -883,6 +883,7 @@ export async function boot(dom) {
   const { notCarriedWords, mintLink, copyLink, openLink } = createLinks(app);
   /* 0.3.1 · S3 THE TRUE HISTORY and its card: lab/shell/history.js (0.5.2 R3a), created here, so the card keeps its seat in the rack */
   const { historyApi } = createHistory(app); app.sh.historyApi = historyApi;
+  installEnvelopeTrigger(app);   // 036 P6: THE ENVELOPE TRIGGER (lab/shell/modulation.js) — ENV + PATTERN, its rows a domain of the history just made
 
   const verbs = createVerbs(app); app.sh.verbs = verbs;   // 0.6.6 G1: THE VERB TABLE + THE INVENTORY (lab/verbs.js), before the facade that carries it
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */

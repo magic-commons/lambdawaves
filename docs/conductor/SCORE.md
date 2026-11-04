@@ -52,6 +52,7 @@ under a clip a device's routes on that target stand aside); a score names no dev
 | `overlays.particles` | `{ on, count 20…600, trail 0…120 }` or bool | — | PARTICLES |
 | `overlays.vortex` | bool | — | VORTEX › LOCATE |
 | `nodes` | `[{ type, knobs: { k: v }, bypass }]` | — | the NODES graph REPLACED, in chain order (types: TARGETS.md › nodes); set live and saved with the project (036: the graph is the project's) |
+| `pattern` | `[{ target, steps, depth, env, name }]` | — | THE ENVELOPE TRIGGER (036): each row an ENV on the rack, a macro bound to it routed to `target` (`depth` 0…1 of the target's range added at a full hit, default 0.5), and its step row live in the PATTERN window — below |
 | `lanes` | see below | `[]` | automation lanes |
 | `triggers` | `[{ action, at: [beats] }]` | `[]` | an `action.<id>` pulse (0 → 1 for ⅛ beat → 0) at each beat: `preset.next`, `style`, `view`, `invert`, `reseed`, `chem.vibrate`, … |
 | `audio` | `{ file, offset, keep, bands }` | `keep true` | an audio-reactive arrangement, below |
@@ -67,6 +68,15 @@ under a clip a device's routes on that target stand aside); a score names no dev
 - A `wrap` target (yaw, hue) turns freely: `[[0, 0.6], [16, 6.88]]` is one full turn (the curve is split at the seam).
 - `nodes.<type>.<knob>` names a placed node by its type (`nodes.decohere.amount`, `nodes.grain#2.amount` for the second).
 - Prefer the ABSOLUTE targets `material.style` · `material.view` · `palette.index` (integer, step) for a look change on a bar.
+
+### The hits (`pattern`, 036)
+`{ "target": "material.softness", "steps": "x...x...x...x...", "depth": 0.6, "env": { "a": 0.005, "d": 0.25, "s": 0, "r": 0.1 }, "name": "KICK" }`
+- **steps** is the row, a 16th note a step: a string — `x` a full hit, `1`…`9` a softer one (n/9 of velocity 127), `.` or `-` a rest, spaces
+  and `|` ignored (`"x... x... x..x x..."`) — or an array of 0–127 velocities; at most 64 steps, the row's length the next of 16 · 32 · 64.
+  The row LOOPS while the play runs (a 16-step row is one bar in 4/4), in the app as in a film (the sequencer rides the clock's beats).
+- **env** is the ENV's shape in seconds (`a` attack, `hold`, `d` decay, `r` release; `s` the sustain LEVEL 0…1); the default is a short hit
+  (5 ms · 0 · 250 ms · 0 · 100 ms). A velocity scales the ENV's macro, so a softer step is a smaller pulse.
+- the row, its ENV and its route are saved with the project (`presentation.pattern`); a `nodes.<type>.<knob>` target is resolved as a lane's is.
 
 ### Audio
 `{ "file": "media/track.mp3", "offset": 12.8, "keep": true, "bands": { "level": "material.exposure", "low": { "target": "observer.dist", "min": 2.2, "max": 1.6 } } }`

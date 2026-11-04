@@ -95,6 +95,8 @@ const ICONS = {
   lens: p('M3 8.5A1.5 1.5 0 0 1 4.5 7h3L9 4.5h6L16.5 7h3A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z') + c(12, 13, 3.6),   // CAMERA: a lens
   about: p('M6.5 3.5H8c1 0 1.7.5 2.1 1.4l8.4 15.6') + p('M12.4 10.6 5.5 20.5'),                                    // the λ mark
   timeline: fill(3.5, 4.5, 9, 3.2, 1) + fill(8.5, 10.4, 11, 3.2, 1) + fill(5.5, 16.3, 7, 3.2, 1) + p('M15.5 2.5v19'),   // lanes of clips and the playhead
+  pattern: fill(2.5, 5.5, 5, 5, 1.2) + box(10.45, 6.45, 3.1, 3.1, .8) + fill(16.5, 5.5, 5, 5, 1.2) +
+    box(3.45, 14.45, 3.1, 3.1, .8) + fill(9.5, 13.5, 5, 5, 1.2) + box(17.45, 14.45, 3.1, 3.1, .8),                     // 036 P6: step pads, some lit (the PATTERN window)
   film: box(3, 5, 18, 14, 2.5) + solid('M10 9v6l5.2-3Z'),                                                        // RENDER: a frame with a play
   picker: box(3.5, 3.5, 7.5, 7.5, 1.5) + box(13, 3.5, 7.5, 7.5, 1.5) + box(3.5, 13, 7.5, 7.5, 1.5) + fill(13, 13, 7.5, 7.5, 1.5),   // a shelf of tiles, one picked
   transition: p('M3.5 5.5h9M3.5 18.5h9') + p('M8 6.5v10') + p('M5.8 14.3 8 16.5l2.2-2.2') + p('M13 12c.8-1.8 1.6-1.8 2.4 0s1.6 1.8 2.4 0 1.6-1.8 2.4 0'),   // two levels, the jump, the photon
@@ -160,7 +162,7 @@ export const WINDOW_GLYPH = {
   radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film',
   /* the kit factories' windows (windowGlyphs) */
   gui: 'cogSolid', 'gui-about': 'about', keyboard: 'keyboard', 'keys-help': 'keyboard', timeline: 'timeline', modulation: 'modulation',
-  'transport-free': 'controlSurface', folders: 'folders',
+  'transport-free': 'controlSurface', folders: 'folders', pattern: 'pattern',
 };
 
 let done = false;

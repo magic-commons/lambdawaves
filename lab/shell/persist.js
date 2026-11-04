@@ -96,6 +96,7 @@ export function createPersist(app) {
        graph writes nothing, so NEW and the demos keep their bytes); its `nodes.*` routes, lanes and bases ride with the rack (021's refusal is lifted) */
     if (!edit) { const G = app.sh.LW && app.sh.LW.nodes ? app.sh.LW.nodes.graph() : null; if (G) S.presentation.nodes = G; }
     if (!edit) { const I = infoOfProject(); if (I) S.presentation.info = I; }   // 036 S4: INFORMATIONAL's rows off their default, default-absent; never an undo row's
+    if (!edit && layout.pattern) { const Pt = layout.pattern.model.capture(); if (Pt.rows.length) S.presentation.pattern = Pt; }   // 036 P6: the ENVs' step rows, default-absent (an untouched row is nothing); the history keeps them as their own domain
     if (!edit) return S;
     const pr = S.presentation, R = app.state.modHost && app.state.modHost.registry;
     delete S.experiment.t; delete pr.mat.steps; if (pr.domain.auto) delete pr.domain.half;
@@ -341,6 +342,7 @@ export function createPersist(app) {
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
         if (modWas) app.state.modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)
         if (pr.modwin && app.state.modView) app.state.modView.restore(pr.modwin);
+        if (!hist && layout.pattern) layout.pattern.model.restore(pr.pattern || null);   // 036 P6: the step rows after the rack (their ENVs exist now), before the arrangement; absent → none; an undo leaves them (their own domain)
         if (!hist && app.state.tl) app.state.tl.model.restore(liftBands(pr.timeline, app.state.modHost && app.state.modHost.registry) || null);   // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own; 032 W3: an older banded curve re-read
       }
       schedule(TIER.REBUILD); wState.setStatus(said || 'restored', said ? 'warn' : 'live');
