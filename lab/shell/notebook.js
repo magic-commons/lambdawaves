@@ -278,6 +278,7 @@ export function createNotebook(app) {
         const tl = app.state.tl;
         if (tl) { tl.restore({ workLane: 'top' }); tl.win.restore({ dock: 'bottom', open: false }); tl.editor.setSnap(1); tl.editor.act.zoomLevel(2); }
         if (app.sh.LW && app.sh.LW.nodes) app.sh.LW.nodes.close();
+        if (layout.pattern) layout.pattern.close();   // 036 P6: a free PATTERN window is NEW's too (a docked one closes with the modulation window)
         if (layout.DEFAULT) layout.applyLayout(layout.DEFAULT);
       }
       /* RENDER's SUBJECT says THIS VIEW's system: an open card is painted again when a project lands or ⓘ points (iteration 004) */
