@@ -373,10 +373,11 @@ body.transport-under #transport.mini { z-index: var(--z-chrome); }
 /* ── spectrum rail ──────────────────────────────────────────────────────── */
 .ladder { position: relative; height: 92px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
 .ladder canvas { width: 100%; height: 100%; display: block; }
-/* iteration 016 R1 · THE REGISTER'S FOOTNOTE (paint-stroke.js footLine): the law line under SPECTRUM's ladder and MOLECULES' two ladders, shown only
-   while its window is hovered or focused; reduced motion: no fade */
+/* iteration 016 R1 · THE REGISTER'S FOOTNOTE (paint-stroke.js footLine): the law line under SPECTRUM's ladder and MOLECULES' two ladders; reduced motion: no fade.
+   037 H7 · THE LAW LINE REVEALS ITSELF (Josh: "should only happen inside that reader thingy"): shown while the pointer is on ITS LADDER — the canvas it
+   lies over (the line is pointer-events none, so the ladder's own hover is the line's) — or keyboard focus walks the window; no longer on the window's hover */
 .reg-foot { position: absolute; z-index: 1; height: 11px; font: 8px/11px ui-monospace, monospace; color: var(--fg); opacity: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; transition: opacity 160ms ease; }
-.dev:is(:hover, :focus-within) .reg-foot { opacity: .8; }
+canvas:hover + .reg-foot, .dev:has(:focus-visible) .reg-foot { opacity: .8; }
 @media (prefers-reduced-motion: reduce) { .reg-foot { transition: none; } }
 .sp-rows { display: flex; flex-direction: column; gap: 3px; }
 .sp-row { display: grid; grid-template-columns: 4px 50px minmax(0, 1fr) 40px 28px 28px 22px; align-items: center; gap: 4px; height: 56px; padding: 0 4px 0 0;
