@@ -34,6 +34,8 @@ const ACCEPTED = {
   '1.5.7-alpha.3': 'b7884739ef17bc5550b85f8f6776d93cd884ea554c8e2ecedcfc21e86d57a5f7',
   /* 036 K4 · MIR 1.5.7-alpha.4 THE MORE MENU APP ROWS (kit-032 @ 2ec7dbb): installTimeline({ moreRows }) */
   '1.5.7-alpha.4': '5e98e31a3b1e3bdf2e97e55d231b033f277895700d888ad39c14a97fd295d878',
+  /* 036 K5 · MIR 1.5.7-alpha.5 THE FIELDS OWN WORDS (kit-032 @ a3dcb80): FOLDERS placeholders and proposeName false */
+  '1.5.7-alpha.5': 'b3ca138d0e87bdf20bb30b46fd9c2a7a77e09a8718ba8012f7e18250b1d81f6a',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

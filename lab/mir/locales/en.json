@@ -504,6 +504,7 @@
   "LOW": "LOW",
   "LOWER": "LOWER",
   "LW Title": "LW Title",
+  "Left empty, {:SAVE} names it after its folder": "Left empty, {:SAVE} names it after its folder",
   "Left-drag a point or tension handle": "Left-drag a point or tension handle",
   "Limit modulation updates per second": "Limit modulation updates per second",
   "Listening for “{action}”. This looks like a touch screen with no keyboard and no board to tap: press the new keys on a hardware keyboard if one is connected, or press {:RECORD INPUT} again to cancel.": "Listening for “{action}”. This looks like a touch screen with no keyboard and no board to tap: press the new keys on a hardware keyboard if one is connected, or press {:RECORD INPUT} again to cancel.",
@@ -3263,6 +3264,9 @@
   "LW Title": [
    "mir/shell/gui.js"
   ],
+  "Left empty, {:SAVE} names it after its folder": [
+   "mir/folders/gallery.js"
+  ],
   "Left-drag a point or tension handle": [
    "mir/timeline/shortcuts.js"
   ],
@@ -4231,6 +4235,7 @@
   "SAVE": [
    "mir/app.js",
    "mir/folders/folders.js",
+   "mir/folders/gallery.js",
    "mir/modulation/modwindow/modwindow.js",
    "mir/modulation/window.js",
    "mir/notes/face.js"

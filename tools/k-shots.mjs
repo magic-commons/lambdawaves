@@ -201,6 +201,20 @@ try {
     out.undo = await g.ev(`__LW.timeline.model.undo ? __LW.timeline.model.undo() : 0; const st = __LW.timeline.model.state(); return st.curves.filter((c) => c.kind !== 'audio').map((c) => c.color).slice(0, 6);`);
     out.undoIsPalette = JSON.stringify(out.undo) === JSON.stringify(cP.slice(0, 6));
   }
+  if (scene === 'k5') {
+    const fields = () => g.ev(`const n = document.querySelector('.sv-name-input'), f = document.querySelector('.sv-to-input'); const G = __LW.projects.folders.gallery; return { folder: G.state().folder, name: n.value, namePh: n.placeholder, nameHint: n.title || n.dataset.help || '', to: f.value, toPh: f.placeholder };`);
+    await g.ev(`__LW.projects.show(); await new Promise((r) => setTimeout(r, 900)); return 1;`);
+    out.atOpen = await fields();
+    out.shotOpen = await shot('036-K5-folders-demos', await rectOf('[data-mir-window="folders"], .mir-folders'), 6);
+    /* a save into a folder of one's own: SAVE TO names it there */
+    const nm = await rectOf('.sv-name-input'), to = await rectOf('.sv-to-input');
+    const type = async (r, text) => { await click(r[0] + 20, (r[1] + r[3]) / 2); await drv.actions(g.s, [{ type: 'key', id: 'kk' + (++pid), actions: [...text].flatMap((ch) => [{ type: 'keyDown', value: ch }, { type: 'keyUp', value: ch }]) }]); };
+    await type(to, 'MINE'); await type(nm, 'K FIVE');
+    await drv.actions(g.s, [{ type: 'key', id: 'kk' + (++pid), actions: [{ type: 'keyDown', value: '' }, { type: 'keyUp', value: '' }] }]); await wait(1500);
+    out.saved = await g.ev(`const e = __LW.projects.folders.files ? null : null; const es = __LW.projects.store && __LW.projects.store.entries ? __LW.projects.store.entries() : []; const hit = es.find((x) => x.name === 'K FIVE'); if (hit) __LW.projects.folders.gallery.select(hit.id); await new Promise((r) => setTimeout(r, 400)); return hit ? { folder: hit.folder, name: hit.name } : { count: es.length };`);
+    out.inMine = await fields();
+    out.shotMine = await shot('036-K5-folders-mine', await rectOf('[data-mir-window="folders"], .mir-folders'), 6);
+  }
 } catch (e) { out.error = String(e && e.stack || e); }
 console.log(JSON.stringify(out, null, 1));
 await g.close();

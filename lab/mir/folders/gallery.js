@@ -188,15 +188,22 @@ export function buildGallery(panel, opts) {
     inp.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); save(); } }, on);
     return inp;
   };
-  const nameIn = field(copy.name, 'sv-name-input', 80, phrase('Name'));
-  const toIn = field(copy.saveTo, 'sv-to-input', 320, phrase('{:ROOT} / folder'));
+  /* 1.5.7-alpha.5 · THE FIELDS' OWN WORDS (λWAVES 036 K5): an app names the two placeholders (`copy.namePlaceholder`, `copy.saveToPlaceholder`;
+     the defaults are what the fields always read), and `copy.proposeName: false` leaves NAME empty (its placeholder shows) instead of proposing
+     the folder's name, and SAVE TO empty at ROOT and in a folder of read-only starters — a save there lands at ROOT under the proposed name */
+  const own = o.copy || {}, proposing = own.proposeName !== false;
+  const nameIn = field(copy.name, 'sv-name-input', 80, own.namePlaceholder || phrase('Name'));
+  const toIn = field(copy.saveTo, 'sv-to-input', 320, own.saveToPlaceholder || phrase('{:ROOT} / folder'));
+  if (!proposing) nameIn.title = t('Left empty, {:SAVE} names it after its folder');
   kitAria(nameIn, 'Project name');
   kitAria(toIn, 'Save to folder');
   const toList = mk('datalist', null, fields);
   toList.id = 'sv-folders-' + Math.random().toString(36).slice(2, 8);
   toIn.setAttribute('list', toList.id);
   let nameTouched = false;
-  const proposeName = () => { if (!nameTouched) nameIn.value = files.proposedName(toIn.value); };
+  const proposeName = () => { if (!nameTouched) nameIn.value = proposing ? files.proposedName(toIn.value) : ''; };
+  /** the folder SAVE TO shows: the one open, or (proposeName: false) none at ROOT and in a folder holding only read-only starters */
+  const shownFolder = () => { if (proposing || !S.folder) return S.folder; const in_ = files.entries().filter((e) => e.folder === S.folder); return in_.length && in_.every(ro) ? '' : S.folder; };
   nameIn.addEventListener('input', () => { nameTouched = !!nameIn.value.trim(); }, on);
   toIn.addEventListener('input', proposeName, on);
   /* the one place a menu, a question or a refusal appears */
@@ -604,7 +611,7 @@ export function buildGallery(panel, opts) {
     }
     if (typeof o.onInspect === 'function') o.onInspect(S.selected ? files.entry(S.selected) : null, { show: false });
   }
-  function go(path) { S.folder = normalizeFolder(path); S.page = 0; selectCard(null); closeContext(); toIn.value = S.folder; nameTouched = false; proposeName(); paintExplorer(); }
+  function go(path) { S.folder = normalizeFolder(path); S.page = 0; selectCard(null); closeContext(); toIn.value = shownFolder(); nameTouched = false; proposeName(); paintExplorer(); }
   function paintExplorer() {
     for (const off of tileLife) { try { off(); } catch (_) {} }
     tileLife = [];
@@ -723,7 +730,7 @@ export function buildGallery(panel, opts) {
   function paint() {
     toList.textContent = '';
     for (const f of files.folders()) { const op = doc.createElement('option'); op.value = f; toList.appendChild(op); }
-    if (doc.activeElement !== toIn) toIn.value = S.folder;
+    if (doc.activeElement !== toIn) toIn.value = shownFolder();
     if (doc.activeElement !== nameIn) proposeName();
     paintParts();
     paintPicture();
