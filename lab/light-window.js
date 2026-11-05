@@ -37,6 +37,17 @@ export function lightDefs(app) {
   return TARGETS.map(([k, label, map, min, max]) => ({ id: 'light.' + k, label, map, min, max, def: HOME[k], group: 'light',
     knob: () => (ui.light && ui.light.knobs[k]) || null, get: () => valOf(mat.light, k), set: (v) => { if (ui.light) ui.light.put(k, v); } }));
 }
+/** 037 L4 · THE SUMMONS, plain: LIGHTING opens directly below `from` (CAMERA's card) in its rack — or as any window opens when `from` floats or is not
+ *  in a rack — by the kit rack's own open, so its motion and its save follow.  Chain T's lab/summon.js (THE SUMMONS with THE MITOSIS) takes this
+ *  body's place at the merge: `summon('camera', 'light')`. */
+export function summonLight(app, from) {
+  const rk = app.sh.rk, d = app.DEVICES.get('light'), host = from.parentElement, side = host && host.id === 'rackL' ? 'left' : host && host.id === 'rack' ? 'right' : '';
+  if (!rk || !d) return;
+  d.root.hidden = false;
+  if (!side || from.classList.contains('floating') || from.classList.contains('closed')) { rk.open('light'); return; }
+  const list = [...host.children].filter((c) => c.classList.contains('dev') && c !== d.root && !c.hidden && !c.classList.contains('closed'));
+  rk.open('light', { side, index: list.indexOf(from) + 1 });
+}
 const valOf = (L, k) => (L && (k === 'frame' ? L.frame === 'world' : Number.isFinite(L[k])) ? L[k] : HOME[k]);
 /** a direction in the frame (degrees) ↔ the unit vector (x right, y up, z toward the eye) ↔ the SUN pad's point (centre = toward the eye, r ½ = the horizon) */
 const vecOf = (az, el) => [Math.cos(el * RAD) * Math.cos(az * RAD), Math.cos(el * RAD) * Math.sin(az * RAD), Math.sin(el * RAD)];

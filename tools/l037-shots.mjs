@@ -83,6 +83,22 @@ try {
     if (out.trip.E || out.route.E) throw new Error(JSON.stringify([out.route, out.trip]));
     out.ok = out.targets.length === 12 && out.route.seen.some((v) => v > 0.05) && out.route.base === 0 && out.route.stamped && out.trip.back.key === 1.6 && !out.trip.afterEmpty;
   }
+  if (scene === 'l4') {
+    /* the check: CAMERA in the right rack with LIGHTING closed; a real click on CAMERA's LIGHTING opens it as the next open card under CAMERA */
+    out.before = await g.ev(`const L = __LW; L.layout.reopen('camera', 'R'); await new Promise((r) => setTimeout(r, 300));
+      const cam = document.querySelector('.dev[data-id="camera"]'); if (cam.classList.contains('folded')) cam.querySelector('.dev-fold').click();
+      const f = cam.querySelector('.cam-mode .lw-fold'); if (f && f.getAttribute('aria-expanded') !== 'true') f.click();
+      const t = cam.querySelector('.cam-light-open'); t.scrollIntoView({ block: 'center' }); await new Promise((r) => setTimeout(r, 400));
+      return { lightClosed: document.querySelector('.dev[data-id="light"]').classList.contains('closed'), rack: cam.parentElement.id };`);
+    const t = await rectOf('.dev[data-id="camera"] .cam-light-open');
+    await drv.actions(g.s, [{ type: 'pointer', id: 'c' + (++pid), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: Math.round((t[0] + t[2]) / 2), y: Math.round((t[1] + t[3]) / 2) },
+      { type: 'pointerDown', button: 0 }, { type: 'pointerUp', button: 0 }] }]);
+    out.after = await g.ev(`await new Promise((r) => setTimeout(r, 600)); const cam = document.querySelector('.dev[data-id="camera"]'), open = [...cam.parentElement.children].filter((c) => c.classList.contains('dev') && !c.hidden && !c.classList.contains('closed')).map((c) => c.dataset.id);
+      return { open, below: open[open.indexOf('camera') + 1] };`);
+    const cam = await rectOf('.dev[data-id="camera"]');
+    out['shot trigger'] = await shot('037-L4-camera-summons-lighting', [cam[0], Math.max(0, cam[1]), cam[2], H - 10]);
+    out.ok = out.before.lightClosed && out.after.below === 'light';
+  }
   console.log(JSON.stringify(out, null, 1));
   const e = (await g.errors()).errs || []; if (e.length) console.log('page errors:', JSON.stringify(e).slice(0, 800));
 } finally { await g.close(); }
