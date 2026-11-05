@@ -49,6 +49,39 @@ try {
       const s = document.querySelector('.dev[data-id="light"] .lw-sun .xy-dot').style; return { light: __LW.mat.light || null, sunAt: [s.getPropertyValue('--x'), s.getPropertyValue('--y')] };`);
     out.ok = !out.home.light && Math.abs(out.dragged.light.az - 180) < 6 && Math.abs(out.dragged.light.el) < 6 && out.key.key > 1 && !out.reset.light;
   }
+  if (scene === 'l2') {
+    /* the check: with no record, an empty one, or one at every home the gate is shut and the picture is the old one to the byte; one value a hair off
+       its home opens the rig, which draws within a few levels of it (the rig's arithmetic at the homes is the old light's); a real light moves it */
+    const LIGHTS = { none: null, empty: {}, atHome: { key: 1, ambient: 0.32, frame: 'camera' }, hair: { ambient: 0.321 }, lowLeft: { az: 180, el: 10 },
+      rim: { rim: 0.8, hue: 0.55, tint: 0.8, key: 0.5 }, spot: { cone: 40 }, world: { frame: 'world' } };
+    const run = (style) => g.ev(`const L = __LW, F = L.field; if (!F.ok) return { skip: F.error || 'no WebGPU' };
+      const px = async (light) => { const m = { ...L.mat, style: ${style}, frame: false, axis: false, dither: 0 }; if (light) m.light = light; else delete m.light; F.stats.presents = 13; return (await F.readPixels(L.obs, m, 320, 240, true)).px; };
+      const diff = (a, b) => { let d = 0, n = 0; for (let i = 0; i < a.length; i++) { const x = Math.abs(a[i] - b[i]); if (x > d) d = x; if (x > 2) n++; } return [d, n]; };
+      const A = await px(null), o = {}; for (const [k, v] of Object.entries(${JSON.stringify(LIGHTS)})) o[k] = diff(A, await px(v)); return o;`);
+    out.solid = await run(1); out.signed = await run(3); out.shell = await run(6);
+    await g.ev(`__LW.verbs.run([{ verb: 'molecule', args: { id: 'H2O' } }], { who: 'SHOTS' }); return 1;`);
+    await g.waitFor('window.__LW.chem.on && window.__LW.chem.solution()', 600, 200);
+    await g.ev(`const b = document.querySelector('.dev[data-id="observer"] [data-key-action="style"] .seg-b:last-child'); b.click(); await new Promise((r) => setTimeout(r, 2500)); await __LW.settle(); return 1;`);
+    out.esp = await run(11);
+    const gate = (o) => o.empty[0] === 0 && o.atHome[0] === 0 && o.hair[0] <= 6 && o.lowLeft[0] > 40 && o.rim[0] > 40;
+    out.ok = [out.solid, out.signed, out.shell, out.esp].every((o) => o.skip || gate(o));
+  }
+  if (scene === 'l3') {
+    /* the check: the twelve light.* targets are registered with their dials' ranges; an LFO on a macro routed to light.rim moves the record and the RIM
+       dial's shown value, the hand's base stays home; a project round trip keeps a hand's light and NEW (an empty file) puts the old light back */
+    out.targets = await g.ev(`return __LW.mod.targets().filter((t) => t.id.startsWith('light.')).map((t) => [t.id, t.min, t.max, t.map].join(' '));`);
+    await float('light', 600, 60, 300);
+    out.route = await g.ev(`const M = __LW.mod, s = M.addSource('lfo'), m = M.addMacro(); M.bind(m, s); M.route(m, 'light.rim', 0, 1); M.arm(true); M.play();
+      const seen = []; for (let i = 0; i < 6; i++) { M.step(0.13); await new Promise((r) => setTimeout(r, 30)); seen.push(+((__LW.mat.light && __LW.mat.light.rim) || 0).toFixed(3)); }
+      const k = document.querySelector('.dev[data-id="light"] .k[data-param="light.rim"]'); M.stop();
+      return { seen, base: M.registry.baseOf('light.rim'), stamped: !!k, dial: k && k.querySelector('.k-val').textContent };`);
+    out.trip = await g.ev(`const L = __LW; L.mod.model.clear ? 0 : 0; for (const r of [...L.mod.model.routes()]) L.mod.model.removeRoute(r.id);
+      L.mod.registry.restoreAll(); L.mat.light = { az: -90, el: 20, key: 1.6, rim: 0.4 }; const S = L.serialize(); delete L.mat.light; L.restore(S, { project: true }); await L.settle();
+      const back = { ...L.mat.light }, dial = document.querySelector('.dev[data-id="light"] .k[data-param="light.key"] .k-val').textContent;
+      L.restore({ experiment: S.experiment, presentation: { ...S.presentation, mat: { ...S.presentation.mat, light: undefined } } }, { project: true }); await L.settle();
+      return { back, dial, afterEmpty: L.mat.light || null };`);
+    out.ok = out.targets.length === 12 && out.route.seen.some((v) => v > 0.05) && out.route.base === 0 && out.route.stamped && out.trip.back.key === 1.6 && !out.trip.afterEmpty;
+  }
   console.log(JSON.stringify(out, null, 1));
   const e = (await g.errors()).errs || []; if (e.length) console.log('page errors:', JSON.stringify(e).slice(0, 800));
 } finally { await g.close(); }
