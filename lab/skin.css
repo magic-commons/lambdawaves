@@ -1159,9 +1159,9 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
    each masked from transparent at 0 · 6 · 16 · 34 · 64 px to whole 60 px later, so the blur is 0 at the sheet's left edge, climbs fast and
    is full inside — and one thin wash of the ground (.28) on the same climb, so the rows read over a bright tile.  Without FROST a plain .92
    plate.  The rows are BORDERLESS: the kit's control strokes (the rings, the rims, the relief's lit line) are zeroed inside the sheet. */
-#lwMenu .mm-sheet { background: none; box-shadow: none; isolation: isolate; }
+#lwMenu .mm-sheet { background: none; box-shadow: none; } #lwMenu .mm-sheet > :is(.mm-sheet-head, .mm-sheet-body) { position: relative; z-index: 1; }   /* the blur layers first, at z 0, the rows over them in order (no isolated group: a layer at the bottom of one would have no backdrop) */
 body:not(.frost) #lwMenu .mm-sheet { background: hsl(var(--glass-tint) / .92); }
-#lwMenu .mm-sheet-fx { position: absolute; inset: 0; z-index: -1; pointer-events: none; display: none; }
+#lwMenu .mm-sheet-fx { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: none; }
 body.frost #lwMenu .mm-sheet-fx { display: block; }
 #lwMenu .mm-sheet-fx > * { position: absolute; inset: 0; --e: 0px; -webkit-mask-image: linear-gradient(to right, transparent var(--e), #000 calc(var(--e) + 60px)); mask-image: linear-gradient(to right, transparent var(--e), #000 calc(var(--e) + 60px)); }
 #lwMenu .mm-sheet-fx > :nth-child(1) { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
