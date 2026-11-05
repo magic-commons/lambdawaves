@@ -892,6 +892,9 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   let ro = V.cam.xyz;
   let rd = normalize(V.fwd.xyz + in.uv.x * V.right.w * V.right.xyz + in.uv.y * V.up.w * V.up.xyz);
   let bg = mix(V.p5.xyz * 0.82, V.p5.xyz * 1.25, in.uv.y * 0.5 + 0.5);     // the theme's stage, with the old subtle vertical gradient
+  /* 037 T3 · GAMMA EVERYWHERE (Josh: "gamma seems to only work for inside the box"): a ray that misses the box or the cut, and every NaN
+     fallback, takes the output gamma a ray through the field takes — selected out at GAMMA 1, so that picture (THE LOCK's) keeps its bits */
+  let bgOut = select(pow(max(bg, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05))), bg, V.p5.w == 1.0);
   // box
   let inv = vec3<f32>(select(1.0 / rd.x, 1e30, abs(rd.x) < 1e-9), select(1.0 / rd.y, 1e30, abs(rd.y) < 1e-9), select(1.0 / rd.z, 1e30, abs(rd.z) < 1e-9));
   let t1 = (vec3<f32>(-half) - ro) * inv; let t2 = (vec3<f32>(half) - ro) * inv;
@@ -907,7 +910,7 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
     if (smode == 1u) { iv = slabInterval(rok, rdk, -1e30, spos); } else { iv = slabInterval(rok, rdk, spos - thick, spos + thick); }
     t0 = max(t0, iv.x); tf = min(tf, iv.y);
   }
-  if (tf <= t0) { return vec4<f32>(bg, 1.0); }
+  if (tf <= t0) { return vec4<f32>(bgOut, 1.0); }
   let steps = max(V.fwd.w, 8.0);
   let ds = (tf - t0) / steps;
   let mode = u32(V.p0.x);
@@ -924,13 +927,13 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   if (style == 2u || style == 5u) {                               // DUST (a retired GRAIN, 2, draws as DUST)
     let d = dustPixel(ro, rd, t0, tEnd, half, mode, soft, rhoMax, ampMax, refMax, pxA);
     var od = pow(max(d.rgb + back * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
-    od = select(od, bg, od != od);
+    od = select(od, bgOut, od != od);
     return vec4<f32>(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
   }
   if (style == 11u && V.p7.x > 0.5) {                               // iteration 014 B: ESP draws the map over its sticks (none set: the march below, as CLOUD); 032 O1: BALLS · STICKS are the composite above
     let oc = espPixel(ro, rd, t0, tf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
     var om = pow(max(oc, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
-    om = select(om, bg, om != om);
+    om = select(om, bgOut, om != om);
     return vec4<f32>(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
   }
   let kq = V.p3.w;                                                // THE KNEE's q (0 at the shipped 0.6: the old compositing, untouched)
@@ -1068,7 +1071,7 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   }
   let bgBlend = select(1.0 - alpha, max(0.0, 1.0 - max(col.r, max(col.g, col.b))), style == 7u);
   var o = pow(max(col + back * bgBlend, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));   // output gamma (a SURFACE control); 032 O1: the atoms' hit is the ground
-  o = select(o, bg, o != o);                                                                          // a NaN anywhere on the ray would paint the pixel black on Metal: show the stage instead
+  o = select(o, bgOut, o != o);                                                                       // a NaN anywhere on the ray would paint the pixel black on Metal: show the stage instead
   /* DITHER (wave 54).  The LAST thing that happens to the colour, AFTER the gamma, because the quantiser it
      defeats is the 8-bit swapchain and nothing else — dithering in linear light would be dithering the wrong
      ladder.  V.p2.w is the amplitude in LEAST SIGNIFICANT BITS: 1.0 is the textbook ±½ LSB, which turns the
