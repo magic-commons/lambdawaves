@@ -36,6 +36,10 @@ const TIP_URL = 'https://ko-fi.com/magiccommons';
 /* 032 THE PORTRAIT SHELF: the volumes that have a hero and in which themes ('dark light'), written by tools/volume-heroes.mjs with its files
    (img/menu/vol/<id>.<theme>.mp4 and the still .webp). A volume not named here wears the λWAVES palette. */
 export const HEROES = { 'vol-1': 'dark@9.1 light@13.45' };   // 036 G7: lab/loader.js keeps their files
+/* 037 M2 THE STILL WALL (Josh 11-05: "let it show a still wallpaper at random. I'll provide the high quality backgrounds later"): the face's
+   still wallpapers by name — img/menu/wall/<name>.dark.webp and .light.webp (DATA, kept once shown; lab/loader.js keeps them) — one picked at
+   random per show while the collage is off, stilled, not yet at its first frame or dead.  Empty: the theme's plain ground. */
+export const WALLS = [];
 /* 034 M3 THE TUTORIAL DECK: one card a row, in this order — its id (`tut-<slug>`), its title, its caption ('' until Josh's words come) and the
    themes its hero has files in (img/menu/tut/<id>.<theme>.mp4 and the still .webp; a theme not named shows the other's), written by
    tools/tutorial-heroes.mjs, one row a line */
@@ -173,7 +177,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const prefs = readPrefs();
   /* 035 THE COLLAGE (lab/picker-collage.js): its canvas and veil are the root's first children, behind the face; it runs while the face is shown.
      037 M1 THE COLLAGE SWITCH: the sheet's COLLAGE row (prefs.collage) is its one switch; PERFORMANCE no longer rests it */
-  const collage = createCollage(root, { theme: () => (document.body.dataset.theme === 'light' ? 'light' : 'dark'), still, off: () => prefs.collage === false });
+  const collage = createCollage(root, { theme: () => (document.body.dataset.theme === 'light' ? 'light' : 'dark'), still, off: () => prefs.collage === false, walls: WALLS });
   /* 036 G4 (Josh 11-03: "Clicking on logo shows the about window, and clicking on the MIR logo shows the MIR about window"): the face's logo
      and the MIR mark are buttons (no plate) onto ABOUT's door, `layout.about.open('lw' | 'mir')` — opened OVER the menu (openAbout below) */
   const faceLogo = el('button', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);

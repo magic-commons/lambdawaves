@@ -4,7 +4,7 @@
  * where THE SET is not all on this device or the build is new (rack.js; never for a test driver unless ?loader=1).
  * THE SET: (a) THE APP — the worker's precache: its cache's entries counted against the worker's `files` every 150 ms until it is active
  * (the worker says no word per entry; a page it already controls is done); (b) THE FACES — document.fonts.load, then ready; (c) THE MENU's
- * DATA — the wall's atlases, posters and collage.json, the face's art, VOL. I's heroes, the tutorial's films and stills, the strip's two
+ * DATA — the wall's atlases, its still walls (WALLS) and collage.json, the face's art, VOL. I's heroes, the tutorial's films and stills, the strip's two
  * faces — fetched with a byte reader and kept whole (library.js keepData; the worker answers a film's Range from it); (d) THE MOLECULES —
  * the 47 built-in records (library.json's rows and vibrations), each checked against its name (fetchRecord).  The volumes never.
  * THE FRESHNESS (img/menu/ left the worker's sweep): on the first open of a build (the PREFERENCE `lambdawaves.q0.loader` { build }) every
@@ -18,7 +18,7 @@ import { BUILD_ID } from './build-id.js';
 import { keepData, fetchRecord, DATA_CACHE } from './library.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { el } from './mir/kit.js';
-import { TUTORIAL, HEROES } from './picker.js';
+import { TUTORIAL, HEROES, WALLS } from './picker.js';
 
 const KEY = 'lambdawaves.q0.loader';
 const APP_MEAN = 20000, FACE_W = 40000;   // the bar's weight of one precache entry (≈ 8.2 MiB over ≈ 430 files) and of one face, in bytes
@@ -31,7 +31,7 @@ const MB = (b) => (b / 1048576).toFixed(1) + ' MB';
 
 function menuSet() {
   const out = [], add = (g, f) => out.push({ g, url: abs('./img/menu/' + f) });
-  for (const t of ['dark', 'light']) { add('wall', `collage/${t}.mp4`); add('wall', `collage/${t}.webp`); }
+  for (const t of ['dark', 'light']) { add('wall', `collage/${t}.mp4`); for (const w of WALLS) add('wall', `wall/${w}.${t}.webp`); }   // 037 M2: no poster; the still walls
   add('wall', 'collage/collage.json');
   for (const f of ['mir-interface.webp', 'library-dark.webp', 'library-light.webp']) add('wall', 'face/' + f);
   for (const [id, th] of Object.entries(HEROES)) for (const t of th.split(' ').map((s) => s.split('@')[0])) { add('wall', `vol/${id}.${t}.mp4`); add('wall', `vol/${id}.${t}.webp`); }

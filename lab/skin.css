@@ -1222,6 +1222,10 @@ body.frost #lwMenu .mm-sheet-fx { display: block; }
 #lwMenu .mm-collage.on { opacity: 1; }
 #lwMenu .mm-veil { z-index: 1; background: radial-gradient(ellipse 75% 70% at 50% 50%, hsl(var(--glass-tint) / 0) 32%, hsl(var(--glass-tint) / .1) 55%, hsl(var(--glass-tint) / .3) 78%, hsl(var(--glass-tint) / .5)); }
 #lwMenu :is(.mm-collage, .mm-veil)[hidden] { display: none; }
+/* 037 M2 · THE STILL WALL: the wall at rest is never a paused frame — the plain ground under the veil, or a WALLS picture (picker.js) behind the
+   canvas, covering the view, faded in once loaded; the playing wall fades in over it on its first frame */
+#lwMenu .mm-wall { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; opacity: 0; transition: opacity .8s ease; }
+#lwMenu .mm-wall.on { opacity: 1; } #lwMenu .mm-wall[hidden] { display: none; }
 /* CONTINUE over moving tiles: its type kept, on a soft plate of the ground; THE LOGO's DROP SHADOW (036 C3, Josh: "let the main logo have a
    drop shadow to combat that lessened background effect") — dark under it in both themes; in LIGHT over a halo of the ground (the pale λ
    and the teal dot) and softer */

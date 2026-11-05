@@ -7,10 +7,14 @@
  * P/6 px/s; at the first instant the lattice is tiled again 12 s or more after the last turn it turns to COLUMNS (nothing moves at that
  * instant).  The wall leans by a random 1.5–3.5° either way, chosen per load.  It runs only while the face is shown and the page visible;
  * stillness (picker-fx still()) and the sheet's COLLAGE switch (037 M1, `off`; PERFORMANCE no longer rests it), looked at once a second
- * while it runs, pause it on the poster drawn through the same deal.  036: NO EDGE (the pitch an even count of device px, every tile a whole device px abutting, the slot inset 2 px against
+ * while it runs, rest it.  036: NO EDGE (the pitch an even count of device px, every tile a whole device px abutting, the slot inset 2 px against
  * x264's cross-slot bleed); the video's frame copied only when a NEW one is presented (requestVideoFrameCallback, else the frame count);
- * a dip of the video holds its last frame (the poster only before the first frame and in stillness); a resize (debounced) keeps the mode
- * and the clock; collage.json and the poster kept on the device (library.js keepData).  A plain module: no app, no state outside its root. */
+ * a dip of the video holds its last frame; a resize (debounced) keeps the mode and the clock; collage.json kept on the device (library.js
+ * keepData).  037 M2 THE STILL WALL, NEVER THE POSTER (Josh 11-05: "I'd rather not have the collage paused as the videos looks lowres"): off,
+ * stilled, before its first frame, dead or refused, the wall is not drawn at all — the face shows the theme's plain ground under the veil,
+ * or, when the picker names WALLS, one of them picked at random per show (img/menu/wall/<name>.<theme>.webp, an <img> behind the canvas);
+ * a video error or a refused play is retried once 2 s later, then the still wall stands for the page's life (a theme change forgives it);
+ * a collage.json that did not come is asked again at the next show.  A plain module: no app, no state outside its root. */
 import { onThemeChange } from './mir/kit.js';
 import { keepData } from './library.js';
 
@@ -19,14 +23,15 @@ const DIR = './img/menu/collage/', TURN = 12, DRAW_HZ = 30, NEAR = 3.5, INSET = 
 const RVFC = typeof HTMLVideoElement !== 'undefined' && 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
 const mod = (a, n) => ((a % n) + n) % n;
 
-/** createCollage(root, { theme, still, off }) → { show, hide, setTheme, wake, destroy }: the canvas and the veil become root's first children */
-export function createCollage(root, { theme, still, off }) {
-  const cvs = document.createElement('canvas'), veil = document.createElement('div');
-  cvs.className = 'mm-collage'; veil.className = 'mm-veil'; cvs.hidden = veil.hidden = true; cvs.setAttribute('aria-hidden', 'true');
-  root.prepend(cvs, veil);
+/** createCollage(root, { theme, still, off, walls }) → { show, hide, setTheme, wake, destroy }: the still wall, the canvas and the veil become root's first children */
+export function createCollage(root, { theme, still, off, walls = [] }) {
+  const wall = document.createElement('img'), cvs = document.createElement('canvas'), veil = document.createElement('div');
+  wall.className = 'mm-wall'; wall.alt = ''; wall.decoding = 'async'; wall.draggable = false; wall.setAttribute('aria-hidden', 'true');
+  cvs.className = 'mm-collage'; veil.className = 'mm-veil'; wall.hidden = cvs.hidden = veil.hidden = true; cvs.setAttribute('aria-hidden', 'true');
+  root.prepend(wall, cvs, veil);
   const ctx = cvs.getContext('2d'), buf = document.createElement('canvas'), bctx = buf.getContext('2d');
   const tilt = (Math.random() < 0.5 ? -1 : 1) * (1.5 + 2 * Math.random()) * (Math.PI / 180);
-  let man = null, manP = null, th = null, shown = false, raf = 0, last = 0, vid = null, dead = false, poster = null, fresh = false, lastAt = 0, frames = -1, vfc = 0, qAt = 0, qT = 0, sizeT = 0;
+  let man = null, manP = null, th = null, shown = false, raf = 0, last = 0, vid = null, dead = false, tries = 0, retryT = 0, pick = null, fresh = false, lastAt = 0, frames = -1, vfc = 0, qAt = 0, qT = 0, sizeT = 0;
   let W = 0, H = 0, dpr = 1, P = 0, v = 0, T = 0, hx = 0, hy = 0, nc = 0, nr = 0, ox = 0, oy = 0, grid = null, mode = 0, tau = 0, px = 0, py = 0;
   const g = [0, 0];   // the lattice's offsets along x and y (a turn on a half tile carries P/2)
   let seen = null, ban = null, fams = null, best = null; const nb = new Array(6);   // choose()'s scratch, reused: no allocation per frame
@@ -129,8 +134,8 @@ export function createCollage(root, { theme, still, off }) {
     g[mode] = g2; mode ^= 1;
   }
   function paint(at, src) {
-    if (!src || !grid || (src === poster && !poster.naturalWidth)) return;   // a poster not yet decoded draws nothing
-    const sc = src === poster ? 0.5 : 1, t = man.tile * sc, e = INSET * sc, cols = man.cols, L = nAl() * P, s = Math.round(P * dpr);
+    if (!grid) return;
+    const t = man.tile, e = INSET, cols = man.cols, L = nAl() * P, s = Math.round(P * dpr);
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cvs.width, cvs.height); ctx.imageSmoothingQuality = 'medium';
     for (let ln = 0; ln < nLn(); ln++) for (let al = 0; al < nAl(); al++) {
       const c = cell(ln, al), u = along(ln, al, tau), lap = Math.floor(u / L);
@@ -155,57 +160,68 @@ export function createCollage(root, { theme, still, off }) {
     if (now - last < 1000 / DRAW_HZ - 4) return;   // the wall moves 30 times a second: at P/6 px/s a step is under a pixel
     tau += Math.min(0.25, (now - last) / 1000); last = now;
     while (tau >= T) { turn(); tau -= T; }
-    paint(fresh ? atNow() : 0, fresh ? buf : poster);   // a dip holds the last frame: the poster only before the first
+    if (fresh) paint(atNow(), buf);   // a dip holds the last frame; before the first nothing is drawn: the still wall shows
   }
 
   const quiet = () => still() || off();
-  /** quiet: the video paused, the poster drawn once through the same deal, and a look once a second for the way back */
+  /** THE STILL WALL: the canvas fades out and keeps no frame (037 M2: a paused wall is never shown) */
+  function toStill() { fresh = false; cvs.classList.remove('on'); }
+  /** quiet: the video paused, the still wall, and a look once a second for the way back */
   function rest() {
-    halt(); paint(0, poster);
+    halt(); toStill();
     clearTimeout(qT); qT = setTimeout(function wake() { qT = 0; if (!shown || root.hidden || document.hidden) return; if (quiet()) qT = setTimeout(wake, 1000); else start(); }, 1000);
   }
   function halt() { if (raf) cancelAnimationFrame(raf); raf = 0; if (vfc && vid) vid.cancelVideoFrameCallback(vfc); vfc = 0; if (vid) vid.pause(); }
-  function loadPoster() {
-    const want = DIR + th + '.webp'; if (poster && poster.getAttribute('src') === want) return;
-    poster = new Image(); poster.decoding = 'async'; poster.src = want;
-    poster.addEventListener('load', () => { keepData(want); if (shown && !raf) paint(0, poster); }, { once: true });
+  /** the picker's WALLS: the one picked for this show, in the theme in use, kept once loaded; none named, the plain ground */
+  function paintWall() {
+    wall.hidden = !pick; if (!pick) return;
+    const want = './img/menu/wall/' + pick + '.' + (th || theme()) + '.webp'; if (wall.getAttribute('src') === want) return;
+    wall.classList.remove('on'); wall.onload = () => { wall.classList.add('on'); keepData(want); }; wall.src = want;
+  }
+  /** a video error or a refused play: one retry 2 s later, then the still wall for the page's life (setTheme forgives it) */
+  function fail() {
+    if (retryT || dead) return; halt(); toStill();
+    if (tries++) { dead = true; return; }
+    retryT = setTimeout(() => { retryT = 0; if (vid && !dead) { vid.load(); start(); } }, 2000);
   }
   function start() {
     if (!man || !shown || root.hidden || document.hidden) return;
     if (!th) th = theme();
     if (!grid) layout();
-    loadPoster();
-    if (quiet() || dead) { rest(); return; }   // stillness (or no atlas): the poster once (when it has come), no loop
+    if (dead || retryT) return;   // fail() left the still wall: a retry is on its way, or the atlas is gone for the page's life
+    if (quiet()) { rest(); return; }   // stillness: the still wall, no loop
     if (!vid) {
       vid = document.createElement('video'); vid.muted = vid.defaultMuted = vid.loop = vid.playsInline = true; vid.preload = 'metadata';
-      vid.addEventListener('error', () => { halt(); vid = null; dead = true; paint(0, poster); }, { once: true });   // no atlas: the poster stays
+      vid.addEventListener('error', fail);
     }
     const src = DIR + th + '.mp4'; if (vid.getAttribute('src') !== src) { vid.src = src; fresh = false; frames = -1; }
-    const r = vid.play(); if (r && r.catch) r.catch(() => {});
+    const r = vid.play(); if (r && r.catch) r.catch((e) => { if (!e || e.name !== 'AbortError') fail(); });   // a pause or a new source aborts a play: not a refusal
     if (!raf) { last = qAt = performance.now(); raf = requestAnimationFrame(drawCollage); }
     if (RVFC && !vfc) vfc = vid.requestVideoFrameCallback(onFrame);
   }
   function stop() { halt(); clearTimeout(qT); qT = 0; }
   const onVis = () => (document.hidden ? stop() : start());
-  const onResize = () => { clearTimeout(sizeT); sizeT = setTimeout(() => { sizeT = 0; if (!grid) return; layout(); if (shown && !raf) paint(fresh ? lastAt : 0, fresh ? buf : poster); }, 150); };   // debounced: a phone's bar fires a stream
+  const onResize = () => { clearTimeout(sizeT); sizeT = setTimeout(() => { sizeT = 0; if (grid) layout(); }, 150); };   // debounced: a phone's bar fires a stream; a playing wall repaints at its next draw
   document.addEventListener('visibilitychange', onVis); addEventListener('resize', onResize);
   const offTheme = onThemeChange(() => api.setTheme(theme()));
 
   const api = {
     show() {
       if (shown) return; shown = true; cvs.hidden = veil.hidden = false;
+      pick = walls.length ? walls[Math.floor(Math.random() * walls.length)] : null; paintWall();   // a still wall at random per show
       if (!manP) manP = fetch(DIR + 'collage.json').then((r) => { if (!r.ok) return null; keepData(DIR + 'collage.json', r.clone()); return r.json(); })
-        .then((j) => { man = j && j.themes ? j : null; }, () => {});   // once; none: the plain ground
+        .then((j) => { man = j && j.themes ? j : null; if (!man) manP = null; }, () => { manP = null; });   // none: the still wall, and the next show asks again
       manP.then(start);
     },
-    hide() { if (!shown) return; shown = false; stop(); cvs.hidden = veil.hidden = true; },
+    hide() { if (!shown) return; shown = false; stop(); wall.hidden = cvs.hidden = veil.hidden = true; },
     /** the COLLAGE switch moved (037 M1): rest or run at once, not at the next look */
     wake() { if (!shown || !man) return; if (quiet()) rest(); else { clearTimeout(qT); qT = 0; start(); } },
     setTheme(t) {
       t = t === 'light' ? 'light' : 'dark'; if (t === th) return; th = t;
-      fresh = false; if (man) deal(); cvs.classList.remove('on'); if (shown) { halt(); start(); }   // the new atlas: its own frame callbacks
+      dead = false; tries = 0; clearTimeout(retryT); retryT = 0;   // the other atlas starts with its own retry
+      fresh = false; if (man) deal(); cvs.classList.remove('on'); if (shown) { paintWall(); halt(); start(); }   // the new atlas: its own frame callbacks
     },
-    destroy() { api.hide(); offTheme(); document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onResize); if (vid) vid.removeAttribute('src'); cvs.remove(); veil.remove(); },
+    destroy() { api.hide(); clearTimeout(retryT); offTheme(); document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onResize); if (vid) vid.removeAttribute('src'); wall.remove(); cvs.remove(); veil.remove(); },
   };
   return api;
 }
