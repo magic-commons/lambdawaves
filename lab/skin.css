@@ -975,6 +975,8 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-stage-card .stage-seat { flex: 1 1 100%; flex-direction: row; align-items: center; align-self: center; gap: 8px; }
 .lw-stage-card .stage-colour { flex: 1 1 auto; width: auto; height: 22px; }
 .lw-stage-card .stage-knobs { margin-bottom: 2px; }
+.lw-stage-card .grp { margin: 4px 0 0; padding-top: 8px; border-top: 1px solid var(--glass-hairline); }   /* 037 T4: PULSE under a thin rule */
+.lw-stage-card .stage-pulse { margin-bottom: 2px; }
 .native-clean[data-id="settings"] .lw-edit-stage > .trig { flex: 1 1 100%; }
 /* 037 T2 · THE MITOSIS (lab/summon.js): the two title-bar pills in one fixed layer over the racks, drawn at the UI scale, gone when they land */
 .lw-mitosis { position: fixed; inset: 0; z-index: calc(var(--z-chrome) + 3); pointer-events: none; zoom: var(--ui-zoom, 1); }
