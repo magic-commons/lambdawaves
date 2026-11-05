@@ -35,11 +35,11 @@ import { keepData, installed, safariTab } from './library.js';
 const TIP_URL = 'https://ko-fi.com/magiccommons';
 /* 032 THE PORTRAIT SHELF: the volumes that have a hero and in which themes ('dark light'), written by tools/volume-heroes.mjs with its files
    (img/menu/vol/<id>.<theme>.mp4 and the still .webp). A volume not named here wears the λWAVES palette. */
-const HEROES = { 'vol-1': 'dark light' };
+export const HEROES = { 'vol-1': 'dark light' };   // 036 G7: lab/loader.js keeps their files
 /* 034 M3 THE TUTORIAL DECK: one card a row, in this order — its id (`tut-<slug>`), its title, its caption ('' until Josh's words come) and the
    themes its hero has files in (img/menu/tut/<id>.<theme>.mp4 and the still .webp; a theme not named shows the other's), written by
    tools/tutorial-heroes.mjs, one row a line */
-const TUTORIAL = [
+export const TUTORIAL = [   // 036 G7: lab/loader.js keeps their files
   { id: 'tut-hero-1', title: 'HERO 1', caption: '', themes: 'light' },
   { id: 'tut-hero-2', title: 'HERO 2', caption: '', themes: 'light' },
   { id: 'tut-hero-3', title: 'HERO 3', caption: '', themes: 'light' },
@@ -172,7 +172,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const face = el('div', 'mm-face', root); face.hidden = true;
   /* 035 THE COLLAGE (lab/picker-collage.js): its canvas and veil are the root's first children, behind the face; it runs while the face is shown */
   const collage = createCollage(root, { theme: () => (document.body.dataset.theme === 'light' ? 'light' : 'dark'), still, lite: () => !!(app.ctl.perf && app.ctl.perf.tier === 'light') });
-  const faceLogo = el('div', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);
+  /* 036 G4 (Josh 11-03: "Clicking on logo shows the about window, and clicking on the MIR logo shows the MIR about window"): the face's logo
+     and the MIR mark are buttons (no plate) onto ABOUT's door, `layout.about.open('lw' | 'mir')` — opened OVER the menu (openAbout below) */
+  const faceLogo = el('button', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);
+  faceLogo.type = 'button'; faceLogo.setAttribute('aria-label', 'ABOUT λWAVES'); faceLogo.title = 'ABOUT λWAVES'; faceLogo.addEventListener('click', () => openAbout('lw'));
   fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { for (const host of [logo, faceLogo]) { host.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = host.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } } }).catch(() => { logo.textContent = faceLogo.textContent = 'λWAVES'; });
   /* iteration 015 M1 · THE HEAD (Josh: "Logo (a little bit bigger), Atomic, molecular, etc. Row, and then Home Folder, and Hue. Add a 4th
      button"): the logo, the tabs, then four round buttons — RETURN HOME (the lab), FOLDERS (the projects and the demos), THE HUE ring (a dial
@@ -183,14 +186,25 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
   /* 035 G1 (Josh 11-03: "a back arrow instead of a home arrow; home icon in library takes you to the lab"): ← is the face (the tutorial's
      one way back, the decks' and the folders' first), ⌂ enters the lab as CONTINUE does */
-  navBtn('back', 'Main menu', () => showFace()).dataset.nav = 'back';
+  /* 036 G3 (Josh 11-03: "Instead of the arrow to go back to the main menu in the library mode, have it be a large arrow in the top left"): ← is
+     the menu's own, pinned to its top-left corner, large and plateless (skin.css); still `data-nav="back"`, still the face */
+  const backB = el('button', 'mm-navb mm-backb', root); backB.type = 'button'; icon(backB, 'back'); backB.setAttribute('aria-label', 'Main menu'); backB.title = 'Main menu';
+  backB.dataset.nav = 'back'; backB.addEventListener('click', () => showFace());
   navBtn('home', 'Continue to the lab', () => close()).dataset.nav = 'home';
   navBtn('folders', 'Folders — your projects and the demos', () => (at === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
-  /* the face's two doors (album art in THE CARD'S LIGHT, the λWAVES palette) and the way into the lab */
-  const door = (id, word, glyph, k, go) => { const b = el('button', 'mm-door mm-holo', doors); b.type = 'button'; b.dataset.door = id; b.setAttribute('aria-label', word); b.style.setProperty('--k', String(k)); b.style.setProperty('--i', String(k));
-    el('span', 'mm-halo', b); const lit = el('span', 'mm-lit mm-art-plain', b); el('span', 'mm-foil', lit); el('span', 'mm-rim', b);
-    const w = el('span', 'mm-door-word', lit); icon(w, glyph); el('b', '', w, word); b.addEventListener('click', go); return b; };
-  const doorBtns = [door('tutorial', 'TUTORIAL', 'film', 0, () => showTutorial()), door('library', 'LIBRARY', 'library', 1, () => showDecks('molecular'))];
+  /* the face's two doors (album art in THE CARD'S LIGHT) and the way into the lab.  036 G1 (Josh 11-03: "Show the thumbnail to be the MIR thingy
+     from the Lambdawaves about site … for library, use the background image for the title in the about page site which is also light and dark
+     aware"; "Don't include the icons … just text"): the word alone over the about site's pictures — TUTORIAL its MIR picture (one for both
+     themes, as the site), LIBRARY its title backgrounds (the CSS shows the theme's) — img/menu/face/ (DATA, kept once loaded); the palette
+     art shows while they load */
+  const door = (id, word, arts, k, go) => { const b = el('button', 'mm-door mm-holo', doors); b.type = 'button'; b.dataset.door = id; b.setAttribute('aria-label', word); b.style.setProperty('--k', String(k)); b.style.setProperty('--i', String(k));
+    el('span', 'mm-halo', b); const lit = el('span', 'mm-lit mm-art-plain', b);
+    for (const [file, th] of arts) { const i = el('img', 'mm-door-art', lit); i.alt = ''; i.decoding = 'async'; i.draggable = false; if (th) i.dataset.theme = th;
+      i.addEventListener('load', () => { i.classList.add('on'); keepData(i.src); }, { once: true }); i.src = './img/menu/face/' + file; }
+    el('span', 'mm-foil', lit); el('span', 'mm-rim', b);
+    el('b', '', el('span', 'mm-door-word', lit), word); b.addEventListener('click', go); return b; };
+  const doorBtns = [door('tutorial', 'TUTORIAL', [['mir-interface.webp']], 0, () => showTutorial()),
+    door('library', 'LIBRARY', [['library-dark.webp', 'dark'], ['library-light.webp', 'light']], 1, () => showDecks('molecular'))];
   const labB = el('button', 'mm-face-lab', face, 'CONTINUE'); labB.type = 'button'; labB.title = 'Continue to the lab'; labB.addEventListener('click', () => close());   // 035 G1: was ENTER THE LAB
   /* 035 G2 · THE CORNERS (Josh 11-03: "a Light/Dark Toggle and a settings … reveal", "the MIR logo … Kinda small in the bottom right", "3 Icon
      Logos of Claude, OpenAI's Emblem, and Gemini's Star … During mouseover, It expands towards the right to show the names"): the face's own —
@@ -200,15 +214,22 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const faceTop = el('div', 'mm-corner mm-tr', face);
   const faceTheme = el('button', 'mm-navb mm-themeb', faceTop); faceTheme.type = 'button'; faceTheme.title = 'Light or dark — the theme'; faceTheme.setAttribute('aria-label', faceTheme.title);
   icon(faceTheme, 'sun').classList.add('gly-sun'); icon(faceTheme, 'moon').classList.add('gly-moon'); faceTheme.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
-  { const mir = el('div', 'mm-corner mm-br', face);
+  { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'MIR ABOUT'); mir.title = 'MIR ABOUT — the kit this app is built on'; mir.addEventListener('click', () => openAbout('mir'));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
   { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');
-    for (const [ai, name, by] of [['claude', 'Claude', 'ANTHROPIC'], ['openai', 'GPT', 'OpenAI'], ['gemini', 'Gemini', 'GOOGLE']]) {
+    /* 036 G6 (Josh 11-03: "Claude Logo is incorrect; use the actual real logo. Checkout the screenshot of the correct font and logo styling. Also
+       no need to show company who made it"): the about site's real marks and names — Claude's starburst (img/ai/claude-mark.svg, its
+       terracotta) and its serif wordmark in the theme's ink (claude-word-{dark,light}.svg) in place of a typed name; GPT in OpenAI Sans and
+       Gemini in Google Sans Flex (img/menu/ai/, DATA; skin.css @font-face); no makers' line (ABOUT names them) */
+    const aiPic = (host, cls, src, alt = '') => { const i = el('img', cls, host); i.alt = alt; i.decoding = 'async'; i.draggable = false; i.src = src; return i; };
+    for (const [ai, name] of [['claude', 'Claude'], ['openai', 'GPT'], ['gemini', 'Gemini']]) {
       const c = el('span', 'mm-cr', credits); c.dataset.ai = ai;
-      if (ai === 'claude') icon(c, 'claudeMark').classList.add('mm-cr-mark');   // drawn (lab/icons.js): the site holds only the wordmark
+      if (ai === 'claude') aiPic(c, 'mm-cr-mark', './img/ai/claude-mark.svg');
       else if (ai === 'openai') el('i', 'mm-cr-mark mm-cr-ink', c);             // the blossom as a mask over the ink (skin.css)
-      else { const i = el('img', 'mm-cr-mark', c); i.alt = ''; i.decoding = 'async'; i.draggable = false; i.src = './img/ai/gemini.svg'; }   // its own gradient
-      const t = el('span', '', el('span', 'mm-cr-name', c)); el('b', '', t, name); el('small', '', t, by);
+      else aiPic(c, 'mm-cr-mark', './img/ai/gemini.svg');                         // its own gradient
+      const t = el('span', '', el('span', 'mm-cr-name', c));
+      if (ai === 'claude') for (const th of ['dark', 'light']) aiPic(t, 'mm-cr-word', './img/ai/claude-word-' + th + '.svg', name).dataset.theme = th;
+      else el('b', '', t, name);
     }
     credits.addEventListener('click', () => credits.classList.toggle('open')); }   // a tap shows the names (touch), a second puts them away
   /* 035 G3 · THE SHEET (Josh 11-03: "Hitting settings icon will reveal a little slide-over which is a minimalist-CSS version of Settings rack window
@@ -219,6 +240,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const gear = el('button', 'mm-navb mm-gear', faceTop); gear.type = 'button'; gear.title = 'Settings — quality and the look'; gear.setAttribute('aria-label', 'Settings');
   gear.setAttribute('aria-haspopup', 'dialog'); gear.setAttribute('aria-expanded', 'false'); icon(gear, 'settings');
   const sheet = el('div', 'mm-sheet', root); sheet.hidden = true; sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-label', 'Settings');
+  /* 036 G5 · THE FOCUS BLUR: the sheet's ground is five stacked blur layers and a thin wash, each masked from the sheet's left edge (skin.css) */
+  { const fx = el('div', 'mm-sheet-fx', sheet); fx.setAttribute('aria-hidden', 'true'); for (let i = 0; i < 5; i++) el('i', '', fx); el('b', '', fx); }
   const sheetHead = el('div', 'mm-sheet-head', sheet); el('b', '', sheetHead, 'SETTINGS');
   const sheetX = el('button', 'mm-sheet-x', sheetHead); sheetX.type = 'button'; sheetX.setAttribute('aria-label', 'Close the settings'); icon(sheetX, 'close');
   const sheetBody = el('div', 'mm-sheet-body', sheet);
@@ -228,6 +251,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function openSheet() {
     if (sheetUp() || !app.hooks.menuSheet) return;
     if (!sheetRows) sheetRows = app.hooks.menuSheet(sheetBody); else sheetRows.paint();
+    sheetBody.scrollTop = 0;   // 036 G5: every open starts at the top
     clearTimeout(sheetT); sheet.classList.remove('out'); sheet.hidden = false; void sheet.offsetWidth; sheet.classList.add('in');
     gear.setAttribute('aria-expanded', 'true'); addEventListener('pointerdown', sheetOutside, true);
     const f = sheetBody.querySelector('[tabindex="0"], .sw'); if (f) f.focus({ preventScroll: true });
@@ -239,6 +263,19 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (refocus) gear.focus({ preventScroll: true });
   }
   gear.addEventListener('click', () => (sheetUp() ? closeSheet(true) : openSheet())); sheetX.addEventListener('click', () => closeSheet(true));
+  /* 036 G4 · ABOUT OVER THE MENU: ABOUT is a window of #floats (under the menu's z); while it is open from the menu `body.about-over` lifts
+     #floats over the menu with ABOUT alone painted there (skin.css), the sheet put away.  Its × or Escape (escape below, before the menu's
+     own) closes it and the menu is still there; the class drops when the window hides or the menu closes. */
+  let aboutSeen = null;
+  const aboutOf = () => app.sh.layout && app.sh.layout.about, aboutOver = () => document.body.classList.contains('about-over');
+  const dropAbout = () => document.body.classList.remove('about-over');
+  function openAbout(f) {
+    const A = aboutOf(); if (!A) return;
+    closeSheet(); document.body.classList.add('about-over'); A.open(f);
+    if (!aboutSeen && A.win && A.win.root) { aboutSeen = new MutationObserver(() => { if (A.win.root.hidden) dropAbout(); }); aboutSeen.observe(A.win.root, { attributes: true, attributeFilter: ['hidden'] }); }
+  }
+  const closeAbout = () => { const A = aboutOf(); if (A) A.close(); dropAbout(); };
+  root.addEventListener('pointerdown', (e) => { if (aboutOver() && e.target === root) { e.preventDefault(); closeAbout(); } });   // a press on the face under ABOUT (its veil is the root's own)
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
   /* 032 (Josh 11-01: "a light and dark toggle in the picker in between the hue knob and thumbnail switcher"): THEME, the action's own
@@ -256,6 +293,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const foldersEl = el('div', 'mm-folders', root); foldersEl.hidden = true; foldersEl.setAttribute('role', 'region'); foldersEl.setAttribute('aria-label', 'Folders');
   let foldersView = null;
   const tutEl = el('div', 'mm-tut', root); tutEl.hidden = true; tutEl.setAttribute('role', 'region'); tutEl.setAttribute('aria-label', 'Tutorial');
+  /* 036 G2 (Josh 11-03: "When scrolling between Atomic, Molecular, and Expansions, there needs to be a gradient blur or gradual something … Right
+     now, it's a sharp cuttoff"): WHILE a deck or the tutorial's wall scrolls (`mm-moving`, held 220 ms past the last scroll event), the scroller
+     fades over its first and last 72 px and two bands of PROGRESSIVE BLUR lie over its edges (under FROST; skin.css) — a section passes the
+     edges gradually; at rest nothing is faded, so a deck's first and last rows stay whole */
+  for (const side of ['top', 'foot']) { const e = el('div', 'mm-edge ' + side, root); e.setAttribute('aria-hidden', 'true'); el('i', '', e); el('i', '', e); }
+  let edgeT = 0; const edging = () => { root.classList.add('mm-moving'); clearTimeout(edgeT); edgeT = setTimeout(() => root.classList.remove('mm-moving'), 220); };
+  for (const sc of [scroller, tutEl]) sc.addEventListener('scroll', edging, { passive: true });
   /* 034 M1 · THE VIEWS: the face (over the decks, which stay laid out under it), the decks, FOLDERS' gallery and the tutorial (each in the
      decks' seat); one at a time, one hero playing at most, and leaving a view puts its hero to rest */
   let at = 'decks', firstDeal = false;   // firstDeal: a first run's LIBRARY deals MOLECULAR's first page in THE ENTRANCE (iteration 012 L3)
@@ -264,7 +308,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (name === at) return false;
     const was = at; at = name; closeDrop(); closeSheet(); restHero();
     face.hidden = name !== 'face'; root.classList.toggle('at-face', name === 'face');
-    for (const e of [top, scroller, caption]) e.inert = name === 'face';
+    for (const e of [top, scroller, caption, backB]) e.inert = name === 'face';
     const away = name === 'folders' || name === 'tutorial';
     foldersEl.hidden = name !== 'folders'; tutEl.hidden = name !== 'tutorial'; scroller.hidden = caption.hidden = away;
     if (away) { root.dataset.sec = name; for (const x of sections) x.b.classList.remove('on'); pill.style.setProperty('--pw', '0px'); }
@@ -920,9 +964,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (first) { setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700); setTimeout(() => { root.classList.remove('first'); }, 2600); }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); if (at === 'decks') enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; dropAbout(); closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = (o) => (root.hidden ? open(o) : close());
-  const escape = () => (!drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : close());   // M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET
+  /* M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET; 036 G3 (Josh, FOR JOSH 035 answer 5): then it STEPS BACK — off the face
+     to the face, on the face out to the lab (the inner Escapes — the look drop's, the isomer deck's, the tip sheet's — still stop first) */
+  const escape = () => (aboutOver() ? closeAbout() : !drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : at !== 'face' ? showFace() : close());   // 036 G4: ABOUT over the menu first
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
   /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
   let escDrop = null; const layer = () => { if (escDrop) escDrop(); escDrop = app.sh.ACTIONS.escape.push(() => { escDrop = null; escape(); if (!root.hidden) layer(); }, { alive: () => !root.hidden }); };

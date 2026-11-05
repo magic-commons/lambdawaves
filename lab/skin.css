@@ -572,6 +572,28 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-scroll { overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; overscroll-behavior: contain; }
 #lwMenu .mm-scroll::-webkit-scrollbar { display: none; }
 #lwMenu .mm-sec { min-height: 100%; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 8px 16px 14px; box-sizing: border-box; }
+/* 036 G2 · THE DECKS' EDGES (picker.js, the two .mm-edge bands): WHILE a deck or the tutorial's wall scrolls (#lwMenu.mm-moving) the scroller
+   fades a section out over its first and last 72 px (--mm-edge eases 0 → 72 px), and under FROST a band of PROGRESSIVE BLUR grows over each
+   edge — two layers, 6 px over the whole band and 16 px near the edge, each masked so the blur grows toward the edge — so ATOMIC, MOLECULAR and
+   EXPANSIONS pass one another gradually; at rest nothing is faded (a deck's first row sits 8 px under the edge).  The rows are placed by name,
+   so the bands share the scroller's cell; the head stays above them; FOLDERS and the face have none. */
+@property --mm-edge { syntax: '<length>'; inherits: false; initial-value: 0px; }
+#lwMenu .mm-top { grid-row: 1; } #lwMenu .mm-scroll { grid-row: 2; grid-column: 1; } #lwMenu .mm-caption { grid-row: 3; }
+#lwMenu :is(.mm-scroll, .mm-tut) { --mm-edge: 0px; transition: --mm-edge 260ms var(--ease);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); }
+#lwMenu.mm-moving > :is(.mm-scroll, .mm-tut) { --mm-edge: 72px; }
+#lwMenu .mm-edge { grid-row: 2; grid-column: 1; position: relative; z-index: 2; --mm-edge: 0px; height: var(--mm-edge); transition: --mm-edge 260ms var(--ease); pointer-events: none; display: none; }   /* it grows from the edge: an opacity under 1 would cut its blur off from the backdrop */
+#lwMenu.mm-moving > .mm-edge { --mm-edge: 72px; }
+#lwMenu .mm-edge.top { align-self: start; } #lwMenu .mm-edge.foot { align-self: end; }
+body.frost #lwMenu .mm-edge { display: block; }
+#lwMenu .mm-edge > i { position: absolute; inset: 0; }
+#lwMenu .mm-edge > i:first-child { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+#lwMenu .mm-edge > i:last-child { -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+#lwMenu .mm-edge.top > i:first-child { -webkit-mask-image: linear-gradient(to bottom, #000 25%, transparent); mask-image: linear-gradient(to bottom, #000 25%, transparent); }
+#lwMenu .mm-edge.top > i:last-child { -webkit-mask-image: linear-gradient(to bottom, #000, transparent 55%); mask-image: linear-gradient(to bottom, #000, transparent 55%); }
+#lwMenu .mm-edge.foot > i:first-child { -webkit-mask-image: linear-gradient(to top, #000 25%, transparent); mask-image: linear-gradient(to top, #000 25%, transparent); }
+#lwMenu .mm-edge.foot > i:last-child { -webkit-mask-image: linear-gradient(to top, #000, transparent 55%); mask-image: linear-gradient(to top, #000, transparent 55%); }
+#lwMenu.at-face > .mm-edge, #lwMenu[data-sec="folders"] > .mm-edge { visibility: hidden; }
 /* a tile: the picture alone moves */
 #lwMenu .mm-tile { position: relative; display: block; aspect-ratio: 1; border-radius: 10px; }
 #lwMenu .mm-tile:hover, #lwMenu .mm-tile:focus-visible { z-index: 3; }
@@ -766,6 +788,13 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 #lwMenu .mm-navb { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; opacity: .55; transition: opacity 140ms, color 140ms, scale 160ms var(--ease); }
 #lwMenu .mm-navb .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-navb:hover, #lwMenu .mm-navb:focus-visible { opacity: 1; color: var(--acc); scale: 1.1; } #lwMenu .mm-navb:active { scale: .94; }
+/* 036 G3 · THE BIG ARROW (picker.js backB): ← pinned to the menu's top-left corner, the glyph 46 px in a 56-px hit, no plate; .72 → 1 and the
+   accent on a hover or a key's focus, as the chips; 40 px on a phone; never on the face */
+#lwMenu .mm-backb { position: absolute; top: 12px; left: 14px; z-index: 6; width: 56px; height: 56px; opacity: .72; }
+#lwMenu .mm-backb .mm-ico { width: 46px; height: 46px; }
+#lwMenu .mm-backb:is(:hover, :focus-visible) { scale: 1.06; }
+#lwMenu.at-face > .mm-backb { visibility: hidden; }
+@media (max-width: 700px) { #lwMenu .mm-backb { top: 8px; left: 6px; width: 48px; height: 48px; } #lwMenu .mm-backb .mm-ico { width: 40px; height: 40px; } }
 #lwMenu .mm-hue { opacity: .55; cursor: ns-resize; touch-action: none; }
 #lwMenu .mm-hue-ring { display: block; width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; transition: rotate 120ms var(--ease); }
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-hue-ring { transition: none; } }   /* 021 V3: the ring turns to the hue at once */
@@ -1025,8 +1054,34 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 #lwMenu .mm-door { display: block; width: clamp(210px, 21vw, 330px); aspect-ratio: 16 / 10; border-radius: 18px; }
 #lwMenu .mm-door-word { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 #lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
-#lwMenu .mm-door-word .mm-ico { width: 28px; height: 28px; opacity: .75; }
+#lwMenu .mm-door-word b { text-shadow: 0 0 18px hsl(var(--glass-tint) / .85), 0 0 4px hsl(var(--glass-tint) / .6); }
 #lwMenu .mm-door:is(:hover, :focus-visible) .mm-door-word b { color: var(--acc); }
+/* 036 G1 · THE DOORS' ART (picker.js door): the word alone over the about site's pictures, img/menu/face/ (DATA), each faded in once loaded
+   over the palette art.  TUTORIAL: the site's MIR picture placed as the site places it (right of centre, turned in perspective, its radial
+   mask), one for both themes.  LIBRARY: the title background of the theme in use, the site's object-positions and its wash of the ground. */
+#lwMenu .mm-door-art { position: absolute; z-index: 0; display: block; pointer-events: none; opacity: 0; transition: opacity .4s ease; }
+#lwMenu .mm-door-art.on { opacity: 1; }
+#lwMenu .mm-door[data-door="tutorial"] .mm-door-art { top: 58%; left: 60%; width: 86%; height: auto; max-width: none;
+  transform: translate(-50%, -50%) perspective(760px) rotateY(-10deg) rotate(12.5deg) scale(1.16); filter: blur(1px) saturate(1.16);
+  -webkit-mask-image: radial-gradient(ellipse 55% 58% at 58% 37%, #000 9%, rgb(0 0 0 / .92) 34%, rgb(0 0 0 / .45) 57%, transparent 86%);
+  mask-image: radial-gradient(ellipse 55% 58% at 58% 37%, #000 9%, rgb(0 0 0 / .92) 34%, rgb(0 0 0 / .45) 57%, transparent 86%); }
+#lwMenu .mm-door[data-door="library"] .mm-door-art { inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#lwMenu .mm-door[data-door="library"] .mm-door-art[data-theme="light"] { object-position: 57% center; }
+#lwMenu .mm-door[data-door="library"] .mm-door-art[data-theme="dark"] { object-position: 50% center; translate: 16% 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%); mask-image: linear-gradient(90deg, transparent, #000 15%); }
+body[data-theme="light"] #lwMenu .mm-door-art[data-theme="dark"], body:not([data-theme="light"]) #lwMenu .mm-door-art[data-theme="light"] { display: none; }
+#lwMenu .mm-door[data-door="library"] .mm-door-word { background: linear-gradient(90deg, hsl(var(--glass-tint) / .92), hsl(var(--glass-tint) / .74) 30%, hsl(var(--glass-tint) / .2) 62%, transparent); }
+/* 036 G4 · THE LOGOS OPEN ABOUT (picker.js openAbout): the face's logo and the MIR mark are plateless buttons (a lift on a hover or a key's
+   focus); while ABOUT is opened from the menu it paints over it: #floats sits in #lab, a fixed box (a stacking context of its own, under
+   #lwMenu's z 100000), so #lab rises over the menu with everything in it unpainted but ABOUT (visibility inherits; a press passes through
+   the unpainted lab to the menu) */
+#lwMenu .mm-face-logo { cursor: pointer; } #lwMenu .mm-face-logo svg { transition: translate 280ms var(--ease); }
+#lwMenu .mm-face-logo:is(:hover, :focus-visible) svg { translate: 0 -3px; }
+#lwMenu .mm-mirb { cursor: pointer; opacity: .86; transition: opacity 140ms; } #lwMenu .mm-mirb:is(:hover, :focus-visible) { opacity: 1; }
+body.menu-open.about-over #lab { z-index: 100001; visibility: hidden; }
+body.menu-open.about-over #lab :not(.lw-about, .lw-about *) { visibility: hidden; }   /* the DISCONNECTED look shows a window's parts explicitly (the kit's skin.css) */
+body.menu-open.about-over #floats > .lw-about { visibility: visible; background: hsl(var(--glass-tint) / .9); }   /* a page over the wall: its pane nearly opaque there */
+body.menu-open.about-over #lwMenu::after { content: ''; position: absolute; inset: 0; z-index: 9; background: hsl(var(--glass-tint) / .6); }   /* the face steps back under ABOUT; a press on it puts ABOUT away (picker.js) */
 #lwMenu .mm-face-lab { font-size: 11px; letter-spacing: .22em; padding: 6px 12px; border-radius: 999px; opacity: .45; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-face-lab:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
 #lwMenu .mm-face.in .mm-face-logo { animation: mm-drop 820ms var(--ease) both; }
@@ -1051,13 +1106,19 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 #lwMenu .mm-credits:is(:hover, :focus-visible, .open) { opacity: 1; }
 #lwMenu .mm-cr { display: flex; align-items: center; }
 #lwMenu .mm-cr-mark { display: block; flex: none; width: 24px; height: 24px; }
-#lwMenu .mm-cr[data-ai="claude"] .mm-cr-mark { color: #d97757; }   /* the second pass: Claude's starburst in Anthropic's terracotta, both themes (OpenAI keeps the ink, Gemini its gradient) */
 #lwMenu .mm-cr-ink { background: currentColor; -webkit-mask: url('img/ai/openai-blossom.svg') center / 125% no-repeat; mask: url('img/ai/openai-blossom.svg') center / 125% no-repeat; }
 #lwMenu .mm-cr-name { display: grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns 380ms var(--ease), opacity 240ms ease; }
 #lwMenu .mm-cr-name > span { display: grid; min-width: 0; overflow: hidden; white-space: nowrap; text-align: left; font-family: var(--font-ui); line-height: 1; }
 #lwMenu .mm-cr-name > span > * { padding-left: 8px; translate: -6px 0; transition: translate 380ms var(--ease); }
 #lwMenu .mm-cr-name b { font-size: 13px; font-weight: 600; letter-spacing: .02em; }
-#lwMenu .mm-cr-name small { margin-top: 3px; font-size: 8px; letter-spacing: .2em; opacity: .6; }
+/* 036 G6 · THE REAL MARKS: Claude's serif wordmark (two files, the CSS shows the theme's), GPT in OpenAI Sans and Gemini in Google Sans Flex at
+   the about site's weights and tracking (img/menu/ai/, DATA — the loader keeps them; until then the UI face stands in) */
+@font-face { font-family: 'Google Sans Flex'; src: url('img/menu/ai/GoogleSansFlex-Semibold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }   /* SIL OFL 1.1 — img/ai/GoogleSansFlex-OFL.txt (precached: a licence travels with the install) */
+@font-face { font-family: 'OpenAI Sans'; src: url('img/menu/ai/OpenAISans-Semibold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+#lwMenu .mm-cr-word { display: block; height: 13px; width: auto; }
+body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-theme="light"]) #lwMenu .mm-cr-word[data-theme="light"] { display: none; }
+#lwMenu .mm-cr[data-ai="openai"] .mm-cr-name b { font: 600 15px/1 'OpenAI Sans', var(--font-ui); letter-spacing: -.025em; }
+#lwMenu .mm-cr[data-ai="gemini"] .mm-cr-name b { font: 600 15px/1 'Google Sans Flex', var(--font-ui); letter-spacing: -.035em; }
 #lwMenu .mm-cr:nth-child(2) :is(.mm-cr-name, .mm-cr-name > span > *) { transition-delay: 50ms; } #lwMenu .mm-cr:nth-child(3) :is(.mm-cr-name, .mm-cr-name > span > *) { transition-delay: 100ms; }
 #lwMenu .mm-credits:is(:focus-visible, .open) .mm-cr-name { grid-template-columns: 1fr; opacity: 1; } #lwMenu .mm-credits:is(:focus-visible, .open) .mm-cr-name > span > * { translate: 0 0; }
 @media (hover: hover) and (pointer: fine) and (min-width: 701px) { #lwMenu .mm-credits:hover .mm-cr-name { grid-template-columns: 1fr; opacity: 1; } #lwMenu .mm-credits:hover .mm-cr-name > span > * { translate: 0 0; } }
@@ -1067,7 +1128,7 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
   #lwMenu .mm-tr { top: 12px; right: 12px; gap: 2px; } #lwMenu .mm-tr .mm-navb { width: 32px; height: 32px; } #lwMenu .mm-tr .mm-navb .mm-ico { width: 18px; height: 18px; }
   #lwMenu .mm-br { right: 16px; bottom: 16px; } #lwMenu .mm-mir { height: 18px; }
   #lwMenu .mm-credits { left: 16px; bottom: 16px; height: 18px; gap: 10px; } #lwMenu .mm-cr-mark { width: 18px; height: 18px; }
-  #lwMenu .mm-cr-name b { font-size: 11px; } #lwMenu .mm-cr-name small { font-size: 7px; margin-top: 2px; } #lwMenu .mm-cr-name > span > * { padding-left: 6px; }
+  #lwMenu .mm-cr-name b, #lwMenu .mm-cr[data-ai] .mm-cr-name b { font-size: 12px; } #lwMenu .mm-cr-word { height: 10px; } #lwMenu .mm-cr-name > span > * { padding-left: 6px; }
 }
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-face.in .mm-corner { animation: none; } #lwMenu :is(.mm-cr-name, .mm-cr-name > span > *) { transition: none; translate: none; } }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-face.in .mm-corner { animation: none; }
@@ -1078,7 +1139,6 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 #lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; padding: 6px 24px 32px; box-sizing: border-box; }
 #lwMenu .mm-tut[hidden] { display: none; }
 #lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="back"], .mm-themeb)) { display: none; }   /* 035 G1: the tutorial's way back is ← */
-#lwMenu[data-sec="tutorial"] .mm-navb[data-nav="back"] { opacity: 1; }
 #lwMenu .mm-tut-head { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 0 0 20px; color: var(--acc); font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; }
 #lwMenu .mm-tut-head b { font-weight: 400; } #lwMenu .mm-tut-head .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 28px 18px; width: min(1500px, 100%); margin: 0 auto; }
@@ -1100,6 +1160,31 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
   background: hsl(var(--glass-tint));
   box-shadow: -1px 0 0 var(--glass-hairline), -28px 0 60px -30px rgb(0 0 0 / .45); translate: 100% 0; transition: translate 300ms var(--ease); }
 #lwMenu .mm-sheet[hidden] { display: none; } #lwMenu .mm-sheet.in { translate: 0 0; } #lwMenu .mm-sheet.out { translate: 100% 0; transition-duration: 220ms; }
+/* 036 G5 · THE SHEET IS THE FIRST TASTE OF MIR FOCUS (Josh 11-03: "a gradient transparency/opacity of a blur mask … maximum blur from the edge
+   and then becoming 0% blur at the edge … an asymptotic drop-off near the edge so that the background is mostly blurred"): no plate, no
+   hairline, no shadow.  Under FROST the ground is a BLUR MASK — five stacked layers (picker.js .mm-sheet-fx), blur 3 · 7 · 13 · 20 · 28 px,
+   each masked from transparent at 0 · 6 · 16 · 34 · 64 px to whole 60 px later, so the blur is 0 at the sheet's left edge, climbs fast and
+   is full inside — and one thin wash of the ground (.28) on the same climb, so the rows read over a bright tile.  Without FROST a plain .92
+   plate.  The rows are BORDERLESS: the kit's control strokes (the rings, the rims, the relief's lit line) are zeroed inside the sheet. */
+#lwMenu .mm-sheet { background: none; box-shadow: none; } #lwMenu .mm-sheet > :is(.mm-sheet-head, .mm-sheet-body) { position: relative; z-index: 1; }   /* the blur layers first, at z 0, the rows over them in order (no isolated group: a layer at the bottom of one would have no backdrop) */
+body:not(.frost) #lwMenu .mm-sheet { background: hsl(var(--glass-tint) / .92); }
+#lwMenu .mm-sheet-fx { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: none; }
+body.frost #lwMenu .mm-sheet-fx { display: block; }
+#lwMenu .mm-sheet-fx > * { position: absolute; inset: 0; --e: 0px; -webkit-mask-image: linear-gradient(to right, transparent var(--e), #000 calc(var(--e) + 60px)); mask-image: linear-gradient(to right, transparent var(--e), #000 calc(var(--e) + 60px)); }
+#lwMenu .mm-sheet-fx > :nth-child(1) { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+#lwMenu .mm-sheet-fx > :nth-child(2) { --e: 6px; -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
+#lwMenu .mm-sheet-fx > :nth-child(3) { --e: 16px; -webkit-backdrop-filter: blur(13px); backdrop-filter: blur(13px); }
+#lwMenu .mm-sheet-fx > :nth-child(4) { --e: 34px; -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+#lwMenu .mm-sheet-fx > :nth-child(5) { --e: 64px; -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
+#lwMenu .mm-sheet-fx > b { background: hsl(var(--glass-tint) / .28); }
+#lwMenu .mm-tr { transition: opacity 200ms; } #lwMenu:has(> .mm-sheet.in) .mm-tr { opacity: 0; pointer-events: none; }   /* the face's THEME and ⚙ step aside under the plateless sheet (its × closes it) */
+#lwMenu .mm-sheet-body :is(.sw, .seg, .seg-b, .trig, .k-dial) { border-color: transparent; box-shadow: none; }
+#lwMenu .mm-sheet-body .seg { background: hsl(var(--glass-tint) / .3); }
+#lwMenu .mm-sheet-body .seg-b.on { background: hsl(var(--glass-tint) / .85); }
+#lwMenu .mm-sheet-body .sw { background: transparent; } #lwMenu .mm-sheet-body .sw:hover { background: hsl(var(--glass-tint) / .4); }
+/* THE MORE FOLD (lab/fold.js): a quiet row, its word and the chevron; the rows under it once open */
+#lwMenu .mm-sh-more { display: flex; padding: 4px 0 0; }
+#lwMenu .mm-sh-more .lw-fold { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 30px; padding: 0; background: transparent; font-size: 10px; letter-spacing: .24em; color: var(--acc); }
 #lwMenu .mm-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 12px 6px 20px; }
 #lwMenu .mm-sheet-head b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: 15px; letter-spacing: .12em; }
 #lwMenu .mm-sheet-x { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; opacity: .6; transition: opacity 140ms, color 140ms; }
@@ -1143,3 +1228,18 @@ body[data-theme="light"] #lwMenu .mm-face-logo svg { filter: drop-shadow(0 0 10p
 /* the face's ground is plain, the wall or not (a cold load, offline: img/menu is never precached) — under it the frost would show the rack's
    chips through the corners, and while the wall plays its blur would be redrawn every frame; the decks and the tutorial keep the frost */
 body.frost #lwMenu.at-face { background: hsl(var(--glass-tint) / .985); -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* 036 G7 · THE LOADING SCREEN (lab/loader.js): over everything on the theme's ground — the MIR flag's 576 cells (a canvas), the percentage in
+   the UI face's numerals, one line naming what loads, a quiet CONTINUE after 8 s; it fades as the face comes in.  The boot veil wears the
+   theme's ground too (it was black in LIGHT). */
+#lwLoader { position: fixed; inset: 0; z-index: 100001; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; box-sizing: border-box;
+  background: hsl(var(--glass-tint)); color: var(--fg); transition: opacity 450ms cubic-bezier(.22, .7, .25, 1); }
+#lwLoader.out { opacity: 0; pointer-events: none; }
+#lwLoader .ld-flag { width: clamp(150px, 30vmin, 240px); aspect-ratio: 1; }
+#lwLoader .ld-pct { margin-top: 6px; font: 300 42px/1 var(--font-ui); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+#lwLoader .ld-line { min-height: 1.5em; max-width: 92vw; font-size: 10px; letter-spacing: .2em; line-height: 1.5; text-align: center; opacity: .62; font-variant-numeric: tabular-nums; }
+#lwLoader .ld-skip { margin-top: 10px; padding: 6px 12px; border: 0; border-radius: 999px; background: none; color: inherit; font: inherit; font-size: 11px; letter-spacing: .22em; opacity: .5; cursor: pointer; transition: opacity 140ms, color 140ms; }
+#lwLoader .ld-skip:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
+#lwLoader .ld-skip[hidden] { display: none; }
+body.lw-loading #menubar { visibility: hidden; }
+body .mir-veil { --veil-fill: hsl(var(--glass-tint)); }
+@media (prefers-reduced-motion: reduce) { #lwLoader { transition: none; } }

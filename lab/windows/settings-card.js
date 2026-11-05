@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, readout, group, label } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
+import { el, knob, sw, seg, readout, group, label } from '../mir/kit.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, perf, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
@@ -217,16 +217,11 @@ export function createSettingsCard(app) {
      VALUE WITH TWO FACES and no setter is forked.  A readout's face copies its text.  The switches carry their options as seg and knob do. */
   function createMenuSheet(host) {
     const paints = [], paint = () => { for (const p of paints) p(); };
-    const group = (word) => { const g = el('div', 'mm-sh-group', host); el('div', 'mm-sh-h', g, word); return g; };
+    const group = (word) => { const g = el('div', 'mm-sh-group', host); if (word) el('div', 'mm-sh-h', g, word); return g; };
     const row = (g, ...cs) => { const r = el('div', 'mm-sh-row' + (cs.length > 1 ? ' two' : ''), g); for (const c of cs) r.appendChild(c.root); return r; };
     const lookSeg = (key, word, opts, set = (v) => look.set({ [key]: v })) => {
       const s = seg({ label: word, value: look.get(key), options: opts.map(([id, l, t]) => ({ id, label: l, title: t })), onChange: set });
       paints.push(() => s.set(look.get(key))); return s; };
-    const gm = group('MIR');
-    row(gm, lookSeg('theme', 'THEME', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM', 'Follow the system']], (v) => app.hooks.setTheme(v)));
-    row(gm, lookSeg('motion', 'MOTION', [['auto', 'AUTO', 'Follow the system'], ['full', 'FULL'], ['reduced', 'REDUCED', 'Fades only: nothing travels'], ['off', 'OFF', 'Nothing animates']]));
-    row(gm, lookSeg('card', 'PANE', [['tinted', 'TINTED', 'The theme tint behind windows: no blur'], ['refractive', 'REFRACTIVE', 'Clear window surfaces: the blur, with a veil'], ['solid', 'SOLID', 'An opaque pane in the tint’s colour']]));
-    { const h = sw({ label: 'HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
     /** face(orig, over) — a second face of a rack row: the kit's own control from the row's options (`over` a word the sheet's row wants), one value between them */
     const face = (orig, over) => {
       if (!orig.spec) {   // a readout: its text, copied
@@ -238,9 +233,29 @@ export function createSettingsCard(app) {
       paints.push(() => { if (f.get() !== orig.get()) f.set(orig.get()); if (f.setDisabled) { const d = orig.root.classList.contains('disabled'); if (f.root.classList.contains('disabled') !== d) f.setDisabled(d); } });
       return f;
     };
-    const gq = group('QUALITY'), Q = (...ks) => row(gq, ...ks.map((k) => face(ui[k])));
-    row(gq, face(ui.gridSeg, { label: 'GRID' }));   // the rack's grid seg is wordless (013 S1: its group head names it); the sheet's row says GRID
-    Q('capSeg'); Q('autoSw', 'govSw'); Q('perfSeg'); Q('tierSeg'); Q('cadSeg'); Q('clockSeg'); Q('cadenceSeg'); Q('latencyRo'); Q('scaleRo');
+    /* 036 G5 (Josh 11-03: "THIS will be the first taste of how MIR Focus is going to be like … borderless floating knobs and features on that
+       blurring background"; the rows "I'll defer to your judgement" — the critic's order): PERFORMANCE first, MOTION, FROST, FULLSCREEN, THEME,
+       HINTS; then a MORE fold (closed; lab/fold.js) holding the rest of QUALITY.  PANE is out (a pane the menu does not show); the FIELD CLOCK
+       cap and READERS stay in the rack's SETTINGS › QUALITY.  `more` takes a row as any group does (a later door's knob joins it there). */
+    const gm = group('');
+    row(gm, face(ui.tierSeg));
+    row(gm, lookSeg('motion', 'MOTION', [['auto', 'AUTO', 'Follow the system'], ['full', 'FULL'], ['reduced', 'REDUCED', 'Fades only: nothing travels'], ['off', 'OFF', 'Nothing animates']]));
+    row(gm, lookSeg('frost', 'FROST', [['off', 'OFF', 'No backdrop blur'], ['still', 'STILL', 'Blur while the picture is still'], ['always', 'ALWAYS', 'Blur always: it can cost frames']]));
+    { const on = () => !!document.fullscreenElement, f = sw({ label: 'FULLSCREEN', value: on(), title: 'Fill the screen (F)', onChange: () => { app.sh.ACTIONS.run('fullscreen'); setTimeout(paint, 400); } });
+      paints.push(() => f.set(on())); document.addEventListener('fullscreenchange', () => f.set(on())); row(gm, f); }   // the `fullscreen` action's road; the switch mirrors the document
+    row(gm, lookSeg('theme', 'THEME', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM', 'Follow the system']], (v) => app.hooks.setTheme(v)));
+    { const h = sw({ label: 'HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
+    const moreRow = el('div', 'mm-sh-more', host), more = group('');
+    { const f = fold(moreRow, more, { what: 'more settings', key: 'menuMore' }); f.button.prepend(el('span', 'mm-sh-morew', null, 'MORE')); }
+    /* 036 G5b (chain K's FOR-SOS): STROKE — the kit's look key `stroke` (0–1 by .05; MIR OPTIONS › CONTROLS' 0–100 % knob; λWAVES' home 0), a
+       second face of the look store as the rows above; shown only where the kit carries the key (MIR 1.5.7-alpha's door) */
+    if (look.get('stroke') !== undefined) {
+      const k = knob({ label: 'STROKE', title: 'The controls’ outline: 0 % none', min: 0, max: 100, step: 5, value: Math.round((look.get('stroke') || 0) * 100), fmt: (v) => Math.round(v) + ' %',
+        onChange: (v) => look.set({ stroke: Math.round(v / 5) * 5 / 100 }) });
+      paints.push(() => { const v = Math.round((look.get('stroke') || 0) * 100); if (k.get() !== v) k.set(v); }); row(more, k); }
+    const Q = (...ks) => row(more, ...ks.map((k) => face(ui[k])));
+    row(more, face(ui.gridSeg, { label: 'GRID' }));   // the rack's grid seg is wordless (013 S1: its group head names it); the sheet's row says GRID
+    Q('autoSw', 'govSw'); Q('cadSeg'); Q('clockSeg'); Q('cadenceSeg'); Q('latencyRo'); Q('scaleRo');
     Q('ditherSeg'); Q('ditherK'); Q('domainAuto', 'domainKnob'); Q('keepSw');
     paint();
     return { paint };
