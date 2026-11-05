@@ -506,12 +506,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
       const side = narrow ? 12 : innerWidth >= 1100 ? Math.min(rackW + 20, (innerWidth - 900) / 2) : 75;
       const H = Math.max(150, scroller.clientHeight - above - 70), W = Math.max(200, Math.min(scroller.clientWidth - 2 * side, 1900));
-      let rows = H >= 560 ? 4 : H >= 400 ? 3 : 2, t = Math.min(260, (H - (rows - 1) * gap) / rows);   // iteration 008 P: a row sooner (4 from 560 px, once 640) — "more molecules per page"
-      let cols = Math.max(3, Math.min(12, Math.floor((W + gap) / (t + gap))));
-      const want = narrow ? 3 : 8;   // Josh: bigger AND more columns — a desktop page is at least eight across while a tile stays ≥ 150 px
-      if (cols < want && (W - (want - 1) * gap) / want >= (narrow ? 80 : 150)) cols = want;
-      t = Math.min(t, (W - (cols - 1) * gap) / cols); rows = Math.max(2, Math.min(6, Math.floor((H + gap) / (t + gap))));
-      return { cols, rows, t: Math.floor(t), gap };
+      /* 037 M6 THE DENSE GRID (Josh 11-05: "show as many rows and columns as you can for the molecules"): as many rows (≤ 7) and columns (≤ 16)
+         as fit at the least tile — 120 px, 80 on a phone — then the tile as large as both leave, ≤ 200 (so a desktop page is eight across
+         wherever eight fit at 120).  The catalogue and a volume share this deck */
+      const MIN = narrow ? 80 : 120, rows = Math.max(2, Math.min(7, Math.floor((H + gap) / (MIN + gap)))), cols = Math.max(3, Math.min(16, Math.floor((W + gap) / (MIN + gap))));
+      return { cols, rows, t: Math.floor(Math.min(200, (H - (rows - 1) * gap) / rows, (W - (cols - 1) * gap) / cols)), gap };
     }
     function lay() {
       if (root.hidden || !make || !host.getClientRects().length) return;
