@@ -64,6 +64,13 @@ export const SLICE = { off: 0, clip: 1, slab: 2 };
  *  surface exactly — up to 1 at γ 0.3; the default γ 0.7 reads e ≈ 0.79 */
 export const espSoftOf = (g) => Math.min(1, Math.max(0, (2.2 - (Number.isFinite(g) ? g : 0.7)) / 1.9));
 export const STICK_R = 0.38, PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.1, ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
+/** 037 L · THE LIGHTING WINDOW's homes (lab/light-window.js): `mat.light` holds only the values a hand moved off these (absent = the old light, THE
+ *  LEGACY GATE shut).  KEY az/el in degrees in the FRAME (CAMERA: right · up · toward the eye; WORLD: the box's axes), its home the atoms' old
+ *  upper-right light; AMBIENT and SPECULAR at the atoms' old 0.32, SHINE their Phong 40; FILL off, CONE 180° (no spot) */
+export const LIGHT_HOME = Object.freeze({ az: 57.5, el: 57, key: 1, hue: 0, tint: 0, ambient: 0.32, specular: 0.32, shine: 40, rim: 0, softness: 0,
+  fill: 0, fillAz: -135, fillEl: 30, cone: 180, blend: 0.2, frame: 'camera' });
+/** the KEY's colour: hue (turns) at tint (saturation), full value — white at tint 0 */
+export function lightRgb(h, s) { const f = (n) => { const k = ((n + h * 6) % 6 + 6) % 6; return 1 - s * Math.max(0, Math.min(k, 4 - k, 1)); }; return [f(5), f(3), f(1)]; }
 export const MAX_MODES = 320;                                 // the whole 140-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr
 

@@ -161,7 +161,7 @@ export const WINDOW_GLYPH = {
   history: 'history', transport: 'controlSurface', chem: 'molecule', atoms: 'atom', equalizer: 'equalizer',
   staticfield: 'field', separable: 'separable', central: 'central', lattice: 'lattice', emission: 'emission', bloch: 'bloch', slice: 'plane',
   calculus: 'calculus', ladder: 'ladder', wigner: 'wigner', shadow: 'shadow', orbit: 'orbit', vortex: 'vortex', meters: 'meters',
-  radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film',
+  radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film', light: 'sun',   // 037 L1: LIGHTING wears the sun (the KEY)
   /* the kit factories' windows (windowGlyphs) */
   gui: 'cogSolid', 'gui-about': 'about', keyboard: 'keyboard', 'keys-help': 'keyboard', timeline: 'timeline', modulation: 'modulation',
   'transport-free': 'controlSurface', folders: 'folders', pattern: 'pattern',
