@@ -7,7 +7,8 @@
  * (scrub, range, Shift-zoom), the lanes and their clips, the playhead, the selection, the curve editor (FL's gestures: modulation/curve-gesture.js is the law), the popups, drops.  No hint row at
  * the foot (fix 6): the status line takes no space and shows only while it says something.
  *
- *   buildTimelineEditor(win, { model, mod, controller, present, say, audio, keys }) → api
+ *   buildTimelineEditor(win, { model, mod, controller, present, say, audio, keys, moreRows }) → api
+ *     moreRows() → [[word, fn, id, chosen?], …]: the app's rows, after a separator at the foot of MORE (⋯) (1.5.7-alpha.4)
  *     win         { body, root, rail, isOpen(), open() } — the kit window it lives in (window.js createTimeline)
  *     model       timeline/model.js createTimelineModel()
  *     mod         installModulation's result: its registry is the targets, its clock the time
@@ -61,7 +62,7 @@ const SCOPES=[['clips','CLIPS'],['points','POINTS']];   // what a selection pick
 const FOLD_SLACK=6;   // px: a folded tool comes back to the bar only with this much room to spare (a bar at the edge never flickers)
 export const SWATCHES=['#a7adb8','#f8858b','#e9b368','#a5cb7b','#6cc1cc','#92a7e9','#c297e6'];   // BASINS' seven clip tints, the six hues 20 % more chroma in oklch, same lightness and hue (1.5.6-alpha.24, T10; data: a clip's colour is saved, so a clip keeps the tint it was given)
 
-export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say=()=>{},audio=null,keys=null}) {
+export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say=()=>{},audio=null,keys=null,moreRows=null}) {
   /* the chord the app's table holds for a timeline action, in the user's platform ('' when none): never typed here */
   const chordOf=id=>{const k=typeof keys==='function'?keys():keys;return k&&k.get&&k.get('timeline.'+id)?k.menuKey('timeline.'+id):'';};
   const withKey=(node,id)=>{const c=id&&chordOf(id);if(c)el('span','tl-key',node).textContent=' · '+c;return node;};
@@ -94,7 +95,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   const activeButton=button(toolbar,'ACTIVE',()=>markActive());activeButton.dataset.mode='active';activeButton.setAttribute('aria-pressed','false');activeButton.title='Mark the selected time range (or the whole arrangement) as the active range';
   // MORE (⋯, a trigger: no lamp) always ends the bar: the tools folded off the bar (in bar order), then the selection's actions.
   const moreButton=button(toolbar,{raw:''},b=>{const r=b.getBoundingClientRect();pop(r.left,r.bottom,'SELECTION',[
-    ...(audio?.pick?[['ADD AUDIO…',()=>audio.pick({laneId:selectedLane,start:controller.state().beat}),'add-audio']]:[]),['ZOOM TO SELECTION',zoomSelection,'zoom-selection'],['DUPLICATE',duplicateSelection,'duplicate'],['COPY',()=>copySelection(),'copy'],['CUT',()=>copySelection(true),'cut'],['PASTE',pasteSelection,'paste'],['DELETE',deleteSelection,'delete'],['SELECT ALL',selectAll,'select-all'],['DESELECT',deselect,'deselect'],['SHORTCUTS',()=>api.onShortcuts?.(r.left,r.bottom),'shortcuts']],'more');
+    ...(audio?.pick?[['ADD AUDIO…',()=>audio.pick({laneId:selectedLane,start:controller.state().beat}),'add-audio']]:[]),['ZOOM TO SELECTION',zoomSelection,'zoom-selection'],['DUPLICATE',duplicateSelection,'duplicate'],['COPY',()=>copySelection(),'copy'],['CUT',()=>copySelection(true),'cut'],['PASTE',pasteSelection,'paste'],['DELETE',deleteSelection,'delete'],['SELECT ALL',selectAll,'select-all'],['DESELECT',deselect,'deselect'],['SHORTCUTS',()=>api.onShortcuts?.(r.left,r.bottom),'shortcuts'],...appRows()],'more');
     const head=menu.firstChild;for(const f of fold.slice(shown))menu.insertBefore(f.row(r),head);if(shown<fold.length){placeMenu(r.left,r.bottom);menu.querySelector('button')?.focus();}},'tl-icon');
   moreButton.dataset.mode='more';moreButton.insertAdjacentHTML('beforeend',glyphSvg('more','gly gly-more',16));ariaLabel(moreButton,'More tools and actions');
   /* THE ONE LINE (wave 19, Josh: "never let the timeline's work bars word wrap"): the bar keeps one line; the tools that do
@@ -165,10 +166,12 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   }
   /* a popup: the house's menu pane; `title` is a word (or { raw } for a clip's own name); each action [word, fn, id, chosen?]
      (a boolean `chosen` makes the row a choice that shows whether it is the one in force) */
+  /* 1.5.7-alpha.4 · THE APP'S ROWS (λWAVES 036 K4): `moreRows()` hands MORE its own rows, after a separator; nothing passed, nothing shown */
+  function appRows(){const rows=typeof moreRows==='function'?(moreRows()||[]).filter(Array.isArray):[];return rows.length?[null,...rows]:[];}
   function pop(x,y,title,actions,id='') {
     closeMenu();menu=el('div','tl-pop glass',document.body);menu.dataset.mirSurface='menu';if(id)menu.dataset.pop=id;menu.setAttribute('role','menu');
     const head=word(el('div','tl-pop-title',menu),title);ariaLabel(menu,typeof title==='string'?title:'Clip options');if(title&&title.raw)menu.setAttribute('aria-label',head.textContent);
-    for(const [text,fn,id,chosen]of actions){const b=withKey(button(menu,text,()=>{closeMenu();fn();}),id);if(id)b.dataset.row=id;if(typeof chosen==='boolean'){b.setAttribute('aria-pressed',String(chosen));b.classList.toggle('on',chosen);}}
+    for(const a of actions){if(!a){el('div','tl-pop-sep',menu).setAttribute('role','separator');continue;}const [text,fn,id,chosen]=a;const b=withKey(button(menu,text,()=>{closeMenu();fn();}),id);if(id)b.dataset.row=id;if(typeof chosen==='boolean'){b.setAttribute('aria-pressed',String(chosen));b.classList.toggle('on',chosen);}}
     placeMenu(x,y);menu.querySelector('button')?.focus();
   }
   function editIdentity(x,y,curve) {

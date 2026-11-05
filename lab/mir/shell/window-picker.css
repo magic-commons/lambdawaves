@@ -3,11 +3,11 @@
    0.94 × 0.6 (320 ms, an overshoot), the rows enter 30 ms apart (--i, capped by the script), each trailing a stretched copy of itself
    at 10 % alpha that collapses into it (the faux motion blur: one composited layer, no filter), and the close is a fast 120 ms fade.
    Reduced motion: the end state, no animation. ── */
-.mir-window-picker { --wp-w: min(420px, calc(100vw - 32px)); --wp-r: 14px; --wp-row: 34px; --wp-ease: cubic-bezier(.2, 1.4, .4, 1);
-  position: fixed; z-index: calc(var(--z-chrome, 40) + 6); left: 50%; top: 12vh; width: var(--wp-w); max-height: 58vh; margin-left: calc(var(--wp-w) / -2);
+.mir-window-picker { --wp-w: min(420px, calc(calc(100vw / var(--in-zoom, 1)) - 32px)); --wp-r: 14px; --wp-row: 34px; --wp-ease: cubic-bezier(.2, 1.4, .4, 1);
+  position: fixed; z-index: calc(var(--z-chrome, 40) + 6); left: 50%; top: calc(12vh / var(--in-zoom, 1)); width: var(--wp-w); max-height: calc(58vh / var(--in-zoom, 1)); margin-left: calc(var(--wp-w) / -2);
   display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: var(--wp-r); transform-origin: 50% 0; color: var(--fg); }
 .mir-window-picker[hidden] { display: none; }
-.mir-window-picker .wp-search { display: block; flex: 0 0 auto; width: 100%; height: 34px; padding: 0 12px; border: 1px solid var(--glass-hairline, transparent); border-radius: var(--r-pill, 999px);
+.mir-window-picker .wp-search { display: block; flex: 0 0 auto; width: 100%; height: 34px; padding: 0 12px; border: 1px solid var(--ctl-hairline, transparent); border-radius: var(--r-pill, 999px);
   background: var(--glass-well, transparent); color: var(--fg); font: 14px var(--font-ui); }
 .mir-window-picker .wp-search:focus { outline: 0; }   /* no accent ring: the field is the finder's only input */
 .mir-window-picker .wp-list { display: flex; flex-direction: column; gap: 1px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--dim) 55%, transparent) transparent; }

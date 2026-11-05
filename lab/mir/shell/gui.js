@@ -154,8 +154,16 @@ export function lookSchema({ tier = () => null } = {}) {
     { key: 'relief', type: 'enum', values: ['default', 'flat'], default: 'default', apply: [
       { on: 'html', prop: '--relief-raise', map: (v) => (v === 'flat' ? ZERO_SHADOW : null) },
       { on: 'html', prop: '--relief-well', map: (v) => (v === 'flat' ? ZERO_SHADOW : null) }] },
+    /* 1.5.7-alpha.1 · STROKE — the 1-px rings around the controls (the switch's seat, the ON rim, the knob's live ring, the hairline
+       borders, the rail chips', the transport pill's), 0 … 100 %, the alpha of each times it; on <html>, where the rings' tokens are
+       declared.  Not the panes' EDGE, not the menus' edge, not the focus ring.  Not a THEME_KEYS key: the reader's own */
+    { key: 'stroke', type: 'number', step: 0.05, min: 0, max: 1, default: 1, apply: [{ on: 'html', prop: '--ctl-stroke', map: (v) => (v === 1 ? null : String(v)) }] },
     /* EDGE — a window pane's hairline rim (BASINS' glass draws none on its windows; its menus and popovers keep theirs) */
     { key: 'edge', type: 'bool', default: false, apply: [{ on: 'body', prop: '--pane-edge', map: (v) => (v ? null : 'transparent') }] },
+    /* 1.5.7-alpha.2 · UI SCALE — 50 … 200 % by 5 %: CSS zoom on the UI roots (css/base.css), never on the stage; a change re-lays every
+       window through one `resize` (each clamps to the screen at the new scale).  Not a THEME_KEYS key: the reader's own */
+    { key: 'scale', type: 'number', step: 0.05, min: 0.5, max: 2, default: 1, apply: [{ on: 'html', prop: '--ui-zoom', map: (v) => (v === 1 ? null : String(v)) },
+      { run(v, s, e, c) { if (!c) return; const was = c.lastZoom; c.lastZoom = v; if (was !== undefined && was !== v && typeof requestAnimationFrame === 'function') requestAnimationFrame(() => dispatchEvent(new Event('resize'))); } }] },
     /* THE ONE LIGHT — LIGHT ANGLE, SHADOW 0–200 % (BASINS' range), DISTANCE, SOFTNESS, SHINE, its SOFTNESS.  Each writes
        its number on <html> off home; html[data-cast] lets the sheets draw the cast, html[data-shine] the shine layer */
     { key: 'lightAngle', type: 'number', step: 1, min: 0, max: 360, wrap: true, default: 0, apply: [{ on: 'html', prop: '--light-angle', map: (v) => (v ? v + 'deg' : null) }] },
@@ -386,7 +394,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   const line = (g, cls = '') => el('div', 'gui-line' + (cls ? ' ' + cls : ''), g);
   const segOf = (key, label, options) => bind(key, seg({ label, options: options.map(([id, l, title]) => ({ id, label: l, title })), value: P.get(key), onChange: (v) => P.set(key, v) }));
   const swOf = (key, label, title) => bind(key, sw({ label, title, value: P.get(key), onChange: (v) => P.set(key, v) }));
-  const knobOf = (key, label, o) => bind(key, (o.arc ? arcKnob : knob)({ label, title: o.title, aria: o.aria, value: o.toUi ? o.toUi(P.get(key)) : P.get(key), min: o.min, max: o.max, fmt: o.fmt, wrap: o.wrap, cls: o.cls, ink: o.ink,
+  const knobOf = (key, label, o) => bind(key, (o.arc ? arcKnob : knob)({ label, title: o.title, aria: o.aria, value: o.toUi ? o.toUi(P.get(key)) : P.get(key), min: o.min, max: o.max, step: o.step, fmt: o.fmt, wrap: o.wrap, cls: o.cls, ink: o.ink,
     onInput: (v) => { P.set(key, o.fromUi ? o.fromUi(v) : v); if (o.input) o.input(v); } }), o.toUi);
   const pct = (v) => Math.round(v) + '%', px = (v) => Math.round(v) + 'px', deg = (v) => Math.round(v) + '°';
   const hundred = { min: 0, max: 100, fmt: pct, toUi: (v) => v * 100, fromUi: (v) => v / 100 };
@@ -451,7 +459,8 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   line(g).append(segOf('relief', phrase('RELIEF'), [['default', phrase('DEFAULT'), phrase('Raised controls and wells, lit by {:LIGHT ANGLE}')], ['flat', phrase('FLAT'), phrase('Flat control faces: hairlines and accents only')]]).root,
     segOf('faces', phrase('FACES'), [['glass', phrase('GLASS'), phrase('Under refractive or frost the knobs, buttons and fields are clear glass')], ['solid', phrase('SOLID'), phrase('The kit’s filled knobs, buttons and fields')]]).root);
   const kBlend = knobOf('faceBlend', phrase('BLEND'), { ...hundred, aria: 'Solid to glass control faces', title: '0% solid · 100% glass. The transition uses color burn in dark mode and color dodge in light mode.' });
-  line(g, 'gui-knobs').append(kBlend.root, seat(), seat());
+  const kStroke = knobOf('stroke', phrase('STROKE'), { ...hundred, step: 5, title: 'The 1-px rings around knobs, buttons, switches and fields' });   // tr[STROKE]: the thin outline drawn around each control (not a brush stroke)
+  line(g, 'gui-knobs').append(kBlend.root, kStroke.root, seat());
 
   /* QUALITY — AUTO (the device's tier), the three tiers by hand, and what it costs */
   g = groupEl('quality', phrase('QUALITY'));
@@ -517,6 +526,8 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
     swOf('transportBar', phrase('TRANSPORT BAR'), phrase('Show the main transport bar, floating or docked')).root);
   line(g).append(segOf('spacing', phrase('SPACING'), [['0', '0', phrase('Rack windows flush to each other and to the screen’s edge')], ['tight', phrase('TIGHT'), phrase('3 px between rack windows and from the edge')],
     ['default', phrase('DEFAULT'), phrase('6 px between rack windows and from the edge')], ['airy', phrase('AIRY'), phrase('16 px between rack windows and from the edge')]]).root);   // BASINS' row (settings-window.js), and AIRY
+  const kScale = knobOf('scale', phrase('UI SCALE'), { min: 50, max: 200, step: 5, fmt: pct, toUi: (v) => v * 100, fromUi: (v) => v / 100, title: 'The size of every window, menu and bar; the picture keeps its resolution' });   // tr[UI SCALE]: the size of the interface (windows, menus, bars), not of the picture
+  line(g, 'gui-knobs').append(kScale.root, seat(), seat());
   line(g).append(segOf('rackPill', phrase('SCROLL PILL'), [['off', phrase('OFF'), phrase('No name pill while a rack scrolls')],   // tr[SCROLL PILL]: the small coloured label with a window's name shown beside it while the column of windows scrolls
     ['a', phrase('A'), phrase('While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar')],
     ['b', phrase('B'), phrase('While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar')]]).root);   // tr[SCROLL PILL]: the small coloured label with a window's name shown beside it while the column of windows scrolls

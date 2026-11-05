@@ -11,6 +11,11 @@ height and the face's padding, capped by the screen, the width kept — and fits
 face's width); nothing on that face is saved (its `persist.write` returns early), so neither the fit nor a hand's resize there ever moves
 `abW` / `abH`. On the λWAVES face it returns to the reader's last `abW` × `abH` (WORKSPACE; 470 × 670 on a first run), and a resize there is saved.
 
+FOLDERS' FIELDS (036 K5, MIR 1.5.7-alpha.5): NAME reads the greyed NAME FILE and SAVE TO the greyed FOLDER NAME (`lab/projects.js` galleryCopy
+`namePlaceholder` · `saveToPlaceholder` · `proposeName: false`): NAME is never pre-filled with the folder's name (it was DEMOS · DEMOS); SAVE TO
+names the open folder when it is the reader's own and stays empty at ROOT and in DEMOS (read-only starters: a save there lands at ROOT). A SAVE
+with an empty NAME still takes the folder's name (`files.proposedName`; the field's hint says so). `demosFirst` stands.
+
 THE ICONS OF 036: `hand` and `brush` (BUTTONS · PAINT, register-and-systems.md), `pattern` (the PATTERN window, `WINDOW_GLYPH.pattern`) joined
 `lab/icons.js`; NODES' mute wears the kit's `power`, its remove the kit's `close` (nodes.md).
 

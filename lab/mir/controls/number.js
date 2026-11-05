@@ -24,6 +24,7 @@
 import { el, label, ariaLabel, watchTouches, verticalDrag, setKnobLaw } from '../kit.js';
 import { drag as pointerDrag } from '../core/pointer.js';
 import { setText, setAttr } from '../core/perf.js';
+import { cssZoom } from '../core/zoom.js';
 
 export const NUMBER = Object.freeze({ slop: 4, chars: 8, steps: 100 });   // a drag starts after 4 px; a field holds 8 characters; a range-less number moves 100 steps per full travel
 
@@ -44,7 +45,7 @@ export function numberTravel(start, p, { min = -Infinity, max = Infinity, step =
 }
 
 /** bindNumber — see the header */
-export function bindNumber({ button, input, model, parse = parseNumber, enabled = () => true, drag: dragToo = true, click = true, paint = () => {}, chars = NUMBER.chars, step = 0, range, signal } = {}) {
+export function bindNumber({ button, input, model, parse = parseNumber, format = String, enabled = () => true, drag: dragToo = true, click = true, paint = () => {}, chars = NUMBER.chars, step = 0, range, signal } = {}) {
   const ctl = new AbortController(); if (signal) signal.addEventListener('abort', () => ctl.abort(), { once: true });
   const on = { signal: ctl.signal };
   watchTouches();
@@ -55,9 +56,11 @@ export function bindNumber({ button, input, model, parse = parseNumber, enabled 
   let editing = false, dragged = false;
   function open() {
     if (editing || !enabled()) return false;
-    const seat = button.getBoundingClientRect();
-    Object.assign(input.style, { width: seat.width + 'px', flex: '0 0 ' + seat.width + 'px', height: seat.height + 'px' });
-    button.hidden = true; input.hidden = false; input.value = String(model.get()); editing = true;
+    /* 1.5.7-alpha.3 · THE EDITOR IS THE BUTTON'S BOX: its width and height, never a flex-basis (in a flex COLUMN a basis is the HEIGHT: the
+       CSB's 72 × 34 pill became a 72 × 72 square); measured seen, written in the field's own px (UI SCALE); the value in the button's format */
+    const seat = button.getBoundingClientRect(), z = cssZoom(input);
+    Object.assign(input.style, { width: seat.width / z + 'px', height: seat.height / z + 'px', flex: 'none' });
+    button.hidden = true; input.hidden = false; input.value = format(model.get()); editing = true;
     input.focus({ preventScroll: true }); input.select();
     return true;
   }

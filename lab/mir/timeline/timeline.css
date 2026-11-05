@@ -106,7 +106,7 @@
   --tl-confirm-max: 220px;
   --tl-confirm-pad: 12px;
   --tl-confirm-size: 12px;
-  --tl-sheet-w: min(640px, calc(100vw - 16px));
+  --tl-sheet-w: min(640px, calc(calc(100vw / var(--in-zoom, 1)) - 16px));
   --tl-sheet-cols: 150px 1fr 1fr;
   --tl-sheet-section-track: .08em;
   --tl-sheet-row-pad: 3px 4px;
@@ -114,7 +114,7 @@
   --tl-sheet-key-weight: 600;
   --tl-sheet-fade: .6;
   --tl-sheet-note-fade: .65;
-  --tl-sheet-h: 60vh;
+  --tl-sheet-h: calc(60vh / var(--in-zoom, 1));
   --tl-pattern-group: .04;                                     /* FL's alternating groups of four steps */
   --tl-pattern-group-alt: .09;
   --tl-pattern-off: .14;
@@ -368,8 +368,9 @@
 
 /* ── THE POPUPS: the house's menu pane (`.glass[data-mir-surface="menu"]`), BASINS' box ── */
 .tl-pop { position: fixed; z-index: calc(var(--z-veil) + 20); padding: var(--tl-pop-pad); min-width: var(--tl-pop-min); display: flex; flex-direction: column; gap: var(--tl-pop-gap);
-  max-height: calc(100dvh - 16px); overflow: auto; color: var(--fg); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
+  max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); overflow: auto; color: var(--fg); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
 .tl-pop-title { font-size: var(--tl-pop-title-size); padding: 4px; letter-spacing: var(--tl-pop-title-track); }
+.tl-pop-sep { height: 0; margin: 3px 4px; border-top: 1px solid var(--glass-hairline); }   /* 1.5.7-alpha.4: before the app's rows (moreRows) */
 .tl-pop .trig { min-height: var(--tl-pop-trig-h); font-size: var(--tl-pop-trig-size); }
 /* a folded tool's row in ⋯'s list: its icon (when it has one), then its word */
 .tl-pop .trig.tl-row { display: flex; align-items: center; gap: var(--tl-pop-row-gap); }

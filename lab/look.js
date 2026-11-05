@@ -25,7 +25,7 @@ export const LOOK_ROWS = Object.freeze(lookSchema().map((r) => r.key));
 /** λWAVES' home for the rows SETTINGS never had: the value at which each writes nothing, so the page looks as it did before
  *  MIR OPTIONS (FULL tier, no benchmark; the kit's own faces, shadows, corners, veil and ink; no pointer glow or parallax) */
 const LOOK_HOME = Object.freeze({ veil: 10, saturation: 1, corners: 14, faces: 'solid', text: 'theme', edge: true, shadow: 1,
-  glow: false, parallax: false, quality: 'full' });
+  glow: false, parallax: false, quality: 'full', stroke: 0 });   // 036 K1: STROKE 0 — the controls' rings gone (Josh), the knob brings them back
 /** the kit maps that write at λWAVES' home, homed: AUTO ink is the theme's own ladder (a SOLID pane keeps the kit's), SATURATION
  *  at 100 % is no filter at any blur, the CAST is drawn only off LIGHT_HOME (the kit sheet's own words), DEFAULT spacing is the
  *  sheets' own air */

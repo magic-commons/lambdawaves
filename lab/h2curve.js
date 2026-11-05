@@ -4,6 +4,7 @@
 import { sto3gIntegrals, minimalH2, eriTensor, sto3gHydrogen, eigSym } from './h2ci.js';
 import { uhf } from './scf.js';   // 0.7.1: U1's UHF (two densities, one DIIS held under the broken-symmetry seed) on the 2-AO integrals
 import { themeInk, accentRGB } from './mir/kit.js';
+import { cssZoom } from './mir/core/zoom.js';
 /** one R (bohr): RHF, UHF, FCI (total, hartree), the entanglement number S and the UHF's ⟨S²⟩ */
 export function h2Point(R) {
   const I = sto3gIntegrals(R), m = minimalH2(I), u = uhf({ n: 2, S: [1, I.S, I.S, 1], h: I.h, eri: eriTensor(I.eri), Enuc: I.Enuc }, { nAlpha: 1, nBeta: 1, mix: 0.1 });
@@ -18,7 +19,7 @@ export function h2Curve(Rs) {
   return { R: col('R'), rhf: col('rhf'), uhf: col('uhf'), fci: col('fci'), S: col('S'), s2: col('s2'), limit: 2 * sto3gHydrogen().E, cf: (lo + hi) / 2 }; }
 /** the three curves relative to 2E(H) on a small 2-D canvas in the kit's ink (RHF dashed, FCI) and accent (UHF), the CF tick and a cursor at R */
 export function drawCurve(cv, T, R) {
-  const g = cv.getContext('2d'), W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1); if (W < 32 || H < 24) return;
+  const g = cv.getContext('2d'), W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(cv); if (W < 32 || H < 24) return;
   cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.font = '8px ui-monospace, monospace';
   const ink = themeInk(g), acc = `rgb(${accentRGB(g).join(',')})`, n = T.R.length, lo = Math.min(...T.fci) - T.limit, hi = Math.max(...T.rhf) - T.limit;
   const x = (r) => 6 + (W - 34) * (r - T.R[0]) / (T.R[n - 1] - T.R[0]), y = (E) => 6 + (H - 18) * (hi - E + T.limit) / (hi - lo), path = (pts) => { g.beginPath(); pts.forEach(([a, b], i) => g[i ? 'lineTo' : 'moveTo'](a, b)); g.stroke(); };

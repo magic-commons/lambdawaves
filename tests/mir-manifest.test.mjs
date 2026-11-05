@@ -26,6 +26,16 @@ const ACCEPTED = {
   /* 032 · MIR 1.5.6 CUT (Josh 2026-11-01, "Cut the kit as 1.5.6 and push it"): the eight doors as 1.5.6 — kit commit cdf20ae, tag v1.5.6, branch kit-1.5.6 on
      github.com/magic-commons/mir. A new door continues from 1.5.7-alpha.1. */
   '1.5.6': 'de0ac92dda7ab61901efb41c0e6aa4a81b972e60398d769c2ff780b3a344a6c3',
+  /* 036 K1 · MIR 1.5.7-alpha.1 THE STROKE (the clone road from the 1.5.6 cut, kit-032 @ c986c99): --ctl-stroke multiplies every control ring's alpha; the relief's soft halo again */
+  '1.5.7-alpha.1': '68fc7a6017fd9fbdab624ba86ca73ef7b325eece8c34dcb3705e05285e0998ff',
+  /* 036 K2 · MIR 1.5.7-alpha.2 THE UI SCALE (kit-032 @ aee0bd6): --ui-zoom on the UI roots, core/zoom.js and the geometry pass; the stage untouched */
+  '1.5.7-alpha.2': '42af8b05502d9164764111f1ad9e4e7741655e9c4d8de967b42e04ef19a9f1ee',
+  /* 036 K3 · MIR 1.5.7-alpha.3 THE TEMPO EDITOR BOX (kit-032 @ 1d07748): the field is its button box, the pill format and size */
+  '1.5.7-alpha.3': 'b7884739ef17bc5550b85f8f6776d93cd884ea554c8e2ecedcfc21e86d57a5f7',
+  /* 036 K4 · MIR 1.5.7-alpha.4 THE MORE MENU APP ROWS (kit-032 @ 2ec7dbb): installTimeline({ moreRows }) */
+  '1.5.7-alpha.4': '5e98e31a3b1e3bdf2e97e55d231b033f277895700d888ad39c14a97fd295d878',
+  /* 036 K5 · MIR 1.5.7-alpha.5 THE FIELDS OWN WORDS (kit-032 @ a3dcb80): FOLDERS placeholders and proposeName false */
+  '1.5.7-alpha.5': 'b3ca138d0e87bdf20bb30b46fd9c2a7a77e09a8718ba8012f7e18250b1d81f6a',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

@@ -30,7 +30,8 @@
   --xport-pill-w: 72px;              /* the BPM pill's least width; it sizes to its number (BASINS ui-fixes 9: ≈ 90 px) */
   --xport-pill-r: 10px;              /* its corner (BASINS skin.css:87) */
   --xport-radius: 16px;              /* the bar's corner when CORNERS is at home (BASINS skin.css:66) */
-  --xport-num-size: 18px;            /* the tempo's number (BASINS ui-fixes 9, --xport-tempo-size; was 12) */
+  --xport-num-size: 18px;
+  --xport-edit-size: var(--xport-num-size);   /* 1.5.7-alpha.3 · the tempo editor's number: the pill's own size unless the seat says (λWAVES' CSB: 12 px) */            /* the tempo's number (BASINS ui-fixes 9, --xport-tempo-size; was 12) */
   --xport-micro: 8px;                /* BPM and the Hz reading (BASINS ui-fixes 9; was 7) */
   --xport-play-size: 32px;           /* play's glyph (BASINS ui-fixes 10, --xport-play-size; was 20); its seat is the glyph + 8 */
   --xport-work-seat: 34px;           /* a seat inside a work bar: the bar's button (BASINS ui-fixes 8, .tl-action) */
@@ -38,9 +39,9 @@
   --xport-work-h: 52px;              /* the transport inside a work bar: the tool bar's height (BASINS ui-fixes 8) */
   --xport-work-pad: 3px 8px;         /* … and its padding (BASINS timeline-window.css: 44 px power seat + border = 52) */
   --xport-face: hsl(var(--glass-tint) / 1);                                   /* the pill's face: it stands proud */
-  --xport-pill-rim: var(--glass-hairline);                                    /* the pill's hairline (BASINS) */
-  --xport-pill-rim-hot: color-mix(in srgb, var(--acc2) 60%, transparent);     /* hovered / focused (BASINS skin.css:448) */
-  --xport-pill-rim-open: color-mix(in srgb, var(--acc2) 70%, transparent);    /* its panel open (BASINS skin.css:449) */
+  --xport-pill-rim: color-mix(in srgb, var(--glass-hairline) calc(var(--ctl-stroke) * 100%), transparent);   /* × STROKE (1.5.7-alpha.1) */                                    /* the pill's hairline (BASINS) */
+  --xport-pill-rim-hot: color-mix(in srgb, var(--acc2) calc(60% * var(--ctl-stroke)), transparent);     /* hovered / focused (BASINS skin.css:448) */
+  --xport-pill-rim-open: color-mix(in srgb, var(--acc2) calc(70% * var(--ctl-stroke)), transparent);    /* its panel open (BASINS skin.css:449) */
   --xport-pill-glow: 0 0 7px color-mix(in srgb, var(--acc2) 24%, transparent);   /* … and its glow */
   --xport-glyph-lift: drop-shadow(0 1px 0 var(--glass-raise));                /* the dock chip's and door's glyph (λWAVES lab.css:324) */
   --xport-panel-fill: linear-gradient(180deg, var(--glass-well), transparent);   /* the tempo panel (BASINS skin.css:455) */
@@ -79,7 +80,7 @@
 /* ── the bar, on the stage (BASINS `#transport.mini`) ─────────────────────────────────────────────────────── */
 .mir-transport {
   position: fixed; left: 50%; right: auto; top: auto; bottom: var(--xport-bottom); transform: translateX(-50%); z-index: var(--z-chrome);
-  box-sizing: border-box; width: max-content; min-width: 0; max-width: calc(100vw - 24px); height: var(--xport-h); padding: 2px 7px 3px;   /* as wide as its row (BASINS basins.css `#transport.mini`: 359 px measured) */
+  box-sizing: border-box; width: max-content; min-width: 0; max-width: calc(calc(100vw / var(--in-zoom, 1)) - 24px); height: var(--xport-h); padding: 2px 7px 3px;   /* as wide as its row (BASINS basins.css `#transport.mini`: 359 px measured) */
   display: flex; align-items: center; gap: 2px; border-radius: var(--xport-radius);   /* its own corner, as BASINS' bar keeps 16 px under any CORNERS (1.5.0-alpha.7) */
   box-shadow: var(--surface-shadow, var(--glass-shadow)); touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
@@ -159,7 +160,7 @@
 .mir-transport .transport-tempo-input {
   box-sizing: border-box; flex: none; padding: 0 6px; border: 0; border-radius: var(--xport-pill-r);
   background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--acc2);
-  font: var(--w-bold) var(--xport-num-size) / 1 var(--font-num); font-variant-numeric: tabular-nums; text-align: center; user-select: text; -webkit-user-select: text;
+  font: var(--w-bold) var(--xport-edit-size) / 1 var(--font-num); font-variant-numeric: tabular-nums; text-align: center; user-select: text; -webkit-user-select: text;
 }
 .mir-transport .transport-tempo-input[hidden] { display: none; }
 
@@ -243,7 +244,7 @@
 body.rack-hidden .mir-transport.mir-rack-transport[data-bar="work"] { translate: none; visibility: inherit; }
 /* … its tempo panel floats over the lanes, toward the free side (BASINS timeline-window.css:79–87, positionTempo) */
 .mir-transport[data-bar="work"] .native-tempo {
-  position: absolute; top: calc(100% + var(--xport-pop-gap)); left: 0; width: min(var(--xport-pop-w), calc(100vw - 32px)); z-index: 1;
+  position: absolute; top: calc(100% + var(--xport-pop-gap)); left: 0; width: min(var(--xport-pop-w), calc(calc(100vw / var(--in-zoom, 1)) - 32px)); z-index: 1;
   padding: 8px; border: var(--glass-border) solid var(--glass-border-color); border-radius: var(--xport-pop-r);
   background: var(--surface-fill, var(--glass-well)); box-shadow: var(--surface-shadow, var(--glass-shadow));
   -webkit-backdrop-filter: var(--surface-filter, blur(var(--glass-blur))); backdrop-filter: var(--surface-filter, blur(var(--glass-blur)));
@@ -345,7 +346,7 @@ body.no-transport-bar .mir-transport, body.no-transport-bar .dev[data-id="transp
 
 /* ── λWAVES' OWN LAYOUT (LAMBDAWAVES_LAYOUT writes data-layout="lambdawaves"): its 640 px bar, the pill last in the row,
    the docked row wrapping, its 13 px glyphs and its pill ink — the arrangement it had before BASINS' became the default ── */
-.mir-transport.mini[data-layout="lambdawaves"] { width: auto; min-width: min(var(--xport-w), calc(100vw - 24px)); }
+.mir-transport.mini[data-layout="lambdawaves"] { width: auto; min-width: min(var(--xport-w), calc(calc(100vw / var(--in-zoom, 1)) - 24px)); }
 .mir-transport[data-layout="lambdawaves"] { --xport-glyph: 13px; }
 .mir-transport[data-layout="lambdawaves"] :is(.tbtn.tempo-expand, .transport-tempo-input) { order: 8; }
 .mir-transport[data-layout="lambdawaves"] .tbtn.tempo-expand { color: var(--fg-soft); }

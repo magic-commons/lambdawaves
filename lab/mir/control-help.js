@@ -6,6 +6,7 @@
  * first.  Tests and selectors that want a control by its hint read `data-help-en`, which never changes. */
 import { el, ariaLabel } from './kit.js';
 import { t, onLanguage } from './core/i18n.js';
+import { cssZoom } from './core/zoom.js';
 const vars = (n) => { try { return n.dataset.tHvars ? JSON.parse(n.dataset.tHvars) : undefined; } catch (_) { return undefined; } };
 export const HELP_HOVER_DELAY = 600;
 /* THE TWO SWITCHES an app flips on <body> to silence help:
@@ -29,8 +30,8 @@ export function infoPanel(content, label = 'Information') {
   const cancelHover=()=>{if(hoverTimer){clearTimeout(hoverTimer);hoverTimer=0;}};
   const close=()=>{cancelHover();if(content.matches(':popover-open'))content.hidePopover();b.setAttribute('aria-expanded','false');};
   const open=()=>{if(document.body.classList.contains(HELP_CLASSES.infoOff))return;if(!content.matches(':popover-open'))content.showPopover();const r=b.getBoundingClientRect();
-    content.style.left=Math.max(8,Math.min(innerWidth-content.offsetWidth-8,r.left))+'px';
-    content.style.top=Math.max(8,Math.min(innerHeight-content.offsetHeight-8,r.bottom+6))+'px';
+    const z=cssZoom(content);content.style.left=Math.max(8,Math.min(innerWidth-content.offsetWidth*z-8,r.left))/z+'px';
+    content.style.top=Math.max(8,Math.min(innerHeight-content.offsetHeight*z-8,r.bottom+6))/z+'px';
     b.setAttribute('aria-expanded','true');};
   b.addEventListener('click',()=>{cancelHover();pinned=!pinned;pinned?open():close();});
   anchor.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!pinned){cancelHover();hoverTimer=setTimeout(()=>{hoverTimer=0;open();},HELP_HOVER_DELAY);}});
@@ -79,9 +80,9 @@ export function installControlHelp(root = document) {
   const open = (node) => {
     const copy = node?.dataset?.help; if (!copy || document.body.classList.contains(hintsOffClass)) return;
     close(); owner = node; tip.textContent = node.dataset.keyHint ? copy + '  ' + node.dataset.keyHint : copy; tip.hidden = false; raise(true); node.setAttribute('aria-describedby', tip.id);   // a key cap (data-key-hint, keys.hints) is never translated
-    const r = node.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
-    tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
-    tip.style.top = (r.bottom + h + 8 <= innerHeight ? r.bottom + 7 : Math.max(8, r.top - h - 7)) + 'px';
+    const z = cssZoom(tip), r = node.getBoundingClientRect(), w = tip.offsetWidth * z, h = tip.offsetHeight * z;   // seen; written ÷ UI SCALE
+    tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) / z + 'px';
+    tip.style.top = (r.bottom + h + 8 <= innerHeight ? r.bottom + 7 : Math.max(8, r.top - h - 7)) / z + 'px';
   };
   adopt(root.documentElement || root);
   new MutationObserver((records) => { for (const r of records) { if (r.type === 'attributes') adopt(r.target); else for (const n of r.addedNodes) adopt(n); } })

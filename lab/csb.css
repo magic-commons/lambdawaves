@@ -158,9 +158,9 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport.docked { --xport-micro: 8px; }   /* … 8 in the rack card */
 #transport .native-tempo { order: 9; width: 100%; }   /* 022 C2: its grid is THE SURFACE's (above) */
 #transport.mini.tempo-open { width:min(640px,calc(100vw - 24px));height:auto;min-height:46px;padding-bottom:8px; }
-#transport .tempo-expand { position:relative;flex:0 0 72px;width:72px;height:34px;padding:4px 15px 4px 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:4px;align-items:center;border:1px solid var(--glass-hairline);border-radius:8px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));color:var(--fg-soft);touch-action:none; }
-#transport .tempo-expand:hover,#transport .tempo-expand:focus-visible { border-color:color-mix(in srgb,var(--acc2) 60%,transparent);background:var(--glass-raise);outline:0; }
-#transport .native-tempo { padding:8px;border-top:1px solid var(--glass-hairline);border-radius:0 0 10px 10px; }
+#transport .tempo-expand { position:relative;flex:0 0 72px;width:72px;height:34px;padding:4px 15px 4px 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:4px;align-items:center;border:1px solid color-mix(in srgb,var(--glass-hairline) calc(100% * var(--ctl-stroke)),transparent);border-radius:8px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));color:var(--fg-soft);touch-action:none; }
+#transport .tempo-expand:hover,#transport .tempo-expand:focus-visible { border-color:color-mix(in srgb,var(--acc2) calc(60% * var(--ctl-stroke)),transparent);background:var(--glass-raise);outline:0; }
+#transport .native-tempo { padding:8px;border-top:1px solid color-mix(in srgb,var(--glass-hairline) calc(100% * var(--ctl-stroke)),transparent);border-radius:0 0 10px 10px; }
 #transport.mini .tbtn.modb.on { color:var(--acc2); }
 #transport.docked .tbtn:not(.transport-home,.tempo-expand) { border:0;background:transparent;box-shadow:none;color:var(--ink-key); }
 #transport.docked .tbtn:not(.transport-home,.tempo-expand):hover { color:var(--fg);background:var(--state-hover,var(--glass-raise)); }

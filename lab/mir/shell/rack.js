@@ -49,6 +49,7 @@ import { registerWindow } from '../window/window.js';
 import { glyphEl, hasGlyph } from '../glyph.js';
 import { createRackScrollbars, createRackPills } from './rack-scrollbar.js';
 import { jsonStore } from '../core/prefs.js';
+import { cssZoom } from '../core/zoom.js';
 
 export const SIDES = Object.freeze(['left', 'right']);
 /** the numbers the rack keeps (BASINS and λWAVES measured them) */
@@ -226,7 +227,7 @@ export function createRackMotion(hosts, view = globalThis) {
     if (held && held.card === c) return { x: held.x, y: held.y };
     if (!moves.has(c)) return { x: 0, y: 0 };
     const cs = view.getComputedStyle(c), m = new view.DOMMatrixReadOnly(cs.transform), t = String(cs.translate).split(' ');
-    return { x: m.m41 + (parseFloat(t[0]) || 0), y: m.m42 + (parseFloat(t[1]) || 0) };
+    const z = cssZoom(c); return { x: (m.m41 + (parseFloat(t[0]) || 0)) * z, y: (m.m42 + (parseFloat(t[1]) || 0)) * z };   // own px → seen
   };
   const rectOf = (c) => {
     const h = c.parentElement, r = c.getBoundingClientRect(), hr = h.getBoundingClientRect();
@@ -266,14 +267,14 @@ export function createRackMotion(hosts, view = globalThis) {
     if (live()) {
       for (const [c, p] of next) {
         const old = previous.get(c), h = oldHeights.get(c);
-        if (old && Math.abs(h - p.height) > 0.5 && Math.abs(old.width - p.width) < 0.5) animate(heights, c, [{ height: h + 'px' }, { height: p.height + 'px' }], true);
+        if (old && Math.abs(h - p.height) > 0.5 && Math.abs(old.width - p.width) < 0.5) { const z = cssZoom(c); animate(heights, c, [{ height: h / z + 'px' }, { height: p.height / z + 'px' }], true); }
       }
       /* read after the height motions have started: the initial flow, so translation carries only the moves */
       for (const [c] of next) {
         if (held && held.card === c) continue;
         const from = oldScreen.get(c); if (!from) continue;
-        const r = c.getBoundingClientRect(), dx = from.x - r.left, dy = from.y - r.top;
-        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) animate(moves, c, [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0px, 0px)' }]);
+        const r = c.getBoundingClientRect(), dx = from.x - r.left, dy = from.y - r.top, z = cssZoom(c);
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) animate(moves, c, [{ transform: `translate(${dx / z}px, ${dy / z}px)` }, { transform: 'translate(0px, 0px)' }]);
       }
     }
     previous = next;
@@ -306,7 +307,7 @@ export function createRackMotion(hosts, view = globalThis) {
       const r = c.getBoundingClientRect();
       if (x !== undefined) held.x = x - (r.left - held.x);
       held.y = y - (r.top - held.y);
-      setVar(c, 'translate', `${held.x}px ${held.y}px`);
+      const z = cssZoom(c); setVar(c, 'translate', `${held.x / z}px ${held.y / z}px`);
     },
     /** release(card, settle) — the hand lets go: it travels from where it is seen into its slot (settle) or stays */
     release(c, settle = true) {
@@ -626,19 +627,19 @@ export function createRack({ host = globalThis.document && document.body, sides 
   /** clampAt(root, x, y, w) — the one clamp for a float: on a touch tablet the whole window inside the visual viewport
    *  (its drawn size), elsewhere 120 px across and the header below the top */
   function clampAt(root, x, y, w) {
-    if (!isTablet()) return clampFloat(x, y, w, viewSize());
+    if (!isTablet()) return clampFloat(x, y, w * cssZoom(root), viewSize());          // w is the window's own px; the clamp is seen
     const r = root.getBoundingClientRect(), vv = view.visualViewport;
     return clampFloatTablet(x, y, r.width, r.height, { width: view.innerWidth, height: view.innerHeight, top: vv ? vv.offsetTop : 0, vh: vv ? vv.height : view.innerHeight });
   }
-  const placeFloat = (root, st) => { const c = clampAt(root, st.x, st.y, st.w); st.x = c.x; st.y = c.y; setVar(root, 'left', c.x + 'px'); setVar(root, 'top', c.y + 'px'); };
+  const placeFloat = (root, st) => { const c = clampAt(root, st.x, st.y, st.w), z = cssZoom(root); st.x = c.x; st.y = c.y; setVar(root, 'left', c.x / z + 'px'); setVar(root, 'top', c.y / z + 'px'); };
   const restOf = (rk) => { const r = rk.getBoundingClientRect(), m = new view.DOMMatrixReadOnly(view.getComputedStyle(rk).transform); return { left: r.left - m.m41, top: r.top - m.m42, width: r.width, height: r.height }; };
   /** the DOM change of floating a window, no motion (the drag and the pop chip each bring their own) */
   function floatNow(id, at = {}) {
     const w = reg.get(id), root = w.dev.root, rk = root.parentElement;
     const r = root.getBoundingClientRect(), list = cards(rk);
     const home = at.home || { side: sideFor(root), index: Math.max(0, list.indexOf(root)) };
-    const wd = Math.round(at.w || r.width || 300), v = viewSize();
-    let x = at.x ?? (r.width ? (home.side === 'left' ? r.left + wd + 24 : r.left - wd - 24) : (v.width - wd) / 2);
+    const z = cssZoom(root), wd = Math.round(at.w || r.width / z || 300), v = viewSize(), ws = wd * z;   // wd own px, ws seen
+    let x = at.x ?? (r.width ? (home.side === 'left' ? r.left + ws + 24 : r.left - ws - 24) : (v.width - ws) / 2);
     let y = at.y ?? (r.height ? r.top : 72);
     if (at.y === undefined) { const h = Math.min(r.height || 320, v.height - 16); y = Math.max(8, Math.min(y, v.height - h - 8)); }
     const st = { home, x: Math.round(x), y: Math.round(y), w: wd, compact: false };
@@ -731,7 +732,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
     return out;
   }
   /* a rack's windows as layout boxes (offsetTop: no transform, no running flip) */
-  const boxes = (col, except) => cards(col.rk).filter((c) => c !== except).map((c) => ({ top: col.rest.top + c.offsetTop - col.rk.scrollTop, height: c.offsetHeight, el: c }));
+  const boxes = (col, except) => { const z = cssZoom(col.rk); return cards(col.rk).filter((c) => c !== except).map((c) => ({ top: col.rest.top + (c.offsetTop - col.rk.scrollTop) * z, height: c.offsetHeight * z, el: c })); };   // own px → seen
 
   const drg = drag(grip, { slop: 1,
     onStart() {
@@ -788,11 +789,11 @@ export function createRack({ host = globalThis.document && document.body, sides 
       motion.refresh();                                               // BASINS: the others make room, travelling (FLIP)
     }
     /* the held window follows the hand vertically at its own x; its layout place is the slot it will land in */
-    const top = col.rest.top + card.offsetTop - rk.scrollTop, left = col.rest.left + card.offsetLeft;
+    const zr = cssZoom(rk), top = col.rest.top + (card.offsetTop - rk.scrollTop) * zr, left = col.rest.left + card.offsetLeft * zr;
     motion.follow(card, undefined, s.y - G.ay);
     const proj = s.x - G.ax;
     if (!phoneOn && col.right > col.left && detached(proj, G.w, col)) { toFloat(s, proj); return; }
-    landProx.update({ x: s.x, y: s.y }, [{ id: col.side || 'home', rect: { left, top, width: G.w, height: card.offsetHeight }, hit: { left: col.left, top: 0, width: col.right - col.left, height: view.innerHeight }, shape: 'rect' }]);
+    landProx.update({ x: s.x, y: s.y }, [{ id: col.side || 'home', rect: { left, top, width: G.w, height: card.offsetHeight * zr }, hit: { left: col.left, top: 0, width: col.right - col.left, height: view.innerHeight }, shape: 'rect' }]);
     if (col.right > col.left) {
       const leftward = col.side !== 'left', x = leftward ? col.left - RACK.detach : col.right + RACK.detach;
       const trailing = leftward ? proj + G.w : proj;                 // the edge that must clear the line for the window to come loose
@@ -803,7 +804,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
     const card = G.card, rk = card.parentElement;
     edgeProx.cancel(); landProx.cancel();
     motion.release(card, false);                                      // BASINS: let go without settling, then off the rack
-    floatNow(G.id, { x: proj, y: s.y - G.ay, w: G.w, home: { side: rk.dataset.side, index: Math.max(0, cards(rk).indexOf(card)) } });
+    floatNow(G.id, { x: proj, y: s.y - G.ay, w: G.w / cssZoom(card), home: { side: rk.dataset.side, index: Math.max(0, cards(rk).indexOf(card)) } });
     G.mode = 'float'; G.cols = columns();
     floatMove(s);
   }
@@ -811,7 +812,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
     const st = floatState.get(G.id); if (!st) return;
     const want = clampAt(G.card, s.x - G.ax, s.y - G.ay, st.w);
     G.at = want;
-    setVar(G.card, 'translate', `${want.x - st.x}px ${want.y - st.y}px`);
+    const z = cssZoom(G.card); setVar(G.card, 'translate', `${(want.x - st.x) / z}px ${(want.y - st.y) / z}px`);
     const targets = G.cols.map((col) => {
       const bx = boxes(col, G.card), index = insertionIndex(bx, s.y - G.ay + G.headH / 2);   // the title bar decides here too
       return { id: col.side, index, rect: slotRect(col, bx, index), hit: { left: col.left, top: 0, width: col.right - col.left, height: view.innerHeight }, shape: 'slot' };
@@ -859,7 +860,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
   let phoneShown = false;
   /** setInterface(shown) — H: the whole interface out of paint (display: none), and the edge handle the way back */
   function setInterface(shown) { body.classList.toggle('ui-hidden', !shown); if (shown) setPeek(''); return !!shown; }
-  const readW = () => { const r = racks.right || racks.left; rackW = r ? r.offsetWidth : 0; return rackW; };
+  const readW = () => { const r = racks.right || racks.left; rackW = r ? r.offsetWidth * cssZoom(r) : 0; return rackW; };   // seen
   const hasShown = (side) => !!racks[side] && (!!G || cards(racks[side]).length > 0);
   view.addEventListener('pointermove', (e) => {
     if (!isHidden() || phoneOn || body.classList.contains('ui-hidden')) { if (peek) setPeek(''); return; }
@@ -887,7 +888,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
      rack's TRANSPORT window, a work lane or with its panel open is not the size of the seat it will take (W20 TR) */
   const trSize = () => {
     if (trBox || !transport) return trBox;
-    const b = { w: transport.offsetWidth || 560, h: transport.offsetHeight || 46 };
+    const z = cssZoom(transport), b = { w: (transport.offsetWidth || 560) * z, h: (transport.offsetHeight || 46) * z };   // seen
     if (!transport.matches('.docked, .tempo-open, [data-bar="work"]')) trBox = b;
     return b;
   };

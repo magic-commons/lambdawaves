@@ -45,7 +45,7 @@
      of use as var(--state-on-light, var(--acc-glow)) because it reads the accent.  The values match the window rail's
      chip (mir/window/window.css), so the rail and the widgets draw ON one way. */
   --state-on: hsl(0 0% 100% / .086);
-  --state-on-rim: inset 0 0 0 1px hsl(0 0% 100% / .30), inset 0 1px 0 hsl(0 0% 100% / .12);
+  --state-on-rim: inset 0 0 0 1px hsl(0 0% 100% / calc(.30 * var(--ctl-stroke))), inset 0 1px 0 hsl(0 0% 100% / .12);   /* 1.5.7-alpha.1: the ring × STROKE; the top light stays */
   --state-press-scale: .96;                                       /* pressed: the wash and this small scale (INTENT O6) */
   --state-disabled: .38;                                          /* the one fade, relief removed (INTENT O6) */
   --glass-well: hsl(0 0% 0% / .28); --glass-raise: hsl(0 0% 100% / .045); --glass-press: hsl(0 0% 100% / .12);
@@ -64,15 +64,17 @@
   --shine-amount: 0; --shine-soft: 6px;                           /* SHINE and its SOFTNESS (0–6, drawn ÷ 3: a 0–2 px hairline, 1.5.6-alpha.5): read only under html[data-shine] */
   --shine-term: 0 0 0 0 transparent;                              /* the shine's layer in a pane's shadow list, off */
   /* 1.5.6-alpha.5 · RELIEF IS TIGHT (INTENT: a raise is a 1–2 px highlight; a dark highlight is grey): the highlight is the dark
-     pane's tint lifted, a grey at a third, never white, and it reaches 1 px */
+     pane's tint lifted, a grey at a third, never white, and it reaches 1 px.  1.5.7-alpha.1 · THE RELIEF SOFTENS (λWAVES 036, Josh:
+     "before there was a subtle outset/inset … a 1px stroke around the objects"): the raise's highlight is the soft halo of before
+     alpha.5 again — 3 px at .05 with the top light at .08 — read as a glow, not a line; the drop is alpha.5's.  --neu-lit stays a token. */
   --neu-lit: color-mix(in srgb, color-mix(in srgb, hsl(var(--glass-tint)), hsl(0 0% 100%) 34%) 32%, transparent);
-  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 1px var(--neu-lit),
+  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 3px hsl(0 0% 100% / .05),
     calc(-2px * sqrt(2) * var(--relief-sin)) calc(2px * sqrt(2) * var(--relief-cos)) 4px hsl(0 0% 0% / .42),
-    inset 0 1px 0 var(--neu-lit);                                   /* a control that stands proud */
+    inset 0 1px 0 hsl(0 0% 100% / .08);                            /* a control that stands proud */
   --neu-inset: inset calc(-1px * sqrt(2) * var(--relief-sin)) calc(1px * sqrt(2) * var(--relief-cos)) 3px hsl(0 0% 0% / .48),
     inset calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 2px hsl(0 0% 100% / .04);                 /* a well cut into the card */
-  --neu-flat: 0 0 0 1px hsl(0 0% 100% / .05);                     /* a resting seat, neither up nor down */
-  --seat-edge: 1px solid hsl(0 0% 100% / .05);                    /* the same seat as an outline, beside a pane shadow (the tooltip, the badge) */
+  --neu-flat: 0 0 0 1px hsl(0 0% 100% / calc(.05 * var(--ctl-stroke)));   /* a resting seat, neither up nor down (× STROKE, 1.5.7-alpha.1) */
+  --seat-edge: 1px solid hsl(0 0% 100% / calc(.05 * var(--ctl-stroke)));                    /* the same seat as an outline, beside a pane shadow (the tooltip, the badge) */
   --fg: #f2f5f7; --fg-soft: hsl(0 0% 88%); --dim: hsl(0 0% 72%); --ink-key: hsl(0 0% 74%); --ink-faint: hsl(0 0% 64%);  /* all ≥ 4.5:1 on the card, see skin-notes */
   --ink-shadow: 0 1px 1px hsl(0 0% 0% / .5);
   --hue-acc: 188; --sat-acc: 80%; --lum-acc: 70.6%;               /* the house cyan, #78e1f0 to within one level of green */
@@ -127,10 +129,10 @@ body[data-theme="light"] {
   --surface-shadow-menu: inset 0 1px 0 hsl(0 0% 100% / .8), 0 10px 28px hsl(214 40% 20% / .20), 0 2px 6px hsl(214 40% 20% / .10);
   --tip-shadow: inset 0 1px 0 hsl(0 0% 100% / .8), 0 10px 28px hsl(214 40% 20% / .20), 0 2px 6px hsl(214 40% 20% / .10);
   --state-on: hsl(0 0% 100% / .62);                               /* on a light card a .086 white is invisible: the frost face is whiter */
-  --state-on-rim: inset 0 0 0 1px hsl(214 30% 40% / .34), inset 0 1px 0 hsl(0 0% 100% / .12);
-  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 1px hsl(0 0% 100% / .7),
+  --state-on-rim: inset 0 0 0 1px hsl(214 30% 40% / calc(.34 * var(--ctl-stroke))), inset 0 1px 0 hsl(0 0% 100% / .12);
+  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 3px hsl(0 0% 100% / .9),
     calc(-2px * sqrt(2) * var(--relief-sin)) calc(2px * sqrt(2) * var(--relief-cos)) 4px hsl(214 30% 40% / .22),
-    inset 0 1px 0 hsl(0 0% 100% / .7);                             /* 1.5.6-alpha.5: the highlight 3 px · .9 → 1 px · .7 (RELIEF IS TIGHT) */
+    inset 0 1px 0 hsl(0 0% 100% / .9);                             /* 1.5.7-alpha.1: the soft 3 px · .9 halo again (alpha.5 had 1 px · .7) */
   --neu-inset: inset calc(-1px * sqrt(2) * var(--relief-sin)) calc(1px * sqrt(2) * var(--relief-cos)) 3px hsl(214 30% 40% / .24),
     inset calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 2px hsl(0 0% 100% / .8);
   --lum-acc: 34%; --acc: hsl(var(--hue-acc) calc(var(--sat-acc) - 10%) var(--lum-acc)); --acc-ink: hsl(0 0% 100%);   /* hsl(188 70% 34%) by default, and it follows the hue */
@@ -197,8 +199,9 @@ body[data-card="solid"] {
   --solid-shade: color-mix(in srgb, var(--solid-pane), hsl(0 0% 0%) var(--solid-sink, 32%));
   --glass-well: color-mix(in srgb, var(--solid-pane), hsl(0 0% 0%) 10%);
   --sw-fill: var(--solid-pane);
-  /* 1.5.6-alpha.5 · RELIEF IS TIGHT: the highlight (1, 1) 2 px, the drop (1.5, 1.5) 3 px, the wells ±1 at 2 px (were 2.8 / 6, ±2 / 4: the white blob) */
-  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 2px var(--solid-lit),
+  /* 1.5.6-alpha.5 · RELIEF IS TIGHT: the highlight (1, 1) 2 px, the drop (1.5, 1.5) 3 px, the wells ±1 at 2 px (were 2.8 / 6, ±2 / 4: the white blob);
+     1.5.7-alpha.1 · THE RELIEF SOFTENS: the highlight (2, 2) 6 px again, over alpha.5's capped lift; the drop and the wells stay */
+  --neu-raise: calc(2px * sqrt(2) * var(--relief-sin)) calc(-2px * sqrt(2) * var(--relief-cos)) 6px var(--solid-lit),
     calc(-1.5px * sqrt(2) * var(--relief-sin)) calc(1.5px * sqrt(2) * var(--relief-cos)) 3px var(--solid-shade);
   --neu-inset: inset calc(-1px * sqrt(2) * var(--relief-sin)) calc(1px * sqrt(2) * var(--relief-cos)) 2px var(--solid-shade),
     inset calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 2px var(--solid-lit);
@@ -270,7 +273,7 @@ html[data-shine] body {
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
   :root {
     --phone: 1;
-    --rack-w: min(300px, calc(100vw - 76px));      /* the designed 300-px density, clamped only under 376 px */
+    --rack-w: min(300px, calc(calc(100vw / var(--in-zoom, 1)) - 76px));      /* the designed 300-px density, clamped only under 376 px */
     --rack-edge: calc(var(--rack-w) + 10px);       /* the rack's outer edge: what the hide toggle FOLLOWS */
     --top-bar: 46px;                               /* the masthead strip the rack starts below — deep enough that the tags' fingers clear the first card */
   }
@@ -281,11 +284,11 @@ html[data-shine] body {
 }
 /* the values that read another token, declared on the element that draws them, so each resolves where it always did */
 .dev, .dev-head, .dev-body {
-  --dev-carried-edge: 1px solid color-mix(in srgb, var(--acc) 35%, transparent);     /* CARRIED: the accent ring beside the float, drawn as an outline, outside the pane shadow's list */
-  --dev-tab-ring: color-mix(in srgb, var(--acc) 70%, transparent);                   /* the TAB-cycle mark */
+  --dev-carried-edge: 1px solid color-mix(in srgb, var(--acc) calc(35% * var(--ctl-stroke)), transparent);     /* CARRIED: the accent ring beside the float, drawn as an outline, outside the pane shadow's list */
+  --dev-tab-ring: color-mix(in srgb, var(--acc) calc(70% * var(--ctl-stroke)), transparent);                   /* the TAB-cycle mark */
 }
 .k-dial, .trig { --state-hover-wash: inset 0 0 0 99px var(--state-hover, var(--glass-raise)); }   /* HOVER: a full inset wash, a lighter face */
-.k-dial { --knob-face: hsl(var(--glass-tint) / 1); --k-live-ring: 0 0 0 1px color-mix(in srgb, var(--acc) 60%, transparent); }
+.k-dial { --knob-face: hsl(var(--glass-tint) / 1); --k-live-ring: 0 0 0 1px color-mix(in srgb, var(--acc) calc(60% * var(--ctl-stroke)), transparent); }
 .k-val { --k-val-fill: hsl(var(--glass-tint) / .96); }
 .trig { --trig-face: hsl(var(--glass-tint) / 1); }
 .fd-fill { --fd-fill-color: color-mix(in srgb, var(--acc) 16%, transparent); }
@@ -429,7 +432,7 @@ body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="so
   .seg, .seg-b, .sw:not(.on), select.sel, .fd, .ro, .native-info-button, .badge,                 /* not .dev-power: the power disc stays solid in every face (Josh 2026-10-06) */
   .mir-folders :is(.sv-split, .sv-parts, .sv-field input, .sv-input, .sv-card, .sv-folder, .sr-section)) { background-color: transparent; background-image: none; }   /* FOLDERS' seats: BASINS' SAVE seats (material.css) */
 body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.k-dial, .trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]),
-  .sw:not(.on), .seg, select.sel, .fd, .ro) { border-color: var(--glass-hairline); }
+  .sw:not(.on), .seg, select.sel, .fd, .ro) { border-color: var(--ctl-hairline); }   /* × STROKE (1.5.7-alpha.1) */
 /* … and BLEND's crossing layer, over the face, under the label (BASINS material.css BLEND) */
 :where(body[data-faces="blend"]:is([data-card="refractive"], .frost):not([data-card="solid"])) :is(.trig, .seg, .sw, select.sel, .fd, .ro) {
   background-image: linear-gradient(var(--faces-transition-source), var(--faces-transition-source)); background-blend-mode: var(--faces-transition-mode); }
@@ -494,7 +497,7 @@ body[data-card] .glass[data-mir-surface="menu"]:not([hidden]) { background-color
 :where([data-mir-surface="well"]) { background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 .badge { min-height: 24px; padding: 2px 9px; border-color: transparent; box-shadow: var(--surface-shadow, var(--glass-shadow)); outline: var(--seat-edge); outline-offset: 0;   /* a pane's height (L13) */
   color: var(--ink-key);
-  background: hsl(var(--glass-tint) / var(--glass-opacity)); max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  background: hsl(var(--glass-tint) / var(--glass-opacity)); max-width: calc(46vw / var(--in-zoom, 1)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .badge:hover { color: var(--fg-soft); }
 
 
@@ -671,7 +674,7 @@ body.disconnected:not(.phone) .dev.dragging > .dev-body {
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
   /* (the phone's tokens — the --phone sentinel, the rack width, the opaque card — are in the FROST block at the top) */
   /* the tag clips its TEXT, not itself: `overflow: hidden` on the chip (skin §10) was eating the finger */
-  .badge { position: relative; max-width: 40vw; overflow: visible; }
+  .badge { position: relative; max-width: calc(40vw / var(--in-zoom, 1)); overflow: visible; }
   .badge > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .badge::after { content: ''; position: absolute; inset: -11px 0; }        /* 24 px of chip, 46 px of finger (the strip's own height caps it) */
 
@@ -755,8 +758,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 .native-info { display: inline-flex; vertical-align: middle; position: relative; height: 28px; align-items: center; }
 .native-info-button { width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: none; color: var(--dim); cursor: pointer; font: italic var(--w-bold) var(--help-glyph-size) var(--font-help-glyph); }
 .native-info-button:hover, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--state-hover, var(--glass-raise)); }   /* focus is the ring (§6), not this look (L42) */
-.native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--surface-radius, var(--r-lg)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
-.control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--surface-radius, var(--r-md)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
+.native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(calc(100vw / var(--in-zoom, 1)) - 16px)); max-height: min(360px, calc(calc(100vh / var(--in-zoom, 1)) - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--surface-radius, var(--r-lg)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
+.control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(calc(100vw / var(--in-zoom, 1)) - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--surface-radius, var(--r-md)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
 .control-help[hidden] { display: none; }
 .control-help[popover] { inset: auto; margin: 0; overflow: visible; height: auto; }   /* 1.5.0-alpha.26: the top-layer hint keeps its own seat (left / top inline), never the UA popover's centred box */
 .native-info .native-info-content, .control-help {   /* a popover: the TINTED pane at menu height (L10/L11), no blur; layers replace the !important */

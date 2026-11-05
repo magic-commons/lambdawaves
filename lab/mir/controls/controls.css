@@ -91,7 +91,7 @@ button.mir-step-name:disabled { cursor: default; }
 
 /* ── the list pane: the menu height, the card style's material (skin.css), a box here ── */
 .mir-pick { position: fixed; z-index: var(--list-z); display: flex; flex-direction: column; gap: 1px; padding: var(--sp-1); overflow-y: auto; box-sizing: border-box;
-  max-width: calc(100vw - 16px); border-radius: var(--surface-radius, var(--r-lg)); }
+  max-width: calc(calc(100vw / var(--in-zoom, 1)) - 16px); border-radius: var(--surface-radius, var(--r-lg)); }
 .mir-pick-i { display: flex; align-items: center; min-height: var(--touch); padding: 0 var(--sp-4); border: 0; border-radius: var(--r-sm); background: transparent; color: var(--fg-soft);
   font: inherit; font-size: var(--fs-small); letter-spacing: var(--label-tracking, var(--tr-wide)); text-align: start; white-space: nowrap; cursor: pointer; }
 .mir-pick-i:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }

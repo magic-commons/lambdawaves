@@ -504,6 +504,7 @@
   "LOW": "LOW",
   "LOWER": "LOWER",
   "LW Title": "LW Title",
+  "Left empty, {:SAVE} names it after its folder": "Left empty, {:SAVE} names it after its folder",
   "Left-drag a point or tension handle": "Left-drag a point or tension handle",
   "Limit modulation updates per second": "Limit modulation updates per second",
   "Listening for “{action}”. This looks like a touch screen with no keyboard and no board to tap: press the new keys on a hardware keyboard if one is connected, or press {:RECORD INPUT} again to cancel.": "Listening for “{action}”. This looks like a touch screen with no keyboard and no board to tap: press the new keys on a hardware keyboard if one is connected, or press {:RECORD INPUT} again to cancel.",
@@ -876,6 +877,7 @@
   "STRETCH AUDIO": "STRETCH AUDIO",
   "STRETCH TO CLIP · SHIFT+T": "STRETCH TO CLIP · SHIFT+T",
   "STRETCH ×{rate} · pitch follows": "STRETCH ×{rate} · pitch follows",
+  "STROKE": "STROKE",
   "STUTTER released — rejoined the running beat": "STUTTER released — rejoined the running beat",
   "STUTTER {note} latched — applies to BPM-synced LFOs; press again to release": "STUTTER {note} latched — applies to BPM-synced LFOs; press again to release",
   "SUSTAIN": "SUSTAIN",
@@ -1022,6 +1024,7 @@
   "Target the envelope drives": "Target the envelope drives",
   "That is not a project zip — nothing changed": "That is not a project zip — nothing changed",
   "That is not a project zip: {why}": "That is not a project zip: {why}",
+  "The 1-px rings around knobs, buttons, switches and fields": "The 1-px rings around knobs, buttons, switches and fields",
   "The MIR logo is outlined from Butler Free Extra Bold by {who}.": "The MIR logo is outlined from Butler Free Extra Bold by {who}.",
   "The bank holds {n}: STORE over one, or × one.": "The bank holds {n}: STORE over one, or × one.",
   "The browser has WebGPU but found no graphics adapter to use.": "The browser has WebGPU but found no graphics adapter to use.",
@@ -1045,6 +1048,7 @@
   "The renderer currently owns the clock.": "The renderer currently owns the clock.",
   "The shadow’s blur": "The shadow’s blur",
   "The shine’s blur": "The shine’s blur",
+  "The size of every window, menu and bar; the picture keeps its resolution": "The size of every window, menu and bar; the picture keeps its resolution",
   "The view moved since the picture was made — capture it again.": "The view moved since the picture was made — capture it again.",
   "The view moved since the picture was made — tap CAPTURE IMAGE again.": "The view moved since the picture was made — tap CAPTURE IMAGE again.",
   "The wheel zooms a notch at a time": "The wheel zooms a notch at a time",
@@ -1076,6 +1080,7 @@
   "Type the tempo in BPM": "Type the tempo in BPM",
   "Type: {roboto} · {title} (a renamed subset of Spinwerad by gluk) · {stix} · the notebook’s {spectral}, {playfair} and {alegreya} — all SIL OFL 1.1.": "Type: {roboto} · {title} (a renamed subset of Spinwerad by gluk) · {stix} · the notebook’s {spectral}, {playfair} and {alegreya} — all SIL OFL 1.1.",
   "Type: {title}, a renamed subset of Spinwerad by gluk · {roboto} · {stix} — all SIL OFL 1.1, subset for this app.": "Type: {title}, a renamed subset of Spinwerad by gluk · {roboto} · {stix} — all SIL OFL 1.1, subset for this app.",
+  "UI SCALE": "UI SCALE",
   "UNDO": "UNDO",
   "UNSAVED CHANGES": "UNSAVED CHANGES",
   "UNTITLED": "UNTITLED",
@@ -1676,6 +1681,7 @@
   "STARTER": "a preset the app ships (a starter project's modulation), not one the user saved",
   "STATUS TAGS": "the small status labels over the picture (BASINS' badges and stats bar)",
   "STRETCH TO CLIP · SHIFT+T": "a clip's menu: the file plays / the envelope alone / fit the audio into the clip's length (varispeed)",
+  "STROKE": "the thin outline drawn around each control (not a brush stroke)",
   "STUTTER {note} latched — applies to BPM-synced LFOs; press again to release": "STUTTER: the clock holds the current beat and repeats it at the note value {note} (1/4 or 1)",
   "Selection scope": "what a selection picks: whole clips or curve points",
   "Step through twelve density levels to reveal shells.": "shells: the nested surfaces of equal density in the picture (like the layers of an onion)",
@@ -1690,6 +1696,7 @@
   "The controls take the panes’ light: one {:ANGLE} for everything": "the relief follows the pane light's ANGLE: one light for the whole interface",
   "The {panel} panel could not be built: {why}": "an error notice: {panel} is a panel's name (RENDER …), {why} the program's reason, left as it is",
   "This device’s tier, measured once: A and B are {:FULL}, C is {:BALANCED}": "a short benchmark sorts this device into tier A, B or C",
+  "UI SCALE": "the size of the interface (windows, menus, bars), not of the picture",
   "WALL": "the clock follows wall-clock time (real elapsed seconds), as opposed to FREE, which counts frame time and slows with the picture",
   "clock state::HOLD": "— the modulation clock is held (paused in place), as opposed to RUN",
   "close ({key})": "{key} is the notebook’s shortcut key, e.g. J",
@@ -3257,6 +3264,9 @@
   "LW Title": [
    "mir/shell/gui.js"
   ],
+  "Left empty, {:SAVE} names it after its folder": [
+   "mir/folders/gallery.js"
+  ],
   "Left-drag a point or tension handle": [
    "mir/timeline/shortcuts.js"
   ],
@@ -4225,6 +4235,7 @@
   "SAVE": [
    "mir/app.js",
    "mir/folders/folders.js",
+   "mir/folders/gallery.js",
    "mir/modulation/modwindow/modwindow.js",
    "mir/modulation/window.js",
    "mir/notes/face.js"
@@ -4404,6 +4415,9 @@
   ],
   "STRETCH ×{rate} · pitch follows": [
    "mir/timeline/editor.js"
+  ],
+  "STROKE": [
+   "mir/shell/gui.js"
   ],
   "STUTTER released — rejoined the running beat": [
    "mir/modulation/window.js"
@@ -4844,6 +4858,9 @@
   "That is not a project zip: {why}": [
    "mir/folders/folders.js"
   ],
+  "The 1-px rings around knobs, buttons, switches and fields": [
+   "mir/shell/gui.js"
+  ],
   "The MIR logo is outlined from Butler Free Extra Bold by {who}.": [
    "mir/shell/gui.js"
   ],
@@ -4911,6 +4928,9 @@
    "mir/shell/gui.js"
   ],
   "The shine’s blur": [
+   "mir/shell/gui.js"
+  ],
+  "The size of every window, menu and bar; the picture keeps its resolution": [
    "mir/shell/gui.js"
   ],
   "The view moved since the picture was made — capture it again.": [
@@ -5005,6 +5025,9 @@
   ],
   "Type: {title}, a renamed subset of Spinwerad by gluk · {roboto} · {stix} — all SIL OFL 1.1, subset for this app.": [
    "mir/shell/about.js"
+  ],
+  "UI SCALE": [
+   "mir/shell/gui.js"
   ],
   "UNDO": [
    "mir/history/history-list.js",

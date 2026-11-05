@@ -6,6 +6,7 @@
  * (picker.js suggest: the catalogue and every installed volume, read on the first keystroke, never at boot), each tile the Picker's own tile and its
  * press the Picker's road.  ↑ ↓ choose, Enter opens; Escape or a press elsewhere closes the pill and the tiles. */
 import { el, chip } from './mir/kit.js';
+import { cssZoom } from './mir/core/zoom.js';
 
 export function createCsbSearch(app, { bar }) {
   const root = el('button', 'csb-search-b'); root.type = 'button'; chip(root, 'search', 'search the molecules'); root.title = 'Search the molecules';
@@ -22,18 +23,18 @@ export function createCsbSearch(app, { bar }) {
   /** the pill above the bar (below it near the top); beside the card when the bar is docked or FREE; the tiles stacked on the pill's far side */
   function place() {
     const b = bar(), r = b.getBoundingClientRect(), card = b.classList.contains('docked') || b.dataset.place === 'free';
-    const pw = pill.offsetWidth, ph = pill.offsetHeight, gap = 8;
+    const zp = cssZoom(pill), pw = pill.offsetWidth * zp, ph = pill.offsetHeight * zp, gap = 8;   // 036 K2: seen px; written ÷ UI SCALE
     let x, y, up;
     if (card) {
       x = r.right + gap + pw <= innerWidth - 8 ? r.right + gap : r.left - gap - pw;
       const s = root.getBoundingClientRect(); y = s.top + s.height / 2 - ph / 2; up = y - 200 > 8;
     } else { up = r.top - ph - gap - 100 >= 8; x = r.left + r.width / 2 - pw / 2; y = up ? r.top - ph - gap : r.bottom + gap; }
     x = Math.max(8, Math.min(innerWidth - pw - 8, x)); y = Math.max(8, Math.min(innerHeight - ph - 8, y));
-    pill.style.left = Math.round(x) + 'px'; pill.style.top = Math.round(y) + 'px';
+    pill.style.left = Math.round(x / zp) + 'px'; pill.style.top = Math.round(y / zp) + 'px';
     if (pane.hidden) return;
-    const w = pane.offsetWidth, h = pane.offsetHeight;
-    pane.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, x + pw / 2 - w / 2))) + 'px';
-    pane.style.top = Math.round(up ? Math.max(8, y - h - gap) : Math.min(innerHeight - h - 8, y + ph + gap)) + 'px';
+    const z = cssZoom(pane), w = pane.offsetWidth * z, h = pane.offsetHeight * z;
+    pane.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, x + pw / 2 - w / 2)) / z) + 'px';
+    pane.style.top = Math.round((up ? Math.max(8, y - h - gap) : Math.min(innerHeight - h - 8, y + ph + gap)) / z) + 'px';
   }
   function open() { pill.hidden = false; root.setAttribute('aria-expanded', 'true'); place(); input.focus(); }
   async function find() {

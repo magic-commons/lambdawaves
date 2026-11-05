@@ -28,6 +28,7 @@ import { wignerSlice, wignerAxial } from './wigner.js';
 import { BASIS } from './hydrogen.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { el, knob, readout, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
+import { cssZoom } from './mir/core/zoom.js';
 
 const NZ = 64, NP = 64;                 // the grid the window runs (the brief's 64 × 64)
 const GAMMA = 0.35;                     // the display law for the ink's opacity: |W/W_max|^γ, printed on the card
@@ -82,7 +83,7 @@ export function createWigner(host, api = {}) {
   /* ── the map ─────────────────────────────────────────────────────────── */
   function clear() { const W = cv.clientWidth, H = cv.clientHeight; if (W > 0 && H > 0) { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); } }
   function paint() {
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(cv);
     if (W < 40 || H < 40 || !cache) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);

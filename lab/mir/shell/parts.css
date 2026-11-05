@@ -48,10 +48,10 @@ body[data-theme="light"] .mir-toast { --toast-fill: hsl(0 0% 100% / .86); --toas
   --dialog-pad: 18px 20px 16px;
   --dialog-gap: 12px;
   --dialog-gutter: 32px;
-  --dialog-max-h: 80vh;
+  --dialog-max-h: calc(80vh / var(--in-zoom, 1));
   --dialog-z: calc(var(--z-banner) + 10);
   position: fixed; inset: 0; margin: auto; z-index: var(--dialog-z);
-  width: min(var(--dialog-w), calc(100vw - var(--dialog-gutter))); height: fit-content; max-height: var(--dialog-max-h); overflow: auto;
+  width: min(var(--dialog-w), calc(calc(100vw / var(--in-zoom, 1)) - var(--dialog-gutter))); height: fit-content; max-height: var(--dialog-max-h); overflow: auto;
   display: flex; flex-direction: column; gap: var(--dialog-gap); padding: var(--dialog-pad);
   border-radius: var(--card-r); color: var(--fg); font-family: var(--font-ui); user-select: text; -webkit-user-select: text;
 }
@@ -68,14 +68,14 @@ body[data-theme="light"] .mir-toast { --toast-fill: hsl(0 0% 100% / .86); --toas
    pane, its colour tokens, its trigger and its focus ring.  The values are BASINS', as BASINS wrote them. */
 .mir-dialog[data-kind="notice"] {
   --warn-w: 34em;                                        /* the column (.mandel-warn-card) */
-  --warn-art: clamp(200px, 44vmin, 420px);               /* the picture's square (.mandel-warn-image) */
-  --warn-title-size: clamp(1.1rem, 2.8vmin, 1.45rem);    /* the title (.mandel-warn-heading) … */
+  --warn-art: clamp(200px, calc(44vmin / var(--in-zoom, 1)), 420px);               /* the picture's square (.mandel-warn-image) */
+  --warn-title-size: clamp(1.1rem, calc(2.8vmin / var(--in-zoom, 1)), 1.45rem);    /* the title (.mandel-warn-heading) … */
   --warn-title-track: .18em;                             /* … and its tracking */
-  --warn-body-size: clamp(.95rem, 2vmin, 1.05rem);       /* the words (.mandel-warn-body) */
+  --warn-body-size: clamp(.95rem, calc(2vmin / var(--in-zoom, 1)), 1.05rem);       /* the words (.mandel-warn-body) */
   --warn-btn-size: .95rem;                               /* CONTINUE (.mandel-warn-button): its size … */
   --warn-btn-track: .14em;                               /* … its tracking … */
   --warn-btn-r: 4px;                                     /* … and its corner */
-  --dialog-w: calc(var(--warn-w) + 40px + 2 * var(--glass-border)); --dialog-gap: 0; --dialog-max-h: calc(100dvh - 3rem); text-align: center; align-items: center;
+  --dialog-w: calc(var(--warn-w) + 40px + 2 * var(--glass-border)); --dialog-gap: 0; --dialog-max-h: calc(calc(100dvh / var(--in-zoom, 1)) - 3rem); text-align: center; align-items: center;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }   /* BASINS' stack as written: --font-sans puts system-ui before Roboto, which is another face on Linux */
 .mir-dialog[data-kind="notice"] > :is(.mir-caution, .mir-notice-art) { margin: 0 auto 2rem; }
 .mir-notice-art { display: block; width: var(--warn-art); height: var(--warn-art); max-width: 100%; object-fit: contain; user-select: none; -webkit-user-select: none; pointer-events: none; }
@@ -91,7 +91,7 @@ body[data-theme="light"] .mir-toast { --toast-fill: hsl(0 0% 100% / .86); --toas
 .mir-toast {
   --toast-bottom: 84px;
   --toast-w: 560px;
-  --toast-max: 90vw;
+  --toast-max: calc(90vw / var(--in-zoom, 1));
   --toast-pad: 8px 14px;
   --toast-z: calc(var(--z-veil) + 10);          /* BASINS' 50: above the veil (40), under the banner (60) and the menus */
   position: fixed; inset-inline: 0; bottom: var(--toast-bottom); margin-inline: auto; z-index: var(--toast-z);
@@ -115,7 +115,7 @@ body:not([data-card="refractive"]) #mir-toast { -webkit-backdrop-filter: none; b
   --notice-gap: 8px;
   --notice-z: calc(var(--z-banner) + 8);
   position: fixed; inset-block-end: var(--notice-inset); inset-inline-end: var(--notice-inset); z-index: var(--notice-z);
-  width: min(var(--notice-w), calc(100vw - 2 * var(--notice-inset))); display: flex; flex-direction: column; gap: var(--notice-gap);
+  width: min(var(--notice-w), calc(calc(100vw / var(--in-zoom, 1)) - 2 * var(--notice-inset))); display: flex; flex-direction: column; gap: var(--notice-gap);
   pointer-events: none;
 }
 .mir-notices > .mir-notice {
@@ -181,7 +181,7 @@ body:not([data-card="refractive"]) #mir-toast { -webkit-backdrop-filter: none; b
   --boot-w: 22em;
   --boot-pad: 18px 20px;
   --boot-gutter: 32px;
-  position: fixed; inset: 0; margin: auto; z-index: var(--z-veil); width: min(var(--boot-w), calc(100vw - var(--boot-gutter))); height: fit-content;
+  position: fixed; inset: 0; margin: auto; z-index: var(--z-veil); width: min(var(--boot-w), calc(calc(100vw / var(--in-zoom, 1)) - var(--boot-gutter))); height: fit-content;
   display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); padding: var(--boot-pad); text-align: center;
   border-radius: var(--card-r); color: var(--fg); font-family: var(--font-ui);
 }

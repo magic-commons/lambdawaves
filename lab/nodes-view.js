@@ -23,6 +23,7 @@ import { el, label, ariaLabel, chip, onContext } from './mir/kit.js'; import { c
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun, over } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
+import { cssZoom } from './mir/core/zoom.js';
 /** keysAt(el) — the acts of the graph whose ground `el` is (the `nodes.*` rows run them while it has the focus), or null */
 const GROUNDS = new WeakMap(); export const keysAt = (n) => (n && GROUNDS.get(n)) || null;
 
@@ -43,8 +44,8 @@ const icon = (parent, name, first) => { const s = glyphEl(nodeGlyph(name), 'node
 const grab = (handle, ok, start, move, end) => handle.addEventListener('pointerdown', (e) => {
   if (e.button !== 0 || !ok(e)) return;
   e.preventDefault(); handle.setPointerCapture(e.pointerId);
-  const x0 = e.clientX, y0 = e.clientY, base = start(e);
-  const mv = (ev) => move(base, ev.clientX - x0, ev.clientY - y0);
+  const x0 = e.clientX, y0 = e.clientY, base = start(e), u = cssZoom(handle);   // 036 K2: the hand in the window's px (UI SCALE)
+  const mv = (ev) => move(base, (ev.clientX - x0) / u, (ev.clientY - y0) / u);
   const up = () => { for (const [t, f] of [['pointermove', mv], ['pointerup', up], ['pointercancel', up]]) handle.removeEventListener(t, f); end(base); };
   for (const [t, f] of [['pointermove', mv], ['pointerup', up], ['pointercancel', up]]) handle.addEventListener(t, f);
 });
@@ -62,7 +63,7 @@ export function createView(parent, kind, M) {
   const keep = () => M.put({ pan: { ...(M.rec().pan || {}), [kind]: pan }, ...(W ? { zoom: z } : {}) });
   /** zoom to zz about the ground point p (px): the plane point under it stays */
   const zoomAt = (zz, p, base = pan, z0 = z) => { zz = clampZ(zz); setPan([p[0] - ((p[0] - base[0]) * zz) / z0, p[1] - ((p[1] - base[1]) * zz) / z0], zz); };
-  const local = (e) => { const r = ground.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  const local = (e) => { const r = ground.getBoundingClientRect(), u = cssZoom(ground); return [(e.clientX - r.left) / u, (e.clientY - r.top) / u]; };   // 036 K2: own px
   /** FIT: the cards' bounding box in the ground, a 24 px margin, the zoom clamped */
   function fit() {
     const B = Object.values(cards).map(({ c }) => [c.offsetLeft, c.offsetTop, c.offsetLeft + c.offsetWidth, c.offsetTop + c.offsetHeight]);

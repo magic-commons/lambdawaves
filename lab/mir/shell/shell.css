@@ -67,7 +67,7 @@ body[data-theme="dark"] #notebook { --nb-line: hsl(0 0% 100% / .18); --nb-btn: h
 .nb-dump, .ab-home { --nb-btn-line-hot: color-mix(in srgb, var(--acc) 45%, var(--nb-btn-line)); }
 .mb-list { --mb-list-veil: hsl(var(--glass-tint) / .65); }
 /* ── end of the values ── */
-#notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: var(--surface-radius, var(--nb-r));
+#notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(calc(100vw / var(--in-zoom, 1)) - 2 * var(--rack-w) - 40px); max-height: calc(calc(100vh / var(--in-zoom, 1)) - 40px); resize: both; z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: var(--surface-radius, var(--nb-r));
   border: var(--surface-edge-width, 1px) solid var(--pane-edge, var(--surface-edge, var(--nb-edge))); background: var(--surface-veil, transparent); -webkit-backdrop-filter: var(--surface-filter, blur(var(--glass-blur)) saturate(115%)); backdrop-filter: var(--surface-filter, blur(var(--glass-blur)) saturate(115%));
   box-shadow: var(--surface-shadow-float, var(--glass-shadow)); color: var(--fg); overflow: hidden; }   /* it floats like a window: height 3 (L14/L15) */
 #notebook[data-face="about"] { width: 520px; height: 812px; left: calc(50% - 260px); top: max(20px, calc(50% - 438px)); }
@@ -137,7 +137,7 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .mb-group { position: relative; }
 .mb-btn { height: 26px; padding: 0 10px; border: 0; border-radius: var(--mb-btn-r); background: transparent; color: var(--fg-soft); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); cursor: pointer; }
 .mb-btn:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
-.mb-list { position: absolute; inset-inline-start: 0; top: 30px; min-width: 240px; max-height: 60vh; overflow: auto; padding: 4px; border-radius: var(--surface-radius, var(--mb-list-r)); box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); display: flex; flex-direction: column; }
+.mb-list { position: absolute; inset-inline-start: 0; top: 30px; min-width: 240px; max-height: calc(60vh / var(--in-zoom, 1)); overflow: auto; padding: 4px; border-radius: var(--surface-radius, var(--mb-list-r)); box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); display: flex; flex-direction: column; }
 .mb-item { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; text-align: start; border: 0; background: transparent; color: var(--fg-soft); padding: 6px 10px; border-radius: var(--mb-item-r); font: var(--fs-small) var(--font-ui); cursor: pointer; white-space: nowrap; }
 .mb-item:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
 .mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wide)); }
@@ -209,11 +209,11 @@ body[data-theme="light"] #title .word[data-art] > .wordmark-light { display: blo
 #title::after { content: ''; position: absolute; inset: -3px -8px; }
 #notebook { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--surface-fill, var(--nb-phone-fill)); }
 body[data-theme="dark"] #notebook::before { display: none; }
-#notebook { left: 0 !important; top: 0 !important; width: 100vw !important; height: 100dvh !important;   /* !important beats the inline width/height the desktop's resize grip wrote */
+#notebook { left: 0 !important; top: 0 !important; width: calc(100vw / var(--in-zoom, 1)) !important; height: calc(100dvh / var(--in-zoom, 1)) !important;   /* !important beats the inline width/height the desktop's resize grip wrote */
     max-width: none; max-height: none; border-radius: 0; resize: none;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
 .nb-grip { display: none; }
-.mb-list { max-width: calc(100vw - 24px); }
+.mb-list { max-width: calc(calc(100vw / var(--in-zoom, 1)) - 24px); }
 .mb-item { min-height: var(--touch); }
 #menubar { flex-wrap: wrap; }                 /* seven groups do not fit beside the wordmark on 390 px: menubar.js gives the bar the room to the edge and it wraps */
 }

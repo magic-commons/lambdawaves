@@ -3,6 +3,7 @@
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
 import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
+import { cssZoom } from '../mir/core/zoom.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
@@ -87,9 +88,9 @@ export function createTransport(app) {
         else if (v) rk.open('transport', { index: app.sh.layout.dockIndex }); else rk.close('transport'); } });
     /* the rack's ☆ list opens beside its button, wherever the bar sits (it is the stage's, never the bar's: the bar clips) */
     for (const [b, l] of [['rackFav', 'rackFavList']]) { const btnEl = byId(b), list = byId(l); if (!btnEl || !list) continue;
-      btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const r = btnEl.getBoundingClientRect(), h = list.offsetHeight, w = list.offsetWidth, up = r.top - h - 8 >= 8;
-        list.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2))) + 'px'; list.style.right = 'auto';
-        list.style.top = Math.round(up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) + 'px'; })); }
+      btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const z = cssZoom(list), r = btnEl.getBoundingClientRect(), h = list.offsetHeight * z, w = list.offsetWidth * z, up = r.top - h - 8 >= 8;   // 036 K2: seen, written ÷ UI SCALE
+        list.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) / z) + 'px'; list.style.right = 'auto';
+        list.style.top = Math.round((up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) / z) + 'px'; })); }
     ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
     /* A8 · the door wears the modulation window's own icon (Josh: "a sine wave icon instead of the MIR 3x3 square logo"; 021 V2: the table's
        `modulation`, an SVG); the turning mark is the kit's unplaced logoButton now */

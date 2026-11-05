@@ -32,6 +32,8 @@
 :root {
   color-scheme: dark;
   --ui-scale: 1; --touch: 44px;
+  --ctl-stroke: 1;
+  --ui-zoom: 1;                                                    /* 1.5.7-alpha.2 · UI SCALE: the UI roots' CSS zoom (MIR OPTIONS writes it on <html>) */                                                 /* 1.5.7-alpha.1 · STROKE: every control ring's alpha times it (MIR OPTIONS writes it on <html>) */
   --font-ui: 'Roboto', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   --font-sans: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
@@ -104,7 +106,7 @@ button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 [hidden] { display: none !important; }
 h1, h2 { margin: 0; font-weight: var(--w-bold); }
-.dev-swap { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline); background: var(--glass-raise); color: var(--dim); font-size: var(--dev-swap-glyph); cursor: pointer; margin-right: 4px; }
+.dev-swap { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--ctl-hairline); background: var(--glass-raise); color: var(--dim); font-size: var(--dev-swap-glyph); cursor: pointer; margin-right: 4px; }
 .dev-head { cursor: grab; user-select: none; touch-action: none; }
 .dev { touch-action: pan-y; }
 .dev.closed { display: none !important; }
@@ -126,7 +128,7 @@ h1, h2 { margin: 0; font-weight: var(--w-bold); }
 .dev-power[aria-pressed="false"]::after { background: var(--dim); }
 .dev-close { width: 22px; height: 22px; border-radius: 50%; border: 0; background: transparent; color: var(--dim); font-size: var(--dev-close-glyph); line-height: 1; cursor: pointer; margin-inline-start: 2px; }
 .dev-close:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
-.dev-copy { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline); background: var(--glass-raise); color: var(--dim); font-size: var(--dev-copy-glyph); cursor: copy; margin-right: 4px; }
+.dev-copy { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--ctl-hairline); background: var(--glass-raise); color: var(--dim); font-size: var(--dev-copy-glyph); cursor: copy; margin-right: 4px; }
 .dev-copy:hover { color: var(--fg); background: linear-gradient(var(--state-hover, var(--glass-raise)) 0 0), var(--glass-raise); }   /* HOVER is a lighter face, not ink alone (L37) */
 .dev[data-kind="info"] .ro-sub { max-height: 3em; opacity: 1; }
 .rack-fav-head { padding: 5px 10px 3px; font-size: var(--fs-tiny); letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--dim); }
@@ -211,7 +213,7 @@ m { font-family: var(--font-math); font-style: normal; font-size: var(--math-sca
 /* THE TWO NEW CHIPS wear the puck the other round header buttons wear — same 22 px, same rim, same ink.
    The RAIL chip is in every header and shown only while the window floats, so a header's box does not
    change shape when a window comes off the rack. */
-.dev-pop, .dev-rail { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-hairline);
+.dev-pop, .dev-rail { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--ctl-hairline);
   background: var(--glass-raise); color: var(--dim); cursor: pointer; margin-inline-end: 4px; }
 .dev-pop:hover, .dev-rail:hover { color: var(--fg); background: linear-gradient(var(--state-hover, var(--glass-raise)) 0 0), var(--glass-raise); }   /* a lighter face (L38) */
 /* the child combinator is not decoration: `.dev-util > button` below sets `display: inline-flex` at
@@ -245,11 +247,27 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
 .note { font-family: var(--font-sans); font-size: var(--fs-small); color: var(--dim); line-height: 1.35; }
 .note b { color: var(--fg-soft); font-weight: var(--w-med); }
 
+/* 1.5.7-alpha.2 · UI SCALE (λWAVES 036; MIR OPTIONS › WINDOWS, 50–200 % by 5 %): CSS `zoom` on the UI ROOTS only — the racks, the float
+   layer, the transport, the menubar, the context menu, the hint, the notices, the dialogs, the finder — never on html, body or a stage
+   canvas, so the picture's backing store never moves.  A root inside another root (the transport docked into a rack, a dialog in a window)
+   takes zoom 1: zoom compounds.  --in-zoom is the factor INSIDE a root (1 outside): a viewport unit in a zoomed rule is divided by it, and
+   the geometry that mixes viewport px (getBoundingClientRect, clientX, innerWidth) with an element's own px reads core/zoom.js. */
+:where(#rack, #rackL, #floats, #rackFav, #rackFavList, #rackToggle, #transport, #notebook, #menubar, .mir-ctx, .control-help, .mir-notices, .mir-dialog, .mir-window-picker, #graphTip) { zoom: var(--ui-zoom); --in-zoom: var(--ui-zoom); }
+:where(#rack, #rackL, #floats, #rackFav, #rackFavList, #rackToggle, #transport, #notebook, #menubar, .mir-ctx, .control-help, .mir-notices, .mir-dialog, .mir-window-picker, #graphTip) :where(#rack, #rackL, #floats, #rackFav, #rackFavList, #rackToggle, #transport, #notebook, .mir-ctx, .control-help, .mir-window-picker, .mir-dialog) { zoom: 1; }
+/* … but the modulation material's windows (MODULATION, TIMELINE, PATTERN, and their rails) keep 100 %: their editors map the pointer to beats
+   and values through a lane's px per beat and a curve's box, read both ways; in a zoomed root they take the inverse zoom (not yet zoom-aware) */
+:where(#rack, #rackL, #floats) > :where(.mir-modwindow, [data-mir-material="modulation"], [data-mir-rail="modulation"]) { zoom: calc(1 / var(--ui-zoom)); --in-zoom: 1; }
+
+/* 1.5.7-alpha.1 · THE STROKE (λWAVES 036): a control's hairline is the pane's hairline times STROKE (MIR OPTIONS › CONTROLS, --ctl-stroke
+   on <html>, 0 … 1, home 1). Declared on the control, so it reads the hairline where the control sits (the modulation material's, LIGHT's) */
+.k-dial, .sw, .seg, .trig, select.sel, .fd, .ro, .dev-swap, .dev-copy, .dev-pop, .dev-rail, .wp-search {
+  --ctl-hairline: color-mix(in srgb, var(--glass-hairline) calc(var(--ctl-stroke) * 100%), transparent); }
+
 /* ── knob ───────────────────────────────────────────────────────────────── */
 .k { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 62px; flex: 0 0 auto; }
 .k-lbl { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-key); white-space: nowrap;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; }   /* 1.5.6-alpha.3: a label longer than its control ends in … rather than spilling */
-.k-dial { position: relative; width: 34px; height: 34px; border-radius: 50%; border: var(--glass-border) solid var(--glass-hairline); touch-action: none; cursor: grab;
+.k-dial { position: relative; width: 34px; height: 34px; border-radius: 50%; border: var(--glass-border) solid var(--ctl-hairline); touch-action: none; cursor: grab;
   background: repeating-conic-gradient(var(--glass-groove-hot) 0deg 1.8deg, var(--k-dial-groove-gap) 1.8deg 30deg), var(--glass-raise); }
 .k-dial::before { content: ""; position: absolute; left: -12px; right: -12px; top: -8px; bottom: -8px; }   /* the 44-px finger, the 34-px ink */
 .k-lg .k-dial { width: 42px; height: 42px; }
@@ -320,18 +338,18 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
    stands down keeps its seat and carries its note (wave 58: and a trigger the plan refuses). */
 
 /* ── switch, segmented select, trigger ───────────────────────────────────── */
-.sw { display: inline-flex; align-items: center; gap: 5px; min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline);
+.sw { display: inline-flex; align-items: center; gap: 5px; min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md); border: var(--glass-border) solid var(--ctl-hairline);
   background: var(--sw-fill); color: var(--dim); font-size: var(--fs-tiny); letter-spacing: var(--label-tracking, var(--tr-wide)); }
 .sw-led { width: 7px; height: 7px; border-radius: 50%; background: var(--sw-led-fill); }
 .sw.on .sw-led { background: var(--acc); box-shadow: var(--state-on-light, var(--acc-glow)); }   /* the LED is ON's light; the face is skin.css's frost */
 .sw:active { background: var(--state-press, var(--glass-press)); }
 .segw { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; min-width: 0; max-width: 100%; }
 .segw > .k-lbl { white-space: normal; }                                      /* a row label longer than the card wraps rather than running off it */
-.seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; gap: 2px; padding: 2px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--seg-ground); }
+.seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; gap: 2px; padding: 2px; border-radius: var(--r-md); border: var(--glass-border) solid var(--ctl-hairline); background: var(--seg-ground); }
 .seg-b { min-width: 40px; min-height: 38px; padding: 0 9px; border: 0; border-radius: var(--seg-b-r); background: transparent; color: var(--dim); font-size: var(--fs-tiny); letter-spacing: var(--label-tracking, var(--tr-wide)); }
 .seg-b:active { background: var(--state-press, var(--glass-press)); }
 .trig { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 48px; min-height: var(--touch); padding: 0 10px; border-radius: var(--r-md);
-  border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); color: var(--fg-soft); font-size: var(--fs-tiny); letter-spacing: var(--label-tracking, var(--tr-wide)); }
+  border: var(--glass-border) solid var(--ctl-hairline); background: var(--glass-raise); color: var(--fg-soft); font-size: var(--fs-tiny); letter-spacing: var(--label-tracking, var(--tr-wide)); }
 .trig:active { background: var(--state-press, var(--glass-press)); color: var(--fg); }
 /* PRESSED (INTENT): the wash above and one small scale, for every control the kit presses (S1).  `scale`, not
    `transform`, so it composes with the hover lift and never fights a transform an app sets. */
@@ -339,10 +357,10 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
 .trig.acc2 { color: var(--acc2); }
 .trig-g { font-size: var(--trig-glyph); }
 .trig-g > svg { display: block; }                                             /* 1.5.6-alpha.3: a glyph name draws (kit.js trig) */
-select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--sel-fill); color: var(--fg); font-size: var(--fs-small); max-width: 100%; }
+select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md); border: var(--glass-border) solid var(--ctl-hairline); background: var(--sel-fill); color: var(--fg); font-size: var(--fs-small); max-width: 100%; }
 
 /* ── fader ──────────────────────────────────────────────────────────────── */
-.fd { position: relative; min-width: 60px; height: var(--touch); border-radius: var(--fd-r); overflow: hidden; border: var(--glass-border) solid var(--glass-hairline); background: var(--fd-ground); touch-action: none; cursor: ew-resize; }
+.fd { position: relative; min-width: 60px; height: var(--touch); border-radius: var(--fd-r); overflow: hidden; border: var(--glass-border) solid var(--ctl-hairline); background: var(--fd-ground); touch-action: none; cursor: ew-resize; }
 .fd-fill { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--fill, 0) * 100%); background: var(--fd-fill-color); pointer-events: none; }
 .fd-edge { position: absolute; top: 0; bottom: 0; width: 2px; left: calc(var(--fill, 0) * 100%); margin-left: -1px; background: var(--fg); box-shadow: var(--fd-edge-shadow); pointer-events: none; }
 .fd-lbl { position: absolute; left: 7px; top: 5px; font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-key); pointer-events: none; }
@@ -352,7 +370,7 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
 .fd.pop .fd-fill { background: var(--fd-pop-fill); }
 
 /* ── readouts / meters ──────────────────────────────────────────────────── */
-.ro { display: flex; flex-direction: column; gap: 1px; padding: 4px 7px; border-radius: var(--r-sm); background: var(--ro-ground); border: var(--glass-border) solid var(--glass-hairline); }
+.ro { display: flex; flex-direction: column; gap: 1px; padding: 4px 7px; border-radius: var(--r-sm); background: var(--ro-ground); border: var(--glass-border) solid var(--ctl-hairline); }
 .ro-lbl { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-key); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ro-val { font-size: var(--fs-lead); color: var(--fg); font-variant-numeric: tabular-nums; line-height: 1.15; }
 .ro-val.live { color: var(--acc); }
@@ -524,8 +542,8 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
   /* the frost rule would otherwise put a second backdrop on the transparent root, under the head's and body's */
   body.touch-tablet.disconnected.frost:not(.phone) .dev { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
   body.touch-tablet.disconnected:not(.phone) .mir-rack-floats > .dev:not(.compact) > .dev-body {
-    max-height: calc(100dvh - 88px); min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-  body.touch-tablet .mir-rack-floats > .dev:not(.compact) { max-height: calc(100dvh - 16px); }
+    max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 88px); min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  body.touch-tablet .mir-rack-floats > .dev:not(.compact) { max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); }
   body.touch-tablet .dev-head { min-height: 44px; }
   body.touch-tablet .dev-util > :is(.dev-swap, .dev-copy) { display: none; }
   body.touch-tablet .dev-head > .dev-util { gap: 2px; }

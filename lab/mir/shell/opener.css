@@ -24,10 +24,10 @@
   --opener-cover-ground: #090909; --opener-cover-rim: #ffffff38; --opener-cover-r: 18px;
   --opener-cover-lift: 0 7px 22px #0006;                           /* the cover at rest: a drop shadow, falling down */
   --opener-mask: linear-gradient(#fff, #fff);                      /* a mask only: keeps the decoded video and its drift in one rounded group */
-  --opener-card-w: min(29vw, calc(48dvh * 9 / 16), 340px);         /* one cover's width */
-  --opener-logo-w: min(60vw, 460px, 46dvh);
+  --opener-card-w: min(calc(29vw / var(--in-zoom, 1)), calc(calc(48dvh / var(--in-zoom, 1)) * 9 / 16), 340px);         /* one cover's width */
+  --opener-logo-w: min(calc(60vw / var(--in-zoom, 1)), 460px, calc(46dvh / var(--in-zoom, 1)));
   --opener-title-font: var(--font-display, Georgia, serif);
-  --opener-title-size: clamp(21px, 2.5vw, 32px); --opener-foot-size: clamp(23px, 2.2vw, 30px); --opener-sup-size: .65em;
+  --opener-title-size: clamp(21px, calc(2.5vw / var(--in-zoom, 1)), 32px); --opener-foot-size: clamp(23px, calc(2.2vw / var(--in-zoom, 1)), 30px); --opener-sup-size: .65em;
   --opener-zoom: 1.06; --opener-spill: .03;                        /* the active cover's growth, and how far its labels spill */
   --opener-light-r: 105px;
   --opener-btn-line: rgba(255, 255, 255, .45); --opener-btn-fill-hot: #fff; --opener-btn-ink-hot: #000; --opener-btn-fill-press: rgba(255, 255, 255, .85);
@@ -48,7 +48,7 @@
 /* ── end of the values ── */
 
 .mir-opener {
-  position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; z-index: 2147483647; box-sizing: border-box; padding: 1.5rem;
+  position: fixed; inset: 0; width: calc(100vw / var(--in-zoom, 1)); height: calc(100vh / var(--in-zoom, 1)); height: calc(100dvh / var(--in-zoom, 1)); z-index: 2147483647; box-sizing: border-box; padding: 1.5rem;
   display: flex; align-items: flex-start; justify-content: center; overflow: hidden auto; overflow-x: hidden;
   background-color: var(--opener-ground); color: var(--opener-ink); font-family: var(--font-ui, system-ui, sans-serif);
   opacity: 1; animation: lw-warn-in var(--opener-t-in) forwards; transition: opacity var(--opener-t-in);
@@ -57,7 +57,7 @@
 .mir-opener[data-fading] { opacity: 0; pointer-events: none; }
 .mir-opener-card {
   display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 22px; padding: 8px 0;
-  width: 100%; max-width: 1280px; min-height: calc(100dvh - 3rem); margin: auto; box-sizing: border-box;
+  width: 100%; max-width: 1280px; min-height: calc(calc(100dvh / var(--in-zoom, 1)) - 3rem); margin: auto; box-sizing: border-box;
 }
 .mir-opener-logo { display: block; width: var(--opener-logo-w); height: auto; flex: 0 0 auto; user-select: none; -webkit-user-select: none; }
 .mir-opener-covers {
@@ -132,12 +132,12 @@ html .mir-opener .mir-opener-option[data-active] .mir-opener-cover[data-light]::
 .mir-opener-card[data-launching] :is(.mir-opener-meta, .mir-opener-logo, .mir-opener-actions) { opacity: 0; transition: opacity var(--opener-t-launch); }
 @media (max-width: 620px) {
   .mir-opener-card { padding: 10px 0 20px; gap: 22px; }
-  .mir-opener-logo { width: min(66vw, 280px); }
+  .mir-opener-logo { width: min(calc(66vw / var(--in-zoom, 1)), 280px); }
   .mir-opener-covers {
     display: flex; justify-content: flex-start; gap: 14px; overflow: auto hidden; scroll-snap-type: x mandatory; scroll-padding: 18px;
     overscroll-behavior-inline: contain; padding: 80px 38px; scrollbar-width: none;
   }
-  .mir-opener-option { flex: 0 0 min(74vw, calc(52dvh * 9 / 16), 280px); scroll-snap-align: center; }
+  .mir-opener-option { flex: 0 0 min(calc(74vw / var(--in-zoom, 1)), calc(calc(52dvh / var(--in-zoom, 1)) * 9 / 16), 280px); scroll-snap-align: center; }
   .mir-opener-actions { gap: 10px; }
 }
 /* reduced or no motion (the policy on <html>): the screen stays, nothing moves */
