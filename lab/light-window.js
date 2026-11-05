@@ -31,6 +31,7 @@ const DIALS = {
 /** THE TARGETS (L3): `light.<key>`, the dials' own ranges; AZ and EL are the SUN pad's (no dial: a route moves the sun) */
 const TARGETS = [['az', 'LIGHT AZ', 'wrap', -180, 180], ['el', 'LIGHT EL', 'linear', -90, 90], ...['key', 'ambient', 'specular', 'shine', 'rim', 'hue', 'tint', 'fill', 'cone', 'softness']
   .map((k) => [k, 'LIGHT ' + DIALS[k][0], DIALS[k][6] ? 'wrap' : DIALS[k][5] ? 'log' : 'linear', DIALS[k][1], DIALS[k][2]])];
+export const LIGHT_KEYS = Object.freeze(TARGETS.map((t) => t[0]));   // persist.js modSeats: each target's base sits at presentation.mat.light[key]
 export function lightDefs(app) {
   const { ui, mat } = app;
   return TARGETS.map(([k, label, map, min, max]) => ({ id: 'light.' + k, label, map, min, max, def: HOME[k], group: 'light',

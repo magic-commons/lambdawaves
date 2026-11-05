@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js';
+import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js'; import { lightDefs } from '../light-window.js';   // 037 L3: THE LIGHT's targets
 /** 032 W3 · AN OLDER CURVE ON A BANDED TARGET (the project open road, shell/persist.js): a curve drawn before its target had `options` carries no
  *  `steps` and meant the old integer line — k at k / (max − min) — so each point is read back as that integer (an older GRAIN as DUST, BALLS or
  *  STICKS as SHELL), seated at the centre of its option's band, and the curve remembers the count (WATER ESP's, STAR LOOP's and BENZENE π's STYLE
@@ -228,12 +228,15 @@ export function createModSeam(app) {
         hint: 'Set the A–B transition rate',
         get: () => app.hooks.ab.omega,
         set: (v) => { app.hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
+      /* 037 L3 · THE LIGHT (lab/light-window.js): light.az · light.el (the SUN pad's; no dial) and the LIGHTING window's ten dials, their ranges the dials' own;
+         a route's value is written as a hand's is (mat.light, off its home), the hand's base is the registry's */
+      ...lightDefs(app),
     ];
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
        CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
        sphere arcs, so they are drop targets now, like every observer.* dial. */
-    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes', 'action', 'palette']);
+    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes', 'action', 'palette', 'light']);
     /* 032 W3: each event target's control says its target (`data-event`) and each of its buttons its value (`data-v`) — CREATE EVENT and COPY VALUE
        (lab/actions.js, the control menu) read them; SETTINGS' FRAME · AXIS and INFORMATIONAL's switches name their `action.<id>` toggles */
     for (const d of defs) for (const c of [d.seg && d.seg(), d.also && d.also()]) { const r = c && (c.root || c); if (!r || !r.dataset) continue; r.dataset.event = d.id;

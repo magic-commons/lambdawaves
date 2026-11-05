@@ -93,7 +93,7 @@ const fm = await import('/lab/field.js');
 const OCC2 = [[40, 40, 300, 200], [500, 300, 900, 700]];
 const CORNER = { cornerX: 0.8, cornerY: -0.8, cornerScaleX: 0.04, cornerScaleY: 0.064 };
 const mat0 = JSON.parse(JSON.stringify(LW.mat));
-const MAT_KEYS = ['view', 'style', 'paletteOn', 'invert', 'finish', 'dither', 'frame', 'frameMode', 'axis', 'axisMode', 'lightUI', 'slice', 'boost', 'cornerX', 'cornerY', 'cornerScaleX', 'cornerScaleY'];
+const MAT_KEYS = ['view', 'style', 'paletteOn', 'invert', 'finish', 'dither', 'frame', 'frameMode', 'axis', 'axisMode', 'lightUI', 'slice', 'boost', 'cornerX', 'cornerY', 'cornerScaleX', 'cornerScaleY', 'light'];   // 037 L3: 'light' (LIGHTING's record, absent = the old light)
 const restoreMat = () => { for (const k of MAT_KEYS) { if (mat0[k] === undefined) delete LW.mat[k]; else LW.mat[k] = JSON.parse(JSON.stringify(mat0[k])); } };
 /** the pinned readback: occlusion set, jitter seed pinned for the synchronous half of the call, then put back */
 async function rp(w, h, occ = []) {

@@ -75,11 +75,12 @@ try {
       const seen = []; for (let i = 0; i < 6; i++) { M.step(0.13); await new Promise((r) => setTimeout(r, 30)); seen.push(+((__LW.mat.light && __LW.mat.light.rim) || 0).toFixed(3)); }
       const k = document.querySelector('.dev[data-id="light"] .k[data-param="light.rim"]'); M.stop();
       return { seen, base: M.registry.baseOf('light.rim'), stamped: !!k, dial: k && k.querySelector('.k-val').textContent };`);
-    out.trip = await g.ev(`const L = __LW; L.mod.model.clear ? 0 : 0; for (const r of [...L.mod.model.routes()]) L.mod.model.removeRoute(r.id);
+    out.trip = await g.ev(`const L = __LW; L.mod.model.removeRoutesOfTarget('light.rim');
       L.mod.registry.restoreAll(); L.mat.light = { az: -90, el: 20, key: 1.6, rim: 0.4 }; const S = L.serialize(); delete L.mat.light; L.restore(S, { project: true }); await L.settle();
       const back = { ...L.mat.light }, dial = document.querySelector('.dev[data-id="light"] .k[data-param="light.key"] .k-val').textContent;
       L.restore({ experiment: S.experiment, presentation: { ...S.presentation, mat: { ...S.presentation.mat, light: undefined } } }, { project: true }); await L.settle();
       return { back, dial, afterEmpty: L.mat.light || null };`);
+    if (out.trip.E || out.route.E) throw new Error(JSON.stringify([out.route, out.trip]));
     out.ok = out.targets.length === 12 && out.route.seen.some((v) => v > 0.05) && out.route.base === 0 && out.route.stamped && out.trip.back.key === 1.6 && !out.trip.afterEmpty;
   }
   console.log(JSON.stringify(out, null, 1));
