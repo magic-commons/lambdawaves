@@ -33,18 +33,18 @@ try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify((await g.errors()).errs));
   await g.ev(`__LW.loadPreset('2p'); __LW.pause(); await __LW.settle(); return 1;`);
   if (scene === 'h2') {
-    await float('camera', 1100, 70, 300);
+    await float('camera', 600, 60, 300);
     await g.ev(`const f = document.querySelector('.dev[data-id="camera"] .cam-mode .lw-fold'); if (f && f.getAttribute('aria-expanded') !== 'true') f.click(); await new Promise((r) => setTimeout(r, 400)); return 1;`);
     const cam = await rectOf('.dev[data-id="camera"]');
     const read = (id) => g.ev(`const k = document.querySelector('[data-param="${id}"]'); return { val: k.querySelector('.k-val').textContent, turn: getComputedStyle(k.querySelector('.k-needle')).getPropertyValue('--turn').trim() };`);
     for (const [deg, tag] of [[5, 'fov5'], [90, 'fov90']]) {
       await g.ev(`__LW.camera.setFov(${deg} * Math.PI / 180); await __LW.settle(); await new Promise((r) => setTimeout(r, 300)); return 1;`);
-      out[tag] = await read('observer.fov'); out['shot ' + tag] = await shot(`037-H2-camera-${tag}`, [380, 40, W - 20, Math.min(H - 20, cam[3])]);
+      out[tag] = await read('observer.fov'); out['shot ' + tag] = await shot(`037-H2-camera-${tag}`, [60, 40, 960, Math.min(H - 100, cam[3])]);
     }
     await g.ev(`__LW.camera.setFov(0.6); return 1;`);
     for (const [d, tag] of [[1, 'zoom-near'], [12, 'zoom-far']]) {
       await g.ev(`__LW.camera.setDist(${d}); await __LW.settle(); await new Promise((r) => setTimeout(r, 300)); return 1;`);
-      out[tag] = await read('observer.dist'); out['shot ' + tag] = await shot(`037-H2-camera-${tag}`, [380, 40, W - 20, Math.min(H - 20, cam[3])]);
+      out[tag] = await read('observer.dist'); out['shot ' + tag] = await shot(`037-H2-camera-${tag}`, [60, 40, 960, Math.min(H - 100, cam[3])]);
     }
     /* the check: on the reversed dial an arrow up (a clockwise turn) comes NEAR — obs.dist falls */
     out.arrowUp = await g.ev(`__LW.camera.setDist(3.3); await new Promise((r) => setTimeout(r, 100)); const k = document.querySelector('[data-param="observer.dist"]'), d0 = __LW.obs.dist;
