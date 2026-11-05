@@ -208,7 +208,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     for (const [file, th] of arts) { const i = el('img', 'mm-door-art', lit); i.alt = ''; i.decoding = 'async'; i.draggable = false; if (th) i.dataset.theme = th;
       i.addEventListener('load', () => { i.classList.add('on'); keepData(i.src); }, { once: true }); i.src = './img/menu/face/' + file; }
     el('span', 'mm-foil', lit); el('span', 'mm-rim', b);
-    el('b', '', el('span', 'mm-door-word', lit), word); b.addEventListener('click', go); return b; };
+    const dw = el('span', 'mm-door-word', lit); dw.dataset.word = word; el('b', '', dw, word);   // 037 M4: the word's inverted copy is its ::after (data-word)
+    b.addEventListener('click', go); return b; };
   const doorBtns = [door('tutorial', 'TUTORIAL', [['mir-interface.webp']], 0, () => showTutorial()),
     door('library', 'LIBRARY', [['library-dark.webp', 'dark'], ['library-light.webp', 'light']], 1, () => showDecks('molecular'))];
   const labB = el('button', 'mm-face-lab', face, 'CONTINUE'); labB.type = 'button'; labB.title = 'Continue to the lab'; labB.addEventListener('click', () => close());   // 035 G1: was ENTER THE LAB

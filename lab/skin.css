@@ -1054,7 +1054,15 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 #lwMenu .mm-door { display: block; width: clamp(210px, 21vw, 330px); aspect-ratio: 16 / 10; border-radius: 18px; }
 #lwMenu .mm-door-word { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 #lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
-#lwMenu .mm-door-word b { text-shadow: 0 0 18px hsl(var(--glass-tint) / .85), 0 0 4px hsl(var(--glass-tint) / .6); }
+/* 037 M4 · THE DOORS' INK (Josh 11-05: "Don't use drop shadow for 'Tutorial' and 'Library' … let a copy underneath the text be inverted. So top
+   layer is the text, next layer is … 4px right, 4px down, and then set to invert"): no shadow; the word's copy (the span's ::after, its
+   data-word) 4 px right and 4 px down in white ink under `difference`, so it inverts the art beneath it.  The span is no stacking context (z
+   auto): the copy blends with the art and the foil in the card's isolated layer (.mm-lit), and the word rides over it (.05em: the copy's
+   trailing letter-space, which the word's negative margin cancels) */
+#lwMenu .mm-door-word { z-index: auto; }
+#lwMenu .mm-door-word b { position: relative; z-index: 6; }
+#lwMenu .mm-door-word::after { content: attr(data-word); position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; translate: calc(4px + .05em) 4px; pointer-events: none;
+  font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; color: #fff; mix-blend-mode: difference; }
 #lwMenu .mm-door:is(:hover, :focus-visible) .mm-door-word b { color: var(--acc); }
 /* 036 G1 · THE DOORS' ART (picker.js door): the word alone over the about site's pictures, img/menu/face/ (DATA), each faded in once loaded
    over the palette art.  TUTORIAL: the site's MIR picture placed as the site places it (right of centre, turned in perspective, its radial
@@ -1082,7 +1090,7 @@ body.menu-open.about-over #lab { z-index: 100001; visibility: hidden; }
 body.menu-open.about-over #lab :not(.lw-about, .lw-about *) { visibility: hidden; }   /* the DISCONNECTED look shows a window's parts explicitly (the kit's skin.css) */
 body.menu-open.about-over #floats > .lw-about { visibility: visible; background: hsl(var(--glass-tint) / .9); }   /* a page over the wall: its pane nearly opaque there */
 body.menu-open.about-over #lwMenu::after { content: ''; position: absolute; inset: 0; z-index: 9; background: hsl(var(--glass-tint) / .6); }   /* the face steps back under ABOUT; a press on it puts ABOUT away (picker.js) */
-#lwMenu .mm-face-lab { font-size: 11px; letter-spacing: .22em; padding: 6px 12px; border-radius: 999px; opacity: .45; transition: opacity 140ms, color 140ms; }
+#lwMenu .mm-face-lab { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(17px, 1.5vw, 22px); letter-spacing: .22em; margin-right: -.22em; padding: 6px 14px; opacity: .9; transition: opacity 140ms, color 140ms; }   /* 037 M4: the serif, no plate, no border */
 #lwMenu .mm-face-lab:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
 #lwMenu .mm-face.in .mm-face-logo { animation: mm-drop 820ms var(--ease) both; }
 #lwMenu .mm-face.in .mm-door { animation: mm-up 620ms var(--ease) both; animation-delay: calc(220ms + var(--i, 0) * 90ms); }
@@ -1226,10 +1234,12 @@ body.frost #lwMenu .mm-sheet-fx { display: block; }
    canvas, covering the view, faded in once loaded; the playing wall fades in over it on its first frame */
 #lwMenu .mm-wall { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; opacity: 0; transition: opacity .8s ease; }
 #lwMenu .mm-wall.on { opacity: 1; } #lwMenu .mm-wall[hidden] { display: none; }
-/* CONTINUE over moving tiles: its type kept, on a soft plate of the ground; THE LOGO's DROP SHADOW (036 C3, Josh: "let the main logo have a
-   drop shadow to combat that lessened background effect") — dark under it in both themes; in LIGHT over a halo of the ground (the pale λ
-   and the teal dot) and softer */
-#lwMenu .mm-face-lab { opacity: .8; background: hsl(var(--glass-tint) / .6); border-radius: 6px; padding: 6px 14px; }
+/* CONTINUE over moving tiles (037 M4, Josh: "Let the continue button be the lambdawaves serif font with no box borders... this will be the one
+   that has a drop shadow"): THE word with the drop shadow, no plate — dark under it in DARK; in LIGHT a halo of the ground under a softer one.
+   THE LOGO's DROP SHADOW (036 C3, Josh: "let the main logo have a drop shadow to combat that lessened background effect") — dark under it in
+   both themes; in LIGHT over a halo of the ground (the pale λ and the teal dot) and softer */
+#lwMenu .mm-face-lab { text-shadow: 0 2px 12px hsl(0 0% 0% / .6), 0 1px 3px hsl(0 0% 0% / .45); }
+body[data-theme="light"] #lwMenu .mm-face-lab { text-shadow: 0 0 10px hsl(var(--glass-tint) / .95), 0 2px 10px hsl(0 0% 0% / .3); }
 #lwMenu .mm-face-logo svg { filter: drop-shadow(0 4px 18px hsl(0 0% 0% / .55)); }
 body[data-theme="light"] #lwMenu .mm-face-logo svg { filter: drop-shadow(0 0 10px hsl(var(--glass-tint) / .95)) drop-shadow(0 0 22px hsl(var(--glass-tint) / .8)) drop-shadow(0 4px 16px hsl(0 0% 0% / .3)); }
 /* the face's ground is plain, the wall or not (a cold load, offline: img/menu is never precached) — under it the frost would show the rack's
