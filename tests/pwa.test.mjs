@@ -470,7 +470,7 @@ const note = (fromRel, ref) => {
   if (target.out) return;                                    // above /lab/ — §D4 accounts for those
   if (target.rel.startsWith('..')) return;
   if (!existsSync(path.join(LAB, target.rel))) dangling.push(`lab/${fromRel} → ${ref}`);
-  else if (!listed.includes(target.rel)) uncached.push(`lab/${fromRel} → ${ref}`);
+  else if (!listed.includes(target.rel) && !IS_DATA(target.rel)) uncached.push(`lab/${fromRel} → ${ref}`);   // 036 G6: a DATA file (§1b) is never precached by law — a sheet may name one (the AI strip's two faces, img/menu/ai/), the page keeps it
 };
 /* Comments come out first.  mir/glyph.js keeps `// import { publishM4 } from './overlay.js';` as the written
    record of a forced port edit — a disabled import is not a dangling one, and a check that cannot tell the
@@ -850,7 +850,7 @@ const FACES = onDisk.filter((r) => /\.woff2$/i.test(r)).sort();
    not subsets of ours: they are Google Fonts' own files, fetched UNMODIFIED — lab/fonts/info/SOURCE.txt records each file's byte
    count and URL, and the bytes are held to it below — so, like KaTeX's, they are vendored faces whose Reserved Font Names stand. */
 const KIT_FACES = FACES.filter((r) => r.startsWith('fonts/info/'));
-const ours = FACES.filter((r) => r.startsWith('fonts/') && !KIT_FACES.includes(r)), vendored = FACES.filter((r) => !r.startsWith('fonts/'));
+const ours = FACES.filter((r) => r.startsWith('fonts/') && !KIT_FACES.includes(r)), vendored = FACES.filter((r) => !r.startsWith('fonts/') && !IS_DATA(r));   // 036 G6: OpenAI Sans (img/menu/ai/, DATA) is the maker's own file, unmodified, shown only as its name
 assert.equal(ours.length, 3, `expected the three subset interface faces in lab/fonts/, found ${ours.length}`);
 if (KIT_FACES.length) {
   const kitSource = text('fonts/info/SOURCE.txt');

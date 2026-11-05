@@ -108,6 +108,18 @@ try {
       await g.press('\uE00C'); await wait(500);
     }
   }
+  if (scene === 'strip') {
+    await wait(1500);
+    for (const t of ['dark', 'light']) {
+      await theme(t);
+      await g.ev(`document.querySelector('#lwMenu .mm-credits').classList.add('open'); return 1;`); await wait(900);   // the tap's state (a hover opens the same)
+      out[t] = await g.ev(`await document.fonts.ready; const c = document.querySelector('#lwMenu .mm-credits');
+        return { names: [...c.querySelectorAll('.mm-cr')].map((x) => x.dataset.ai + ':' + ([...x.querySelectorAll('.mm-cr-name b, .mm-cr-word')].filter((e) => e.getClientRects().length).map((e) => e.tagName === 'IMG' ? e.getAttribute('src') : e.textContent + ' ' + getComputedStyle(e).fontFamily.split(',')[0]).join('|'))),
+          small: c.querySelectorAll('small').length, fonts: ['600 15px "OpenAI Sans"', '600 15px "Google Sans Flex"'].map((f) => document.fonts.check(f)), mark: c.querySelector('[data-ai="claude"] .mm-cr-mark').getAttribute('src') };`);
+      const r = await rectOf('#lwMenu .mm-credits'); out[t + 'Shot'] = await shot(`G6-strip-open-${t}`, [r[0], r[1], r[0] + 420, r[3]], 12, 600);
+      await g.ev(`document.querySelector('#lwMenu .mm-credits').classList.remove('open'); return 1;`);
+    }
+  }
   console.log(JSON.stringify(out, null, 1));
   const errs = await g.errors(); if (errs.errs && errs.errs.length) console.log('page errors', JSON.stringify(errs.errs));
 } finally { await g.close(); }

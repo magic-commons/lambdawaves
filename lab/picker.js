@@ -217,12 +217,19 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'MIR ABOUT'); mir.title = 'MIR ABOUT — the kit this app is built on'; mir.addEventListener('click', () => openAbout('mir'));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
   { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');
-    for (const [ai, name, by] of [['claude', 'Claude', 'ANTHROPIC'], ['openai', 'GPT', 'OpenAI'], ['gemini', 'Gemini', 'GOOGLE']]) {
+    /* 036 G6 (Josh 11-03: "Claude Logo is incorrect; use the actual real logo. Checkout the screenshot of the correct font and logo styling. Also
+       no need to show company who made it"): the about site's real marks and names — Claude's starburst (img/ai/claude-mark.svg, its
+       terracotta) and its serif wordmark in the theme's ink (claude-word-{dark,light}.svg) in place of a typed name; GPT in OpenAI Sans and
+       Gemini in Google Sans Flex (img/menu/ai/, DATA; skin.css @font-face); no makers' line (ABOUT names them) */
+    const aiPic = (host, cls, src, alt = '') => { const i = el('img', cls, host); i.alt = alt; i.decoding = 'async'; i.draggable = false; i.src = src; return i; };
+    for (const [ai, name] of [['claude', 'Claude'], ['openai', 'GPT'], ['gemini', 'Gemini']]) {
       const c = el('span', 'mm-cr', credits); c.dataset.ai = ai;
-      if (ai === 'claude') icon(c, 'claudeMark').classList.add('mm-cr-mark');   // drawn (lab/icons.js): the site holds only the wordmark
+      if (ai === 'claude') aiPic(c, 'mm-cr-mark', './img/ai/claude-mark.svg');
       else if (ai === 'openai') el('i', 'mm-cr-mark mm-cr-ink', c);             // the blossom as a mask over the ink (skin.css)
-      else { const i = el('img', 'mm-cr-mark', c); i.alt = ''; i.decoding = 'async'; i.draggable = false; i.src = './img/ai/gemini.svg'; }   // its own gradient
-      const t = el('span', '', el('span', 'mm-cr-name', c)); el('b', '', t, name); el('small', '', t, by);
+      else aiPic(c, 'mm-cr-mark', './img/ai/gemini.svg');                         // its own gradient
+      const t = el('span', '', el('span', 'mm-cr-name', c));
+      if (ai === 'claude') for (const th of ['dark', 'light']) aiPic(t, 'mm-cr-word', './img/ai/claude-word-' + th + '.svg', name).dataset.theme = th;
+      else el('b', '', t, name);
     }
     credits.addEventListener('click', () => credits.classList.toggle('open')); }   // a tap shows the names (touch), a second puts them away
   /* 035 G3 · THE SHEET (Josh 11-03: "Hitting settings icon will reveal a little slide-over which is a minimalist-CSS version of Settings rack window
