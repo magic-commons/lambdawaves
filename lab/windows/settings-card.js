@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, trig, readout, group, label } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
+import { el, knob, sw, seg, trig, readout, group, label } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { summon } from '../summon.js';import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, perf, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
@@ -84,7 +84,7 @@ export function createSettingsCard(app) {
     ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } });
     /* 037 T1 · THE STAGE WINDOW: the rows above leave DISPLAY for `stage` (the controls move, the roads do not); DISPLAY keeps EDIT STAGE (native-ui.js seats it) */
     createStageWindow(app);
-    ui.editStage = trig({ label: 'EDIT STAGE', glyph: 'stage', title: 'Open STAGE below SETTINGS', onFire: () => app.sh.ACTIONS.reveal('stage') });
+    ui.editStage = trig({ label: 'EDIT STAGE', glyph: 'stage', title: 'Open STAGE below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'stage') });   // 037 T2 · THE SUMMONS (lab/summon.js)
     const gamutSup = field.ok && field.gamutSupport ? field.gamutSupport : { canvas: false, css: false, display: false, reason: 'no WebGPU device: the canvas has no colour space to set' };
     const gamutOK = !!(gamutSup.canvas && gamutSup.css);
     const rg = el('div', 'row tight', gt);

@@ -976,6 +976,10 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-stage-card .stage-colour { flex: 1 1 auto; width: auto; height: 22px; }
 .lw-stage-card .stage-knobs { margin-bottom: 2px; }
 .native-clean[data-id="settings"] .lw-edit-stage > .trig { flex: 1 1 100%; }
+/* 037 T2 · THE MITOSIS (lab/summon.js): the two title-bar pills in one fixed layer over the racks, drawn at the UI scale, gone when they land */
+.lw-mitosis { position: fixed; inset: 0; z-index: calc(var(--z-chrome) + 3); pointer-events: none; zoom: var(--ui-zoom, 1); }
+.lw-mitosis > .lw-mitosis-pill { position: absolute; margin: 0; box-sizing: border-box; }
+.lw-mitosis-pill.folded .dev-fold > svg { transform: none; }   /* a pill is folded for its shape only: its chevron reads as the open window's */
 /* CAMERA: AUTO-ROTATE needs two cells */
 .native-clean[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
 /* SPECTRUM: HYDROGEN's two rows keep ONE column rhythm (017 R4) — three columns for both, filled or not */
