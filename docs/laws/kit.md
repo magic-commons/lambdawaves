@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 037
+
+THE DOORS OF 037 (chain H, Opus 5.5; the clone road on kit branch `kit-037` from kit-032 a3dcb80, adopted as `1.5.7-alpha.7`): alpha.6 THE REVERSED DIAL (a descriptor or a camera port range may say `reverse`, and the panel passes it to `knob()`: the ZOOM dial turns clockwise to zoom in while `obs.dist` stays the distance) · alpha.7 THE SPHERE TAKES A PLANE (`directionSphere({ plane })`: the normal as the tip and look line, the plane as the square, the three world rings, no letters; the CLIP window mounts it in place of plane-model, which PLANE still uses). THE CAMERA/OBJECT FRAME is the app side: `mat.slice.frame` turns the slice normal by the camera basis under CAMERA; absent = OBJECT = the old road, so every LOCK leaf and saved project is unchanged. The next door is 1.5.7-alpha.8. Each door has its BUILT line in docs/FOR-MIR.md § 037.
+
 ## The laws of 036
 
 THE DOORS OF 036 (chain K, Opus 5.5; the clone road on kit branch `kit-032` from the 1.5.6 cut cdf20ae, adopted as `1.5.7-alpha.5`): alpha.1 THE STROKE

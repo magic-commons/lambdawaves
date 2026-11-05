@@ -107,7 +107,7 @@ const ICONS = {
   sticks: p('M3 12h11.3') + c(17.5, 12, 3.2),                                   // was 1.6 wide
   fillAll: '<rect ' + S + ' x="5" y="2.5" width="14" height="19" rx="3"/>' + p('M8.5 6.5h7M8.5 10h7M8.5 13.5h7') + dot(12, 17.6, 1.9),
   emptyAll: '<rect ' + S + ' x="5" y="2.5" width="14" height="19" rx="3"/>' + c(12, 12, 3.6) + p('M8.6 16.4 15.4 7.6'),
-  /* 036 P1 · BUTTONS · PAINT (paint-stroke.js strokeSeg): a hand pointing up (a click toggles one) · a paintbrush (drag adds, right-drag removes) */
+  /* 036 P1 · BUTTONS · PAINT (paint-stroke.js strokeButton, 037 H6: one toggle button whose glyph swaps): a hand pointing up (a click toggles one) · a paintbrush (drag adds, right-drag removes) */
   hand: p('M9 14.5V4.75a1.5 1.5 0 0 1 3 0V11') + p('M12 10.25a1.5 1.5 0 0 1 3 0v1.25') + p('M15 11a1.5 1.5 0 0 1 3 0v1.5') +
     p('M18 12.25a1.5 1.5 0 0 1 3 0v3.25a6 6 0 0 1-6 6h-2a5.2 5.2 0 0 1-3.9-1.75l-3.6-4.1a1.45 1.45 0 0 1 2.15-1.95L9 15.5'),
   brush: p('M10.4 15.6 20.3 5.7a1.9 1.9 0 0 0-2.7-2.7L7.7 12.9') + p('M7.7 12.9l2.7 2.7') +
