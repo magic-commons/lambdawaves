@@ -79,7 +79,7 @@
 /* ── the bar, on the stage (BASINS `#transport.mini`) ─────────────────────────────────────────────────────── */
 .mir-transport {
   position: fixed; left: 50%; right: auto; top: auto; bottom: var(--xport-bottom); transform: translateX(-50%); z-index: var(--z-chrome);
-  box-sizing: border-box; width: max-content; min-width: 0; max-width: calc(100vw - 24px); height: var(--xport-h); padding: 2px 7px 3px;   /* as wide as its row (BASINS basins.css `#transport.mini`: 359 px measured) */
+  box-sizing: border-box; width: max-content; min-width: 0; max-width: calc(calc(100vw / var(--in-zoom, 1)) - 24px); height: var(--xport-h); padding: 2px 7px 3px;   /* as wide as its row (BASINS basins.css `#transport.mini`: 359 px measured) */
   display: flex; align-items: center; gap: 2px; border-radius: var(--xport-radius);   /* its own corner, as BASINS' bar keeps 16 px under any CORNERS (1.5.0-alpha.7) */
   box-shadow: var(--surface-shadow, var(--glass-shadow)); touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
@@ -243,7 +243,7 @@
 body.rack-hidden .mir-transport.mir-rack-transport[data-bar="work"] { translate: none; visibility: inherit; }
 /* … its tempo panel floats over the lanes, toward the free side (BASINS timeline-window.css:79–87, positionTempo) */
 .mir-transport[data-bar="work"] .native-tempo {
-  position: absolute; top: calc(100% + var(--xport-pop-gap)); left: 0; width: min(var(--xport-pop-w), calc(100vw - 32px)); z-index: 1;
+  position: absolute; top: calc(100% + var(--xport-pop-gap)); left: 0; width: min(var(--xport-pop-w), calc(calc(100vw / var(--in-zoom, 1)) - 32px)); z-index: 1;
   padding: 8px; border: var(--glass-border) solid var(--glass-border-color); border-radius: var(--xport-pop-r);
   background: var(--surface-fill, var(--glass-well)); box-shadow: var(--surface-shadow, var(--glass-shadow));
   -webkit-backdrop-filter: var(--surface-filter, blur(var(--glass-blur))); backdrop-filter: var(--surface-filter, blur(var(--glass-blur)));
@@ -345,7 +345,7 @@ body.no-transport-bar .mir-transport, body.no-transport-bar .dev[data-id="transp
 
 /* ── λWAVES' OWN LAYOUT (LAMBDAWAVES_LAYOUT writes data-layout="lambdawaves"): its 640 px bar, the pill last in the row,
    the docked row wrapping, its 13 px glyphs and its pill ink — the arrangement it had before BASINS' became the default ── */
-.mir-transport.mini[data-layout="lambdawaves"] { width: auto; min-width: min(var(--xport-w), calc(100vw - 24px)); }
+.mir-transport.mini[data-layout="lambdawaves"] { width: auto; min-width: min(var(--xport-w), calc(calc(100vw / var(--in-zoom, 1)) - 24px)); }
 .mir-transport[data-layout="lambdawaves"] { --xport-glyph: 13px; }
 .mir-transport[data-layout="lambdawaves"] :is(.tbtn.tempo-expand, .transport-tempo-input) { order: 8; }
 .mir-transport[data-layout="lambdawaves"] .tbtn.tempo-expand { color: var(--fg-soft); }

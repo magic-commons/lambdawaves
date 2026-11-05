@@ -193,7 +193,7 @@ body.rack-hidden:not(.transport-peek) .mir-rack-transport[data-seat="top"] { tra
 
 /* ── THE NARROW SCREEN (an iPad in portrait, a narrow desktop window): the rack along the bottom (λWAVES lab.css) ── */
 @media (max-width: 860px) {
-  .mir-rack[data-side="right"] { top: auto; bottom: 0; left: 0; right: 0; width: auto; height: 46vh; }
+  .mir-rack[data-side="right"] { top: auto; bottom: 0; left: 0; right: 0; width: auto; height: calc(46vh / var(--in-zoom, 1)); }
 }
 
 /* ── THE PHONE: one rack, on the left, and the chrome follows its edge in the thumb zone (λWAVES skin.css §1, §3) ── */
@@ -211,7 +211,7 @@ body.rack-hidden:not(.transport-peek) .mir-rack-transport[data-seat="top"] { tra
   .mir-rack-btn[data-rack-btn="fav"] { bottom: calc(max(env(safe-area-inset-bottom), 0px) + 60px); }
   .mir-rack-btn::after { content: ''; position: absolute; inset: -8px; }   /* 30 px of ink, 44 px of finger */
   .mir-rack-list { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto; top: auto;
-    bottom: calc(max(env(safe-area-inset-bottom), 0px) + 152px); max-width: calc(100vw - var(--rack-edge) - 24px); max-height: 50vh; }
+    bottom: calc(max(env(safe-area-inset-bottom), 0px) + 152px); max-width: calc(calc(100vw / var(--in-zoom, 1)) - var(--rack-edge) - 24px); max-height: calc(50vh / var(--in-zoom, 1)); }
 }
 }
 /* THE FINDER's REVEAL (rack.js reveal(), 1.5.0-alpha.31): the card it scrolled to, or opened, wears an accent ring that fades in 900 ms */

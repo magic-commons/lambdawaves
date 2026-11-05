@@ -8,6 +8,7 @@ import { toScreen } from './field.js';
 import { keplerOrbits, orbitPoints } from './kepler.js';
 import { vividInk, showGraphTip, hideGraphTip, fitText } from './mir/kit.js';
 import { HELP_CLASSES, HELP_HOVER_DELAY } from './mir/control-help.js';
+import { cssZoom } from './mir/core/zoom.js';
 
 const N_RGB = { 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150], 7: [246, 142, 159] };
 
@@ -28,7 +29,7 @@ export function createKepler(canvas) {
     orbits = keplerOrbits(c.re, c.im, 0.01);
   }
   function draw(obs, half) {
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(cv);
     if (W < 32 || H < 32) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
@@ -64,7 +65,7 @@ export function createKepler(canvas) {
    *  there is no Kepler scene to redraw beneath an active impulse, but the impulse still needs a
    *  clean frame; otherwise every arrow and text raster remains and the gesture turns into a trail. */
   function clear() {
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(cv);
     if (W < 32 || H < 32) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0);

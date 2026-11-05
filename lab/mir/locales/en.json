@@ -1047,6 +1047,7 @@
   "The renderer currently owns the clock.": "The renderer currently owns the clock.",
   "The shadow’s blur": "The shadow’s blur",
   "The shine’s blur": "The shine’s blur",
+  "The size of every window, menu and bar; the picture keeps its resolution": "The size of every window, menu and bar; the picture keeps its resolution",
   "The view moved since the picture was made — capture it again.": "The view moved since the picture was made — capture it again.",
   "The view moved since the picture was made — tap CAPTURE IMAGE again.": "The view moved since the picture was made — tap CAPTURE IMAGE again.",
   "The wheel zooms a notch at a time": "The wheel zooms a notch at a time",
@@ -1078,6 +1079,7 @@
   "Type the tempo in BPM": "Type the tempo in BPM",
   "Type: {roboto} · {title} (a renamed subset of Spinwerad by gluk) · {stix} · the notebook’s {spectral}, {playfair} and {alegreya} — all SIL OFL 1.1.": "Type: {roboto} · {title} (a renamed subset of Spinwerad by gluk) · {stix} · the notebook’s {spectral}, {playfair} and {alegreya} — all SIL OFL 1.1.",
   "Type: {title}, a renamed subset of Spinwerad by gluk · {roboto} · {stix} — all SIL OFL 1.1, subset for this app.": "Type: {title}, a renamed subset of Spinwerad by gluk · {roboto} · {stix} — all SIL OFL 1.1, subset for this app.",
+  "UI SCALE": "UI SCALE",
   "UNDO": "UNDO",
   "UNSAVED CHANGES": "UNSAVED CHANGES",
   "UNTITLED": "UNTITLED",
@@ -1693,6 +1695,7 @@
   "The controls take the panes’ light: one {:ANGLE} for everything": "the relief follows the pane light's ANGLE: one light for the whole interface",
   "The {panel} panel could not be built: {why}": "an error notice: {panel} is a panel's name (RENDER …), {why} the program's reason, left as it is",
   "This device’s tier, measured once: A and B are {:FULL}, C is {:BALANCED}": "a short benchmark sorts this device into tier A, B or C",
+  "UI SCALE": "the size of the interface (windows, menus, bars), not of the picture",
   "WALL": "the clock follows wall-clock time (real elapsed seconds), as opposed to FREE, which counts frame time and slows with the picture",
   "clock state::HOLD": "— the modulation clock is held (paused in place), as opposed to RUN",
   "close ({key})": "{key} is the notebook’s shortcut key, e.g. J",
@@ -4922,6 +4925,9 @@
   "The shine’s blur": [
    "mir/shell/gui.js"
   ],
+  "The size of every window, menu and bar; the picture keeps its resolution": [
+   "mir/shell/gui.js"
+  ],
   "The view moved since the picture was made — capture it again.": [
    "mir/folders/gallery.js"
   ],
@@ -5014,6 +5020,9 @@
   ],
   "Type: {title}, a renamed subset of Spinwerad by gluk · {roboto} · {stix} — all SIL OFL 1.1, subset for this app.": [
    "mir/shell/about.js"
+  ],
+  "UI SCALE": [
+   "mir/shell/gui.js"
   ],
   "UNDO": [
    "mir/history/history-list.js",

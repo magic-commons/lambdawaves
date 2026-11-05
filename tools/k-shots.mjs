@@ -29,7 +29,7 @@ from PIL import Image
 im = Image.open(sys.argv[1]).convert('RGB'); b = sys.argv[3]
 if b != '-': im = im.crop(tuple(int(v) for v in b.split(',')))
 if im.width > 1200: im = im.resize((1200, round(im.height * 1200 / im.width)))
-im.save(sys.argv[2], quality=80)`, png, `${DIR}/${name}.jpg`, box ? box.map((v, i) => Math.max(0, v + (i < 2 ? -pad : pad))).join(',') : '-']);
+im.save(sys.argv[2], quality=80)`, png, `${DIR}/${name}.jpg`, box ? box.map((v, i) => Math.round(Math.max(0, v + (i < 2 ? -pad : pad)))).join(',') : '-']);
   return `${DIR}/${name}.jpg`;
 }
 const look = (o) => g.ev(`__LW.look.set(${JSON.stringify(o)}); await new Promise((r) => setTimeout(r, 250)); return 1;`);
@@ -51,6 +51,99 @@ try {
         out['shot ' + sk + th + st] = await shot(`036-K1-${sk}-${th}-stroke${st}`, [Math.max(0, (gui?.[0] ?? 300) - 10), 40, W - 20, Math.min(H - 40, 760)]);
       }
     }
+  }
+  if (scene === 'k2look') {
+    const field = () => g.ev(`const f = document.getElementById('field'); return [f.width, f.height];`);
+    await g.ev(`__LW.layout.reopen('wave'); __LW.layout.raise('wave'); __LW.layout.popOut('wave', { x: 520, y: 120, w: 320 }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+    out.field1 = await field();
+    for (const z of [1.5, 0.75]) {
+      await look({ scale: z }); await wait(800);
+      out['field' + z] = await field();
+      out['zoom' + z] = await g.ev(`return ['rack', 'floats', 'transport', 'menubar'].map((id) => { const e = document.getElementById(id); return id + ':' + (e ? e.currentCSSZoom : '-'); }).join(' ') + ' field:' + document.getElementById('field').currentCSSZoom;`);
+      out['shot' + z] = await shot(`036-K2-look-${Math.round(z * 100)}`, null);
+    }
+    await look({ scale: 1 });
+  }
+  if (scene === 'k2') {
+    const field = () => g.ev(`const f = document.getElementById('field'); return [f.width, f.height];`);
+    const f0 = await field(); out.field100 = f0;
+    const c = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
+    const esc = () => drv.actions(g.s, [{ type: 'key', id: 'kk' + (++pid), actions: [{ type: 'keyDown', value: '' }, { type: 'keyUp', value: '' }] }]);
+    for (const z of (process.env.K_SCALES || '0.75,1.5').split(',').map(Number)) {
+      const P = {}; out['scale' + z] = P;
+      await look({ scale: z, menuBar: 'always' }); await wait(700);
+      P.field = await field(); P.fieldSame = P.field.join() === f0.join();
+      P.zoom = await g.ev(`return ['rack', 'floats', 'transport'].map((id) => { const e = document.getElementById(id); return id + ':' + (e ? e.currentCSSZoom : '-'); }).join(' ');`);
+      /* a floating window moves exactly with the hand, then clamps (120 px stay on screen) */
+      await g.ev(`__LW.layout.reopen('observer'); __LW.layout.raise('observer'); __LW.layout.popOut('observer', { x: 420, y: 140, w: 320 }); await new Promise((r) => setTimeout(r, 600)); const d = document.querySelector('.dev[data-id="observer"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click(); return 1;`);
+      await wait(400);
+      const w0 = await rectOf('.dev[data-id="observer"]'), h0 = await rectOf('.dev[data-id="observer"] .dev-head');
+      const hx = h0[0] + 70, hy = (h0[1] + h0[3]) / 2;
+      await stroke([[hx, hy], [hx + 40, hy + 20], [hx + 120, hy + 60]], 0, 80); await wait(300);
+      const w1 = await rectOf('.dev[data-id="observer"]');
+      P.move = { dx: w1[0] - w0[0], dy: w1[1] - w0[1], want: [120, 60], width: w1[2] - w1[0] };
+      await stroke([[hx + 120, hy + 60], [hx + 600, hy + 80], [W - 5, hy + 80]], 0, 80); await wait(300);
+      const w2 = await rectOf('.dev[data-id="observer"]');
+      P.clamp = { left: w2[0], onScreen: W - w2[0], want: 120 };
+      const h2 = await rectOf('.dev[data-id="observer"] .dev-head');
+      await stroke([[h2[0] + 30, (h2[1] + h2[3]) / 2], [h2[0] - 200, (h2[1] + h2[3]) / 2], [560, 360]], 0, 80); await wait(300);
+      /* a kit window (MIR OPTIONS) moves exactly with the hand by its title bar */
+      await g.ev(`__LW.run('gui'); await new Promise((r) => setTimeout(r, 700)); return 1;`);
+      const g0 = await rectOf('[data-mir-window="gui"]'), t0 = await rectOf('[data-mir-window="gui"] .mir-win-title, [data-mir-window="gui"] .mir-win-head');
+      if (g0 && t0) { const tx = t0[0] + 200, ty = (t0[1] + t0[3]) / 2; await stroke([[tx, ty], [tx + 30, ty + 10], [tx + 80, ty + 40]], 0, 80); await wait(300);
+        const g1 = await rectOf('[data-mir-window="gui"]'); P.kitWindow = { dx: Math.round(g1[0] - g0[0]), dy: Math.round(g1[1] - g0[1]), want: [80, 40], width: Math.round(g1[2] - g1[0]) }; }
+      else P.kitWindow = { g0, t0 };
+      await g.ev(`__LW.run('gui'); return 1;`); await wait(300);
+      /* a knob drags its full travel (220 px of hand; 330 here) */
+      const kn = await g.ev(`const k = document.querySelector('.dev[data-id="observer"] .k[role="slider"]'); if (!k) return null; const r = k.querySelector('.k-dial').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, min: +k.getAttribute('aria-valuemin'), max: +k.getAttribute('aria-valuemax'), v0: +k.getAttribute('aria-valuenow'), lbl: k.getAttribute('aria-label') };`);
+      if (kn) {
+        const now = () => g.ev(`return +document.querySelector('.dev[data-id="observer"] .k[role="slider"]').getAttribute('aria-valuenow');`);
+        const dn = Math.min(H - 4 - kn.y, 240), up = Math.min(kn.y - 4, 240);   // a full scale is 220 px of hand: two strokes where the screen is short
+        for (let i = 0; i < 2; i++) await stroke([[kn.x, kn.y], [kn.x, kn.y + 30], [kn.x, kn.y + dn]], 0, 120); await wait(200); const lo = await now();
+        for (let i = 0; i < 2; i++) await stroke([[kn.x, kn.y], [kn.x, kn.y - 30], [kn.x, kn.y - up]], 0, 120); await wait(200); const hi = await now();
+        P.knob = { lbl: kn.lbl, min: kn.min, max: kn.max, down: lo, up: hi, strokes: [dn, up].map(Math.round), full: Math.abs(lo - kn.min) < 1e-6 && Math.abs(hi - kn.max) < 1e-6 };
+        await g.ev(`for (let i = 0; i < 4; i++) __LW.undo && __LW.undo(); return 1;`);
+      }
+      /* the menubar's EDIT list opens under its word */
+      const word = await g.ev(`const b = [...document.querySelectorAll('#menubar [data-menu]')].find((x) => x.dataset.menu === 'EDIT'); if (!b) return null; const r = b.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom];`);
+      if (word) {
+        await click(...c(word)); await wait(350);
+        const list = await g.ev(`const l = [...document.querySelectorAll('#menubar .mb-list')].find((x) => !x.hidden && x.getClientRects().length); if (!l) return null; const r = l.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom];`);
+        P.menubar = { word: word.map(Math.round), list: list && list.map(Math.round), dxLeft: list && Math.round(list[0] - word[0]), gapTop: list && Math.round(list[1] - word[3]) };
+        out['shotMenu' + z] = await shot(`036-K2-menubar-${Math.round(z * 100)}`, [Math.max(0, word[0] - 60), 0, Math.min(W, word[0] + 460), Math.min(H, (list ? list[3] : word[3]) + 20)]);
+        await esc(); await wait(200);
+      }
+      /* a hint sits by its control */
+      const ctl = await g.ev(`const k = [...document.querySelectorAll('.dev[data-id="observer"] [data-help]')].find((n) => n.getClientRects().length && n.getBoundingClientRect().width > 20); const r = k.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom];`);
+      await hover(...c(ctl)); await wait(1500);
+      const tip = await g.ev(`const t = document.getElementById('controlHelp'); if (!t || t.hidden || !t.getClientRects().length) return null; const r = t.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom];`);
+      P.hint = { ctl: ctl.map(Math.round), tip: tip && tip.map(Math.round), dxCentre: tip && Math.round((tip[0] + tip[2]) / 2 - (ctl[0] + ctl[2]) / 2), gap: tip && Math.round(tip[1] >= ctl[3] ? tip[1] - ctl[3] : ctl[1] - tip[3]) };
+      out['shotWin' + z] = await shot(`036-K2-window-hint-${Math.round(z * 100)}`, null);
+      await hover(W / 2, H / 2); await wait(200);
+      /* the CSB in its seat; the tempo editor on the pill */
+      P.csb = await g.ev(`const t = document.getElementById('transport'), r = t.getBoundingClientRect(); return { rect: [r.left, r.top, r.right, r.bottom].map(Math.round), inside: r.left >= 0 && r.right <= innerWidth && r.bottom <= innerHeight && r.top >= 0, centred: Math.round((r.left + r.right) / 2 - innerWidth / 2) };`);
+      const pill = await rectOf('#transport .tempo-expand');
+      if (pill) {
+        await click(pill[0] + 14, (pill[1] + pill[3]) / 2); await wait(300);
+        const inp = await g.ev(`const i = document.querySelector('#transport .transport-tempo-input'); if (!i || i.hidden) return null; const r = i.getBoundingClientRect(); return { r: [r.left, r.top, r.right, r.bottom].map(Math.round), value: i.value, font: getComputedStyle(i).fontSize };`);
+        P.tempo = { pill, input: inp && inp.r, value: inp && inp.value, font: inp && inp.font };
+        out['shotTempo' + z] = await shot(`036-K2-csb-tempo-${Math.round(z * 100)}`, [Math.max(0, pill[0] - 140), Math.max(0, pill[1] - 60), Math.min(W, pill[2] + 340), Math.min(H, pill[3] + 70)]);
+        await esc(); await wait(200);
+      }
+      /* a route dragged from MACRO 1's grip lands on a knob */
+      { const hh = await rectOf('.dev[data-id="observer"] .dev-head'); await stroke([[hh[0] + 30, (hh[1] + hh[3]) / 2], [hh[0] - 100, 500], [60, 520]], 0, 80); await wait(300); }
+      await g.ev(`__LW.layout.modulation.expand(); await new Promise((r) => setTimeout(r, 900)); return 1;`);
+      const rt = await g.ev(`const grip = document.querySelector('[data-mir-window="modulation"] .m2slot .m2grip'); const k = [...document.querySelectorAll('.dev:not(.closed) .k[data-param]')].find((x) => { const r = x.querySelector('.k-dial').getBoundingClientRect(); const h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return h && x.contains(h); });
+        if (!grip || !k) return { grip: !!grip, k: !!k }; const a = grip.getBoundingClientRect(), b = k.querySelector('.k-dial').getBoundingClientRect(); return { from: [a.left + a.width / 2, a.top + a.height / 2], to: [b.left + b.width / 2, b.top + b.height / 2], param: k.dataset.param, before: __LW.mod.model.routeList().length };`);
+      if (rt.from) {
+        await stroke([rt.from, [rt.from[0] + 10, rt.from[1] - 10], [(rt.from[0] + rt.to[0]) / 2, (rt.from[1] + rt.to[1]) / 2], rt.to, rt.to], 0, 150); await wait(400);
+        P.route = await g.ev(`const l = __LW.mod.model.routeList(); return { before: ${rt.before}, after: l.length, onTarget: l.some((r) => r.targetId === ${JSON.stringify(rt.param)}), target: ${JSON.stringify(rt.param)} };`);
+        out['shotRoute' + z] = await shot(`036-K2-route-${Math.round(z * 100)}`, null);
+        await g.ev(`__LW.undo && __LW.undo(); return 1;`);
+      } else { P.route = rt; out["shotRoute" + z] = await shot(`036-K2-route-${Math.round(z * 100)}`, null); }
+      await g.ev(`__LW.layout.modulation.close ? __LW.layout.modulation.close() : 0; return 1;`);
+    }
+    await look({ scale: 1, menuBar: 'hover' });
   }
 } catch (e) { out.error = String(e && e.stack || e); }
 console.log(JSON.stringify(out, null, 1));

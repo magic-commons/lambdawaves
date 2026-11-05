@@ -28,6 +28,7 @@ import { dipoleMatrix, einsteinA, lifetime, coherentPower, pattern, vec3c, C_AU,
 import { BASIS } from './hydrogen.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { el, readout, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
+import { cssZoom } from './mir/core/zoom.js';
 
 const HARTREE_EV = 27.211386245988;          // CODATA 2018
 const A0_NM = 0.0529177210903;               // the Bohr radius in nm
@@ -111,7 +112,7 @@ export function createRadiation(host, api = {}) {
   const hover = graphHover(cv, { repaint: () => paint(0), plot: () => rect });
   /* ── the picture: the instantaneous dipole's pattern in the (x̂, ẑ) plane, at its own scale ── */
   function paint(t) {
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(cv);
     if (W < 40 || H < 40) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);

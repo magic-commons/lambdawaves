@@ -20,6 +20,7 @@
  * same numbers here as the fallback, so a page without the sheet still moves the same way.
  */
 import { rect, setVar, count } from './perf.js';
+import { cssZoom } from './zoom.js';
 
 export const MOTION = Object.freeze({ micro: 80, ui: 160, structural: 320,
   out: 'cubic-bezier(.22, 1, .36, 1)', in: 'cubic-bezier(.55, 0, 1, .45)' });
@@ -133,13 +134,14 @@ export function commitRect(el, to, base) {
  *  starts from the box's current visual rect. */
 export function tweenRect(el, toRect, o = {}) {
   const to = box(toRect), commit = o.commit || commitRect;
-  const visual = rect(el);
+  const z = cssZoom(el), own = (r) => (z === 1 ? r : { left: r.left / z, top: r.top / z, width: r.width / z, height: r.height / z });   // 1.5.7-alpha.2: own px under UI SCALE
+  const visual = own(rect(el));
   take(el);
-  const base = rect(el);                                            // the layout, with the old motion gone
+  const base = own(rect(el));                                       // the layout, with the old motion gone
   const near = (r) => ['left', 'top', 'width', 'height'].every((k) => Math.abs(r[k] - to[k]) < 0.5);
   if (!near(base)) commit(el, to, base);                             // the one layout write: it rests where it will land
   if (!animates() || near(visual) || base.width <= 0 || base.height <= 0) { release(el); return Promise.resolve(true); }
-  const now = rect(el);                                             // the resting box (≈ to; the commit may have been clamped)
+  const now = own(rect(el));                                        // the resting box (≈ to; the commit may have been clamped)
   if (now.width <= 0 || now.height <= 0) { release(el); return Promise.resolve(true); }
   const dx = visual.left - now.left, dy = visual.top - now.top;
   const grewR = Math.max(0, now.width - visual.width), grewB = Math.max(0, now.height - visual.height);

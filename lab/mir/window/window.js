@@ -36,6 +36,7 @@ import { ariaLabel, label, hint } from '../kit.js';
 import { glyphEl, hasGlyph } from '../glyph.js';
 import { createRail, seatRail, seatOn, nearestSide, roomFor, markForwarded, RAIL } from './rail.js';
 import { dockGeometry, createDockGuide, anchorBox } from './dock.js';
+import { cssZoom, ownRect } from '../core/zoom.js';
 
 /** the house clamp (kwin.js): 120 px of a window stays across the screen, 52 px of it stays below its top */
 export const CLAMP = Object.freeze({ x: 120, y: 52, inset: 16, top: 56 });
@@ -203,8 +204,9 @@ export function gripGesture(rail, w) {
       gest = { before: { ...P }, anchor: null, shifted: false, own: w.begin ? w.begin() : null };
       rail.grip.classList.add('drag');
     },
-    onMove(s) {
+    onMove(s0) {
       if (!gest || rail.holding()) return;
+      const z = w.zoom ? w.zoom() : 1, s = z === 1 ? s0 : { ...s0, x: s0.x / z, y: s0.y / z, x0: s0.x0 / z, y0: s0.y0 / z };   // the hand in the window's px
       const P = w.P();
       if (s.shiftKey) {                                              // Shift: the nearest edge takes the rail
         gest.shifted = true; gest.anchor = null; if (w.guide) w.guide.cancel();
@@ -307,8 +309,9 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
   const wantOpen = P.open; P.open = false;
   let box = null, moving = null, deferred = false, gripping = () => false, kbBefore = null, active = panels && panels.length ? panels[0].name : null;
   let reserve = 0, stack = null;                                     // the lego stack: a band kept free above; the window this one sits on
-  const seatOf = () => (dock && dock.anchor && typeof dock.anchor.rect === 'function' ? dock.anchor.rect() || null : undefined);
-  const env = () => ({ view: { width: view.innerWidth, height: view.innerHeight }, sizes: rail.sizes(), span: dock ? withReserve(dock.span.read(), reserve) : null,
+  const seatOf = () => (dock && dock.anchor && typeof dock.anchor.rect === 'function' ? ownOf(dock.anchor.rect()) || null : undefined);   // a seat is a seen rect
+  const zoom = () => cssZoom(root), ownOf = (r) => { if (!r) return r; const z = zoom(); return z === 1 ? r : { ...r, left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z, width: r.width / z, height: r.height / z }; };
+  const env = () => ({ view: { width: view.innerWidth / zoom(), height: view.innerHeight / zoom() }, sizes: rail.sizes(), span: dock ? withReserve(ownOf(dock.span.read()), reserve) : null,
     gap: railGap, anchor: P.dock === 'anchor' ? seatOf() : undefined, top: reserve > 0 ? 8 + reserve : undefined });
   const shape = () => ({ x: P.x, y: P.y, w: P.w, h: P.h, open: P.open, dock: P.dock, chipSide: P.chipSide });
   const save = () => { if (persist && persist.write) persist.write(shape()); };
@@ -379,7 +382,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
     return box;
   }
   /** stop the window's own travel where it is seen, so a hand can take it */
-  function still() { if (moving) { moving = null; tweenRect(root, rect(root)); box = { ...box, ...pick(rect(root)) }; } }
+  function still() { if (moving) { moving = null; tweenRect(root, ownRect(root)); box = { ...box, ...pick(ownRect(root)) }; } }
   const pick = (r) => ({ left: Math.round(r.left), top: Math.round(r.top), width: Math.round(r.width), height: Math.round(r.height) });
   const pin = () => { if (!P.dock && box) { P.x = box.left; P.y = box.top; } };
   /** the state after the hand chooses `side`: a floating window makes room for its rail there */
@@ -391,7 +394,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
   function relocate(side) { if (!rail.el) return; Object.assign(P, relocated(side).Q); layout({ animate: true }); }
 
   /* ── THE DRAG: the grip (and empty glass, handed to it) ── */
-  const grip = gripGesture(rail, { P: () => P, box: () => box, moving: () => !!moving, still, layout, relocate, guide, save,
+  const grip = gripGesture(rail, { P: () => P, box: () => box, moving: () => !!moving, still, layout, relocate, guide, save, zoom,
     floatSize: () => { const e = env(); return { w: Math.min(P.w, e.view.width - CLAMP.inset), h: Math.min(P.h, e.view.height - CLAMP.inset) }; },
     track: () => guide.track(box, dockInput(P, env()), seatOf() || null),
     begin: () => { const s = stack; stack = null; return s; },   // dragged away, a stacked window leaves its stack (BASINS)
@@ -418,8 +421,9 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
     onMove(s) {
       if (!rz) return;
       const e = env();
-      if (!P.dock) P.w = Math.round(clamp(rz.w + s.dx, min.w, e.view.width - CLAMP.inset));
-      P.h = Math.round(clamp(rz.h + (P.dock === 'bottom' ? -s.dy : s.dy), min.h, e.view.height - CLAMP.inset));
+      const z = zoom();
+      if (!P.dock) P.w = Math.round(clamp(rz.w + s.dx / z, min.w, e.view.width - CLAMP.inset));
+      P.h = Math.round(clamp(rz.h + (P.dock === 'bottom' ? -s.dy : s.dy) / z, min.h, e.view.height - CLAMP.inset));
       layout();
     },
     onEnd() { root.classList.remove('resizing'); rz = null; save(); },
@@ -516,7 +520,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
     stackAbove(anchor) { stack = typeof anchor === 'function' ? anchor : null; if (P.open) layout(); },
     get isStacked() { return !!stack; },
     /** stackHeight() — the height the stack must leave free for this window */
-    stackHeight: () => (box ? box.height : Math.min(P.h, view.innerHeight - CLAMP.inset)),
+    stackHeight: () => (box ? box.height : Math.min(P.h, view.innerHeight / zoom() - CLAMP.inset)),
     /** stackAt(z) — the pane at z-index z and its rail just above it (an app's own stacking law; an app whose own windows
      *  are registered (registerWindow) needs none: raise() is one press order for all of them) */
     stackAt(z, { railOffset = railTier } = {}) { const n = Math.round(+z) || 0; setVar(root, 'z-index', String(n)); if (rail.el) setVar(rail.el, 'z-index', String(n + (Math.round(+railOffset) || 0))); },

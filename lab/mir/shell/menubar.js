@@ -62,6 +62,7 @@ import { copyText } from './clipboard.js';
 import { notice } from './notice.js';
 import { hoverable } from '../core/kbm.js';
 import { glyphEl } from '../glyph.js';
+import { cssZoom } from '../core/zoom.js';
 
 /** comingRow(name, hint) — a disabled row for a window that is not built yet (BASINS: '○  JULIA  (coming)') */
 export const comingRow = (name, hint = '') => ['○  ' + name + '  (coming)', () => {}, () => true, hint];
@@ -88,8 +89,8 @@ function rowsOn({ layer, phone, done, surface = false }) {
     const sub = el('div', 'mb-list mb-sub-list'), ph = phone(); sub.mbRow = it; sub.mbParent = list; list.mbChild = sub; it.setAttribute('aria-expanded', 'true');
     if (ph) { sub.classList.add('mb-accordion'); it.after(sub); } else { layer.appendChild(sub); if (surface) { sub.classList.add('glass'); sub.dataset.mirSurface = 'menu'; } }
     render(sub, entries);
-    if (!ph) { const r = it.getBoundingClientRect(), o = layer.getBoundingClientRect(), w = sub.offsetWidth, h = sub.offsetHeight, W = window.innerWidth, H = window.innerHeight;   // placed in the viewport, written in the bar's frame
-      const left = r.right + 2 + w <= W - 8 ? r.right + 2 : Math.max(8, r.left - 2 - w); sub.style.left = Math.round(left - o.left) + 'px'; sub.style.top = Math.round(Math.max(8, Math.min(H - h - 8, r.top - 4)) - o.top) + 'px'; }
+    if (!ph) { const z = cssZoom(sub), r = it.getBoundingClientRect(), o = layer.getBoundingClientRect(), w = sub.offsetWidth * z, h = sub.offsetHeight * z, W = window.innerWidth, H = window.innerHeight;   // placed in the viewport, written in the bar's frame (÷ UI SCALE)
+      const left = r.right + 2 + w <= W - 8 ? r.right + 2 : Math.max(8, r.left - 2 - w); sub.style.left = Math.round((left - o.left) / z) + 'px'; sub.style.top = Math.round((Math.max(8, Math.min(H - h - 8, r.top - 4)) - o.top) / z) + 'px'; }
     return sub;
   }
   const subKeys = (e, list) => {
@@ -154,9 +155,9 @@ export function contextMenu({ x = 0, y = 0, entries, anchor = null, onClose = nu
   const api = { pane, host, close() { if (life.signal.aborted) return; life.abort(); if (off) off(); host.remove(); if (ctxOpen === api) ctxOpen = null; if (onClose) onClose(); } };
   rowsOn({ layer: host, phone: phoneNow, done: api.close, surface: true }).render(pane, rows);
   if (anchor) { const r = anchor.getBoundingClientRect(); x = r.left; y = r.bottom + 2; }
-  const w = pane.offsetWidth, h = pane.offsetHeight, W = window.innerWidth, H = window.innerHeight, M = 8;
-  pane.style.left = Math.round(Math.max(M, x + w > W - M ? Math.min(x - w, W - w - M) : x)) + 'px';
-  pane.style.top = Math.round(Math.max(M, y + h > H - M ? Math.min(y - h, H - h - M) : y)) + 'px';
+  const z = cssZoom(pane), w = pane.offsetWidth * z, h = pane.offsetHeight * z, W = window.innerWidth, H = window.innerHeight, M = 8;   // seen; written ÷ UI SCALE
+  pane.style.left = Math.round(Math.max(M, x + w > W - M ? Math.min(x - w, W - w - M) : x) / z) + 'px';
+  pane.style.top = Math.round(Math.max(M, y + h > H - M ? Math.min(y - h, H - h - M) : y) / z) + 'px';
   document.addEventListener('pointerdown', (e) => { if (!host.contains(e.target)) api.close(); }, cap);
   window.addEventListener('scroll', (e) => { if (!host.contains(e.target)) api.close(); }, cap);
   for (const t of ['resize', 'blur']) window.addEventListener(t, api.close, { signal: life.signal });
@@ -256,12 +257,12 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
   /* ON A PHONE the bar may not run off the screen: it gets the width from the wordmark to the edge and wraps onto a
      second row there (shell.css), its first row level with the wordmark.  The desktop bar is one row, as it was. */
   const place = () => {
-    const r = opener.getBoundingClientRect(), phone = isPhone(), hidden = logoHidden(), width = hidden ? 0 : opener.offsetWidth;
+    const z = cssZoom(bar), r = opener.getBoundingClientRect(), phone = isPhone(), hidden = logoHidden(), width = hidden ? 0 : r.width;   // seen; the bar's own lengths ÷ UI SCALE
     let rtl = false; try { rtl = bar.matches(':dir(rtl)'); } catch (_) {}
-    bar.style.maxWidth = phone ? Math.max(120, (rtl ? r.right - width : window.innerWidth - r.left - width) - 16) + 'px' : '';
-    bar.style.left = (rtl ? r.right - width - (hidden ? 0 : 8) - bar.offsetWidth : r.left + width + (hidden ? 0 : 8)) + 'px';   // a hidden logo gives its seat to the menus; RTL keeps the right edge
-    const row = phone && bar.firstElementChild ? bar.firstElementChild.offsetHeight : bar.offsetHeight;
-    bar.style.top = Math.max(0, r.top + r.height / 2 - row / 2) + 'px';
+    bar.style.maxWidth = phone ? Math.max(120, (rtl ? r.right - width : window.innerWidth - r.left - width) - 16) / z + 'px' : '';
+    bar.style.left = (rtl ? r.right - width - (hidden ? 0 : 8) - bar.offsetWidth * z : r.left + width + (hidden ? 0 : 8)) / z + 'px';   // a hidden logo gives its seat to the menus; RTL keeps the right edge
+    const row = (phone && bar.firstElementChild ? bar.firstElementChild.offsetHeight : bar.offsetHeight) * z;
+    bar.style.top = Math.max(0, r.top + r.height / 2 - row / 2) / z + 'px';
     publish();
   };
   /* the bar's foot, for the chrome below it: on a phone the kit's rack starts under it (rack.css reads --menubar-bottom
@@ -272,7 +273,7 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
     list.style.translate = '';
     const r = list.getBoundingClientRect(), W = window.innerWidth, M = 8;
     const dx = r.right > W - M ? Math.max(M - r.left, W - M - r.right) : r.left < M ? M - r.left : 0;
-    if (dx) list.style.translate = Math.round(dx) + 'px 0';
+    if (dx) list.style.translate = Math.round(dx / cssZoom(list)) + 'px 0';
   };
   const showBar = (focusIt) => {
     clearTimeout(barTimer); barShown(true); place();

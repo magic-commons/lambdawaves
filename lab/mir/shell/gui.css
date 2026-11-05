@@ -25,7 +25,7 @@
 /* ── end of the values ── */
 
 /* ── OPTIONS: one pack, the groups in their order down the columns (an app may hide a group: nothing is left empty) ── */
-.gui-options { width: min(calc(var(--gui-cols) * var(--gui-col) + (var(--gui-cols) - 1) * var(--gui-gap)), calc(100vw - 64px)); }   /* the screen less the window's margin, padding and a scrollbar */
+.gui-options { width: min(calc(var(--gui-cols) * var(--gui-col) + (var(--gui-cols) - 1) * var(--gui-gap)), calc(calc(100vw / var(--in-zoom, 1)) - 64px)); }   /* the screen less the window's margin, padding and a scrollbar */
 .gui-grid { columns: var(--gui-cols) var(--gui-col); column-gap: var(--gui-gap); }
 .gui-grid > .gui-grp { break-inside: avoid; margin-bottom: var(--gui-gap); }
 /* help prose goes with HELP (BASINS: "make it go away when 'help' is OFF"), and keeps its seat: a switch never moves the

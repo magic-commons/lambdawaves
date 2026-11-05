@@ -273,7 +273,7 @@ html[data-shine] body {
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
   :root {
     --phone: 1;
-    --rack-w: min(300px, calc(100vw - 76px));      /* the designed 300-px density, clamped only under 376 px */
+    --rack-w: min(300px, calc(calc(100vw / var(--in-zoom, 1)) - 76px));      /* the designed 300-px density, clamped only under 376 px */
     --rack-edge: calc(var(--rack-w) + 10px);       /* the rack's outer edge: what the hide toggle FOLLOWS */
     --top-bar: 46px;                               /* the masthead strip the rack starts below — deep enough that the tags' fingers clear the first card */
   }
@@ -497,7 +497,7 @@ body[data-card] .glass[data-mir-surface="menu"]:not([hidden]) { background-color
 :where([data-mir-surface="well"]) { background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 .badge { min-height: 24px; padding: 2px 9px; border-color: transparent; box-shadow: var(--surface-shadow, var(--glass-shadow)); outline: var(--seat-edge); outline-offset: 0;   /* a pane's height (L13) */
   color: var(--ink-key);
-  background: hsl(var(--glass-tint) / var(--glass-opacity)); max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  background: hsl(var(--glass-tint) / var(--glass-opacity)); max-width: calc(46vw / var(--in-zoom, 1)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .badge:hover { color: var(--fg-soft); }
 
 
@@ -674,7 +674,7 @@ body.disconnected:not(.phone) .dev.dragging > .dev-body {
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
   /* (the phone's tokens — the --phone sentinel, the rack width, the opaque card — are in the FROST block at the top) */
   /* the tag clips its TEXT, not itself: `overflow: hidden` on the chip (skin §10) was eating the finger */
-  .badge { position: relative; max-width: 40vw; overflow: visible; }
+  .badge { position: relative; max-width: calc(40vw / var(--in-zoom, 1)); overflow: visible; }
   .badge > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .badge::after { content: ''; position: absolute; inset: -11px 0; }        /* 24 px of chip, 46 px of finger (the strip's own height caps it) */
 
@@ -758,8 +758,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 .native-info { display: inline-flex; vertical-align: middle; position: relative; height: 28px; align-items: center; }
 .native-info-button { width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: none; color: var(--dim); cursor: pointer; font: italic var(--w-bold) var(--help-glyph-size) var(--font-help-glyph); }
 .native-info-button:hover, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--state-hover, var(--glass-raise)); }   /* focus is the ring (§6), not this look (L42) */
-.native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--surface-radius, var(--r-lg)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
-.control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--surface-radius, var(--r-md)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
+.native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(calc(100vw / var(--in-zoom, 1)) - 16px)); max-height: min(360px, calc(calc(100vh / var(--in-zoom, 1)) - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--surface-radius, var(--r-lg)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
+.control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(calc(100vw / var(--in-zoom, 1)) - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--surface-radius, var(--r-md)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
 .control-help[hidden] { display: none; }
 .control-help[popover] { inset: auto; margin: 0; overflow: visible; height: auto; }   /* 1.5.0-alpha.26: the top-layer hint keeps its own seat (left / top inline), never the UA popover's centred box */
 .native-info .native-info-content, .control-help {   /* a popover: the TINTED pane at menu height (L10/L11), no blur; layers replace the !important */

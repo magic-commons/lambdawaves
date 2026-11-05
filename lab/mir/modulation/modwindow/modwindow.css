@@ -848,7 +848,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 .mir-modwindow .m2predead.off { display: none; }
 /* The warning's inspector floats from the 46 px extension.  It is outside the
    work bar's clipped flow, so opening it cannot bargain with the preset core. */
-.mir-modwindow .m2deadpick { position: absolute; width: 320px; max-width: calc(100vw - 16px); z-index: 43;
+.mir-modwindow .m2deadpick { position: absolute; width: 320px; max-width: calc(calc(100vw / var(--in-zoom, 1)) - 16px); z-index: 43;
   box-sizing: border-box; border-radius: var(--surface-radius, var(--r-lg)); padding: 7px;
   border: var(--surface-edge-width, var(--glass-border)) solid var(--surface-edge, var(--glass-hairline));
   display: flex; flex-direction: column; gap: 4px; overflow: hidden; }

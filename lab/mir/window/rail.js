@@ -24,6 +24,7 @@ import { phrase } from '../core/i18n.js';
 import { rect, setAttr, setVar, setText } from '../core/perf.js';
 import { tweenRect, flip, owns } from '../core/motion.js';
 import { createProximity } from '../core/proximity.js';
+import { cssZoom, ownRect } from '../core/zoom.js';
 
 export const SIDES = Object.freeze(['left', 'right', 'top', 'bottom']);
 /* gap: how far a FLOATING window's rail sits from its pane, per side — kwin.js's RAIL_GAP (BASINS): 8 px on the right,
@@ -225,7 +226,7 @@ export function createRail({ id, title, chips = [], layer, seats, onChip, onSide
   function seat(s, { animate = false } = {}) {
     const was = el.dataset.side;
     const write = () => { setAttr(el, 'data-side', s.side); pos(el, s); };
-    if (!animate || el.hidden || !was) { if (owns(el)) tweenRect(el, rect(el), { commit: pos }); write(); return Promise.resolve(true); }
+    if (!animate || el.hidden || !was) { if (owns(el)) tweenRect(el, ownRect(el), { commit: pos }); write(); return Promise.resolve(true); }
     if (vertical(was) === vertical(s.side)) { setAttr(el, 'data-side', s.side); return tweenRect(el, s, { commit: pos }); }
     return flip([el], write);
   }
@@ -240,12 +241,12 @@ export function createRail({ id, title, chips = [], layer, seats, onChip, onSide
     if (forwarded.has(e) || (!e.isPrimary && e.isTrusted) || e.button !== 0) return;   // a scripted press is a press (core/pointer.js)
     hold = { id: e.pointerId, x: e.clientX, y: e.clientY, timer: setTimeout(() => {
       hold.timer = 0; picking = held = true; grip.classList.add('armed'); setAttr(el, 'data-picking', 'true');
-      prox.update({ x: hold.x, y: hold.y }, seatsNow());
+      prox.update({ x: hold.x / cssZoom(el), y: hold.y / cssZoom(el) }, seatsNow());
     }, RAIL.longPress) };
   };
   const holdMove = (e) => {
     if (!hold || e.pointerId !== hold.id) return;
-    if (picking) { prox.update({ x: e.clientX, y: e.clientY }, seatsNow()); return; }
+    if (picking) { prox.update({ x: e.clientX / cssZoom(el), y: e.clientY / cssZoom(el) }, seatsNow()); return; }
     if (hold.timer && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > RAIL.slop) { clearTimeout(hold.timer); hold = null; }
   };
   const holdUp = (e) => {

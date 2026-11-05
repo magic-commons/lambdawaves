@@ -51,6 +51,7 @@ import { settled } from '../core/motion.js';
 import * as MOD from '../modulation/mod.js';
 import { jsonStore } from '../core/prefs.js';
 import { createWindow, CLAMP } from '../window/window.js';
+import { cssZoom } from '../core/zoom.js';
 
 /** the numbers the bar keeps (BASINS transport.js measured them) */
 export const TRANSPORT = Object.freeze({
@@ -759,7 +760,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   const playPart = playButton({ clock, onRefused, signal });
   let pillP = null;
   function panelPart() { if (!panel) { panel = tempoPanel({ tempo, mod, macros, signal }); parts.push(panel); panel.onToggle((v) => {   /* THE HAND: the bar keeps the row's width while the panel opens beside its row — read with the panel out of the flow (it is already shown when this runs), so the panel never widens the bar */
-      if (v && placement === 'stage') { panel.root.hidden = true; bar.style.width = bar.getBoundingClientRect().width + 'px'; panel.root.hidden = false; } else bar.style.removeProperty('width');
+      if (v && placement === 'stage') { panel.root.hidden = true; bar.style.width = bar.getBoundingClientRect().width / cssZoom(bar) + 'px'; panel.root.hidden = false; } else bar.style.removeProperty('width');
       bar.classList.toggle('tempo-open', v); aimPanel(); if (pillP) pillP.sync(); if (placement === 'free') view.requestAnimationFrame(fitFree); }); } return panel; }
   function pillPart() { if (!pillP) pillP = tempoPill({ tempo, panel: layoutNames(layout).includes('panel') ? panelPart() : null, work: () => placement === 'work', typed: layoutNames(layout).includes('expand'), signal }); return pillP; }
   /* 'expand' (1.5.0-alpha.31, λWAVES 018 E2 · E6): the expander's own button — it opens and shuts the tempo panel, so the pill only types; its
@@ -804,7 +805,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     if (fw > 0) bar.style.width = fw + 'px';
     W.resize({ w: bar.offsetWidth + (W.root.offsetWidth - W.body.clientWidth), h: bar.offsetHeight + (W.root.offsetHeight - W.body.clientHeight) });
     /* 1.5.6-alpha.3 (λWAVES 021 V1): grown (the expander), it is placed again against the viewport — the whole window on screen */
-    const r = W.rect(), m = CLAMP.inset / 2, vw = view.innerWidth, vh = view.innerHeight;
+    const r = W.rect(), m = CLAMP.inset / 2, z = cssZoom(W.root), vw = view.innerWidth / z, vh = view.innerHeight / z;   // the window's px
     if (r && (r.left < m || r.top < 0 || r.left + r.width > vw - m || r.top + r.height > vh - m))
       W.place({ x: Math.max(m, Math.min(r.left, vw - r.width - m)), y: Math.max(0, Math.min(r.top, vh - r.height - m)) });
   }
@@ -914,7 +915,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     const b = bar.getBoundingClientRect(), m = menu.getBoundingClientRect(), vw = view.innerWidth, vh = view.innerHeight;
     const x = Math.max(8, Math.min(vw - m.width - 8, (at ? at.x : b.left + b.width / 2) - m.width / 2));
     const y = menuSide(seat) === 'below' ? Math.min(vh - m.height - 8, b.bottom + 8) : Math.max(8, b.top - m.height - 8);
-    menu.style.left = x + 'px'; menu.style.top = y + 'px';
+    const z = cssZoom(menu); menu.style.left = x / z + 'px'; menu.style.top = y / z + 'px';
     (seatItems.find((it) => it.classList.contains('on')) || seatItems[0]).focus({ preventScroll: true });
   }
   function applySeat(s, { save = false } = {}) {

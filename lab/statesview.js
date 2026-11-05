@@ -32,6 +32,7 @@ import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeSeg, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
+import { cssZoom } from './mir/core/zoom.js';
 
 const TAU = 2 * Math.PI;
 const LANE_CAP = 8;                         // eight modulation slots (reg.amp1…8, reg.ph1…8): S₀ + seven states
@@ -619,7 +620,7 @@ export function createStates(host, api) {
   function paint() {
     if (!shown) return;
     const W = cv.clientWidth, H = cv.clientHeight; if (W < 32 || H < 32) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(cv);
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const T = themeInk(g), left = 44, right = W - 8, top0 = 10, bot = H - 15, plot = { x0: left, y0: top0, x1: right, y1: bot };
@@ -669,7 +670,7 @@ export function createStates(host, api) {
   function paintScope() {
     if (!shown) return;
     const W = scope.clientWidth, H = scope.clientHeight; if (W < 24 || H < 24) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(scope);
     if (scope.width !== Math.round(W * dpr) || scope.height !== Math.round(H * dpr)) { scope.width = Math.round(W * dpr); scope.height = Math.round(H * dpr); }
     const g = scope.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const T = themeInk(g), A = accentRGB(g, 2), cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 12;
