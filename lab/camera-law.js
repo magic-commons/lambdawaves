@@ -50,7 +50,7 @@ export const clampShift = (s) => [0, 1].map((i) => { const v = s ? +s[i] : 0; re
 export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
   const subs = new Set(), tell = () => { for (const f of subs) f(); }, present = () => { paint(); tell(); };   // A8: every PRESENT the law asks for is a notice
   const camera = {
-    autoRotate: false, friction: CAM.MU_DEF,
+    autoRotate: true, friction: CAM.MU_DEF,          // 037 H3 (Josh: "make it as if friction is 0 by default"): ON from the boot — a fling never stops; no ambient spin
     dragGain: CAM.GAIN_DEF, flingGain: CAM.FLING_DEF,   // wave 58: rad/px = dragGain × CAM.SENS · the release is multiplied by flingGain before the law sees it
     dy: 0, dp: 0,                                    // THE RESIDUAL d = ω (rad/s): the only state the law carries
     t: 0, steps: 0, flings: 0, last: null,           // t: the seconds the law has integrated — the CAMERA clock (§12)
@@ -175,8 +175,9 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
      k = D·tanH / (D′·tanH′).  The wheel and the pinch pass the cursor or the fingers' centroid; the dials and the keys
      anchor at the frame's centre (c = 0, p′ = p·k).  A modulated ZOOM or FOV leaves the shift alone. */
   /* 0.5.3 M6 · THE LOCK, the classic camera (R3: the PAN only): the pivot stays at the frame's centre, so anchor adds no shift and every zoom
-     is from the centre; setShift and panBy answer with a notice and move nothing; FOV, the mode and the turn stay live.  PREFERENCE `camLock`. */
-  const CENTRE = Object.freeze([0, 0]); let locked = false;
+     is from the centre; setShift and panBy answer with a notice and move nothing; FOV, the mode and the turn stay live.  PREFERENCE `camLock`.
+     037 H3 (Josh: "Autorotate and lock should be on by default"): ON from the boot — the PAN pad rests until the reader unlocks it. */
+  const CENTRE = Object.freeze([0, 0]); let locked = true;
   const anchor = (c, k) => { if (!locked && k !== 1 && Number.isFinite(k)) { const p = obs.shift || CENTRE; setShift(c[0] - (c[0] - p[0]) * k, c[1] - (c[1] - p[1]) * k); } };
   function zoomAt(c, v) { const d0 = obs.dist; if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); anchor(c, d0 / obs.dist); present(); return obs.dist; }
   const setDist = (v) => zoomAt(CENTRE, v);

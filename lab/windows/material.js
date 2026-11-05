@@ -317,8 +317,8 @@ export function createMaterial(app) {
     const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
     /* 0.5.3 M6 · LOCK, the classic camera (a PREFERENCE, `camLock`): the pan held at the centre and every zoom from it; the PAN pad rests while it holds */
-    ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK: pan and zoom at centre', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
-    let lockShown = false;
+    ui.camLockSw = sw({ label: 'LOCK', value: !!cameraPort.get('lock'), title: 'LOCK: pan and zoom at centre', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
+    let lockShown = !!cameraPort.get('lock'); camView.pad.widget.setDisabled(lockShown);   // 037 H3: the LOCK is on from the boot, so the pad rests from its first paint
     cameraPort.subscribe(() => { const on = cameraPort.get('lock'); if (on !== lockShown) { lockShown = on; ui.camLockSw.set(on); camView.pad.widget.setDisabled(on); } });   // every road (the switch, the settings, LW) is a notice
     /* iteration 001 (Josh): CAMERA, SHORTER — the group's CAMERA word goes (the window says it), LOCK joins HOME · PAN HOME, and the PAN pad,
        the scales and the HAND fold behind (SET Δρ REF left at iteration 008) CONTROL's chevron (lab/fold.js): HOME, CONTROL, the sphere, ZOOM · FOV stay out */

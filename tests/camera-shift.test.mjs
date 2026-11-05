@@ -98,9 +98,10 @@ pass('clampShift: each component in [−1, 1], a non-number reads 0, no −0, a 
 
 /* ── THE CAMERA LAW (lab/camera-law.js), built here as rack.js builds it: the pose, present, modHand (C1: no dials — the panel reads the port) ── */
 const BOOT = () => ({ yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38), shift: [0, 0] });   // rack.js's boot pose
-function law(pose, held = () => false) {
+function law(pose, held = () => false, boot = false) {
   const obs = pose, writes = [];
   const L = createCameraLaw({ obs, present() {}, modHand: (id, v) => { if (held(id)) { writes.push([id, v]); return true; } return false; }, resetWall() {} });
+  if (!boot) { L.camera.setLock(false); L.camera.setAutoRotate(false); }   // 037 H3: the law boots LOCKed with AUTO-ROTATE on (§ 9 reads that); the maths here is the free camera's
   return { obs, writes, ...L };
 }
 /** the point of the pivot plane under uv c: the pointer's ray met with the plane through the target ⟂ fwd (rack.js unproject, unclamped) */
@@ -197,8 +198,10 @@ pass('the port as the kit panel\'s: a dial is one axis (a routed PAN X keeps its
    Alt+Arrows), PAN X / PAN Y / PAN HOME on the port, and the anchors of zoomAt (the wheel at the cursor, the pinch at the centroid)
    and setFov — so every zoom is from the centre.  ZOOM, FOV, the mode and the turn stay live; released, the pan answers again. */
 {
+  const B = law(BOOT(), undefined, true);
+  assert.deepEqual([B.camera.lock, B.port.get('lock'), B.camera.autoRotate, B.camera.mu], [true, true, true, 0], '037 H3: LOCK and AUTO-ROTATE on from the boot (FRICTION read as 0)');
   const L = law(BOOT(), (id) => id === 'observer.panx'), P = L.port, o = L.obs; let told = 0; P.subscribe(() => told++);
-  assert.equal(L.camera.lock, false); assert.equal(P.get('lock'), false, 'off by default');
+  assert.equal(L.camera.lock, false); assert.equal(P.get('lock'), false, 'released');
   o.shift = [0.4, -0.3];   /* a project's shift, or a route's output */
   P.set('lock', true); assert.deepEqual([L.camera.lock, P.get('lock'), o.shift], [true, true, [0, 0]], 'engaged: the pivot goes home');
   assert.deepEqual(L.writes, [], 'raw: the routed PAN X keeps its base');
