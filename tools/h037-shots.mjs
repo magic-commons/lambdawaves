@@ -102,6 +102,30 @@ try {
     out.verdict = { objectSphereStill: JSON.stringify(out.objectTip0) === JSON.stringify(out.objectTip1), cameraSphereStill: JSON.stringify(out.cameraTip0) === JSON.stringify(out.cameraTip1),
       dragTurned: n1.some((v, i) => Math.abs(v - n0[i]) > 0.05), homeIsZ: JSON.stringify(n2) === '[0,0,1]' };
   }
+  if (scene === 'h6') {
+    /* PAINT/ADD's two faces on SPECTRUM's head: a real press swaps the glyph, the word, data-state and the PREFERENCE; the MOLECULES heads follow */
+    await float('spectrum', 520, 60, 340);
+    const face = () => g.ev(`const b = document.querySelector('.dev[data-id="spectrum"] .sp-stroke'); return { tag: b.tagName, cls: b.className, label: b.getAttribute('aria-label'), state: b.dataset.state, pressed: b.getAttribute('aria-pressed'),
+      glyph: b.querySelector("svg") && b.querySelector("svg").innerHTML.length, hint: b.dataset.helpEn || b.title, stored: localStorage.getItem('lambdawaves.q0.stroke'), seats: document.querySelectorAll('.sp-stroke').length,
+      agree: [...document.querySelectorAll('.sp-stroke')].every((x) => x.dataset.state === b.dataset.state) };`);
+    const head = await rectOf('.dev[data-id="spectrum"] .sp-head');
+    out.before = await face(); out['shot buttons'] = await shot('037-H6-stroke-buttons', head, 24);
+    const r = await rectOf('.dev[data-id="spectrum"] .sp-stroke');
+    await drv.actions(g.s, [{ type: 'pointer', id: 'h' + (++pid), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: Math.round((r[0] + r[2]) / 2), y: Math.round((r[1] + r[3]) / 2) },
+      { type: 'pointerDown', button: 0 }, { type: 'pointerUp', button: 0 }] }]);
+    await hover(20, 700);
+    out.after = await face(); out['shot paint'] = await shot('037-H6-stroke-paint', head, 24);
+  }
+  if (scene === 'h7') {
+    /* the law line: hidden while the pointer is on the window elsewhere, shown on the ladder it belongs to */
+    await float('spectrum', 520, 60, 340);
+    const lad = await rectOf('.dev[data-id="spectrum"] .ladder canvas'), btn = await rectOf('.dev[data-id="spectrum"] .sp-head .trig'), card = await rectOf('.dev[data-id="spectrum"]');
+    const op = () => g.ev(`return +getComputedStyle(document.querySelector('.dev[data-id="spectrum"] .reg-foot')).opacity;`);
+    const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+    await hover((btn[0] + btn[2]) / 2, (btn[1] + btn[3]) / 2); await wait(400); out.onWindow = await op(); out['shot resting'] = await shot('037-H7-lawline-resting', [card[0], card[1], card[2], btn[3] + 12], 10);
+    await hover((lad[0] + lad[2]) / 2, (lad[1] + lad[3]) / 2); await wait(400); out.onLadder = await op(); out['shot revealed'] = await shot('037-H7-lawline-revealed', [card[0], card[1], card[2], btn[3] + 12], 10);
+    out.text = await g.ev(`return document.querySelector('.dev[data-id="spectrum"] .reg-foot').textContent;`);
+  }
   const errs = await g.errors(); out.errs = errs.errs;
 } finally { await g.close(); }
 console.log(JSON.stringify(out, null, 1));

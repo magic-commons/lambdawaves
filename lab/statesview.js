@@ -29,7 +29,7 @@
 import { stateName } from './names.js';
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, vividInk, nRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeSeg, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 import { cssZoom } from './mir/core/zoom.js';
@@ -85,7 +85,7 @@ export function createStates(host, api) {
   const painted = () => { if (api.stroked) api.stroked('states'); };
   const fillB = fillButton(head, { fill: 'S₀ and every state the ladder shows (up to ' + LANE_CAP + ' lanes) on, equal and in phase', empty: 'every state off but S₀' },
     (empty) => { if (!empty) return clear(); const r = fill(); if (r) painted(); return r; });
-  head.appendChild(strokeSeg().root);   // 036 P1: BUTTONS · PAINT, the one preference SPECTRUM's head sets too
+  head.appendChild(strokeButton().root);   // 036 P1 · 037 H6: BUTTONS · PAINT, one toggle button, the one preference SPECTRUM's head sets too
 
   const bar = el('div', 'row tight reg-bar', host);
   /* 022 P3: the kit's select (its list the menu pane); a pick runs the preset and the list goes back to PRESET… */
