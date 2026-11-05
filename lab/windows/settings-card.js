@@ -247,6 +247,12 @@ export function createSettingsCard(app) {
     { const h = sw({ label: 'HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
     const moreRow = el('div', 'mm-sh-more', host), more = group('');
     { const f = fold(moreRow, more, { what: 'more settings', key: 'menuMore' }); f.button.prepend(el('span', 'mm-sh-morew', null, 'MORE')); }
+    /* 036 G5b (chain K's FOR-SOS): STROKE — the kit's look key `stroke` (0–1 by .05; MIR OPTIONS › CONTROLS' 0–100 % knob; λWAVES' home 0), a
+       second face of the look store as the rows above; shown only where the kit carries the key (MIR 1.5.7-alpha's door) */
+    if (look.get('stroke') !== undefined) {
+      const k = knob({ label: 'STROKE', title: 'The controls’ outline: 0 % none', min: 0, max: 100, step: 5, value: Math.round((look.get('stroke') || 0) * 100), fmt: (v) => Math.round(v) + ' %',
+        onChange: (v) => look.set({ stroke: Math.round(v / 5) * 5 / 100 }) });
+      paints.push(() => { const v = Math.round((look.get('stroke') || 0) * 100); if (k.get() !== v) k.set(v); }); row(more, k); }
     const Q = (...ks) => row(more, ...ks.map((k) => face(ui[k])));
     row(more, face(ui.gridSeg, { label: 'GRID' }));   // the rack's grid seg is wordless (013 S1: its group head names it); the sheet's row says GRID
     Q('autoSw', 'govSw'); Q('cadSeg'); Q('clockSeg'); Q('cadenceSeg'); Q('latencyRo'); Q('scaleRo');
