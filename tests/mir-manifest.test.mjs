@@ -30,6 +30,8 @@ const ACCEPTED = {
   '1.5.7-alpha.1': '68fc7a6017fd9fbdab624ba86ca73ef7b325eece8c34dcb3705e05285e0998ff',
   /* 036 K2 · MIR 1.5.7-alpha.2 THE UI SCALE (kit-032 @ aee0bd6): --ui-zoom on the UI roots, core/zoom.js and the geometry pass; the stage untouched */
   '1.5.7-alpha.2': '42af8b05502d9164764111f1ad9e4e7741655e9c4d8de967b42e04ef19a9f1ee',
+  /* 036 K3 · MIR 1.5.7-alpha.3 THE TEMPO EDITOR BOX (kit-032 @ 1d07748): the field is its button box, the pill format and size */
+  '1.5.7-alpha.3': 'b7884739ef17bc5550b85f8f6776d93cd884ea554c8e2ecedcfc21e86d57a5f7',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

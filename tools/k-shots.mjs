@@ -145,6 +145,21 @@ try {
     }
     await look({ scale: 1, menuBar: 'hover' });
   }
+  if (scene === 'k3') {
+    const esc = () => drv.actions(g.s, [{ type: 'key', id: 'kk' + (++pid), actions: [{ type: 'keyDown', value: '' }, { type: 'keyUp', value: '' }] }]);
+    for (const z of [1, 1.5]) {
+      await look({ scale: z }); await wait(600);
+      const pill = await rectOf('#transport .tempo-expand');
+      const bar0 = await rectOf('#transport');
+      await click(pill[0] + 14, (pill[1] + pill[3]) / 2); await wait(300);
+      const inp = await g.ev(`const i = document.querySelector('#transport .transport-tempo-input'); if (!i || i.hidden) return null; const r = i.getBoundingClientRect(); return { r: [r.left, r.top, r.right, r.bottom].map(Math.round), value: i.value, font: getComputedStyle(i).fontSize };`);
+      const bar1 = await rectOf('#transport');
+      out['k3-' + z] = { pill: pill.map(Math.round), input: inp && inp.r, value: inp && inp.value, font: inp && inp.font, barHeld: JSON.stringify(bar0.map(Math.round)) === JSON.stringify(bar1.map(Math.round)) };
+      out['shot' + z] = await shot(`036-K3-tempo-editor-${Math.round(z * 100)}`, [Math.max(0, pill[0] - 120), Math.max(0, pill[1] - 50), pill[2] + 300, pill[3] + 50]);
+      await esc(); await wait(200);
+    }
+    await look({ scale: 1 });
+  }
 } catch (e) { out.error = String(e && e.stack || e); }
 console.log(JSON.stringify(out, null, 1));
 await g.close();

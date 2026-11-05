@@ -30,7 +30,8 @@
   --xport-pill-w: 72px;              /* the BPM pill's least width; it sizes to its number (BASINS ui-fixes 9: ≈ 90 px) */
   --xport-pill-r: 10px;              /* its corner (BASINS skin.css:87) */
   --xport-radius: 16px;              /* the bar's corner when CORNERS is at home (BASINS skin.css:66) */
-  --xport-num-size: 18px;            /* the tempo's number (BASINS ui-fixes 9, --xport-tempo-size; was 12) */
+  --xport-num-size: 18px;
+  --xport-edit-size: var(--xport-num-size);   /* 1.5.7-alpha.3 · the tempo editor's number: the pill's own size unless the seat says (λWAVES' CSB: 12 px) */            /* the tempo's number (BASINS ui-fixes 9, --xport-tempo-size; was 12) */
   --xport-micro: 8px;                /* BPM and the Hz reading (BASINS ui-fixes 9; was 7) */
   --xport-play-size: 32px;           /* play's glyph (BASINS ui-fixes 10, --xport-play-size; was 20); its seat is the glyph + 8 */
   --xport-work-seat: 34px;           /* a seat inside a work bar: the bar's button (BASINS ui-fixes 8, .tl-action) */
@@ -159,7 +160,7 @@
 .mir-transport .transport-tempo-input {
   box-sizing: border-box; flex: none; padding: 0 6px; border: 0; border-radius: var(--xport-pill-r);
   background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--acc2);
-  font: var(--w-bold) var(--xport-num-size) / 1 var(--font-num); font-variant-numeric: tabular-nums; text-align: center; user-select: text; -webkit-user-select: text;
+  font: var(--w-bold) var(--xport-edit-size) / 1 var(--font-num); font-variant-numeric: tabular-nums; text-align: center; user-select: text; -webkit-user-select: text;
 }
 .mir-transport .transport-tempo-input[hidden] { display: none; }
 

@@ -399,6 +399,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
    collage or its decks (their geometry is picker.js'; 036 K FOR-SOS).  A root inside another root takes zoom 1 (zoom compounds). */
 :where(#title, #badges, #sheet, .csb-pill, .csb-suggest, #lwMenu > .mm-top, #lwMenu > .mm-face, #lwMenu > .mm-caption) { zoom: var(--ui-zoom); --in-zoom: var(--ui-zoom); }
 :where(#rack, #rackL, #floats, #transport, #notebook) :where(#title, #badges, #sheet, .csb-pill, .csb-suggest) { zoom: 1; }
+/* 036 K3 · THE TEMPO EDITOR (MIR 1.5.7-alpha.3): the CSB's editor types at its pill's 12 px (csb.css .csb-tempo .tempo-number), in the pill's box */
+#transport[data-layout="csb"] .csb-tempo { --xport-edit-size: 12px; }
 /* Window contents expand naturally. The rack/page handles navigation; History alone keeps its list scroll. */
 #floats > .dev { max-height:none; }
 #floats > .dev > .dev-body { overflow:visible; }

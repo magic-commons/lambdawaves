@@ -358,7 +358,7 @@ export function logoButton({ mark = 'mark', label: name = 'MIR', run = null, sig
 export function bindTempoField({ button, input, tempo, enabled = () => true, drag: dragToo = false, paint = () => {}, signal } = {}) {
   /* the tempo field IS the kit's number field (controls/number.js bindNumber): a click opens it, Enter or leaving takes the number, Escape
      does not; the drag is the one knob law (220 px, 320 under a finger, ⅛ on any modifier or a second finger, on a virtual point) */
-  const field = bindNumber({ button, input, model: tempo, parse: parseBpm, enabled, drag: dragToo, click: dragToo, paint, chars: TRANSPORT.fieldChars, step: 0.1, signal });
+  const field = bindNumber({ button, input, model: tempo, parse: parseBpm, format: formatBpm, enabled, drag: dragToo, click: dragToo, paint, chars: TRANSPORT.fieldChars, step: 0.1, signal });   // 1.5.7-alpha.3: 30.0, as the pill reads
   /* 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the field's button turns by the wheel as the pill does (the modulation window's own tempo had none) */
   const notch = {};
   button.addEventListener('wheel', (e) => {
