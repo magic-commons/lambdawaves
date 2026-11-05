@@ -781,6 +781,13 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 #lwMenu .mm-navb { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; opacity: .55; transition: opacity 140ms, color 140ms, scale 160ms var(--ease); }
 #lwMenu .mm-navb .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-navb:hover, #lwMenu .mm-navb:focus-visible { opacity: 1; color: var(--acc); scale: 1.1; } #lwMenu .mm-navb:active { scale: .94; }
+/* 036 G3 · THE BIG ARROW (picker.js backB): ← pinned to the menu's top-left corner, the glyph 46 px in a 56-px hit, no plate; .72 → 1 and the
+   accent on a hover or a key's focus, as the chips; 40 px on a phone; never on the face */
+#lwMenu .mm-backb { position: absolute; top: 12px; left: 14px; z-index: 6; width: 56px; height: 56px; opacity: .72; }
+#lwMenu .mm-backb .mm-ico { width: 46px; height: 46px; }
+#lwMenu .mm-backb:is(:hover, :focus-visible) { scale: 1.06; }
+#lwMenu.at-face > .mm-backb { visibility: hidden; }
+@media (max-width: 700px) { #lwMenu .mm-backb { top: 8px; left: 6px; width: 48px; height: 48px; } #lwMenu .mm-backb .mm-ico { width: 40px; height: 40px; } }
 #lwMenu .mm-hue { opacity: .55; cursor: ns-resize; touch-action: none; }
 #lwMenu .mm-hue-ring { display: block; width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; transition: rotate 120ms var(--ease); }
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-hue-ring { transition: none; } }   /* 021 V3: the ring turns to the hue at once */
@@ -1108,7 +1115,6 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 #lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; padding: 6px 24px 32px; box-sizing: border-box; }
 #lwMenu .mm-tut[hidden] { display: none; }
 #lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="back"], .mm-themeb)) { display: none; }   /* 035 G1: the tutorial's way back is ← */
-#lwMenu[data-sec="tutorial"] .mm-navb[data-nav="back"] { opacity: 1; }
 #lwMenu .mm-tut-head { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 0 0 20px; color: var(--acc); font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; }
 #lwMenu .mm-tut-head b { font-weight: 400; } #lwMenu .mm-tut-head .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 28px 18px; width: min(1500px, 100%); margin: 0 auto; }

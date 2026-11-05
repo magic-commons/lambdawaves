@@ -183,7 +183,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
   /* 035 G1 (Josh 11-03: "a back arrow instead of a home arrow; home icon in library takes you to the lab"): ← is the face (the tutorial's
      one way back, the decks' and the folders' first), ⌂ enters the lab as CONTINUE does */
-  navBtn('back', 'Main menu', () => showFace()).dataset.nav = 'back';
+  /* 036 G3 (Josh 11-03: "Instead of the arrow to go back to the main menu in the library mode, have it be a large arrow in the top left"): ← is
+     the menu's own, pinned to its top-left corner, large and plateless (skin.css); still `data-nav="back"`, still the face */
+  const backB = el('button', 'mm-navb mm-backb', root); backB.type = 'button'; icon(backB, 'back'); backB.setAttribute('aria-label', 'Main menu'); backB.title = 'Main menu';
+  backB.dataset.nav = 'back'; backB.addEventListener('click', () => showFace());
   navBtn('home', 'Continue to the lab', () => close()).dataset.nav = 'home';
   navBtn('folders', 'Folders — your projects and the demos', () => (at === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
   /* the face's two doors (album art in THE CARD'S LIGHT) and the way into the lab.  036 G1 (Josh 11-03: "Show the thumbnail to be the MIR thingy
@@ -279,7 +282,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (name === at) return false;
     const was = at; at = name; closeDrop(); closeSheet(); restHero();
     face.hidden = name !== 'face'; root.classList.toggle('at-face', name === 'face');
-    for (const e of [top, scroller, caption]) e.inert = name === 'face';
+    for (const e of [top, scroller, caption, backB]) e.inert = name === 'face';
     const away = name === 'folders' || name === 'tutorial';
     foldersEl.hidden = name !== 'folders'; tutEl.hidden = name !== 'tutorial'; scroller.hidden = caption.hidden = away;
     if (away) { root.dataset.sec = name; for (const x of sections) x.b.classList.remove('on'); pill.style.setProperty('--pw', '0px'); }
@@ -937,7 +940,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   function close() { if (root.hidden) return; closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = (o) => (root.hidden ? open(o) : close());
-  const escape = () => (!drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : close());   // M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET
+  /* M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET; 036 G3 (Josh, FOR JOSH 035 answer 5): then it STEPS BACK — off the face
+     to the face, on the face out to the lab (the inner Escapes — the look drop's, the isomer deck's, the tip sheet's — still stop first) */
+  const escape = () => (!drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : at !== 'face' ? showFace() : close());
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
   /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
   let escDrop = null; const layer = () => { if (escDrop) escDrop(); escDrop = app.sh.ACTIONS.escape.push(() => { escDrop = null; escape(); if (!root.hidden) layer(); }, { alive: () => !root.hidden }); };
