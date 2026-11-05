@@ -42,6 +42,35 @@ try {
       out[t + 'Face'] = await shot(`G1-face-${t}`, null, 0, 1000);
     }
   }
+  if (scene === 'decks') {
+    const at = () => g.ev(`const m = document.getElementById('lwMenu'); return { face: m.classList.contains('at-face'), sec: m.dataset.sec || null, frost: document.body.classList.contains('frost'), edges: [...m.querySelectorAll('.mm-edge')].map((e) => getComputedStyle(e).display + '/' + getComputedStyle(e).visibility), mask: getComputedStyle(m.querySelector('.mm-scroll')).maskImage.slice(0, 40) };`);
+    out.face = await at();
+    for (const t of ['dark', 'light']) {
+      await theme(t);
+      await g.tap('.mm-face:not([hidden]) .mm-door[data-door="library"]'); await wait(1400); out[t] = await at();
+      out[t + 'Rest'] = await shot(`G2-decks-rest-${t}`, null, 0, 1000);
+      /* mid-passage between MOLECULAR and EXPANSIONS: the snap held off for the picture */
+      await g.ev(`const sc = document.querySelector('#lwMenu .mm-scroll'), sec = document.querySelector('#lwMenu .mm-sec.mm-molecular'); sc.style.scrollSnapType = 'none'; sc.scrollTop = sec.offsetTop - sc.clientHeight * .45; return sc.scrollTop;`); await wait(600);
+      await g.ev(`document.getElementById('lwMenu').classList.add('mm-moving'); return 1;`); await wait(600);   // held as a scroll holds it
+      out[t + 'Mid'] = await shot(`G2-decks-passage-${t}`, null, 0, 1000);
+      await g.ev(`const sc = document.querySelector('#lwMenu .mm-scroll'); sc.style.scrollSnapType = ''; document.getElementById('lwMenu').classList.remove('mm-moving'); document.querySelectorAll('.mm-tab')[1].click(); return 1;`); await wait(700);
+      await g.tap('.mm-backb'); await wait(900);
+    }
+  }
+  if (scene === 'ways') {
+    const st = () => g.ev(`const m = document.getElementById('lwMenu'); return m.hidden ? 'closed' : m.classList.contains('at-face') ? 'face' : (m.dataset.sec === 'tutorial' ? 'tutorial' : 'decks');`);
+    const seq = []; await wait(1500);   // the face's entrance (a door mid-rise is not pressable)
+    out.tap = await g.tap('.mm-face:not([hidden]) .mm-door[data-door="library"]'); await wait(1000); seq.push(await st());
+    const b = await rectOf('.mm-backb'); out.arrow = b; await move(...mid(b)); await wait(400);
+    out.arrowShot = await shot('G3-arrow-hover', [0, 0, 420, 180], 0, 420);
+    out.arrowCss = await g.ev(`const b = document.querySelector('.mm-backb'), cs = getComputedStyle(b), i = b.querySelector('.mm-ico').getBoundingClientRect(); return { opacity: cs.opacity, color: cs.color, ico: Math.round(i.width), hit: Math.round(b.getBoundingClientRect().width) };`);
+    await move(800, 600); await g.press('\uE00C'); await wait(700); seq.push(await st());
+    await wait(1200); out.tap2 = await g.tap('.mm-face:not([hidden]) .mm-door[data-door="tutorial"]'); await wait(1000); seq.push(await st());
+    out.tutShot = await shot('G3-tutorial-arrow', [0, 0, 800, 300], 0, 800);
+    await g.press('\uE00C'); await wait(700); seq.push(await st());
+    await g.press('\uE00C'); await wait(700); seq.push(await st());
+    out.seq = seq.join(' → ');
+  }
   console.log(JSON.stringify(out, null, 1));
   const errs = await g.errors(); if (errs.errs && errs.errs.length) console.log('page errors', JSON.stringify(errs.errs));
 } finally { await g.close(); }

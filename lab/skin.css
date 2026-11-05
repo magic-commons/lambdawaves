@@ -565,6 +565,28 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-scroll { overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; overscroll-behavior: contain; }
 #lwMenu .mm-scroll::-webkit-scrollbar { display: none; }
 #lwMenu .mm-sec { min-height: 100%; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 8px 16px 14px; box-sizing: border-box; }
+/* 036 G2 · THE DECKS' EDGES (picker.js, the two .mm-edge bands): WHILE a deck or the tutorial's wall scrolls (#lwMenu.mm-moving) the scroller
+   fades a section out over its first and last 72 px (--mm-edge eases 0 → 72 px), and under FROST a band of PROGRESSIVE BLUR grows over each
+   edge — two layers, 6 px over the whole band and 16 px near the edge, each masked so the blur grows toward the edge — so ATOMIC, MOLECULAR and
+   EXPANSIONS pass one another gradually; at rest nothing is faded (a deck's first row sits 8 px under the edge).  The rows are placed by name,
+   so the bands share the scroller's cell; the head stays above them; FOLDERS and the face have none. */
+@property --mm-edge { syntax: '<length>'; inherits: false; initial-value: 0px; }
+#lwMenu .mm-top { grid-row: 1; } #lwMenu .mm-scroll { grid-row: 2; grid-column: 1; } #lwMenu .mm-caption { grid-row: 3; }
+#lwMenu :is(.mm-scroll, .mm-tut) { --mm-edge: 0px; transition: --mm-edge 260ms var(--ease);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); }
+#lwMenu.mm-moving > :is(.mm-scroll, .mm-tut) { --mm-edge: 72px; }
+#lwMenu .mm-edge { grid-row: 2; grid-column: 1; position: relative; z-index: 2; --mm-edge: 0px; height: var(--mm-edge); transition: --mm-edge 260ms var(--ease); pointer-events: none; display: none; }   /* it grows from the edge: an opacity under 1 would cut its blur off from the backdrop */
+#lwMenu.mm-moving > .mm-edge { --mm-edge: 72px; }
+#lwMenu .mm-edge.top { align-self: start; } #lwMenu .mm-edge.foot { align-self: end; }
+body.frost #lwMenu .mm-edge { display: block; }
+#lwMenu .mm-edge > i { position: absolute; inset: 0; }
+#lwMenu .mm-edge > i:first-child { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+#lwMenu .mm-edge > i:last-child { -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+#lwMenu .mm-edge.top > i:first-child { -webkit-mask-image: linear-gradient(to bottom, #000 25%, transparent); mask-image: linear-gradient(to bottom, #000 25%, transparent); }
+#lwMenu .mm-edge.top > i:last-child { -webkit-mask-image: linear-gradient(to bottom, #000, transparent 55%); mask-image: linear-gradient(to bottom, #000, transparent 55%); }
+#lwMenu .mm-edge.foot > i:first-child { -webkit-mask-image: linear-gradient(to top, #000 25%, transparent); mask-image: linear-gradient(to top, #000 25%, transparent); }
+#lwMenu .mm-edge.foot > i:last-child { -webkit-mask-image: linear-gradient(to top, #000, transparent 55%); mask-image: linear-gradient(to top, #000, transparent 55%); }
+#lwMenu.at-face > .mm-edge, #lwMenu[data-sec="folders"] > .mm-edge { visibility: hidden; }
 /* a tile: the picture alone moves */
 #lwMenu .mm-tile { position: relative; display: block; aspect-ratio: 1; border-radius: 10px; }
 #lwMenu .mm-tile:hover, #lwMenu .mm-tile:focus-visible { z-index: 3; }

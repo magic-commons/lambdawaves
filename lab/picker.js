@@ -264,6 +264,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const foldersEl = el('div', 'mm-folders', root); foldersEl.hidden = true; foldersEl.setAttribute('role', 'region'); foldersEl.setAttribute('aria-label', 'Folders');
   let foldersView = null;
   const tutEl = el('div', 'mm-tut', root); tutEl.hidden = true; tutEl.setAttribute('role', 'region'); tutEl.setAttribute('aria-label', 'Tutorial');
+  /* 036 G2 (Josh 11-03: "When scrolling between Atomic, Molecular, and Expansions, there needs to be a gradient blur or gradual something … Right
+     now, it's a sharp cuttoff"): WHILE a deck or the tutorial's wall scrolls (`mm-moving`, held 220 ms past the last scroll event), the scroller
+     fades over its first and last 72 px and two bands of PROGRESSIVE BLUR lie over its edges (under FROST; skin.css) — a section passes the
+     edges gradually; at rest nothing is faded, so a deck's first and last rows stay whole */
+  for (const side of ['top', 'foot']) { const e = el('div', 'mm-edge ' + side, root); e.setAttribute('aria-hidden', 'true'); el('i', '', e); el('i', '', e); }
+  let edgeT = 0; const edging = () => { root.classList.add('mm-moving'); clearTimeout(edgeT); edgeT = setTimeout(() => root.classList.remove('mm-moving'), 220); };
+  for (const sc of [scroller, tutEl]) sc.addEventListener('scroll', edging, { passive: true });
   /* 034 M1 · THE VIEWS: the face (over the decks, which stay laid out under it), the decks, FOLDERS' gallery and the tutorial (each in the
      decks' seat); one at a time, one hero playing at most, and leaving a view puts its hero to rest */
   let at = 'decks', firstDeal = false;   // firstDeal: a first run's LIBRARY deals MOLECULAR's first page in THE ENTRANCE (iteration 012 L3)
