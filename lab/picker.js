@@ -35,11 +35,11 @@ import { keepData, installed, safariTab } from './library.js';
 const TIP_URL = 'https://ko-fi.com/magiccommons';
 /* 032 THE PORTRAIT SHELF: the volumes that have a hero and in which themes ('dark light'), written by tools/volume-heroes.mjs with its files
    (img/menu/vol/<id>.<theme>.mp4 and the still .webp). A volume not named here wears the λWAVES palette. */
-const HEROES = { 'vol-1': 'dark light' };
+export const HEROES = { 'vol-1': 'dark light' };   // 036 G7: lab/loader.js keeps their files
 /* 034 M3 THE TUTORIAL DECK: one card a row, in this order — its id (`tut-<slug>`), its title, its caption ('' until Josh's words come) and the
    themes its hero has files in (img/menu/tut/<id>.<theme>.mp4 and the still .webp; a theme not named shows the other's), written by
    tools/tutorial-heroes.mjs, one row a line */
-const TUTORIAL = [
+export const TUTORIAL = [   // 036 G7: lab/loader.js keeps their files
   { id: 'tut-hero-1', title: 'HERO 1', caption: '', themes: 'light' },
   { id: 'tut-hero-2', title: 'HERO 2', caption: '', themes: 'light' },
   { id: 'tut-hero-3', title: 'HERO 3', caption: '', themes: 'light' },

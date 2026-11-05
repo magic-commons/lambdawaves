@@ -783,13 +783,23 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
   assert.equal(hit && await hit.clone().text(), 'the device copy', 'sw.js: an installed record was not answered from lw-data-v1');
   assert.equal(W.fetched.length, 0, 'sw.js: an installed record still went to the network');
   W.caches.set('lw-lab-anolderbuild', new W.FakeCache());
-  /* iteration 028 R-08: a picture kept under a name no hash is in is swept by the new build's activate; the record stays */
-  const pic = 'https://host.invalid/lab/img/menu/' + readdirSync(path.join(LAB, 'img/menu'))[0];
-  await dc.put(pic, new Response('a picture of the last build'));
+  /* iteration 028 R-08: a cover kept under a name no hash is in is swept by the new build's activate; the record stays — and since 036 G7 a
+     kept menu film stays too (the loader validates img/menu/), and a Range on it is answered from the kept body: a 206 with the slice */
+  const pic = 'https://host.invalid/lab/demos/covers/' + readdirSync(path.join(LAB, 'demos/covers'))[0];
+  const film = 'https://host.invalid/lab/img/menu/collage/dark.mp4';
+  await dc.put(pic, new Response('a cover of the last build'));
+  await dc.put(film, new Response('0123456789', { headers: { 'content-type': 'video/mp4' } }));
+  const ranged = async (u, r) => { let a = null; await W.handlers.fetch[0]({ request: { method: 'GET', url: u, mode: 'no-cors', headers: { get: (k) => (k === 'range' ? r : null) } }, respondWith: (q) => { a = q; } }); return a === null ? null : await a; };
+  const part = await ranged(film, 'bytes=2-5'), tail = await ranged(film, 'bytes=7-'), far = await ranged(film, 'bytes=40-');
+  W.fetched.length = 0;
+  const away = await ranged('https://host.invalid/lab/img/menu/collage/light.mp4', 'bytes=0-'), awayAsked = W.fetched.length;
+  assert.deepEqual([part.status, part.headers.get('content-range'), await part.text(), tail.status, await tail.text(), far.status, part.headers.get('content-type')],
+    [206, 'bytes 2-5/10', '2345', 206, '789', 416, 'video/mp4'], 'sw.js: a Range on a kept DATA body must be answered with the 206 slice (036 G7)');
+  assert.ok(away && awayAsked === 1 && !dc.m.has('https://host.invalid/lab/img/menu/collage/light.mp4'), 'sw.js: a Range on a DATA path the page has not kept must go to the network and store nothing');
   let p; await W.handlers.activate[0]({ waitUntil: (x) => { p = x; } }); await p;
   assert.ok(W.caches.has(W.LW_SW.DATA_CACHE) && !W.caches.has('lw-lab-anolderbuild'), 'sw.js: activate must collect a stale build and keep lw-data-v1');
-  assert.deepEqual([dc.m.has(url), dc.m.has(pic)], [true, false], 'sw.js: a new build\'s activate must keep the content-addressed record and sweep the kept picture (R-08)');
-  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there, and a new build's activate keeps the record and sweeps a kept picture (img/menu/, demos/covers/, vendor/nist/ carry no hash).`);
+  assert.deepEqual([dc.m.has(url), dc.m.has(film), dc.m.has(pic)], [true, true, false], 'sw.js: a new build\'s activate must keep the record and the kept menu film and sweep the kept cover (R-08; 036 G7)');
+  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there; a Range on a kept DATA body is its 206 slice (416 past its end) and an unkept one the network's; a new build's activate keeps the record and the kept menu film and sweeps a kept cover (demos/covers/, vendor/nist/).`);
 }
 
 console.log(`PASS update policy executed, not described: install precaches ${pc.length} files with cache:'reload' + ?__rev=<content hash> and does NOT skipWaiting; ` +

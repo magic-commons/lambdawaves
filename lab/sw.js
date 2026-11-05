@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '628d7346cc22'],
-  ['./build-id.js',                                                 '9e5ad03555de'],
+  ['./build-id.js',                                                 '8caa2c7a4eed'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '41922d244a06'],
@@ -147,6 +147,7 @@ const PRECACHE = [
   ['./library.js',                                                  '62bf4124afdd'],
   ['./library.json',                                                '0a3531a7c866'],
   ['./linalg.js',                                                   'da2367cdcb97'],
+  ['./loader.js',                                                   '51d6cf5495cd'],
   ['./look.js',                                                     '89d95fc0b5c5'],
   ['./main.js',                                                     '1f9a7eeba5dc'],
   ['./manifest.webmanifest',                                        '3c7086f9dfa8'],
@@ -393,11 +394,11 @@ const PRECACHE = [
   ['./period.js',                                                   'f95fecca589e'],
   ['./picker-collage.js',                                           '0c1062b66b9e'],
   ['./picker-fx.js',                                                '4233fe629128'],
-  ['./picker.js',                                                   'a35357ca44f0'],
+  ['./picker.js',                                                   '2e3a934ef331'],
   ['./project-store.js',                                            '22a3b1177f0c'],
   ['./projects.js',                                                 'a0615ea52761'],
   ['./qho.js',                                                      'c0dfa6e21c94'],
-  ['./rack.js',                                                     'ba220f4be2ca'],
+  ['./rack.js',                                                     'acb5ff4ffb33'],
   ['./radiation.js',                                                '678be6f37657'],
   ['./radiationview.js',                                            'abb61c437b49'],
   ['./register-morph.js',                                           'cf0e273be934'],
@@ -409,7 +410,7 @@ const PRECACHE = [
   ['./rpa-inspector.js',                                            'baf1eaa062e7'],
   ['./scf.js',                                                      '76359349f917'],
   ['./separable.js',                                                'e99b6c67ebd5'],
-  ['./settings-store.js',                                           '7cc7eb21c78c'],
+  ['./settings-store.js',                                           'fd5fa4cff739'],
   ['./shadowview.js',                                               'ad101af8b299'],
   ['./shell/controller.js',                                         '1e6415d2d383'],
   ['./shell/facade.js',                                             '3bd047931564'],
@@ -425,7 +426,7 @@ const PRECACHE = [
   ['./shell/stage-words.js',                                        'f30b967a9069'],
   ['./shell/transport.js',                                          'f0898f8e0649'],
   ['./skeleton.js',                                                 '521904b4e851'],
-  ['./skin.css',                                                    'cb8efb474471'],
+  ['./skin.css',                                                    'e1f3faa2c7de'],
   ['./slice.js',                                                    '0fbaa89ce784'],
   ['./sliceview.js',                                                '042dfa4eb967'],
   ['./spectrum.js',                                                 '80a79ac5b010'],
@@ -485,9 +486,11 @@ const PRECACHE = [
  * THE PICTURES (iteration 005 A) are DATA by the same rule: img/menu/ (the Picker's thumbnails, 720 KB) and the demo covers — deployed,
  * never precached, kept by the page in DATA_CACHE after their first good answer (library.js keepData), so an installed app shows them
  * offline from its second run; a picture not yet held is the tile's own placeholder.  Their names carry no hash and a re-render keeps
- * the name, so they are kept for ONE BUILD: every new build's activate (§4) sweeps img/menu/ and demos/covers/ out of DATA_CACHE, and
- * the next view keeps the deployed bytes (iteration 028 R-08).  The records, the basis records and the volumes are named by what they
- * hold or kept by a press, and stay.
+ * the name, so the covers are kept for ONE BUILD: every new build's activate (§4) sweeps demos/covers/ out of DATA_CACHE, and the next
+ * view keeps the deployed bytes (iteration 028 R-08).  img/menu/ left the sweep in 036 G7: THE LOADING SCREEN (lab/loader.js) keeps the
+ * menu's films and pictures whole and, on the first open of a new build, compares each kept one with the deployed file (a HEAD's ETag or
+ * length and date) and fetches only what changed; the other kept menu pictures it drops, as the sweep did.  The records, the basis records
+ * and the volumes are named by what they hold or kept by a press, and stay.
  * THE DEMOS (iteration 026) are DATA whole: demos/ (the four demo files, 270 KB, and their covers) — deployed, never precached; a demo
  * file is read by the boot's seed (FOLDERS' DEMOS store it, and a DEMOS press opens that copy offline) and is never kept here, so a
  * changed demo still reaches every browser (its `saved` stamp is the DEMOS refresh revision).
@@ -496,7 +499,7 @@ const PRECACHE = [
  * and never need it. */
 const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/'];
 const DATA_CACHE = 'lw-data-v1';
-const SWEEP = ['img/menu/', 'demos/covers/', 'vendor/nist/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4)
+const SWEEP = ['demos/covers/', 'vendor/nist/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4); img/menu/ left it in 036 G7 — the page's loader validates what it keeps
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */
@@ -515,7 +518,7 @@ const NEVER_PRECACHE = [
 /* AND WHAT THE FETCH HANDLER REFUSES TO CACHE AT RUNTIME (§4), each with its reason. */
 const NEVER_CACHE_AT_RUNTIME = [
   ['any method but GET',        'a POST/PUT is a write; replaying one from a cache is a lie about what the server did.'],
-  ['a Range request',           'the answer is a 206 with a slice of the body. A partial response stored under a whole-file key is a poisoned entry that fails silently later.'],
+  ['a Range request',           'the answer is a 206 with a slice of the body. A partial response stored under a whole-file key is a poisoned entry that fails silently later. Nothing is ever stored for one; since 036 G7 a Range on a DATA path the page has KEPT WHOLE is answered with the 206 sliced from that body (a <video> plays from the device), and every other Range goes to the network.'],
   ['a cross-origin request',    'lab/ has none (the test proves it), and an opaque response has status 0 and an unreadable body — it cannot be validated, so it is never kept.'],
   ['any navigation that is not the app entry', '/REPORT.md, /LICENSE, /NOTICE and the eight licence texts ABOUT opens in a new tab are DOCUMENTS, not the lab. They change every wave; a cached build log is a lie. This used to be enforced by a path prefix ("above /lab/"), which silently became a no-op the day the lab moved to its own origin and SCOPE became "/" — every navigation on the hostname was then answered with the lab\'s own index.html, and the nine document links in ABOUT each opened a second copy of the lab. Only the ENTRY set is served: everything else is the network\'s, which is also what restores the real 404 wrangler.jsonc\'s not_found_handling asks for. Offline a document fails, which is honest — it is not the lab.'],
   ['anything not already in §1', 'this worker NEVER grows a runtime cache. The precache is the whole app; a URL that is not in it is a URL the lab does not need, so it goes to the network and nothing is stored.'],
@@ -597,9 +600,9 @@ self.addEventListener('install', (event) => {
  * dropped, a 404.  That is why §6 refuses any take while a second window is open unless the user said UPDATE ALL,
  * and why the page tells each other window at once (sw-client.js: one holding no work reloads, one holding work
  * is told RELOAD NOW).
- * THE SWEEP (iteration 028 R-08): the pictures, the covers and the measured lines are kept under names a re-render does not change,
- * so a kept copy would answer for the deployed one forever; each new build deletes them from DATA_CACHE and the page keeps the new
- * bytes on their next view.  library/<sha>.json, the basis records and lw-vol-* are untouched. */
+ * THE SWEEP (iteration 028 R-08): the covers and the measured lines are kept under names a re-render does not change, so a kept copy
+ * would answer for the deployed one forever; each new build deletes them from DATA_CACHE and the page keeps the new bytes on their next
+ * view (img/menu/ is the loader's, 036 G7).  library/<sha>.json, the basis records and lw-vol-* are untouched. */
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const names = await caches.keys();
@@ -636,18 +639,34 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;                                     // never a write
-  if (req.headers && req.headers.get && req.headers.get('range')) return;   // never a 206
+  const range = req.headers && req.headers.get ? req.headers.get('range') : null;   // never a 206 stored; one answered only from a kept DATA body (below)
   let url;
   try { url = new URL(req.url); } catch (e) { return; }
   if (url.origin !== self.location.origin) return;                      // never cross-origin / opaque
   if (!url.pathname.startsWith(SCOPE)) return;                          // never above the mount (a no-op at an origin root — see above)
   if (req.mode === 'navigate') { if (!ENTRY.has(url.pathname)) return; event.respondWith(serve(INDEX, req)); return; }   // the APP ENTRY only; a document is the network's
   if (DATA.some((d) => url.pathname.startsWith(SCOPE + d))) {           // §1b: a record — the device's copy, else the network; stored by the page only
-    event.respondWith(caches.open(DATA_CACHE).then((c) => c.match(url.origin + url.pathname)).then((hit) => hit || fetch(req))); return;
+    event.respondWith(caches.open(DATA_CACHE).then((c) => c.match(url.origin + url.pathname)).then((hit) => (hit ? (range ? slice(hit, range) : hit) : fetch(req)))); return;
   }
+  if (range) return;                                                    // a Range outside a kept DATA body: the network's
   if (!BY_PATH.has(url.pathname)) return;                               // not ours: network, and store nothing
   event.respondWith(serve(url.pathname, req));
 });
+
+/* 036 G7 · THE RANGE ANSWER: a media element asks for its file in byte ranges, and a Range used to pass every worker by, so the wall and the
+   heroes streamed from the network on every open.  For a DATA path the page has kept whole (the loader keeps the menu's films) the answer
+   is a 206 sliced from the kept body — `bytes=a-b`, `a-` or `-n`; an unsatisfiable range is a 416; anything else (several ranges) gets the
+   whole body, as a server may answer.  Nothing is written. */
+async function slice(hit, range) {
+  const m = /^bytes=(\d*)-(\d*)$/.exec(String(range).trim());
+  if (!m || (m[1] === '' && m[2] === '')) return hit;
+  const blob = await hit.clone().blob(), n = blob.size;
+  let a = m[1] === '' ? Math.max(0, n - Number(m[2])) : Number(m[1]), b = m[1] === '' || m[2] === '' ? n - 1 : Math.min(Number(m[2]), n - 1);
+  if (a >= n || a > b) return new Response(null, { status: 416, statusText: 'Range Not Satisfiable', headers: { 'Content-Range': 'bytes */' + n } });
+  const h = new Headers(hit.headers); h.delete('content-encoding');
+  h.set('Content-Range', 'bytes ' + a + '-' + b + '/' + n); h.set('Content-Length', String(b - a + 1)); h.set('Accept-Ranges', 'bytes');
+  return new Response(blob.slice(a, b + 1), { status: 206, statusText: 'Partial Content', headers: h });
+}
 
 async function serve(pathname, req) {
   const href = BY_PATH.get(pathname);

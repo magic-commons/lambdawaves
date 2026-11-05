@@ -35,6 +35,7 @@ import { createTransition } from './windows/transition.js';   // 018 C1: A ↔ B
 import { createStaticField } from './windows/static-field.js';   // iteration 008 S: the FIELD card (STATE's static field, drives and impulse knobs)
 import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js'; import { createFacade } from './shell/facade.js'; import { createVerbs } from './verbs.js';   // 0.5.2 R3a (edit-domain.js left with the history) · R5 the facade
 import { createCameraLaw } from './camera-law.js'; import { createPicker } from './picker.js';   // iteration 003: THE MAIN MENU; iteration 004: THE PICKER   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
+import { runLoader } from './loader.js';   // 036 G7 THE LOADING SCREEN: between the notice's CONTINUE and the menu's face
 import { createNodes } from './nodes.js';     // 018 D3: NODES, the CURVES card's heir (the kit's curves panel in a node graph)
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
@@ -953,10 +954,14 @@ export async function boot(dom) {
   /* THE PICKER (iteration 004; iteration 003's main menu) is the front page unless something was opened — and it opens only once the
      photosensitivity notice is accepted: the notice (the kit's dialog, z 70) would sit UNDER the Picker (z 100000), and its CONTINUE
      could not be reached (IT004-MIR15-GAP §0 item 5).  `onAccept` runs at once when the notice is not up (a returning visitor, a driver). */
-  const pickerAtBoot = !linkAtBoot.opened && !q.get('preset') && q.get('menu') !== '0' && (navigator.webdriver !== true || q.get('menu') === '1' || q.get('opener') === '1' || q.get('warn') === '1');   // a test driver goes straight in (as the opener's law was); ?menu=1, ?opener=1 or ?warn=1 (a human start, played) shows it there
+  const pickerAtBoot = !linkAtBoot.opened && !q.get('preset') && q.get('menu') !== '0' && (navigator.webdriver !== true || q.get('menu') === '1' || q.get('opener') === '1' || q.get('warn') === '1' || q.get('loader') === '1');   // a test driver goes straight in (as the opener's law was); ?menu=1, ?opener=1 or ?warn=1 (a human start, played) shows it there
   createPicker(app, { open: false });
   const firstRun = dom.start.warning.open;   // iteration 012 L3: a reader who has just read the notice meets the MOLECULAR deck, with THE ENTRANCE
-  dom.start.warning.onAccept(() => { if (pickerAtBoot && app.state.picker) app.state.picker.open(firstRun ? { first: true } : undefined); });
+  /* 036 G7 · THE LOADING SCREEN (lab/loader.js) stands before the face on an open whose set is not all on the device (or a new build's) —
+     never for a test driver unless ?loader=1 (the worker is not registered there without ?sw=1) */
+  const loaderOn = navigator.webdriver !== true || q.get('loader') === '1';
+  dom.start.warning.onAccept(() => { if (!pickerAtBoot || !app.state.picker) return; const go = () => app.state.picker.open(firstRun ? { first: true } : undefined);
+    if (loaderOn) runLoader({ sw: app.host.swClient }).then(go, go); else go(); });
   /* the fragment is a live address, not only a start.  WAVE 133 (found by its verifier; the hole is wave 56's): a link pasted
      over an EDITED session replaced the edit and wiped the undo ring without a question, and over an unedited one left the page
      reading dirty although a reload brings the same scene back clean.  It now asks first, in the house's words, and a link

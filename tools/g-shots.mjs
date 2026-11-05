@@ -34,6 +34,24 @@ const out = {};
 try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify((await g.errors()).errs));
   if (scene !== 'loader') await g.waitFor(`!!document.querySelector('#lwMenu .mm-face:not([hidden])')`, 100, 100);
+  if (scene === 'loader') {   // the open as a first visit makes it: the loader's timings by its own aria-valuenow, a picture at ~40 % and at 100 %
+    const t0 = Date.now(), T = {}, read = () => g.ev(`const l = document.getElementById('lwLoader'); return l ? { p: +l.getAttribute('aria-valuenow'), line: l.querySelector('.ld-line').textContent, out: l.classList.contains('out') } : { p: null, face: !!document.querySelector('#lwMenu .mm-face:not([hidden])') };`);
+    let r = await read(), mid = false;
+    for (let i = 0; i < 1200; i++) {
+      if (r.p !== null && T.shown === undefined) T.shown = Date.now() - t0;
+      if (r.p >= 35 && !mid) { mid = true; T.p40 = Date.now() - t0; out.mid = r; out.midShot = await shot('G7-loader-40', null, 0, 1000); }
+      if (r.p === 100 && T.p100 === undefined) { T.p100 = Date.now() - t0; out.end = r; out.endShot = await shot('G7-loader-100', null, 0, 1000); }
+      if (r.p === null && T.shown !== undefined) { if (r.face) { T.face = Date.now() - t0; break; } }
+      await wait(100); r = await read();
+    }
+    out.T = T;
+    out.after = await g.ev(`const ks = await caches.keys(), dc = await caches.open('lw-data-v1'), k = await dc.keys(); let bytes = 0; for (const q of k) { const m = await dc.match(q); bytes += (await m.blob()).size; }
+      const reg = await navigator.serviceWorker.getRegistration(); return { caches: ks, kept: k.length, bytes, record: localStorage.getItem('lambdawaves.q0.loader'), active: !!(reg && reg.active) };`);
+    /* the Range answer: the wall's film asked by range under the worker (a reload: this page is the first install's, uncontrolled) */
+    await g.nav(`https://127.0.0.1:${PORT}/lab/?loader=1&sw=1&menu=1`, { wait: false }); await g.waitFor('window.__LW?.ready', 400, 100);
+    out.second = await g.ev(`await new Promise((r) => setTimeout(r, 1500)); const r = await fetch('./img/menu/collage/dark.mp4', { headers: { range: 'bytes=0-99' } });
+      return { controlled: !!navigator.serviceWorker.controller, status: r.status, range: r.headers.get('content-range'), len: (await r.arrayBuffer()).byteLength, loader: !!document.getElementById('lwLoader') };`);
+  }
   if (scene === 'face') {
     for (const t of ['dark', 'light']) {
       await theme(t); await wait(1500);

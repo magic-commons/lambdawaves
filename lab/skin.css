@@ -1221,3 +1221,18 @@ body[data-theme="light"] #lwMenu .mm-face-logo svg { filter: drop-shadow(0 0 10p
 /* the face's ground is plain, the wall or not (a cold load, offline: img/menu is never precached) — under it the frost would show the rack's
    chips through the corners, and while the wall plays its blur would be redrawn every frame; the decks and the tutorial keep the frost */
 body.frost #lwMenu.at-face { background: hsl(var(--glass-tint) / .985); -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* 036 G7 · THE LOADING SCREEN (lab/loader.js): over everything on the theme's ground — the MIR flag's 576 cells (a canvas), the percentage in
+   the UI face's numerals, one line naming what loads, a quiet CONTINUE after 8 s; it fades as the face comes in.  The boot veil wears the
+   theme's ground too (it was black in LIGHT). */
+#lwLoader { position: fixed; inset: 0; z-index: 100001; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; box-sizing: border-box;
+  background: hsl(var(--glass-tint)); color: var(--fg); transition: opacity 450ms cubic-bezier(.22, .7, .25, 1); }
+#lwLoader.out { opacity: 0; pointer-events: none; }
+#lwLoader .ld-flag { width: clamp(150px, 30vmin, 240px); aspect-ratio: 1; }
+#lwLoader .ld-pct { margin-top: 6px; font: 300 42px/1 var(--font-ui); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+#lwLoader .ld-line { min-height: 1.5em; max-width: 92vw; font-size: 10px; letter-spacing: .2em; line-height: 1.5; text-align: center; opacity: .62; font-variant-numeric: tabular-nums; }
+#lwLoader .ld-skip { margin-top: 10px; padding: 6px 12px; border: 0; border-radius: 999px; background: none; color: inherit; font: inherit; font-size: 11px; letter-spacing: .22em; opacity: .5; cursor: pointer; transition: opacity 140ms, color 140ms; }
+#lwLoader .ld-skip:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
+#lwLoader .ld-skip[hidden] { display: none; }
+body.lw-loading #menubar { visibility: hidden; }
+body .mir-veil { --veil-fill: hsl(var(--glass-tint)); }
+@media (prefers-reduced-motion: reduce) { #lwLoader { transition: none; } }
