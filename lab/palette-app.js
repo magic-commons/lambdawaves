@@ -17,7 +17,7 @@ import { N_COLOR, N_RGB, N_RGB_LIGHT } from './mir/kit.js';
 export const DEFAULT_PALETTE = 'prism';
 
 const JET_BLACK = {
-  id: 'jetblack', label: 'Jet Black', points: 3, constL: true, harsh: false, cvd: false, flat: true,
+  id: 'jetblack', label: '000000', points: 3, constL: true, harsh: false, cvd: false, flat: true,
   note: 'three bands of pure black — a solid body, not a phase map',
   stops: ['#000000', '#000000', '#000000'].map((h, i, all) => ({ at: i / all.length, rgb: hexToRgb(h) })),
 };

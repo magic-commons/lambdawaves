@@ -814,6 +814,11 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 #lwMenu .mm-hue:is(:hover, :focus-visible, .drag) .mm-hue-ring::after { opacity: 1; }
 #lwMenu .mm-mol .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)); transition: scale 280ms var(--ease), filter 360ms var(--ease); }
 #lwMenu .mm-mol:not(.off):hover .mm-pic, #lwMenu .mm-mol:not(.off):focus-visible .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)) saturate(1.15) brightness(1.06); }
+/* 037 M7 · MONOCHROME (picker.js setMono): under html.mono the molecule pictures go grey after their hue turn — the decks', the CSB's suggestions
+   (csb.css) and MOLECULES' thumbnail (lab.css), all three here (the hue's list as a prefix, so the change glides); the ring's arc is grey */
+html.mono #lwMenu .mm-mol .mm-pic, html.mono .csb-suggest .mm-pic, html.mono .mol-pick .mol-thumb { filter: hue-rotate(var(--mol-hue, 0deg)) grayscale(1); }
+html.mono #lwMenu .mm-mol:not(.off):hover .mm-pic, html.mono #lwMenu .mm-mol:not(.off):focus-visible .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)) grayscale(1) brightness(1.06); }
+html.mono #lwMenu .mm-hue-ring::after { opacity: 1; background: conic-gradient(from 0deg, hsl(0 0% 14%), hsl(0 0% 90%), hsl(0 0% 14%)); }
 #lwMenu .mm-tab .mm-ico { width: 18px; height: 18px; transition: translate 160ms var(--ease); } #lwMenu .mm-tab:hover .mm-ico { translate: 0 -1px; }
 #lwMenu .mm-ring-host > .mm-ico { position: absolute; left: 50%; top: 50%; width: 52%; height: 52%; translate: -50% -50%; opacity: .7; transition: opacity 160ms; }
 #lwMenu .mm-install[data-state="installed"] .mm-ring-host > .mm-ico { opacity: 1; } #lwMenu .mm-install[data-state="busy"] .mm-ring-host > .mm-ico { opacity: 0; }

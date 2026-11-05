@@ -95,7 +95,7 @@ const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB'
 
 /* iteration 012 L1 · the Picker's own PREFERENCE (settings-store.js FAMILIES, never a project or a link): SHOW LABELS for the atoms (on: the symbol
    and Z, as before) and for the molecules (on: the formula on every tile, the name under it on a hover) */
-const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, atomic: 'atoms', collage: true };   // iteration 016 P3: no `look` until the reader picks one (lookFor)   // atomic: THE ATOMIC deck's HYDROGEN | ATOMS (iteration 015 M3)   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
+const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, atomic: 'atoms', collage: true, mono: false };   // iteration 016 P3: no `look` until the reader picks one (lookFor)   // atomic: THE ATOMIC deck's HYDROGEN | ATOMS (iteration 015 M3)   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
 /* iteration 016 P3 · DEFAULT LOOKS (Josh: "Im ψ for atoms, arg ψ for molecules, until the reader changes it"): a record before 016 wrote PREF0's
    look 'density' on every save of the hue or the labels, so a stored 'density' without `lookHand` is read as no choice; any other stored look
    could only be a hand's and wins */
@@ -425,18 +425,26 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const wheelLook = (d) => { const live = lookTiles.filter((b) => b.getAttribute('aria-disabled') !== 'true'), k = live.findIndex((b) => b.dataset.look === lookFor(current && current.id === 'atomic'));
     const n = live[(k + d + live.length) % live.length]; if (!n) return; setLook(n.dataset.look); if (!drop.hidden) n.focus({ preventScroll: true }); };
   wheelSteps(drop, wheelLook); wheelSteps(lookB, (d) => { paintLooks(); wheelLook(d); });
+  /* 037 M7 MONOCHROME (Josh 11-05: "a new p probablity thumbnail view which is not affected by the hue wheel … 'Monochrome' … Clicking on the hue
+     wheel like a button will toggle 'monochrome' vs 'colored'"): a press of THE HUE ring that does not turn it (under 4 px of travel) and is not
+     a double-click's toggles the Picker's PREFERENCE `mono`; under `html.mono` the molecule pictures — the decks', the CSB's suggestions,
+     MOLECULES' thumbnail — go grey after their hue turn and the ring's arc is grey (skin.css) */
+  const paintHue = () => { hue.setAttribute('aria-valuenow', String(prefs.hue)); hue.setAttribute('aria-valuetext', prefs.mono ? 'monochrome' : prefs.hue + '°');
+    hue.title = 'Pictures · ' + (prefs.mono ? 'monochrome' : 'hue ' + prefs.hue + '°') + ' · click: colour ↔ mono · double-click: 0'; };
+  const setMono = (on, keep = true) => { prefs.mono = !!on; document.documentElement.classList.toggle('mono', prefs.mono); paintHue(); if (keep) writePrefs(prefs); };
   const setHue = (deg, keep = true) => {
     prefs.hue = ((Math.round(deg) % 360) + 360) % 360; hueShown += ((prefs.hue - hueShown) % 360 + 540) % 360 - 180;
     document.documentElement.style.setProperty('--mol-hue', hueShown + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
-    hue.setAttribute('aria-valuenow', String(prefs.hue)); hue.title = 'Hue of the pictures · ' + prefs.hue + '° (double-click: 0)';
-    if (keep) writePrefs(prefs);
+    paintHue(); if (keep) writePrefs(prefs);
   };
-  setHue(+prefs.hue || 0, false);
-  { let y0 = null, h0 = 0;   // the ONE KNOB LAW's vertical drag: a full turn in 360 px, ⅛ with Shift
-    hue.addEventListener('pointerdown', (e) => { if (e.button) return; y0 = e.clientY; h0 = prefs.hue; hue.setPointerCapture(e.pointerId); hue.classList.add('drag'); e.preventDefault(); });   // M6: the colours while the hand turns it
-    hue.addEventListener('pointermove', (e) => { if (y0 != null) setHue(h0 + (y0 - e.clientY) * (e.shiftKey ? 0.125 : 1)); });
+  setHue(+prefs.hue || 0, false); setMono(prefs.mono, false);
+  { let y0 = null, x0 = 0, h0 = 0, moved = 0, monoT = 0;   // the ONE KNOB LAW's vertical drag: a full turn in 360 px, ⅛ with Shift (037 M7: from 4 px of travel)
+    hue.addEventListener('pointerdown', (e) => { if (e.button) return; y0 = e.clientY; x0 = e.clientX; moved = 0; h0 = prefs.hue; hue.setPointerCapture(e.pointerId); hue.classList.add('drag'); e.preventDefault(); });   // M6: the colours while the hand turns it
+    hue.addEventListener('pointermove', (e) => { if (y0 == null) return; moved = Math.max(moved, Math.abs(e.clientY - y0), Math.abs(e.clientX - x0)); if (moved >= 4) setHue(h0 + (y0 - e.clientY) * (e.shiftKey ? 0.125 : 1)); });
     const end = () => { y0 = null; hue.classList.remove('drag'); }; hue.addEventListener('pointerup', end); hue.addEventListener('pointercancel', end);
     hue.addEventListener('wheel', (e) => { e.preventDefault(); setHue(prefs.hue - Math.sign(e.deltaY) * (e.shiftKey ? 2 : 10)); }, { passive: false });
+    /* a press that did not turn it: colour ↔ mono, held 300 ms so a double-click's second press can take it back (the double-click puts the hue at 0); a key's press at once */
+    hue.addEventListener('click', (e) => { if (!e.detail) { setMono(!prefs.mono); return; } if (moved >= 4) return; clearTimeout(monoT); monoT = 0; if (e.detail > 1) return; monoT = setTimeout(() => { monoT = 0; setMono(!prefs.mono); }, 300); });
     hue.addEventListener('dblclick', () => setHue(0));
     hue.addEventListener('keydown', (e) => { const d = { ArrowUp: 10, ArrowRight: 10, ArrowDown: -10, ArrowLeft: -10 }[e.key]; if (d) { e.preventDefault(); e.stopPropagation(); setHue(prefs.hue + (e.shiftKey ? d / 5 : d)); } else if (e.key === 'Home' || e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); setHue(0); } }); }
 
