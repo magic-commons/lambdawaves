@@ -95,7 +95,7 @@ export function createSettings(app) {
     if (typeof s.friction === 'number') app.host.camera.setFriction(s.friction);   // wave 51: the camera's feel comes back … but AUTO-ROTATE never does (see saveSettings); 018 B4: SPIN left, an old `spin` is read by nothing
     if (typeof s.dragGain === 'number') app.host.camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them
     if (typeof s.fling === 'number') app.host.camera.setFling(s.fling);
-    if (typeof s.camLock === 'boolean') app.host.camera.setLock(s.camLock);       // 0.5.3 M6: the classic camera (pan held at the centre), off when nothing was said
+    if (typeof s.camLock === 'boolean') app.host.camera.setLock(s.camLock);       // 0.5.3 M6: the classic camera (pan held at the centre); 037 H3: ON when nothing was said
     if (s.audio === true && ui.audioSw) { ui.audioSw.set(true); ui.setAudio(true); }   // 0.6.4 S2: the AUDIO consent (SOUND itself is a hand press each session)
     /* SKELETON · BEAD · UNCERTAINTY left this blob for INFORMATIONAL's record in the fix round (C6: shell/stage-words.js lifts them once) */
     if (s.askOk === true) ui.askOk = true; if (typeof s.askUrl === 'string' && ui.askUrlIn) ui.askUrlIn.value = s.askUrl;   // 0.6.6 G2: ASK's consent and Gemma's address (absent: this host at 9443)

@@ -373,10 +373,11 @@ body.transport-under #transport.mini { z-index: var(--z-chrome); }
 /* ── spectrum rail ──────────────────────────────────────────────────────── */
 .ladder { position: relative; height: 92px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
 .ladder canvas { width: 100%; height: 100%; display: block; }
-/* iteration 016 R1 · THE REGISTER'S FOOTNOTE (paint-stroke.js footLine): the law line under SPECTRUM's ladder and MOLECULES' two ladders, shown only
-   while its window is hovered or focused; reduced motion: no fade */
+/* iteration 016 R1 · THE REGISTER'S FOOTNOTE (paint-stroke.js footLine): the law line under SPECTRUM's ladder and MOLECULES' two ladders; reduced motion: no fade.
+   037 H7 · THE LAW LINE REVEALS ITSELF (Josh: "should only happen inside that reader thingy"): shown while the pointer is on ITS LADDER — the canvas it
+   lies over (the line is pointer-events none, so the ladder's own hover is the line's) — or keyboard focus walks the window; no longer on the window's hover */
 .reg-foot { position: absolute; z-index: 1; height: 11px; font: 8px/11px ui-monospace, monospace; color: var(--fg); opacity: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; transition: opacity 160ms ease; }
-.dev:is(:hover, :focus-within) .reg-foot { opacity: .8; }
+canvas:hover + .reg-foot, .dev:has(:focus-visible) .reg-foot { opacity: .8; }
 @media (prefers-reduced-motion: reduce) { .reg-foot { transition: none; } }
 .sp-rows { display: flex; flex-direction: column; gap: 3px; }
 .sp-row { display: grid; grid-template-columns: 4px 50px minmax(0, 1fr) 40px 28px 28px 22px; align-items: center; gap: 4px; height: 56px; padding: 0 4px 0 0;
@@ -791,12 +792,9 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .lw-field-head > .grp-lbl { flex: 1 1 auto; margin: 0; }
 .native-clean .row > .trig.lw-fold { flex: 0 0 30px; }
 .sp-preset > .mir-step { flex: 1 1 auto; }
-/* 036 P1 · BUTTONS · PAINT (paint-stroke.js strokeSeg) in the head seat VISUALS left: two glyph cells, the kit's seg face (its curves/xy precedent) */
-.sp-head > .segw.sp-stroke { min-width: 0; width: 100%; margin: 0; }
-.sp-head > .segw.sp-stroke .seg { display: flex; width: 100%; height: 100%; }
-.sp-head > .segw.sp-stroke .seg-b { flex: 1 1 0; min-width: 0; padding: 0; display: grid; place-items: center; }
-.sp-head > .segw.sp-stroke .gly { width: 16px; height: 16px; }
-.reg-pane .sp-head > .segw.sp-stroke { flex: 1 1 0; width: auto; }
+/* 036 P1 · 037 H6 · BUTTONS · PAINT (paint-stroke.js strokeButton) in the head seat VISUALS left: ONE toggle button whose glyph swaps (FILL ALL ↔ EMPTY's law) */
+.sp-head > .trig.sp-stroke { min-width: 0; padding: 0; display: grid; place-items: center; }
+.sp-head > .trig.sp-stroke svg { width: 16px; height: 16px; }
 /* § iteration 015 S4 · SAVE A PRESET (lab/spectrum.js): the bare save glyph in a 26-px seat beside the stepper (no chrome: the mod window's .m2presave
    way), the name asked in the stepper's own seat, and the list's USER / PRESETS headings and each reader's × */
 .dev .row.sp-preset { gap: 4px; flex-wrap: nowrap; }
@@ -907,3 +905,8 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .dev[data-id="render"] .sr-fold[hidden], .dev[data-id="render"] .sr-early[hidden] { display: none; }
 /* 017 R4 (call 14) · a WIDE readout in a rack window is CLAMPED to its two lines (modhost.css gives it `overflow: auto`, a tiny scroller) */
 [data-mir-rack] > .dev .ro.wide .ro-val { overflow: hidden; }
+/* 037 H4 · CLIP's frame (CAMERA | OBJECT, material.js sliceFrameSeg) beside the plane's picture, its two cells stacked */
+.clip-plane { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2); align-items: center; min-width: 0; }
+.clip-plane > .segw { margin: 0; }
+.clip-plane > .segw .seg { display: flex; flex-direction: column; }
+.clip-plane > .segw .seg-b { width: 100%; padding: 0 8px; }

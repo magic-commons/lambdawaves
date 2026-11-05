@@ -2,12 +2,29 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 037
+
+THE TOGGLE BUTTON (037 H6, Josh 11-05: "I said 'Toggle' but you've built what I call a 'Switch' … The icon just swaps between two different
+icons"): the words, kept forever — a SWITCH is the kit's `sw`, two states on one body with a lamp (ON / OFF: CLIP's ON, the CAMERA's LOCK);
+a SEGMENTED CONTROL is the kit's `seg`, two to four named cells side by side, one lit (TURNTABLE | FREE, CLIP | SLAB, CAMERA | OBJECT); a
+TOGGLE BUTTON is one `.trig` whose glyph swaps between two drawings, never lit (FILL ALL ↔ EMPTY, BUTTONS ↔ PAINT). iOS calls its on/off
+switch a "toggle"; λWAVES does not. BUTTONS · PAINT is a toggle button since 037 (`lab/paint-stroke.js` `strokeButton`, it replaced 036's
+`strokeSeg`): the hand (BUTTONS) ↔ the brush (PAINT), the face the mode in force, its word the aria-label, its hint "… · press: …",
+`data-state`; one press flips the PREFERENCE `lambdawaves.q0.stroke`, every seat in step.
+
+THE LAW LINE (037 H7, Josh 11-05: "Mouseover reveal of text in spectrum should only happen inside that reader thingy. Tell me what you call
+that thing"): the box SPECTRUM draws its levels in is THE LADDER (SPECTRUM's register ladder; MOLECULES' ORBITAL and STATES ladders are the
+same thing), and the line of maths that appears at its foot is THE LAW LINE (`.reg-foot`, `paint-stroke.js` `footLine`). It shows while the
+pointer is on its own ladder (the canvas it lies over: `canvas:hover + .reg-foot`, the line itself takes no pointer) or while keyboard focus
+walks the window (`.dev:has(:focus-visible)`), never on the window's hover alone (lab.css). The kit's READOUT (`.ro`, a value with a
+whispered sub-line on hover) is a different part.
+
 ## The laws of 036
 
 BUTTONS · PAINT (036 P1, Josh 2026-11-03: "a 'Paint' vs 'Buttons' toggle … the original control of a left-click only feature … Same goes for
 switching between atoms and molecules; don't change the wave/palette windows"): the ladders' stroke has two modes, one PREFERENCE record
 `lambdawaves.q0.stroke` { mode } read at each press (`lab/paint-stroke.js` `strokeMode`, `paintStroke`'s `mode` and `isOn`), its seat
-`strokeSeg` — a pointing hand · a paintbrush — on SPECTRUM's head (in PRESET VISUALS' place, the four-column grid kept) and on the ORBITAL
+`strokeSeg` (since 037 `strokeButton`, THE TOGGLE BUTTON above) — a pointing hand · a paintbrush — on SPECTRUM's head (in PRESET VISUALS' place, the four-column grid kept) and on the ORBITAL
 and STATES heads (SPECTRUM hides under MOLECULES), every seat in step. BUTTONS, the default: a left press released on the item it began on
 TOGGLES it (normalised, VIEW MIX, one undo row, as a stroke), a drag sweeps nothing, the right button is the context menu's (the grid's
 CLEAR · NORMALIZE · NEXT PRESET · CREATE EVENT …). PAINT is THE PAINT GESTURE below. WAVE and PALETTE never read it.

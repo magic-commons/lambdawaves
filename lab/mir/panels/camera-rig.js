@@ -117,7 +117,7 @@ export function has(port, id) {
 export const present = (port) => IDS.filter((id) => has(port, id));
 
 /** describe(id, port) → the descriptor the panel builds from: the vocabulary's entry, the port's own range laid over it (`port.ranges[id]`:
- *  { min, max, home, log, step, fmt, label, wrap }, in the port's unit), the angle unit applied, `fmt` resolved to a function. */
+ *  { min, max, home, log, step, fmt, label, wrap, reverse }, in the port's unit), the angle unit applied, `fmt` resolved to a function. */
 export function describe(id, port) {
   const v = VOCAB[id];
   if (!v) return null;
@@ -170,6 +170,25 @@ export function sphereDrag(yaw, pitch, dsx, dsy) {
   const m00 = a[0] * a[0] + a[1] * a[1] + lam, m01 = a[0] * b[0] + a[1] * b[1], m11 = b[0] * b[0] + b[1] * b[1] + lam;
   const r0 = a[0] * dsx + a[1] * dsy, r1 = b[0] * dsx + b[1] * dsy, det = m00 * m11 - m01 * m01;
   return [(r0 * m11 - r1 * m01) / det, (m00 * r1 - m01 * r0) / det];
+}
+
+/* ── 1.5.7-alpha.7 THE SPHERE TAKES A PLANE: a plane's normal on the same drawing ── */
+/** the drawing's own view frame (project's): its right, its up and toward its eye — a direction given in a VIEWER's frame (x right, y up,
+ *  z toward the eye) is drawn through it, so the drawing shows it as that viewer sees it (a plane that rides with a camera) */
+export const VIEW_FRAME = Object.freeze({ right: Object.freeze([S2, -S2, 0]), up: Object.freeze([-S6, -S6, S23]), eye: Object.freeze([1 / Math.sqrt(3), 1 / Math.sqrt(3), 1 / Math.sqrt(3)]) });
+/** a viewer-frame direction → the drawing's, and back (the frame is orthonormal: the inverse is its transpose) */
+export const fromView = (n) => [0, 1, 2].map((i) => n[0] * VIEW_FRAME.right[i] + n[1] * VIEW_FRAME.up[i] + n[2] * VIEW_FRAME.eye[i]);
+export const toView = (d) => [VIEW_FRAME.right, VIEW_FRAME.up, VIEW_FRAME.eye].map((a) => a[0] * d[0] + a[1] * d[1] + a[2] * d[2]);
+/** planeDrag(d, dsx, dsy) → the unit direction whose TIP has moved by the screen step (dsx, dsy) (the drawing's units) from the unit
+ *  direction d — in 3-D, on the tangent plane at d, so there is no pole (a plane's home normal z sits exactly where yaw / pitch lock);
+ *  the same damped least squares as sphereDrag where the tip runs along the line of sight */
+export function planeDrag(d, dsx, dsy) {
+  const cr = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]], nrm = (a) => { const n = Math.hypot(...a) || 1; return a.map((x) => x / n); };
+  const t1 = nrm(cr(d, Math.abs(d[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0])), t2 = cr(d, t1), a = linear(t1), b = linear(t2);
+  const lam = 1e-3 * SPHERE.R * SPHERE.R;
+  const m00 = a[0] * a[0] + a[1] * a[1] + lam, m01 = a[0] * b[0] + a[1] * b[1], m11 = b[0] * b[0] + b[1] * b[1] + lam;
+  const r0 = a[0] * dsx + a[1] * dsy, r1 = b[0] * dsx + b[1] * dsy, det = m00 * m11 - m01 * m01, x = (r0 * m11 - r1 * m01) / det, y = (m00 * r1 - m01 * r0) / det;
+  return nrm(d.map((v, i) => v + x * t1[i] + y * t2[i]));
 }
 
 /* ── THE CSS CAMERA: what a picture does with no engine ── */

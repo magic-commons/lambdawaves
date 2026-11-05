@@ -29,6 +29,12 @@ try {
     blur:'22px',vivid:.5,tier:'FULL|SMOOTH*|BALANCED|LIGHT',errors:[] });
   console.log('PASS fresh desktop defaults: visibility, quality, light refractive frost, 22px blur, 50% vivid and PERFORMANCE SMOOTH');
 
+  // 037 H3 (Josh: "Autorotate and lock should be on by default"): AUTO-ROTATE (FRICTION read as 0) and the LOCK, its switch lit and the PAN pad resting
+  const cam = await g.ev(`const card = document.querySelector('.dev[data-id="camera"]'), lock = [...card.querySelectorAll('button.sw')].find((b) => b.textContent.trim() === 'LOCK');
+    return { autoRotate: __LW.camera.autoRotate, mu: __LW.camera.mu, lock: __LW.camera.lock, lit: lock.getAttribute('aria-pressed'), padOff: card.querySelector('.mir-camera .mir-xy').classList.contains('disabled') };`);
+  assert.deepEqual(cam, { autoRotate: true, mu: 0, lock: true, lit: 'true', padOff: true });
+  console.log('PASS fresh camera defaults: AUTO-ROTATE on (FRICTION read as 0) and LOCK on, the PAN pad resting');
+
   // 029 M1: a STAGE write re-inks the header λ alone; every square keeps its fill, and the λ wears what the kit's full paint gives it
   const marks = await g.ev(`const L=__LW, F=document.querySelector('.stage-follow'), follow=F.classList.contains('on');
     const read=()=>({lam:[...document.querySelectorAll('#title .lam')].map(e=>e.style.color).join(),

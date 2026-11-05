@@ -23,7 +23,8 @@
  *
  * THE PORT   an app implements only the ids it has; the panel shows only those (camera-rig.js VOCAB lists every id)
  *   { get(id) → number | boolean | string | undefined,     set(id, v),     subscribe(fn) → off      (the app notifies; nothing is polled)
- *     has?(id), angle?: 'deg' | 'rad', ranges?: { [id]: { min, max, home, log, step, fmt, label } }, modIds?: { [id]: 'the.apps.id' },
+ *     has?(id), angle?: 'deg' | 'rad', ranges?: { [id]: { min, max, home, log, step, fmt, label, reverse } }, modIds?: { [id]: 'the.apps.id' },
+ *     (`reverse`, 1.5.7-alpha.6 THE REVERSED DIAL: that knob turns the other way — a ZOOM whose number is a distance turns clockwise to come near)
  *     verbs?: [{ label, title?, run() → void | Promise }],   home?(), north?(), northMemo?() → degrees | null,   turn?(dyaw, dpitch) }
  * MODULATION  every continuous control is a target under `camera.<id lower-cased>` (camera.rotation, camera.panx …: BASINS' ids), or `modPrefix.<id>` (two cameras on a page), or the
  *   port's `modIds`.  `mod` is installModulation()'s result: the panel adds its targets when it is built, and a hand on a routed dial writes the
@@ -40,7 +41,7 @@ import { registerProjectPart } from '../core/project.js';
 import { handWrite } from '../modulation/registry.js';
 import {
   HAND_IDS, ANGLE_UNIT, createCameraRig, setCameraValue, atNorth, northStep, wrapDegrees, fmtDeg,
-  describe, present, SPHERE, lookDir, project, depthOf, splitDepth, sphereDrag, transform2d, transform3d,
+  describe, present, SPHERE, lookDir, project, depthOf, splitDepth, sphereDrag, transform2d, transform3d, planeDrag, fromView, toView,
 } from './camera-rig.js';
 
 const DEG = Math.PI / 180;
@@ -96,17 +97,26 @@ export function createCssPort(canvas, { mode = '2d', values } = {}) {
  *   directionSphere({ label, aria, yaw, pitch, unit, roll, turn(dyaw, dpitch) in radians, home(), onChange() })
  *     yaw, pitch   the arc knobs' options ({ min, max, value, wrap, fmt, … }) in the port's unit; `unit` is port-units per degree
  *     roll         () → the roll in degrees now, for the film's turn
- *   → { root, svg, yaw, pitch, paint(), destroy() }   yaw and pitch are the arc knobs: register them as the targets */
+ *   → { root, svg, yaw, pitch, paint(), destroy() }   yaw and pitch are the arc knobs: register them as the targets
+ * 1.5.7-alpha.7 THE SPHERE TAKES A PLANE — the same drawing for a plane (CLIP's), in place of plane-model.js's canvas:
+ *   directionSphere({ plane: { normal() → [x, y, z], pos?() → −1…1, set(n), view?() → bool }, home(), onChange(), label, aria })
+ *     the normal is the look line and the tip, the plane the film-like square through n·pos (no camera film), the three world rings, no
+ *     letters and no arcs; the drag moves the tip after the finger IN 3-D (planeDrag: no yaw / pitch, so no pole — a plane's home normal
+ *     z sits exactly there) and hands the new unit normal to set(); the arrows nudge the tip on the screen (Shift the kit's fine gear);
+ *     a double-tap, Home or Delete is home().  view() true: the normal is in the VIEWER's frame (x right, y up, z toward the eye), drawn as
+ *     that viewer sees it (camera-rig.js VIEW_FRAME) — a plane that rides with a camera; set() is handed the viewer's frame back.
+ *   → { root, svg, body, yaw: null, pitch: null, paint(), setDisabled(on), destroy() }   paint() redraws only when the normal, pos or view
+ *     changed, so a frame loop may call it */
 export function directionSphere(o = {}) {
   const unit = o.unit || 1, toRad = (v) => v * DEG / unit;
-  const root = el('div', 'mir-camsphere');
+  const root = el('div', 'mir-camsphere' + (o.plane ? ' plane' : ''));
   if (o.label) label(el('div', 'k-lbl', root), o.label);
   const body = el('div', 'mir-camsphere-body', root);
   const svg = svgEl('svg', 'cs-svg', body);
   svg.setAttribute('viewBox', '0 0 ' + SPHERE.W + ' ' + SPHERE.H); svg.setAttribute('role', 'application'); svg.tabIndex = 0;
-  svg.setAttribute('aria-roledescription', 'direction sphere');
+  svg.setAttribute('aria-roledescription', o.plane ? 'plane sphere' : 'direction sphere');
   if (o.aria || o.label) svg.setAttribute('aria-label', o.aria || o.label);
-  const side = el('div', 'mir-camsphere-side', body);
+  const side = o.plane ? null : el('div', 'mir-camsphere-side', body);
   const ball = svgEl('circle', 'cs-ball', svg); ball.setAttribute('cx', SPHERE.cx); ball.setAttribute('cy', SPHERE.cy); ball.setAttribute('r', SPHERE.R);
   for (let axis = 0; axis < 3; axis++) {                                          // the three world rings: fixed on the screen; the half behind the view plane dashed
     const pts = [];
@@ -118,6 +128,7 @@ export function directionSphere(o = {}) {
   tip.setAttribute('r', 5);
   const origin = project([0, 0, 0]);
   look.setAttribute('x1', f2(origin[0])); look.setAttribute('y1', f2(origin[1]));
+  if (o.plane) return planeSphere(o, { root, body, svg, film, look, tip });
 
   const mk = (a) => arcKnob({ ...a, onInput: (v) => { paint(); if (a.onInput) a.onInput(v); }, onChange: (v) => { paint(); if (a.onChange) a.onChange(v); } });
   const ky = mk({ ...o.yaw }), kp = mk({ ...o.pitch });
@@ -183,6 +194,63 @@ export function directionSphere(o = {}) {
     destroy() { root.remove(); } };
 }
 
+/* 1.5.7-alpha.7 · the plane mode of directionSphere (see its header): the normal drawn as the look and the tip, the plane as the film */
+function planeSphere(o, { root, body, svg, film, look, tip }) {
+  const P = o.plane, unitOf = (a) => { const n = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / n, a[1] / n, a[2] / n]; };
+  const cr = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const isView = () => !!(P.view && P.view()), drawn = () => { const n = unitOf(P.normal()); return isView() ? fromView(n) : n; };
+  let last = '';
+  function paint(force) {
+    const d = drawn(), pos = P.pos ? +P.pos() || 0 : 0, key = d.map((v) => v.toFixed(5)).join(',') + '|' + pos.toFixed(5);
+    if (!force && key === last) return false;
+    last = key;
+    const t = project(d), behind = depthOf(d) < 0;
+    setAttr(look, 'x2', f2(t[0])); setAttr(look, 'y2', f2(t[1])); setAttr(tip, 'cx', f2(t[0])); setAttr(tip, 'cy', f2(t[1]));
+    look.classList.toggle('back', behind); tip.classList.toggle('back', behind);
+    const u = unitOf(cr(d, Math.abs(d[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0])), v = cr(d, u);   // the plane's square through d·pos, the film's size
+    setAttr(film, 'points', [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => project(d.map((x, k) => x * pos + 0.7 * (u[k] * i + v[k] * j))).map(f2).join(',')).join(' '));
+    return true;
+  }
+  const put = (d) => { P.set(isView() ? toView(d) : d); paint(); };
+  /* ── the hand: the tip follows the finger (planeDrag), the one knob law's fine gear, a double-tap is home ── */
+  watchTouches();
+  let g = null, homed = false;
+  const home = () => { if (o.home) o.home(); paint(true); };
+  const tap = tapWatcher(() => { homed = true; home(); });
+  svg.addEventListener('pointerdown', (e) => {
+    if (g || e.button || svg.getAttribute('aria-disabled') === 'true') return;
+    e.preventDefault(); svg.focus({ preventScroll: true });
+    homed = false; tap(e); if (homed) return;
+    try { svg.setPointerCapture(e.pointerId); } catch (_) { /* a pointer already gone */ }
+    const r = svg.getBoundingClientRect();
+    g = { id: e.pointerId, lx: e.clientX, ly: e.clientY, s: Math.min(r.width / SPHERE.W, r.height / SPHERE.H) || 1 };
+    svg.classList.add('drag');
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (!g || e.pointerId !== g.id) return;
+    const gear = gearOf(e, g.id), dsx = gear * (e.clientX - g.lx) / g.s, dsy = gear * (e.clientY - g.ly) / g.s;
+    g.lx = e.clientX; g.ly = e.clientY;
+    put(planeDrag(drawn(), dsx, dsy));
+  });
+  const end = (e) => { if (!g || (e && e.pointerId !== g.id)) return; g = null; svg.classList.remove('drag'); paint(); if (o.onChange) o.onChange(); };
+  svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end); svg.addEventListener('lostpointercapture', end);
+  svg.addEventListener('dblclick', (e) => e.preventDefault());
+  svg.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+  svg.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || svg.getAttribute('aria-disabled') === 'true') return;
+    const step = SPHERE.R * (2 * Math.PI / 100) * (e.code.startsWith('Page') ? 10 : 1) * (e.shiftKey ? setKnobLaw().keyFine : 1);   // the camera sphere's arrow, as a tip step on the drawing
+    const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1], PageUp: [0, -1], PageDown: [0, 1] }[e.code];
+    if (!dir && e.code !== 'Home' && e.code !== 'Delete' && e.code !== 'Backspace') return;
+    e.preventDefault(); e.stopPropagation();
+    if (dir) put(planeDrag(drawn(), dir[0] * step, dir[1] * step)); else home();
+    if (o.onChange) o.onChange();
+  });
+  paint(true);
+  return { root, svg, body, yaw: null, pitch: null, paint,
+    setDisabled(on) { root.classList.toggle('disabled', !!on); svg.tabIndex = on ? -1 : 0; svg.setAttribute('aria-disabled', String(!!on)); },
+    destroy() { root.remove(); } };
+}
+
 /* ═══ THE VIEW: the rows ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 export function createCameraView(parent, o = {}) {
   const port = o.port || (o.canvas ? createCssPort(o.canvas, { mode: o.mode || '2d' }) : null);
@@ -211,7 +279,7 @@ export function createCameraView(parent, o = {}) {
   function desc(id, extra) {
     const d = D(id);
     return { id: modId(id), label: d.label, hint: d.hint, min: d.min, max: d.max, home: d.home, log: d.log, step: d.step, fmt: d.fmt,
-      wrap: !!d.wrap, angle: d.kind === 'angle', value: port.get(id), get: () => port.get(id), set: (v) => write(id, v), ...extra };
+      wrap: !!d.wrap, angle: d.kind === 'angle', reverse: !!d.reverse, value: port.get(id), get: () => port.get(id), set: (v) => write(id, v), ...extra };   // 1.5.7-alpha.6: a port's range may ask `reverse`
   }
   function add(parentEl, vids, c, read) {
     parentEl.appendChild(c.root);

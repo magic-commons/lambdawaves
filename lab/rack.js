@@ -779,7 +779,7 @@ export async function boot(dom) {
    *     here: every register write bumps reg.version, which is the UNDO ring's trigger and the
    *     recurrence scan's cache key — an LFO on an amplitude would push an undo entry every 400 ms
    *     and re-run densityPeriod on every frame.  The register is the hand's, not the modulator's.
-   *   · RANGES ARE THE DIALS' OWN, not host.js's illustrative ones: ZOOM really is [1.2, 8] and
+   *   · RANGES ARE THE DIALS' OWN, not host.js's illustrative ones: ZOOM really is CAM.DIST ([1, 12] since 037) and
    *     EXPOSURE really is [0.08, 12], because a registry whose range disagrees with the knob lies
    *     about where the parameter is the moment either end is reached.
    * Each adapter also moves the control's REAL DIAL (setKnob), because a knob that does not follow

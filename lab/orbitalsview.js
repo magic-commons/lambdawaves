@@ -25,7 +25,7 @@
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeSeg, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
 
@@ -65,7 +65,7 @@ export function createOrbitals(host, api) {
   const painted = () => { if (api.stroked) api.stroked('orbital'); };
   const fillB = fillButton(head, { fill: 'every orbital on, equal and in phase', empty: 'every orbital off' },
     (empty) => { if (!empty) return clear(); const r = fill(); if (r) painted(); return r; });
-  head.appendChild(strokeSeg().root);   // 036 P1: BUTTONS · PAINT, the one preference SPECTRUM's head sets too
+  head.appendChild(strokeButton().root);   // 036 P1 · 037 H6: BUTTONS · PAINT, one toggle button, the one preference SPECTRUM's head sets too
   /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */

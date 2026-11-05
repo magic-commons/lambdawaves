@@ -39,7 +39,7 @@ try {
     await float('spectrum', 560, 10, 340); await wait(700);
     const chip = (lbl) => g.ev(`const b = [...document.querySelectorAll('.dev[data-id="spectrum"] .pk-c')].find((x) => x.textContent === ${JSON.stringify(lbl)}); b.scrollIntoView({ block: 'center' }); const r = b.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, +b.dataset.a];`);
     const pop = () => g.ev(`return __LW.reg.populated().length;`);
-    out.mode0 = await g.ev(`return document.querySelector('.dev[data-id="spectrum"] .sp-stroke .seg-b.on').getAttribute('aria-label');`);
+    out.mode0 = await g.ev(`return document.querySelector('.dev[data-id="spectrum"] .sp-stroke').getAttribute('aria-label');`);   // 037 H6: one toggle button, its face the mode
     /* the reader's view, rate and window, then a hand's preset (the stepper's ›, a real click; the picker still closed so it is on screen) */
     await g.ev(`__LW.clock.setRate(7.5); __LW.clock.window = 33; const d = document.querySelector('.dev[data-id="spectrum"]'), p = d.querySelector('.picker'); if (!p.hidden) [...d.querySelectorAll('.sp-head .trig')].find((b) => /MODE/.test(b.textContent)).click(); return 1;`); await wait(300);
     const before = await g.ev(`return { rate: __LW.clock.rate, window: __LW.clock.window, view: __LW.mat.view };`);
@@ -53,7 +53,7 @@ try {
     await click(b[0], b[1], 2); await wait(300); const menu = await g.ev(`const m = document.querySelector('.mir-ctx'); return !!m && m.textContent.slice(0, 60);`);
     await click(1300, 600); await wait(300);   // a press elsewhere closes the menu
     out.buttons = { p0, tapOn: p1, tapOff: p2, dragSweeps: p3 - p2, rightMenu: menu };
-    const pb = await g.ev(`const b = document.querySelector('.dev[data-id="spectrum"] .sp-stroke .seg-b[aria-label="PAINT"]'); const r = b.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2];`);
+    const pb = await g.ev(`const b = document.querySelector('.dev[data-id="spectrum"] .sp-stroke'); const r = b.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2];`);
     await click(pb[0], pb[1]); await wait(250);
     const q0 = await pop(); await stroke([[a[0], a[1]], [b[0], b[1]], [c[0], c[1]]]); await wait(250); const q1 = await pop();
     await stroke([[a[0], a[1]], [c[0], c[1]]], 2); await wait(250); const q2 = await pop();

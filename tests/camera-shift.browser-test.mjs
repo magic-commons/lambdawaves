@@ -22,7 +22,7 @@ async function check(name, script, verify) {
 }
 try {
   assert.equal((await g.waitFor('window.__LW?.ready', 300, 100)).ok, 1);
-  await g.ev(`__LW.pause(); __LW.governor.on = false; await __LW.settle(); return 1;`);
+  await g.ev(`__LW.pause(); __LW.governor.on = false; __LW.camera.setLock(false); __LW.camera.setAutoRotate(false); await __LW.settle(); return 1;`);   // 037 H3: a fresh profile boots LOCKed with AUTO-ROTATE on; this file judges the free pan, and § 5 presses LOCK itself
 
   /* ── 1 · ONE FRAME CORNER, ONE PIXEL ──
      At ZOOM 8 the whole box is on the frame; the stage is a flat grey for the two readbacks (either theme), the ray pass's

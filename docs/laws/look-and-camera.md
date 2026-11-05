@@ -2,9 +2,30 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 037
+
+THE RANGES OF 037 (037 H1–H3, Josh 11-05): FOV spans 5°–90° (`CAM.FOV`, radians; the readout prints degrees) and ZOOM spans [1, 12] (`CAM.DIST`,
+log); both homes stand (3.3, 0.6 rad), so THE LOCK's poses are its own. The ZOOM dial is REVERSED — clockwise comes near (MIR 1.5.7-alpha.6
+THE REVERSED DIAL: the port's `ranges.zoom.reverse`); `obs.dist`, `observer.dist` and the ×dist readout are still the distance. A saved
+route or timeline curve on `observer.fov` / `observer.dist` is a share of its range, so the demos' FOV and ZOOM curves (STAR LOOP, WAVE
+DANCER) now swing over the wider ranges. AUTO-ROTATE (FRICTION read as 0: a fling never stops, no ambient spin) and the LOCK (the PAN pad
+resting) are ON from the boot; a project that says `camera.autoRotate: false` keeps it, a reader who unlocked keeps `camLock: false`.
+
+THE CLIP'S FRAME (037 H4, Josh: "'Lock' or 'Unlock' the clip to be separate from the camera"): CLIP's segmented control CAMERA | OBJECT beside
+the plane. OBJECT (`mat.slice.frame` absent: every file before 037, NEW, a link) is the plane fixed to the object. CAMERA (`'camera'`, a hand's
+only, PROJECT inside `presentation.mat`) reads the normal in the eye's frame — n.x·right + n.y·up + n.z·toward the eye (`lab/field.js`
+`eyeTurn`, from the basis `writeView` wrote) — in the ray's slab and the outline (the square built in its own frame, then turned), so the cut
+rides with the camera. A press keeps the plane where it stands (the normal re-read through `cameraBasis`); Home or a double-tap is z in the
+frame in force. A `lw:` link does not carry the frame.
+
+THE SPHERE (037 H5): CLIP's plane is drawn on the camera's sphere (MIR 1.5.7-alpha.7 THE SPHERE TAKES A PLANE, `directionSphere({ plane })`)
+in place of the plane-model canvas — the normal as the tip, the plane as the film, the rings, no letters; the tip follows the finger in 3-D
+(no pole at z). Under OBJECT it is the object's picture (an orbit turns the cut, not the sphere); under CAMERA it draws the eye's normal as
+the eye sees it (`view`), so neither the sphere nor the cut moves while the eye orbits. PLANE's own window keeps the plane-model canvas.
+
 ## The standing paragraphs
 
-The CAMERA card's LOCK (PREFERENCE `camLock`, off by default) is the classic camera. It holds the pan only: the shift stays 0,
+The CAMERA card's LOCK (PREFERENCE `camLock`, on by default since 037) is the classic camera. It holds the pan only: the shift stays 0,
 every zoom (the wheel, the pinch, the dials, the dolly zoom) is from the centre, the PAN pad rests, and a route on observer.panx/pany
 or a project's shift opens centred without its record being written. FOV, CONTROL and the turn stay live (`lab/camera-law.js`
 `setLock`). Alt(+Shift)+Drag is the 1:1 pan; Shift does not make it finer (0.5.3 M6, M7).

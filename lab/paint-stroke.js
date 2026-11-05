@@ -25,9 +25,9 @@
  * 036 P1 · BUTTONS · PAINT (Josh: "a 'Paint' vs 'Buttons' toggle … the original control of a left-click only feature"): the gesture above is
  * PAINT; BUTTONS (the default) is the left click alone — a press released on the item it began on TOGGLES it (apply([key], !isOn(key)), then
  * onEnd, in the same undo row), a drag sweeps nothing, the right button is the context menu's.  The mode is the PREFERENCE record
- * `lambdawaves.q0.stroke` { mode }; `strokeSeg` is its seat on each ladder's head, every seat in step.
+ * `lambdawaves.q0.stroke` { mode }; `strokeButton` (037 H6: one toggle button) is its seat on each ladder's head, every seat in step.
  */
-import { el, seg } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
+import { el } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
 const STROKE_KEY = 'lambdawaves.q0.stroke', MODES = ['buttons', 'paint'], watchers = new Set();
 let mode = null;
 /** the reader's stroke mode now: 'buttons' (the default) or 'paint' */
@@ -42,13 +42,22 @@ export function setStrokeMode(m) {
 }
 /** watchStroke(fn) — fn(mode) on every change (a surface's hint follows it) */
 export function watchStroke(fn) { watchers.add(fn); fn(strokeMode()); }
-/** strokeSeg() — the BUTTONS · PAINT seat (a pointing hand · a paintbrush) a ladder's head carries */
-export function strokeSeg() {
-  const s = seg({ aria: 'stroke mode', cls: 'sp-stroke', value: strokeMode(), onChange: setStrokeMode, options: [
-    { id: 'buttons', label: '', title: 'BUTTONS · a click toggles one' }, { id: 'paint', label: '', title: 'PAINT · drag adds, right-drag removes' }] });
-  for (const [id, g, w] of [['buttons', 'hand', 'BUTTONS'], ['paint', 'brush', 'PAINT']]) { const b = s.button(id); b.innerHTML = glyphSvg(g, 'gly', 16); b.setAttribute('aria-label', w); }
-  watchStroke((m) => { if (s.get() !== m) s.set(m); });
-  return s;
+/** strokeButton() — the BUTTONS · PAINT seat a ladder's head carries.  037 H6 · THE TOGGLE BUTTON (Josh: "The Paint vs Add thing should behave
+ *  the same way [as FILL / EMPTY] instead of an extremely narrow switch"): ONE `.trig` whose glyph swaps — a pointing hand (BUTTONS: a click
+ *  toggles one) ↔ a paintbrush (PAINT: drag adds, right-drag removes) — with its word as aria-label, its hint and `data-state`, every seat in
+ *  step through watchStroke; a press flips the PREFERENCE `lambdawaves.q0.stroke`.  The face is the mode in force;
+ *  it replaced 036 P1's two-cell segmented control (strokeSeg). */
+export function strokeButton() {
+  const b = el('button', 'trig sp-stroke'); b.type = 'button';
+  let shown = null;
+  watchStroke((m) => {
+    if (m === shown) return; shown = m; const paint = m === 'paint';
+    b.innerHTML = glyphSvg(paint ? 'brush' : 'hand', 'gly', 16); b.dataset.state = m;   // no aria-pressed: the face is not lit, the glyph alone swaps (FILL ALL ↔ EMPTY's law); the word says the mode
+    b.setAttribute('aria-label', paint ? 'PAINT' : 'BUTTONS');
+    b.title = paint ? 'PAINT · drag adds, right-drag removes · press: BUTTONS' : 'BUTTONS · a click toggles one · press: PAINT';
+  });
+  b.addEventListener('click', () => setStrokeMode(strokeMode() === 'paint' ? 'buttons' : 'paint'));
+  return { root: b };
 }
 export function paintStroke(surface, o) {
   const local = o.local || ((e) => ({ x: e.clientX, y: e.clientY }));

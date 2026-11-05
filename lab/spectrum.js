@@ -13,7 +13,7 @@
  */
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, chip } from './mir/kit.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeSeg } from './paint-stroke.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton } from './paint-stroke.js';
 import { PRESET_BY_ID } from './state.js';
 import { createUserPresets } from './user-presets.js';
 
@@ -101,7 +101,7 @@ export function createSpectrum(host, api) {
   const fillSync = () => fillB.set(!api.reg.populated().length);
   const fillB = fillButton(head, { fill: 'every label on, equal and in phase', empty: 'every label off' },
     () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); fillSync(); });
-  fillB.set(true); fillB.root.addEventListener('pointerenter', fillSync); head.appendChild(strokeSeg().root);   // 036 P1: BUTTONS · PAINT in VISUALS' seat
+  fillB.set(true); fillB.root.addEventListener('pointerenter', fillSync); head.appendChild(strokeButton().root);   // 036 P1 · 037 H6: BUTTONS · PAINT, one toggle button, in VISUALS' seat
   const info = el('div', 'note', head);
   /* ── WAVE 69 · THE REGISTER'S OWN LAW, LIVE ────────────────────────────────────────────────────
    * `c(t) = e^{−iE t} c(0)` is not a caption here, it is what the evolution IS — one phase per mode,
