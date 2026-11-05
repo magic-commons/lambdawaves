@@ -33,7 +33,7 @@ export const RECORDS = Object.freeze([
   row('lambdawaves.q0.palettes', P, 'v 1', false, 'user-presets.js: PALETTE’s save glyph'),
   row('lambdawaves.q0.presets', P, 'v 1', false, 'user-presets.js: SPECTRUM’s save glyph'),
   row('lambdawaves.q0.csb', P, 'v 1', true, 'csb-favs.js: the CONTROL SURFACE’s favourites'),
-  row('lambdawaves.q0.picker', P, 'v 1', true, 'picker.js: SHOW LABELS, THE HUE, the decks’ looks'),
+  row('lambdawaves.q0.picker', P, 'v 1', true, 'picker.js: SHOW LABELS, THE HUE, the decks’ looks, THE COLLAGE switch (037 M1)'),
   row('lambdawaves.q0.loader', P, 'v 1', true, 'loader.js: the build THE LOADING SCREEN last kept the set for { build } (036 G7)'),
   row('lambdawaves.q0.stroke', P, 'v 1', true, 'paint-stroke.js: BUTTONS · PAINT, the ladders’ stroke { mode } (036 P1)'),
   row('lambdawaves.q0.keys', P, 'v 1', true, 'key-table.js: the rebound chords (the kit’s difference)'),

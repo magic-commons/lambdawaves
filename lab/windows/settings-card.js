@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, readout, group, label } from '../mir/kit.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
+import { el, knob, sw, seg, readout, group, label } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, perf, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
@@ -234,12 +234,19 @@ export function createSettingsCard(app) {
       return f;
     };
     /* 036 G5 (Josh 11-03: "THIS will be the first taste of how MIR Focus is going to be like … borderless floating knobs and features on that
-       blurring background"; the rows "I'll defer to your judgement" — the critic's order): PERFORMANCE first, MOTION, FROST, FULLSCREEN, THEME,
+       blurring background"; the rows "I'll defer to your judgement" — the critic's order): PERFORMANCE first, MOTION, COLLAGE (037), FROST, FULLSCREEN, THEME,
        HINTS; then a MORE fold (closed; lab/fold.js) holding the rest of QUALITY.  PANE is out (a pane the menu does not show); the FIELD CLOCK
        cap and READERS stay in the rack's SETTINGS › QUALITY.  `more` takes a row as any group does (a later door's knob joins it there). */
     const gm = group('');
     row(gm, face(ui.tierSeg));
     row(gm, lookSeg('motion', 'MOTION', [['auto', 'AUTO', 'Follow the system'], ['full', 'FULL'], ['reduced', 'REDUCED', 'Fades only: nothing travels'], ['off', 'OFF', 'Nothing animates']]));
+    /* 037 M1 · THE COLLAGE SWITCH (Josh: "an option in the main menu settings to enable or disable collage animation … a video icon and the
+       switches to the icon with a line crossing it out"): the word, and the film camera or the camera struck through (both glyphs in the
+       switch, the CSS shows the state's); the value is the main menu's own PREFERENCE (app.state.picker — this module never imports it) */
+    { const P = () => app.state.picker, on = () => !P() || P().collage();
+      const f = sw({ label: 'COLLAGE', value: on(), lamp: false, cls: 'mm-sh-glyph', title: 'The main menu’s wall of clips, or a still ground', onChange: (v) => { if (P()) P().setCollage(v); } });
+      for (const g of ['videoOn', 'videoOff']) f.root.append(glyphEl(g, 'gly gly-' + g, 20));
+      paints.push(() => f.set(on())); row(gm, f); }
     row(gm, lookSeg('frost', 'FROST', [['off', 'OFF', 'No backdrop blur'], ['still', 'STILL', 'Blur while the picture is still'], ['always', 'ALWAYS', 'Blur always: it can cost frames']]));
     { const on = () => !!document.fullscreenElement, f = sw({ label: 'FULLSCREEN', value: on(), title: 'Fill the screen (F)', onChange: () => { app.sh.ACTIONS.run('fullscreen'); setTimeout(paint, 400); } });
       paints.push(() => f.set(on())); document.addEventListener('fullscreenchange', () => f.set(on())); row(gm, f); }   // the `fullscreen` action's road; the switch mirrors the document

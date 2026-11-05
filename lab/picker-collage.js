@@ -6,8 +6,8 @@
  * least seen on screen, not its neighbours' family — so the wall never repeats its arrangement and shows no twin while a slot is spare.  ROWS: even rows drift right, odd rows left, at
  * P/6 px/s; at the first instant the lattice is tiled again 12 s or more after the last turn it turns to COLUMNS (nothing moves at that
  * instant).  The wall leans by a random 1.5–3.5° either way, chosen per load.  It runs only while the face is shown and the page visible;
- * stillness (picker-fx still()) and λWAVES' PERFORMANCE LIGHT, looked at once a second while it runs, pause it on the poster drawn through
- * the same deal.  036: NO EDGE (the pitch an even count of device px, every tile a whole device px abutting, the slot inset 2 px against
+ * stillness (picker-fx still()) and the sheet's COLLAGE switch (037 M1, `off`; PERFORMANCE no longer rests it), looked at once a second
+ * while it runs, pause it on the poster drawn through the same deal.  036: NO EDGE (the pitch an even count of device px, every tile a whole device px abutting, the slot inset 2 px against
  * x264's cross-slot bleed); the video's frame copied only when a NEW one is presented (requestVideoFrameCallback, else the frame count);
  * a dip of the video holds its last frame (the poster only before the first frame and in stillness); a resize (debounced) keeps the mode
  * and the clock; collage.json and the poster kept on the device (library.js keepData).  A plain module: no app, no state outside its root. */
@@ -19,8 +19,8 @@ const DIR = './img/menu/collage/', TURN = 12, DRAW_HZ = 30, NEAR = 3.5, INSET = 
 const RVFC = typeof HTMLVideoElement !== 'undefined' && 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
 const mod = (a, n) => ((a % n) + n) % n;
 
-/** createCollage(root, { theme, still, lite }) → { show, hide, setTheme, destroy }: the canvas and the veil become root's first children */
-export function createCollage(root, { theme, still, lite }) {
+/** createCollage(root, { theme, still, off }) → { show, hide, setTheme, wake, destroy }: the canvas and the veil become root's first children */
+export function createCollage(root, { theme, still, off }) {
   const cvs = document.createElement('canvas'), veil = document.createElement('div');
   cvs.className = 'mm-collage'; veil.className = 'mm-veil'; cvs.hidden = veil.hidden = true; cvs.setAttribute('aria-hidden', 'true');
   root.prepend(cvs, veil);
@@ -146,7 +146,7 @@ export function createCollage(root, { theme, still, lite }) {
   }
   function drawCollage(now) {
     raf = 0; if (!shown || root.hidden || document.hidden) return;
-    if (now - qAt > 1000) { qAt = now; if (quiet()) { rest(); return; } }   // MOTION or PERFORMANCE may change under the open menu: a look a second
+    if (now - qAt > 1000) { qAt = now; if (quiet()) { rest(); return; } }   // MOTION may change under the open menu: a look a second
     raf = requestAnimationFrame(drawCollage);
     if (!RVFC && vid && vid.readyState >= 2) {   // no requestVideoFrameCallback: the frame count says a new frame came
       const q = vid.getVideoPlaybackQuality ? vid.getVideoPlaybackQuality().totalVideoFrames : vid.currentTime;
@@ -158,7 +158,7 @@ export function createCollage(root, { theme, still, lite }) {
     paint(fresh ? atNow() : 0, fresh ? buf : poster);   // a dip holds the last frame: the poster only before the first
   }
 
-  const quiet = () => still() || lite();
+  const quiet = () => still() || off();
   /** quiet: the video paused, the poster drawn once through the same deal, and a look once a second for the way back */
   function rest() {
     halt(); paint(0, poster);
@@ -199,6 +199,8 @@ export function createCollage(root, { theme, still, lite }) {
       manP.then(start);
     },
     hide() { if (!shown) return; shown = false; stop(); cvs.hidden = veil.hidden = true; },
+    /** the COLLAGE switch moved (037 M1): rest or run at once, not at the next look */
+    wake() { if (!shown || !man) return; if (quiet()) rest(); else { clearTimeout(qT); qT = 0; start(); } },
     setTheme(t) {
       t = t === 'light' ? 'light' : 'dark'; if (t === th) return; th = t;
       fresh = false; if (man) deal(); cvs.classList.remove('on'); if (shown) { halt(); start(); }   // the new atlas: its own frame callbacks

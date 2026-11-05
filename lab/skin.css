@@ -1199,6 +1199,9 @@ body.frost #lwMenu .mm-sheet-fx { display: block; }
 #lwMenu .mm-sh-row .seg-b { flex: 1 1 auto; min-width: 0; padding: 0 5px; white-space: nowrap; }
 @media (pointer: fine) { #lwMenu .mm-sh-row .seg-b { min-height: 28px; } #lwMenu .mm-sh-row .sw { min-height: 32px; } }
 #lwMenu .mm-sh-row .sw { width: 100%; justify-content: space-between; box-sizing: border-box; } #lwMenu .mm-sh-row .sw-led { order: 2; }
+/* 037 M1 · THE COLLAGE SWITCH: the word left, the state's glyph right — the film camera on, struck through off (THEME's sun and moon swap) */
+#lwMenu .mm-sh-row .sw.mm-sh-glyph .gly { order: 2; flex: none; width: 20px; height: 20px; }
+#lwMenu .mm-sh-row .sw.mm-sh-glyph.on .gly-videoOff, #lwMenu .mm-sh-row .sw.mm-sh-glyph:not(.on) .gly-videoOn { display: none; }
 #lwMenu .mm-sh-row .k { display: grid; grid-template-columns: var(--lab-w) minmax(0, 1fr) auto; align-items: center; gap: 0 8px; width: auto; }
 #lwMenu .mm-sh-row.two .k { grid-template-columns: auto minmax(0, 1fr) auto; }
 #lwMenu .mm-sh-row .k > .k-lbl { grid-area: 1 / 1; } #lwMenu .mm-sh-row .k > .k-dial { grid-area: 1 / 3; width: 26px; height: 26px; }

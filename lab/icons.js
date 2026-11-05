@@ -43,6 +43,9 @@ const ICONS = {
     p('M12 13.5v4.5') + p('M9.5 16l2.5 2.5 2.5-2.5'),                            // λWAVES' SAVE: a page filed into the library (012 M1), not the kit's floppy
   heart: solid('M12 21.2 3.9 13.4A5.3 5.3 0 0 1 12 6.1a5.3 5.3 0 0 1 8.1 7.3Z'),   // the ☆ layouts seat (#rackFav)
   hueRing: c(12, 12.5, 8) + p('M12 2.5v3.5') + dot(12, 12.5, 1.5),
+  /* 037 M1 · THE COLLAGE SWITCH (Josh: "a video icon and the switches to the icon with a line crossing it out"): the film camera, and it struck through */
+  videoOn: box(2.5, 6.5, 13, 11, 2.5) + p('M15.5 10.5 21.5 7v10l-6-3.5'),
+  videoOff: box(2.5, 6.5, 13, 11, 2.5) + p('M15.5 10.5 21.5 7v10l-6-3.5') + p('M3.5 3.5l17 17'),
   labels: p('M3 10.5V5.5A1.5 1.5 0 0 1 4.5 4h5L17 11.5a1.5 1.5 0 0 1 0 2.1l-4.9 4.9a1.5 1.5 0 0 1-2.1 0L3 10.5Z') + dot(7, 8, 1.2) + p('M16 6h5') + p('M18.5 10H21'),
   library: p('M2.5 20h19') + p('M4 20V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v15') + p('M9 20V4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v16') +
     p('M15.6 20l-1.9-13.2a1 1 0 0 1 .8-1.1l2.9-.5a1 1 0 0 1 1.1.8L20.5 20'),     // the spine ticks gone: they were blobs at 14–16 px

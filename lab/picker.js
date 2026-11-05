@@ -91,7 +91,7 @@ const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB'
 
 /* iteration 012 L1 · the Picker's own PREFERENCE (settings-store.js FAMILIES, never a project or a link): SHOW LABELS for the atoms (on: the symbol
    and Z, as before) and for the molecules (on: the formula on every tile, the name under it on a hover) */
-const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, atomic: 'atoms' };   // iteration 016 P3: no `look` until the reader picks one (lookFor)   // atomic: THE ATOMIC deck's HYDROGEN | ATOMS (iteration 015 M3)   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
+const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, atomic: 'atoms', collage: true };   // iteration 016 P3: no `look` until the reader picks one (lookFor)   // atomic: THE ATOMIC deck's HYDROGEN | ATOMS (iteration 015 M3)   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
 /* iteration 016 P3 · DEFAULT LOOKS (Josh: "Im ψ for atoms, arg ψ for molecules, until the reader changes it"): a record before 016 wrote PREF0's
    look 'density' on every save of the hue or the labels, so a stored 'density' without `lookHand` is read as no choice; any other stored look
    could only be a hand's and wins */
@@ -170,8 +170,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      LIBRARY seat, which opens the decks; the head's ⌂ comes back here.  LIBRARY opens the decks on MOLECULAR (ATOMIC above, EXPANSIONS below),
      TUTORIAL the hero deck (M3).  While it is up the head, the decks and the caption are kept laid out but hidden and inert. */
   const face = el('div', 'mm-face', root); face.hidden = true;
-  /* 035 THE COLLAGE (lab/picker-collage.js): its canvas and veil are the root's first children, behind the face; it runs while the face is shown */
-  const collage = createCollage(root, { theme: () => (document.body.dataset.theme === 'light' ? 'light' : 'dark'), still, lite: () => !!(app.ctl.perf && app.ctl.perf.tier === 'light') });
+  const prefs = readPrefs();
+  /* 035 THE COLLAGE (lab/picker-collage.js): its canvas and veil are the root's first children, behind the face; it runs while the face is shown.
+     037 M1 THE COLLAGE SWITCH: the sheet's COLLAGE row (prefs.collage) is its one switch; PERFORMANCE no longer rests it */
+  const collage = createCollage(root, { theme: () => (document.body.dataset.theme === 'light' ? 'light' : 'dark'), still, off: () => prefs.collage === false });
   /* 036 G4 (Josh 11-03: "Clicking on logo shows the about window, and clicking on the MIR logo shows the MIR about window"): the face's logo
      and the MIR mark are buttons (no plate) onto ABOUT's door, `layout.about.open('lw' | 'mir')` — opened OVER the menu (openAbout below) */
   const faceLogo = el('button', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);
@@ -341,7 +343,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   caption.setAttribute('aria-live', 'polite');
   /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
-  const prefs = readPrefs(), opts = el('div', 'mm-opts', top);
+  const opts = el('div', 'mm-opts', top);
   let labelBtns = [];
   const labelToggle = (host, kind) => { const b = el('button', 'mm-opt', host); b.type = 'button'; b.dataset.labels = kind; icon(b, 'labels'); el('span', '', b, 'SHOW LABELS');
     b.title = kind === 'atomLabels' ? 'the symbol on every element, the name on every state' : 'the formula on every molecule; the name under it on a hover';
@@ -987,7 +989,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { i.src = u; }, () => hold(t, i)); }
     return t;
   };
-  const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggest, suggestTile };
+  /* 037 M1: the sheet's COLLAGE row reads and sets the wall's switch here (settings-card.js never imports this module) */
+  const collageOn = () => prefs.collage !== false, setCollage = (on) => { prefs.collage = !!on; writePrefs(prefs); collage.wake(); };
+  const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggest, suggestTile, collage: collageOn, setCollage };
   app.state.picker = api;
   if (openAtBoot) open();
   return api;
