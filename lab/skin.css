@@ -382,7 +382,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev:not(.mir-modwindow) .seg-b.on { background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise, var(--neu-raise));color:var(--acc); }
 .dev:not(.mir-modwindow) .trig { background:hsl(var(--glass-tint) / 1);border:1px solid transparent;box-shadow:var(--relief-raise, var(--neu-raise));border-radius:8px; }
 .dev:not(.mir-modwindow) .trig:active { background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
-.dev:not(.mir-modwindow) .sw { border:1px solid transparent;border-radius:8px;box-shadow:var(--neu-flat); }
+.dev:not(.mir-modwindow) .sw { border:1px solid transparent;border-radius:8px;box-shadow:var(--neu-flat), var(--relief-raise, var(--neu-raise)); }   /* 036 the critic: at STROKE 0 the resting ring is gone, so an OFF switch keeps the relief's soft outset (the neumorphism Josh asked back) */
 .dev:not(.mir-modwindow) .sw.on,
 .dev:not(.mir-modwindow) .trig[aria-expanded="true"],
 .dev:not(.mir-modwindow) .trig[aria-pressed="true"],

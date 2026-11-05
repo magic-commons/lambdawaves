@@ -93,16 +93,49 @@ class H(http.server.SimpleHTTPRequestHandler):
         return (path + "/").startswith(LAN_PREFIXES)
     def send_head(self):
         if not self.allowed(): self.send_error(404); return None
+        rng = self.headers.get("Range")
+        if rng and rng.startswith("bytes="): return self.send_range(rng[6:])
         return super().send_head()
+    def send_range(self, spec):
+        # 036: a byte range answered as 206, as the live edge answers it — a hero seeks to its still's second, an atlas streams from a wrap.
+        # Without it a media seek is clamped to what has arrived (Firefox), so the preview lied about the hero's start.
+        path = self.translate_path(self.path)
+        if os.path.isdir(path) or not os.path.isfile(path): return super().send_head()
+        size = os.path.getsize(path)
+        a, _, b = spec.partition("-")
+        try:
+            if a == "": start, end = max(0, size - int(b)), size - 1          # the last N bytes
+            else: start, end = int(a), (int(b) if b else size - 1)
+        except ValueError: return super().send_head()
+        if start >= size or start > end: self.send_response(416); self.send_header("Content-Range", "bytes */%d" % size); self.end_headers(); return None
+        end = min(end, size - 1)
+        f = open(path, "rb"); f.seek(start)
+        self.send_response(206)
+        self.send_header("Content-Type", self.guess_type(path))
+        self.send_header("Content-Range", "bytes %d-%d/%d" % (start, end, size))
+        self.send_header("Content-Length", str(end - start + 1))
+        self.send_header("Last-Modified", self.date_time_string(os.fstat(f.fileno()).st_mtime))
+        self.end_headers()
+        return _Slice(f, end - start + 1)
     def list_directory(self, path):
         self.send_error(404); return None
     def end_headers(self):
         # no-store, because the whole point of the gate is that it reads the bytes on disk
         self.send_header("Cache-Control", "no-store")
+        self.send_header("Accept-Ranges", "bytes")
         for k, v in EXTRA_HEADERS.items(): self.send_header(k, v)   # 033: the live edge's headers (LIVE_HEADERS), or LW_EXTRA_HEADERS
         super().end_headers()
     def log_message(self, fmt, *a):
         if not self.loopback(): sys.stderr.write("%s %s — %s\n" % (self.client_address[0], self.log_date_time_string(), fmt % a)); sys.stderr.flush()
+
+
+class _Slice:
+    """a file read up to n bytes, for copyfile (the 206 body)"""
+    def __init__(self, f, n): self.f, self.n = f, n
+    def read(self, k=-1):
+        if self.n <= 0: return b""
+        b = self.f.read(self.n if k is None or k < 0 else min(k, self.n)); self.n -= len(b); return b
+    def close(self): self.f.close()
 
 
 class Server(http.server.ThreadingHTTPServer):

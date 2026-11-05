@@ -23,9 +23,10 @@ const fail = (m) => { console.error('volume-heroes: ' + m); process.exit(1); };
 
 const src = readFileSync(PICKER, 'utf8'), line = /^const HEROES = (\{[^\n]*\});$/m, m = src.match(line);
 if (!m) fail("lab/picker.js has no `const HEROES = { … };` line");
-const heroes = Function('return ' + m[1])();
+const heroes = Function('return ' + m[1])();   // a token is `dark` or `dark@9.1` (the still's second, where the hero starts on its first play)
+const toks = (id) => Object.fromEntries((heroes[id] || '').split(' ').filter(Boolean).map((s) => s.split('@')));
 const write = () => {
-  const body = Object.keys(heroes).sort().map((k) => `'${k}': '${['dark', 'light'].filter((t) => heroes[k].split(' ').includes(t)).join(' ')}'`).join(', ');
+  const body = Object.keys(heroes).sort().map((k) => { const t = toks(k); return `'${k}': '${['dark', 'light'].filter((th) => th in t).map((th) => th + (t[th] ? '@' + t[th] : '')).join(' ')}'`; }).join(', ');
   writeFileSync(PICKER, src.replace(line, `const HEROES = {${body ? ' ' + body + ' ' : ''}};`));
 };
 
@@ -45,7 +46,7 @@ const ff = (a) => execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', 
 if (clip) ff(['-i', clip, '-an', '-vf', crop + ',fps=30', '-c:v', 'libx264', '-preset', 'slow', '-crf', '24', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', mp4]);
 else if (!existsSync(mp4)) fail(`no hero to take a still from: ${mp4}`);
 ff([...(at ? ['-ss', String(at)] : []), '-i', mp4, '-frames:v', '1', '-vf', 'scale=540:960', '-c:v', 'libwebp', '-quality', '82', webp]);
-heroes[id] = [...new Set([...(heroes[id] || '').split(' ').filter(Boolean), theme])].join(' '); write();
+{ const t = toks(id); t[theme] = at ? String(at) : ''; heroes[id] = Object.entries(t).map(([th, s]) => th + (s ? '@' + s : '')).join(' '); write(); }
 const kb = (f) => Math.round(statSync(f).size / 1024);
 if (!clip) { console.log(`volume-heroes: ${id} ${theme} → the still at ${at} s (${kb(webp)} KB), the hero untouched. Next: node tests/pwa.test.mjs --write`); process.exit(0); }
 console.log(`volume-heroes: ${id} ${theme} → lab/img/menu/vol/${id}.${theme}.mp4 (${kb(mp4)} KB) + .webp (${kb(webp)} KB); HEROES['${id}'] = '${heroes[id]}'.`
