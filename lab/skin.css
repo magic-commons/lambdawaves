@@ -1018,8 +1018,23 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 #lwMenu .mm-door { display: block; width: clamp(210px, 21vw, 330px); aspect-ratio: 16 / 10; border-radius: 18px; }
 #lwMenu .mm-door-word { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 #lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
-#lwMenu .mm-door-word .mm-ico { width: 28px; height: 28px; opacity: .75; }
+#lwMenu .mm-door-word b { text-shadow: 0 0 18px hsl(var(--glass-tint) / .85), 0 0 4px hsl(var(--glass-tint) / .6); }
 #lwMenu .mm-door:is(:hover, :focus-visible) .mm-door-word b { color: var(--acc); }
+/* 036 G1 · THE DOORS' ART (picker.js door): the word alone over the about site's pictures, img/menu/face/ (DATA), each faded in once loaded
+   over the palette art.  TUTORIAL: the site's MIR picture placed as the site places it (right of centre, turned in perspective, its radial
+   mask), one for both themes.  LIBRARY: the title background of the theme in use, the site's object-positions and its wash of the ground. */
+#lwMenu .mm-door-art { position: absolute; z-index: 0; display: block; pointer-events: none; opacity: 0; transition: opacity .4s ease; }
+#lwMenu .mm-door-art.on { opacity: 1; }
+#lwMenu .mm-door[data-door="tutorial"] .mm-door-art { top: 58%; left: 60%; width: 86%; height: auto; max-width: none;
+  transform: translate(-50%, -50%) perspective(760px) rotateY(-10deg) rotate(12.5deg) scale(1.16); filter: blur(1px) saturate(1.16);
+  -webkit-mask-image: radial-gradient(ellipse 55% 58% at 58% 37%, #000 9%, rgb(0 0 0 / .92) 34%, rgb(0 0 0 / .45) 57%, transparent 86%);
+  mask-image: radial-gradient(ellipse 55% 58% at 58% 37%, #000 9%, rgb(0 0 0 / .92) 34%, rgb(0 0 0 / .45) 57%, transparent 86%); }
+#lwMenu .mm-door[data-door="library"] .mm-door-art { inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#lwMenu .mm-door[data-door="library"] .mm-door-art[data-theme="light"] { object-position: 57% center; }
+#lwMenu .mm-door[data-door="library"] .mm-door-art[data-theme="dark"] { object-position: 50% center; translate: 16% 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%); mask-image: linear-gradient(90deg, transparent, #000 15%); }
+body[data-theme="light"] #lwMenu .mm-door-art[data-theme="dark"], body:not([data-theme="light"]) #lwMenu .mm-door-art[data-theme="light"] { display: none; }
+#lwMenu .mm-door[data-door="library"] .mm-door-word { background: linear-gradient(90deg, hsl(var(--glass-tint) / .92), hsl(var(--glass-tint) / .74) 30%, hsl(var(--glass-tint) / .2) 62%, transparent); }
 #lwMenu .mm-face-lab { font-size: 11px; letter-spacing: .22em; padding: 6px 12px; border-radius: 999px; opacity: .45; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-face-lab:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
 #lwMenu .mm-face.in .mm-face-logo { animation: mm-drop 820ms var(--ease) both; }

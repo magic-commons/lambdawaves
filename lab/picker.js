@@ -186,11 +186,19 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   navBtn('back', 'Main menu', () => showFace()).dataset.nav = 'back';
   navBtn('home', 'Continue to the lab', () => close()).dataset.nav = 'home';
   navBtn('folders', 'Folders — your projects and the demos', () => (at === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
-  /* the face's two doors (album art in THE CARD'S LIGHT, the λWAVES palette) and the way into the lab */
-  const door = (id, word, glyph, k, go) => { const b = el('button', 'mm-door mm-holo', doors); b.type = 'button'; b.dataset.door = id; b.setAttribute('aria-label', word); b.style.setProperty('--k', String(k)); b.style.setProperty('--i', String(k));
-    el('span', 'mm-halo', b); const lit = el('span', 'mm-lit mm-art-plain', b); el('span', 'mm-foil', lit); el('span', 'mm-rim', b);
-    const w = el('span', 'mm-door-word', lit); icon(w, glyph); el('b', '', w, word); b.addEventListener('click', go); return b; };
-  const doorBtns = [door('tutorial', 'TUTORIAL', 'film', 0, () => showTutorial()), door('library', 'LIBRARY', 'library', 1, () => showDecks('molecular'))];
+  /* the face's two doors (album art in THE CARD'S LIGHT) and the way into the lab.  036 G1 (Josh 11-03: "Show the thumbnail to be the MIR thingy
+     from the Lambdawaves about site … for library, use the background image for the title in the about page site which is also light and dark
+     aware"; "Don't include the icons … just text"): the word alone over the about site's pictures — TUTORIAL its MIR picture (one for both
+     themes, as the site), LIBRARY its title backgrounds (the CSS shows the theme's) — img/menu/face/ (DATA, kept once loaded); the palette
+     art shows while they load */
+  const door = (id, word, arts, k, go) => { const b = el('button', 'mm-door mm-holo', doors); b.type = 'button'; b.dataset.door = id; b.setAttribute('aria-label', word); b.style.setProperty('--k', String(k)); b.style.setProperty('--i', String(k));
+    el('span', 'mm-halo', b); const lit = el('span', 'mm-lit mm-art-plain', b);
+    for (const [file, th] of arts) { const i = el('img', 'mm-door-art', lit); i.alt = ''; i.decoding = 'async'; i.draggable = false; if (th) i.dataset.theme = th;
+      i.addEventListener('load', () => { i.classList.add('on'); keepData(i.src); }, { once: true }); i.src = './img/menu/face/' + file; }
+    el('span', 'mm-foil', lit); el('span', 'mm-rim', b);
+    el('b', '', el('span', 'mm-door-word', lit), word); b.addEventListener('click', go); return b; };
+  const doorBtns = [door('tutorial', 'TUTORIAL', [['mir-interface.webp']], 0, () => showTutorial()),
+    door('library', 'LIBRARY', [['library-dark.webp', 'dark'], ['library-light.webp', 'light']], 1, () => showDecks('molecular'))];
   const labB = el('button', 'mm-face-lab', face, 'CONTINUE'); labB.type = 'button'; labB.title = 'Continue to the lab'; labB.addEventListener('click', () => close());   // 035 G1: was ENTER THE LAB
   /* 035 G2 · THE CORNERS (Josh 11-03: "a Light/Dark Toggle and a settings … reveal", "the MIR logo … Kinda small in the bottom right", "3 Icon
      Logos of Claude, OpenAI's Emblem, and Gemini's Star … During mouseover, It expands towards the right to show the names"): the face's own —
