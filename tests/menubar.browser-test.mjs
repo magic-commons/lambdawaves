@@ -96,8 +96,8 @@ try {
     const r = await __row('EDIT', 'STATE › CLEAR the register');
     sv.clearTrail = orig;
     __LW.history.flush(); await __LW.settle();
-    const tl = document.querySelector('#transport .tr-open'); tl.click(); await __LW.settle();   // 018 E2: t left the CSB; the playhead's reading is the TIMELINE's t (keys.js ui.tlTime)
-    const tro = document.querySelector('#floats .ro.time .ro-val'), scrubNow = tro ? parseFloat(tro.textContent) : NaN; tl.click();
+    const tl = document.querySelector('#transport .tr-open'); tl.click(); await __LW.settle();   // 018 E2: t left the CSB; 036 W2: the playhead's t is the TIMELINE's TIME hint (keys.js ui.tlTime)
+    const tro = document.querySelector('#floats .ro.time.tl-clock'), scrubNow = tro ? parseFloat((tro.dataset.help || '').replace('t = ', '')) : NaN; tl.click();   // the kit's control-help keeps the hint as data-help ('t = 0.00 a.u. · lap 0')
     const out = { r, floated, firstIsHistory, d0, pop0, t0, pop1: __LW.reg.populated().length, t1: __LW.clock.t, trails, scrubNow,
       d1: __LW.history.depth, canUndo: __LW.history.canUndo };
     __LW.history.undo(); await __LW.settle();

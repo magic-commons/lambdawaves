@@ -60,19 +60,22 @@ export function createKeys(app) {
   if (app.state.modHost && app.state.modView) {
     /* iteration 014 A5 · THE WORK BAR (Josh: "the timeline should now have the basic tempo, play/pause button and the likes for a 'work bar'"):
        the kit's own work-bar transport (timeline/window.js, BASINS' TIMELINE_TRANSPORT less the dock) — play is THE play, power the MOD
-       bypass, the BPM pill the one tempo model, ⏮ the beat to 0, the door the modulation window — with λWAVES' t as its readout.  It is
+       bypass, the BPM pill the one tempo model, ⏮ the beat to 0, the door the modulation window — with λWAVES' TIME as its readout.  It is
        its own bar: λWAVES' stage strip stays where it is.  The readout paints with the playhead (rack.js loop: 5 Hz playing, every paused
        present; `set` writes only a changed string). */
-    const tlRo = readout({ label: 't', value: '0.00', cls: 'time' }); let tlWall = 0;
-    const compact = (v, at, d) => (Math.abs(v) < at ? v.toFixed(d) : v.toExponential(d).replace('e+', 'e'));   // the stage strip's clockText form (A9: with the lap)
+    let tlWall = 0;
+    const compact = (v, at, d) => (Math.abs(v) < at ? v.toFixed(d) : v.toExponential(d).replace('e+', 'e'));
     /* 032 T4 · THE PLAYLIST'S TIME (Josh: "a playlist time 0:00 beside t ="): the playhead's beat as m:ss.d at the tempo in force (the kit's
-       formatSeconds), its own readout beside t in t's face, painted with it — t is ψ's time, TIME the arrangement's */
+       formatSeconds) — TIME the arrangement's.  036 W2 (Josh: "I've always disliked the t= thing … hide it into the timeline's time reader …
+       During mouseover, it will show a little hint box that shows the t= (loop count)"): the work bar's t readout is gone; ψ's t and its lap
+       (the SCRUB windows elapsed) ride TIME's hint, written with each paint through the kit's hint road (one phrase for the language pack) */
     const tlSec = readout({ label: 'TIME', value: '0:00.0', cls: 'time tl-clock' }), M = app.state.modHost.model;
-    ui.tlTime = { root: tlRo.root, paint(now) { const on = clock.playing; if (on && now - tlWall < 200) return; tlWall = now; const t = clock.t, lap = Math.floor(t / clock.window);
-      tlRo.set(compact(t, 1e5, 2) + (lap ? '  (' + compact(lap, 1e4, 1) + ')' : ''), on ? 'live' : '');
-      const T = M.transport; tlSec.set(formatSeconds((T.beats || 0) * 60 / (T.bpm || 120), true), on ? 'live' : ''); } };
+    ui.tlTime = { root: tlSec.root, paint(now) { const on = clock.playing; if (on && now - tlWall < 200) return; tlWall = now; const t = clock.t, lap = Math.floor(t / clock.window);
+      const T = M.transport; tlSec.set(formatSeconds((T.beats || 0) * 60 / (T.bpm || 120), true), on ? 'live' : '');
+      const h = 't = {t} a.u. · lap {lap}', v = { t: compact(t, 1e5, 2), lap: compact(lap, 1e6, 0) };
+      if (tlSec.root.dataset.tHvars !== JSON.stringify(v)) hint(tlSec.root, h, v); } };
     /* 025 C2 · THE TIMELINE'S DOOR: a RENDER chip on the work bar (the rail takes no app chip — its chips are fixed when the window is made —
-       so it rides the bar's own `app:` seat, as the t readout does): the RENDER card in front on SELECTION when one is marked, else ACTIVE */
+       so it rides the bar's own `app:` seat, as TIME does): the RENDER card in front on SELECTION when one is marked, else ACTIVE */
     const tlRender = el('button', 'tbtn tl-render'); tlRender.type = 'button'; tlRender.dataset.keyAction = 'render.timeline';
     setGlyph(tlRender, 'film', { label: 'render this range' }); hint(tlRender, 'render this range'); tlRender.addEventListener('click', () => app.sh.ACTIONS.run('render.timeline'));
     const tlRows = timelineRows(app);   // 036 K4: FOLLOW PLAYHEAD and AUTO-COLOR at the foot of the timeline's ⋯ (lab/timeline-follow.js)
@@ -82,7 +85,7 @@ export function createKeys(app) {
         isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => layout.modulation && layout.modulation.toggle(), persist: () => ui.saveNative && ui.saveNative(),   // A5: the work bar's door and tempo
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, audio: false,
-      transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:readout', 'app:clock', 'rewind', 'app:render'] }, 'door'], nodes: { readout: tlRo.root, clock: tlSec.root, render: tlRender }, seats: 'thin',
+      transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:clock', 'rewind', 'app:render'] }, 'door'], nodes: { clock: tlSec.root, render: tlRender }, seats: 'thin',
         door: 'none',   // 021 V2: dressed below with the table's `modulation` (an SVG, no mask)
         onSwitch: () => { app.state.tl.close(); layout.modulation.expand(); } },   // 015 T5: the timeline's door SWAPS to the modulation window, as that window's switch swaps back   // A9: the modulation window's own icon, no MIR logo (Josh 10-22)
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },

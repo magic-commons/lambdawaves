@@ -137,6 +137,27 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 .csb-sec-mac .tempo-pane, .csb-favs { flex: 1 1 100%; min-width: 0; }
 #transport[data-layout="csb"] .csb-favs .pal-invert { width: var(--xport-grid); height: var(--xport-grid); }
 .csb-favs .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); } .csb-favs .pal-invert.on svg { transform: rotate(180deg); }
+/* 036 W1 · THE FLOATING FAVOURITES (lab/csb-favs.js float): the collapsed bar's hover lifts the one strip into this layer, the bar's sibling on the
+   stage — no ground, no plate, no frame: the faces alone, the bank's page and order, each word after its window's glyph (12 px, the label's ink at
+   .7); the layer takes no pointer, its faces do; UI SCALE's zoom as the bar's; a 6-px rise in (a drop below a bar at the top), none under reduced motion */
+.csb-float { position: absolute; z-index: calc(var(--z-chrome) + 3); width: max-content; translate: -50% 0; zoom: var(--ui-zoom); --in-zoom: var(--ui-zoom); pointer-events: none; animation: csbFloatIn var(--motion-ui, .16s) var(--ease-out, ease-out); }
+.csb-float[hidden] { display: none; }
+.csb-float.below { animation-name: csbFloatInBelow; }
+@keyframes csbFloatIn { from { opacity: 0; translate: -50% 6px; } }
+@keyframes csbFloatInBelow { from { opacity: 0; translate: -50% -6px; } }
+body.transport-under .csb-float { z-index: var(--z-chrome); }
+.csb-float .mir-bank-grid { display: flex; flex-wrap: nowrap; justify-content: center; align-items: flex-end; gap: 6px; }
+.csb-float.below .mir-bank-grid { align-items: flex-start; }
+.csb-float :is(.mir-bank-slot.filled, .mir-bank-nav) { pointer-events: auto; }
+.csb-float .mir-bank-slot { width: 64px; }
+.csb-float .mir-bank-slot[style*="span"] { width: auto; container-type: normal; }   /* a segment: its own width */
+.csb-float .mir-bank-slot.empty, .csb-fav-gly, #transport .csb-fav-sw > .k-lbl { display: none; }   /* in the expander the faces are as they were */
+.csb-float .csb-fav-gly { display: block; flex: none; width: 12px; height: 12px; color: var(--ink-key); opacity: .7; }
+.csb-float :is(.k.csb-fav, .segw.csb-fav, .csb-fav-sw) { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; gap: 3px; }
+.csb-float :is(.k.csb-fav, .segw.csb-fav, .csb-fav-sw) > :not(.csb-fav-gly, .k-lbl) { grid-column: 1 / -1; justify-self: center; }
+.csb-float .pal-invert { width: 44px; height: 44px; }
+.csb-float :is(.k-lbl, .k-val) { text-shadow: 0 1px 3px rgb(0 0 0 / .6); }
+body[data-theme="light"] .csb-float :is(.k-lbl, .k-val) { text-shadow: 0 1px 3px rgb(255 255 255 / .8); }
 /* METERS: LOW · MID · HIGH as LED bars and the beat equaliser's seven gains */
 .csb-sec-met > .mir-section-body { flex-wrap: nowrap; align-items: stretch; flex: 1 1 auto; }
 .csb-sec-met .mir-meter { min-height: 64px; }
@@ -181,6 +202,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 @media (max-width:730px) { body:not(.phone) #transport.mini[data-layout="csb"] { transform:translateX(-50%) scale(.8);transform-origin:50% 0;max-width:none; } }
 /* 021 V3 · THE REDUCED-MOTION LIST CLOSED (REVIEW-C §3): PLAY's hover and press scale (023 B3) and INVERT's turn arrive at their end state at once (the system's
    setting or MIR OPTIONS' motion, <html data-motion>) */
-@media (prefers-reduced-motion: reduce) { #transport[data-layout="csb"] .csb-play > .tbtn.play { transition: none; } .pal-invert svg { transition: none; } }
+@media (prefers-reduced-motion: reduce) { #transport[data-layout="csb"] .csb-play > .tbtn.play { transition: none; } .pal-invert svg { transition: none; } .csb-float { animation: none; } }
 :root:is([data-motion="reduced"], [data-motion="off"]) #transport[data-layout="csb"] .csb-play > .tbtn.play { transition: none; }
 :root:is([data-motion="reduced"], [data-motion="off"]) .pal-invert svg { transition: none; }
+:root:is([data-motion="reduced"], [data-motion="off"]) .csb-float { animation: none; }   /* 036 W1: no rise */

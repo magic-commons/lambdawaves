@@ -13,7 +13,7 @@ export function createTransport(app) {
     const T = dom.transport;
     /* iteration 014 A0 · THE KIT'S BAR (lab/mir/shell/transport.js createTransport): play, the MOD power, rewind, the dock chip, the modulation door, the
        BPM pill and its tempo panel (MACROS | CLOCK) are the kit's parts; λWAVES' own nodes — ‹ ›, SCRUB, RATE, the t readout, REPEATS, ⟳ — are built here
-       and handed in by name.  THE PLAY is appPlay (the kit's play part toggles it); the power is setModArm; the docked seat is λWAVES' TRANSPORT card
+       and handed in by name (036 W2: the unmounted t readout is gone — t is TIME's hint, keys.js).  THE PLAY is appPlay (the kit's play part toggles it); the power is setModArm; the docked seat is λWAVES' TRANSPORT card
        (rack-wiring.js, through the kit's transportDock).  The physics behind REPEATS stays below. */
     const btn = (cls, text, title, aria) => { const b = el('button', 'tbtn ' + cls, null, text); b.type = 'button'; b.title = title; b.setAttribute('aria-label', aria); return b; };
     const sm = chip(btn('transport-step-back', '', 'step back  (←)', 'step back'), 'chevronLeft');   // 021 V2: the kit's chevrons, not ‹ ›
@@ -21,7 +21,6 @@ export function createTransport(app) {
     ui.scrub = fader({ label: 'SCRUB  t / window', min: 0, max: 1, value: 0, fmt: (v) => (v * clock.window).toFixed(2) + ' a.u.',
       onInput: (v) => appPlay.seek(v * clock.window + laps() * clock.window, { trail: false }) });   // 021 R3: THE ONE SEEK (clock.js); R6: a drag keeps the trail, as before
     ui.rateKnob = knob({ label: 'RATE', min: 0.1, max: 3000, value: 4, log: true, fmt: (v) => (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' a.u./s', onInput: (v) => { if (app.state.stageText) app.state.stageText.say('rate', 'RATE · ' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' a.u./s', { hold: true }); if (modHand('transport.rate', v)) return; clock.setRate(v); } });   // iteration 007: INFORMATIONAL › RATE
-    const tro = readout({ label: 't  a.u.  (lap)', value: '0.00', cls: 'time' });
     /* ── THE CLOCK's law: when does this density repeat?  T = 2π / gcd{|E_a − E_b|} over the populated labels (EXACT where the
        differences are commensurate: hydrogen and its ions, the oscillator; a near-recurrence with its error otherwise) ── */
     ui.periodRo = readout({ label: 'REPEATS every', value: '—', cls: 'period', sub: 'exact period of the density, from the energies in force' });
@@ -49,7 +48,7 @@ export function createTransport(app) {
        … a dedicated icon to expand the CSB … Remove the t = n thing from the CSB"): PLAY floats outside the bar's left edge; LEFT = RATE over the
        typed BPM pill, MOD over EXPAND, then ⏮ · TIMELINE / the door · the dock; CENTRE = MOLECULES' chooser over LIBRARY · MOLECULAR · HYDROGEN ·
        FOLDERS (lab.css centres it with two equal side tracks); RIGHT = SEARCH · FINDER · ♥ · ◧ · FOLDS / NODES · INFORMATIONAL · THEME · ⚙ (020 T2).  Every seat is one
-       36-px box, its icon one 20-px glyph (021 V2: lab/icons.js through the kit's roads).  t lives in the TIMELINE window (keys.js ui.tlTime).  The layout is λWAVES' own array
+       36-px box, its icon one 20-px glyph (021 V2: lab/icons.js through the kit's roads).  t lives in the TIMELINE's TIME reader, its hint (036 W2, keys.js ui.tlTime).  The layout is λWAVES' own array
        under the kit's 'csb' drawing name, so the docked card keeps the kit's CONTROL SURFACE title. */
     const CSB = Object.assign([{ group: 'csb-play', items: ['play'] },
       { group: 'csb-side csb-left', items: [{ group: 'csb-col csb-tempo', items: ['app:rate', 'tempo'] }, { group: 'csb-col csb-mod', items: ['power', 'expand'] },
@@ -114,7 +113,9 @@ export function createTransport(app) {
     /* A3 · THE EXPANDER'S FAVOURITES (lab/csb-favs.js): eight slots under the macros; a knob's right-click / hold menu ADDs it, three segments are offered
        (Josh's answer 4: SPECTRUM's HYDROGEN | STURMIAN, WAVE's POSITION | MOMENTUM and its OBSERVABLE); the faces are made when the expander opens */
     const favs = createCsbFavs(app, { panel: sec.fav ? sec.fav.body : P }); app.sh.csb = favs;
-    if (bar.parts.panel) bar.parts.panel.onToggle((v) => { if (v) favs.show(); });
+    /* 036 W1 · THE FLOATING FAVOURITES: the collapsed bar's hover lifts the strip into a layer beside it (csb-favs.js float); EXPAND puts it home */
+    const floatFavs = favs.float(T, { home: sec.fav ? sec.fav.body : P, open: () => !!(P && !P.hidden) });
+    if (bar.parts.panel) bar.parts.panel.onToggle((v) => { if (v) { floatFavs.hide(); favs.show(); } });
     for (const [id, c] of [['spectrum.scale', ui.scaleSeg], ['wave.space', ui.spaceSeg], ['wave.view', ui.viewSeg]]) favs.offer(id, c, { width: 150 });
     /* iteration 014 D4 (Josh: "Let Invert also be a custom button that's a 'Knob' size for the CSB"): PALETTE's INVERT, offered as a knob-sized switch */
     favs.offer('palette.invert', ui.invertSw, { width: 44, build: (c) => favs.swFace('palette.invert', c, { label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ' }) });
@@ -122,8 +123,9 @@ export function createTransport(app) {
        the 0.6.5 strip, `openAsk` does nothing (no key row calls it) and createAsk is never made, so no request can leave */
     let echoOn = false, openAsk = () => {};
     if (ASK_ENABLED) {
-      /* 0.6.6 G2 · THE TYPE BOX: ASK (or /) swaps the centre — the t readout, REPEATS — for one line to Gemma (lab/ask.js); the first press ever asks consent */
-      const seat = el('span', 'ask-seat'); tro.root.before(seat);   // its seat, as 0.6.6 built it: just before the t readout
+      /* 0.6.6 G2 · THE TYPE BOX: ASK (or /) swaps the centre — the t readout, REPEATS — for one line to Gemma (lab/ask.js); the first press ever asks consent.
+         036 W2: the t readout left the bar (TIME's hint); her echo keeps a readout of its own, made only under the flag */
+      const tro = readout({ label: 'GEMMA', value: '', cls: 'time' }), seat = el('span', 'ask-seat'); tro.root.before(seat);   // its seat, as 0.6.6 built it: just before the readout
       const line = el('input', 'ask-line', seat), note = el('span', 'ask-note', seat), okB = el('button', 'tbtn ask-ok', seat, 'CONTINUE');
       line.type = 'text'; line.spellcheck = false; line.autocomplete = 'off'; line.placeholder = 'ask Gemma — what does benzene look like?'; line.setAttribute('aria-label', 'ask Gemma'); okB.type = 'button'; okB.style.flex = 'none';
       const askB = el('button', 'tbtn ask', null, 'ASK'); jmp.after(askB); askB.type = 'button'; askB.title = 'ask Gemma  (/)'; askB.setAttribute('aria-label', 'ask Gemma');
@@ -135,7 +137,7 @@ export function createTransport(app) {
         note.hidden = okB.hidden = !first; line.hidden = first; (first ? okB : line).focus();
       }
       function echo(s) { endEcho(); if (!s) return; echoOn = true; T.classList.add('echo'); troLbl.textContent = 'GEMMA'; tro.set(s, ''); tro.root.title = s; echoT = setTimeout(endEcho, 4000); }
-      function endEcho() { clearTimeout(echoT); if (!echoOn) return; echoOn = false; T.classList.remove('echo'); troLbl.textContent = 't  a.u.  (lap)'; tro.root.title = ''; tro.set(clockText(), clock.playing ? 'live' : ''); }
+      function endEcho() { clearTimeout(echoT); if (!echoOn) return; echoOn = false; T.classList.remove('echo'); tro.root.title = ''; tro.set('', ''); }
       openAsk = () => { endEcho(); showAsk(true); };
       askB.addEventListener('click', () => (T.classList.contains('asking') ? showAsk(false) : openAsk()));
       okB.addEventListener('click', () => { ui.askOk = true; saveSettings(); showAsk(true); });
@@ -256,25 +258,15 @@ export function createTransport(app) {
     }
     app.hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer
     const laps = () => Math.floor(clock.t / clock.window);
-    const compactClock = (v, threshold, decimals) => Math.abs(v) < threshold
-      ? v.toFixed(decimals)
-      : v.toExponential(decimals).replace('e+', 'e');
-    const clockText = () => {
-      const lap = laps();
-      return compactClock(clock.t, 1e5, 2) + (lap ? '  (' + compactClock(lap, 1e4, 1) + ')' : '');
-    };
     const stepDt = () => clock.window / 48;
     sm.addEventListener('click', () => { clock.step(-stepDt()); schedule(TIER.EVOLVE); });
     sp.addEventListener('click', () => { clock.step(stepDt()); schedule(TIER.EVOLVE); });
-    let troWall = 0, periodWall = 0, railWall = 0;
+    let periodWall = 0, railWall = 0;
     function update() {
       const on = clock.playing, now = performance.now();
       /* KEEP FRAMES (wave 45): on, the playhead follows every frame as it always did; off — the default — the bar is
-         disabled and never repainted, and the t readout runs at 5 Hz while playing (every paused frame, as before) */
-      if (keep.frames) {
-        if (!ui.scrub.dragging()) ui.scrub.set(((clock.t % clock.window) + clock.window) % clock.window / clock.window);
-        if (!echoOn) tro.set(clockText(), on ? 'live' : '');
-      } else if (!echoOn && (!on || now - troWall >= 200)) { troWall = now; tro.set(clockText(), on ? 'live' : ''); }
+         disabled and never repainted (036 W2: the unmounted t readout's 5-Hz paint is gone) */
+      if (keep.frames && !ui.scrub.dragging()) ui.scrub.set(((clock.t % clock.window) + clock.window) % clock.window / clock.window);
       if (P && !P.hidden) {   // 022 C2 · THE SURFACE's readings, once a frame through the kit's coalescer, only while it is open
         const H = app.state.modHost, T = H && H.model.transport, A = audioDevice(app), o = (k) => (A && A.outs[k] ? +A.outs[k].out || 0 : 0);
         if (T) { mt.bpm.set(T.bpm.toFixed(1)); mt.beat.set(H.clock.isPlaying() && T.beats % 1 < 0.15); }
