@@ -1117,20 +1117,22 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-sheet { transition: none; } }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-sheet { transition: none; }
 
-/* 035 THE COLLAGE (lab/picker-collage.js): under the face, the canvas of clips (the root's first child) and the veil over it — the menu's
-   ground at ~.68 in the middle and ~.35 at the rim, with a band of ~.7 along the top and the foot (where the corners sit), so the logo, the
-   doors, CONTINUE and the corners read on both themes; the canvas (placed, sized and turned by the module: the tilt is its CSS rotate)
-   fades in on its first picture.  The decks, FOLDERS and the tutorial keep their ground (both hidden, the video paused). */
+/* 035 THE COLLAGE (lab/picker-collage.js): under the face, the wall of clips (the root's first child) and the veil over it; the wall (placed,
+   sized and turned by the module: the tilt is its CSS rotate) fades in on its first picture.  036 C3 (Josh 11-03: "reduce the fade effect into
+   just a vignette"): the veil is a VIGNETTE ONLY — no flat tint, no bands: the ground from 0 in the middle to ~.5 at the rim, so the tiles read
+   clean around the doors and the corners stay quiet for the marks; the logo carries its own drop shadow instead.  The decks, FOLDERS and
+   the tutorial keep their ground (both hidden, the video paused). */
 #lwMenu :is(.mm-collage, .mm-veil) { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 #lwMenu .mm-collage { opacity: 0; transition: opacity .8s ease; }
 #lwMenu .mm-collage.on { opacity: 1; }
-#lwMenu .mm-veil { z-index: 1; background:
-  linear-gradient(to bottom, hsl(var(--glass-tint) / .52), hsl(var(--glass-tint) / .52) 120px, hsl(var(--glass-tint) / 0) 220px, hsl(var(--glass-tint) / 0) calc(100% - 220px), hsl(var(--glass-tint) / .52) calc(100% - 120px), hsl(var(--glass-tint) / .52)),
-  radial-gradient(ellipse 75% 70% at 50% 50%, hsl(var(--glass-tint) / .68), hsl(var(--glass-tint) / .52) 45%, hsl(var(--glass-tint) / .35)); }
+#lwMenu .mm-veil { z-index: 1; background: radial-gradient(ellipse 75% 70% at 50% 50%, hsl(var(--glass-tint) / 0) 32%, hsl(var(--glass-tint) / .1) 55%, hsl(var(--glass-tint) / .3) 78%, hsl(var(--glass-tint) / .5)); }
 #lwMenu :is(.mm-collage, .mm-veil)[hidden] { display: none; }
-/* CONTINUE over moving tiles: its type kept, on a soft plate of the ground; in LIGHT the pale λ and the teal dot keep a halo of the ground */
+/* CONTINUE over moving tiles: its type kept, on a soft plate of the ground; THE LOGO's DROP SHADOW (036 C3, Josh: "let the main logo have a
+   drop shadow to combat that lessened background effect") — dark under it in both themes; in LIGHT over a halo of the ground (the pale λ
+   and the teal dot) and softer */
 #lwMenu .mm-face-lab { opacity: .8; background: hsl(var(--glass-tint) / .6); border-radius: 6px; padding: 6px 14px; }
-body[data-theme="light"] #lwMenu .mm-face-logo svg { filter: drop-shadow(0 0 10px hsl(var(--glass-tint) / .95)) drop-shadow(0 0 22px hsl(var(--glass-tint) / .8)); }
+#lwMenu .mm-face-logo svg { filter: drop-shadow(0 4px 18px hsl(0 0% 0% / .55)); }
+body[data-theme="light"] #lwMenu .mm-face-logo svg { filter: drop-shadow(0 0 10px hsl(var(--glass-tint) / .95)) drop-shadow(0 0 22px hsl(var(--glass-tint) / .8)) drop-shadow(0 4px 16px hsl(0 0% 0% / .3)); }
 /* the face's ground is plain, the wall or not (a cold load, offline: img/menu is never precached) — under it the frost would show the rack's
    chips through the corners, and while the wall plays its blur would be redrawn every frame; the decks and the tutorial keep the frost */
 body.frost #lwMenu.at-face { background: hsl(var(--glass-tint) / .985); -webkit-backdrop-filter: none; backdrop-filter: none; }
