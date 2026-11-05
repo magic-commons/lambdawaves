@@ -40,7 +40,8 @@
   --chip-filter: var(--glass-filter);
   --chip-lift: hsl(0 0% 100% / .16);
   --chip-ink-drop: drop-shadow(0 1px 0 var(--glass-raise));   /* the glyph's and the dots' one-pixel lift (BASINS rail rule 32) */
-  --chip-rim: hsl(0 0% 100% / .30);
+  --chip-rim: hsl(0 0% 100% / calc(.30 * var(--ctl-stroke)));   /* × STROKE (1.5.7-alpha.1); --chip-sink and the ON rim read it */
+  --chip-edge: color-mix(in srgb, var(--glass-border-color) calc(var(--ctl-stroke) * 100%), transparent);   /* the disc's border: the pane edge × STROKE */
   --chip-sink: inset 0 2px 5px hsl(0 0% 0% / .30), inset 0 0 0 1px var(--chip-rim);
   /* ON reads the semantic tier (a skin may set it); the fallbacks are §56's: the plugin's frost at its default blend */
   --chip-on: var(--state-on, hsl(0 0% 100% / .086));
@@ -52,7 +53,7 @@
   --rail-gap-share: .667;
   --rail-gap-derived: min(var(--rail-gap-max), calc(var(--rack-gap, 6px) * var(--rail-gap-share)));   /* the fallback: SPACING writes --rail-gap on <html> (the look engine), and that wins */
 }
-body[data-theme="light"] :is(.mir-rail, .kwin-chiprail[data-mir-rail="modulation"]) { --chip-rim: hsl(214 30% 40% / .34); }
+body[data-theme="light"] :is(.mir-rail, .kwin-chiprail[data-mir-rail="modulation"]) { --chip-rim: hsl(214 30% 40% / calc(.34 * var(--ctl-stroke))); }
 body:is([data-card="tinted"], [data-card="solid"]) .mir-rail { --chip-fill: var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }
 body[data-card="refractive"] .mir-rail { --chip-fill: var(--surface-veil, transparent); }
 body.frost .mir-rail { --chip-filter: var(--surface-filter, var(--frost-filter)); }   /* every card style, as BASINS' rails (lab.css §56); TINTED's fill thins with --card-opacity */
@@ -160,7 +161,7 @@ body.touch-tablet .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--t
 .mir-chip::before {
   content: ""; position: absolute; z-index: -1; left: 50%; top: 50%;
   width: var(--chrome-chip-disc); height: var(--chrome-chip-disc); box-sizing: border-box;
-  border: var(--glass-border) solid var(--glass-border-color); border-radius: 50%;
+  border: var(--glass-border) solid var(--chip-edge); border-radius: 50%;
   background-color: var(--chip-fill); background-image: none; box-shadow: var(--surface-shadow, var(--glass-shadow));
   -webkit-backdrop-filter: var(--chip-filter); backdrop-filter: var(--chip-filter);
   transform: translate(-50%, -50%);

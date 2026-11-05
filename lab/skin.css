@@ -376,7 +376,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));border-radius:8px; }
 
 /* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
-.dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--glass-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
+.dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--ctl-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
 .dev:not(.mir-modwindow) .seg-b { border:0;border-radius:6px;background:transparent;color:var(--ink-key); }
 .dev:not(.mir-modwindow) .seg-b:hover { background:var(--glass-raise); }
 .dev:not(.mir-modwindow) .seg-b.on { background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise, var(--neu-raise));color:var(--acc); }
@@ -386,7 +386,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev:not(.mir-modwindow) .sw.on,
 .dev:not(.mir-modwindow) .trig[aria-expanded="true"],
 .dev:not(.mir-modwindow) .trig[aria-pressed="true"],
-#transport .native-tempo .trig[aria-pressed="true"] { color:var(--fg);background:var(--acc-soft);border-color:color-mix(in srgb,var(--acc) 60%,transparent);box-shadow:var(--relief-well, var(--neu-inset)),0 0 5px color-mix(in srgb,var(--acc) 22%,transparent); }
+#transport .native-tempo .trig[aria-pressed="true"] { color:var(--fg);background:var(--acc-soft);border-color:color-mix(in srgb,var(--acc) calc(60% * var(--ctl-stroke)),transparent);box-shadow:var(--relief-well, var(--neu-inset)),0 0 5px color-mix(in srgb,var(--acc) 22%,transparent); }
 .dev:not(.mir-modwindow) .sw.on .sw-led { background:var(--acc);box-shadow:0 0 6px color-mix(in srgb,var(--acc) 70%,transparent); }
 .dev:not(.mir-modwindow) .trig[aria-expanded]::before,
 .dev:not(.mir-modwindow) .trig[aria-pressed]::before,
@@ -408,7 +408,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev[data-id="spectrum"] .sp-knobs { align-self:center; }
 .dev[data-id="spectrum"] .sp-knobs > .k { flex:none;min-height:0; }
 .dev[data-id="spectrum"] .sp-b { background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise, var(--neu-raise)); }
-.dev[data-id="spectrum"] .sp-b.on { color:var(--acc);background:var(--acc-soft);border-color:var(--acc);box-shadow:var(--relief-well, var(--neu-inset)),0 0 5px color-mix(in srgb,var(--acc) 25%,transparent); }
+.dev[data-id="spectrum"] .sp-b.on { color:var(--acc);background:var(--acc-soft);border-color:color-mix(in srgb,var(--acc) calc(100% * var(--ctl-stroke)),transparent);box-shadow:var(--relief-well, var(--neu-inset)),0 0 5px color-mix(in srgb,var(--acc) 25%,transparent); }
 
 /* Explanatory pockets are optional; numerical interaction labels stay available. */
 body.window-info-off .native-info,

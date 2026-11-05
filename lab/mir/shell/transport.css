@@ -38,9 +38,9 @@
   --xport-work-h: 52px;              /* the transport inside a work bar: the tool bar's height (BASINS ui-fixes 8) */
   --xport-work-pad: 3px 8px;         /* … and its padding (BASINS timeline-window.css: 44 px power seat + border = 52) */
   --xport-face: hsl(var(--glass-tint) / 1);                                   /* the pill's face: it stands proud */
-  --xport-pill-rim: var(--glass-hairline);                                    /* the pill's hairline (BASINS) */
-  --xport-pill-rim-hot: color-mix(in srgb, var(--acc2) 60%, transparent);     /* hovered / focused (BASINS skin.css:448) */
-  --xport-pill-rim-open: color-mix(in srgb, var(--acc2) 70%, transparent);    /* its panel open (BASINS skin.css:449) */
+  --xport-pill-rim: color-mix(in srgb, var(--glass-hairline) calc(var(--ctl-stroke) * 100%), transparent);   /* × STROKE (1.5.7-alpha.1) */                                    /* the pill's hairline (BASINS) */
+  --xport-pill-rim-hot: color-mix(in srgb, var(--acc2) calc(60% * var(--ctl-stroke)), transparent);     /* hovered / focused (BASINS skin.css:448) */
+  --xport-pill-rim-open: color-mix(in srgb, var(--acc2) calc(70% * var(--ctl-stroke)), transparent);    /* its panel open (BASINS skin.css:449) */
   --xport-pill-glow: 0 0 7px color-mix(in srgb, var(--acc2) 24%, transparent);   /* … and its glow */
   --xport-glyph-lift: drop-shadow(0 1px 0 var(--glass-raise));                /* the dock chip's and door's glyph (λWAVES lab.css:324) */
   --xport-panel-fill: linear-gradient(180deg, var(--glass-well), transparent);   /* the tempo panel (BASINS skin.css:455) */

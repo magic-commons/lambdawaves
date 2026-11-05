@@ -7,7 +7,7 @@
   position: fixed; z-index: calc(var(--z-chrome, 40) + 6); left: 50%; top: 12vh; width: var(--wp-w); max-height: 58vh; margin-left: calc(var(--wp-w) / -2);
   display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: var(--wp-r); transform-origin: 50% 0; color: var(--fg); }
 .mir-window-picker[hidden] { display: none; }
-.mir-window-picker .wp-search { display: block; flex: 0 0 auto; width: 100%; height: 34px; padding: 0 12px; border: 1px solid var(--glass-hairline, transparent); border-radius: var(--r-pill, 999px);
+.mir-window-picker .wp-search { display: block; flex: 0 0 auto; width: 100%; height: 34px; padding: 0 12px; border: 1px solid var(--ctl-hairline, transparent); border-radius: var(--r-pill, 999px);
   background: var(--glass-well, transparent); color: var(--fg); font: 14px var(--font-ui); }
 .mir-window-picker .wp-search:focus { outline: 0; }   /* no accent ring: the field is the finder's only input */
 .mir-window-picker .wp-list { display: flex; flex-direction: column; gap: 1px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--dim) 55%, transparent) transparent; }

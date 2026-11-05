@@ -876,6 +876,7 @@
   "STRETCH AUDIO": "STRETCH AUDIO",
   "STRETCH TO CLIP · SHIFT+T": "STRETCH TO CLIP · SHIFT+T",
   "STRETCH ×{rate} · pitch follows": "STRETCH ×{rate} · pitch follows",
+  "STROKE": "STROKE",
   "STUTTER released — rejoined the running beat": "STUTTER released — rejoined the running beat",
   "STUTTER {note} latched — applies to BPM-synced LFOs; press again to release": "STUTTER {note} latched — applies to BPM-synced LFOs; press again to release",
   "SUSTAIN": "SUSTAIN",
@@ -1022,6 +1023,7 @@
   "Target the envelope drives": "Target the envelope drives",
   "That is not a project zip — nothing changed": "That is not a project zip — nothing changed",
   "That is not a project zip: {why}": "That is not a project zip: {why}",
+  "The 1-px rings around knobs, buttons, switches and fields": "The 1-px rings around knobs, buttons, switches and fields",
   "The MIR logo is outlined from Butler Free Extra Bold by {who}.": "The MIR logo is outlined from Butler Free Extra Bold by {who}.",
   "The bank holds {n}: STORE over one, or × one.": "The bank holds {n}: STORE over one, or × one.",
   "The browser has WebGPU but found no graphics adapter to use.": "The browser has WebGPU but found no graphics adapter to use.",
@@ -1676,6 +1678,7 @@
   "STARTER": "a preset the app ships (a starter project's modulation), not one the user saved",
   "STATUS TAGS": "the small status labels over the picture (BASINS' badges and stats bar)",
   "STRETCH TO CLIP · SHIFT+T": "a clip's menu: the file plays / the envelope alone / fit the audio into the clip's length (varispeed)",
+  "STROKE": "the thin outline drawn around each control (not a brush stroke)",
   "STUTTER {note} latched — applies to BPM-synced LFOs; press again to release": "STUTTER: the clock holds the current beat and repeats it at the note value {note} (1/4 or 1)",
   "Selection scope": "what a selection picks: whole clips or curve points",
   "Step through twelve density levels to reveal shells.": "shells: the nested surfaces of equal density in the picture (like the layers of an onion)",
@@ -4405,6 +4408,9 @@
   "STRETCH ×{rate} · pitch follows": [
    "mir/timeline/editor.js"
   ],
+  "STROKE": [
+   "mir/shell/gui.js"
+  ],
   "STUTTER released — rejoined the running beat": [
    "mir/modulation/window.js"
   ],
@@ -4843,6 +4849,9 @@
   ],
   "That is not a project zip: {why}": [
    "mir/folders/folders.js"
+  ],
+  "The 1-px rings around knobs, buttons, switches and fields": [
+   "mir/shell/gui.js"
   ],
   "The MIR logo is outlined from Butler Free Extra Bold by {who}.": [
    "mir/shell/gui.js"

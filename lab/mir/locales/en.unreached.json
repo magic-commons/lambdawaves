@@ -481,7 +481,7 @@
  },
  {
   "file": "mir/shell/gui.js",
-  "line": 295,
+  "line": 299,
   "why": "fragment",
   "text": "the bench threw: "
  }

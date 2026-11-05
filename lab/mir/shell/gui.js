@@ -154,6 +154,10 @@ export function lookSchema({ tier = () => null } = {}) {
     { key: 'relief', type: 'enum', values: ['default', 'flat'], default: 'default', apply: [
       { on: 'html', prop: '--relief-raise', map: (v) => (v === 'flat' ? ZERO_SHADOW : null) },
       { on: 'html', prop: '--relief-well', map: (v) => (v === 'flat' ? ZERO_SHADOW : null) }] },
+    /* 1.5.7-alpha.1 · STROKE — the 1-px rings around the controls (the switch's seat, the ON rim, the knob's live ring, the hairline
+       borders, the rail chips', the transport pill's), 0 … 100 %, the alpha of each times it; on <html>, where the rings' tokens are
+       declared.  Not the panes' EDGE, not the menus' edge, not the focus ring.  Not a THEME_KEYS key: the reader's own */
+    { key: 'stroke', type: 'number', step: 0.05, min: 0, max: 1, default: 1, apply: [{ on: 'html', prop: '--ctl-stroke', map: (v) => (v === 1 ? null : String(v)) }] },
     /* EDGE — a window pane's hairline rim (BASINS' glass draws none on its windows; its menus and popovers keep theirs) */
     { key: 'edge', type: 'bool', default: false, apply: [{ on: 'body', prop: '--pane-edge', map: (v) => (v ? null : 'transparent') }] },
     /* THE ONE LIGHT — LIGHT ANGLE, SHADOW 0–200 % (BASINS' range), DISTANCE, SOFTNESS, SHINE, its SOFTNESS.  Each writes
@@ -386,7 +390,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   const line = (g, cls = '') => el('div', 'gui-line' + (cls ? ' ' + cls : ''), g);
   const segOf = (key, label, options) => bind(key, seg({ label, options: options.map(([id, l, title]) => ({ id, label: l, title })), value: P.get(key), onChange: (v) => P.set(key, v) }));
   const swOf = (key, label, title) => bind(key, sw({ label, title, value: P.get(key), onChange: (v) => P.set(key, v) }));
-  const knobOf = (key, label, o) => bind(key, (o.arc ? arcKnob : knob)({ label, title: o.title, aria: o.aria, value: o.toUi ? o.toUi(P.get(key)) : P.get(key), min: o.min, max: o.max, fmt: o.fmt, wrap: o.wrap, cls: o.cls, ink: o.ink,
+  const knobOf = (key, label, o) => bind(key, (o.arc ? arcKnob : knob)({ label, title: o.title, aria: o.aria, value: o.toUi ? o.toUi(P.get(key)) : P.get(key), min: o.min, max: o.max, step: o.step, fmt: o.fmt, wrap: o.wrap, cls: o.cls, ink: o.ink,
     onInput: (v) => { P.set(key, o.fromUi ? o.fromUi(v) : v); if (o.input) o.input(v); } }), o.toUi);
   const pct = (v) => Math.round(v) + '%', px = (v) => Math.round(v) + 'px', deg = (v) => Math.round(v) + '°';
   const hundred = { min: 0, max: 100, fmt: pct, toUi: (v) => v * 100, fromUi: (v) => v / 100 };
@@ -451,7 +455,8 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   line(g).append(segOf('relief', phrase('RELIEF'), [['default', phrase('DEFAULT'), phrase('Raised controls and wells, lit by {:LIGHT ANGLE}')], ['flat', phrase('FLAT'), phrase('Flat control faces: hairlines and accents only')]]).root,
     segOf('faces', phrase('FACES'), [['glass', phrase('GLASS'), phrase('Under refractive or frost the knobs, buttons and fields are clear glass')], ['solid', phrase('SOLID'), phrase('The kit’s filled knobs, buttons and fields')]]).root);
   const kBlend = knobOf('faceBlend', phrase('BLEND'), { ...hundred, aria: 'Solid to glass control faces', title: '0% solid · 100% glass. The transition uses color burn in dark mode and color dodge in light mode.' });
-  line(g, 'gui-knobs').append(kBlend.root, seat(), seat());
+  const kStroke = knobOf('stroke', phrase('STROKE'), { ...hundred, step: 5, title: 'The 1-px rings around knobs, buttons, switches and fields' });   // tr[STROKE]: the thin outline drawn around each control (not a brush stroke)
+  line(g, 'gui-knobs').append(kBlend.root, kStroke.root, seat());
 
   /* QUALITY — AUTO (the device's tier), the three tiers by hand, and what it costs */
   g = groupEl('quality', phrase('QUALITY'));

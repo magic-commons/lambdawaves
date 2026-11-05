@@ -26,6 +26,8 @@ const ACCEPTED = {
   /* 032 · MIR 1.5.6 CUT (Josh 2026-11-01, "Cut the kit as 1.5.6 and push it"): the eight doors as 1.5.6 — kit commit cdf20ae, tag v1.5.6, branch kit-1.5.6 on
      github.com/magic-commons/mir. A new door continues from 1.5.7-alpha.1. */
   '1.5.6': 'de0ac92dda7ab61901efb41c0e6aa4a81b972e60398d769c2ff780b3a344a6c3',
+  /* 036 K1 · MIR 1.5.7-alpha.1 THE STROKE (the clone road from the 1.5.6 cut, kit-032 @ c986c99): --ctl-stroke multiplies every control ring's alpha; the relief's soft halo again */
+  '1.5.7-alpha.1': '68fc7a6017fd9fbdab624ba86ca73ef7b325eece8c34dcb3705e05285e0998ff',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
