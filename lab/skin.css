@@ -1147,6 +1147,31 @@ body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-them
   background: hsl(var(--glass-tint));
   box-shadow: -1px 0 0 var(--glass-hairline), -28px 0 60px -30px rgb(0 0 0 / .45); translate: 100% 0; transition: translate 300ms var(--ease); }
 #lwMenu .mm-sheet[hidden] { display: none; } #lwMenu .mm-sheet.in { translate: 0 0; } #lwMenu .mm-sheet.out { translate: 100% 0; transition-duration: 220ms; }
+/* 036 G5 · THE SHEET IS THE FIRST TASTE OF MIR FOCUS (Josh 11-03: "a gradient transparency/opacity of a blur mask … maximum blur from the edge
+   and then becoming 0% blur at the edge … an asymptotic drop-off near the edge so that the background is mostly blurred"): no plate, no
+   hairline, no shadow.  Under FROST the ground is a BLUR MASK — five stacked layers (picker.js .mm-sheet-fx), blur 3 · 7 · 13 · 20 · 28 px,
+   each masked from transparent at 0 · 6 · 16 · 34 · 64 px to whole 60 px later, so the blur is 0 at the sheet's left edge, climbs fast and
+   is full inside — and one thin wash of the ground (.28) on the same climb, so the rows read over a bright tile.  Without FROST a plain .92
+   plate.  The rows are BORDERLESS: the kit's control strokes (the rings, the rims, the relief's lit line) are zeroed inside the sheet. */
+#lwMenu .mm-sheet { background: none; box-shadow: none; isolation: isolate; }
+body:not(.frost) #lwMenu .mm-sheet { background: hsl(var(--glass-tint) / .92); }
+#lwMenu .mm-sheet-fx { position: absolute; inset: 0; z-index: -1; pointer-events: none; display: none; }
+body.frost #lwMenu .mm-sheet-fx { display: block; }
+#lwMenu .mm-sheet-fx > * { position: absolute; inset: 0; --e: 0px; -webkit-mask-image: linear-gradient(to right, transparent var(--e), #000 calc(var(--e) + 60px)); mask-image: linear-gradient(to right, transparent var(--e), #000 calc(var(--e) + 60px)); }
+#lwMenu .mm-sheet-fx > :nth-child(1) { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+#lwMenu .mm-sheet-fx > :nth-child(2) { --e: 6px; -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
+#lwMenu .mm-sheet-fx > :nth-child(3) { --e: 16px; -webkit-backdrop-filter: blur(13px); backdrop-filter: blur(13px); }
+#lwMenu .mm-sheet-fx > :nth-child(4) { --e: 34px; -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+#lwMenu .mm-sheet-fx > :nth-child(5) { --e: 64px; -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
+#lwMenu .mm-sheet-fx > b { background: hsl(var(--glass-tint) / .28); }
+#lwMenu .mm-tr { transition: opacity 200ms; } #lwMenu:has(> .mm-sheet.in) .mm-tr { opacity: 0; pointer-events: none; }   /* the face's THEME and ⚙ step aside under the plateless sheet (its × closes it) */
+#lwMenu .mm-sheet-body :is(.sw, .seg, .seg-b, .trig, .k-dial) { border-color: transparent; box-shadow: none; }
+#lwMenu .mm-sheet-body .seg { background: hsl(var(--glass-tint) / .3); }
+#lwMenu .mm-sheet-body .seg-b.on { background: hsl(var(--glass-tint) / .85); }
+#lwMenu .mm-sheet-body .sw { background: transparent; } #lwMenu .mm-sheet-body .sw:hover { background: hsl(var(--glass-tint) / .4); }
+/* THE MORE FOLD (lab/fold.js): a quiet row, its word and the chevron; the rows under it once open */
+#lwMenu .mm-sh-more { display: flex; padding: 4px 0 0; }
+#lwMenu .mm-sh-more .lw-fold { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 30px; padding: 0; background: transparent; font-size: 10px; letter-spacing: .24em; color: var(--acc); }
 #lwMenu .mm-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 12px 6px 20px; }
 #lwMenu .mm-sheet-head b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: 15px; letter-spacing: .12em; }
 #lwMenu .mm-sheet-x { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; opacity: .6; transition: opacity 140ms, color 140ms; }

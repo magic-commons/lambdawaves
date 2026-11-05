@@ -233,6 +233,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const gear = el('button', 'mm-navb mm-gear', faceTop); gear.type = 'button'; gear.title = 'Settings — quality and the look'; gear.setAttribute('aria-label', 'Settings');
   gear.setAttribute('aria-haspopup', 'dialog'); gear.setAttribute('aria-expanded', 'false'); icon(gear, 'settings');
   const sheet = el('div', 'mm-sheet', root); sheet.hidden = true; sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-label', 'Settings');
+  /* 036 G5 · THE FOCUS BLUR: the sheet's ground is five stacked blur layers and a thin wash, each masked from the sheet's left edge (skin.css) */
+  { const fx = el('div', 'mm-sheet-fx', sheet); fx.setAttribute('aria-hidden', 'true'); for (let i = 0; i < 5; i++) el('i', '', fx); el('b', '', fx); }
   const sheetHead = el('div', 'mm-sheet-head', sheet); el('b', '', sheetHead, 'SETTINGS');
   const sheetX = el('button', 'mm-sheet-x', sheetHead); sheetX.type = 'button'; sheetX.setAttribute('aria-label', 'Close the settings'); icon(sheetX, 'close');
   const sheetBody = el('div', 'mm-sheet-body', sheet);
@@ -242,6 +244,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function openSheet() {
     if (sheetUp() || !app.hooks.menuSheet) return;
     if (!sheetRows) sheetRows = app.hooks.menuSheet(sheetBody); else sheetRows.paint();
+    sheetBody.scrollTop = 0;   // 036 G5: every open starts at the top
     clearTimeout(sheetT); sheet.classList.remove('out'); sheet.hidden = false; void sheet.offsetWidth; sheet.classList.add('in');
     gear.setAttribute('aria-expanded', 'true'); addEventListener('pointerdown', sheetOutside, true);
     const f = sheetBody.querySelector('[tabindex="0"], .sw'); if (f) f.focus({ preventScroll: true });

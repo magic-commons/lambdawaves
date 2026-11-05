@@ -88,6 +88,26 @@ try {
       { type: 'pointerDown', button: 0 }, { type: 'pointerMove', duration: 300, origin: 'viewport', x: 5, y: 2 }, { type: 'pointerUp', button: 0 }] }]); await wait(500); out.dragged = await st(); }
     out.tapX = await g.tap('#floats > .lw-about .mir-win-x'); await wait(700); out.afterX = await st();
   }
+  if (scene === 'sheet') {
+    const rows = () => g.ev(`const b = document.querySelector('#lwMenu .mm-sheet-body'), lbl = (r) => [...r.querySelectorAll('.seg-lbl, .sw-lbl, .k-lbl, .ro-lbl')].map((x) => x.textContent.trim()).join(' + ');
+      const more = b.querySelector('.mm-sh-more .lw-fold'), ctl = [...b.querySelectorAll('.sw, .seg, .seg-b, .k-dial')].filter((c) => c.getClientRects().length);
+      return { top: b.scrollTop, rows: [...b.querySelectorAll('.mm-sh-group:not([hidden]) > .mm-sh-row')].map(lbl), more: more && more.getAttribute('aria-expanded'),
+        strokes: ctl.filter((c) => { const cs = getComputedStyle(c); return cs.boxShadow !== 'none' || (parseFloat(cs.borderTopWidth) && cs.borderTopColor !== 'rgba(0, 0, 0, 0)'); }).length, controls: ctl.length,
+        fx: [...document.querySelectorAll('#lwMenu .mm-sheet-fx > *')].map((x) => getComputedStyle(x).backdropFilter), plate: getComputedStyle(document.querySelector('#lwMenu .mm-sheet')).backgroundColor };`);
+    await wait(1500);
+    for (const t of ['dark', 'light']) {
+      await theme(t); await wait(600);
+      out[t + 'Tap'] = await g.tap('.mm-gear'); await wait(700); out[t] = await rows();
+      out[t + 'Shot'] = await shot(`G5-sheet-${t}`, null, 0, 1000);
+      if (t === 'dark') {
+        await g.tap('.mm-sh-more .lw-fold'); await wait(400); out.moreOpen = await rows();
+        await g.ev(`document.querySelector('#lwMenu .mm-sheet-body').scrollTop = 400; return 1;`); out.moreShot = await shot('G5-sheet-more-dark', await rectOf('#lwMenu .mm-sheet'), 0, 500);
+        await g.press('\uE00C'); await wait(500);
+        await g.tap('.mm-gear'); await wait(700); out.reopen = (await rows()).top;   // scrollTop 0 on every open
+      }
+      await g.press('\uE00C'); await wait(500);
+    }
+  }
   console.log(JSON.stringify(out, null, 1));
   const errs = await g.errors(); if (errs.errs && errs.errs.length) console.log('page errors', JSON.stringify(errs.errs));
 } finally { await g.close(); }
