@@ -4,6 +4,11 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ## The standing paragraphs
 
+SETTINGS › DISPLAY's STAGE ROWS MOVED (037 T1): FRAME · AXES · AXIS COLOUR and the stage colour · FOLLOW THEME · STAGE · GAMMA live in the
+STAGE window (`docs/laws/look-and-camera.md` THE STAGE WINDOW); DISPLAY keeps EDIT STAGE. A label move: every key (FIELD_CHROME,
+`presentation.ui.stage`, `presentation.mat.gamma`), every target (`material.stage`, `material.gamma`) and every hand road is as it was, so an
+older file, a link and a route open unchanged; a history row now names the window STAGE.
+
 The five LEGACY windows are DELETED (0.5.0, R5-L1): QCD, H₂⁺ and HELIUM in D9,
 H₂ and ELECTROSTATICS in D9b. An older file that used one opens on its shim and
 says so in one line (`retired in 0.5.0: …`, PROJECTS and SPECTRUM status): a QCD

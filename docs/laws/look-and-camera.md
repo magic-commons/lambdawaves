@@ -23,6 +23,31 @@ in place of the plane-model canvas — the normal as the tip, the plane as the f
 (no pole at z). Under OBJECT it is the object's picture (an orbit turns the cut, not the sphere); under CAMERA it draws the eye's normal as
 the eye sees it (`view`), so neither the sphere nor the cut moves while the eye orbits. PLANE's own window keeps the plane-model canvas.
 
+THE STAGE WINDOW (037 T1, Josh: "New MIR rack window called 'Stage' where the stage can have different effects"): a rack card `stage`
+(`lab/stage-window.js`, glyph `stage`, KIND core, CLOSED on a first run, in the FINDER, `window.stage.*` generated) holding FRAME, then AXES ·
+AXIS COLOUR, then the stage colour · FOLLOW THEME, then STAGE · GAMMA, then PULSE. A LABEL MOVES, A KEY STAYS: those rows left SETTINGS › DISPLAY
+as the same controls (settings-card.js still makes them), so FIELD_CHROME, `presentation.ui.stage`, `presentation.mat.gamma`, `material.stage`
+and `material.gamma` are untouched; DISPLAY keeps one row, EDIT STAGE. The body is short and never scrolls.
+
+THE SUMMONS (037 T2): `summon(rk, fromId, id)` (`lab/summon.js`) opens `id` DIRECTLY BELOW `fromId` in fromId's rack (the kit's
+`open(id, { side, index })`; open already, it is docked or moved there and unfolded, nothing raised) and plays THE MITOSIS once — a copy of
+fromId's title bar over it, a pill wearing id's title sliding out beneath (180 ms), then rushing down to id's title bar and dissolving as the
+window materialises (360 ms in all; the kit's easing; nothing under reduced motion). The copies are the cards' own nodes in one fixed layer
+(`.lw-mitosis`, at the UI scale) removed when they land. A `fromId` not seated in a rack opens `id` as the FINDER does; the FINDER never
+summons (index 0, no mitosis). EDIT STAGE is `summon(rk, 'settings', 'stage')`; CAMERA → LIGHTING is the second caller.
+
+GAMMA EVERYWHERE (037 T3, Josh: "gamma seems to only work for inside the box"): a ray that misses the box or the cut, and the three NaN
+fallbacks, take the same output gamma as a ray through the field (`lab/field.js` `bgOut`), selected out at GAMMA 1 so that picture — THE LOCK's
+— is bit-identical.
+
+PULSE (037 T4, the first STAGE FX): a radial wash of the stage — `bg` × 2.2 + 0.035 on a dark stage (× 1.6 alone moved the dark ground by two
+codes), × 0.7 on a light one, chosen by the stage colour's own luminance — weighted by `w` = 1 − smoothstep(k − 1, k, r) for CENTRE or
+smoothstep(1 − k, 2 − k, r) for EDGE (r: 0 at the centre, 1 in the corners, the frame's aspect kept). RATE 0 stands the wash at reach k = 1; above 0 the reach breathes 0 → 1 → 0 at RATE Hz of the clock's
+play (t ÷ the clock's rate, re-anchored when either rate moves, so a turn never jumps it; paused, it stands — one clock). AMOUNT 0 returns
+`bg` untouched (THE LOCK). Uniforms p16.w (AMOUNT), p17.x (SHAPE), p17.y (RATE), p17.z (the phase, written by `writeView`). `mat.stage
+{ pulse, shape, rate }`, absent at home; PROJECT `presentation.stage` (absent = homes, never in NEW; the history keeps it); targets
+`stage.pulse` (flash-guarded, its own `flash` step) and `stage.rate` under the `stage` root.
+
 ## The standing paragraphs
 
 The CAMERA card's LOCK (PREFERENCE `camLock`, on by default since 037) is the classic camera. It holds the pan only: the shift stays 0,
