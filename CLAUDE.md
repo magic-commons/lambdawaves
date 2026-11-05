@@ -72,7 +72,7 @@ A law a gate enforces is cited by its gate, not restated: THE LOCK (the field's 
 - the app literal, rack-deps, the boot's modules, the dependency graph, the facade's seat → `architecture.md`
 - the action registry, the menus, the keys and the KEYBOARD/MAPPING window, the icons, the mask, FOLDS, the start, GEMMA → `shell.md`
 - the CONTROL SURFACE (the bar, its seats, the expander, search, favourites, the scroll pill) → `control-surface.md`
-- the look store, the blur, the CAMERA card, WASD → `look-and-camera.md`
+- the look store, the blur, the CAMERA card, WASD, THE STAGE WINDOW (FRAME · AXES · STAGE colour · GAMMA · PULSE), THE SUMMONS (a window opens another below itself), THE LIGHTING WINDOW → `look-and-camera.md`
 - the three scopes, records, projects and FOLDERS, NEW, the undo ring, `lw:` links → `scopes-and-records.md`
 - MOLECULES, the mode, the chem worker, the volumes and their pipeline → `chemistry.md`
 - the register, the paint gesture, SPECTRUM, ATOMS, n = 7, the scale, emission, the physics of 005 → `register-and-systems.md`
