@@ -1,8 +1,8 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
-import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
+import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
+import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel, directionSphere } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, obs, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
@@ -209,8 +209,13 @@ export function createMaterial(app) {
         mat.slice.normal = was ? [0, 1, 2].map((i) => n[0] * E[0][i] + n[1] * E[1][i] + n[2] * E[2][i]) : E.map((a) => a[0] * n[0] + a[1] * n[1] + a[2] * n[2]);
         if (v === 'camera') mat.slice.frame = 'camera'; else delete mat.slice.frame; schedule(TIER.PRESENT); } });
     const planeRow = el('div', 'clip-plane', gs);   // 037 H4: the plane's picture and its frame side by side (a fifth cell in r3 wrapped THICK to a second line)
-    const mini = planeModel(planeRow, { getNormal:()=>mat.slice.normal || sliceNormals[mat.slice.axis|0] || sliceNormals[2], getPosition:()=>mat.slice.pos, onTurn:n=>{mat.slice.normal=n; schedule(TIER.PRESENT);} });
-    planeRow.appendChild(ui.sliceFrameSeg.root);
+    /* 037 H5 · THE CLIP'S SPHERE (Josh: "Update 'Clip's XYZ sphere thing with Camera's XYZ thingy"): the camera's sphere taking a plane (MIR
+       1.5.7-alpha.7) in place of the plane-model canvas — the normal as its tip, the plane as its film, no letters; under CAMERA the normal is
+       the eye's own and the sphere draws it as the eye sees it (`view`), so the picture never lies about where the cut is.  rack.js paints it
+       each frame CLIP shows; paint() redraws only on a change */
+    const mini = directionSphere({ aria: 'Clip plane: drag to turn it; Home resets', plane: { normal: sliceN, pos: () => mat.slice.pos, view: () => mat.slice.frame === 'camera',
+      set: (n) => { mat.slice.normal = n; schedule(TIER.PRESENT); } }, home: () => { mat.slice.normal = [0, 0, 1]; schedule(TIER.PRESENT); } });
+    hint(mini.root, 'PLANE · drag to turn it; double-tap or Home resets'); planeRow.append(mini.root, ui.sliceFrameSeg.root);
     ui.sliceMini = mini;
     ui.sliceAxisSeg.root.hidden = true;
     /* WAVE 106 · THESE TWO KEEP THEIR HANDLES NOW, and that is what makes them modulatable.  Both

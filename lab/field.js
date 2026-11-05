@@ -1893,11 +1893,12 @@ export async function createField(canvas, opts = {}) {
     let n = 15;
     if (mat.slice && mat.slice.mode) {
       const ax = mat.slice.axis | 0, s = mat.slice.pos * h, c = [1, 0.85, 0.4, 0.55];
-      const normal0 = mat.slice.normal || AXIS_NORMALS[ax] || AXIS_NORMALS[2], normal = mat.slice.frame === 'camera' ? eyeTurn(normal0, VIEW) : normal0;   // 037 H4
+      const normal = mat.slice.normal || AXIS_NORMALS[ax] || AXIS_NORMALS[2];
       const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
       const raw=cross(normal,Math.abs(normal[2])<.9?[0,0,1]:[0,1,0]),len=Math.hypot(...raw)||1;
       const uvec=raw.map(v=>v/len),vvec=cross(normal,uvec);
-      const q=(u,w)=>normal.map((v,i)=>v*s+uvec[i]*u+vvec[i]*w);
+      const toEye = mat.slice.frame === 'camera' ? (p) => eyeTurn(p, VIEW) : (p) => p;   // 037 H4: the square is built in its own frame, then turned by the eye — a CAMERA outline stands still on the screen
+      const q=(u,w)=>toEye(normal.map((v,i)=>v*s+uvec[i]*u+vvec[i]*w));
       push(q(-h, -h), q(h, -h), c); push(q(h, -h), q(h, h), c); push(q(h, h), q(-h, h), c); push(q(-h, h), q(-h, -h), c);
       n += 4;
     }

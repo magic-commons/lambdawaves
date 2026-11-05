@@ -75,6 +75,33 @@ try {
     const clip = await rectOf('.dev[data-id="clip"]');
     out['shot clip-camera'] = await shot('037-H4-clip-camera', [380, 40, W - 20, Math.min(H - 20, clip[3] + 20)]);
   }
+  if (scene === 'h5') {
+    /* CLIP's sphere in both frames: under OBJECT an orbit turns the stage's cut and leaves the sphere (the object's own picture); under CAMERA
+       the cut and the sphere both stay (the plane is the eye's); a real drag on the sphere turns the normal; a double-click is home */
+    await g.ev(`__LW.loadPreset('2pz'); __LW.pause(); await __LW.settle(); return 1;`);
+    await float('clip', 520, 90, 300);
+    const tip = `const t = document.querySelector('.dev[data-id="clip"] .cs-tip'); return [+t.getAttribute('cx'), +t.getAttribute('cy')];`;
+    await g.ev(`const c = document.querySelector('.dev[data-id="clip"]'); [...c.querySelectorAll('.seg-b')].find((b) => b.textContent.trim() === 'SLAB').click();
+      __LW.mat.slice.thick = 0.12; __LW.mat.slice.normal = [0.5, 0, 0.866]; __LW.camera.reset(); await __LW.settle(); await new Promise((r) => setTimeout(r, 300)); return 1;`);
+    const clip = await rectOf('.dev[data-id="clip"]'), box = [0, 40, W - 20, Math.min(H - 20, clip[3] + 30)];
+    const orbit = (dy) => g.ev(`__LW.orbitBy(${dy}, 0); await __LW.settle(); await new Promise((r) => setTimeout(r, 300)); return 1;`);
+    out.objectTip0 = await g.ev(tip); out['shot object-0'] = await shot('037-H5-clip-object-home', box);
+    await orbit(0.9); out.objectTip1 = await g.ev(tip); out['shot object-1'] = await shot('037-H5-clip-object-orbited', box);
+    await g.ev(`document.querySelector('.dev[data-id="clip"] .clip-frame .seg-b:first-child').click(); await __LW.settle(); await new Promise((r) => setTimeout(r, 300)); return 1;`);
+    out.cameraTip0 = await g.ev(tip); out['shot camera-0'] = await shot('037-H5-clip-camera-pressed', box);
+    await orbit(-1.4); out.cameraTip1 = await g.ev(tip); out['shot camera-1'] = await shot('037-H5-clip-camera-orbited', box);
+    /* a real drag on the sphere: 30 px right, then a double-click home */
+    const sv = await rectOf('.dev[data-id="clip"] .cs-svg'), cx = (sv[0] + sv[2]) / 2, cy = (sv[1] + sv[3]) / 2, n0 = await g.ev(`return __LW.mat.slice.normal.slice();`);
+    await drv.actions(g.s, [{ type: 'pointer', id: 'h' + (++pid), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: Math.round(cx), y: Math.round(cy) },
+      { type: 'pointerDown', button: 0 }, { type: 'pointerMove', duration: 150, origin: 'viewport', x: Math.round(cx + 30), y: Math.round(cy) }, { type: 'pointerUp', button: 0 }] }]);
+    const n1 = await g.ev(`return __LW.mat.slice.normal.slice();`);
+    await drv.actions(g.s, [{ type: 'pointer', id: 'h' + (++pid), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: Math.round(cx), y: Math.round(cy) },
+      { type: 'pointerDown', button: 0 }, { type: 'pointerUp', button: 0 }, { type: 'pause', duration: 60 }, { type: 'pointerDown', button: 0 }, { type: 'pointerUp', button: 0 }] }]);
+    const n2 = await g.ev(`return __LW.mat.slice.normal.slice();`);
+    out.hand = { n0: n0.map((v) => +v.toFixed(3)), dragged: n1.map((v) => +v.toFixed(3)), home: n2, frame: await g.ev(`return __LW.mat.slice.frame || 'object';`) };
+    out.verdict = { objectSphereStill: JSON.stringify(out.objectTip0) === JSON.stringify(out.objectTip1), cameraSphereStill: JSON.stringify(out.cameraTip0) === JSON.stringify(out.cameraTip1),
+      dragTurned: n1.some((v, i) => Math.abs(v - n0[i]) > 0.05), homeIsZ: JSON.stringify(n2) === '[0,0,1]' };
+  }
   const errs = await g.errors(); out.errs = errs.errs;
 } finally { await g.close(); }
 console.log(JSON.stringify(out, null, 1));

@@ -20,6 +20,12 @@
   --cam-film-mix: 22%;                               /* the film plane: the accent at a low mix under a thin rim */
   --cam-ring: var(--ink-faint);
 }
+/* 1.5.7-alpha.7: a PLANE sphere stands outside any camera panel (CLIP's), so it carries the sphere's own three values */
+.mir-camsphere.plane {
+  --cam-sphere: 240px;
+  --cam-film-mix: 22%;
+  --cam-ring: var(--ink-faint);
+}
 @media (pointer: coarse) { .mir-camera { --cam-btn: var(--touch); } }
 /* ── end of the values ── */
 

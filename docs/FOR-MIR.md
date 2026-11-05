@@ -173,3 +173,4 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 
 ## 037 (2026-11-05, chain H — the doors 1.5.7-alpha.6 … 7 on kit-037, from kit-032's a3dcb80)
 - **BUILT 1.5.7-alpha.6 · THE REVERSED DIAL** (037 H2, `controls/factory.js` knobOpts, `panels/camera.js` desc): a descriptor's `reverse` and a camera port range's `reverse` reach `knob()`'s own; λWAVES' ZOOM (a distance) asks it, so clockwise comes near.
+- **BUILT 1.5.7-alpha.7 · THE SPHERE TAKES A PLANE** (037 H5, `panels/camera.js` directionSphere `plane`, `panels/camera-rig.js` `planeDrag` · `VIEW_FRAME` · `fromView` · `toView`, `panels/camera.css`): the camera's sphere draws a plane (CLIP's) — the normal as the tip, the plane as the film, no letters; the tip follows the finger in 3-D (no pole); `view()` draws a viewer-frame normal as the eye sees it. plane-model.js stays (PLANE's window).

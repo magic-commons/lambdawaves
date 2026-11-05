@@ -181,13 +181,13 @@
  },
  {
   "file": "mir/panels/camera-rig.js",
-  "line": 179,
+  "line": 198,
   "why": "fragment",
   "text": "px, "
  },
  {
   "file": "mir/panels/camera.js",
-  "line": 369,
+  "line": 436,
   "why": "fragment",
   "text": "NORTH · back to "
  },
