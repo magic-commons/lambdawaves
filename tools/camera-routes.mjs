@@ -23,7 +23,7 @@ const SCENES = [...STARTERS.map((s) => [s.name, 'demo', s.file, 'demos/' + s.fil
   ...readdirSync(new URL('../tests/fixtures/retired-demos/', import.meta.url)).filter((f) => f.endsWith('.lambdawaves.json')).sort()
     .map((f) => ['retired · ' + f.replace('.lambdawaves.json', ''), 'file', null, '../tests/fixtures/retired-demos/' + f])];
 /** the saved-route law of the six observer.* targets (rack.js' defs; CAM in lab/camera-law.js) */
-const LAW = { 'observer.yaw': ['wrap', 0, 2 * Math.PI], 'observer.pitch': ['bipolar', -1.52, 1.52], 'observer.dist': ['log', 1.2, 8],
+const LAW = { 'observer.yaw': ['wrap', 0, 2 * Math.PI], 'observer.pitch': ['bipolar', -1.52, 1.52], 'observer.dist': ['log', 1, 12],
   'observer.fov': ['linear', 5 * Math.PI / 180, Math.PI / 2], 'observer.panx': ['bipolar', -1, 1], 'observer.pany': ['bipolar', -1, 1] };
 const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
   const md = navigator.mediaDevices; if (md) md.getUserMedia = () => Promise.reject(new Error('routes: no microphone'));

@@ -117,7 +117,7 @@ export function has(port, id) {
 export const present = (port) => IDS.filter((id) => has(port, id));
 
 /** describe(id, port) → the descriptor the panel builds from: the vocabulary's entry, the port's own range laid over it (`port.ranges[id]`:
- *  { min, max, home, log, step, fmt, label, wrap }, in the port's unit), the angle unit applied, `fmt` resolved to a function. */
+ *  { min, max, home, log, step, fmt, label, wrap, reverse }, in the port's unit), the angle unit applied, `fmt` resolved to a function. */
 export function describe(id, port) {
   const v = VOCAB[id];
   if (!v) return null;

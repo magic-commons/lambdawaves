@@ -1190,7 +1190,7 @@ function runWindow(r, n, dt) {
     return [
       { id: 'observer.yaw', label: 'YAW', map: 'wrap', min: 0, max: 2 * Math.PI, ...f(p.obs, 'yaw') },
       { id: 'observer.pitch', label: 'PITCH', map: 'bipolar', min: -CAM_PITCH, max: CAM_PITCH, def: 0, ...f(p.obs, 'pitch') },
-      { id: 'observer.dist', label: 'ZOOM', map: 'log', min: 1.2, max: 8, ...f(p.obs, 'dist') },
+      { id: 'observer.dist', label: 'ZOOM', map: 'log', min: 1, max: 12, ...f(p.obs, 'dist') },   // 037 H2: [1, 12]
       { id: 'observer.fov', label: 'FOV', map: 'linear', min: 5 * Math.PI / 180, max: Math.PI / 2, ...f(p.obs, 'fov') },   // 037 H1: 5°–90°
       { id: 'material.exposure', label: 'EXPOSURE', map: 'log', min: 0.08, max: 12, ...f(p.mat, 'exposure') },
       { id: 'material.softness', label: 'SOFT', map: 'linear', min: 0.3, max: 2.2, ...f(p.mat, 'softness') },

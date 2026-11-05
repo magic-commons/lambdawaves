@@ -23,7 +23,8 @@
  *
  * THE PORT   an app implements only the ids it has; the panel shows only those (camera-rig.js VOCAB lists every id)
  *   { get(id) → number | boolean | string | undefined,     set(id, v),     subscribe(fn) → off      (the app notifies; nothing is polled)
- *     has?(id), angle?: 'deg' | 'rad', ranges?: { [id]: { min, max, home, log, step, fmt, label } }, modIds?: { [id]: 'the.apps.id' },
+ *     has?(id), angle?: 'deg' | 'rad', ranges?: { [id]: { min, max, home, log, step, fmt, label, reverse } }, modIds?: { [id]: 'the.apps.id' },
+ *     (`reverse`, 1.5.7-alpha.6 THE REVERSED DIAL: that knob turns the other way — a ZOOM whose number is a distance turns clockwise to come near)
  *     verbs?: [{ label, title?, run() → void | Promise }],   home?(), north?(), northMemo?() → degrees | null,   turn?(dyaw, dpitch) }
  * MODULATION  every continuous control is a target under `camera.<id lower-cased>` (camera.rotation, camera.panx …: BASINS' ids), or `modPrefix.<id>` (two cameras on a page), or the
  *   port's `modIds`.  `mod` is installModulation()'s result: the panel adds its targets when it is built, and a hand on a routed dial writes the
@@ -211,7 +212,7 @@ export function createCameraView(parent, o = {}) {
   function desc(id, extra) {
     const d = D(id);
     return { id: modId(id), label: d.label, hint: d.hint, min: d.min, max: d.max, home: d.home, log: d.log, step: d.step, fmt: d.fmt,
-      wrap: !!d.wrap, angle: d.kind === 'angle', value: port.get(id), get: () => port.get(id), set: (v) => write(id, v), ...extra };
+      wrap: !!d.wrap, angle: d.kind === 'angle', reverse: !!d.reverse, value: port.get(id), get: () => port.get(id), set: (v) => write(id, v), ...extra };   // 1.5.7-alpha.6: a port's range may ask `reverse`
   }
   function add(parentEl, vids, c, read) {
     parentEl.appendChild(c.root);

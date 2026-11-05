@@ -37,8 +37,10 @@ import { slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit q
  * (two turns a second) so no flick can outrun the picture.  A fling that hits the POLE CLAMP loses its pitch
  * component and keeps its yaw.  THE CAMERA NEVER TOUCHES ψ: it schedules TIER.PRESENT and nothing else, it is
  * not on the undo stack, and reg.version cannot move because of it (§14).
- * 037 H1 (Josh: "min 5 degrees, max 90 degrees"): FOV spans 5°–90° (radians; the home 0.6 rad stays, so THE LOCK's poses are its own). */
-export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [5 * Math.PI / 180, Math.PI / 2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, shift: Object.freeze([0, 0]) },
+ * 037 H1 (Josh: "min 5 degrees, max 90 degrees"): FOV spans 5°–90° (radians; the home 0.6 rad stays, so THE LOCK's poses are its own).
+ * 037 H2 (Josh: "going clockwise should increase in zoom"): DIST spans [1, 12] (log, home 3.3), and the ZOOM dial is reversed (MIR 1.5.7-alpha.6:
+ * the port's range asks `reverse`) — clockwise comes near; `obs.dist`, `observer.dist` and the ×dist readout are still the distance. */
+export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1, 12], FOV: [5 * Math.PI / 180, Math.PI / 2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, shift: Object.freeze([0, 0]) },
   GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01, SHIFT: 1 };
 /** THE LENS SHIFT's one bound (0.4.0 S2): obs.shift = [px, py] is where the pivot appears on the frame, in NDC (+y up),
  *  each component in [−SHIFT, SHIFT] — the pivot reaches the frame's edge and never leaves it.  A fresh array; anything
@@ -212,7 +214,7 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }, notify: tell, turn, home: () => resetView(), setShift, zoomAt, panBy,
     verbs: Object.freeze([{ label: 'PAN HOME', title: 'PAN HOME — put the pivot back in the middle of the frame', run: () => { setShift(0, 0); } }]),
     modIds: Object.freeze({ yaw: 'observer.yaw', pitch: 'observer.pitch', zoom: 'observer.dist', fov: 'observer.fov', panX: 'observer.panx', panY: 'observer.pany' }),
-    ranges: Object.freeze({ zoom: R(...CAM.DIST, H.dist, { log: true, fmt: 'zoom' }), fov: R(...CAM.FOV, H.fov), yaw: R(0, 2 * Math.PI, H.yaw),
+    ranges: Object.freeze({ zoom: R(...CAM.DIST, H.dist, { log: true, fmt: 'zoom', reverse: true }), fov: R(...CAM.FOV, H.fov), yaw: R(0, 2 * Math.PI, H.yaw),
       pitch: R(-CAM.PITCH, CAM.PITCH, H.pitch), panX: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }), panY: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }),
       drag: R(...CAM.GAIN, CAM.GAIN_DEF, { step: CAM.GAIN_STEP, log: false }), friction: R(0, CAM.MU_MAX, CAM.MU_DEF, { step: CAM.MU_STEP }),
       fling: R(...CAM.FLING, CAM.FLING_DEF, { step: CAM.FLING_STEP }) }) };

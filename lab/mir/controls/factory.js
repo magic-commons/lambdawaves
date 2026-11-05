@@ -17,7 +17,8 @@
  *   otherwise ................................................................. number field
  *
  * descriptor: { id, label, hint, value, get?, set?, type?, options?: [{ id, label, coming?/disabled? }], min, max, step, log, wrap, hue, angle,
- *   cyclic, principal, list, ordered, colour, pair, ink, unit, digits, fmt, orient, lamp, onInput?, onChange? }.  `get` and `set` are the app's
+ *   cyclic, principal, list, ordered, colour, pair, ink, unit, digits, fmt, orient, lamp, reverse, onInput?, onChange? }.  `reverse` (1.5.7-alpha.6): the
+ *   knob turns the other way (kit.js knob's own law; the value, the range and a modulation map unchanged).  `get` and `set` are the app's
  *   own road to the value (the registry's adapters): the control reads its first value from `get()`, and every hand writes `set(v)`.
  *   → { kind, root, widget, targets, get(), set(v), desc, params() }
  *     kind     one of KINDS
@@ -72,7 +73,7 @@ export function control(d, hooks = {}) {
   const change = (v) => { write(v); if (d.onChange) d.onChange(v); if (hooks.onChange) hooks.onChange(v); };
   const common = { label: d.label, title: d.hint, aria: d.aria };
   const knobOpts = () => ({ ...common, min: d.min, max: d.max, value: read(), step: d.step, log: d.log, wrap: !!(d.wrap || d.cyclic || d.hue || d.angle), unit: d.unit, fmt: d.fmt, size: d.size,
-    onInput: input, onChange: change });
+    reverse: !!d.reverse, onInput: input, onChange: change });   // 1.5.7-alpha.6 THE REVERSED DIAL: knob()'s own `reverse` (a wrap knob and an arc ignore it)
   let widget, targets = [], getter, setter, recs = null;
   switch (kind) {
     case 'switch': widget = sw({ ...common, value: !!read(), lamp: d.lamp, onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;

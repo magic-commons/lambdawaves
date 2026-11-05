@@ -170,7 +170,7 @@ pass('the pan law: panBy adds in uv, setShift clamps at the frame\'s edge, a mod
   P.home(); assert.deepEqual([o.dist, o.fov, o.shift], [3.3, 0.6, [0, 0]], 'HOME is RESET VIEW');
   off(); const r = told; P.set('zoom', 4); assert.equal(told, r, 'unsubscribed');
   assert.deepEqual(P.modIds, { yaw: 'observer.yaw', pitch: 'observer.pitch', zoom: 'observer.dist', fov: 'observer.fov', panX: 'observer.panx', panY: 'observer.pany' });
-  assert.deepEqual([P.ranges.zoom.min, P.ranges.zoom.max, P.ranges.zoom.home, P.ranges.zoom.log, P.ranges.pitch.max, P.ranges.drag.log], [1.2, 8, 3.3, true, CAM.PITCH, false]);
+  assert.deepEqual([P.ranges.zoom.min, P.ranges.zoom.max, P.ranges.zoom.home, P.ranges.zoom.log, P.ranges.pitch.max, P.ranges.drag.log, P.ranges.zoom.reverse], [1, 12, 3.3, true, CAM.PITCH, false, true]);   // 037 H2: [1, 12], clockwise comes near
   for (const k of ['setShift', 'zoomAt', 'panBy', 'turn', 'subscribe']) assert.equal(typeof P[k], 'function', k);
 }
 pass('the camera port: get reads the law\'s numbers (11 ids, radians), set takes the hand\'s road (a routed YAW moves its base), subscribe hears every pose change and a still camera tells nobody, HOME is RESET VIEW, modIds name the saved observer.* routes');
