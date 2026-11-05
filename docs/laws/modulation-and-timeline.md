@@ -18,6 +18,16 @@ ONE PART law); the one undo stack keeps them as their own snapshot domain (a pai
 WINDOW › TOOLS › PATTERN (the action `pattern`), its shape the WORKSPACE record `lambdawaves.q0.patternwin`. The conductor writes hits with a
 score's `pattern` key (docs/conductor/SCORE.md § The hits).
 
+THE TIMELINE'S OWN ROWS (036 K4, MIR 1.5.7-alpha.4 `installTimeline({ moreRows })`; `lab/timeline-follow.js`, bound in `lab/shell/keys.js`): ⋯ ends,
+after a separator, with FOLLOW PLAYHEAD and AUTO-COLOR. FOLLOW PLAYHEAD (Josh 11-03: "the playhead appears to be fixed but the whole lanes move …
+disabled the moment a user clicks/scroll anywhere on the timeline (not clicking buttons)") is a choice row, OFF at every open, no stored key: while
+on, each present scrolls the lanes BEFORE the head paints, so the head stands where it stood when chosen (pinned inside the middle half of the
+view); a loop's wrap jumps the view; a press on the lanes or the ruler, a wheel, or any scroll it did not write (the kit's zoom, a new clip, LOCATE,
+Shift+0) ends it, a button, a field, the work bar or a rail chip does not; under a film it stands still. AUTO-COLOR (Josh: "'Auto-Color' will
+instantly paint the clips to the current active palette (If nothing active, then use HSV)") paints every clip's curve from the active PALETTE,
+spread evenly round its wheel in lane-then-start order, or — PALETTE off — the HSV wheel (s .85, v 1) in golden-angle order; AUDIO clips keep their
+tint; one undo row (the model's begin/commit).
+
 ## The laws of 032 (TIMELINE REDUX, MIR 1.5.6-alpha.21 … 28)
 
 THE ARRANGEMENT WINS WHERE IT PLAYS (alpha.21 · alpha.27): two clips on one target — the highest lane, then the earliest start; under a clip its value is the target's (a device's routes on it stand aside; a hand macro still layers); off a clip the device plays as before; →TL bypasses the device it sent. THE LOOP (alpha.25): the timeline loops while it plays — the ruler's range › ACTIVE › the clips' extent › free run; a film never loops (λWAVES passes no controller of its own: the kit's loops). ONE MODIFIER TABLE (alpha.23): Shift selects and fine-tunes (⅛ on curves, tension and knobs), Ctrl shapes (the ruler's vertical drag zooms about the pointer, its horizontal half scrubs snapped; Ctrl on a clip's body clones, on its edge stretches keeping the shape, Ctrl+Shift at ⅛; Ctrl locks a point's time), Alt bypasses Snap and deletes a point; the value lock is gone; the pencil stamps the clip last pressed. THE WORK BAR (032 T8 · T4): its power seat wears MOD (the kit's word face, dressed as its door is; the modulation window keeps the power ring) and beside t a second reader, TIME, the playhead's beat as m:ss.d at the tempo in force (`formatSeconds`), painted with t.

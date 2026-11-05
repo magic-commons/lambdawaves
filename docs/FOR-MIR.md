@@ -160,3 +160,13 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - Open edge (λWAVES 032 W3, app-side today): with a heavy solve running while the timeline plays, RENDER is refused ("Finish scrubbing before rendering") until the solve lands — the busy hold rides the scrub gate's door; a `hold(reason)` of its own on the clock would let the film start and wait.
 - Pre-existing at 1.5.5 (not 032's): `tests/parity5.browser.mjs` (FROST TEXT LIGHT, 8/9), `render.browser.mjs` (the motionUi.paint-throws case, 64/65), `widgets.browser.mjs` (1 of 47) fail at 3051daf and at kit-032's tip alike.
 
+
+## 036 (2026-11-04, chain K — the five doors 1.5.7-alpha.1 … 5 are DONE on kit-032; what is left)
+- **BUILT 1.5.7-alpha.1 · THE STROKE** (036 K1, `shell/gui.js`, `css/base.css` `--ctl-hairline`, `css/skin.css`, `window/window.css` `--chip-edge`, `shell/transport.css`): the look key `stroke` × every control ring's alpha; the relief's soft 3-px halo again. λWAVES' home 0.
+- **BUILT 1.5.7-alpha.2 · THE UI SCALE** (036 K2, `core/zoom.js` new, `css/base.css` the roots, the geometry pass in `window/window.js` `window/rail.js` `shell/rack.js` `shell/menubar.js` `control-help.js` `shell/transport.js` `core/motion.js`).
+- **BUILT 1.5.7-alpha.3 · THE TEMPO EDITOR'S BOX** (036 K3, `controls/number.js` `format`, `--xport-edit-size`).
+- **BUILT 1.5.7-alpha.4 · THE ⋯ MENU'S APP ROWS** (036 K4, `installTimeline({ moreRows })`).
+- **BUILT 1.5.7-alpha.5 · THE FIELDS' OWN WORDS** (036 K5, `folders/gallery.js` `copy.namePlaceholder` · `saveToPlaceholder` · `proposeName`).
+- **OPEN · the modulation material under UI SCALE** (036 K2): MODULATION (`modulation/window.js`, 57 geometry reads), TIMELINE (`timeline/view.js` `world()`, `editor.js` `zoomAt`, the lanes' px per beat) and PATTERN map the pointer to beats and values through a seen rect and their own px; until they divide by `cssZoom` they take the inverse zoom (`css/base.css`) and stay 100 %.
+- **OPEN · seen constants under UI SCALE** (036 K2): `clampFloat`'s 44-px head (`shell/rack.js`) and the transport dodge's seat offsets (λWAVES `shell/modulation.js` `seatRect`: 52 / 60 / 112 px) are seen px beside CSS offsets that scale; the route ghost and the glow layer (body children, seen px) stay unscaled; `.mir-rack-handle` / `.mir-rack-grip` are not roots; a window an app mounts on `body` (not `#floats`) is not a root.
+- **OPEN · a saved rect is px** (036 K2): a changed UI SCALE moves a saved window layout by the factor (each window clamps on screen at the next layout).

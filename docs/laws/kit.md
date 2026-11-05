@@ -2,7 +2,27 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
-## The laws of 032
+## The laws of 036
+
+THE DOORS OF 036 (chain K, Opus 5.5; the clone road on kit branch `kit-032` from the 1.5.6 cut cdf20ae, adopted as `1.5.7-alpha.5`): alpha.1 THE STROKE
+(MIR OPTIONS › CONTROLS › STROKE, the look key `stroke` 0–1, `--ctl-stroke` on <html>: every control ring's alpha × it — the switch's flat seat, the
+ON rim's ring, the seat edge, the knob's live ring, the carried and tab rings, the controls' hairline borders through `--ctl-hairline`, the rail
+chips' rim and disc edge `--chip-edge`, the transport pill's rims; not the panes' EDGE, the menus' edge (022's ≥ 3 : 1) or the focus ring; THE
+RELIEF SOFTENS — `--neu-raise`'s highlight is the soft 3-px halo of before 1.5.6-alpha.5 again, the drop unchanged) · alpha.2 THE UI SCALE (MIR
+OPTIONS › WINDOWS › UI SCALE, the look key `scale` 0.5–2 by .05, `--ui-zoom` on <html>: CSS `zoom` on the UI roots only, never on html, body,
+#stage or a canvas; `--in-zoom` divides every viewport length in the kit's sheets; `core/zoom.js` `cssZoom` · `ownRect` · `viewIn` and the
+geometry pass) · alpha.3 THE TEMPO EDITOR'S BOX (`bindNumber` opens the field in its button's box — no flex-basis, which a column seat read as the
+height — in the button's format, at `--xport-edit-size`) · alpha.4 THE ⋯ MENU'S APP ROWS (`installTimeline({ moreRows })`, after a separator) ·
+alpha.5 THE FIELDS' OWN WORDS (FOLDERS' `copy.namePlaceholder` / `copy.saveToPlaceholder`, `copy.proposeName: false`). λWAVES' side: STROKE's home
+is 0 (`LOOK_HOME.stroke`, lab/look.js) and λWAVES' own rings take the factor (skin.css, lab.css, csb.css); `lab/skin.css` § 036 K2 adds λWAVES' roots
+(#title, #badges, #sheet, the CSB's search pill and list, the main menu's head, face and caption — not its collage or decks).
+
+UI SCALE'S GEOMETRY LAW (036 K2): under zoom a rect, a pointer and innerWidth are SEEN px; offset*, client*, scroll*, getComputedStyle and every
+length an element is given are its OWN px. A place written from a seen number divides by the element's `cssZoom`; a seen number compared with an
+own one multiplies; two seen (or two own) numbers need nothing. A kit window's model is its host's own px; a rack float keeps its seen x, y and its
+own width. The modulation material's windows (MODULATION, TIMELINE, PATTERN, their rails) take the inverse zoom and stay 100 % (their editors are not
+zoom-aware yet: FOR-MIR); a plot canvas in a window multiplies its backing store by its zoom; the stage canvases never move.
+
 
 THE DOORS OF 032 (TIMELINE REDUX, Claude Sos with an Opus builder; the clone road from the 1.5.5 cut, kit branch `kit-032` @ 27dadc0, adopted as `1.5.6-alpha.28`): alpha.21 THE ARRANGEMENT'S LAW (`timeline/model.js` — where clips overlap on one target the HIGHEST lane wins, then the earliest start; `extent()`, `stretchClip()` keeps a curve's shape as `scale · old / new`; a plain curve's `steps`) · alpha.22 THE EVENT TARGET (`modulation/registry.js` — an `integer` row's `options` cut the unit line into equal bands, a value lands on its band's centre, `describe(id)` says `options` and `steps`) · alpha.23 THE TIMELINE'S HANDS (one modifier table: Shift selects and fine-tunes ⅛, Ctrl shapes — zoom on the ruler, clone, stretch, the time lock — Alt bypasses snap; the pencil stamps the clip last pressed; the shared `curve-gesture.js` law reaches the modulation window and CURVES too) · alpha.24 THE WORK LANE'S FACE (round tools with a `slice` glyph, SNAP `1 · 1/4 · 1/8 · 1/16 · OFF` in a pill, 36 px seats, a loud selection, fuller clips, FIT with `place()`'s NaN fix, DISABLE CLIP, the lane ask through `confirmDialog`, an event clip's bands and ⚠ when its target's band count changes) · alpha.25 THE LOOP (the timeline loops while it plays: the ruler's range › ACTIVE › the clips' extent › free run; `loop: false` opts out; a film never loops) · alpha.26 THE ROUTE FROM A CLIP (`armFor` on the modulation window's api; the clip menu's ROUTE NEW PARAMETER…) · alpha.27 THE SEND DISARMS (THE ARRANGEMENT WINS WHERE IT PLAYS: under a clip a device's routes on that target stand aside, hand macros still layer; →TL bypasses the device it sent) · alpha.28 THE CARD'S × AND THE BARE POP (a `card: true` window's × closes through the rack and every close road undocks the bar; `register({ bare: true })`; `placeGlyph` for a two-place cycle). The precache ceiling is 8.5 MiB since this adoption (`tests/pwa.test.mjs`: 8.02 MiB of code, nothing lazily read left to skip). CUT AS MIR 1.5.6 on 2026-11-01 (Josh: "Cut the kit as 1.5.6 and push it"; kit commit cdf20ae, tag `v1.5.6`, branch `kit-1.5.6` pushed to github.com/magic-commons/mir); λWAVES adopts `1.5.6`; a new door continues from 1.5.7-alpha.1. The siblings re-adopt on Josh's word (four of the doors change a kit-wide law: the highest lane wins, the loop on by default, Shift/Ctrl, a clip overrides a device's routes).
 
