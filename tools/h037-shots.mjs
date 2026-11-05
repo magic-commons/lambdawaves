@@ -55,6 +55,26 @@ try {
     out.fresh = await g.ev(`const pad = document.querySelector('.dev[data-id="camera"] .mir-camera .mir-xy');
       return { lock: __LW.camera.lock, autoRotate: __LW.camera.autoRotate, padOff: !!pad && pad.classList.contains('disabled'), mu: __LW.camera.mu };`);
   }
+  if (scene === 'h4') {
+    /* the check: 1s is round, so a SLAB through the pivot that faces the eye (CAMERA, normal z) is the same picture from any yaw; under OBJECT a slab with the world's x normal
+       tilts as the eye turns about z.  Then the hand: a press of CAMERA keeps the picture where it stands */
+    out.rides = await g.ev(`const L = __LW, F = L.field; if (!F.ok) return { skip: F.error || 'no WebGPU' };
+      L.loadPreset('1s'); L.pause(); await L.settle();
+      const look = (frame) => ({ ...L.mat, frame: false, axis: false, dither: 0, slice: { mode: 2, axis: 2, pos: 0, thick: 0.08, normal: frame ? [0, 0, 1] : [1, 0, 0], ...(frame && { frame }) } });   /* OBJECT: the world's x normal, which yaw turns */
+      const at = async ([yaw, pitch], m) => { F.stats.presents = 0; return (await F.readPixels({ ...L.obs, mode: 'turntable', yaw, pitch }, m, 240, 180, true)).px; };   /* yaw AND pitch: a normal read as the world's z would tilt */
+      const diff = (a, b) => { let d = 0; for (let i = 0; i < a.length; i++) d = Math.max(d, Math.abs(a[i] - b[i])); return d; };
+      const A = [0.65, 0.38], B = [1.45, -0.5], cam = diff(await at(A, look('camera')), await at(B, look('camera'))), obj = diff(await at(A, look()), await at(B, look())), worldZ = diff(await at(A, { ...look(), slice: { ...look().slice, normal: [0, 0, 1] } }), await at(B, { ...look(), slice: { ...look().slice, normal: [0, 0, 1] } }));
+      return { cameraDiff: cam, objectDiff: obj, worldZDiff: worldZ, rides: cam <= 3 && obj > 40 && worldZ > 40 };`);
+    await float('clip', 1100, 70, 300);
+    out.press = await g.ev(`const L = __LW, F = L.field, card = document.querySelector('.dev[data-id="clip"]'); if (!F.ok) return { skip: 'no WebGPU' };
+      card.querySelector('.clip-on').click(); await L.settle(); L.camera.reset(); await L.settle();
+      const px = async () => { F.stats.presents = 0; return (await F.readPixels(L.obs, L.mat, 240, 180, true)).px; };
+      const diff = (a, b) => { let d = 0; for (let i = 0; i < a.length; i++) d = Math.max(d, Math.abs(a[i] - b[i])); return d; };
+      const p0 = await px(); card.querySelector('.clip-frame .seg-b:first-child').click(); await L.settle(); const p1 = await px();
+      return { frame: L.mat.slice.frame, normal: L.mat.slice.normal.map((v) => +v.toFixed(3)), keptPicture: diff(p0, p1) };`);
+    const clip = await rectOf('.dev[data-id="clip"]');
+    out['shot clip-camera'] = await shot('037-H4-clip-camera', [380, 40, W - 20, Math.min(H - 20, clip[3] + 20)]);
+  }
   const errs = await g.errors(); out.errs = errs.errs;
 } finally { await g.close(); }
 console.log(JSON.stringify(out, null, 1));

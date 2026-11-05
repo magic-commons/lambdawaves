@@ -206,6 +206,7 @@ export function createPersist(app) {
         if (ui.sliceModeSeg && mat.slice) ui.sliceModeSeg.set(['off', 'clip', 'slab'][mat.slice.mode] || 'off');
         if (ui.styleSync) ui.styleSync(pr.mat || {});   // iteration 014 B: THE THREE VIEWS' keys (absent: the defaults); iteration 015 W1: every WAVE control the style reads
         if (ui.sliceAxisSeg && mat.slice) ui.sliceAxisSeg.set(['x', 'y', 'z'][mat.slice.axis] || 'z');
+        if (ui.sliceFrameSeg && mat.slice) ui.sliceFrameSeg.set(mat.slice.frame === 'camera' ? 'camera' : 'object');   // 037 H4: CLIP's frame (absent: OBJECT)
         if (ui.gridSeg && [64, 96, 128].includes(quality.res)) ui.gridSeg.set(String(quality.res));
         if (ui.autoSw) ui.autoSw.set(!!quality.auto);
         if (ui.domainKnob && Number.isFinite(app.ctl.domain.half)) ui.domainKnob.set(app.ctl.domain.half);

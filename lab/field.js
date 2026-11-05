@@ -1128,6 +1128,10 @@ struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32> };
 /* ── small mat4 helpers (column-major, as WGSL reads them) ───────────────── */
 const ORIGIN = [0, 0, 0], DEFAULT_BG = [0.028, 0.038, 0.058];
 const AXIS_NORMALS = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+/* 037 H4 · THE CLIP'S FRAME: under `mat.slice.frame === 'camera'` the plane's normal is read in the eye's frame — n.x·right + n.y·up + n.z·toward
+   the eye — from the basis writeView has just written (VIEW 4–6 right, 8–10 up, 12–14 fwd = −toward), so the slice rides with the camera;
+   absent (OBJECT, every file before 037) the normal is the object's own and no byte moves */
+const eyeTurn = (n, V) => [0, 1, 2].map((i) => n[0] * V[4 + i] + n[1] * V[8 + i] - n[2] * V[12 + i]);
 export function perspective(fovy, aspect, near, far, out) {
   const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far), o = out || new Float32Array(16);
   o.fill(0); o[0] = f / aspect; o[5] = f; o[10] = far * nf; o[11] = -1; o[14] = far * near * nf;
@@ -1799,7 +1803,7 @@ export async function createField(canvas, opts = {}) {
     const bgc = mat.bg || DEFAULT_BG;
     v[36] = bgc[0]; v[37] = bgc[1]; v[38] = bgc[2]; v[39] = mat.gamma === undefined ? 1 : mat.gamma;
     v.copyWithin(40,36,40);
-    const sn = mat.slice?.normal || AXIS_NORMALS[mat.slice?.axis ?? 2] || AXIS_NORMALS[2];
+    const sn0 = mat.slice?.normal || AXIS_NORMALS[mat.slice?.axis ?? 2] || AXIS_NORMALS[2], sn = mat.slice?.frame === 'camera' ? eyeTurn(sn0, v) : sn0;   // 037 H4
     const snLen = Math.hypot(sn[0], sn[1], sn[2]) || 1;
     v[36]=sn[0]/snLen; v[37]=sn[1]/snLen; v[38]=sn[2]/snLen;
     v[39]=mat.finish==='glass'?1:mat.finish==='matte'?2:0;
@@ -1829,7 +1833,7 @@ export async function createField(canvas, opts = {}) {
   /* Chrome changes with the camera, domain, theme and its own controls, but the field can evolve for hundreds
      of frames without any of those changing. Keep the last geometry in the GPU instead of regenerating and
      uploading as much as a megabyte on every presentation. The fixed signature keeps this check allocation-free. */
-  const LINE_STATE = new Array(32).fill(NaN);
+  const LINE_STATE = new Array(33).fill(NaN);
   let lineStateReady = false, cachedHasSlice = false;
   function setLineState(index, value) {
     const changed = !Object.is(LINE_STATE[index], value);
@@ -1845,7 +1849,8 @@ export async function createField(canvas, opts = {}) {
     const normal = slice && slice.normal;
     /* the CAMERA is read only by the lattice/dots (the cut plane and the fade) and the corner axis (its screen basis);
        the box, the axes and the slice are world geometry, so without those the camera is not part of the key (K6) */
-    const cam = (mat.frame !== false && frameMode !== 0) || (mat.axis !== false && axisMode === 1);
+    const eye = !!(slice && slice.mode && slice.frame === 'camera');   // 037 H4: a CLIP that rides with the eye reads the camera too
+    const cam = (mat.frame !== false && frameMode !== 0) || (mat.axis !== false && axisMode === 1) || eye;
     changed = setLineState(i++, half) || changed;
     for (let j = 0; j < 12; j++) changed = setLineState(i++, cam ? VIEW[j] : 0) || changed;
     changed = setLineState(i++, canvas.width) || changed;
@@ -1867,6 +1872,7 @@ export async function createField(canvas, opts = {}) {
     changed = setLineState(i++, normal ? normal[0] : undefined) || changed;
     changed = setLineState(i++, normal ? normal[1] : undefined) || changed;
     changed = setLineState(i++, normal ? normal[2] : undefined) || changed;
+    changed = setLineState(i++, eye ? 1 : 0) || changed;
     const same = lineStateReady && !changed;
     lineStateReady = true;
     return same;
@@ -1887,7 +1893,7 @@ export async function createField(canvas, opts = {}) {
     let n = 15;
     if (mat.slice && mat.slice.mode) {
       const ax = mat.slice.axis | 0, s = mat.slice.pos * h, c = [1, 0.85, 0.4, 0.55];
-      const normal = mat.slice.normal || AXIS_NORMALS[ax] || AXIS_NORMALS[2];
+      const normal0 = mat.slice.normal || AXIS_NORMALS[ax] || AXIS_NORMALS[2], normal = mat.slice.frame === 'camera' ? eyeTurn(normal0, VIEW) : normal0;   // 037 H4
       const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
       const raw=cross(normal,Math.abs(normal[2])<.9?[0,0,1]:[0,1,0]),len=Math.hypot(...raw)||1;
       const uvec=raw.map(v=>v/len),vvec=cross(normal,uvec);

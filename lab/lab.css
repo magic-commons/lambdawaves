@@ -907,3 +907,8 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .dev[data-id="render"] .sr-fold[hidden], .dev[data-id="render"] .sr-early[hidden] { display: none; }
 /* 017 R4 (call 14) · a WIDE readout in a rack window is CLAMPED to its two lines (modhost.css gives it `overflow: auto`, a tiny scroller) */
 [data-mir-rack] > .dev .ro.wide .ro-val { overflow: hidden; }
+/* 037 H4 · CLIP's frame (CAMERA | OBJECT, material.js sliceFrameSeg) beside the plane's picture, its two cells stacked */
+.clip-plane { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2); align-items: center; min-width: 0; }
+.clip-plane > .segw { margin: 0; }
+.clip-plane > .segw .seg { display: flex; flex-direction: column; }
+.clip-plane > .segw .seg-b { width: 100%; padding: 0 8px; }

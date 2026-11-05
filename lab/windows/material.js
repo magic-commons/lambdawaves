@@ -1,10 +1,10 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
+import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
-  const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
+  const { ui, device, mat, obs, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
   let paintBar = () => {};   // the ESP bar's colours (018 B5), set where the bar is built
   const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
@@ -196,7 +196,21 @@ export function createMaterial(app) {
     ui.sliceAxisSeg = seg({ aria: 'slice axis', value: 'z', options: [{ id: 'x', label: 'X' }, { id: 'y', label: 'Y' }, { id: 'z', label: 'Z' }], onChange: (v) => { mat.slice.axis = { x: 0, y: 1, z: 2 }[v]; delete mat.slice.normal; schedule(TIER.PRESENT); } });
     r3.appendChild(ui.sliceAxisSeg.root);
     const sliceNormals = [[1,0,0],[0,1,0],[0,0,1]];
-    const mini = planeModel(gs, { getNormal:()=>mat.slice.normal || sliceNormals[mat.slice.axis|0] || sliceNormals[2], getPosition:()=>mat.slice.pos, onTurn:n=>{mat.slice.normal=n; schedule(TIER.PRESENT);} });
+    /* 037 H4 · THE CLIP'S FRAME (Josh: "'Lock' or 'Unlock' the clip to be separate from the camera"): CAMERA — the plane rides with the eye (its
+       normal read in the eye's right · up · toward, field.js eyeTurn) — or OBJECT — fixed to the object, as before.  `mat.slice.frame` is
+       'camera' or absent, written only by a hand, so NEW, a link and every older file open as OBJECT.  A press keeps the plane where it
+       stands now (the normal re-read in the other frame through the same basis the field reads), so only what follows the press differs */
+    const sliceN = () => mat.slice.normal || sliceNormals[mat.slice.axis | 0] || sliceNormals[2];
+    ui.sliceFrameSeg = seg({ aria: 'clip frame', cls: 'clip-frame', value: 'object', options: [
+      { id: 'camera', label: 'CAMERA', title: 'CAMERA · the plane rides with the eye' },
+      { id: 'object', label: 'OBJECT', title: 'OBJECT · the plane stays with the object' }],
+      onChange: (v) => { const was = mat.slice.frame === 'camera'; if ((v === 'camera') === was) return;
+        const B = cameraBasis(obs), n = sliceN(), E = [B.right, B.up, B.dir];
+        mat.slice.normal = was ? [0, 1, 2].map((i) => n[0] * E[0][i] + n[1] * E[1][i] + n[2] * E[2][i]) : E.map((a) => a[0] * n[0] + a[1] * n[1] + a[2] * n[2]);
+        if (v === 'camera') mat.slice.frame = 'camera'; else delete mat.slice.frame; schedule(TIER.PRESENT); } });
+    const planeRow = el('div', 'clip-plane', gs);   // 037 H4: the plane's picture and its frame side by side (a fifth cell in r3 wrapped THICK to a second line)
+    const mini = planeModel(planeRow, { getNormal:()=>mat.slice.normal || sliceNormals[mat.slice.axis|0] || sliceNormals[2], getPosition:()=>mat.slice.pos, onTurn:n=>{mat.slice.normal=n; schedule(TIER.PRESENT);} });
+    planeRow.appendChild(ui.sliceFrameSeg.root);
     ui.sliceMini = mini;
     ui.sliceAxisSeg.root.hidden = true;
     /* WAVE 106 · THESE TWO KEEP THEIR HANDLES NOW, and that is what makes them modulatable.  Both
