@@ -966,6 +966,16 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .native-clean[data-id="settings"] .lw-gamut { align-items: end; }
 .native-clean[data-id="settings"] .lw-gamut > .sw { grid-column: span 2; }
 .native-clean[data-id="settings"] .lw-gamut > .segw { grid-column: span 3; width: auto; }
+/* 037 T1 · STAGE (lab/stage-window.js): FRAME the whole line; AXES · AXIS COLOUR halves; the colour a swatch bar beside FOLLOW THEME; STAGE · GAMMA */
+.lw-stage-card .row { margin: 0 0 8px; }
+.lw-stage-card .stage-frame > .segw { flex: 1 1 100%; }
+.lw-stage-card .stage-axes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; }
+.lw-stage-card .stage-axes > .segw > .seg { display: flex; flex-wrap: nowrap; width: 100%; box-sizing: border-box; }
+.lw-stage-card .stage-axes .seg-b { flex: 1 1 auto; min-width: 0; padding: 0 2px; letter-spacing: .04em; }   /* the camera seg's road (skin.css .camera-control) */
+.lw-stage-card .stage-seat { flex: 1 1 100%; flex-direction: row; align-items: center; align-self: center; gap: 8px; }
+.lw-stage-card .stage-colour { flex: 1 1 auto; width: auto; height: 22px; }
+.lw-stage-card .stage-knobs { margin-bottom: 2px; }
+.native-clean[data-id="settings"] .lw-edit-stage > .trig { flex: 1 1 100%; }
 /* CAMERA: AUTO-ROTATE needs two cells */
 .native-clean[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
 /* SPECTRUM: HYDROGEN's two rows keep ONE column rhythm (017 R4) — three columns for both, filled or not */
