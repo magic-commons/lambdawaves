@@ -72,7 +72,7 @@ export function createTimeline(host, port) {
   win.root.classList.add('mir-timeline');
   const minus = win.rail.chip('removeLane'); if (minus) { const ink = minus.querySelector('.mir-chip-text'); if (ink) ink.outerHTML = glyphSvg('minus', 'mir-chip-ink gly gly-minus', 26); }   // an action is inked once
 
-  editor = buildTimelineEditor({ body: win.body, root: win.root, rail: win.rail, isOpen: win.isOpen, open: win.open }, { model, mod, controller, present, say, audio: port.audio || null,
+  editor = buildTimelineEditor({ body: win.body, root: win.root, rail: win.rail, isOpen: win.isOpen, open: win.open }, { model, mod, controller, present, say, audio: port.audio || null, moreRows: port.moreRows || null,
     keys: () => (tl && tl.keys) || port.keys || null });   // the table's chords beside ⋯'s rows (bind.js sets tl.keys: the app's, or the timeline's own)
   editor.setWorkLane(workLane);
   /* FIT (T5): the whole arrangement across (ZOOM ALL: the clips' extent) and the height that shows every lane, no taller than

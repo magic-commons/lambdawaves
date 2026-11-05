@@ -370,6 +370,7 @@
 .tl-pop { position: fixed; z-index: calc(var(--z-veil) + 20); padding: var(--tl-pop-pad); min-width: var(--tl-pop-min); display: flex; flex-direction: column; gap: var(--tl-pop-gap);
   max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); overflow: auto; color: var(--fg); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
 .tl-pop-title { font-size: var(--tl-pop-title-size); padding: 4px; letter-spacing: var(--tl-pop-title-track); }
+.tl-pop-sep { height: 0; margin: 3px 4px; border-top: 1px solid var(--glass-hairline); }   /* 1.5.7-alpha.4: before the app's rows (moreRows) */
 .tl-pop .trig { min-height: var(--tl-pop-trig-h); font-size: var(--tl-pop-trig-size); }
 /* a folded tool's row in ⋯'s list: its icon (when it has one), then its word */
 .tl-pop .trig.tl-row { display: flex; align-items: center; gap: var(--tl-pop-row-gap); }

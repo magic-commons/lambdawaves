@@ -160,6 +160,47 @@ try {
     }
     await look({ scale: 1 });
   }
+  if (scene === 'k4') {
+    out.demo = await g.ev(`window.confirm = () => true; const ok = await __LW.projects.demo('star-loop'); await new Promise((r) => setTimeout(r, 1500)); await __LW.settle();
+      __LW.timeline.open(); await new Promise((r) => setTimeout(r, 1200)); const st = __LW.timeline.model.state(); return { ok, open: __LW.timeline.isOpen(), clips: st.clips.length, curves: st.curves.length };`);
+    const more = async () => { const r = await rectOf('[data-mir-window="timeline"] [data-mode="more"]'); await click((r[0] + r[2]) / 2, (r[1] + r[3]) / 2); await wait(300); };
+    const row = (id) => rectOf(`.tl-pop[data-pop="more"] [data-row="${id}"]`);
+    const head = () => g.ev(`const v = __LW.timeline.editor.view.viewport, ph = document.querySelector('[data-mir-window="timeline"] .tl-playhead'); const r = ph.getBoundingClientRect(), vr = v.getBoundingClientRect(); return { x: Math.round(r.left - vr.left), scroll: Math.round(v.scrollLeft), beat: +__LW.timeline.controller.state().beat.toFixed(2) };`);
+    /* the menu's rows; FOLLOW chosen; play: the head stays, the lanes move */
+    out.zoomed = await g.ev(`const e = __LW.timeline.editor, z = (e.act && e.act.zoomStep) ? (n) => e.act.zoomStep(n) : e.zoomStep ? (n) => e.zoomStep(n) : null; if (z) for (let i = 0; i < 4; i++) z(1); await new Promise((r) => setTimeout(r, 300)); const v = e.view.viewport; return { px: e.px(), scrollW: v.scrollWidth, w: v.clientWidth, how: !!z };`);
+    await more(); out.menuRows = await g.ev(`return [...document.querySelectorAll('.tl-pop[data-pop="more"] > *')].map((n) => n.classList.contains('tl-pop-sep') ? '—' : (n.dataset.row || n.className)).join(' · ');`);
+    out.shotMenu = await shot('036-K4-more-menu', await rectOf('.tl-pop[data-pop="more"]'), 12);
+    await drv.actions(g.s, [{ type: 'key', id: 'kk' + (++pid), actions: [{ type: 'keyDown', value: '\uE00C' }, { type: 'keyUp', value: '\uE00C' }] }]); await wait(200);
+    await g.ev(`__LW.timeline.controller.seek ? __LW.timeline.controller.seek(4) : 0; __LW.play(); await new Promise((r) => setTimeout(r, 400)); return 1;`);
+    await more(); const f = await row('follow-playhead'); await click((f[0] + f[2]) / 2, (f[1] + f[3]) / 2); await wait(300);
+    const a = await head(); await wait(2500); const b = await head();
+    out.follow = { at: a, later: b, headStill: Math.abs(a.x - b.x) <= 1, lanesMoved: b.scroll !== a.scroll, on: await g.ev(`return 1;`) };
+    /* a press on a button (the work bar's rewind? the ⋯ itself) keeps it; a press on the lanes ends it */
+    await more(); out.chosenInMenu = await g.ev(`const b = document.querySelector('.tl-pop[data-pop="more"] [data-row="follow-playhead"]'); return b && b.getAttribute('aria-pressed');`);
+    await drv.actions(g.s, [{ type: 'key', id: 'kk' + (++pid), actions: [{ type: 'keyDown', value: '\uE00C' }, { type: 'keyUp', value: '\uE00C' }] }]); await wait(200);
+    { const r = await rectOf('[data-mir-window="timeline"] .tl-action[data-tool], [data-mir-window="timeline"] .tl-toolbar button'); out.buttonPressed = r; await click((r[0] + r[2]) / 2, (r[1] + r[3]) / 2); await wait(200); }
+    const c1 = await head(); await wait(1200); const c2 = await head();
+    out.afterButton = { stillFollowing: Math.abs(c1.x - c2.x) <= 1 && c2.scroll !== c1.scroll };
+    const lanes = await rectOf('[data-mir-window="timeline"] .tl-viewport');
+    await click(lanes[0] + 40, lanes[3] - 12); await wait(300);
+    const d1 = await head(); await wait(1200); const d2 = await head();
+    out.afterLanes = { ended: d2.scroll === d1.scroll, headMoves: d2.x !== d1.x };
+    await g.ev(`__LW.pause(); return 1;`);
+    /* AUTO-COLOR: the curves from the active palette (PALETTE on), then HSV (PALETTE off); one undo row each */
+    const colours = () => g.ev(`const st = __LW.timeline.model.state(); return st.curves.filter((c) => c.kind !== 'audio').map((c) => c.color);`);
+    const c0 = await colours();
+    await more(); const ac = await row('auto-color'); await click((ac[0] + ac[2]) / 2, (ac[1] + ac[3]) / 2); await wait(400);
+    const cP = await colours();
+    out.autoPalette = { on: await g.ev(`return !!(__LW.state ? 0 : 0) || !!document.querySelector('.dev[data-id="palette"] .dev-power[aria-pressed="true"]');`), before: c0.slice(0, 6), after: cP.slice(0, 6), changed: cP.filter((x, i) => x !== c0[i]).length, distinct: new Set(cP).size, n: cP.length };
+    out.shotPalette = await shot('036-K4-auto-color-palette', await rectOf('[data-mir-window="timeline"]'), 4);
+    await g.ev(`__LW.run('palette'); await new Promise((r) => setTimeout(r, 300)); return 1;`);
+    await more(); const ac2 = await row('auto-color'); await click((ac2[0] + ac2[2]) / 2, (ac2[1] + ac2[3]) / 2); await wait(400);
+    const cH = await colours();
+    out.autoHsv = { after: cH.slice(0, 6), distinct: new Set(cH).size, n: cH.length };
+    out.shotHsv = await shot('036-K4-auto-color-hsv', await rectOf('[data-mir-window="timeline"]'), 4);
+    out.undo = await g.ev(`__LW.timeline.model.undo ? __LW.timeline.model.undo() : 0; const st = __LW.timeline.model.state(); return st.curves.filter((c) => c.kind !== 'audio').map((c) => c.color).slice(0, 6);`);
+    out.undoIsPalette = JSON.stringify(out.undo) === JSON.stringify(cP.slice(0, 6));
+  }
 } catch (e) { out.error = String(e && e.stack || e); }
 console.log(JSON.stringify(out, null, 1));
 await g.close();

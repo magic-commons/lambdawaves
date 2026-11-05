@@ -2,7 +2,7 @@
  * KEYBOARD window and THE TIMELINE (the kit's; THE FOCUS LAW's scoped rows), toggleUI and THE TAB ORDER.  createKeys(app) runs at its seat; keyState
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../tier.js'; import { setGlyph } from '../mir/glyph.js';
-import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
+import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js'; import { timelineRows } from '../timeline-follow.js';
 import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout, el, hint, label } from '../mir/kit.js'; import { formatSeconds } from '../mir/timeline/time-format.js';
 export function createKeys(app) {
   const { dom, ui, clock, appPlay, mat, settingsStore } = app, { schedule } = app.loop, { floats, rack, rackL } = app.host;
@@ -75,7 +75,8 @@ export function createKeys(app) {
        so it rides the bar's own `app:` seat, as the t readout does): the RENDER card in front on SELECTION when one is marked, else ACTIVE */
     const tlRender = el('button', 'tbtn tl-render'); tlRender.type = 'button'; tlRender.dataset.keyAction = 'render.timeline';
     setGlyph(tlRender, 'film', { label: 'render this range' }); hint(tlRender, 'render this range'); tlRender.addEventListener('click', () => app.sh.ACTIONS.run('render.timeline'));
-    app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
+    const tlRows = timelineRows(app);   // 036 K4: FOLLOW PLAYHEAD and AUTO-COLOR at the foot of the timeline's ⋯ (lab/timeline-follow.js)
+    app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'), moreRows: () => tlRows.rows(),
       mod: { host: app.state.modHost, registry: app.state.modHost.registry, get view() { return app.state.modView; },   // 032 T20: view.api.armFor → the clip menu's ROUTE NEW PARAMETER…
         armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
         isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => layout.modulation && layout.modulation.toggle(), persist: () => ui.saveNative && ui.saveNative(),   // A5: the work bar's door and tempo
@@ -89,6 +90,7 @@ export function createKeys(app) {
       /* iteration 004 · MIR OPTIONS › SAMPLING › SCRUB is how a ruler drag seeks (BASINS shell.js: the kit's controller reads it at each
          scrub's start): LIVE every move, LIGHT one in three, RELEASE when the hand lets go */
       scrubLevel: () => { const g = mirGui(); return g ? g.sampling().scrub : 'live'; } });
+    tlRows.bind(app.state.tl);
     { const d = app.state.tl.root.querySelector('.tl-transport .mod-exp'); if (d) setGlyph(d, 'modulation'); }   // 021 V2: the work bar's door wears the modulation window's own icon (A9)
     /* 032 T8 · MOD ON THE TIMELINE'S POWER (Josh: "MOD word on the timeline's toggle; the power icon stays on the modulation window"): the work bar's
        power seat wears the kit's word face — modPower({ word }), as the CSB's — dressed here as the door is (the timeline's transport takes no powerWord) */
