@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, readout, group, label } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
+import { el, knob, sw, seg, trig, readout, group, label } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { summon } from '../summon.js';import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, perf, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
@@ -19,21 +19,17 @@ export function createSettingsCard(app) {
       au.title = 'GEMMA: where ASK sends your words'; au.addEventListener('change', saveSettings); ui.askUrl = { root: au };   // 0.6.6 G2: a PREFERENCE (`askUrl`)
     }
     createInformational(app);   // 0.5.3 M9: STAGE FORMULA and ATOM LABELS, each with its SIZE, left DISPLAY for their own window (lab/informational.js)
-    const rc = el('div', 'row tight', gi);
+    /* 037 T1: FRAME · AXIS · AXIS COLOUR are made here as before (their keys FIELD_CHROME, their roads unchanged) and seated in STAGE (lab/stage-window.js) */
     ui.frameSw = sw({ label: 'FRAME', value: true, title: 'Show the field boundary', onChange: () => { const modes=['box','lattice','dots','off']; const current=mat.frame===false?'off':mat.frameMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.frame=next!=='off'; mat.frameMode=next==='off'?'box':next; ui.frameSw.set(mat.frame); ui.frameSw.root.title='FRAME · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
-    rc.appendChild(ui.frameSw.root);
     ui.axisSw = sw({ label: 'AXIS', value: true, title: 'Show or hide the x, y, and z axes', onChange: () => { const modes=['box','corner','off']; const current=mat.axis===false?'off':mat.axisMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.axis=next!=='off'; mat.axisMode=next==='off'?'box':next; ui.axisSw.set(mat.axis); ui.axisSw.root.title='AXIS · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
-    rc.appendChild(ui.axisSw.root);
     ui.axisInkSeg = seg({ label: 'AXIS COLOUR', value: 'theme', options: [
       { id: 'theme', label: 'THEME', title: 'Choose axis colours from the current theme' },
       { id: 'cmy', label: 'CMY', title: 'Use cyan, magenta, and yellow axes' },
       { id: 'rgb', label: 'RGB', title: 'Use red, green, and blue axes' }],
       onChange: (v) => { mat.axisInk = v; saveSettings(); schedule(TIER.PRESENT); } });
-    rc.appendChild(ui.axisInkSeg.root);
     /* iteration 012 M1 (Josh 10-20: "In settings window, 'WARNING' should be in the 'ABOUT' menu dropdown"): SHOW THE WARNING AGAIN is ABOUT › PHOTOSENSITIVITY WARNING… (notebook.js MENUS) */
     el('div', 'note', gi).innerHTML = '<b>Settings.</b> Appearance and performance choices are stored in this browser. Window power stops its reader; collapse changes layout; close removes the window until reopened from + or WINDOW.';
     const gt = group(ui.set.body, 'THEME  ·  SURFACE');
-    const rt = el('div', 'row tight', gt);
     const THEMES = { dark: { bg: [0.028, 0.038, 0.058], invert: false }, light: { bg: [0.93, 0.95, 0.975], invert: true } };
     /* THE THEME'S ENGINE SIDE (0.5.0 C2): the kit's theme row writes body[data-theme] (SYSTEM follows the OS by itself) and its
        `run` calls this once per resolved change.  WAVE 56: the browser's own chrome follows the theme — <meta name="theme-color">
@@ -76,7 +72,7 @@ export function createSettingsCard(app) {
     app.hooks.setStageFollow = setStageFollow;
     ui.stageK = knob({ label: 'STAGE', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
     app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); if (x === app.state.stageMix) return x; ui.stageK.set(x); setStageMix(x); return x; };   // 029 M1: the value in force writes nothing
-    { const seat = el('div', 'stage-seat', rt); ui.stageSeat = { root: seat };
+    { const seat = el('div', 'stage-seat'); ui.stageSeat = { root: seat };   // 037 T1: the seat, STAGE and GAMMA are seated in STAGE (lab/stage-window.js)
       ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
       /* iteration 016 P7 (Josh: "if a user chooses a background color, let that automatically" turn it on): a pick leaves FOLLOW THEME and, when the
          STAGE knob sits at its near-theme rest (≤ 5 %, the first run's 4 %), takes it to 100 %, so the colour chosen IS the ground; a knob the hand set
@@ -84,8 +80,11 @@ export function createSettingsCard(app) {
       ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); if (app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });
       ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.title = 'Ignore the chosen stage colour';
       ui.stageFollow.addEventListener('click', () => setStageFollow(!app.state.stageFollow));
-      rt.appendChild(ui.stageK.root); setStageColour(mat.stageCustom); setStageFollow(true); }
-    ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } }); rt.appendChild(ui.gammaK.root);
+      setStageColour(mat.stageCustom); setStageFollow(true); }
+    ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } });
+    /* 037 T1 · THE STAGE WINDOW: the rows above leave DISPLAY for `stage` (the controls move, the roads do not); DISPLAY keeps EDIT STAGE (native-ui.js seats it) */
+    createStageWindow(app);
+    ui.editStage = trig({ label: 'EDIT STAGE', glyph: 'stage', title: 'Open STAGE below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'stage') });   // 037 T2 · THE SUMMONS (lab/summon.js)
     const gamutSup = field.ok && field.gamutSupport ? field.gamutSupport : { canvas: false, css: false, display: false, reason: 'no WebGPU device: the canvas has no colour space to set' };
     const gamutOK = !!(gamutSup.canvas && gamutSup.css);
     const rg = el('div', 'row tight', gt);

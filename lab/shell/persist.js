@@ -8,6 +8,7 @@ import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, quatFromYawPitch, waveView, drawS
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
 import { infoOfProject, loadInfo } from './stage-words.js';   // 036 S4: INFORMATIONAL's rows are the project's
+import { stageOfProject, loadStage } from '../stage-window.js';   // 037 T4: STAGE's PULSE is the project's
 import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS, N6, narrow, widen } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 /** 028 R-04 · A FILE'S NUMBER IS TAKEN ONLY WHEN IT IS ONE: `v` (a file's obs, mat, quality or domain) with every number `cur` holds
@@ -47,6 +48,7 @@ export function createPersist(app) {
       'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'], 'transport.rate': [data.experiment, 'rate'],
       'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'], 'state.defect.l2': [pr.rotationRates, 'def'], 'state.rabi': [pr.ab, 'omega'],
       ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((n) => ['shell.rate.n' + n, [shellSeat(pr.rates, n), 'v']])),
+      'stage.pulse': [pr.stage, 'pulse'], 'stage.rate': [pr.stage, 'rate'],   // 037 T4: absent at the homes (no seat, so nothing is written)
       'chem.kick': [I.chem, 'kappa'], 'chem.speed': [I.chem, 'speed'], 'chem.orbital': [I.chem && Number.isFinite(I.chem.orbital) ? I.chem : null, 'orbital'],   // iteration 007 O: an orbital not yet chosen (null, HOMO by default) is never seated
       'reg.morph': [st, 'morph'], [OMORPH]: [I.orbitals, 'morph'], 'reg.e0': [st && st.drive, 'e0'], 'reg.w': [st && st.drive, 'omega'],
       ...Object.fromEntries(((st && st.lanes) || []).slice(0, 8).flatMap((L, i) => [['reg.amp' + (i + 1), [L, 'amp', Math.sqrt, (a) => a * a]], ['reg.ph' + (i + 1), [L, 'phase', (v) => ((v % T) + T) % T]]])) };
@@ -56,7 +58,7 @@ export function createPersist(app) {
   app.state.restoreNotice = '';   // D9: what the last restore could not bring back (a retired legacy window), in one line; '' when nothing
   function serialize(opt) {
     const edit = !!(opt && opt.scope === 'edit');
-    const m = JSON.parse(JSON.stringify(mat)); for (const k of ['bg', 'lightUI', 'stageCustom', ...FIELD_CHROME]) delete m[k];   // the stage colour travels under presentation.ui.stage; GAMMA remains an artist-owned material value; the chrome is the reader's (S1)
+    const m = JSON.parse(JSON.stringify(mat)); for (const k of ['bg', 'lightUI', 'stageCustom', 'stage', ...FIELD_CHROME]) delete m[k];   // 037 T4: STAGE's FX ride as presentation.stage   // the stage colour travels under presentation.ui.stage; GAMMA remains an artist-owned material value; the chrome is the reader's (S1)
     const H = getHamiltonian();
     /* WAVE 56 · THE TWO KEYS A LINK NEEDED.  `damping` (DRAG γ) lived only in the undo ring's own record and
        `paletteId` only in this browser's settings, so a state serialised for a LINK arrived at the reader with
@@ -92,6 +94,7 @@ export function createPersist(app) {
     const T = !edit && app.state.tl ? app.state.tl.model.serialize() : null;
     if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
     { const E = app.state.eq.serialize(); if (E) S.presentation.eq = E; }   // 0.6.0 B2: the BEAT EQUALIZER, PROJECT and default-absent (FLAT writes nothing)
+    { const St = stageOfProject(mat); if (St) S.presentation.stage = St; }   // 037 T4: STAGE's PULSE, PROJECT and default-absent (NEW and the demos keep their bytes); the history keeps it
     /* 036 S1 · THE GRAPH IS THE PROJECT'S (Josh: "Make sure that nodes get saved"): NODES' graph and its CURVES grade, default-absent (the empty
        graph writes nothing, so NEW and the demos keep their bytes); its `nodes.*` routes, lanes and bases ride with the rack (021's refusal is lifted) */
     if (!edit) { const G = app.sh.LW && app.sh.LW.nodes ? app.sh.LW.nodes.graph() : null; if (G) S.presentation.nodes = G; }
@@ -284,6 +287,7 @@ export function createPersist(app) {
             if (app.hooks.setStageColour) app.hooks.setStageColour(custom);
             if (app.hooks.setStageFollow) app.hooks.setStageFollow(typeof U.stage.follow === 'boolean' ? U.stage.follow : !custom);
           } }
+        loadStage(mat, pr.stage);                                     // 037 T4: STAGE's PULSE — every open, link and undo; absent (NEW, a demo, any file before 037) is the homes
         if (pr.camera) camera.setAutoRotate(!!pr.camera.autoRotate);
         if (pr.overlays) { const O = pr.overlays;
           if (O.vortex) { vortex.setOn(!!O.vortex.on); vortex.setOverlay(!!O.vortex.overlay); }

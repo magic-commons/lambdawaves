@@ -218,7 +218,7 @@ export async function createController(app) {
      and the picture is frozen with no explanation.  That is the most likely failure on a phone and it is the
      one this app was silent about.  0.5.0 C9 · R14: this is λWAVES' GPU RECOVERY, `gpuRecovery` (gate: tests/gpu-recovery).
      0.5.0 C6b: the banner is the kit's (main.js installBanner, dom.banner: its pane, its ×, its ink on both themes). */
-  const field = await createField(dom.canvas, { resolution: quality.res,
+  const field = await createField(dom.canvas, { resolution: quality.res, clock,   // 037 T4: PULSE breathes on the clock's t (read only)
     onError: (m) => dom.banner.fail('GPU error', m),
     onLost: function gpuRecovery(i) { dom.banner.fail('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); } });
   if (field.ok) look.setGamut((rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')'));   // wave 54: one map, both sides

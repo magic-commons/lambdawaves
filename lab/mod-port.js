@@ -134,7 +134,7 @@ export function createModPort({ available, present, view, onCapture, save, say }
     install(defs, roots) {
       host = createModHost({ available, present, presentationActive: false, roots });   // a closed editor has no preview demand
       G = routeGuard({ driven: routed, now: () => host.clock.stats().seconds, say, read: host.registry.read, onAdvance: host.clock.onAdvance });   // the modulation's own seconds: wall live, the exact step in a film
-      defs = defs.map((d) => (d.id in FLASH_STEP ? G.wrap(d, FLASH_STEP[d.id]) : d));
+      defs = defs.map((d) => (d.id in FLASH_STEP ? G.wrap(d, FLASH_STEP[d.id]) : d.flash > 0 ? G.wrap(d, d.flash) : d));   // 037 T4: an install def may declare its own step, as a runtime target does
       adapters = defs; idOf = null;
       host.install(defs.map(({ knob: _k, ...d }) => d));
       for (const d of defs) { if (d.knob) knobs[d.id] = d.knob; gets[d.id] = d.get; }

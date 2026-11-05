@@ -228,12 +228,18 @@ export function createModSeam(app) {
         hint: 'Set the A–B transition rate',
         get: () => app.hooks.ab.omega,
         set: (v) => { app.hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
+      /* 037 T4 · PULSE (lab/stage-window.js), the `stage` root: the wash's AMOUNT — a luminance route, so it declares its own `flash` step (a light
+         stage's × 0.7 moves the picture 10 % at about a third of the range) — and its RATE */
+      { id: 'stage.pulse', label: 'PULSE', map: 'linear', min: 0, max: 1, def: 0, group: 'stage', flash: 0.3, knob: () => ui.pulseK, hint: 'STAGE › PULSE: how strongly the stage washes',
+        get: () => (mat.stage ? mat.stage.pulse : 0), set: (v) => { ui.setPulse({ pulse: v }); setKnob(ui.pulseK, v); } },
+      { id: 'stage.rate', label: 'PULSE RATE', unit: ' Hz', map: 'linear', min: 0, max: 2, def: 0, group: 'stage', knob: () => ui.pulseRateK, hint: 'STAGE › PULSE: breaths a second while playing',
+        get: () => (mat.stage ? mat.stage.rate : 0), set: (v) => { ui.setPulse({ rate: v }); setKnob(ui.pulseRateK, v); } },
     ];
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
        CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
        sphere arcs, so they are drop targets now, like every observer.* dial. */
-    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes', 'action', 'palette']);
+    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes', 'action', 'palette', 'stage']);   // 037 T4: `stage` (PULSE)
     /* 032 W3: each event target's control says its target (`data-event`) and each of its buttons its value (`data-v`) — CREATE EVENT and COPY VALUE
        (lab/actions.js, the control menu) read them; SETTINGS' FRAME · AXIS and INFORMATIONAL's switches name their `action.<id>` toggles */
     for (const d of defs) for (const c of [d.seg && d.seg(), d.also && d.also()]) { const r = c && (c.root || c); if (!r || !r.dataset) continue; r.dataset.event = d.id;

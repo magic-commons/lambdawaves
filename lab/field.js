@@ -886,12 +886,29 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   if (V.p6.w < 1.5) { c = atomLit(c, n, rd); }                       // MATTE: the map's colour unlit
   return mix(back, c, clamp(0.8 * V.p0.y, 0.05, 1.0));
 }
+/* 037 T4 · PULSE (lab/stage-window.js), the first STAGE FX: a radial wash of the stage — × 2.2 + 0.035 on a dark stage, × 0.7 on a light one (by
+   the stage colour's own luminance) — weighted from the centre outward (CENTRE, p17.x 0) or from the edge inward (EDGE, 1); r is 0 at the centre and 1
+   in the corners, the frame's aspect kept; the reach k stands at 1 while RATE (p17.y) is 0, else breathes 0 → 1 → 0 on writeView's phase (p17.z).
+   AMOUNT (p16.w) 0 returns bg itself: the old arithmetic, THE LOCK's bits */
+fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
+  let a = V.p16.w;
+  if (a <= 0.0) { return bg; }
+  let s = vec2<f32>(V.right.w / max(V.up.w, 1e-6), 1.0);
+  let r = length(uv * s) / length(s);
+  let k = select(1.0, 0.5 - 0.5 * cos(6.2831853 * V.p17.z), V.p17.y > 0.0);
+  let w = select(1.0 - smoothstep(k - 1.0, k, r), smoothstep(1.0 - k, 2.0 - k, r), V.p17.x > 0.5);
+  let lit = select(bg * 2.2 + vec3<f32>(0.035), bg * 0.7, dot(V.p5.xyz, vec3<f32>(0.2126, 0.7152, 0.0722)) > 0.5);   // a dark ground glows (× 1.6 alone moved 0.03 by two codes)
+  return mix(bg, lit, clamp(a * w, 0.0, 1.0));
+}
 @fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
   let pxA = abs(dpdy(in.uv.y)) * V.up.w;                          // DUST: one pixel's angle (uniform control flow: before any branch)
   let half = V.cam.w;
   let ro = V.cam.xyz;
   let rd = normalize(V.fwd.xyz + in.uv.x * V.right.w * V.right.xyz + in.uv.y * V.up.w * V.up.xyz);
-  let bg = mix(V.p5.xyz * 0.82, V.p5.xyz * 1.25, in.uv.y * 0.5 + 0.5);     // the theme's stage, with the old subtle vertical gradient
+  let bg = stageWash(mix(V.p5.xyz * 0.82, V.p5.xyz * 1.25, in.uv.y * 0.5 + 0.5), in.uv);     // the theme's stage, with the old subtle vertical gradient; 037 T4: PULSE's wash
+  /* 037 T3 · GAMMA EVERYWHERE (Josh: "gamma seems to only work for inside the box"): a ray that misses the box or the cut, and every NaN
+     fallback, takes the output gamma a ray through the field takes — selected out at GAMMA 1, so that picture (THE LOCK's) keeps its bits */
+  let bgOut = select(pow(max(bg, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05))), bg, V.p5.w == 1.0);
   // box
   let inv = vec3<f32>(select(1.0 / rd.x, 1e30, abs(rd.x) < 1e-9), select(1.0 / rd.y, 1e30, abs(rd.y) < 1e-9), select(1.0 / rd.z, 1e30, abs(rd.z) < 1e-9));
   let t1 = (vec3<f32>(-half) - ro) * inv; let t2 = (vec3<f32>(half) - ro) * inv;
@@ -907,7 +924,7 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
     if (smode == 1u) { iv = slabInterval(rok, rdk, -1e30, spos); } else { iv = slabInterval(rok, rdk, spos - thick, spos + thick); }
     t0 = max(t0, iv.x); tf = min(tf, iv.y);
   }
-  if (tf <= t0) { return vec4<f32>(bg, 1.0); }
+  if (tf <= t0) { return vec4<f32>(bgOut, 1.0); }
   let steps = max(V.fwd.w, 8.0);
   let ds = (tf - t0) / steps;
   let mode = u32(V.p0.x);
@@ -924,13 +941,13 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   if (style == 2u || style == 5u) {                               // DUST (a retired GRAIN, 2, draws as DUST)
     let d = dustPixel(ro, rd, t0, tEnd, half, mode, soft, rhoMax, ampMax, refMax, pxA);
     var od = pow(max(d.rgb + back * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
-    od = select(od, bg, od != od);
+    od = select(od, bgOut, od != od);
     return vec4<f32>(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
   }
   if (style == 11u && V.p7.x > 0.5) {                               // iteration 014 B: ESP draws the map over its sticks (none set: the march below, as CLOUD); 032 O1: BALLS · STICKS are the composite above
     let oc = espPixel(ro, rd, t0, tf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
     var om = pow(max(oc, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
-    om = select(om, bg, om != om);
+    om = select(om, bgOut, om != om);
     return vec4<f32>(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
   }
   let kq = V.p3.w;                                                // THE KNEE's q (0 at the shipped 0.6: the old compositing, untouched)
@@ -1068,7 +1085,7 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   }
   let bgBlend = select(1.0 - alpha, max(0.0, 1.0 - max(col.r, max(col.g, col.b))), style == 7u);
   var o = pow(max(col + back * bgBlend, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));   // output gamma (a SURFACE control); 032 O1: the atoms' hit is the ground
-  o = select(o, bg, o != o);                                                                          // a NaN anywhere on the ray would paint the pixel black on Metal: show the stage instead
+  o = select(o, bgOut, o != o);                                                                       // a NaN anywhere on the ray would paint the pixel black on Metal: show the stage instead
   /* DITHER (wave 54).  The LAST thing that happens to the colour, AFTER the gamma, because the quantiser it
      defeats is the 8-bit swapchain and nothing else — dithering in linear light would be dithering the wrong
      ladder.  V.p2.w is the amplitude in LEAST SIGNIFICANT BITS: 1.0 is the textbook ±½ LSB, which turns the
@@ -1795,6 +1812,15 @@ export async function createField(canvas, opts = {}) {
     const pass = enc.beginComputePass(), g = Math.ceil(res / 4); pass.setPipeline(cardPipe); pass.setBindGroup(0, cardBind); pass.dispatchWorkgroups(g, g, g); pass.end();
     cardDirty = false; generation++; stats.generation = generation; stats.reconstructs++;
   }
+  /* 037 T4 · PULSE's phase: RATE Hz of the clock's play (t over the clock's rate: wall seconds while it plays), re-anchored whenever RATE or the
+     clock's rate moves so a turn never jumps it; paused, it stands.  ONE clock: the field reads t (opts.clock), never writes it */
+  const pulse = { t: 0, rate: 1, hz: 0, ph: 0 };
+  const pulseAt = (t) => { const x = pulse.ph + pulse.hz * (t - pulse.t) / pulse.rate; return x - Math.floor(x); };
+  function pulsePhase(hz) {
+    const C = opts.clock; if (!C) return 0;
+    if (hz !== pulse.hz || C.rate !== pulse.rate) { pulse.ph = pulseAt(C.t); pulse.t = C.t; pulse.hz = hz; pulse.rate = C.rate; }
+    return pulseAt(C.t);
+  }
   function writeView(obs, mat, w, h) {
     const E = cameraEye(obs, half), B = E.basis, cam = E.eye, tanH = E.tanH, aspect = w / h;
     const v = VIEW;
@@ -1821,6 +1847,8 @@ export async function createField(canvas, opts = {}) {
     v[52] = phi.half; v[53] = phi.M; v[54] = phi.ok ? 1 : 0; v[55] = (mat.iso === undefined ? 0.06 : mat.iso) / 30;
     v[56] = atomsBound[0]; v[57] = atomsBound[1]; v[58] = atomsBound[2]; v[59] = atomsBound[3] + Math.max(atomsBound[4] * Math.max(asz, 1), srad) + 0.01;
     v[60] = espSoftOf(mat.softness); v[61] = mat.espBare ? 1 : 0;   // iteration 016 S1 · S2
+    const ps = mat.stage;   // 037 T4 · PULSE: p16.w AMOUNT, p17.x SHAPE, p17.y RATE, p17.z the phase; absent = the homes (AMOUNT 0: bg untouched). p16.xyz and p17.w are chain L's
+    v[83] = ps ? ps.pulse : 0; v[84] = ps && ps.shape === 'edge' ? 1 : 0; v[85] = ps ? ps.rate : 0; v[86] = ps && ps.rate > 0 ? pulsePhase(ps.rate) : 0;
     perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
     device.queue.writeBuffer(viewBuf, 0, v);
     lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);

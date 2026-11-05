@@ -157,7 +157,7 @@ try {
   const undoMs = {};
   undoMs.look = (await scene('a LOOK knob drag (twelve moves over 600 ms, longer than the quiet window)',
     `const k = __show(__knob('EXPOSURE')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -48, 12, 50);`, 'EXPOSURE · WAVE')).undoMs;
-  await scene('the stage colour (its colour well)', `await __field(__show(document.querySelector('.stage-colour')), '#305070');`, 'STAGE COLOUR · SETTINGS');
+  await scene('the stage colour (its colour well)', `await __field(__show(document.querySelector('.stage-colour')), '#305070');`, 'STAGE COLOUR · STAGE');
   await scene('an overlay switch (KEPLER ORBIT)', `const s = __show(__sw('KEPLER ORBIT')); await __w(50); await __press(s.querySelector('button') || s);`, 'KEPLER ORBIT · ORBIT');
   undoMs.preset = (await scene('a preset (SPECTRUM\'s ‹ PRESET › stepper → loadPreset; iteration 008 S: it left STATE)', `await __press(__show(document.querySelector('.dev[data-id="spectrum"] .sp-preset [aria-label="next"]')));`, 'edit')).undoMs;   // the kit's stepper names no row yet (the palette's RAMP stepper below is 'edit' too)
   undoMs.element = (await scene('an element change (ELEMENT dragged)', `const k = __show(__knob('ELEMENT')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -30);`, 'ELEMENT · SPECTRUM')).undoMs;
@@ -211,7 +211,7 @@ try {
     (r) => assert.equal(r.rebuilds, 1));
   const routed = await ev(`return { routes: __LW.mod.model.routeList().map((r) => r.targetId), target: window.__target };`);
   assert.deepEqual(routed.routes, [routed.target]);
-  const nonMod = await scene('an edit outside the modulation undone with the window open (the rack is not reloaded)', `await __field(document.querySelector('.stage-colour'), '#506070');`, 'STAGE COLOUR · SETTINGS',
+  const nonMod = await scene('an edit outside the modulation undone with the window open (the rack is not reloaded)', `await __field(document.querySelector('.stage-colour'), '#506070');`, 'STAGE COLOUR · STAGE',
     (r) => assert.equal(r.rebuilds, 0, 'an unchanged modulation rack was rebuilt by the undo'));
   const viaApi = await ev(`return await __scene(async () => { __LW.mod.addSource('env'); });`);
   assert.equal(viaApi.added, 1); assert.equal(viaApi.undoSame, true); assert.equal(viaApi.redoSame, true);
@@ -250,7 +250,7 @@ try {
   assert.equal(held.routed.modulated, true); assert.equal(held.routed.base, 0.3); assert.notEqual(held.routed.live, 0.3, 'the route did not move the stage');
   assert.deepEqual(held.undone, { live: 0.3, base: 0.3, modulated: false, playing: true }, 'the undone route left the stage off its hand value');
   assert.equal(held.redone.modulated, true); assert.equal(held.redone.base, 0.3); assert.equal(held.redone.playing, true);
-  assert.equal(held.hand.added, 1); assert.equal(held.hand.name, 'STAGE · SETTINGS'); assert.equal(held.hand.undoSame, true); assert.equal(held.hand.redoSame, true);
+  assert.equal(held.hand.added, 1); assert.equal(held.hand.name, 'STAGE'); assert.equal(held.hand.undoSame, true); assert.equal(held.hand.redoSame, true);
   assert.equal(held.hand.rebuilds, 0); assert.notEqual(held.baseAfter, 0.3, 'the hand did not move the routed base'); assert.deepEqual(held.errs, []);
   pass(`a route undone while it plays: the stage returns to its hand value 0.3 exactly (it read ${held.routed.live.toFixed(3)} under the LFO), redo routes it again on base 0.3, and the hand on the routed STAGE knob (base → ${held.baseAfter.toFixed(3)}) undoes to its base with no rebuild`);
 
@@ -349,7 +349,7 @@ try {
     __LW.pause(); __LW.setRotRate('z', 0); await __w(600); H.flush();
     const stopped = { rows: count() - n, name: H.entries().at(-1).label };
     return { still, turning, stopped, errs: __e.slice() };`);
-  assert.equal(drive.still.added, 1, 'ROTATE z on 1s+2pz, paused: a STAGE drag made ' + drive.still.added + ' rows ' + JSON.stringify(drive.still)); assert.equal(drive.still.name, 'STAGE · SETTINGS');
+  assert.equal(drive.still.added, 1, 'ROTATE z on 1s+2pz, paused: a STAGE drag made ' + drive.still.added + ' rows ' + JSON.stringify(drive.still)); assert.equal(drive.still.name, 'STAGE');
   assert.equal(drive.still.undoSame, true); assert.equal(drive.still.redoSame, true);
   assert.equal(drive.turning.rows, 0, 'ROTATE z on 2p_x, playing 3 s: ' + drive.turning.rows + ' phantom rows');
   assert.deepEqual(drive.stopped, { rows: 1, name: 'rotation drive' }); assert.deepEqual(drive.errs, []);
