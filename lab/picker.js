@@ -172,7 +172,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const face = el('div', 'mm-face', root); face.hidden = true;
   /* 035 THE COLLAGE (lab/picker-collage.js): its canvas and veil are the root's first children, behind the face; it runs while the face is shown */
   const collage = createCollage(root, { theme: () => (document.body.dataset.theme === 'light' ? 'light' : 'dark'), still, lite: () => !!(app.ctl.perf && app.ctl.perf.tier === 'light') });
-  const faceLogo = el('div', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);
+  /* 036 G4 (Josh 11-03: "Clicking on logo shows the about window, and clicking on the MIR logo shows the MIR about window"): the face's logo
+     and the MIR mark are buttons (no plate) onto ABOUT's door, `layout.about.open('lw' | 'mir')` — opened OVER the menu (openAbout below) */
+  const faceLogo = el('button', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);
+  faceLogo.type = 'button'; faceLogo.setAttribute('aria-label', 'ABOUT λWAVES'); faceLogo.title = 'ABOUT λWAVES'; faceLogo.addEventListener('click', () => openAbout('lw'));
   fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { for (const host of [logo, faceLogo]) { host.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = host.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } } }).catch(() => { logo.textContent = faceLogo.textContent = 'λWAVES'; });
   /* iteration 015 M1 · THE HEAD (Josh: "Logo (a little bit bigger), Atomic, molecular, etc. Row, and then Home Folder, and Hue. Add a 4th
      button"): the logo, the tabs, then four round buttons — RETURN HOME (the lab), FOLDERS (the projects and the demos), THE HUE ring (a dial
@@ -211,7 +214,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const faceTop = el('div', 'mm-corner mm-tr', face);
   const faceTheme = el('button', 'mm-navb mm-themeb', faceTop); faceTheme.type = 'button'; faceTheme.title = 'Light or dark — the theme'; faceTheme.setAttribute('aria-label', faceTheme.title);
   icon(faceTheme, 'sun').classList.add('gly-sun'); icon(faceTheme, 'moon').classList.add('gly-moon'); faceTheme.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
-  { const mir = el('div', 'mm-corner mm-br', face);
+  { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'MIR ABOUT'); mir.title = 'MIR ABOUT — the kit this app is built on'; mir.addEventListener('click', () => openAbout('mir'));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
   { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');
     for (const [ai, name, by] of [['claude', 'Claude', 'ANTHROPIC'], ['openai', 'GPT', 'OpenAI'], ['gemini', 'Gemini', 'GOOGLE']]) {
@@ -250,6 +253,19 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (refocus) gear.focus({ preventScroll: true });
   }
   gear.addEventListener('click', () => (sheetUp() ? closeSheet(true) : openSheet())); sheetX.addEventListener('click', () => closeSheet(true));
+  /* 036 G4 · ABOUT OVER THE MENU: ABOUT is a window of #floats (under the menu's z); while it is open from the menu `body.about-over` lifts
+     #floats over the menu with ABOUT alone painted there (skin.css), the sheet put away.  Its × or Escape (escape below, before the menu's
+     own) closes it and the menu is still there; the class drops when the window hides or the menu closes. */
+  let aboutSeen = null;
+  const aboutOf = () => app.sh.layout && app.sh.layout.about, aboutOver = () => document.body.classList.contains('about-over');
+  const dropAbout = () => document.body.classList.remove('about-over');
+  function openAbout(f) {
+    const A = aboutOf(); if (!A) return;
+    closeSheet(); document.body.classList.add('about-over'); A.open(f);
+    if (!aboutSeen && A.win && A.win.root) { aboutSeen = new MutationObserver(() => { if (A.win.root.hidden) dropAbout(); }); aboutSeen.observe(A.win.root, { attributes: true, attributeFilter: ['hidden'] }); }
+  }
+  const closeAbout = () => { const A = aboutOf(); if (A) A.close(); dropAbout(); };
+  root.addEventListener('pointerdown', (e) => { if (aboutOver() && e.target === root) { e.preventDefault(); closeAbout(); } });   // a press on the face under ABOUT (its veil is the root's own)
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
   /* 032 (Josh 11-01: "a light and dark toggle in the picker in between the hue knob and thumbnail switcher"): THEME, the action's own
@@ -938,11 +954,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (first) { setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700); setTimeout(() => { root.classList.remove('first'); }, 2600); }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); if (at === 'decks') enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; dropAbout(); closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = (o) => (root.hidden ? open(o) : close());
   /* M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET; 036 G3 (Josh, FOR JOSH 035 answer 5): then it STEPS BACK — off the face
      to the face, on the face out to the lab (the inner Escapes — the look drop's, the isomer deck's, the tip sheet's — still stop first) */
-  const escape = () => (!drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : at !== 'face' ? showFace() : close());
+  const escape = () => (aboutOver() ? closeAbout() : !drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : at !== 'face' ? showFace() : close());   // 036 G4: ABOUT over the menu first
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
   /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
   let escDrop = null; const layer = () => { if (escDrop) escDrop(); escDrop = app.sh.ACTIONS.escape.push(() => { escDrop = null; escape(); if (!root.hidden) layer(); }, { alive: () => !root.hidden }); };

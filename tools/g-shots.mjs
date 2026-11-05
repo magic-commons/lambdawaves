@@ -71,6 +71,23 @@ try {
     await g.press('\uE00C'); await wait(700); seq.push(await st());
     out.seq = seq.join(' → ');
   }
+  if (scene === 'about') {
+    const st = () => g.ev(`const A = __LW.layout.about, w = document.querySelector('#floats > .lw-about'), m = document.getElementById('lwMenu'); let top = null;
+      if (A.isOpen && w) { const r = w.getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); top = !!(e && e.closest('.lw-about')); }
+      return { open: A.isOpen, face: A.face, over: document.body.classList.contains('about-over'), labZ: getComputedStyle(document.getElementById('lab')).zIndex, onTop: top, menu: m.hidden ? 'closed' : m.classList.contains('at-face') ? 'face' : 'other',
+        rect: w && A.isOpen ? (() => { const r = w.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round); })() : null };`);
+    await wait(1500);
+    out.tapLogo = await g.tap('.mm-face-logo'); await wait(900); out.lw = await st();
+    out.lwShot = await shot('G4-about-over-menu', null, 0, 1000);
+    await g.press('\uE00C'); await wait(600); out.afterEsc = await st();
+    out.tapMir = await g.tap('.mm-mirb'); await wait(900); out.mir = await st();
+    out.mirShot = await shot('G4-mir-about-over-menu', null, 0, 1000);
+    /* the drag bounds over the menu: the title bar pulled far up and left */
+    const hd = await rectOf('#floats > .lw-about .mir-win-title');
+    if (hd) { await drv.actions(g.s, [{ type: 'pointer', id: 'pd', parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: hd[0] + 40, y: Math.round((hd[1] + hd[3]) / 2) },
+      { type: 'pointerDown', button: 0 }, { type: 'pointerMove', duration: 300, origin: 'viewport', x: 5, y: 2 }, { type: 'pointerUp', button: 0 }] }]); await wait(500); out.dragged = await st(); }
+    out.tapX = await g.tap('#floats > .lw-about .mir-win-x'); await wait(700); out.afterX = await st();
+  }
   console.log(JSON.stringify(out, null, 1));
   const errs = await g.errors(); if (errs.errs && errs.errs.length) console.log('page errors', JSON.stringify(errs.errs));
 } finally { await g.close(); }

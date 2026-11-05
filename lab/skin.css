@@ -1064,6 +1064,17 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%); mask-image: linear-gradient(90deg, transparent, #000 15%); }
 body[data-theme="light"] #lwMenu .mm-door-art[data-theme="dark"], body:not([data-theme="light"]) #lwMenu .mm-door-art[data-theme="light"] { display: none; }
 #lwMenu .mm-door[data-door="library"] .mm-door-word { background: linear-gradient(90deg, hsl(var(--glass-tint) / .92), hsl(var(--glass-tint) / .74) 30%, hsl(var(--glass-tint) / .2) 62%, transparent); }
+/* 036 G4 · THE LOGOS OPEN ABOUT (picker.js openAbout): the face's logo and the MIR mark are plateless buttons (a lift on a hover or a key's
+   focus); while ABOUT is opened from the menu it paints over it: #floats sits in #lab, a fixed box (a stacking context of its own, under
+   #lwMenu's z 100000), so #lab rises over the menu with everything in it unpainted but ABOUT (visibility inherits; a press passes through
+   the unpainted lab to the menu) */
+#lwMenu .mm-face-logo { cursor: pointer; } #lwMenu .mm-face-logo svg { transition: translate 280ms var(--ease); }
+#lwMenu .mm-face-logo:is(:hover, :focus-visible) svg { translate: 0 -3px; }
+#lwMenu .mm-mirb { cursor: pointer; opacity: .86; transition: opacity 140ms; } #lwMenu .mm-mirb:is(:hover, :focus-visible) { opacity: 1; }
+body.menu-open.about-over #lab { z-index: 100001; visibility: hidden; }
+body.menu-open.about-over #lab :not(.lw-about, .lw-about *) { visibility: hidden; }   /* the DISCONNECTED look shows a window's parts explicitly (the kit's skin.css) */
+body.menu-open.about-over #floats > .lw-about { visibility: visible; background: hsl(var(--glass-tint) / .9); }   /* a page over the wall: its pane nearly opaque there */
+body.menu-open.about-over #lwMenu::after { content: ''; position: absolute; inset: 0; z-index: 9; background: hsl(var(--glass-tint) / .6); }   /* the face steps back under ABOUT; a press on it puts ABOUT away (picker.js) */
 #lwMenu .mm-face-lab { font-size: 11px; letter-spacing: .22em; padding: 6px 12px; border-radius: 999px; opacity: .45; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-face-lab:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
 #lwMenu .mm-face.in .mm-face-logo { animation: mm-drop 820ms var(--ease) both; }
