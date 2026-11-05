@@ -26,12 +26,13 @@ const ID = /^tut-[a-z0-9]+(-[a-z0-9]+)*$/, THEMES = ['dark', 'light'];
 const fail = (m) => { console.error('tutorial-heroes: ' + m); process.exit(1); };
 const argv = process.argv.slice(2), flag = (k) => { const i = argv.indexOf(k); if (i < 0) return undefined; const v = argv[i + 1]; argv.splice(i, 2); if (v === undefined) fail(k + ' wants a value'); return v; };
 
-/* the TUTORIAL table: `const TUTORIAL = [` … `];`, one row a line */
-const src = readFileSync(PICKER, 'utf8'), block = /^const TUTORIAL = \[\n([\s\S]*?)^\];$/m, m = src.match(block);
-if (!m) fail('lab/picker.js has no `const TUTORIAL = [` … `];` block');
-const rows = Function('return [' + m[1] + ']')();
+/* the TUTORIAL table: `export const TUTORIAL = [` (and the comment after it) … `];`, one row a line (037 M3: since 036 G7 the table is exported
+   for lab/loader.js and carries a comment; the old `^const TUTORIAL = [$` pattern found nothing) */
+const src = readFileSync(PICKER, 'utf8'), block = /^(export )?const TUTORIAL = \[([^\n]*)\n([\s\S]*?)^\];$/m, m = src.match(block);
+if (!m) fail('lab/picker.js has no `export const TUTORIAL = [` … `];` block');
+const rows = Function('return [' + m[3] + ']')();
 const q = (s) => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ') + "'";
-const write = () => writeFileSync(PICKER, src.replace(block, 'const TUTORIAL = [\n' + rows.map((r) =>
+const write = () => writeFileSync(PICKER, src.replace(block, (m[1] || '') + 'const TUTORIAL = [' + m[2] + '\n' + rows.map((r) =>
   `  { id: ${q(r.id)}, title: ${q(r.title)}, caption: ${q(r.caption || '')}, themes: ${q(THEMES.filter((t) => String(r.themes).split(' ').includes(t)).join(' '))} },\n`).join('') + '];'));
 const next = 'Next: node tests/pwa.test.mjs --write';
 

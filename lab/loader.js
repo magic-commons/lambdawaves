@@ -34,7 +34,7 @@ function menuSet() {
   for (const t of ['dark', 'light']) { add('wall', `collage/${t}.mp4`); for (const w of WALLS) add('wall', `wall/${w}.${t}.webp`); }   // 037 M2: no poster; the still walls
   add('wall', 'collage/collage.json');
   for (const f of ['mir-interface.webp', 'library-dark.webp', 'library-light.webp']) add('wall', 'face/' + f);
-  for (const [id, th] of Object.entries(HEROES)) for (const t of th.split(' ').map((s) => s.split('@')[0])) { add('wall', `vol/${id}.${t}.mp4`); add('wall', `vol/${id}.${t}.webp`); }
+  for (const [id, th] of Object.entries(HEROES)) for (const t of th.split(' ')) { add('wall', `vol/${id}.${t}.mp4`); add('wall', `vol/${id}.${t}.webp`); }
   for (const f of ['GoogleSansFlex-Semibold.ttf', 'OpenAISans-Semibold.woff2']) add('faces', 'ai/' + f);
   for (const r of TUTORIAL) for (const t of r.themes.split(' ')) { add('tut', `tut/${r.id}.${t}.mp4`); add('tut', `tut/${r.id}.${t}.webp`); }
   return out;

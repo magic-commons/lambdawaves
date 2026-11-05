@@ -35,7 +35,7 @@ import { keepData, installed, safariTab } from './library.js';
 const TIP_URL = 'https://ko-fi.com/magiccommons';
 /* 032 THE PORTRAIT SHELF: the volumes that have a hero and in which themes ('dark light'), written by tools/volume-heroes.mjs with its files
    (img/menu/vol/<id>.<theme>.mp4 and the still .webp). A volume not named here wears the λWAVES palette. */
-export const HEROES = { 'vol-1': 'dark@9.1 light@13.45' };   // 036 G7: lab/loader.js keeps their files
+export const HEROES = { 'vol-1': 'dark light' };   // 036 G7: lab/loader.js keeps their files
 /* 037 M2 THE STILL WALL (Josh 11-05: "let it show a still wallpaper at random. I'll provide the high quality backgrounds later"): the face's
    still wallpapers by name — img/menu/wall/<name>.dark.webp and .light.webp (DATA, kept once shown; lab/loader.js keeps them) — one picked at
    random per show while the collage is off, stilled, not yet at its first frame or dead.  Empty: the theme's plain ground. */
@@ -630,14 +630,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const theme = () => (document.body.dataset.theme === 'light' ? 'light' : 'dark');
   let liveHero = null; const restHero = () => { if (liveHero) liveHero.stop(); };
   function artOf(art, dir, id, themes) {
-    /* a theme token is `dark` or `dark@9.1`: the second is where the still was taken, and where the hero STARTS on its first play (036, the
-       critic: a hero that fades in from black showed its black first frame on hover) */
-    const has = (themes || '').split(' ').filter(Boolean).map((s) => ({ th: s.split('@')[0], at: Number(s.split('@')[1]) || 0 }));
-    const pick = (th) => has.find((h) => h.th === th) || has[0];
+    /* 037 M3 (Josh 11-05: "the thumbnail doesn't have to be the start point, it's just the cover, let the video play as is"): `themes` names the
+       files ('dark light'); the still is the cover and the hero plays from its own start (036's `dark@9.1` start token is gone) */
+    const has = (themes || '').split(' ').filter(Boolean), pick = (th) => (has.includes(th) ? th : has[0]);
     if (!has.length) { art.classList.add('mm-art-plain'); return null; }
     for (const th of ['dark', 'light']) {
       const i = el('img', 'mm-art-still', art); i.alt = ''; i.dataset.theme = th; i.decoding = 'async'; i.loading = 'lazy'; i.draggable = false;
-      i.addEventListener('load', () => keepData(i.src), { once: true }); i.src = dir + id + '.' + pick(th).th + '.webp';
+      i.addEventListener('load', () => keepData(i.src), { once: true }); i.src = dir + id + '.' + pick(th) + '.webp';
     }
     let vid = null, want = false;
     const h = {
@@ -645,8 +644,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         if (still()) return; if (liveHero && liveHero !== h) liveHero.stop(); liveHero = h; want = true;
         if (!vid) { vid = el('video', 'mm-art-hero', art); vid.muted = vid.defaultMuted = vid.loop = vid.playsInline = true; vid.preload = 'auto'; vid.tabIndex = -1; vid.setAttribute('aria-hidden', 'true');
           vid.addEventListener('playing', () => { if (want) vid.classList.add('on'); }); vid.addEventListener('error', () => { vid.remove(); vid = null; }, { once: true }); }   // no hero: the still stays
-        const p = pick(theme()), src = dir + id + '.' + p.th + '.mp4';
-        if (vid.getAttribute('src') !== src) { vid.src = src; if (p.at) vid.addEventListener('loadedmetadata', () => { vid.currentTime = p.at; }, { once: true }); }   // a seek before the metadata is dropped by the load
+        const src = dir + id + '.' + pick(theme()) + '.mp4'; if (vid.getAttribute('src') !== src) vid.src = src;
         const r = vid.play(); if (r && r.catch) r.catch(() => {});
       },
       stop() { want = false; if (liveHero === h) liveHero = null; if (vid) { vid.pause(); vid.classList.remove('on'); } },
