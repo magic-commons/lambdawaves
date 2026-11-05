@@ -139,7 +139,7 @@ try {
         await stroke([rt.from, [rt.from[0] + 10, rt.from[1] - 10], [(rt.from[0] + rt.to[0]) / 2, (rt.from[1] + rt.to[1]) / 2], rt.to, rt.to], 0, 150); await wait(400);
         P.route = await g.ev(`const l = __LW.mod.model.routeList(); return { before: ${rt.before}, after: l.length, onTarget: l.some((r) => r.targetId === ${JSON.stringify(rt.param)}), target: ${JSON.stringify(rt.param)} };`);
         out['shotRoute' + z] = await shot(`036-K2-route-${Math.round(z * 100)}`, null);
-        await g.ev(`__LW.undo && __LW.undo(); return 1;`);
+        await g.ev(`for (const r of __LW.mod.model.routeList()) __LW.mod.model.removeRoute(r.id); return __LW.mod.model.routeList().length;`);
       } else { P.route = rt; out["shotRoute" + z] = await shot(`036-K2-route-${Math.round(z * 100)}`, null); }
       await g.ev(`__LW.layout.modulation.close ? __LW.layout.modulation.close() : 0; return 1;`);
     }
