@@ -14,12 +14,14 @@ Writes <out>/candidates.json, <out>/thumbs/<id>.jpg and <out>/sheets/sheet-NN.jp
 
 036 C1 THE STUTTER MEASURE (Josh 11-03: "inspect some of the videos for stutter and lag … don't confuse them for the incredibly fast rate
 motion videos"): no new scene scan — every candidate's window [t, t + 2.4] is decoded at the source's own rate (centre square, 96 px grey)
-and each frame's mean |Δ| from the last is read (tblend difference → signalstats YAVG). A frame is NEW when its |Δ| passes the window's
-own floor, max(0.15, 0.05 × its 75th-percentile |Δ|): a held frame of an x264 recording is not 0 but carries 0.01–0.14 of residue, so a
-fixed 0.02 would call it new. From the new frames' intervals (in source frames): `cadence` = the modal interval (1 = a true 60, 2 = a
-30-in-60 recording: both smooth — speed is never stutter, only holds are), `stall` = the share of the window's time inside intervals of
-50 ms or more beyond the cadence (3 frames at 60 fps), `run` = the longest interval in ms, `moved` = the 75th-percentile |Δ|. A
-window is STUTTERY when it moves (moved > 0.3) and stall ≥ 0.08 or run ≥ 130 ms; a still scene never is. A stuttery window tries up to
+and each frame's mean |Δ| from the last is read (tblend difference → signalstats YAVG). A frame is NEW when its |Δ| passes 0.15: a held
+frame of an x264 recording is not 0 but carries 0.01–0.14 of residue (a floor relative to the window's motion, 035's first cut, called a
+slow drift after a fast patch "held"). From the new frames' intervals (in source frames): `cadence` = the modal interval (1 = a true 60,
+2 = a 30-in-60 recording: both smooth — speed is never stutter, only holds are), `stall` = the share of the window's time inside
+intervals of 50 ms or more beyond the cadence, `run` = the longest interval in ms, `moved` = the 75th-percentile |Δ|. A window is
+STUTTERY (036 C1b, calibrated on the eye's 36 filmstrips) when it MOVES — moved ≥ 4 (a slow drift or a near-still scene never is) — and
+somewhere in it a HOLD of cadence + 3 frames or more ends in a JUMP: the closing frame's |Δ| over 2.5 × the window's median |Δ| (the
+freeze-then-leap the eye sees; the whole window is read, so a late one counts). stall and run are said, not judged. A stuttery window tries up to
 four other starts 0.6 s apart inside its cut-free segment (forward from t, then back; a start whose frames hold a cut, scene > 0.35, is
 passed over) and keeps the cleanest: a clean one rewrites `t` (the eye's own start kept as `t0`). Each item gains `stutter: { rate,
 cadence, stall, run, moved, call }` (call: clean · still · rescued · stuttery); `menu-collage.mjs cut` refuses the stuttery. FILMSTRIPS
@@ -53,7 +55,7 @@ def run(cmd):
     return subprocess.run(cmd, capture_output=True, text=True)
 
 # 036 C1 THE STUTTER MEASURE (the head)
-MOVES, FLOOR_D, FRAC_D, STALL, RUN_MS, TRIES, STEP, SCENE_CUT = 0.3, 0.15, 0.05, 0.08, 130, 4, 0.6, 0.35
+MOVES, FLOOR_D, MOTION, JUMP, TRIES, STEP, SCENE_CUT = 0.3, 0.15, 4.0, 2.5, 4, 0.6, 0.35
 SQ = "crop='min(iw,ih)':'min(iw,ih)',scale=96:96:flags=area"
 
 def native(src, t):
@@ -74,14 +76,19 @@ def measure(src, t):
     pts, d = [f[0] for f in fr], [f[1] for f in fr]
     ds = sorted(b - a for a, b in zip(pts, pts[1:])); ok = [x for x in ds if x <= 1.5 * ds[len(ds) // 2]]
     dt = sum(ok) / len(ok) or 1 / 60   # the frame period: the mean step short of a gap (an mkv's 1-ms clock alternates 16 and 17 ms)
-    lvl = sorted(d)[int(0.75 * (len(d) - 1))]; floor = max(FLOOR_D, FRAC_D * lvl)
-    new = [pts[0] - dt] + [p for p, y in zip(pts, d) if y > floor]   # the window's first frame (before the first difference) is new
-    iv = [max(1, round((b - a) / dt)) for a, b in zip(new, new[1:])] + [max(1, round((pts[-1] + dt - new[-1]) / dt))]
-    cad = max(set(iv), key=lambda n: (iv.count(n), -n)); long = max(range(len(iv)), key=lambda i: iv[i])
-    stall = sum(n for n in iv if (n - cad) * dt >= 0.049) / sum(iv); run_ms = round(max(iv) * dt * 1000)   # a stall: 50 ms or more beyond the cadence
-    call = 'still' if lvl <= MOVES else 'stuttery' if stall >= STALL or run_ms >= RUN_MS else 'clean'
+    lvl = sorted(d)[int(0.75 * (len(d) - 1))]; mid = sorted(d)[len(d) // 2]
+    new = [pts[0] - dt] + [p for p, y in zip(pts, d) if y > FLOOR_D]   # the window's first frame (before the first difference) is new
+    step = [y for y in d if y > FLOOR_D]                                 # step[i]: the |Δ| that closes the interval new[i] → new[i + 1]
+    iv = [max(1, round((b - a) / dt)) for a, b in zip(new, new[1:])]
+    tail = max(1, round((pts[-1] + dt - new[-1]) / dt)); ivs = iv + [tail]
+    cad = max(set(ivs), key=lambda n: (ivs.count(n), -n))
+    stall = sum(n for n in ivs if (n - cad) * dt >= 0.049) / sum(ivs); run_ms = round(max(ivs) * dt * 1000)   # said, not judged
+    jumps = [i for i, n in enumerate(iv) if n >= cad + 3 and step[i] > JUMP * max(mid, FLOOR_D)]   # a hold that ends in a leap
+    call = 'still' if lvl <= MOVES else 'stuttery' if lvl >= MOTION and jumps else 'clean'
+    long = max(jumps, key=lambda i: iv[i]) if jumps else max(range(len(ivs)), key=lambda i: ivs[i])
     return {'rate': round(1 / dt, 1), 'cadence': cad, 'stall': round(stall, 3), 'run': run_ms, 'moved': round(lvl, 2), 'call': call,
-            'cut': max(f[2] for f in fr) > SCENE_CUT, 'hold': new[long] - (pts[0] - dt), 'dt': dt, 'pattern': ''.join('|' if y > floor else '.' for y in d)}
+            'jumps': len(jumps), 'cut': max(f[2] for f in fr) > SCENE_CUT, 'hold': new[long] - (pts[0] - dt), 'dt': dt,
+            'pattern': ''.join('|' if y > FLOOR_D else '.' for y in d)}
 
 def rescore_one(it):
     t0 = it.get('t0', it['t']); m = measure(it['src'], t0)
@@ -120,7 +127,7 @@ def rescore():
             if m is None: it['stutter'] = None; continue
             if abs(t - t0) > 1e-6: it['t0'] = t0; it['t'] = round(t, 2)
             else: it['t'] = t0; it.pop('t0', None)
-            keep[it['id']] = m; it['stutter'] = {k: m[k] for k in ('rate', 'cadence', 'stall', 'run', 'moved', 'call')}
+            keep[it['id']] = m; it['stutter'] = {k: m[k] for k in ('rate', 'cadence', 'stall', 'run', 'moved', 'jumps', 'call')}
     (OUT / 'candidates.json').write_text(json.dumps(cand, indent=0))
     calls, theme = ('clean', 'still', 'rescued', 'stuttery'), lambda it: verdicts.get(it['id'], {}).get('theme') or it['theme']
     for scope, test in (('every candidate', lambda it: True), ("the pool's clean tier (λWAVES, grade ≥ 2, no UI, no informational)", poolable)):
