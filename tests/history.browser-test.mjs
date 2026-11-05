@@ -414,7 +414,7 @@ try {
      keys are byte-identical, the lock is still on, and an undo and a redo leave the lock and the centred pivot alone ── */
   const lock = await ev(`const L = __LW, H = L.history, WS = ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack'];
     const strip = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of WS) delete o[k]; return JSON.stringify(o); };
-    L.camera.reset(); L.camera.setShift(0.3, 0.2); const S = L.serialize(), bytes = JSON.stringify(S), carried = S.presentation.obs.shift.slice();
+    L.camera.reset(); L.camera.setLock(false); L.camera.setShift(0.3, 0.2); const S = L.serialize(), bytes = JSON.stringify(S), carried = S.presentation.obs.shift.slice();
     L.camera.setLock(true); L.saveSettings(); await __w(50); const before = strip(), settingsLock = JSON.parse(localStorage.getItem('lambdawaves.q0.settings')).camLock;
     L.camera.setLock(false); L.camera.setShift(-0.4, 0.1); L.camera.setLock(true);
     const ok = L.restore(S); await __w(400); const opened = L.obs.shift.slice(), after = strip(), untouched = JSON.stringify(S) === bytes;

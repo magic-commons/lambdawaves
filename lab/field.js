@@ -525,6 +525,14 @@ struct View {
   p9: vec4<f32>,     // φ's grid: half-width, cells a side, valid (0 · 1), the ISO surface's ρ (a.u.)
   p10: vec4<f32>,    // the atoms' bounding sphere (centre xyz, radius w)
   p11: vec4<f32>,    // iteration 016 S: ESP's SOFT edge (0 = the hard ISO surface … 1), MAP ONLY (0 · 1)
+  p12: vec4<f32>,    // 037 W0 THE VIEW GROWS · chain L: KEY light direction xyz (in the FRAME), w KEY intensity
+  p13: vec4<f32>,    // KEY colour rgb, w SPOT cone (degrees; 180 = none)
+  p14: vec4<f32>,    // FILL direction xyz, w FILL intensity
+  p15: vec4<f32>,    // AMBIENT, SPECULAR, SHINE, RIM
+  p16: vec4<f32>,    // SPOT blend, SOFTNESS, FRAME (0 CAMERA · 1 WORLD), w chain T: PULSE amount
+  p17: vec4<f32>,    // PULSE shape, PULSE rate, PULSE phase, w THE LEGACY GATE (0 = every light at home: the old expressions run)
+  p18: vec4<f32>,    // spare
+  p19: vec4<f32>,    // spare
 };
 @group(0) @binding(0) var<uniform> V: View;
 @group(0) @binding(1) var psiTex: texture_3d<f32>;
@@ -1516,7 +1524,7 @@ export async function createField(canvas, opts = {}) {
   const modesBuf = [0, 1].map(() => device.createBuffer({ size: MAX_MODES * MODE_BYTES, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }));
   const radialBuf = device.createBuffer({ size: 48 * 256 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // 43 rows in use: the 6 × 6 (n_r, l) grid and n = 7's (6, 0) and (0, 6) at 36 + l (atoms.js rowOf)
   const statsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC });
-  const viewBuf = device.createBuffer({ size: 16 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const viewBuf = device.createBuffer({ size: 24 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const vpBuf = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   /* the phase PALETTE: 256 RGBA colours around the complex plane (see palette.js) */
   const palBuf = device.createBuffer({ size: 256 * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
@@ -1558,7 +1566,7 @@ export async function createField(canvas, opts = {}) {
   /* the per-frame scratch (wave 45): the frame path allocates nothing — the params block, the stats zero, the view block,
      the three matrices and the line vertices are written in place */
   const PARAMS = new ArrayBuffer(32), PARAMS_U = new Uint32Array(PARAMS), PARAMS_F = new Float32Array(PARAMS), ZERO_U32 = new Uint32Array([0]);
-  const VIEW = new Float32Array(64), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
+  const VIEW = new Float32Array(96), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
   /* LATTICE MESH (wave 108 zero-allocation law): pre-allocated unit grid lines.
      Radius 8 grid (17^3 nodes). Segments: X (16*17*17), Y (17*16*17), Z (17*17*16) = 13872 segments. */
   const LATTICE_SEGS = new Int8Array(13872 * 6);
