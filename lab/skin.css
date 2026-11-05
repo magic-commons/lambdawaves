@@ -718,14 +718,21 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
   box-shadow: 2px -2px 0 -1px hsl(var(--glass-tint) / .72), 2px -2px 0 0 color-mix(in srgb, var(--fg) 30%, transparent); pointer-events: none; }
 #lwMenu .mm-volview { position: relative; }
 /* iteration 018 A2: the pane is as big as its isomers (three isomers, three tiles), centred over the deck; the tiles keep the deck's size */
-#lwMenu .mm-isos { position: absolute; top: 52px; left: 50%; translate: -50% 0; width: max-content; max-width: 100%; box-sizing: border-box; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 14px 32px; overflow: hidden auto; scrollbar-width: thin;
-  border-radius: var(--surface-radius, 18px); }   /* 022 P3: the menu surface (picker.js: .glass[data-mir-surface=menu]) */
-#lwMenu .mm-isos[hidden] { display: none; }
+#lwMenu .mm-isos { position: absolute; top: 0; left: 0; width: max-content; max-width: calc(100% - 16px); box-sizing: border-box; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 14px 24px; overflow: hidden auto; scrollbar-width: thin;
+  border-radius: var(--surface-radius, 18px); }   /* 022 P3: the menu surface (picker.js: .glass[data-mir-surface=menu]); 037 M5: placed by picker.js placeIsomers */
+#lwMenu .mm-isos[hidden], #lwMenu .mm-iso-tail[hidden] { display: none; }
+/* 037 M5 · THE ISOMER BUBBLE: slightly opaque, never transparent — the menu tint at .94 (REFRACTIVE's .72 floor read as see-through), and under
+   FROST blurred (14 px; a menu pane is otherwise exempt from the frost) over a .85 wash; the tail is the pane's sibling in the same dress, a
+   24 × 12 triangle whose base sits on the pane's edge (picker.js sets its side) */
+#lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--surface-menu-tint, var(--glass-tint)) / .94); }
+body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--surface-menu-tint, var(--glass-tint)) / .85); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+#lwMenu .mm-iso-tail { position: absolute; z-index: 6; width: 24px; height: 12px; pointer-events: none; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+#lwMenu .mm-iso-tail[data-side="up"] { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 #lwMenu .mm-isohead { display: flex; align-items: baseline; gap: 14px; }
 #lwMenu .mm-isof { font: var(--w-bold, 600) 22px/1 var(--font-math, serif); } #lwMenu .mm-isocount { font-size: 12px; letter-spacing: .12em; opacity: .6; }
 #lwMenu .mm-isox { font-size: 18px; letter-spacing: 0; }
 #lwMenu .mm-isogrid { display: grid; grid-template-columns: repeat(min(var(--n, 1), var(--cols, 8)), var(--t, 150px)); grid-auto-rows: var(--t, 150px); gap: var(--gap, 10px); justify-content: center; }
-#lwMenu .mm-isogrid .mm-tile.here { outline: 1px solid color-mix(in srgb, var(--acc) 60%, transparent); outline-offset: 2px; }
+#lwMenu .mm-isogrid .mm-tile.here { background: color-mix(in srgb, var(--fg) 9%, transparent); border-radius: 14px; }   /* 037 M5: the volume's thumbnail isomer on a soft plate, no outline */
 /* … and under the shelf THIS DEVICE (032: the RECORDS cards left — every section's molecules are the MOLECULAR deck's) */
 #lwMenu .mm-dev[hidden] { display: none; }
 #lwMenu .mm-dev b { font-weight: 400; font-size: 11px; letter-spacing: .22em; opacity: .55; }

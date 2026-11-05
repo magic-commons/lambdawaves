@@ -845,7 +845,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       labelToggle(vhead, 'molLabels');
       animate(view, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
       try { mols = (await V.index(v.id)).molecules; } catch (err) { mols = []; countEl.textContent = String(err && err.message || err); }
-      byId = new Map(mols.map((m) => [m.id, m])); isoEl.hidden = true;
+      byId = new Map(mols.map((m) => [m.id, m])); isoEl.hidden = isoTail.hidden = true;
       if (cur !== v) return;
       paintTags(); filter();
     }
@@ -870,7 +870,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     function molTile(host, m, deep) {
       const z = atomZ(m.formula), atom = z && ATOMS.some((a) => a.Z === z) ? z : 0, isos = deep && !atom ? isomersIn(m) : [];
       const t = tile(host, 'mm-mol', { formula: m.formulaM ? mathPlain(m.formulaM) : m.formula, name: cap(m.name), sub: atom ? volName(cur) + ' · one atom: it opens in ATOMS' : [volName(cur), ...(m.tags || []), isos.length ? (isos.length + 1) + ' isomers' : ''].filter(Boolean).join(' · ') },
-        () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos); else { isoEl.hidden = true; goVolume(cur, m); } });
+        () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos, t); else { isoEl.hidden = isoTail.hidden = true; goVolume(cur, m); } });
       el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
       if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + SYM[atom - 1] + ':' + v.nl + '_' + v.m); return t; }
@@ -881,20 +881,37 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const wordsOf = (m) => (m.geo ? [...(m.tags || []), ...m.geo] : m.tags || []);   // C3: a molecule's chips, what it is and its shape
     const isomersIn = (m) => (m.isomers || []).map((id) => byId.get(id)).filter(Boolean);
     /* THE ISOMER DECK: over the volume's deck, the molecule and its isomers (the catalogue's order); a press opens one, ×, Escape or a press on
-       the ground puts it away */
+       the ground puts it away.  037 M5 THE ISOMER BUBBLE (Josh 11-05: "the popup to show isomers should appear like a speech bubble … where the
+       popup is coming from. Don't let it be transparent, let it be blurry, slightly opaque … no outline, just a highlight of the selection"):
+       a speech bubble over the tile it came from when the room between the pager's top and the tile holds it, else under it, its 12-px tail
+       (a sibling, so the pane's scroll never clips it) on the tile's centre; the pane blurred under FROST (skin.css); the molecule whose
+       picture is the volume's thumbnail sits on a soft plate */
     const isoEl = el('div', 'mm-isos glass', view); isoEl.hidden = true; isoEl.dataset.mirSurface = 'menu';   // 022 P3: a menu pane isoEl.setAttribute('role', 'dialog');
+    const isoTail = el('i', 'mm-iso-tail', view); isoTail.hidden = true; isoTail.setAttribute('aria-hidden', 'true');
     const isoHead = el('div', 'mm-isohead', isoEl), isoGrid = el('div', 'mm-isogrid', isoEl);
-    const closeIsomers = () => { if (isoEl.hidden) return; isoEl.hidden = true; const f = vdeck.tiles.find((x) => x.dataset.iso === isoEl.dataset.of); if (f) f.focus({ preventScroll: true }); };
+    const closeIsomers = () => { if (isoEl.hidden) return; isoEl.hidden = isoTail.hidden = true; const f = vdeck.tiles.find((x) => x.dataset.iso === isoEl.dataset.of); if (f) f.focus({ preventScroll: true }); };
+    addEventListener('resize', closeIsomers);   // the deck is laid again: the tile it pointed at is gone
+    /** the bubble beside the tile `from` (in the volume view's box): over it when the pager's room above holds it, else under it (its height
+        capped by the page), centred on the tile within the view, the tail's tip on the tile's centre and clear of the pane's corners */
+    function placeIsomers(from) {
+      const TAIL = 12, GAP = 4, V = view.getBoundingClientRect(), pager = view.querySelector('.mm-pager'), P = (pager || view).getBoundingClientRect();
+      const T = from && from.isConnected ? from.getBoundingClientRect() : P, w = isoEl.offsetWidth;
+      let h = isoEl.offsetHeight; const up = T.top - P.top - TAIL - GAP >= h;
+      if (!up) { isoEl.style.maxHeight = Math.max(160, innerHeight - T.bottom - TAIL - GAP - 16) + 'px'; h = isoEl.offsetHeight; }
+      const cx = T.left + T.width / 2 - V.left, left = clamp(cx - w / 2, 8, Math.max(8, V.width - w - 8)), top = up ? T.top - V.top - TAIL - GAP - h : T.bottom - V.top + TAIL + GAP;
+      isoEl.style.left = left + 'px'; isoEl.style.top = top + 'px';
+      isoTail.dataset.side = up ? 'down' : 'up'; isoTail.style.left = clamp(cx, left + 30, left + w - 30) - TAIL + 'px'; isoTail.style.top = (up ? top + h : top - TAIL) + 'px';
+      isoTail.hidden = !from;
+    }
     isoEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeIsomers(); } });
     view.addEventListener('click', (e) => { if (!isoEl.hidden && !isoEl.contains(e.target)) { e.stopPropagation(); e.preventDefault(); closeIsomers(); } }, true);   // the ground around the pane
-    function openIsomers(m, isos) {
+    function openIsomers(m, isos, from) {
       isoHead.textContent = ''; isoGrid.textContent = ''; isoEl.dataset.of = m.id;
       el('b', 'mm-isof', isoHead, m.formulaM ? mathPlain(m.formulaM) : m.formula); el('span', 'mm-isocount', isoHead, (isos.length + 1) + ' isomers');
       const x = el('button', 'mm-back mm-isox', isoHead); x.type = 'button'; x.setAttribute('aria-label', 'close the isomers'); x.textContent = '×'; x.addEventListener('click', closeIsomers);
       isoGrid.style.setProperty('--n', String(isos.length + 1));
       for (const y of [m, ...isos]) { const t = molTile(isoGrid, y, false); if (y === m) t.classList.add('here'); }
-      const pager = view.querySelector('.mm-pager'); if (pager) { isoEl.style.top = pager.offsetTop + 'px'; isoEl.style.maxHeight = Math.max(200, innerHeight - pager.getBoundingClientRect().top - 24) + 'px'; }   // over the deck, never the head (its tag rows set its height)
-      isoEl.hidden = false; enterTiles([...isoGrid.children]);
+      isoEl.style.maxHeight = ''; isoEl.hidden = false; placeIsomers(from); enterTiles([...isoGrid.children]);
       const first = isoGrid.firstElementChild; if (first) first.focus({ preventScroll: true });
     }
     function filter() {
