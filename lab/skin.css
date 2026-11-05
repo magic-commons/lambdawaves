@@ -1068,12 +1068,12 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 #lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
 /* 037 M4 · THE DOORS' INK (Josh 11-05: "Don't use drop shadow for 'Tutorial' and 'Library' … let a copy underneath the text be inverted. So top
    layer is the text, next layer is … 4px right, 4px down, and then set to invert"): no shadow; the word's copy (the span's ::after, its
-   data-word) 4 px right and 4 px down in white ink under `difference`, so it inverts the art beneath it.  The span is no stacking context (z
+   data-word) 1 px right and 1 px down (Josh 11-05, later: "maybe just be 1px to the right, 1px down. instead of 4px") in white ink under `difference`, so it inverts the art beneath it.  The span is no stacking context (z
    auto): the copy blends with the art and the foil in the card's isolated layer (.mm-lit), and the word rides over it (.05em: the copy's
    trailing letter-space, which the word's negative margin cancels) */
 #lwMenu .mm-door-word { z-index: auto; }
 #lwMenu .mm-door-word b { position: relative; z-index: 6; }
-#lwMenu .mm-door-word::after { content: attr(data-word); position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; translate: calc(4px + .05em) 4px; pointer-events: none;
+#lwMenu .mm-door-word::after { content: attr(data-word); position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; translate: calc(1px + .05em) 1px; pointer-events: none;
   font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; color: #fff; mix-blend-mode: difference; }
 #lwMenu .mm-door:is(:hover, :focus-visible) .mm-door-word b { color: var(--acc); }
 /* 036 G1 · THE DOORS' ART (picker.js door): the word alone over the about site's pictures, img/menu/face/ (DATA), each faded in once loaded
