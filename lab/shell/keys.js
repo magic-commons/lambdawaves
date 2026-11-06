@@ -135,10 +135,9 @@ export function createKeys(app) {
   function toggleUI() {
     const on = document.body.classList.toggle('ui-hidden');
     app.state.uiHidden = on;
-    /* 034 M4 · THE FLAG ALONE: the kit's layered `body.ui-hidden #title { display: none !important }` (mir/shell/shell.css) outranks every
-       unlayered rule, so under H the title is kept in paint by its own style (an element's important style is read before the layers);
-       lab.css hides its λ and WAVES, leaving the MIR flag (FOR-MIR: a door for this) */
-    const title = document.getElementById('title'); if (title) title.style.setProperty('display', on ? 'flex' : '', on ? 'important' : '');
+    /* 037 (Josh 11-06: "when the UI is hidden I see the MIR diamond in the top right. It should be absolutely clear. It's supposed to be only
+       for hide and reveal"): under H the title goes with everything else — the kit's `body.ui-hidden #title { display: none !important }`
+       stands (034 M4 kept the flag in paint here by an inline style; that is B's alone now: THE FLAG ALONE lives under body.rack-hidden) */
     if (on) { ui.frameWas = mat.frame; ui.axisWas = mat.axis; mat.frame = false; mat.axis = false; }
     else { if (ui.frameWas !== undefined) mat.frame = ui.frameWas; if (ui.axisWas !== undefined) mat.axis = ui.axisWas; app.state.metersWall = 0; app.state.govVersion = -1; }
     if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false);
