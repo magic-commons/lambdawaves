@@ -431,6 +431,7 @@ export function createChem(host, api) {
   rV.appendChild(vSeg.root);
   /** the hand on the ORBITAL dial: routed, it moves the BASE (the modulator keeps the picture); else it is the orbital, said on the stage */
   function orbInput(v) {
+    if (api.wake) api.wake();                                        // 038 C4: a hand on the dial — a CSB favourite's face turns it while the card is quiet
     const k = Math.round(v), routed = !!(api.modHand && api.modHand('chem.orbital', k)); handK = k;
     if (!routed) { orbital = k; baseHand(); }
     if (view !== 'orbital') toView('orbital', true);                 // iteration 008 R: the HAND on the dial picks VIEW ORBITAL (and the ladder's ORBITAL pane)
@@ -471,7 +472,7 @@ export function createChem(host, api) {
   r2.appendChild(aSeg.root); const PULSES = ['none', 'step', 'ramp', 'wave', 'gaussian'];   // 0.7.0 V1 · PULSES: κ·f(t) along the kick axis for 40 a.u. (density.js fieldOf), the WAVE at the first bright root — instead of the δ-kick
   const pSeg = seg({ label: 'PULSE', value: 'none', options: PULSES.map((id) => ({ id, label: id.toUpperCase(), title: id === 'none' ? 'The δ-kick exp(−iκ q̂)' : 'κ·' + { step: '1', ramp: 't', wave: 'cos ωt (ω: first bright root)', gaussian: 'e^{−0.05 t²}' }[id] + ' for 40 a.u., not a δ-kick' })), onChange: (v) => { pulse = v; setRun(false); rt = spec = fit = null; pushMatrix(); refresh(); } }); r2.appendChild(pSeg.root);
   const kapKnob = knob({ label: '<m>κ</m>', min: 1e-4, max: 1e-2, value: 1e-3, log: true, title: 'δ-kick strength κ: smaller is more linear',
-    fmt: (v) => v.toExponential(1), onInput: (v) => { if (api.modHand && api.modHand('chem.kick', v)) return; kappa = v; } });   // iteration 007 (MIR check B2): routed, the hand moves the base
+    fmt: (v) => v.toExponential(1), onInput: (v) => { if (api.wake) api.wake(); if (api.modHand && api.modHand('chem.kick', v)) return; kappa = v; } });   // iteration 007 (MIR check B2): routed, the hand moves the base; 038 C4: a favourite's turn wakes the card
   r2.appendChild(kapKnob.root);
   const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂), then field-free propagation', onFire: () => { kick(); if (api.strike) api.strike(Math.sqrt(kappa / 1e-3)); } }); r2.appendChild(kickT.root); kickT.root.dataset.keyAction = 'chem.kick';   // 021 I1: the action presses it; 034 I: a hand's KICK strikes the register too
   /* iteration 008 U · Δρ, the VIEW that left the seg: the induced density against the reference stored at the kick, over whatever VIEW the card draws */
@@ -489,7 +490,7 @@ export function createChem(host, api) {
   const roCon = readout({ label: 'CONTINUITY  ‖∂ρ/∂t + ∇·j‖₂ / ‖∂ρ/∂t‖₂ on PLANE\'s sample · ∇·j the full 3-D divergence (the in-plane one would miss ∂j⊥/∂n)', cls: 'wide calc-ray', value: '—' }), conCv = el('canvas', '', roCon.root), conG = conCv.getContext('2d');
   conCv.style.height = '112px'; roCon.root.hidden = true;
   const spdKnob = knob({ label: 'SPEED', min: 1, max: 50, value: 10, title: 'Propagation steps per frame',
-    fmt: (v) => Math.round(v) + '/frame', onInput: (v) => { if (api.modHand && api.modHand('chem.speed', v)) return; speed = Math.max(1, Math.round(v)); } });
+    fmt: (v) => Math.round(v) + '/frame', onInput: (v) => { if (api.wake) api.wake(); if (api.modHand && api.modHand('chem.speed', v)) return; speed = Math.max(1, Math.round(v)); } });
   r2.appendChild(spdKnob.root);
   const dSeg = seg({ label: '<m>STEP  Δt</m>', value: '0.01', options: DTS.map((d) => ({ id: d, label: d, title: 'Δt = ' + d + ' a.u. (0.01 the default)' })),
     onChange: (v) => { dt = Number(v); reset(); } });

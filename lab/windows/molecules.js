@@ -6,7 +6,7 @@ import { VIEW, VIEW_NAMES, STYLE } from '../field.js'; import { MOLECULE_BY_ID }
 import { MODE } from '../shell/settings.js';   // 021 R5: ONE MODE, the windows' table
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
-  const { dom, ui, device, clock, mat, useCompactDefaults, FIRST_RUN, reg } = app, { schedule, canPresent } = app.loop, { rack } = app.host,
+  const { dom, ui, device, clock, mat, useCompactDefaults, FIRST_RUN, reg } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { powered } = app.sh,
     { wState, wSpec, switchHamiltonian, setElement, wSh, wOrb, wVor, wSlice } = app.w, { cardLoading, field, solveChem, solveCard, touchState } = app.ctl, balance = (msg) => solveCard(msg, () => null, (r) => r);   // BALANCED FLOW's repair: the cards queue, never the frame thread
   /* H₂⁺ · LEGACY (the `molecule` card, with W-MO and W-PULSE) was DELETED in 0.5.0 D9: restore opens a file it owned as MOLECULES · H₂ */
   app.state.chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
@@ -89,11 +89,10 @@ export function createMolecules(app) {
   wChem.root.addEventListener('devclose', () => { const C = app.state.chem; if (C && C.on) C.setOn(false); });
   /* 038 C1 · THE POWER BUTTON QUIETS, NEVER SWITCHES (Josh 11-06: "the powerbutton is just to disable the window or any macro routed to it without
      removing the macro/clips and is purely to save resources"): POWER OFF keeps the mode and the molecule — the RT pump and the register stand still
-     (rack.js' loop reads `powered`), the routes and clips on chem.* · reg.* write nothing (shell/modulation.js) and the stage keeps what it shows;
-     POWER ON lands them again; a HAND's pick (a molecule, a volume's, an orbital) powers it on by the rack's road (chemview `wake`) */
+     (rack.js' loop reads `powered`), the routes and clips on chem.* · reg.* write nothing and POWER ON lands them again (shell/modulation.js, C4),
+     and the stage keeps what it shows; a HAND (a molecule, a volume's, an orbital, a favourite's turn) powers it on by the rack's road (chemview `wake`) */
   const power = wChem.root.querySelector('.dev-power');
-  power.addEventListener('click', () => { const H = app.state.modHost; if (!wChem.root.classList.contains('off') && H) H.clock.applyAll(true); });
-  const wake = () => { if (wChem.root.classList.contains('off')) power.click(); };
+  const wake = () => { if (!powered(wChem)) power.click(); };
   /* SKELETON · BEAD · ELLIPSOID (0.7.0 V2 · 0.8.2 P3 · 0.8.3 B3) are INFORMATIONAL's MARKS since iteration 007 (lab/informational.js builds them):
      MOLECULES no longer reaches into that card's body.  The stage words are spoken through ONE verb, stageText.say(kind, text) (shell/stage-words.js) */
   const say = (kind, t, o) => !!app.state.stageText && app.state.stageText.say(kind, t, o);

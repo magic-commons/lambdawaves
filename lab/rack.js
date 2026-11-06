@@ -153,6 +153,7 @@ export async function boot(dom) {
   function readSettings() { return settingsStore.read(); }   // 0.5.2 R3a: §1's reader stays in the head — §0 calls it first (U1), app.sh holds it by value
   /* ── SETTINGS: what this browser remembers — lab/shell/settings.js (0.5.2 R3a), created here ── */
   const { saveSettings, setCardStyle, setFrost, setDisconnected, applySettings, KIND, RETIRED_WINDOWS, powered, DIGESTS } = createSettings(app);
+  app.sh.powered = powered;   // 038 C4: the ONE power predicate — the loop's RT pump and register below, and the quiet MOLECULES card (shell/modulation.js)
   const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 }; app.sh.quality = quality;   // PACE P2: 64³ × 160 × 1 on a desktop (and a phone, whose crossing has its own rule), the GRID pairing 64³ × 110 × 0.75 on a tablet
   /* ── ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD: lab/shell/controller.js (0.5.2 R1), created here; the loop stays below ── */
   const { autoQ, controlStep, RES_LADDER, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, setGovernor, setKeepFrames,
