@@ -73,6 +73,44 @@ export function createWidgets(app) {
   function unmount(id) { const W = live.get(id); if (!W) return; live.delete(id); if (sized) sized.unobserve(W.body); try { if (W.inst.destroy) W.inst.destroy(); } catch (_) {} W.box.remove(); }
   onKinds(() => { for (const it of items) if (!live.has(it.id) && KINDS.has(it.kind)) mount(it); fan(); });
   onThemeChange(() => kick());
+  /* ── 037 W2 · EDIT AND SNAP (Josh: "an 'edit' toggle mode so that you can move widgets around as if treating the stage like a 'home/lock'
+     screen … a toggle for widgets to snap edges together similar to how photoshop snaps"): in EDIT a drag moves a widget, its grip sizes it
+     (≥ MIN each way); SNAP holds the moving edges — a move's left · centre · right and top · middle · bottom, a size's right and bottom — on
+     the nearest line within 6 px among every other widget's edges and centres and the stage's edges and centre lines, a 1-px accent guide
+     across the stage while it holds, gone on release; the record is written on release (one row: WIDGET MOVE or WIDGET SIZE); arrows nudge
+     1 % (Shift 5 %); Escape leaves EDIT (the escape stack, lab/actions.js) ── */
+  const gx = el('i', 'lw-guide', root), gy = el('i', 'lw-guide lw-guide-y', root); gx.hidden = gy.hidden = true;
+  let drop = null;
+  function snapped(r, size, own, S) {
+    const xs = [0, 0.5, 1], ys = [0, 0.5, 1];
+    for (const q of items) if (q !== own) { xs.push(q.x, q.x + q.w / 2, q.x + q.w); ys.push(q.y, q.y + q.h / 2, q.y + q.h); }
+    const near = (edges, lines, span) => { let b = null; for (const e of edges) for (const t of lines) { const d = t - e; if (Math.abs(d * span) <= 6 && (!b || Math.abs(d) < Math.abs(b.d))) b = { d, t }; } return b; };
+    const bx = snapOn && near(size ? [r.x + r.w] : [r.x, r.x + r.w / 2, r.x + r.w], xs, S.width), by = snapOn && near(size ? [r.y + r.h] : [r.y, r.y + r.h / 2, r.y + r.h], ys, S.height);
+    if (bx) r[size ? 'w' : 'x'] += bx.d; if (by) r[size ? 'h' : 'y'] += by.d;
+    gx.hidden = !bx; gy.hidden = !by; if (bx) gx.style.left = bx.t * 100 + '%'; if (by) gy.style.top = by.t * 100 + '%';
+    return r;
+  }
+  root.addEventListener('pointerdown', (e) => {
+    const box = editOn && e.button === 0 && e.target.closest('.lw-widget'), W = box && live.get(box.dataset.id);
+    if (!W || e.target.closest('.lw-widget-bar, .lw-widget-x')) return;   // the kind's controls and × are buttons of their own
+    e.preventDefault(); box.focus({ preventScroll: true }); box.setPointerCapture(e.pointerId);
+    const S = root.getBoundingClientRect(), size = !!e.target.closest('.lw-widget-grip'), o = { ...W.it }, x0 = e.clientX, y0 = e.clientY; let moved = false;
+    const mv = (ev) => {
+      if (!moved && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 3) return; moved = true;
+      const dx = (ev.clientX - x0) / S.width, dy = (ev.clientY - y0) / S.height;
+      const r = snapped(size ? { x: o.x, y: o.y, w: Math.max(MIN, o.w + dx), h: Math.max(MIN, o.h + dy) } : { x: o.x + dx, y: o.y + dy, w: o.w, h: o.h }, size, W.it, S);
+      if (size) { r.w = Math.min(r.w, 1 - r.x); r.h = Math.min(r.h, 1 - r.y); }
+      Object.assign(W.it, fit(r)); place(W);
+    };
+    const end = () => { box.removeEventListener('pointermove', mv); box.removeEventListener('pointerup', end); box.removeEventListener('pointercancel', end); gx.hidden = gy.hidden = true;
+      if (moved) commit(size ? 'WIDGET SIZE' : 'WIDGET MOVE'); };
+    box.addEventListener('pointermove', mv); box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
+  });
+  root.addEventListener('keydown', (e) => {
+    const W = editOn && e.target.classList.contains('lw-widget') && live.get(e.target.dataset.id), d = W && { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    if (!d) return; e.preventDefault(); e.stopPropagation();
+    const k = e.shiftKey ? 0.05 : 0.01; Object.assign(W.it, fit({ ...W.it, x: W.it.x + d[0] * k, y: W.it.y + d[1] * k })); place(W); commit('WIDGET MOVE');
+  });
   const api = L = {
     root,
     /** one more widget of `kind` at the stage's centre (each next one a step down-right, so a pile stays readable); its id, or null */
@@ -89,6 +127,8 @@ export function createWidgets(app) {
     /** EDIT: the widgets take the pointer (W2); no argument reads it */
     edit(on) { if (on === undefined) return editOn; editOn = !!on; root.classList.toggle('edit', editOn); root.toggleAttribute('aria-hidden', !editOn);
       for (const W of live.values()) W.box.tabIndex = editOn ? 0 : -1;
+      if (editOn && !drop && app.sh.ACTIONS) drop = app.sh.ACTIONS.escape.push(() => api.edit(false), { alive: () => editOn });
+      if (!editOn) { if (drop) drop(); drop = null; gx.hidden = gy.hidden = true; if (root.contains(document.activeElement)) document.activeElement.blur(); }
       kick(); fan(); return editOn; },
     snap(on) { if (on === undefined) return snapOn; snapOn = !!on; fan(); return snapOn; },
     tick(now, ctx) {

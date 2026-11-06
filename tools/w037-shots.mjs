@@ -41,5 +41,27 @@ try {
       return { n: __LW.widgets.list().length, rec: JSON.parse(localStorage.getItem('lambdawaves.q0.widgets') || '{"items":[]}').items.length, proj: !!__LW.serialize().presentation.widgets };`);
     out.ok = out.put.rec === 2 && out.put.proj === 2 && out.put.edit === 2 && out.reload.length === 2 && out.fresh.n === 0 && out.fresh.rec === 0 && !out.fresh.proj;
   }
+  if (scene === 'w2') {   /* a real drag in EDIT: the moving widget's centre lands 4 px off the stage's centre line, snaps onto it, the guide shows, one WIDGET MOVE row */
+    await g.ev(`const s = document.createElement('script'); s.type = 'module'; s.src = '/tools/w037-probe-kind.js'; document.head.append(s); return 1;`);   // a probe kind, in the page's own module map
+    if (!(await g.waitFor('window.__probeKind', 100, 100)).ok) throw new Error('the probe kind did not load');
+    const A = await g.ev(`const L = __LW.widgets; L.restore({ items: [{ id: 'w1', kind: 'probe', x: 0.15, y: 0.3, w: 0.1, h: 0.1 }, { id: 'w2', kind: 'probe', x: 0.62, y: 0.55, w: 0.1, h: 0.1 }] }); L.edit(true);
+      await new Promise((r) => setTimeout(r, 200)); const b = document.querySelector('#widgets .lw-widget[data-id="w2"]').getBoundingClientRect(), S = L.root.getBoundingClientRect();
+      return { b: [b.left, b.top, b.width, b.height], S: [S.left, S.top, S.width, S.height], rows: __LW.history.entries().length };`);
+    const [bx, by, bw, bh] = A.b, [sx, , sw] = A.S, from = [bx + bw / 2, by + bh / 2], dx = (sx + sw / 2 + 4) - from[0];
+    await drv.actions(g.s, [{ type: 'pointer', id: 'p' + (++pid), parameters: { pointerType: 'mouse' }, actions: [
+      { type: 'pointerMove', duration: 0, origin: 'viewport', x: Math.round(from[0]), y: Math.round(from[1]) }, { type: 'pointerDown', button: 0 },
+      { type: 'pointerMove', duration: 150, origin: 'viewport', x: Math.round(from[0] + dx / 2), y: Math.round(from[1] - 20) },
+      { type: 'pointerMove', duration: 150, origin: 'viewport', x: Math.round(from[0] + dx), y: Math.round(from[1] - 40) }] }]);
+    out.mid = await g.ev(`const gx = document.querySelector('#widgets .lw-guide:not(.lw-guide-y)'); return { guide: !gx.hidden, at: gx.style.left };`);
+    await shot('037-W2-edit-snap-guide');
+    await drv.actions(g.s, [{ type: 'pointer', id: 'p' + (++pid), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerUp', button: 0 }] }]); await drv.relActions(g.s);
+    out.after = await g.ev(`await new Promise((r) => setTimeout(r, 700)); const q = __LW.widgets.list().find((i) => i.id === 'w2');
+      return { centre: +(q.x + q.w / 2).toFixed(4), y: q.y, guideGone: document.querySelector('#widgets .lw-guide').hidden, rows: __LW.history.entries().length, last: __LW.history.entries().slice(-1)[0].label };`);
+    await g.press('');   // ArrowLeft on the focused widget: a 1 % nudge
+    out.nudge = await g.ev(`await new Promise((r) => setTimeout(r, 600)); const q = __LW.widgets.list().find((i) => i.id === 'w2'); return { centre: +(q.x + q.w / 2).toFixed(4), focus: document.activeElement.dataset.id };`);
+    await g.press('');   // Escape
+    out.esc = await g.ev(`return { edit: __LW.widgets.edit(), pe: getComputedStyle(document.querySelector('#widgets .lw-widget')).pointerEvents };`);
+    out.ok = out.mid.guide && out.mid.at === '50%' && out.after.centre === 0.5 && out.after.guideGone && out.after.last === 'WIDGET MOVE' && out.after.rows > A.rows && out.nudge.centre === 0.49 && !out.esc.edit && out.esc.pe === 'none';
+  }
   out.errs = (await g.errors()).errs;
 } finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }
