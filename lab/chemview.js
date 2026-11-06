@@ -274,7 +274,7 @@ export function createChem(host, api) {
     header();
   }
   /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
-  function handPick(id) { near = true; pivotHand = true; const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app); 034 F2b: the hand's molecule takes the pivot
+  function handPick(id) { near = true; pivotHand = true; if (api.wake) api.wake(); const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app); 034 F2b: the hand's molecule takes the pivot; 038 C1: a powered-off card wakes
     const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
@@ -669,7 +669,7 @@ export function createChem(host, api) {
   /* ── V2 · A VOLUME'S MOLECULE: the .lwm (lab/volumes.js, sha-256 checked) parsed once, each rung opened by THE RECORD ROAD's chem.open with its
      ground.hash under the same `seq` law.  `network: false` is a project's road (installed only, else the sentence, no solve) ── */
   async function openVolume(volId, molId, want = null, { hand = true, network = true, on: turnOn = true, sha = null } = {}) {
-    if (hand) pivotHand = true;   // 034 F2b
+    if (hand) { pivotHand = true; if (api.wake) api.wake(); }   // 034 F2b · 038 C1
     const seq0 = ++volSeq, same = (v) => v && v.volume === volId && v.id === molId;
     let v = same(volRef) ? volRef : same(volKeep) ? volKeep : null;
     if (!v) {
@@ -1536,7 +1536,7 @@ export function createChem(host, api) {
     get view() { return view; }, get delta() { return delta; }, setDelta,
     /** iteration 008 U · the card's two seats the register fills: the ON row (its ORBITAL | STATES seg) and the panes under it */
     slots: { top: rTop, register: regHost },
-    orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = handK = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); baseHand(); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
+    orbital(k) { if (Number.isFinite(k)) { if (api.wake) api.wake(); const [lo, hi] = span(); orbital = handK = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); baseHand(); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },
     setDt(v) { if (!DTS.includes(String(v))) return dt; dt = Number(v); dSeg.set(String(v)); reset(); return dt; },

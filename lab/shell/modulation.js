@@ -238,6 +238,10 @@ export function createModSeam(app) {
          a route's value is written as a hand's is (mat.light, off its home), the hand's base is the registry's */
       ...lightDefs(app),
     ];
+    /* 038 C1 · THE POWER BUTTON QUIETS: MOLECULES powered off swallows every write to its targets (chem.* · reg.*), so a route or a clip on one
+       goes quiet and is KEPT — nothing unrouted, the stage as it was — and the card's power ON lands them again (windows/molecules.js) */
+    const quiet = () => app.w.wChem.root.classList.contains('off');
+    for (const d of defs) if (/^(chem|reg)\./.test(d.id)) { const set = d.set; d.set = (v) => { if (!quiet()) set(v); }; }
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
        CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
