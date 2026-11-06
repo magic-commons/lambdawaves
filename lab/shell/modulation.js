@@ -19,7 +19,7 @@ export function liftBands(doc, registry) {
   return moved ? { ...doc, curves } : doc;
 }
 export function createModSeam(app) {
-  const { ui, hNote, clock, obs, mat, settingsStore, reg, rates, dom } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
+  const { ui, hNote, clock, obs, mat, settingsStore, reg, rates, dom } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings, powered } = app.sh, { wChem } = app.w,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
   /* ── WAVE 64 · THERE IS NO MODULATION CARD ANY MORE ──────────────────────────────────────────
    * The modulation window is a PORTED ARTIFACT (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW
@@ -239,9 +239,16 @@ export function createModSeam(app) {
       ...lightDefs(app),
     ];
     /* 038 C1 · THE POWER BUTTON QUIETS: MOLECULES powered off swallows every write to its targets (chem.* · reg.*), so a route or a clip on one
-       goes quiet and is KEPT — nothing unrouted, the stage as it was — and the card's power ON lands them again (windows/molecules.js) */
-    const quiet = () => app.w.wChem.root.classList.contains('off');
-    for (const d of defs) if (/^(chem|reg)\./.test(d.id)) { const set = d.set; d.set = (v) => { if (!quiet()) set(v); }; }
+       goes quiet and is KEPT — nothing unrouted, the stage as it was.  C4 · THE QUIET CARD LETS GO: a target whose write was swallowed reads back
+       as the registry holds it (so no base re-syncs from the frozen card), and POWER ON writes each one the registry's value now — a clip or a
+       route taken off while quiet lets go to the base, one put on lands — then re-asserts every route */
+    const slept = new Map(), quiet = () => !powered(wChem), R = () => app.state.modHost.registry;
+    for (const d of defs) if (/^(chem|reg)\./.test(d.id)) { const { set, get } = d;
+      d.set = (v) => { if (quiet()) slept.set(d.id, set); else set(v); };
+      d.get = () => (slept.has(d.id) ? R().read(d.id) : get()); }
+    wChem.root.querySelector('.dev-power').addEventListener('click', () => { if (quiet()) return;
+      for (const [id, set] of slept) { slept.delete(id); if (R().has(id)) set(R().read(id)); }
+      app.state.modHost.clock.applyAll(true); });
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
        CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
