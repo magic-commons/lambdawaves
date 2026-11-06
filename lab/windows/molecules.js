@@ -84,10 +84,16 @@ export function createMolecules(app) {
   const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
   rack.appendChild(wChem.root);
-  /* 017 (Josh's call 8, 2026-10-26): AN EFFECT SHOWS ITS WINDOW holds for the mode too — the card's × or POWER OFF is MOLECULES OFF (the molecule
-     lets the field go; the Picker, the CSB's mode or ‹ SYSTEM › MOLECULES bring it back, and moleculeMode reopens a ×'d card) */
+  /* 017 (Josh's call 8, 2026-10-26): AN EFFECT SHOWS ITS WINDOW holds for the mode too — the card's × is MOLECULES OFF (the molecule lets the
+     field go; the Picker, the CSB's mode or ‹ SYSTEM › MOLECULES bring it back, and moleculeMode reopens a ×'d card) */
   wChem.root.addEventListener('devclose', () => { const C = app.state.chem; if (C && C.on) C.setOn(false); });
-  wChem.root.querySelector('.dev-power').addEventListener('click', () => { const C = app.state.chem; if (wChem.root.classList.contains('off') && C && C.on) C.setOn(false); });
+  /* 038 C1 · THE POWER BUTTON QUIETS, NEVER SWITCHES (Josh 11-06: "the powerbutton is just to disable the window or any macro routed to it without
+     removing the macro/clips and is purely to save resources"): POWER OFF keeps the mode and the molecule — the RT pump and the register stand still
+     (rack.js' loop reads `powered`), the routes and clips on chem.* · reg.* write nothing (shell/modulation.js) and the stage keeps what it shows;
+     POWER ON lands them again; a HAND's pick (a molecule, a volume's, an orbital) powers it on by the rack's road (chemview `wake`) */
+  const power = wChem.root.querySelector('.dev-power');
+  power.addEventListener('click', () => { const H = app.state.modHost; if (!wChem.root.classList.contains('off') && H) H.clock.applyAll(true); });
+  const wake = () => { if (wChem.root.classList.contains('off')) power.click(); };
   /* SKELETON · BEAD · ELLIPSOID (0.7.0 V2 · 0.8.2 P3 · 0.8.3 B3) are INFORMATIONAL's MARKS since iteration 007 (lab/informational.js builds them):
      MOLECULES no longer reaches into that card's body.  The stage words are spoken through ONE verb, stageText.say(kind, text) (shell/stage-words.js) */
   const say = (kind, t, o) => !!app.state.stageText && app.state.stageText.say(kind, t, o);
@@ -108,7 +114,7 @@ export function createMolecules(app) {
     setOn(v) { moleculeMode(v); switching(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)
     viewed: (hand) => { const R = app.state.register; if (!R) return; if (hand && app.state.chem.view === 'orbital') R.setMode('orbital'); R.follow(hand); },   // iteration 008 U: ON, VIEW or a file moved — the register follows the one state; R: a HAND's VIEW ORBITAL shows the ladder its cursor stands on
     cursor: () => { if (app.state.register) app.state.register.orbitals.paint(); },   // iteration 008 R: the ORBITAL dial's orbital, the VIEW or ON moved — the ladder redraws its cursor
-    hand: (id) => headPick(id),                                      // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)
+    hand: (id) => headPick(id), wake,                                // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)   // 038 C1: and a powered-off card wakes for one
     atomZ: () => HAMILTONIANS.atom.Z, atom(z) { setElement(z); if (getHamiltonian().id !== 'atom') switchHamiltonian('atom'); ui.hamSeg.set('atom'); app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); },   // 0.7.4 C2: ‹ ATOMS ›' tile, SPECTRUM's ATOM road
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
        model is playing and which observable the field shows.  See molecular-session.js. */

@@ -82,12 +82,12 @@ export function createChem(host, api) {
      consumed by the next solve and then cleared. */
   /* iteration 007 O (ADR-0001) · THE ORBITAL DIAL IS A STEPPED TARGET, `chem.orbital` (lab/shell/modulation.js registers it and re-registers its
      range on every landing).  `handK` is the index the HAND owns — the dial, a landing, a file, a verb; a modulator never writes it — so a
-     saved orbital's name (orbitalKey) is the base's, never wherever an LFO stood at SAVE.  THE STEP-RATE CAP (Josh 10-18: "Orbitals should be
-     steps and I think it could handle it at lower frequencies"): every step rebuilds the volume, so a modulator's writes coalesce — the latest
-     value wins, applied at most once per STEP_MS (O-BUILD measured a rebuild at 40 ms median, 104 ms worst — far under the cap, so the cap
-     is the whole rule).  An LFO at 20 Hz steps at the cap; a lane at 0.5 Hz steps every orbital it crosses. */
-  const STEP_MS = 334;   // ≤ 3 steps a second: THE PHOTOSENSITIVITY LAW's 3 flashes a second (the flash guard does not see chem.orbital); the builder's 120 ms allowed 8.3 (Yan at the merge, 10-18)
-  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, clamped = null, stepParked = false;
+     saved orbital's name (orbitalKey) is the base's, never wherever an LFO stood at SAVE.  038 C2 · THE ROUTE TAKES THE HAND'S ROAD (Josh 11-06:
+     "By hand it moves super fast and smoothly … I see no reason for it to be laggy and only 2 steps per second when in mod/clip mode"): the
+     10-18 cap of one step per 334 ms is retired by his word.  Every step rebuilds the volume, so a modulator's writes still coalesce — the first
+     lands at once, as the hand's does, and the rest of that frame's wait for the next one, the latest value winning — so a routed sweep steps
+     every orbital it crosses at the frame's pace. */
+  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepFrame = 0, clamped = null, stepParked = false;
   let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
@@ -274,7 +274,7 @@ export function createChem(host, api) {
     header();
   }
   /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
-  function handPick(id) { near = true; pivotHand = true; const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app); 034 F2b: the hand's molecule takes the pivot
+  function handPick(id) { near = true; pivotHand = true; if (api.wake) api.wake(); const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app); 034 F2b: the hand's molecule takes the pivot; 038 C1: a powered-off card wakes
     const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
@@ -669,7 +669,7 @@ export function createChem(host, api) {
   /* ── V2 · A VOLUME'S MOLECULE: the .lwm (lab/volumes.js, sha-256 checked) parsed once, each rung opened by THE RECORD ROAD's chem.open with its
      ground.hash under the same `seq` law.  `network: false` is a project's road (installed only, else the sentence, no solve) ── */
   async function openVolume(volId, molId, want = null, { hand = true, network = true, on: turnOn = true, sha = null } = {}) {
-    if (hand) pivotHand = true;   // 034 F2b
+    if (hand) { pivotHand = true; if (api.wake) api.wake(); }   // 034 F2b · 038 C1
     const seq0 = ++volSeq, same = (v) => v && v.volume === volId && v.id === molId;
     let v = same(volRef) ? volRef : same(volKeep) ? volKeep : null;
     if (!v) {
@@ -770,7 +770,7 @@ export function createChem(host, api) {
     orbital = handK = named ? named.k : Number.isFinite(P) ? Math.min(hi, Math.max(lo, Math.round(P))) : r.nocc;
     clamped = !named && Number.isFinite(P) && orbital !== P ? { asked: P, lo, hi, k: orbital, key: r.key } : null;
     const parked = stepParked ? stepWant : null; stepParked = false;
-    pendingOrbital = pendingKey = null; clearTimeout(stepTimer); stepTimer = 0; stepWant = null;
+    pendingOrbital = pendingKey = null; stepWant = null;
     rebuildOrbKnob(); standDown(); pivotTo(); pushField();
     if (Number.isFinite(parked)) { stepWant = parked; stepApply(); }   // 034 F2a: the lane's last write, once, on the new molecule's span
     refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
@@ -816,15 +816,11 @@ export function createChem(host, api) {
     orbKnob.root.replaceWith(next.root); orbKnob = next;
     seats();
   }
-  /** the modulator's road (chem.orbital's set): coalesced, the latest value wins; `held` paints the dial over the base (show), else sets it */
-  function stepOrbital(v, held) {
-    stepWant = v; stepHeld = !!held;
-    if (stepTimer) return;
-    const wait = stepAt + STEP_MS - performance.now();
-    if (wait <= 0) stepApply(); else stepTimer = setTimeout(stepApply, wait);
-  }
+  /** the modulator's road (chem.orbital's set): one step a frame, the latest value wins; `held` paints the dial over the base (show), else sets it */
+  function stepOrbital(v, held) { stepWant = v; stepHeld = !!held; if (!stepFrame) stepTick(); }
+  /** a step now, and the road shut until the next frame, which takes the latest write that came meanwhile (a parked write waits for its landing) */
+  function stepTick() { stepFrame = 0; if (stepWant === null) return; stepApply(); if (stepWant === null) stepFrame = requestAnimationFrame(stepTick); }
   function stepApply() {
-    stepTimer = 0;
     /* 034 F2a (Josh: "When orbital knob in molecules is a clip on the timeline, switching to another molecule breaks it"): while the NEXT
        molecule solves, a lane's write waits for it — the old dial is not stepped on the old molecule's range — and the last one is applied
        once on the landing (land), on the new molecule's span; the re-registration's applyAll follows it there */
@@ -834,7 +830,7 @@ export function createChem(host, api) {
     const [lo, hi] = span(), k = Math.min(hi, Math.max(lo, Math.round(v)));
     if (stepHeld && orbKnob.show) orbKnob.show(k); else orbKnob.set(k);
     if (k === orbital) return;
-    orbital = k; stepAt = performance.now();
+    orbital = k;
     if (view === 'orbital') pushMatrix();
     refresh();
   }
@@ -1516,11 +1512,11 @@ export function createChem(host, api) {
     setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
     get esp() { return espLast; }, espPump() { espPump(); return espLast; },   // 0.6.5 X1: the last chem.esp reply; VIEW ESP pumps from update()
     solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one
-    /* the modulation registry's targets — chem.kick and chem.speed (PRESENT-only setters) and their dials; chem.orbital's capped road is above */
+    /* the modulation registry's targets — chem.kick and chem.speed (PRESENT-only setters) and their dials; chem.orbital's stepped road is above */
     get kappa() { return kappa; }, setKappa(v) { if (!Number.isFinite(v)) return kappa; kappa = Math.min(1e-2, Math.max(1e-4, v)); return kappa; },
     get speed() { return speed; }, setSpeed(v) { if (!Number.isFinite(v)) return speed; speed = Math.min(50, Math.max(1, Math.round(v))); return speed; },
     knobs: { kick: () => kapKnob, speed: () => spdKnob, orbital: () => orbKnob },
-    /* iteration 007 O · chem.orbital: the range a landing re-registers, the capped modulator road, the cap's witness, and a file's clamp */
+    /* iteration 007 O · chem.orbital: the range a landing re-registers, the modulator's stepped road, and a file's clamp */
     span() { return span(); }, stepOrbital, get clamped() { return clamped; },
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
@@ -1536,7 +1532,7 @@ export function createChem(host, api) {
     get view() { return view; }, get delta() { return delta; }, setDelta,
     /** iteration 008 U · the card's two seats the register fills: the ON row (its ORBITAL | STATES seg) and the panes under it */
     slots: { top: rTop, register: regHost },
-    orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = handK = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); baseHand(); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
+    orbital(k) { if (Number.isFinite(k)) { if (api.wake) api.wake(); const [lo, hi] = span(); orbital = handK = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); baseHand(); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },
     setDt(v) { if (!DTS.includes(String(v))) return dt; dt = Number(v); dSeg.set(String(v)); reset(); return dt; },

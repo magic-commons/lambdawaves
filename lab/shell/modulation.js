@@ -139,8 +139,8 @@ export function createModSeam(app) {
          "Orbitals should be steps and I think it could handle it at lower frequencies"): this array used to keep the index out because
          it changes WHICH quantity the volume means — a rebuild of the picture's subject, not a value to sweep.  That is still true, and
          it is answered rather than refused: `chem.orbital` is an INTEGER target (every value a route or a lane writes is a whole
-         orbital, never a cross-fade), and its setter is CAPPED (chemview stepOrbital: the latest value wins, at most one step per
-         334 ms — three a second, THE PHOTOSENSITIVITY LAW's flashes).  Its range is the MOLECULE's, so this row only holds the id, the
+         orbital, never a cross-fade), and its setter steps (chemview stepOrbital: one step a frame, the latest value wins — 038 C2 retired
+         10-18's 334 ms cap by Josh's word, so a route walks the ladder as the hand does).  Its range is the MOLECULE's, so this row only holds the id, the
          adapters and the field's orbital ceiling until the first landing; every landing re-registers it by id with the molecule's
          span (below the install: the kit's HOT RE-REGISTRATION keeps the base and the routes).  Do not move it back out: saved
          projects carry routes and TIMELINE clips on this id.  FIELD RESOLUTION and STEPS stay out — they rebuild the field itself. */
@@ -238,6 +238,10 @@ export function createModSeam(app) {
          a route's value is written as a hand's is (mat.light, off its home), the hand's base is the registry's */
       ...lightDefs(app),
     ];
+    /* 038 C1 · THE POWER BUTTON QUIETS: MOLECULES powered off swallows every write to its targets (chem.* · reg.*), so a route or a clip on one
+       goes quiet and is KEPT — nothing unrouted, the stage as it was — and the card's power ON lands them again (windows/molecules.js) */
+    const quiet = () => app.w.wChem.root.classList.contains('off');
+    for (const d of defs) if (/^(chem|reg)\./.test(d.id)) { const set = d.set; d.set = (v) => { if (!quiet()) set(v); }; }
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
        CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
