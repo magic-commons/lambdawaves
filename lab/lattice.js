@@ -53,11 +53,12 @@ export function createLattice(host, api) {
     else { ro.lev.set(`${n} ${P.preset === 'spin' ? 'states' : 'sites'} · ${E[0].toFixed(4)} … ${E[n - 1].toFixed(4)}`); ro.lev.setSub(`E₁ − E₀ = ${(E[1] - E[0]).toFixed(5)} · mid E_{N/2} − E_{N/2−1} = ${(E[h] - E[h - 1]).toFixed(5)}`); }
     ro.law.set(c.line); ro.law.setSub(c.levels ? `the measured levels agree to ${d.toExponential(1)}` : c.sub || 'the prediction; the IPR is the measurement'); update(api.t());
   }
-  function update(t) { if (dirty) { prepare(); return; } if (!ev || t === lastT) return; lastT = t; paint(ev.at(t - t0)); }
-  function paint(psi) {
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = hold.clientWidth, Hh = hold.clientHeight; if (W < 32 || Hh < 32) return;
-    if (cv.width !== W * dpr || cv.height !== Hh * dpr) { cv.width = W * dpr; cv.height = Hh * dpr; }
-    const g = cv.getContext('2d'), T = themeInk(g), xy = H.xy, pal = api.palette(), stops = pal && pal.on ? pal.stops : null;
+  const views = new Set();   // 037 V1 THE SEAM: one lattice, every view of it — each LATTICE widget's canvas, then the window's (last: the clicks read its geometry)
+  function update(t) { if (dirty) { prepare(); return; } if (!ev || t === lastT) return; lastT = t; const psi = ev.at(t - t0); for (const c of views) paint(psi, c); paint(psi, cv); }
+  function paint(psi, c) {
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = c.clientWidth, Hh = c.clientHeight; if (W < 32 || Hh < 32) return;
+    if (c.width !== W * dpr || c.height !== Hh * dpr) { c.width = W * dpr; c.height = Hh * dpr; }
+    const g = c.getContext('2d'), T = themeInk(g), xy = H.xy, pal = api.palette(), stops = pal && pal.on ? pal.stops : null;
     if (lutOf !== (stops || hsvWheel)) { lutOf = stops || hsvWheel; lut = toLUT(stops || hsvWheel()); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, Hh); ro.ipr.set(ipr(psi).toFixed(4)); ro.ipr.setSub(`1 on one ${P.preset === 'spin' ? 'state' : 'site'} · 1/N = ${(1 / psi.re.length).toFixed(4)} spread · t = ${(lastT - t0).toFixed(2)}/J`);
     if (P.preset === 'spin') { const v = spinView(psi, P.ns), A = P.ns >> 1; psi = v; ro.run.set(`S(t) ${v.S.toFixed(4)} · the most ${A} ln 2 = ${(A * Math.LN2).toFixed(4)} · Page’s mean ${(A * Math.LN2 - 2 ** (2 * A - P.ns - 1)).toFixed(4)}`); ro.run.setSub(`the half chain: the first ${A} spins’ −Tr ρ ln ρ · ⟨σ_z⟩ ${[...v.z].map((z) => z.toFixed(2)).join(' ')}`); }
@@ -80,9 +81,9 @@ export function createLattice(host, api) {
     if (y > r.height - 26) return set({ state: 'eigen', idx: Math.max(0, Math.min(S.n - 1, Math.floor((x - 8) / (r.width - 16) * S.n))) });
     let best = 0, bd = Infinity; for (let i = 0; i < H.xy.length; i++) { const d = Math.hypot(geo.X(H.xy[i][0]) - x, geo.Y(H.xy[i][1]) - y); if (d < bd) { bd = d; best = i; } } set({ state: 'site', idx: P.preset === 'spin' ? P.idx ^ (1 << best) : best });
   });
-  new ResizeObserver(() => { lastT = NaN; if (ev) update(api.t()); }).observe(hold);
+  const redraw = () => { lastT = NaN; if (ev) update(api.t()); }; new ResizeObserver(redraw).observe(hold);
   sync();
-  return (LAT = { prepare, update, set, params: P, ro: Object.values(ro), get label() { return PRE(P.preset).label; },
+  return (LAT = { prepare, update, set, params: P, views, redraw, ro: Object.values(ro), get label() { return PRE(P.preset).label; },
     save() { const d = {}; for (const k in DEFAULTS) if (P[k] !== DEFAULTS[k]) d[k] = P[k]; return Object.keys(d).length ? d : undefined; },
     load(I) { const q = { ...DEFAULTS }; for (const k in q) if (I && typeof I[k] === typeof q[k]) q[k] = I[k]; if (!SK[q.state]) q.state = DEFAULTS.state; set({ ...q, preset: PRE(q.preset).id }); } });
 }

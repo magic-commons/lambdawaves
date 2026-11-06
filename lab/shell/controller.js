@@ -88,6 +88,7 @@ export async function createController(app) {
   const READERS = {};
   function may(name, w) {
     if (w && !app.loop.windowActivity.canPresent(w)) return false;
+    if (w && !w.root) w = READERS[name];   // 037 V1: a WIDGET's root (lab/widget-views.js) presents for itself, its own track; the governor's notes stay on the window
     if (!clock.playing || !gov.on) { if (gov.parked.has(name)) unpark(name, w); return true; }
     const now = performance.now();
     if (now - gov.scroll < 150) return false;

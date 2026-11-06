@@ -37,7 +37,6 @@ export function createOrbit(host, api) {
   hint.innerHTML = 'Drag either sphere to apply one SO(4) rotor. Use KEPLER controls to rotate both as one spatial rotation.';
   const rows = el('div', 'orbit-rows', host);
   el('div', 'note', host).innerHTML = '<b>Interpretation.</b> Schmidt values are unchanged by the two rotor controls. COHERENCE reaches 1 only when both rotor expectations are maximal. The Kepler ellipse is a classical shadow with eccentricity |⟨K⟩|/n.';
-  const g = cv.getContext('2d');
   let lastVersion = -1, shells = [], lastObs = '', centres = [0, 0, 0], radius = 1, midY = 0, lastPaintObs = null, hovers = [], plot = null;
   /* WAVE 46 — the three panels carry no floating text.  "n2  e = 0.834  (rank > 1)" used to be stacked in the
      top-left corner in the shell's own colour, over whatever the spheres had drawn there; the rotor arms, the
@@ -82,9 +81,10 @@ export function createOrbit(host, api) {
       const lk = readout({ label: '|⟨L⟩| · |⟨K⟩| · e', cls: 'wide', value: `${s.absL.toFixed(3)} · ${s.absK.toFixed(3)} · ${s.e.toFixed(3)}`, sub: `⟨z⟩ = ${s.z.toFixed(3)} a₀ · |⟨L⟩|²+|⟨K⟩|² = ${s.casimir.toFixed(4)} of ${s.casimirMax} (coherent ⟺ equal)` }); row.appendChild(lk.root);
     }
   }
-  function paint(obs) {
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
-    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const views = new Set(), paint = (obs) => { for (const c of views) draw(c, obs); draw(cv, obs); };   // 037 V1 THE SEAM: each ORBIT widget's canvas, then the window's (last: its hover and drag geometry)
+  function draw(c, obs) {
+    const g = c.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1), W = c.clientWidth, H = c.clientHeight;
+    if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
     if (W < 32 || H < 32) return;                       // folded: no size, no drawing (radii would go negative)
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle';
     lastPaintObs = obs; hovers = []; plot = { x0: 0, y0: 0, x1: W, y1: H };
@@ -95,7 +95,7 @@ export function createOrbit(host, api) {
     centres = cx; radius = R; midY = cy;
     /* the frame: a thin low-alpha circle, the ẑ tick, and ONE short name per panel — measured and clamped into
        its own third, never over the next sphere (KEPLER's parenthetical is on the panel's hover now) */
-    const sphere = (k, label) => { sphereFrame(g, T, B, cx[k], cy, R); fitText(g, label, cx[k], cy + R + 10, { x0: k * W / 3 + 2, y0: 0, x1: (k + 1) * W / 3 - 2, y1: H }, 'center'); };
+    const sphere = (k, label) => { sphereFrame(g, T, B, cx[k], cy, R); if (c === cv) fitText(g, label, cx[k], cy + R + 10, { x0: k * W / 3 + 2, y0: 0, x1: (k + 1) * W / 3 - 2, y1: H }, 'center'); };
     sphere(0, '⟨J₊⟩ / j'); sphere(1, '⟨J₋⟩ / j'); sphere(2, 'KEPLER');
     hovers.push({ kind: 'dot', key: 'kep', x: cx[2], y: cy + R + 10, r: 7, colour: T.ink(1), info: 'KEPLER — L̂ the orbit normal, K̂ the major axis; the panel drags both rotors together (an ordinary rotation)' });
     for (const s of shells) {
@@ -139,5 +139,5 @@ export function createOrbit(host, api) {
     if (key !== lastObs) { lastObs = key; paint(obs); }
   }
   window.addEventListener('resize', () => { lastObs = ''; });
-  return { update, get shells() { return shells; } };
+  return { update, views, redraw: paint, get shells() { return shells; } };
 }

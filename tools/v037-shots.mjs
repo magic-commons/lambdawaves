@@ -1,0 +1,52 @@
+/* v037-shots.mjs — iteration 037 chain V's light checks and pictures (a diagnostic, not a gate).
+ *   LW_PORT=9699 GD_PORT=5699 node tools/v037-shots.mjs <scene> [out-dir]
+ * Scenes: v1 (the windows' own pictures, hashed at a fixed t: the seam changes nothing a window shows) · v2 (the visualizer kinds paint on the
+ * stage with every window closed, follow the clock, and stand down under H) · v4 (each widget over SOLID and CLOUD, dark and light).
+ * JPEGs into <out-dir> (default .tmp/V-shots). */
+import { writeFileSync, mkdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { open } from './gate/gatekit.mjs';
+
+const scene = process.argv[2] || 'v1', DIR = process.argv[3] || '.tmp/V-shots', URL0 = `https://127.0.0.1:${process.env.LW_PORT || 9699}/lab/?starter=home&menu=0`;
+const KINDS = (process.env.V_KINDS || 'shadow,bloch,lattice,orbit,wigner,plane,emission,equalizer,spectrum,orbitals,states').split(',');
+const WIN = { plane: 'slice', orbitals: 'chem', states: 'chem' };   // a kind's window, where its id differs
+mkdirSync('.tmp', { recursive: true }); mkdirSync(DIR, { recursive: true });
+const g = await open(URL0, { width: 1500, height: 950 });
+async function shot(name, box) {
+  const png = `.tmp/v-${name}.png`; writeFileSync(png, Buffer.from(await g.snap(), 'base64'));
+  execFileSync('python3', ['-I', '-c', `import sys
+from PIL import Image
+im = Image.open(sys.argv[1]).convert('RGB'); b = sys.argv[3]
+if b != '-': im = im.crop(tuple(int(v) for v in b.split(',')))
+if im.width > 1200: im = im.resize((1200, round(im.height * 1200 / im.width)))
+im.save(sys.argv[2], quality=78)`, png, `${DIR}/${name}.jpg`, box ? box.map(Math.round).join(',') : '-']);
+  return `${DIR}/${name}.jpg`;
+}
+/* a canvas's pixels: an FNV-1a hash and the inked count (alpha > 0), in the page */
+const PIX = `const pix = (c) => { if (!c || !c.width || !c.height) return { h: 0, ink: 0, w: c ? c.width : -1 }; const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let h = 2166136261, ink = 0;
+  for (let i = 0; i < d.length; i++) { h = Math.imul(h ^ d[i], 16777619) >>> 0; if ((i & 3) === 3 && d[i]) ink++; } return { h: h.toString(16), ink, w: c.width, hh: c.height }; };`;
+const boot = async () => { if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify((await g.errors()).errs));
+  await g.ev(`__LW.pause(); return 1;`); };
+const out = {};
+try {
+  await boot();
+  if (scene === 'v1') {   /* the four windows open at t = 0, then t = 3: each window canvas hashed (equal before and after the seam) */
+    out.win = await g.ev(`${PIX} __LW.windowActivity.presentOffscreen(true); __LW.seek(0); for (const id of ['shadow', 'bloch', 'lattice', 'orbit']) __LW.actions.run('window.' + id + '.open');
+      await new Promise((r) => setTimeout(r, 1500)); __LW.seek(3); await __LW.settle(); await new Promise((r) => setTimeout(r, 1200));
+      const q = (s) => document.querySelector(s);
+      return { shadow: pix(q('.dev[data-id="shadow"] .shadow-c')), bloch: pix(q('.dev[data-id="bloch"] .ladder-c canvas')), lattice: pix(q('.dev[data-id="lattice"] .ladder-c canvas')), orbit: pix(q('.dev[data-id="orbit"] .orbit-c')) };`);
+    out.ok = Object.values(out.win).every((p) => p.ink > 0);
+  }
+  if (scene === 'v2') {   /* every window closed: each kind's widget paints, a second of play moves its picture, H stands it down */
+    out.add = await g.ev(`${PIX} __LW.seek(0); for (const id of ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}) __LW.actions.run('window.' + id + '.close');
+      __LW.widgets.restore(null); const ids = {}; for (const k of ${JSON.stringify(KINDS)}) ids[k] = __LW.widgets.add(k);
+      await new Promise((r) => setTimeout(r, 1500)); await __LW.settle(); await new Promise((r) => setTimeout(r, 600));
+      const cv = (k) => document.querySelector('#widgets .lw-widget[data-id="' + ids[k] + '"] canvas'), a = {}; for (const k in ids) a[k] = pix(cv(k));
+      __LW.play(); await new Promise((r) => setTimeout(r, 1500)); __LW.pause(); await __LW.settle(); await new Promise((r) => setTimeout(r, 600));
+      const b = {}; for (const k in ids) b[k] = pix(cv(k));
+      const bg = getComputedStyle(document.querySelector('#widgets .lw-widget')).backgroundColor;
+      return { ids, a, b, bg, closed: ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}.map((id) => document.querySelector('.dev[data-id="' + id + '"]').classList.contains('closed')) };`);
+    out.ok = KINDS.every((k) => out.add.a[k].ink > 0) && out.add.bg === 'rgba(0, 0, 0, 0)';
+  }
+  out.errs = (await g.errors()).errs;
+} finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }

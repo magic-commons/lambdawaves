@@ -49,10 +49,11 @@ export function createBloch(host, api) {
     ro.C.set(`${opt ? '2√2' : q.chsh.toFixed(6)} PREDICTION · ≤ 2 classical`, Math.abs(q.chsh) > 2 ? 'ok' : ''); ro.C.setSub(`A measures ẑ, x̂ · B (±x̂ + ẑ)/√2, signed to the preset${P.tape.length ? ' after the tape' : ''} · the best axes give 2√(2 − |r|²) = ${q.max.toFixed(6)}`);
     paint([[q.rA, q.axes.slice(0, 2)], [q.rB, q.axes.slice(2)]], B, 0);
   }
-  function paint(v, B, O) {
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = hold.clientWidth, H = hold.clientHeight; if (W < 32 || H < 32) return;
-    if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
-    const g = cv.getContext('2d'), T = themeInk(g), two = P.mode === 'pair', R = two ? Math.min(H / 2 - 16, W / 4 - 8) : H / 2 - 16, cx = two ? W / 4 : W / 2, cy = H / 2, f = phase(P, tt), a = [O * Math.cos(f), O * Math.sin(f), -(P.d + P.b * tt)], m = Math.hypot(...a), col = nRGB(2), rgba = (q) => `rgba(${col[0]},${col[1]},${col[2]},${q})`;
+  const views = new Set(), paint = (...a) => { for (const c of views) draw(c, ...a); draw(cv, ...a); };   // 037 V1 THE SEAM: one qubit, every view of it — each BLOCH widget's canvas, then the window's
+  function draw(c, v, B, O) {
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = c.clientWidth, H = c.clientHeight; if (W < 32 || H < 32) return;
+    if (c.width !== W * dpr || c.height !== H * dpr) { c.width = W * dpr; c.height = H * dpr; }
+    const g = c.getContext('2d'), T = themeInk(g), two = P.mode === 'pair', R = two ? Math.min(H / 2 - 16, W / 4 - 8) : H / 2 - 16, cx = two ? W / 4 : W / 2, cy = H / 2, f = phase(P, tt), a = [O * Math.cos(f), O * Math.sin(f), -(P.d + P.b * tt)], m = Math.hypot(...a), col = nRGB(2), rgba = (q) => `rgba(${col[0]},${col[1]},${col[2]},${q})`;
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle'; sphereFrame(g, T, B, cx, cy, R);
     if (two) return v.forEach(([u, ax], i) => { const x = cx + i * W / 2; if (i) sphereFrame(g, T, B, x, cy, R); g.fillStyle = T.ink(0.6); g.fillText(i ? 'B' : 'A', x - R, cy - R + 4); ax.forEach((a) => arm(g, x, cy, R, project(a, B), T.ink(0.3), T.ink(0.3))); if (Math.hypot(...u) > 1e-9) arm(g, x, cy, R, project(u, B), rgba(0.9), rgba(1)); });
     const zs = P.O && (P.T1 || P.T2) ? steadyZ(P) : NaN, rs = Math.sqrt(1 - zs * zs); if (zs === zs) { g.strokeStyle = T.ink(0.3); g.lineWidth = 1; g.beginPath();   // the saturation latitude z = r_z(∞)
@@ -61,9 +62,9 @@ export function createBloch(host, api) {
     g.strokeStyle = rgba(0.45); g.lineWidth = 1.25; g.beginPath(); trail.forEach(([, u], i) => { const p = project(u, B); g[i ? 'lineTo' : 'moveTo'](cx + p[0] * R, cy - p[1] * R); }); g.stroke();
     arm(g, cx, cy, R, project(v, B), rgba(0.9), rgba(1));
   }
-  new ResizeObserver(() => { lastKey = ''; update(api.t()); }).observe(hold);
+  const redraw = () => { lastKey = ''; update(api.t()); }; new ResizeObserver(redraw).observe(hold);
   set({});
-  return (BL = { update, set, pick, params: P, get ro() { return Object.values(ro).filter((r) => r.root.style.display !== 'none'); }, get label() { return P.mode === 'pair' ? BLABEL[P.bell] + (P.tape.length ? ' · ' + tapeOf(P.tape) : '') : LABEL[P.preset]; },
+  return (BL = { update, set, pick, params: P, views, redraw, get ro() { return Object.values(ro).filter((r) => r.root.style.display !== 'none'); }, get label() { return P.mode === 'pair' ? BLABEL[P.bell] + (P.tape.length ? ' · ' + tapeOf(P.tape) : '') : LABEL[P.preset]; },
     save() { const d = {}; for (const k in DEFAULTS) if (P[k] !== DEFAULTS[k] && !(k === 'tape' && !P.tape.length)) d[k] = P[k]; return Object.keys(d).length ? d : undefined; },
     load(I) { const q = { ...DEFAULTS }; for (const k in q) if (I && typeof I[k] === typeof q[k]) q[k] = I[k]; if (!PRESETS[q.preset]) q.preset = DEFAULTS.preset; if (!BELL[q.bell]) q.bell = DEFAULTS.bell; if (q.mode !== 'pair') q.mode = 'one';
       q.tape = Array.isArray(q.tape) ? q.tape.filter((g) => Object.hasOwn(GATES, g)).slice(-8) : DEFAULTS.tape; set(q); } });   // 0.9.3 D2: known gate ids only
