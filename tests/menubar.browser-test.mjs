@@ -42,7 +42,7 @@ try {
   /* ── 1 · every key hint is the LIVE binding, and a rebind renames the row ── */
   const hints = await g.ev(`const want = { PLAY: [['PLAY / PAUSE', 'transport.play']], EDIT: [['STATE › RESEED the particles', 'reseed'], ['UNDO', 'undo'], ['REDO', 'redo'], ['HISTORY UNDO', 'historyUndo'], ['SETTINGS', 'settings']],
       VIEW: [['CAMERA › HOME', 'camReset'], ['INTERFACE › HIDE the interface', 'hide'], ['INTERFACE › WINDOW HELP', 'notes'], ['FULL SCREEN', 'fullscreen']], WINDOW: [['TOOLS › MODULATION', 'modulation'], ['TOOLS › NOTEBOOK', 'notebook'], ['RACKS › SHOW THE RACK', 'rack'], ['RACKS › DOCK', 'dock']],
-      HELP: [['KEYBOARD SHORTCUTS', 'help']], FILE: [['SAVE AS', 'saveAs'], ['NEW', 'new'], ['OPEN', 'open'], ['EXPORT › PICTURE', 'export.picture']] };
+      HELP: [['KEYBOARD SHORTCUTS', 'help']], FILE: [['SAVE AS', 'saveAs'], ['NEW', 'new'], ['OPEN', 'open'], ['EXPORT › PICTURE', 'export.picture'], ['MAIN MENU', 'menu']] };   // 038 M2: MAIN MENU at FILE's foot, L
     const bad = [];
     for (const [menu, rows] of Object.entries(want)) for (const [label, id] of rows) { const k = await __keyAt(menu, label); if (k !== __keyOf(id)) bad.push([menu, label, k, __keyOf(id)]); }
     /* 021 I3: a choice is a radio, and the one in force carries the mark (VIEW › OBSERVABLE: the boot's PHASE) */
@@ -178,6 +178,7 @@ try {
     { const m0 = __LW.mod.expanded; const r = await __row('WINDOW', 'TOOLS › MODULATION'); R.mod = ok(r) && __LW.mod.expanded === !m0; await __row('WINDOW', 'TOOLS › MODULATION'); R.mod = R.mod && __LW.mod.expanded === m0; }
     { const n0 = __LW.layout.notebook.isOpen; const r = await __row('WINDOW', 'TOOLS › NOTEBOOK'); R.nb = ok(r) && __LW.layout.notebook.isOpen === !n0 && document.activeElement === document.querySelector('.nb-text'); await __row('WINDOW', 'TOOLS › NOTEBOOK'); }
     { const k0 = document.body.classList.contains('rack-hidden'); const r = await __row('WINDOW', 'RACKS › SHOW THE RACK'); R.rack = ok(r) && document.body.classList.contains('rack-hidden') === !k0; await __row('WINDOW', 'RACKS › SHOW THE RACK'); }
+    { const r = await __row('FILE', 'MAIN MENU'); const M = document.getElementById('lwMenu'); R.mainMenu = ok(r) && !M.hidden; __LW.run('menu'); R.mainMenu = R.mainMenu && M.hidden; }   // 038 M2
     { const d0 = __LW.layout.docked; const r = await __row('WINDOW', 'RACKS › DOCK'); R.dock = ok(r) && __LW.layout.docked === !d0; await __row('WINDOW', 'RACKS › DOCK'); R.dock = R.dock && __LW.layout.docked === d0; }
     { const w0 = document.body.classList.contains('window-info-off'); const r = await __row('VIEW', 'INTERFACE › WINDOW HELP'); R.help = ok(r) && document.body.classList.contains('window-info-off') === !w0; await __row('VIEW', 'INTERFACE › WINDOW HELP'); }
     { const t0 = __LW.themeChoice; R.theme = true; for (const [l, t] of [['THEME › DARK', 'dark'], ['THEME › SYSTEM', 'system'], ['THEME › LIGHT', 'light']]) { const r = await __row('VIEW', l); R.theme = R.theme && ok(r) && __LW.themeChoice === t; } __LW.setTheme(t0); }

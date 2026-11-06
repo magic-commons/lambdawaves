@@ -12,7 +12,7 @@
  * volume's own (t/<id>.webp).  A hover or a focus moves ONLY the picture (lab/picker-fx.js: the spring tilt and a zoom — no background,
  * no tint), writes the name under the tile, and swaps the large caption at the foot.  A press goes there: ATOMS mode and the element
  * (goAtom), MOLECULES mode and the molecule (chem.pick), or a volume's molecule (chem.openVolume).  THE WAY BACK is instant: the DOM is
- * built once and only shown or hidden — the home button (the iris opens from it), L (keys.js `menu`), WINDOW › PICKER; Escape leaves.
+ * built once and only shown or hidden — the home button (the iris opens from it), L (keys.js `menu`), FILE › MAIN MENU; Escape leaves.
  * Under the logo (iteration 012 L2): RETURN HOME (the lab), FOLDERS (the projects and the demos) and THE HUE ring (a dial that turns the
  * molecules' pictures round the colour wheel), THEME (032) and LOOK.  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
@@ -172,7 +172,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const logo = el('div', 'mm-logo', top);
   /* 034 M1 · THE LANDING FACE (Josh 11-02: "When users open up the app, they will be met with the lambdawaves logo in large with two boxes that
      says, 'Tutorial', and 'Library'"): over the decks, the logo large, TUTORIAL · LIBRARY (two album-art doors in THE CARD'S LIGHT) and the
-     quiet way into the lab.  It is the home: every open lands here (the boot after the notice, ?menu=1, L, WINDOW › MAIN MENU) except the CSB's
+     quiet way into the lab.  It is the home: every open lands here (the boot after the notice, ?menu=1, L, FILE › MAIN MENU) except the CSB's
      LIBRARY seat, which opens the decks; the head's ⌂ comes back here.  LIBRARY opens the decks on MOLECULAR (ATOMIC above, EXPANSIONS below),
      TUTORIAL the hero deck (M3).  While it is up the head, the decks and the caption are kept laid out but hidden and inert. */
   const face = el('div', 'mm-face', root); face.hidden = true;
