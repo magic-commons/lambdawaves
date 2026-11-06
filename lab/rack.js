@@ -520,7 +520,7 @@ export async function boot(dom) {
       perf.counts.cpu++;
       if (reg.version !== app.state.govVersion) { app.state.govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
       if (app.state.stageText) { stageTextTick(); app.state.stageText.atomLabels(app.state.chem && app.state.chem.on ? app.state.chem.preset() : '', obs, domain.half); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (initStageText: compares only)
-      tickWidgets(nowMs, { c, ids: stateReaders().populated });      // 037 W1: the stage's WIDGETS, from this one CPU frame (a hidden page and H stand them down); V1: the frame's c and labels for the visualizers
+      tickWidgets(nowMs, { c, ids: stateReaders().populated, may, tick });   // 037 W1: the stage's WIDGETS, from this one CPU frame (a hidden page and H stand them down); V1: the frame's c and labels and the reader law, for the visualizers
       syncEq();                                                      // 0.6.0 B2: the BEAT EQUALIZER's table follows the register, the operator and the space (keyed)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (may('shadow', wSh)) tick('shadow', () => { shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected); if (ui.shadowDetails && !ui.shadowDetails.hidden) shadowFoot.update(reg, c, clock.t, stateReaders().populated); });

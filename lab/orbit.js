@@ -139,5 +139,5 @@ export function createOrbit(host, api) {
     if (key !== lastObs) { lastObs = key; paint(obs); }
   }
   window.addEventListener('resize', () => { lastObs = ''; });
-  return { update, views, redraw: paint, get shells() { return shells; } };
+  return { update, views, redraw: (obs) => { lastObs = ''; update(obs); }, get shells() { return shells; } };
 }

@@ -44,9 +44,21 @@ try {
       const cv = (k) => document.querySelector('#widgets .lw-widget[data-id="' + ids[k] + '"] canvas'), a = {}; for (const k in ids) a[k] = pix(cv(k));
       __LW.play(); await new Promise((r) => setTimeout(r, 1500)); __LW.pause(); await __LW.settle(); await new Promise((r) => setTimeout(r, 600));
       const b = {}; for (const k in ids) b[k] = pix(cv(k));
-      const bg = getComputedStyle(document.querySelector('#widgets .lw-widget')).backgroundColor;
-      return { ids, a, b, bg, closed: ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}.map((id) => document.querySelector('.dev[data-id="' + id + '"]').classList.contains('closed')) };`);
+      const bg = getComputedStyle(document.querySelector('#widgets .lw-widget')).backgroundColor, P = __LW.perf || {}, work = {}; for (const k in ids) work[k] = +((P.profile || {})[${JSON.stringify(WIN)}[k] || k] || 0).toFixed(3);
+      document.body.classList.add('ui-hidden'); __LW.widgets.root.querySelector('canvas').getContext('2d').clearRect(0, 0, 1e4, 1e4); __LW.play(); await new Promise((r) => setTimeout(r, 600)); __LW.pause();
+      const hid = pix(cv(${JSON.stringify(KINDS[0])})).ink; document.body.classList.remove('ui-hidden');
+      return { ids, a, b, bg, work, hid, closed: ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}.map((id) => document.querySelector('.dev[data-id="' + id + '"]').classList.contains('closed')) };`);
     out.ok = KINDS.every((k) => out.add.a[k].ink > 0) && out.add.bg === 'rgba(0, 0, 0, 0)';
+  }
+  if (scene === 'v4') {   /* every kind in a grid over the stage (windows closed), SOLID and CLOUD, dark and light; V_MOL=1 puts benzene in MOLECULES first */
+    const n = KINDS.length, cols = Math.min(4, n), rows = Math.ceil(n / cols), W = 0.8 / cols, H = Math.min(0.26, 0.8 / rows);
+    const items = KINDS.map((k, i) => ({ id: 'w' + (i + 1), kind: k, x: +(0.1 + (i % cols) * W + 0.01).toFixed(4), y: +(0.08 + Math.floor(i / cols) * (H + 0.02)).toFixed(4), w: +(W - 0.02).toFixed(4), h: +H.toFixed(4), opts: {} }));
+    await g.ev(`${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ['shadow', 'bloch', 'lattice', 'orbit', 'wigner', 'slice', 'emission', 'equalizer', 'spectrum', 'chem', 'widgets']) __LW.actions.run('window.' + id + '.close');
+      __LW.widgets.restore({ items: ${JSON.stringify(items)} }); __LW.play(); await new Promise((r) => setTimeout(r, 1500)); __LW.pause(); await __LW.settle(); return 1;`);
+    for (const style of ['solid', 'cloud']) for (const theme of ['dark', 'light']) {
+      await g.ev(`__LW.setStyle('${style}'); __LW.look.set({ theme: '${theme}' }); await __LW.settle(); await new Promise((r) => setTimeout(r, 1200)); return 1;`);
+      out[style + '-' + theme] = await shot(`037-V4-${process.env.V_TAG || 'all'}-${style}-${theme}`);
+    }
   }
   out.errs = (await g.errors()).errs;
 } finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }
