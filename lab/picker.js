@@ -35,11 +35,11 @@ import { keepData, installed, safariTab } from './library.js';
 const TIP_URL = 'https://ko-fi.com/magiccommons';
 /* 032 THE PORTRAIT SHELF: the volumes that have a hero and in which themes ('dark light'), written by tools/volume-heroes.mjs with its files
    (img/menu/vol/<id>.<theme>.mp4 and the still .webp). A volume not named here wears the λWAVES palette. */
-export const HEROES = { 'vol-1': 'dark light' };   // 036 G7: lab/loader.js keeps their files
+export const HEROES = { 'vol-1': 'dark light', 'vol-2': 'dark light' };   // 036 G7: lab/loader.js keeps their files
 /* 037 M2 THE STILL WALL (Josh 11-05: "let it show a still wallpaper at random. I'll provide the high quality backgrounds later"): the face's
    still wallpapers by name — img/menu/wall/<name>.dark.webp and .light.webp (DATA, kept once shown; lab/loader.js keeps them) — one picked at
    random per show while the collage is off, stilled, not yet at its first frame or dead.  Empty: the theme's plain ground. */
-export const WALLS = [];
+export const WALLS = ['wall-01', 'wall-02'];   // 037 (Josh 11-05 evening): his four stills, two a theme, img/menu/wall/<name>.<theme>.webp — "randomize anytime the user returns to the main menu"; more over time
 /* 034 M3 THE TUTORIAL DECK: one card a row, in this order — its id (`tut-<slug>`), its title, its caption ('' until Josh's words come) and the
    themes its hero has files in (img/menu/tut/<id>.<theme>.mp4 and the still .webp; a theme not named shows the other's), written by
    tools/tutorial-heroes.mjs, one row a line.  037 U1: and its deck — 1 or 2, TUTORIAL_DECKS' first or second (deck II's rows go here too:
