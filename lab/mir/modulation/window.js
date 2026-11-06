@@ -1040,6 +1040,10 @@ export function createModulation(host, port) {
     if (!q || !registry.has(id)) { hide(rec.edit); hide(rec.stack); hide(rec.tick); hide(rec.spur); return; }
     const st = registry.state(id), wrap = st.wrap, g = ringGeom(wrap);
     const b = wrap ? ((st.baseNorm % 1) + 1) % 1 : st.baseNorm;
+    /* THE RING FOLLOWS THE DIAL (1.5.7-alpha.12, λWAVES 038 T6): a reversed knob (`k-rev`, knob({ reverse })) draws its needle at
+       1 − u, so the ring's arcs, tick and spur — drawn in value space — mirror with it (they sat mirrored from the needle) */
+    const rv = !wrap && rec.host.classList.contains('k-rev'), at = (u) => (rv ? 1 - u : u);
+    const arc = (lo, hi, r) => (rv ? arcD(1 - hi, 1 - lo, r, g) : arcD(lo, hi, r, g));
     const er = editRouteOf(id);
     if (er) {
       const sp = routeSpan(er);
@@ -1048,13 +1052,13 @@ export function createModulation(host, port) {
       if (!wrap) { lo = clamp01(lo); hi = clamp01(hi); }
       if (Math.abs(sp.hi - sp.lo) < 0.001) {
         /* ZERO DEPTH IS A REAL STATE and it keeps its handle: a 4-px radial TICK at the base. */
-        hide(rec.edit); rec.tick.setAttribute('d', radialD(b, R_TICK0, R_TICK1, g));
+        hide(rec.edit); rec.tick.setAttribute('d', radialD(at(b), R_TICK0, R_TICK1, g));
       } else if (wrap && hi - lo >= 1) {
         hide(rec.tick); rec.edit.setAttribute('d', fullD(R_EDIT));
       } else {
-        hide(rec.tick); rec.edit.setAttribute('d', arcD(lo, hi, R_EDIT, g));
+        hide(rec.tick); rec.edit.setAttribute('d', arc(lo, hi, R_EDIT));
       }
-      if (overLo || overHi) rec.spur.setAttribute('d', radialD(overLo ? 0 : 1, R_EDIT, R_SPUR, g));
+      if (overLo || overHi) rec.spur.setAttribute('d', radialD(at(overLo ? 0 : 1), R_EDIT, R_SPUR, g));
       else hide(rec.spur);
       rec.svg.classList.toggle('is-dormant', !liveSpan(er));
     } else { hide(rec.edit); hide(rec.tick); hide(rec.spur); rec.svg.classList.remove('is-dormant'); }
@@ -1067,7 +1071,7 @@ export function createModulation(host, port) {
     if (sn && Math.abs(shi - slo) > 1e-9) {
       let lo = b + slo, hi = b + shi;
       if (!wrap) { lo = clamp01(lo); hi = clamp01(hi); }
-      rec.stack.setAttribute('d', (wrap && hi - lo >= 1) ? fullD(R_STACK) : arcD(lo, hi, R_STACK, g));
+      rec.stack.setAttribute('d', (wrap && hi - lo >= 1) ? fullD(R_STACK) : arc(lo, hi, R_STACK));
     } else hide(rec.stack);
     rec.svg.classList.toggle('has-stack', sn > 0);
   }
@@ -1308,7 +1312,8 @@ export function createModulation(host, port) {
       if (!drag) return;
       if (!moved && Math.abs(e.clientY - drag.y0) < 4 && Math.abs(e.clientX - drag.x0) < 4) return;
       if (!moved) { moved = true; cancelHold(); }
-      let d = drag.d0 + (drag.y0 - e.clientY) / TRAVEL(e, drag.touch);
+      /* a rise grows the arc clockwise, as a rise turns the dial — on a reversed dial (`k-rev`, 1.5.7-alpha.12) that is toward the lower values */
+      let d = drag.d0 + (rec.host.classList.contains('k-rev') ? -1 : 1) * (drag.y0 - e.clientY) / TRAVEL(e, drag.touch);
       d = d < -1 ? -1 : d > 1 ? 1 : d;
       M.setRouteRange(drag.r.id, { min: Math.max(0, -d), max: Math.max(0, d) });
       apply(); paintRings();

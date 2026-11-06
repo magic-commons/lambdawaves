@@ -48,6 +48,8 @@ const ACCEPTED = {
   '1.5.7-alpha.10': '3a8b15fee08044b50f35605a1504b840d4a23ff7ad21028103341f4afbb1d56e',
   /* 038 T5 · MIR 1.5.7-alpha.11 THE SELECTION RESIZES TOGETHER (kit-038 @ 1f01c88): an edge on a selected clip trims every selected clip, or glues then stretches them */
   '1.5.7-alpha.11': '2bc556b4f46bf9bdac9c16bb022c6f137282f14468b76effebbb01c338642f4c',
+  /* 038 T6 · MIR 1.5.7-alpha.12 THE RING FOLLOWS THE DIAL (kit-038 @ 8836838): a reversed knob wears k-rev and the route ring mirrors with its needle */
+  '1.5.7-alpha.12': '360fb20beff92804d633d28927d9c858a77e431fc34805208c29690f3b404f06',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
