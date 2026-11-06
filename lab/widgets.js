@@ -1,0 +1,113 @@
+/* lab/widgets.js — WIDGETS: the layer and the record (037 W1; Josh, BRIEF.md WIDGETS: "a new class of windows on the stage, extremely similar
+ * to 'Informational's architecture … users can add as many copies of the same widgets as they want"; PLAN §1 A WIDGET IS A STAGE OBJECT, NOT
+ * A WINDOW).  `#widgets` sits in #lab beside the kit's info layer at z 19 — over #atomLabels (9), under INFORMATIONAL's words (20) and every
+ * window (30) — and takes no pointer outside EDIT.  A widget is `section.lw-widget[data-kind][data-id]` with no background, border or shadow
+ * ("empty CSS"); its box {x, y, w, h} is in STAGE FRACTIONS, so a layout survives a resize.  THE RECORD `lambdawaves.q0.widgets`
+ * { items: [{ id, kind, x, y, w, h, opts }] } is the live one a reload boots from; the PROJECT carries it as `presentation.widgets`
+ * (default-absent: NEW, the demos and every file before 037 open with none) and the undo ring keeps it — a hand's change is one named row.
+ * THE KINDS register themselves (registerKind: widget-mol.js, widget-clock.js, widget-text.js, chain V's visualizers) and the layer ticks the
+ * mounted ones from the rack's one CPU frame (tickWidgets), gated on a hidden page and H only, never on a window.
+ *   registerKind({ kind, label, glyph, hint, size: { w, h }, opts, mount(el, api) → { tick(now, force, ctx), set(opts), destroy() }, controls(bar, api) })
+ *   api = { app, id, kind, el, opts(), set(patch, name), theme(), ink(), editing(), size() }
+ *   createWidgets(app) → { root, add(kind, opts), remove(id), clear(), list(), edit(on), snap(on), tick(now, ctx), restore(rec), serialize(), subscribe(fn) } */
+import { el, hint, onThemeChange } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js';
+const KEY = 'lambdawaves.q0.widgets', MIN = 0.06;
+const KINDS = new Map(), heard = new Set();
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v)), r4 = (v) => Math.round(v * 1e4) / 1e4;
+/** a kind joins the gallery (in the order kinds register) and every item of it the record kept is drawn */
+export function registerKind(def) { KINDS.set(def.kind, Object.freeze({ size: { w: 0.2, h: 0.2 }, opts: {}, ...def })); for (const f of heard) f(); }
+export const kinds = () => [...KINDS.values()];
+export const onKinds = (fn) => { heard.add(fn); return () => heard.delete(fn); };
+/** a box held inside the stage, at least MIN each way */
+const fit = (r) => { const w = clamp(+r.w || 0.2, MIN, 1), h = clamp(+r.h || 0.2, MIN, 1); return { x: r4(clamp(+r.x || 0, 0, 1 - w)), y: r4(clamp(+r.y || 0, 0, 1 - h)), w: r4(w), h: r4(h) }; };
+/** a record's items, the well-formed ones only (an id once, a kind named, a box, an opts object) */
+function clean(o) {
+  const out = [], ids = new Set();
+  for (const it of (o && Array.isArray(o.items) ? o.items : [])) {
+    if (!it || typeof it.id !== 'string' || typeof it.kind !== 'string' || ids.has(it.id)) continue;
+    ids.add(it.id); out.push({ id: it.id, kind: it.kind, ...fit(it), opts: it.opts && typeof it.opts === 'object' && !Array.isArray(it.opts) ? { ...it.opts } : {} });
+  }
+  return out;
+}
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+let L = null;   // the one layer
+/** the rack's one call a CPU frame (rack.js); `ctx` is the frame's own, handed to every widget's tick as it came */
+export const tickWidgets = (now, ctx) => { if (L) L.tick(now, ctx); };
+/** the project's record (persist.js serialize, both scopes), or null when no widget stands */
+export const widgetsOfProject = () => (L ? L.serialize() : null);
+/** an open, a link, an undo: the file's widgets (absent: none) */
+export const loadWidgets = (rec) => { if (L) L.restore(rec); };
+
+export function createWidgets(app) {
+  if (L) return L;
+  const root = el('div', '', app.dom.stage.parentElement); root.id = 'widgets'; root.setAttribute('aria-hidden', 'true');
+  const live = new Map(), fans = new Set();   // id → { it, box, body, inst, force }
+  let items = [], editOn = false, snapOn = true, raf = 0;
+  try { items = clean(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (_) {}
+  const theme = () => (document.body.dataset.theme === 'light' ? 'light' : 'dark');
+  const place = (W) => { const s = W.box.style, it = W.it; s.left = it.x * 100 + '%'; s.top = it.y * 100 + '%'; s.width = it.w * 100 + '%'; s.height = it.h * 100 + '%'; };
+  /* a FORCED tick (a mount, a resize, the theme, an opts change, EDIT) runs in the next animation frame, whether or not the rack is drawing */
+  const kick = (W) => { for (const V of W ? [W] : live.values()) V.force = true;
+    if (!raf) raf = requestAnimationFrame(() => { raf = 0; for (const V of live.values()) if (V.force) { V.force = false; if (V.inst.tick) V.inst.tick(performance.now(), true); } }); };
+  const sized = typeof ResizeObserver === 'function' ? new ResizeObserver((es) => { for (const e of es) { const W = live.get(e.target.parentElement.dataset.id); if (W) kick(W); } }) : null;
+  const fan = () => { for (const f of fans) f(); };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ items })); } catch (_) {} };
+  /** a hand's change: the record written, the manager told, one named row of the undo ring (the edit scope carries presentation.widgets) */
+  const commit = (name) => { save(); fan(); if (app.state.history) app.state.history.note(name); };
+  function mount(it) {
+    const K = KINDS.get(it.kind); if (!K) return null;   // a kind not registered (yet): kept in the record, drawn when it registers
+    const box = el('section', 'lw-widget', root); box.dataset.kind = it.kind; box.dataset.id = it.id; box.dataset.word = K.label;
+    const body = el('div', 'lw-widget-body', box), bar = el('div', 'lw-widget-bar', box), x = el('button', 'lw-widget-x', box);
+    x.type = 'button'; x.append(glyphEl('close', 'gly', 16)); hint(x, 'Remove this widget'); x.addEventListener('click', () => api.remove(it.id));
+    el('i', 'lw-widget-grip', box);
+    const W = { it, box, body, inst: {}, force: false };
+    const view = { app, id: it.id, kind: it.kind, el: body, opts: () => W.it.opts, theme, ink: () => getComputedStyle(root).color, editing: () => editOn,
+      size: () => ({ w: body.clientWidth, h: body.clientHeight }),
+      set: (patch, name = 'WIDGET ' + K.label) => { W.it.opts = { ...W.it.opts, ...patch }; if (W.inst.set) W.inst.set(W.it.opts); kick(W); commit(name); } };
+    place(W); live.set(it.id, W); box.tabIndex = editOn ? 0 : -1;
+    W.inst = K.mount(body, view) || {};
+    if (K.controls) K.controls(bar, view);
+    if (sized) sized.observe(body);
+    kick(W); return W;
+  }
+  function unmount(id) { const W = live.get(id); if (!W) return; live.delete(id); if (sized) sized.unobserve(W.body); try { if (W.inst.destroy) W.inst.destroy(); } catch (_) {} W.box.remove(); }
+  onKinds(() => { for (const it of items) if (!live.has(it.id) && KINDS.has(it.kind)) mount(it); fan(); });
+  onThemeChange(() => kick());
+  const api = L = {
+    root,
+    /** one more widget of `kind` at the stage's centre (each next one a step down-right, so a pile stays readable); its id, or null */
+    add(kind, opts = {}) {
+      const K = KINDS.get(kind); if (!K) return null;
+      const n = items.reduce((m, q) => Math.max(m, +q.id.slice(1) || 0), 0) + 1, s = (items.length % 5) * 0.02;
+      const it = { id: 'w' + n, kind, ...fit({ x: 0.5 - K.size.w / 2 + s, y: 0.5 - K.size.h / 2 + s, w: K.size.w, h: K.size.h }), opts: { ...K.opts, ...opts } };
+      items.push(it); mount(it); commit('WIDGET ADD'); return it.id;
+    },
+    remove(id) { if (!items.some((q) => q.id === id)) return false; items = items.filter((q) => q.id !== id); unmount(id); commit('WIDGET REMOVE'); return true; },
+    clear() { if (!items.length) return false; for (const it of items) unmount(it.id); items = []; commit('WIDGETS CLEAR'); return true; },
+    /** the record's items, each with its kind's word (a kind not registered says its id) */
+    list: () => items.map((it) => ({ ...it, opts: { ...it.opts }, label: (KINDS.get(it.kind) || { label: it.kind.toUpperCase() }).label })),
+    /** EDIT: the widgets take the pointer (W2); no argument reads it */
+    edit(on) { if (on === undefined) return editOn; editOn = !!on; root.classList.toggle('edit', editOn); root.toggleAttribute('aria-hidden', !editOn);
+      for (const W of live.values()) W.box.tabIndex = editOn ? 0 : -1;
+      kick(); fan(); return editOn; },
+    snap(on) { if (on === undefined) return snapOn; snapOn = !!on; fan(); return snapOn; },
+    tick(now, ctx) {
+      if (document.hidden || app.state.uiHidden || !live.size) return;
+      for (const W of live.values()) if (W.inst.tick) { const f = W.force; W.force = false; W.inst.tick(now, f, ctx); }
+    },
+    /** a project's record in place (absent: none): the widgets that stay keep their mount, the rest come and go; never a history row */
+    restore(rec) {
+      const next = clean(rec); if (same(next, items)) return;
+      const by = new Map(next.map((it) => [it.id, it]));
+      for (const [id, W] of [...live]) { const n = by.get(id); if (!n || n.kind !== W.it.kind) unmount(id); }
+      items = next;
+      for (const it of items) { const W = live.get(it.id); if (!W) { mount(it); continue; }
+        const moved = !same(W.it.opts, it.opts); W.it = it; place(W); if (moved && W.inst.set) W.inst.set(it.opts); kick(W); }
+      save(); fan();
+    },
+    serialize: () => (items.length ? { items: items.map((it) => ({ ...it, opts: { ...it.opts } })) } : null),
+    subscribe(fn) { fans.add(fn); return () => fans.delete(fn); },
+  };
+  for (const it of items) mount(it);
+  return api;
+}

@@ -175,6 +175,7 @@
  ["render","get"],
  ["conduct","value"],
  ["verbs","value"],
+ ["widgets","value"],
  ["curves","value"],
  ["nodes","value"],
  ["skeletonArgs","method"],

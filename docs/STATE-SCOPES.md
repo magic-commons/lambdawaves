@@ -43,6 +43,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `lambdawaves.q0.settings` | PREFERENCE + WORKSPACE | gen 16 | yes | shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above |
 | `mir.gui` | PREFERENCE | kit prefs | yes | look.js createLook (kit createPrefs over LOOK_SCHEMA; MIR OPTIONS writes it) |
 | `lambdawaves.q0.info` | PROJECT | kit prefs | yes | shell/stage-words.js infoPrefs (INFORMATIONAL) — the live record; the project owns it (presentation.info, 036 S4) |
+| `lambdawaves.q0.widgets` | PROJECT | v 1 | yes | widgets.js createWidgets (WIDGETS) — the live record { items }; the project owns it (presentation.widgets, 037 W1) |
 | `lambdawaves.q0.modulation` | PREFERENCE | — | yes | shell/controller.js modStore (kit localStore): modArm, modCadence |
 | `lambdawaves.q0.curves` | PROJECT | model | yes | nodes.js curvesStore: the CURVES grade (250 ms) — the live mirror; the project owns it (presentation.nodes.curves, 036 S1) |
 | `lambdawaves.q0.nodes` | PROJECT + WORKSPACE | v 1 | yes | nodes.js: the graph { seq, list, at } — the live mirror, the project owns it (presentation.nodes, 036 S1) — and the window’s place { pan, zoom, win, off } (250 ms) |

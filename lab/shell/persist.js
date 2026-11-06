@@ -9,6 +9,7 @@ import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
 import { infoOfProject, loadInfo } from './stage-words.js';   // 036 S4: INFORMATIONAL's rows are the project's
 import { stageOfProject, loadStage } from '../stage-window.js';   // 037 T4: STAGE's PULSE is the project's
+import { widgetsOfProject, loadWidgets } from '../widgets.js';   // 037 W1: the stage's WIDGETS are the project's
 import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS, N6, narrow, widen } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 import { LIGHT_KEYS } from '../light-window.js';   // 037 L3: THE LIGHT's targets, seated in presentation.mat.light
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
@@ -97,6 +98,7 @@ export function createPersist(app) {
     if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
     { const E = app.state.eq.serialize(); if (E) S.presentation.eq = E; }   // 0.6.0 B2: the BEAT EQUALIZER, PROJECT and default-absent (FLAT writes nothing)
     { const St = stageOfProject(mat); if (St) S.presentation.stage = St; }   // 037 T4: STAGE's PULSE, PROJECT and default-absent (NEW and the demos keep their bytes); the history keeps it
+    { const Wd = widgetsOfProject(); if (Wd) S.presentation.widgets = Wd; }   // 037 W1: the WIDGETS, PROJECT and default-absent; the history keeps them (a hand's change is a named row)
     /* 036 S1 · THE GRAPH IS THE PROJECT'S (Josh: "Make sure that nodes get saved"): NODES' graph and its CURVES grade, default-absent (the empty
        graph writes nothing, so NEW and the demos keep their bytes); its `nodes.*` routes, lanes and bases ride with the rack (021's refusal is lifted) */
     if (!edit) { const G = app.sh.LW && app.sh.LW.nodes ? app.sh.LW.nodes.graph() : null; if (G) S.presentation.nodes = G; }
@@ -311,6 +313,7 @@ export function createPersist(app) {
         if (!hist && pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'qcd' && !c.closed)) gone.push('QCD (QUARKONIUM keeps its parameters)');
         said = [gone.length ? 'retired in 0.5.0: ' + gone.join(' · ') : '', ...cut].filter(Boolean).join(' · '); if (said) app.state.restoreNotice = said;
         if (!hist && !(opt && opt.session && pr.info === undefined)) loadInfo(pr.info);   // 036 S4: an open replaces INFORMATIONAL's rows (absent: the defaults); a pre-036 session keeps them
+        if (!(opt && opt.session && pr.widgets === undefined)) loadWidgets(pr.widgets);   // 037 W1: an open, a link, an undo replace the WIDGETS (absent: none); a session written before them keeps the record's
         stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = clampLambda(pr.sturmian.lambda); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it

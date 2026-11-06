@@ -45,6 +45,7 @@ import { createBadges } from './badges.js';             // N7 seam 6: the badges
 import { createActions } from './actions.js'; import { createTransport } from './shell/transport.js'; import { createRackWiring } from './shell/rack-wiring.js'; import { createNotebook } from './shell/notebook.js'; import { createKeys } from './shell/keys.js';   // 0.5.2 R3b (createRack, createMenubar, installWindowChrome left with them)
 import { createMirGui } from './mir-gui.js';   // iteration 003: MIR OPTIONS and MIR ABOUT, the kit's createGui over the look store
 import { readLink } from './statelink.js';   // wave 56: every state of this lab is a LINK
+import { createWidgets, tickWidgets } from './widgets.js';   // 037 W1: THE WIDGETS, the stage's own layer (lab/, not windows/)
 
 /* THE BUILD STAMP is `lab/build-line.js` (021 D1): no module imports from rack.js */
 
@@ -519,6 +520,7 @@ export async function boot(dom) {
       perf.counts.cpu++;
       if (reg.version !== app.state.govVersion) { app.state.govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
       if (app.state.stageText) { stageTextTick(); app.state.stageText.atomLabels(app.state.chem && app.state.chem.on ? app.state.chem.preset() : '', obs, domain.half); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (initStageText: compares only)
+      tickWidgets(nowMs);                                            // 037 W1: the stage's WIDGETS, from this one CPU frame (a hidden page and H stand them down)
       syncEq();                                                      // 0.6.0 B2: the BEAT EQUALIZER's table follows the register, the operator and the space (keyed)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (may('shadow', wSh)) tick('shadow', () => { shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected); if (ui.shadowDetails && !ui.shadowDetails.hidden) shadowFoot.update(reg, c, clock.t, stateReaders().populated); });
@@ -870,6 +872,7 @@ export async function boot(dom) {
    * provider in lab/occlusion.js, registered below in the old order; this host converts, clears and presents. */
   const { refreshOcclusion } = createInk(app);   // 0.5.2 R2d: lab/shell/ink.js
   /* ── 0.5.0 C3 · THE RACK IS THE KIT'S: lab/shell/rack-wiring.js (0.5.2 R3b), created here; its second seat, wireStage(), follows the notebook's ── */
+  const widgets = createWidgets(app);   // 037 W1: the WIDGETS layer (#widgets in #lab, z 19) and its record, before the rack registers the cards
   const { rk, layout, wTr, tablet, syncPhone, wireStage } = createRackWiring(app);
   createMirGui(app);   // iteration 003 (021 D1: mir-gui.js reads the build line from lab/build-line.js): after the rack, whose one dock span the modulation window docks in
   /* ── §19b the skip links · the dock chip · MENUS and the menubar · THE NOTEBOOK · PROJECTS: lab/shell/notebook.js (0.5.2 R3b), created here ── */
@@ -890,6 +893,7 @@ export async function boot(dom) {
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const LW = createFacade(app);   // 0.5.2 R5: lab/shell/facade.js — the literal, whole
   window.__LW = LW; app.sh.LW = LW;
+  LW.widgets = widgets;   // 037 W1: the WIDGETS layer's verbs (add · remove · list · edit · snap · restore · serialize) for the gates and chain V
   /* ── 0.5.0 C7b · THE RENDER CARD (lab/film-card.js): MIR's createRenderCard over the film's host recorder, built once LW exists (the film
      reads it) and registered closed on the right rack (R2), in + and WINDOW; its saves are the hand-over fix (capture.js handOver) ── */
   app.state.filmCard = createFilmCard({ film: app.state.capApi.exact, capture: app.state.capApi.capture, editor: () => app.state.tl && app.state.tl.editor, open: () => app.state.tl && app.state.tl.open(), isOpen: () => !!(app.state.tl && app.state.tl.isOpen()), armed: () => app.state.modArm,

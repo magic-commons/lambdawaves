@@ -25,6 +25,7 @@ export const RECORDS = Object.freeze([
   row(SETTINGS_KEY, P + ' + ' + W, 'gen 16', true, 'shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above'),
   row('mir.gui', P, 'kit prefs', true, 'look.js createLook (kit createPrefs over LOOK_SCHEMA; MIR OPTIONS writes it)'),
   row('lambdawaves.q0.info', J, 'kit prefs', true, 'shell/stage-words.js infoPrefs (INFORMATIONAL) — the live record; the project owns it (presentation.info, 036 S4)'),
+  row('lambdawaves.q0.widgets', J, 'v 1', true, 'widgets.js createWidgets (WIDGETS) — the live record { items }; the project owns it (presentation.widgets, 037 W1)'),
   row('lambdawaves.q0.modulation', P, '—', true, 'shell/controller.js modStore (kit localStore): modArm, modCadence'),
   row('lambdawaves.q0.curves', J, 'model', true, 'nodes.js curvesStore: the CURVES grade (250 ms) — the live mirror; the project owns it (presentation.nodes.curves, 036 S1)'),
   row('lambdawaves.q0.nodes', J + ' + ' + W, 'v 1', true, 'nodes.js: the graph { seq, list, at } — the live mirror, the project owns it (presentation.nodes, 036 S1) — and the window’s place { pan, zoom, win, off } (250 ms)'),

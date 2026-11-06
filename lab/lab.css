@@ -754,6 +754,15 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    leaves the formula on the same axis it holds alone.  THE FADE's and THE HEAD's blocks ([data-fade]) keep the kit's left edge. */
 .mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p { text-align: center; transform-origin: center; }
 .mir-info.lw-stage .katex { font-size: 1.08em; }
+/* 037 W1 · THE WIDGETS (lab/widgets.js): their own layer beside the words, z 19 — over the atom labels (9), under INFORMATIONAL (20) and every window —
+   in the words' ink; a widget is a box in stage fractions with no background, border or shadow, never a pointer target outside EDIT; H takes them out */
+#widgets { position: absolute; inset: 0; z-index: 19; pointer-events: none; user-select: none; -webkit-user-select: none; color: hsl(40 33% 96%); }
+[data-theme="light"] #widgets { color: hsl(232 22% 10%); }
+#widgets .lw-widget { position: absolute; box-sizing: border-box; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; outline: 0; }
+#widgets .lw-widget-body { position: absolute; inset: 0; container-type: size; overflow: hidden; }
+#widgets .lw-widget-bar, #widgets .lw-widget-x, #widgets .lw-widget-grip { display: none; }
+body.ui-hidden #widgets { display: none; }
+body.menu-open #widgets { visibility: hidden; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
 .dev .mol-more-toggle { flex: 0 0 30px; padding: 0; margin-left: auto; }   /* iteration 007 M: the row's end under VALENCE and under the ORBITAL dial alike — one seat */
 /* ATOM LABELS (INFORMATIONAL since 0.5.3 M9; stage-words.js atomLabels): each nucleus's element symbol, small, at its projected
