@@ -45,7 +45,7 @@ import { createBadges } from './badges.js';             // N7 seam 6: the badges
 import { createActions } from './actions.js'; import { createTransport } from './shell/transport.js'; import { createRackWiring } from './shell/rack-wiring.js'; import { createNotebook } from './shell/notebook.js'; import { createKeys } from './shell/keys.js';   // 0.5.2 R3b (createRack, createMenubar, installWindowChrome left with them)
 import { createMirGui } from './mir-gui.js';   // iteration 003: MIR OPTIONS and MIR ABOUT, the kit's createGui over the look store
 import { readLink } from './statelink.js';   // wave 56: every state of this lab is a LINK
-import { createWidgets, tickWidgets } from './widgets.js';   // 037 W1: THE WIDGETS, the stage's own layer (lab/, not windows/)
+import { tickWidgets } from './widgets.js'; import { createWidgetsWindow } from './widgets-window.js';   // 037 W1 · W3: THE WIDGETS, the stage's own layer, and their manager (lab/, not windows/)
 
 /* THE BUILD STAMP is `lab/build-line.js` (021 D1): no module imports from rack.js */
 
@@ -872,7 +872,7 @@ export async function boot(dom) {
    * provider in lab/occlusion.js, registered below in the old order; this host converts, clears and presents. */
   const { refreshOcclusion } = createInk(app);   // 0.5.2 R2d: lab/shell/ink.js
   /* ── 0.5.0 C3 · THE RACK IS THE KIT'S: lab/shell/rack-wiring.js (0.5.2 R3b), created here; its second seat, wireStage(), follows the notebook's ── */
-  const widgets = createWidgets(app);   // 037 W1: the WIDGETS layer (#widgets in #lab, z 19) and its record, before the rack registers the cards
+  const widgets = createWidgetsWindow(app);   // 037 W1 · W3: the WIDGETS layer (#widgets in #lab, z 19), its record and its manager card `widgets`, before the rack registers the cards
   const { rk, layout, wTr, tablet, syncPhone, wireStage } = createRackWiring(app);
   createMirGui(app);   // iteration 003 (021 D1: mir-gui.js reads the build line from lab/build-line.js): after the rack, whose one dock span the modulation window docks in
   /* ── §19b the skip links · the dock chip · MENUS and the menubar · THE NOTEBOOK · PROJECTS: lab/shell/notebook.js (0.5.2 R3b), created here ── */

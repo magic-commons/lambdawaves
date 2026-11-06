@@ -96,6 +96,7 @@ const ICONS = {
   palette: dot(19, 12, 2.3) + dot(15.5, 18.06, 2.3) + dot(8.5, 18.06, 2.3) + dot(5, 12, 2.3) + dot(8.5, 5.94, 2.3) + dot(15.5, 5.94, 2.3),   // a ring of swatches
   lens: p('M3 8.5A1.5 1.5 0 0 1 4.5 7h3L9 4.5h6L16.5 7h3A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z') + c(12, 13, 3.6),   // CAMERA: a lens
   stage: box(3, 4.5, 18, 15, 2.5) + c(12, 12, 2.6) + p('M7 8.5 8.8 10M17 8.5 15.2 10M7 15.5 8.8 14M17 15.5 15.2 14'),   // 037 T1 STAGE: the frame, its centre and the wash between
+  widgets: box(3, 3, 8, 8, 2) + box(13, 3, 8, 8, 2) + box(3, 13, 8, 8, 2) + c(17, 17, 4),   // 037 W3 WIDGETS: a home screen's tiles, one of them round
   about: p('M6.5 3.5H8c1 0 1.7.5 2.1 1.4l8.4 15.6') + p('M12.4 10.6 5.5 20.5'),                                    // the λ mark
   timeline: fill(3.5, 4.5, 9, 3.2, 1) + fill(8.5, 10.4, 11, 3.2, 1) + fill(5.5, 16.3, 7, 3.2, 1) + p('M15.5 2.5v19'),   // lanes of clips and the playhead
   pattern: fill(2.5, 5.5, 5, 5, 1.2) + box(10.45, 6.45, 3.1, 3.1, .8) + fill(16.5, 5.5, 5, 5, 1.2) +
@@ -163,7 +164,7 @@ export const WINDOW_GLYPH = {
   history: 'history', transport: 'controlSurface', chem: 'molecule', atoms: 'atom', equalizer: 'equalizer',
   staticfield: 'field', separable: 'separable', central: 'central', lattice: 'lattice', emission: 'emission', bloch: 'bloch', slice: 'plane',
   calculus: 'calculus', ladder: 'ladder', wigner: 'wigner', shadow: 'shadow', orbit: 'orbit', vortex: 'vortex', meters: 'meters',
-  radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film', stage: 'stage', light: 'sun',   // 037 L1: LIGHTING wears the sun (the KEY)
+  radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film', stage: 'stage', widgets: 'widgets', light: 'sun',   // 037 L1: LIGHTING wears the sun (the KEY)
   /* the kit factories' windows (windowGlyphs) */
   gui: 'cogSolid', 'gui-about': 'about', keyboard: 'keyboard', 'keys-help': 'keyboard', timeline: 'timeline', modulation: 'modulation',
   'transport-free': 'controlSurface', folders: 'folders', pattern: 'pattern',

@@ -63,5 +63,21 @@ try {
     out.esc = await g.ev(`return { edit: __LW.widgets.edit(), pe: getComputedStyle(document.querySelector('#widgets .lw-widget')).pointerEvents };`);
     out.ok = out.mid.guide && out.mid.at === '50%' && out.after.centre === 0.5 && out.after.guideGone && out.after.last === 'WIDGET MOVE' && out.after.rows > A.rows && out.nudge.centre === 0.49 && !out.esc.edit && out.esc.pe === 'none';
   }
+  if (scene === 'w3') {   /* the manager: opened by its act, a gallery tile pressed for real adds one at the centre and lists it, EDIT's switch drives the layer, × removes */
+    await g.ev(`const s = document.createElement('script'); s.type = 'module'; s.src = '/tools/w037-probe-kind.js'; document.head.append(s); return 1;`);
+    await g.waitFor('window.__probeKind', 100, 100);
+    out.open = await g.ev(`__LW.widgets.restore(null); const A = __LW.actions; const ids = A.list().map((r) => r.id).filter((i) => i.startsWith('window.widgets.'));
+      A.run('window.widgets.open'); await new Promise((r) => setTimeout(r, 600)); const d = document.querySelector('.dev[data-id="widgets"]');
+      return { acts: ids.length, open: !d.classList.contains('closed'), kind: d.dataset.kind, tiles: [...d.querySelectorAll('.wg-kind .trig-l')].map((t) => t.textContent) };`);
+    out.add = await g.tap('.dev[data-id="widgets"] .wg-kind');
+    out.added = await g.ev(`await new Promise((r) => setTimeout(r, 400)); const L = __LW.widgets.list(), d = document.querySelector('.dev[data-id="widgets"]');
+      return { n: L.length, centre: L[0] && [+(L[0].x + L[0].w / 2).toFixed(3), +(L[0].y + L[0].h / 2).toFixed(3)], rows: d.querySelectorAll('.wg-row').length, last: __LW.history.entries().slice(-1)[0].label };`);
+    await g.tap('.dev[data-id="widgets"] .wg-acts .sw');
+    out.edit = await g.ev(`return __LW.widgets.edit();`);
+    await shot('037-W3-manager', await g.ev(`const r = document.querySelector('.dev[data-id="widgets"]').getBoundingClientRect(); return [r.left - 8, r.top - 8, r.right + 8, r.bottom + 8];`));
+    await g.tap('.dev[data-id="widgets"] .wg-x');
+    out.removed = await g.ev(`await new Promise((r) => setTimeout(r, 400)); return { n: __LW.widgets.list().length, rows: document.querySelectorAll('.dev[data-id="widgets"] .wg-row').length, h: Math.round(document.querySelector('.dev[data-id="widgets"]').getBoundingClientRect().height) };`);
+    out.ok = out.open.acts >= 3 && out.open.open && out.open.tiles.includes('PROBE') && out.added.n === 1 && out.added.centre[0] === 0.5 && out.added.rows === 1 && out.edit === true && out.removed.n === 0;
+  }
   out.errs = (await g.errors()).errs;
 } finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }
