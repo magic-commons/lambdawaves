@@ -113,17 +113,27 @@ try {
   assert.deepEqual(p0.errs, []);
   pass('a 1.4 notebook is page 0: a browser holding only the 0.4 notebook keys boots onto them, a save carries them into the ONE part (the stored item and the FOLDERS entry), and the kit\'s pageFromNotebook reads them as the first page ("OLD NOTES", the subtitle in italics)');
   /* ── 5 · FOLDERS IS PAINTED GLASS ── */
+  /* 038 Z1: every wait is on a STATE (a refresh counted, the entrance's animations finished, the block holding the landed rect), never a timer —
+     a loaded headless Firefox can hold its refresh driver (rAF, the WAAPI entrance, the paused mask's frame) for seconds after a reload, and the
+     old 600/1200 ms waits read the block before its first refresh (before 0, open 0) */
   const occ = await g.ev(`const w = (n) => new Promise((r) => setTimeout(r, n)), f = __LW.field, o = f.setOcclusion.bind(f);
-    f.setOcclusion = (rects) => { window.__occ = rects.map((x) => x.map(Math.round)); return o(rects); };
-    __LW.pause(); await w(300); document.body.classList.add('pf-probe'); await w(50); document.body.classList.remove('pf-probe'); await w(600);   /* a body class dirties the block: read it once */
-    const before = (window.__occ || []).length;
-    const F = __LW.projects.folders; F.open(); await w(1200);
-    const cb = document.getElementById('field').getBoundingClientRect(), rr = F.win.root.getBoundingClientRect();
-    const want = [rr.left - cb.left, rr.top - cb.top, rr.right - cb.left, rr.bottom - cb.top].map(Math.round);
-    const chips = [...F.win.rail.el.querySelectorAll('.mir-chip')].filter((c) => c.getBoundingClientRect().width > 2).length;
-    const open = window.__occ || [], landed = open.some((x) => x.every((v, i) => Math.abs(v - want[i]) <= 1));
-    F.close(); await w(1200);
-    return { before, open: open.length, chips, landed, after: (window.__occ || []).length, errs: __e.slice() };`);
+    const until = async (ok, ms = 20000) => { for (const t0 = performance.now(); performance.now() - t0 < ms; await w(50)) if (ok()) return true; return !!ok(); };
+    const block = () => window.__occ || [];
+    window.__calls = 0; f.setOcclusion = (rects) => { window.__calls++; window.__occ = rects.map((x) => x.map(Math.round)); return o(rects); };
+    __LW.pause(); await until(() => !__LW.clock.playing);
+    const c0 = window.__calls; document.body.classList.add('pf-probe'); await w(50); document.body.classList.remove('pf-probe');   /* a body class dirties the block: read it once */
+    const read = await until(() => window.__calls > c0);
+    const before = block().length;
+    const F = __LW.projects.folders, R = F.win.root; F.open();
+    const moving = () => R.getAnimations({ subtree: true }).some((a) => a.playState === 'running' && a.effect && a.effect.getTiming().iterations !== Infinity);
+    const want = () => { const cb = document.getElementById('field').getBoundingClientRect(), rr = R.getBoundingClientRect(); return [rr.left - cb.left, rr.top - cb.top, rr.right - cb.left, rr.bottom - cb.top].map(Math.round); };
+    const chipsNow = () => [...F.win.rail.el.querySelectorAll('.mir-chip')].filter((c) => c.getBoundingClientRect().width > 2).length;
+    const landed = await until(() => F.isOpen() && !moving() && block().some((x) => x.every((v, i) => Math.abs(v - want()[i]) <= 1)));
+    await until(() => block().length === before + 1 + chipsNow(), 5000);   /* the rail's chips land a beat after the pane */
+    const chips = chipsNow(), open = block().length;
+    F.close(); await until(() => !F.isOpen() && block().length === before);
+    return { read, before, open, chips, landed, after: block().length, errs: __e.slice() };`);
+  assert.equal(occ.read, true, 'the paused mask was never refreshed after a body class dirtied it: ' + JSON.stringify(occ));
   assert.equal(occ.landed, true, 'paused, the mask kept FOLDERS mid-entrance: ' + JSON.stringify(occ));
   assert.equal(occ.open, occ.before + 1 + occ.chips, 'the pane and its ' + occ.chips + ' chips did not join the block: ' + JSON.stringify(occ));
   assert.equal(occ.after, occ.before, 'FOLDERS stayed in the block after it closed');

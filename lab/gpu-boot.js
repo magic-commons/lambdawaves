@@ -12,7 +12,7 @@
  *         (a device lost while the module graph loads is reported lost, never `ok: true` on a dead device);
  *   (ii)  rack.js's setDprCap sites test the method (M3), so createField's method-less failure object boots;
  *   (iii) SINGLE-USE: `gpuBoot()` hands the early promise out once and then answers null, so a second createField
- *         requests its own device through the same `requestGpu()` and one field's dispose() (device.destroy())
+ *         requests its own device through the same `requestGpu()` and one field's device (a test's destroy, a loss)
  *         can never kill another's;
  *   (iv)  NODE-SAFE: three node suites import field.js, hence this file; `globalThis.navigator?.gpu` is undefined
  *         there, so nothing is requested;

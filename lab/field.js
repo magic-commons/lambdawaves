@@ -2602,14 +2602,17 @@ export async function createField(canvas, opts = {}) {
     /* REAL UNLOAD ONLY (pagehide without bfcache). GPU state is deliberately kept across backgrounding
        (rack.js keeps the textures warm on unified-memory hardware); this is the other case — the page is
        going away — and here the ordered teardown is the mitigation for a driver that otherwise has to reap
-       two 16 MiB textures and a device behind a navigation. Firefox has crashed whole on exactly that. */
+       two 16 MiB textures behind a navigation. Firefox has crashed whole on exactly that.
+       038 Z1 · THE DEVICE IS LEFT TO THE BROWSER: device.destroy() while frames are still in flight (a reload while ψ plays, or
+       just after a project open) wedged the NEXT page's refresh driver in Firefox 158 — no rAF ever again in that tab, the boot
+       veil up for good (tests/project-formats' red; measured headless: 16 of 16 reloads while playing wedged); the textures, the
+       buffers and the context released in order with the device left alone ticked every time. */
     dispose() {
       if (out.disposed) return; out.disposed = true; out.ok = false;
       try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); } catch (_) {}
       try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); cardBuf?.destroy(); palBuf.destroy(); } catch (_) {}
       try { for (const b of molParamsBuf) b.destroy(); molShellBuf.destroy(); molAlphaBuf.destroy(); molWBuf.destroy(); molMatBuf.destroy(); molCutBuf.destroy(); } catch (_) {}
       try { ctx.unconfigure(); } catch (_) {}
-      try { device.destroy(); } catch (_) {}
     },
     /** the windows over the stage, as [x0, y0, x1, y1] in CSS pixels of the canvas box; at most 32. Returns
      *  true when the block changed (the caller presents). Lines are not drawn inside these rectangles. */

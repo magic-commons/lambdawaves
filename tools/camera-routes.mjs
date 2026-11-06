@@ -64,14 +64,17 @@ try {
       /* 4 · a key on a ROUTED dial is the hand: it moves the base, the route stays; the base is put back */
       const hands = {}, routedIds = [...new Set(saved.routes.map((rt) => rt.target))], started = routedIds.length && !routedIds.every((id) => R.isModulated(id));
       if (started) { __LW.mod.play(); await __w(400); }   /* a saved route that is not playing yet: the modulation clock runs for the check, and stops after */
-      for (const id of ids) { if (!R.isModulated(id)) continue; const k = document.querySelector('[data-param="' + id + '"]'); if (!k) { hands[id] = { dial: false }; continue; }
+      /* 038 Z1: the ROUTED ones only — since 032's TIMELINE an arrangement's clip drives a target too (isModulated, no route: STAR LOOP, BENZENE π and
+         WATER ESP turn the camera from clips), and under a clip the value is the clip's (modulation-and-timeline.md THE ARRANGEMENT WINS WHERE IT PLAYS) */
+      const clipped = ids.filter((id) => R.isModulated(id) && !routedIds.includes(id));
+      for (const id of routedIds) { if (!R.isModulated(id)) continue; const k = document.querySelector('[data-param="' + id + '"]'); if (!k) { hands[id] = { dial: false }; continue; }
         const b0 = R.baseOf(id), key = R.toNorm(id, b0) > 0.5 ? 'ArrowLeft' : 'ArrowRight';   /* inward: a base at its end cannot move outward */
         k.focus(); k.dispatchEvent(new KeyboardEvent('keydown', { key, code: key, bubbles: true, cancelable: true })); await __w(80);
         const b1 = R.baseOf(id), still = M.routeList().some((rt) => rt.targetId === id), mod = !!R.isModulated(id); R.write(id, b0); await __w(50);
         hands[id] = { dial: true, moved: b1 !== b0, b0, b1, routeKept: still, stillModulated: mod, putBack: R.baseOf(id) === b0 }; k.blur(); }
       if (started) __LW.mod.stop();
       for (const id of routedIds) if (!hands[id]) hands[id] = { dial: !!document.querySelector('[data-param="' + id + '"]'), moved: false, why: 'never modulated, even playing' };
-      return { status: __LW.projects.status, saved, live, hands, errs: __e.slice() };`);
+      return { status: __LW.projects.status, saved, live, hands, clipped, errs: __e.slice() };`);
     if (!r || r.E) throw new Error(name + ': the open threw in the page — ' + (r && r.E));
     const s = { name, ...r }; run.scenes.push(s);
     const why = [];
@@ -95,7 +98,8 @@ try {
     const routed = r.saved.routes.map((x) => x.id + '→' + x.target).join(', ') || 'none';
     if (why.length) fail(name, why.join('; '));
     else console.log(`GREEN ${name.padEnd(11)} routes on observer.*: ${routed}; 6 targets, bases = the file's, law kept; dials ${JSON.stringify(Object.values(r.live.dials))}` +
-      (Object.keys(r.hands).length ? `; the hand on ${Object.keys(r.hands).join(', ')} moved the base and kept the route` : ''));
+      (Object.keys(r.hands).length ? `; the hand on ${Object.keys(r.hands).join(', ')} moved the base and kept the route` : '') +
+      (r.clipped.length ? `; driven by the arrangement's clips: ${r.clipped.join(', ')}` : ''));
   }
 } finally { await g.close(); }
 const print = (sc) => ({ name: sc.name, routes: sc.live.routes, bases: sc.live.bases, law: sc.live.law });

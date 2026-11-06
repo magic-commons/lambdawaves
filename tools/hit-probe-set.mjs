@@ -11,8 +11,10 @@
  *      between a DISCONNECTED card's head and body, a round corner;
  *   2  the kit's probe() presses at the grid's gaps, then at gaps sampled evenly from the raster (--press in all), and drags
  *      40 px with --watch on the camera pose (yaw, pitch, distance, shift): the press REACHED the stage when the pose moved.
- * The CONTROL presses the bare stage the same way and must move the pose, or the watch is blind and the set says so.
- * Exit 0 only when every window was found, the control reached the stage, and 0 gap presses reached it. */
+ * The CONTROL presses the bare stage the same way and must move the pose, or the watch is blind and the set says so.  A THROUGH scene is
+ * judged as the control is: 037 W's widgets layer (#widgets, z 19 over the stage) is never a pointer target, nor is a widget outside EDIT,
+ * so a press on either must reach the stage; under EDIT the widget takes the pointer (0 reached) and the layer around it still does not.
+ * Exit 0 only when every window was found, the control and every THROUGH scene reached the stage, and 0 gap presses reached it. */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { launch, sleep } from './perf/cdp.mjs';
@@ -26,18 +28,25 @@ const GRID = Number(opt('--grid', 9)), STEP = Number(opt('--step', 4)), PRESS = 
 const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8823}/lab/?sw=0&warn=0&starter=home&menu=0`;   // menu=0: the Picker opens at boot (iteration 012) and would cover every scene
 const POSE = 'JSON.stringify([__LW.obs.yaw, __LW.obs.pitch, __LW.obs.dist, __LW.obs.shift])';
 const MOD = `__LW.layout.modulation.expand(); for (let i = 0; i < 3; i++) __LW.mod.addSource('lfo');`;
-const SHUT = '__LW.layout.modulation.collapse(); __LW.sw.closeOffer();';   // 032: the update popup is put away too   // the first-run modulation window is open over the middle of the stage: every other scene shuts it
-const FLOAT = SHUT + ` __LW.layout.popOut('shadow', { x: 640, y: 180, w: 300 });`;
-/* [name, selector, the scene's setup through __LW] — the C9 row's list: the modulation window open, a floated card, the chip rail,
-   the keyboard window, the notebook, the sheet, the offer, FOLDERS */
+const SHUT = '__LW.layout.modulation.collapse(); __LW.sw.closeOffer(); __LW.widgets.clear();';   // 032: the update popup is put away too; 038: a widget scene's CLOCK too (the record is the profile's)   // the first-run modulation window is open over the middle of the stage: every other scene shuts it
+const FLOAT = SHUT + ` __LW.layout.reopen('shadow'); __LW.layout.popOut('shadow', { x: 640, y: 180, w: 300 });`;   // SHADOW ships closed: open it, then float it
+const NODES = SHUT + ` __LW.layout.reopen('nodes'); __LW.layout.popOut('nodes', { x: 640, y: 120, w: 300 });`;   // the CURVES card's seat since 020 X: NODES' card, the chain as a column
+const WIDGET = SHUT + ` __LW.widgets.add('clock');`;   // 037 W: one CLOCK at the stage's centre
+/* [name, selector, the scene's setup through __LW, THROUGH?] — the C9 row's list: the modulation window open, a floated card, the chip rail,
+   the keyboard window, the notebook, the sheet, the offer, FOLDERS; 037 W's widgets layer; NODES (the CURVES card's successor) */
 const SCENES = [
-  ['control: the bare stage', '#field', ''],
+  ['control: the bare stage', '#field', '', true],
+  /* the widgets first, before a scene leaves a window open over the stage's centre (the profile keeps NODES, FOLDERS and the TIMELINE open) */
+  ['a widget on the stage, outside EDIT (037 W: never a pointer target — THROUGH)', '#widgets > .lw-widget', WIDGET, true],
+  ['the widget under EDIT (it takes the pointer)', '#widgets > .lw-widget', WIDGET + ' __LW.widgets.edit(true);'],
+  ['the widgets layer under EDIT (the empty stage still turns the camera — THROUGH)', '#widgets', WIDGET + ' __LW.widgets.edit(true);', true],
   ['the modulation window open', '[data-mir-window="modulation"]', MOD],
   ['its chip rail', '[data-mir-rail="modulation"]', MOD],
   ['a floated card, DISCONNECTED (the first-run look: head and body apart)', '#floats > .dev[data-id="shadow"]', FLOAT + ' __LW.setDisconnected(true);'],
   ['a floated card, JOINED', '#floats > .dev[data-id="shadow"]', FLOAT + ' __LW.setDisconnected(false);'],
-  ['the CURVES card floated, DISCONNECTED (0.5.1 D10-24)', '#floats > .dev[data-id="curves"]', SHUT + " __LW.layout.reopen('curves'); __LW.layout.popOut('curves', { x: 640, y: 120, w: 300 }); __LW.setDisconnected(true);"],
-  ['the CURVES card floated, JOINED', '#floats > .dev[data-id="curves"]', SHUT + " __LW.layout.reopen('curves'); __LW.layout.popOut('curves', { x: 640, y: 120, w: 300 }); __LW.setDisconnected(false);"],
+  ['the NODES card floated, DISCONNECTED (0.5.1 D10-24\'s CURVES card became a node in it, 020 X)', '#floats > .dev[data-id="nodes"]', NODES + ' __LW.setDisconnected(true);'],
+  ['the NODES card floated, JOINED', '#floats > .dev[data-id="nodes"]', NODES + ' __LW.setDisconnected(false);'],
+  ['the NODES window (the FREE graph: its ground pans, never the camera)', '[data-mir-window="nodes"]', SHUT + " __LW.run('nodes');"],
   ['the keyboard window', '[data-mir-window="keyboard"]', SHUT + ' __LW.keymap.open();'],
   ['the notebook', '[data-mir-window="notebook"]', SHUT + ' __LW.layout.notebook.open();'],
   ['the sheet', '#sheet', SHUT + " document.getElementById('sheet').hidden = false;"],
@@ -63,14 +72,14 @@ const out = { url: URL_, grid: GRID, step: STEP, press: PRESS, kit: KIT, when: n
 let ok = true;
 try {
   await go(URL_); if (!(await ready())) throw new Error('the lab never became ready (warm-up): ' + b.logs.slice(0, 3).join(' | '));
-  for (const [name, selector, setup] of SCENES) {
+  for (const [name, selector, setup, through = false] of SCENES) {
     await go(URL_); if (!(await ready())) throw new Error('the lab never became ready: ' + name);
     const field = await b.eval(`(async () => { if (__LW.warning && __LW.warning.open) __LW.warning.dismiss(); __LW.pause(); __LW.camera.setAutoRotate(false);
       __LW.camera.setFling(0); __LW.camera.stop(); ${setup} await __LW.settle(); await new Promise((r) => setTimeout(r, 400)); return !!__LW.field.ok; })()`);
     const box = await b.eval(`(() => { const n = ${FIND(selector)}; if (!n) return null; const r = n.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height }; })()`);
-    const row = { name, selector, field, found: !!box, box: box && [box.left, box.top, box.width, box.height].map(Math.round), grid: { n: GRID, inside: 0, stage: 0, other: {} }, raster: null, pressed: 0, reached: 0, presses: [] };
+    const row = { name, selector, through, field, found: !!box, box: box && [box.left, box.top, box.width, box.height].map(Math.round), grid: { n: GRID, inside: 0, stage: 0, other: {} }, raster: null, pressed: 0, reached: 0, presses: [] };
     if (!box) { ok = false; out.scenes.push(row); console.log(`FAIL  ${name}: no visible ${selector}`); continue; }
-    const control = selector === '#field', grid = gridPoints(box, GRID), hits = await b.eval(classify(selector, grid));
+    const control = through, grid = gridPoints(box, GRID), hits = await b.eval(classify(selector, grid));
     for (const h of hits) if (h === 'inside') row.grid.inside++; else if (h === 'stage') row.grid.stage++; else row.grid.other[h] = (row.grid.other[h] || 0) + 1;
     let gaps = grid.filter((p, i) => hits[i] === 'stage');
     if (control) gaps = gaps.sort((p, q) => Math.hypot(p.x - 800, p.y - 500) - Math.hypot(q.x - 800, q.y - 500)).slice(0, 3);
@@ -96,9 +105,10 @@ try {
       + `\n      → ${row.pressed} pressed, ${row.reached} reached the stage`);
   }
 } finally { await b.close(); }
-const win = out.scenes.filter((s) => s.selector !== '#field');
-out.total = { pressed: win.reduce((t, s) => t + s.pressed, 0), reached: win.reduce((t, s) => t + s.reached, 0) };
+const win = out.scenes.filter((s) => !s.through), thru = out.scenes.filter((s) => s.through);
+out.total = { pressed: win.reduce((t, s) => t + s.pressed, 0), reached: win.reduce((t, s) => t + s.reached, 0),
+  through: { pressed: thru.reduce((t, s) => t + s.pressed, 0), reached: thru.reduce((t, s) => t + s.reached, 0) } };
 out.ok = ok;
-console.log(`hit-probe set: ${out.total.pressed} presses through a kit window's gap, ${out.total.reached} reached the stage — ${ok ? 'OK' : 'NOT OK'}`);
+console.log(`hit-probe set: ${out.total.pressed} presses through a kit window's gap, ${out.total.reached} reached the stage; ${out.total.through.pressed} presses on the stage and through the widgets layer, ${out.total.through.reached} reached it — ${ok ? 'OK' : 'NOT OK'}`);
 if (JSON_OUT) { fs.mkdirSync(path.dirname(path.resolve(JSON_OUT)), { recursive: true }); fs.writeFileSync(JSON_OUT, JSON.stringify(out, null, 1)); }
 process.exit(ok ? 0 : 1);
