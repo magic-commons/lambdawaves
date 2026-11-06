@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '595fcca1e97a'],
-  ['./build-id.js',                                                 '6e54dd0260ac'],
+  ['./build-id.js',                                                 '55ecbfb34808'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '41922d244a06'],
@@ -72,7 +72,7 @@ const PRECACHE = [
   ['./eq-audio.js',                                                 '686716c5b301'],
   ['./equalizer.js',                                                'dd4a442671a6'],
   ['./export3d.js',                                                 'e239066523c5'],
-  ['./field.js',                                                    '708f1506a747'],
+  ['./field.js',                                                    'c61600445699'],
   ['./film-bake.js',                                                'c5897017b434'],
   ['./film-card.js',                                                '3631f6772c58'],
   ['./first-run.js',                                                'ede0779de68b'],
@@ -107,7 +107,7 @@ const PRECACHE = [
   ['./frame-settle.js',                                             'a3b2724d2033'],
   ['./frontier.js',                                                 '3c8c90156676'],
   ['./gas.js',                                                      '8c1647b5c762'],
-  ['./gpu-boot.js',                                                 '5ea74d0d51a1'],
+  ['./gpu-boot.js',                                                 '4378ba80ae70'],
   ['./h2ci.js',                                                     'ff3d789794a3'],
   ['./h2curve.js',                                                  '553be2126763'],
   ['./hamiltonian.js',                                              '427e474b0ca4'],
@@ -150,7 +150,7 @@ const PRECACHE = [
   ['./linalg.js',                                                   'da2367cdcb97'],
   ['./loader.js',                                                   '5f3db87c55ea'],
   ['./look.js',                                                     '2bec6adca4f5'],
-  ['./main.js',                                                     '1f9a7eeba5dc'],
+  ['./main.js',                                                     '91aecb787ff4'],
   ['./manifest.webmanifest',                                        '3c7086f9dfa8'],
   ['./mapping.js',                                                  'af6824a8f2df'],
   ['./mathworker.js',                                               '24e51f82f922'],
@@ -320,10 +320,7 @@ const PRECACHE = [
   ['./mir/shell/vendor/katex/fonts/KaTeX_Size4-Regular.woff2',      'a4af7d414440'],
   ['./mir/shell/vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2', '71d517d67827'],
   ['./mir/shell/vendor/katex/fonts/OFL.txt',                        'fda55663cd51'],
-  ['./mir/shell/vendor/katex/katex.min.css',                        '717bc9ae7853'],
-  ['./mir/shell/vendor/katex/katex.min.js',                         'e6bfe5deebd4'],
   ['./mir/shell/vendor/marked-LICENSE.md',                          '8e3a3f82f59a'],
-  ['./mir/shell/vendor/marked.min.js',                              '15fabce5b658'],
   ['./mir/shell/window-picker.css',                                 '8cf89be05212'],
   ['./mir/shell/window-picker.js',                                  '93cfa2c1ae7b'],
   ['./mir/shell/wordmark.js',                                       'f47ed2744692'],
@@ -507,10 +504,14 @@ const PRECACHE = [
  * changed demo still reaches every browser (its `saved` stamp is the DEMOS refresh revision).
  * THE MEASURED LINES (iteration 016 E3) are DATA by the same rule: vendor/nist/ (NIST ASD's neutral lines, 330 KB, tools/nist-lines.py) — read when
  * EMISSION SPECTRA first meets the ATOM, kept by the page after that answer and swept with the pictures; HYDROGEN's lines are computed
- * and never need it. */
-const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/'];
+ * and never need it.
+ * THE PARSERS (038 Z3) are DATA by the same rule: the notebook's marked and KaTeX and KaTeX's sheet (mir/shell/vendor/, 327 KiB every install
+ * carried) — index.html loads them as before, and the page keeps what loaded once the worker is registered (main.js), so an installed app sets
+ * maths offline from its second open; a kit adoption may change them under the same names, so every new build sweeps them and the next open
+ * keeps the new bytes.  KaTeX's twenty faces stay precached (each is a @font-face's first source). */
+const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/', 'mir/shell/vendor/marked.min.js', 'mir/shell/vendor/katex/katex.min.js', 'mir/shell/vendor/katex/katex.min.css'];
 const DATA_CACHE = 'lw-data-v1';
-const SWEEP = ['demos/covers/', 'vendor/nist/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4); img/menu/ left it in 036 G7 — the page's loader validates what it keeps
+const SWEEP = ['demos/covers/', 'vendor/nist/', 'mir/shell/vendor/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4); img/menu/ left it in 036 G7 — the page's loader validates what it keeps
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */
@@ -520,7 +521,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
-  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures, the demo covers and the measured lines, kept as the page first shows them until the next build sweeps them (their names carry no hash), and the demo files FOLDERS seeds from.'],
+  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/, the notebook\'s parsers)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures, the demo covers, the measured lines and the notebook\'s parsers, kept as the page first shows or loads them until the next build sweeps them (their names carry no hash), and the demo files FOLDERS seeds from.'],
   ['a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)', 'kit data an adoption brings that the running lab fetches only when a language is chosen, or never: deployed, never precached, never cached (offline, a language other than English stays English).'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
   ['an adopted kit module no root reaches (R5-W1)', '0.5.0 C0: MIR is adopted whole, so lab/mir/ holds modules for consumers λWAVES has not reached yet. tests/wiring.test.mjs walks the roots and names them (--unreached-kit); tests/pwa.test.mjs and tools/build-deploy.mjs READ that set, so a kit module joins this precache the day a consumer imports it. Deployed, never precached, never failed (PLAN §9).'],
@@ -611,7 +612,7 @@ self.addEventListener('install', (event) => {
  * dropped, a 404.  That is why §6 refuses any take while a second window is open unless the user said UPDATE ALL,
  * and why the page tells each other window at once (sw-client.js: one holding no work reloads, one holding work
  * is told RELOAD NOW).
- * THE SWEEP (iteration 028 R-08): the covers and the measured lines are kept under names a re-render does not change, so a kept copy
+ * THE SWEEP (iteration 028 R-08): the covers, the measured lines and the parsers (038 Z3) are kept under names a re-render does not change, so a kept copy
  * would answer for the deployed one forever; each new build deletes them from DATA_CACHE and the page keeps the new bytes on their next
  * view (img/menu/ is the loader's, 036 G7).  library/<sha>.json, the basis records and lw-vol-* are untouched. */
 self.addEventListener('activate', (event) => {

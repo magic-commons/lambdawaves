@@ -3,7 +3,8 @@
  *   node tools/menu-check.mjs [--volume vol-1]
  * Read-only.  THE MENU (lab/img/menu): every element `el-<Sym>.webp` (118), every hydrogen state `orb-<nl>_<m>.webp` with its `.density` and
  * `.phase` (140 × 3; the base IS Im ψ, tools/menu-thumbs.mjs `atoms: { view: 'imag' }`), every catalogue molecule `<id>.webp` with its
- * phase · im · balls · sticks · esp · labels (the looks THE LOOK DROP offers, picker.js LOOKS), and every id of lab/molecules.js MOLECULES among
+ * phase · im · balls · sticks · esp and its `<id>.diagram.svg` (the looks THE LOOK DROP offers, picker.js LOOKS — the 7th, id `labels`, is the
+ * DIAGRAM since 037 D2; 038 Z3 deleted the old `<id>.labels.webp`), and every id of lab/molecules.js MOLECULES among
  * them.  THE VOLUME (~/Documents/LAMBDAWAVES-VOLUMES/dist/<vol>): each index row's `thumb` against `t/<id>.webp`, each named `thumbs` variant
  * against `t/<id>.<style>.webp`.  Prints one screen; exits 1 when the menu is short (the volume's gaps are the next pack day's, reported only). */
 import { readdirSync, existsSync, readFileSync } from 'node:fs';
@@ -11,8 +12,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), MENU = path.join(ROOT, 'lab', 'img', 'menu');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const MOL_LOOKS = ['phase', 'im', 'balls', 'sticks', 'esp', 'labels'], ORB_LOOKS = ['density', 'phase'];
-const files = new Set(readdirSync(MENU).filter((f) => f.endsWith('.webp')));
+const MOL_LOOKS = ['phase', 'im', 'balls', 'sticks', 'esp'], ORB_LOOKS = ['density', 'phase'];
+const all = readdirSync(MENU), files = new Set(all.filter((f) => f.endsWith('.webp'))), svgs = new Set(all.filter((f) => f.endsWith('.diagram.svg')));
 const ids = { el: new Set(), orb: new Set(), mol: new Set() };
 for (const f of files) {
   const base = f.slice(0, -5), dot = base.indexOf('.'), stem = dot > 0 ? base.slice(0, dot) : base;
@@ -20,10 +21,10 @@ for (const f of files) {
 }
 const missing = [];
 const need = (stem, looks) => { if (!files.has(stem + '.webp')) missing.push(stem + '.webp'); for (const l of looks) if (!files.has(stem + '.' + l + '.webp')) missing.push(stem + '.' + l + '.webp'); };
-for (const s of ids.el) need(s, []); for (const s of ids.orb) need(s, ORB_LOOKS); for (const s of ids.mol) need(s, MOL_LOOKS);
+for (const s of ids.el) need(s, []); for (const s of ids.orb) need(s, ORB_LOOKS); for (const s of ids.mol) { need(s, MOL_LOOKS); if (!svgs.has(s + '.diagram.svg')) missing.push(s + '.diagram.svg'); }
 let molsNotDrawn = [];   // a disabled row (the heavy group, 011 Q4) is not drawn by tools/menu-thumbs.mjs either, so it is no gap
 try { const { MOLECULES, RECORD_ONLY } = await import(path.join(ROOT, 'lab', 'molecules.js')); molsNotDrawn = [...MOLECULES, ...RECORD_ONLY].filter((m) => !m.disabled).map((m) => m.id).filter((id) => !ids.mol.has(id)); } catch (e) { molsNotDrawn = ['(lab/molecules.js did not load: ' + (e && e.message) + ')']; }
-console.log(`MENU  ${files.size} files · elements ${ids.el.size} (118 expected) · hydrogen states ${ids.orb.size} (140 expected, each + ${ORB_LOOKS.join(' · ')}) · molecules ${ids.mol.size} (each + ${MOL_LOOKS.join(' · ')})`);
+console.log(`MENU  ${files.size} files · elements ${ids.el.size} (118 expected) · hydrogen states ${ids.orb.size} (140 expected, each + ${ORB_LOOKS.join(' · ')}) · molecules ${ids.mol.size} (each + ${MOL_LOOKS.join(' · ')} · diagram.svg)`);
 console.log(missing.length ? `  MISSING ${missing.length}: ${missing.slice(0, 12).join(', ')}${missing.length > 12 ? ' …' : ''}` : '  every picture present');
 console.log(molsNotDrawn.length ? `  lab/molecules.js ids without a menu picture: ${molsNotDrawn.join(', ')}` : '  every lab/molecules.js id has its pictures');
 const vol = arg('volume', 'vol-1'), VDIR = path.join(process.env.HOME, 'Documents', 'LAMBDAWAVES-VOLUMES', 'dist', vol);

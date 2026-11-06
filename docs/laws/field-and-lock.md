@@ -72,4 +72,6 @@ CLIP is an ON switch with its lamp and the kind CLIP | SLAB (`mat.slice.mode` 0 
 THE LOCK is SAME-MACHINE
 (843 + 987 values since iteration 008 W took Re+Im's 17 style rows out of each fixture — once 860 + 1004; iteration 008 G re-captured the 15 particle rows `styles.{density,phase,real,imag,diff}/{grain,dust,bands}` by name, the counts unchanged; iteration 008 Q moved the default KNEE 0.6 → 3 (`field.js` `KNEE_DEFAULT`), so every readback that composites the volume was re-captured by name (175 + 193 leaves: the states' rp/rpL, every style and flag row but ADD's, the line rows' rp) — the field digests, record bytes, ADD rows and linePixels held, and the tree at KNEE 0.6 read 843/0 and 987/0; ≤ 64 AO tile states; no time-dependent molecular packet, STATES run, FLOW or `record()` is in it). Its 1004-value
 fixture (`tests/fixtures/digest-lock-s4a.json`) predates the gas table and is checked WITH `--query gastab=0`, as the tool's
-header says; without it the gas states read red at every grid.
+header says; without it the gas states read red at every grid. 038 Z4: that red is the "12 · 3" 037's H chain and the integration
+server read (`gas` × 64 · 96 · 128: digest · integral · rp · rpL, and pack) — no leaf moved, and the tree, the volumes link and the
+gate server's version each read 987 · 0 — so `gastab=0` is the tool's DEFAULT now (`--query ''` for the bare tree).

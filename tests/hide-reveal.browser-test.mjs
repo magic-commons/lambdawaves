@@ -1,8 +1,9 @@
 // iteration 015 H3 · HIDE AND REVEAL, in the real page (research/iteration-015/H3-BUILD.md holds the audit's table; this suite carries the rows
 // that can be asserted):
-//   1 · H (the real key) takes EVERY surface out of paint — the racks, the FREE control surface, the TIMELINE, the modulation window, a floating
-//       window, the menubar, the pills — so a grid of points over the screen reads only the stage; frame and axes go with it; H again brings
-//       each back where it was, the frame and the axes as they were.
+//   1 · H (the real key) takes EVERY surface out of paint — the racks, the DETACHED control surface (its card popped out of the rack: 032 C1
+//       took FREE out of the cycle, the places are RACK and STAGE), the TIMELINE, the modulation window, a floating window, the menubar, the
+//       pills — so a grid of points over the screen reads only the stage; frame and axes go with it; H again brings each back where it was,
+//       the frame and the axes as they were.  The bar moves by the action road (`dock`, `window.transport.float`), never a class's click.
 //   2 · B hides both racks and the stage's control surface; the pointer at the left edge peeks the left rack, at the right edge the right
 //       rack, near the bar's seat the bar; in the middle nothing; B again shows them.
 //   3 · every fold press (`.lw-fold`) opens and closes its bodies, and its chevron points right closed and down open; a window's own fold
@@ -39,19 +40,22 @@ try {
     window.__grid = () => { const out = new Set(), lend = [...document.querySelectorAll('.rack-pills, #controlHelp')]; for (const e of lend) e.style.pointerEvents = 'auto';
       for (let i = 1; i < 16; i++) for (let j = 1; j < 10; j++) { const e = document.elementFromPoint(innerWidth * i / 16, innerHeight * j / 10); if (e) out.add(e.closest('#stage > canvas, canvas') ? 'canvas' : (e.id || e.tagName) + (e.closest('#floats, #rack, #rackL, #transport, #menubar, #title, .rack-pills, #notebook') ? '@' + e.closest('#floats, #rack, #rackL, #transport, #menubar, #title, .rack-pills, #notebook').id : '')); }
       for (const e of lend) e.style.pointerEvents = ''; return [...out]; };
+    /* the CONTROL SURFACE's place: 'stage', 'rack', or 'detached' (docked in its card, the card floating) */
+    window.__place = () => __LW.layout.isFloating('transport') ? 'detached' : document.getElementById('transport').dataset.place;
+    window.__toStage = async () => { if (__LW.layout.isFloating('transport')) __LW.run('window.transport.float'); if (__LW.layout.docked) __LW.run('dock'); await __w(500); return __place(); };
     return 1;`);
 
   /* ── 1 · H ── */
   const t1 = await ev(`const L = __LW.layout, tr = document.getElementById('transport');
-    for (let i = 0; i < 3 && tr.dataset.place !== 'free'; i++) { tr.querySelector('.dock-btn').click(); await __w(500); }
+    if (!L.docked) __LW.run('dock'); if (!L.isFloating('transport')) __LW.run('window.transport.float'); await __w(500);
     __LW.timeline.open(); await __w(500); __LW.mod.expand(); await __w(500);
     L.reopen('camera'); L.popOut('camera', { x: 420, y: 140 }); await __w(400);
-    const surf = () => ({ rackL: [...document.querySelectorAll('#rackL .dev > .dev-head')].some(__shown), rack: [...document.querySelectorAll('#rack .dev > .dev-head')].some(__shown), bar: __shown(tr), free: tr.dataset.place,
+    const surf = () => ({ rackL: [...document.querySelectorAll('#rackL .dev > .dev-head')].some(__shown), rack: [...document.querySelectorAll('#rack .dev > .dev-head')].some(__shown), bar: __shown(tr), place: __place(),
       tl: __shown(__LW.timeline.root), mod: __shown(document.getElementById('modwin')), float: __shown(document.querySelector('.dev[data-id="camera"] > .dev-head')) && __LW.layout.isFloating('camera'), title: __shown(document.getElementById('title')),
       pills: [...document.querySelectorAll('.rack-pills')].every((p) => getComputedStyle(p).display !== 'none') });
     const frame0 = __LW.mat.frame, axis0 = __LW.mat.axis, before = surf();
     return { before, frame0, axis0 };`);
-  assert.ok(t1.before.free === 'free' && t1.before.bar && t1.before.tl && t1.before.mod && t1.before.float && t1.before.rackL && t1.before.rack, 'the surfaces did not open: ' + JSON.stringify(t1));
+  assert.ok(t1.before.place === 'detached' && t1.before.bar && t1.before.tl && t1.before.mod && t1.before.float && t1.before.rackL && t1.before.rack, 'the surfaces did not open: ' + JSON.stringify(t1));
   await g.press('h'); await g.ev('await __w(500); return 1;');
   const t1h = await ev(`return { hidden: document.body.classList.contains('ui-hidden'), grid: __grid(), frame: __LW.mat.frame, axis: __LW.mat.axis,
     pills: [...document.querySelectorAll('.rack-pills')].every((p) => getComputedStyle(p).display === 'none') };`);
@@ -61,14 +65,14 @@ try {
   await g.press('h'); await g.ev('await __w(600); return 1;');
   const t1b = await ev(`const tr = document.getElementById('transport');
     return { hidden: document.body.classList.contains('ui-hidden'), frame: __LW.mat.frame, axis: __LW.mat.axis, rackL: [...document.querySelectorAll('#rackL .dev > .dev-head')].some(__shown), rack: [...document.querySelectorAll('#rack .dev > .dev-head')].some(__shown),
-      bar: __shown(tr), free: tr.dataset.place, tl: __shown(__LW.timeline.root), mod: __shown(document.getElementById('modwin')), float: __shown(document.querySelector('.dev[data-id="camera"] > .dev-head')) && __LW.layout.isFloating('camera'), title: __shown(document.getElementById('title')) };`);
+      bar: __shown(tr), place: __place(), tl: __shown(__LW.timeline.root), mod: __shown(document.getElementById('modwin')), float: __shown(document.querySelector('.dev[data-id="camera"] > .dev-head')) && __LW.layout.isFloating('camera'), title: __shown(document.getElementById('title')) };`);
   assert.ok(!t1b.hidden && t1b.frame === t1.frame0 && t1b.axis === t1.axis0, 'H did not bring the frame and the axes back as they were: ' + JSON.stringify({ t1, t1b }));
   for (const k of ['rackL', 'rack', 'bar', 'tl', 'mod', 'float', 'title']) assert.equal(t1b[k], true, 'H did not bring back ' + k + ': ' + JSON.stringify(t1b));
-  assert.equal(t1b.free, 'free', 'H moved the control surface out of its FREE window');
-  pass(`H took every surface out of paint (the grid read only ${t1h.grid.join(' · ')}), the frame and the axes with it; H again brought back both racks, the FREE control surface, the TIMELINE, the modulation window, the floating CAMERA and the title, the frame ${t1b.frame} and the axes ${t1b.axis} as they were`);
+  assert.equal(t1b.place, 'detached', 'H moved the control surface out of its detached card');
+  pass(`H took every surface out of paint (the grid read only ${t1h.grid.join(' · ')}), the frame and the axes with it; H again brought back both racks, the detached control surface, the TIMELINE, the modulation window, the floating CAMERA and the title, the frame ${t1b.frame} and the axes ${t1b.axis} as they were`);
 
   /* put the room back for the rest: the bar on the stage, the windows closed, CAMERA home */
-  await ev(`const tr = document.getElementById('transport'); for (let i = 0; i < 3 && tr.dataset.place !== 'stage'; i++) { tr.querySelector('.dock-btn').click(); await __w(500); }
+  await ev(`await __toStage();
     __LW.mod.collapse(); __LW.timeline.close(); __LW.layout.dockWindow('camera'); await __w(700); return 1;`);
 
   /* ── 2 · B and the peeks ── */
@@ -154,7 +158,7 @@ try {
       t.style.pointerEvents = '';
       return { shown: true, text: t.textContent.slice(0, 40), inside: r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight, top, r: [r.left, r.top, r.right, r.bottom].map(Math.round) };`);
   };
-  await ev(`const tr = document.getElementById('transport'); for (let i = 0; i < 3 && tr.dataset.place !== 'stage'; i++) { tr.querySelector('.dock-btn').click(); await __w(500); } return tr.dataset.place;`);   // §3 raised the TRANSPORT card: the bar back on the stage
+  await ev(`return __toStage();`);   // §3 raised the TRANSPORT card: the bar back on the stage
   /* a value bubble (.k-val) is a hover hint too: none may stick out of a box that clips its paint (contain: paint, overflow) */
   const t5 = await ev(`const out = [];
     for (const v of document.querySelectorAll('#transport .k-val, #transport .fd-val, .dev .k-val, .dev .fd-val')) {

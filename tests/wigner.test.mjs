@@ -227,11 +227,14 @@ function oracle1s(r, p, mu, N = 240) {
      the s_z rule is now cut at the state's extent instead of each row's own tails, and holds only s_z > 0 (W is real) */
   const six = [[6, 5, 5], [6, 0, 0], [5, 4, -4], [4, 3, 3], [2, 1, 0], [1, 0, 0]].map(([n, l, m], i) => ({ a: idx(n, l, m), re: 0.4, im: 0.1 * i }));
   wignerSlice(six, { z: [-8, 8, 8], p: [-2, 2, 8], order: 'normal' });                                             // warm
-  const corners = [[40, 4], [16, 4], [2, 4], [8, 2]].map(([zm, pm]) => { const t = Date.now(); const S = wignerSlice(six, { z: [-zm, zm, 64], p: [-pm, pm, 64], order: 'normal' }); return { zmax: zm, pmax: pm, ms: Date.now() - t, finite: Array.from(S.W).every(isFinite) }; });
+  /* 038 Z2: the cost is this process's CPU time, the best of three — a loaded machine stretches the wall clock, not the work (the old Date.now() read
+     went over 150 ms beside ./test.sh's other suites and under a browser gate, and passed alone) */
+  const cost = (fn) => { let ms = Infinity, S = null; for (let k = 0; k < 3; k++) { const c = process.cpuUsage(); S = fn(); const d = process.cpuUsage(c); ms = Math.min(ms, Math.round((d.user + d.system) / 1000)); } return { ms, S }; };
+  const corners = [[40, 4], [16, 4], [2, 4], [8, 2]].map(([zm, pm]) => { const { ms, S } = cost(() => wignerSlice(six, { z: [-zm, zm, 64], p: [-pm, pm, 64], order: 'normal' })); return { zmax: zm, pmax: pm, ms, finite: Array.from(S.W).every(isFinite) }; });
   const w0 = wignerAxial(S1S, 0, 0, { order: 'normal' }), wm = wignerAxial(S1S, ONE_S.minAt[0], ONE_S.minAt[1], { order: 'normal' });
   const S8 = wignerSlice(six, { z: [-8, 8, 64], p: [-2, 2, 64], order: 'normal' }), F8 = wignerSlice(six, { z: [-8, 8, 64], p: [-2, 2, 64], order: 'fine' });
   let dev = 0; for (let i = 0; i < S8.W.length; i++) dev = Math.max(dev, Math.abs(S8.W[i] - F8.W[i]));
-  judge('W42-8 THE SLICE UNDER 150 ms AT EVERY KNOB CORNER: the six-term n ≤ 6 state on 64 × 64 at (z_max, p_max) = (40, 4) [the reviewer\'s 306 ms], (16, 4), (2, 4) and (8, 2) — ' + corners.map((c) => c.ms).join(', ') + ' ms — at order normal (the extent cut and the half rule), all finite; the 1s anchors at that order: W(0, 0) = 1/π³ to 1e-7 (it is 2e-11) and the minimum −3.0973e-4 to 1e-7 (it is 6e-12); and the six-term slice at the default range agrees with order fine to 2e-4 absolute over the grid (the n = 6 truncation the header states: ~5e-5, 0.3 % of the maximum)',
+  judge('W42-8 THE SLICE UNDER 150 ms AT EVERY KNOB CORNER: the six-term n ≤ 6 state on 64 × 64 at (z_max, p_max) = (40, 4) [the reviewer\'s 306 ms], (16, 4), (2, 4) and (8, 2) — ' + corners.map((c) => c.ms).join(', ') + ' ms of CPU, the best of three — at order normal (the extent cut and the half rule), all finite; the 1s anchors at that order: W(0, 0) = 1/π³ to 1e-7 (it is 2e-11) and the minimum −3.0973e-4 to 1e-7 (it is 6e-12); and the six-term slice at the default range agrees with order fine to 2e-4 absolute over the grid (the n = 6 truncation the header states: ~5e-5, 0.3 % of the maximum)',
     corners.every((c) => c.ms < 150 && c.finite) && Math.abs(w0 - 1 / PI ** 3) < 1e-7 && Math.abs(wm - ONE_S.min) < 1e-7 && dev < 2e-4,
     { corners, peakErr: w0 - 1 / PI ** 3, minErr: wm - ONE_S.min, normalVsFine: dev, max: S8.max });
 }
