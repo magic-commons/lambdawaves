@@ -3,8 +3,8 @@
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --write    record the lock on THIS tree
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --check    re-run and compare, exit 1 on any difference
  *   options:  --fixture <path>   (default tests/fixtures/digest-lock-base.json)
- *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=0'   (appended to the lab URL; W125:
- *             the gas table is the default, so the pre-W125 base fixture is checked with `--query 'gastab=0'`, and
+ *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=0'   (appended to the lab URL; THE DEFAULT since 038 Z4,
+ *             `--query ''` for none; W125: the gas table is the default, so the pre-W125 base fixture is checked with `--query 'gastab=0'`, and
  *             digest-lock-base-w125.json is the base with it on)
  *             --nowarm   (K2) do not warm the specialised present pipelines: every readPixels draws with the generic one
  *             --states a,b,c   only these states (0.4.0 S4a: `--states` with the thirteen pre-S4a names checks the old fixture
@@ -74,7 +74,10 @@ if (!MODE) { console.error('usage: node tools/perf/digest-lock.mjs --write|--che
 const FIXTURE = path.resolve(ROOT, opt('--fixture', 'tests/fixtures/digest-lock-base.json'));
 const ONLY = opt('--only', 'states,styles,lines').split(',');
 const GRIDS = opt('--grids', '64,96,128').split(',').map(Number);
-const QUERY = opt('--query', '');
+/* 038 Z4 · THE QUERY IS THE FIXTURES' OWN: both shipped fixtures (base, s4a) were captured before W125 made the gas table the default, so a
+   check without `gastab=0` read the `gas` state with the table on — 12 readbacks + 3 pack bytes (its digest · integral · rp · rpL and pack at
+   64/96/128): the "12 · 3" the integration server's s4a showed, no leaf moved.  It is the default now; `--query ''` is the bare tree. */
+const QUERY = opt('--query', 'gastab=0');
 const NOWARM = flag('--nowarm');           // K2: skip the specialised-pipeline warm-up (every readPixels then draws generic)
 const ONLY_STATES = opt('--states', '') ? opt('--states', '').split(',') : null;
 const PORT = process.env.LW_PORT || '8721';

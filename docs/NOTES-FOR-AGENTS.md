@@ -105,7 +105,8 @@ and the code disagree, the code is right; please say so in an issue.
   never reached the network once keeps nothing of DATA; one that did sets maths as before.
 - The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 843 values, and 987 with the s4a fixture since iteration 008 W — both runs with `--query gastab=0`; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
   `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (843) and the same with
-  `--fixture tests/fixtures/digest-lock-s4a.json` (987), against a tree served by `tools/gate/server.py`.
+  `--fixture tests/fixtures/digest-lock-s4a.json` (987), against a tree served by `tools/gate/server.py`. Since 038 Z4 `gastab=0` is the
+  tool's default (a run without it read `gas` red at 64/96/128 — 12 readbacks · 3 pack bytes — the old "s4a 12 · 3").
   Source: `tools/perf/digest-lock.mjs` (header).
 - A change to CSS or to what the page builds at boot is checked with MIR's `tools/stylehash.mjs` (computed
   styles and pixels, theme × card × frost, before and after). Source: `research/optimization-2026-09-24/BUILD-BRIEF.md`.
