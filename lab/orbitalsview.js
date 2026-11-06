@@ -51,7 +51,7 @@ export function createOrbitals(host, api) {
   const sel = new Map();                // k → { amp, phase } — the register's own coefficients
 
   /* ── the ladder ───────────────────────────────────────────────────────────────────────────────── */
-  const cv = el('canvas', 'mol-c', host), cfoot = footLine(cv);   // 016 R1: the law line, shown on a hover
+  const cv = el('canvas', 'mol-c', host), cfoot = footLine(cv), views = new Set();   // 016 R1: the law line, shown on a hover
   watchStroke((m) => { cv.title = m === 'paint' ? 'MO ladder ε_k (Eh): drag adds, right-drag removes' : 'MO ladder ε_k (Eh): a click toggles a level'; });   // 036 P1
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
@@ -467,20 +467,22 @@ export function createOrbitals(host, api) {
     }
     return out;
   }
-  function paint() {
-    const W = cv.clientWidth, H = cv.clientHeight;
+  function paint() { for (const c of views) paintOn(c); paintOn(cv); }   // 037 V3 THE SEAM: each ORBITALS widget's canvas (the levels alone), then the window's
+  function paintOn(c) {
+    const bare = c !== cv, W = c.clientWidth, H = c.clientHeight;
     if (W < 32 || H < 32) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const T = themeInk(g), A = accentRGB(g, 1), B = accentRGB(g, 2);
     const occInk = (a) => `rgba(${A[0]},${A[1]},${A[2]},${a})`, virInk = (a) => `rgba(${B[0]},${B[1]},${B[2]},${a})`;
-    const left = 50, right = W - 10, top = 12, bot = H - 15;
+    const left = bare ? 6 : 50, right = W - (bare ? 6 : 10), top = 12, bot = H - 15;
     const plot = { x0: left, y0: top, x1: right, y1: bot };
     hovers = []; hits = [];
     g.font = '8px ui-monospace, monospace'; g.textBaseline = 'middle';
     const rows = rowsOf();
     if (!rows.length) {
+      if (bare) return;
       g.fillStyle = T.ink(0.85); g.textAlign = 'center';
       /* 017 R4: the line WRAPS to the plot's width (it ran past both edges of a rack card's canvas) */
       const lines = []; let ln = '';
@@ -554,6 +556,7 @@ export function createOrbitals(host, api) {
       g.beginPath(); g.moveTo(a + 3, y - h); g.lineTo(a, y - h); g.lineTo(a, y + h); g.lineTo(a + 3, y + h);
       g.moveTo(b - 3, y - h); g.lineTo(b, y - h); g.lineTo(b, y + h); g.lineTo(b - 3, y + h); g.stroke();
     }
+    if (bare) return;
     /* the 50 px gutter, one name a row and NOTHING NUDGED: a name away from its own level would lie (spectrum's law) */
     const used = [];
     g.textAlign = 'right';
@@ -667,7 +670,7 @@ export function createOrbitals(host, api) {
   }
 
   return {
-    update, setActive, paint, refresh, claim,
+    update, setActive, paint, refresh, claim, views,
     get on() { return on; }, setOn: (v) => api.one(v),   // the ONE switch (registerview), never this pane's claim
     get active() { return active; },
     get dials() { return !rowsEl.hidden; }, setDials,

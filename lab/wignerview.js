@@ -63,7 +63,6 @@ export function createWigner(host, api = {}) {
      with its sign in words.  The tick ladder is the two END values per axis, in the muted ink — no more. */
   let rect = null;
   const hover = graphHover(cv, { repaint: () => paint(), plot: () => rect });
-  const g = cv.getContext('2d');
   const off = document.createElement('canvas'); off.width = NZ; off.height = NP;
   const octx = off.getContext('2d');
 
@@ -81,13 +80,14 @@ export function createWigner(host, api = {}) {
   el('div', 'note', host).innerHTML = '<b>Phase-space slice.</b> This is W(z,p<sub>z</sub>) at x = y = p<sub>x</sub> = p<sub>y</sub> = 0, not a marginal distribution. Negative values use Accent B. Opacity is display-scaled; readouts retain the signed values. Hydrogen and oscillator states only.';
 
   /* ── the map ─────────────────────────────────────────────────────────── */
-  function clear() { const W = cv.clientWidth, H = cv.clientHeight; if (W > 0 && H > 0) { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); } }
-  function paint() {
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(cv);
+  const views = new Set(), paint = () => { for (const c of views) draw(c); draw(cv); };   // 037 V3 THE SEAM: each WIGNER widget's canvas (the map alone: no margin, no words), then the window's
+  function clear() { for (const c of [...views, cv]) if (c.clientWidth > 0 && c.clientHeight > 0) { const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height); } }
+  function draw(c) {
+    const g = c.getContext('2d'), bare = c !== cv, W = c.clientWidth, H = c.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(c);
     if (W < 40 || H < 40 || !cache) return;
-    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    const ML = 30, MR = 8, MT = 8, MB = 24, pw = W - ML - MR, ph = H - MT - MB;   // MB: TWO rows under the frame — the end ticks, then the axis name (they used to print over one another)
+    const [ML, MR, MT, MB] = bare ? [0, 0, 0, 0] : [30, 8, 8, 24], pw = W - ML - MR, ph = H - MT - MB;   // MB: TWO rows under the frame — the end ticks, then the axis name (they used to print over one another)
     if (pw < 20 || ph < 20) return;
     const A = accentRGB(g, 1), B = accentRGB(g, 2), dim = readRGB(g, '--dim', '#b8b8b8');
     const S = cache.slice, amp = Math.max(Math.abs(S.min), Math.abs(S.max)) || 1;
@@ -106,10 +106,11 @@ export function createWigner(host, api = {}) {
     g.drawImage(off, 0, 0, NZ, NP, ML, MT, pw, ph);
     /* the frame, the zero cross and the ticks */
     const ink = (a) => `rgba(${dim[0]},${dim[1]},${dim[2]},${a})`;
-    g.strokeStyle = ink(0.35); g.lineWidth = 1; g.strokeRect(ML + 0.5, MT + 0.5, pw - 1, ph - 1);
+    g.strokeStyle = ink(0.35); g.lineWidth = 1; if (!bare) g.strokeRect(ML + 0.5, MT + 0.5, pw - 1, ph - 1);
     const xOf = (z) => ML + (z + zmax) / (2 * zmax) * pw, yOf = (p) => MT + (pmax - p) / (2 * pmax) * ph;
     g.strokeStyle = ink(0.22); g.setLineDash([2, 3]); g.beginPath();
     g.moveTo(xOf(0), MT); g.lineTo(xOf(0), MT + ph); g.moveTo(ML, yOf(0)); g.lineTo(ML + pw, yOf(0)); g.stroke(); g.setLineDash([]);
+    if (bare) return;
     g.font = '8px ui-monospace, monospace'; g.fillStyle = ink(0.8);
     g.textBaseline = 'top';
     const fmt = (v) => (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1));
@@ -235,7 +236,7 @@ export function createWigner(host, api = {}) {
 
   window.addEventListener('resize', () => paint());
   return {
-    update, table, paint,
+    update, table, paint, views, redraw: paint,
     /** the export caption's tail while the window is open and live (film.js caption()) */
     caption() { return cache && !host.closest('.closed') ? ' · WIGNER · ∫|W| − 1 = ' + cache.neg.toFixed(3) : ''; },
     get stats() { return cache ? { peak: cache.peak, min: cache.min.v, minAt: [cache.min.z, cache.min.p], max: cache.slice.max, ms: cache.ms, refineMs: cache.refineMs, terms, capped, norm2, zmax, pmax, nz: NZ, np: NP, label: LABEL } : null; },

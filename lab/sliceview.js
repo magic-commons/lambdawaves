@@ -197,13 +197,22 @@ export function createSliceView(host, api) {
   }
   /* the crosshair answers for the frame: extent, sampling and the U(2) sheet */
   const hover = graphHover(cv, { repaint: () => paint() });
+  /* 037 V3 THE SEAM: each PLANE widget's canvas takes the picture alone (a square, centred) with its black made clear — alpha the brightest channel,
+     so it sits on the stage and not on a well — painted before the window's; a widget on the stage keeps the private pump alive with the window closed */
+  const views = new Set(), sized = (c) => c.clientWidth >= 32, wide = () => [...views].some(sized), clearC = document.createElement('canvas');
   function paint() {
     const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
-    if (W < 32 || H < 32 || !img) return;
-    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    g.setTransform(1, 0, 0, 1, 0, 0);
+    if (!img || (!sized(cv) && !wide())) return;
     if (off.width !== img.width || off.height !== img.height) { off.width = img.width; off.height = img.height; }
     off.getContext('2d').putImageData(img, 0, 0);
+    if (views.size) { const a = img.data, L = new ImageData(img.width, img.height), d = L.data; clearC.width = img.width; clearC.height = img.height;
+      for (let i = 0; i < a.length; i += 4) { const m = Math.max(a[i], a[i + 1], a[i + 2]), k = m ? 255 / m : 0; d[i] = a[i] * k; d[i + 1] = a[i + 1] * k; d[i + 2] = a[i + 2] * k; d[i + 3] = m; }
+      clearC.getContext('2d').putImageData(L, 0, 0); }
+    for (const c of views) { const q = c.getContext('2d'), w = Math.round(c.clientWidth * dpr), h = Math.round(c.clientHeight * dpr), s = Math.min(w, h);
+      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } q.imageSmoothingEnabled = true; q.clearRect(0, 0, w, h); q.drawImage(clearC, (w - s) / 2, (h - s) / 2, s, s); }
+    if (W < 32 || H < 32) return;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    g.setTransform(1, 0, 0, 1, 0, 0);
     g.imageSmoothingEnabled = true;
     g.clearRect(0, 0, cv.width, cv.height);
     g.drawImage(off, 0, 0, cv.width, cv.height);
@@ -271,11 +280,11 @@ export function createSliceView(host, api) {
      paints, and touches no part of the tier machinery — and it is the ONLY stepper, so the 2.2 ms budget is spent once
      per animation frame whether the transport is playing, paused, or not scheduling frames at all. */
   let pumpId = 0, active = true;
-  function armPump() { if (active && !pumpId && job) pumpId = requestAnimationFrame(pump); }
+  function armPump() { if ((active || wide()) && !pumpId && job) pumpId = requestAnimationFrame(pump); }
   function pump() {
     pumpId = 0;
-    if (!job || !active) return;
-    if (cv.clientWidth < 32) { job = null; return; }             // folded mid-job: drop it, exactly as update() would
+    if (!job || !(active || wide())) return;
+    if (!sized(cv) && !wide()) { job = null; return; }           // folded mid-job (and no widget shows it): drop it, exactly as update() would
     stepJob(); paint();
     armPump();                                                   // stepJob() nulls `job` when it finishes, and the pump stops
   }
@@ -291,7 +300,7 @@ export function createSliceView(host, api) {
       dirty = true;
       api.repaint();
     }
-    const visible = cv.clientWidth >= 32;
+    const visible = sized(cv) || wide();
     if (current !== 'off') { const ids = reg.renderSet().ids; one = ids.length === 1 ? BASIS[ids[0]] : null; }
     if (visible) {
       const k = sampleKey(reg, t);
@@ -324,7 +333,7 @@ export function createSliceView(host, api) {
   window.addEventListener('resize', () => { if (active) paint(); });
   /* `sampleAt` is the one-shot route kept for anything that wants a slice OUTSIDE the frame loop (a proof, a test):
      it is slice.js's own sampleSlice, unchunked, and it is what the chunked job reproduces row by row. */
-  return { update, setActive, get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); tour = null; dirty = true; },
+  return { update, setActive, views, redraw: () => paint(), get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); tour = null; dirty = true; },
     get sample() { return sample; }, get mode() { return mode; }, setMode(m) { mode = m === 'ks' ? 'ks' : 'space'; modeSeg.set(mode); dirty = true; },
     get half() { return half; }, get res() { return res; }, get gain() { return gain; },
     save() { return { mode, half, gain, rotor: { qL: rotor.qL.slice(), qR: rotor.qR.slice() }, ...(current !== 'off' && { current }) }; },   // F1: OFF writes no key

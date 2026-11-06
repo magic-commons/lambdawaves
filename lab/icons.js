@@ -100,6 +100,8 @@ const ICONS = {
   clock: c(12, 12, 9) + p('M12 7v5l3.5 2.2'),   // 037 W5 CLOCK: ψ's time
   playhead: p('M3 19.5h18M6 19.5V17M9 19.5V17M15 19.5V17M18 19.5V17M12 8v11.5') + solid('M8.5 3.5h7L12 8Z'),   // 037 W5 PLAYHEAD: the ruler and its head
   words: p('M4 6h10M9 6v12.5M13.5 12H20M16.75 12v6.5'),   // 037 W6 TEXT: words on the stage, a large and a small letter
+  orbitals: p('M4 20h16M4 14.5h7M13 14.5h7M4 9h7M13 9h7M7.5 3.5h9'),   // 037 V3f ORBITALS: an MO ladder, its degenerate pairs side by side
+  states: p('M3.5 20.5h17M11 14h9.5M11 9h9.5M11 4h9.5M6 19V5.5') + p('M3.8 7.8 6 5.5l2.2 2.3'),   // 037 V3g STATES: the ground line, the excited states over it, the lift
   about: p('M6.5 3.5H8c1 0 1.7.5 2.1 1.4l8.4 15.6') + p('M12.4 10.6 5.5 20.5'),                                    // the λ mark
   timeline: fill(3.5, 4.5, 9, 3.2, 1) + fill(8.5, 10.4, 11, 3.2, 1) + fill(5.5, 16.3, 7, 3.2, 1) + p('M15.5 2.5v19'),   // lanes of clips and the playhead
   pattern: fill(2.5, 5.5, 5, 5, 1.2) + box(10.45, 6.45, 3.1, 3.1, .8) + fill(16.5, 5.5, 5, 5, 1.2) +

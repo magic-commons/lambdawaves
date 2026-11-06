@@ -70,7 +70,7 @@ export function createStates(host, api) {
 
   /* ── the top: ladder + scope ──────────────────────────────────────────────────────────────────── */
   const top = el('div', 'row tight reg-top', host);
-  const cv = el('canvas', 'mol-c reg-ladder', top), cfoot = footLine(cv);   // 016 R1: the law line, shown on a hover
+  const cv = el('canvas', 'mol-c reg-ladder', top), cfoot = footLine(cv), views = new Set();   // 016 R1: the law line, shown on a hover
   watchStroke((m) => { cv.title = m === 'paint' ? 'Excited states: drag adds, right-drag removes' : 'Excited states: ω (Eh), f · a click toggles one'; });   // 036 P1
   const scope = el('canvas', 'mol-c reg-scope', top);
   scope.title = 'Dipole scope δμ(t)';
@@ -617,15 +617,15 @@ export function createStates(host, api) {
     }
     return out;
   }
-  function paint() {
-    if (!shown) return;
-    const W = cv.clientWidth, H = cv.clientHeight; if (W < 32 || H < 32) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(cv);
-    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    const T = themeInk(g), left = 44, right = W - 8, top0 = 10, bot = H - 15, plot = { x0: left, y0: top0, x1: right, y1: bot };
+  function paint() { for (const c of views) paintOn(c); if (shown) paintOn(cv); }   // 037 V3 THE SEAM: each STATES widget's canvas (the ladder's lines alone), then the window's
+  function paintOn(c) {
+    const bare = c !== cv, W = c.clientWidth, H = c.clientHeight; if (W < 32 || H < 32) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1) * cssZoom(c);
+    if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    const T = themeInk(g), left = bare ? 6 : 44, right = W - (bare ? 6 : 8), top0 = 10, bot = H - 15, plot = { x0: left, y0: top0, x1: right, y1: bot };
     hovers = []; hits = []; g.font = '8px ui-monospace, monospace'; g.textBaseline = 'middle';
-    if (!ladder) { g.fillStyle = T.ink(0.85); g.textAlign = 'center'; g.fillText(sol ? 'the state ladder is on its way…' : 'no molecule solved — MOLECULES solves this ladder', W / 2, H / 2); hover.set([], plot); return; }
+    if (!ladder) { if (bare) return; g.fillStyle = T.ink(0.85); g.textAlign = 'center'; g.fillText(sol ? 'the state ladder is on its way…' : 'no molecule solved — MOLECULES solves this ladder', W / 2, H / 2); hover.set([], plot); return; }
     const lv = levels(), ys = softCapLevels(lv.map((l) => l.E)), n2 = sum2() || 1;
     let fMax = 0; for (let k = 0; k < ladder.count; k++) fMax = Math.max(fMax, ladder.f[k]);
     const used = []; g.textAlign = 'right';
@@ -647,8 +647,9 @@ export function createStates(host, api) {
             : `${label(key)} · ω_TDA ${ladder.omega[key].toFixed(6)} Eh · f ${ladder.f[key].toFixed(4)}` + (bright ? ` · along ${AX[axisOf(key)]}` : ' · dark')
               + (ladder.size[key] > 1 ? ` · ${ladder.size[key]}-fold` : '') + (lit ? ` · in the register: |b|² ${(c.amp * c.amp / n2).toFixed(3)}, arg b ${(c.phase * 180 / Math.PI).toFixed(0)}°` : '  ·  click to add') });
       });
-      if (!used.some((q) => Math.abs(q - yy) < 9)) { used.push(yy); g.fillStyle = T.ink(0.85); g.fillText(i === 0 ? 'S₀' : row.E.toFixed(row.E < 10 ? 3 : 1), left - 4, yy); }
+      if (!bare && !used.some((q) => Math.abs(q - yy) < 9)) { used.push(yy); g.fillStyle = T.ink(0.85); g.fillText(i === 0 ? 'S₀' : row.E.toFixed(row.E < 10 ? 3 : 1), left - 4, yy); }
     });
+    if (bare) return;
     cfoot(`ω_TDA Eh · ${brightOnly ? 'bright valence states (f > ' + BRIGHT_F + ')' : 'all ' + ladder.count + ' states'} · TD-CIS, not ω_RPA`, left, W, H);
     hover.set(hovers, plot);
   }
@@ -787,7 +788,7 @@ export function createStates(host, api) {
   }
   const slotKey = (i) => keys()[i];
   return {
-    update, setActive, setShown, paint, refresh, claim,
+    update, setActive, setShown, paint, refresh, claim, views,
     get on() { return on; }, setOn: (v, hand) => api.one(v, hand), get songOn() { return song.on; },
     setFlow, setFlowSource, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flow; },
     select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, play, store: (w) => !!M.store(w), setMorph: (v, s) => M.set(v, s), setView, setRef, setDrive, setDriveParam, tune,

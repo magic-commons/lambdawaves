@@ -40,7 +40,7 @@ export function createEmission(host, api) {
 
   /* ── the strip ── */
   const cv = el('canvas', 'em-strip', host); cv.tabIndex = 0; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', 'emission lines');
-  const g = cv.getContext('2d');
+  let g = cv.getContext('2d');
   /* ── row 2: ‹ SERIES › · RANGE ── */
   const r2 = el('div', 'row tight em-row', host);
   const seriesStep = stepper({ aria: 'series', items: [{ id: 'all', label: 'ALL' }], value: 'all', cls: 'em-step', onChange: (id) => { series = id; hover = -1; build(true); } });
@@ -129,10 +129,11 @@ export function createEmission(host, api) {
   /* ── painting ── */
   let rect = { x0: 0, x1: 1, top: 0, base: 1 }, T = null, face = 'system-ui, sans-serif', palOf = null, lut = null;
   const X = (nm) => rect.x0 + xOf(nm, RANGES[range]) * (rect.x1 - rect.x0);
-  function paint() {
-    const W = cv.clientWidth, Hh = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+  const views = new Set(), paint = () => { for (const c of views) draw(c); draw(cv); };   // 037 V3 THE SEAM: each EMISSION widget's canvas (the comb and the lit lines, no words), then the window's (last: g, rect, T are its own again)
+  function draw(c) {
+    g = c.getContext('2d'); const bare = c !== cv, W = c.clientWidth, Hh = c.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
     if (W < 40 || Hh < 30) return;
-    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(Hh * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr); }
+    if (c.width !== Math.round(W * dpr) || c.height !== Math.round(Hh * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(Hh * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, Hh);
     T = themeInk(g); face = getComputedStyle(document.body).getPropertyValue('--font-ui').trim() || 'Roboto, system-ui, sans-serif';
     rect = { x0: 6, x1: W - 6, top: 6, base: Hh - 16 };
@@ -149,7 +150,7 @@ export function createEmission(host, api) {
     g.strokeStyle = T.ink(0.3); g.lineWidth = 1; g.beginPath(); g.moveTo(rect.x0, rect.base + 0.5); g.lineTo(rect.x1, rect.base + 0.5); g.stroke();
     g.font = `9px ${face}`; g.textBaseline = 'top'; g.textAlign = 'center';
     const ticks = R.log ? [100, 200, 500, 1000, 2000, 5000, 10000] : [400, 500, 600, 700];
-    for (const t of ticks) { const x = X(t); g.fillStyle = T.ink(0.3); g.fillRect(Math.round(x), rect.base, 1, 4); g.fillStyle = T.ink(0.85); if (R.log ? [100, 1000, 10000].includes(t) : true) g.fillText(t >= 1000 ? t / 1000 + ' µm' : t + (R.log ? ' nm' : ''), Math.min(rect.x1 - 14, Math.max(rect.x0 + 14, x)), rect.base + 5); }
+    for (const t of ticks) { const x = X(t); g.fillStyle = T.ink(0.3); g.fillRect(Math.round(x), rect.base, 1, 4); g.fillStyle = T.ink(0.85); if (!bare && (R.log ? [100, 1000, 10000].includes(t) : true)) g.fillText(t >= 1000 ? t / 1000 + ' µm' : t + (R.log ? ' nm' : ''), Math.min(rect.x1 - 14, Math.max(rect.x0 + 14, x)), rect.base + 5); }
     const H = getHamiltonian();
     if (sys !== 'hydrogen' && sys !== 'atom') { say('lines for HYDROGEN and ATOM only'); return; }
     if (reg.P) { say('the lines need a diagonal H: switch SCALE back to HYDROGEN'); return; }
@@ -190,7 +191,7 @@ export function createEmission(host, api) {
     else if (!view.length && sys === 'atom') say(cat.length ? 'no measured line in this range' : `NIST ASD lists no neutral ${H.short || ''} line with A and both configurations`);
   }
   function edge(x, acc) { g.fillStyle = `rgb(${acc[0]},${acc[1]},${acc[2]})`; g.beginPath(); const d = x <= rect.x0 ? -1 : 1, y = (rect.top + rect.base) / 2; g.moveTo(x + d * 5, y); g.lineTo(x - d * 1, y - 5); g.lineTo(x - d * 1, y + 5); g.fill(); }
-  function say(t) { g.font = `10px ${face}`; g.fillStyle = T ? T.ink(0.85) : 'rgba(128,128,128,0.85)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, (rect.x0 + rect.x1) / 2, (rect.top + rect.base) / 2); }
+  function say(t) { if (g.canvas !== cv) return; g.font = `10px ${face}`; g.fillStyle = T ? T.ink(0.85) : 'rgba(128,128,128,0.85)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, (rect.x0 + rect.x1) / 2, (rect.top + rect.base) / 2); }
 
   /* ── the hover: the cursor bracket, the kit's graph tip; the wheel and ← → step it ── */
   function tipFor(L) {
@@ -246,7 +247,7 @@ export function createEmission(host, api) {
   /** the facade's three: the catalogue, a press by id or name, the last pair pressed (and the lit lines, for a proof) */
   const find = (id) => cat.find((L) => L.id === id || L.name === id) || (Number.isFinite(+id) ? cat.reduce((b, L) => (!b || Math.abs(L.lambda - id) < Math.abs(b.lambda - id) ? L : b), null) : null);
   return {
-    update, paint,
+    update, paint, views, redraw: () => paint(),
     lines: () => { build(false); return cat.map((L) => ({ id: L.id, name: L.name, lambda: L.lambda, A: L.A, pressable: !!L.map, why: L.why || '' })); },
     pick(id, opt = {}) { build(false); const L = find(id); if (!L || !L.map) return false; pairs = pairsOf(L); const k = Math.max(0, Math.min(pairs.length - 1, opt.pair | 0)); picked = L; paintPairs(k); return press(L, pairs[k], !!opt.decay) ? lastPair : false; },
     pair: () => lastPair,

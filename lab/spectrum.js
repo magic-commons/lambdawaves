@@ -41,7 +41,7 @@ function readRGB(g, name, fallback) {
 
 export function createSpectrum(host, api) {
   const ladder = el('div', 'ladder', host);
-  const lcv = el('canvas', '', ladder), lfoot = footLine(lcv);   // 016 R1: the law line, shown on a hover
+  const lcv = el('canvas', '', ladder), lfoot = footLine(lcv), views = new Set();   // 016 R1: the law line, shown on a hover
   /* iteration 008 S · THE PRESET (it left STATE; since iteration 015 S3 seated under the picker, above the HAMILTONIAN): the kit's stepper in PALETTE's preset look over the same list; ← → and a pick
      load a preset by the hand's road (api.loadPreset: THE FADE announces it), a pick of the preset already shown is RELOAD; since 036 P1 a hand's
      preset sets the REGISTER only (PRESET VISUALS went: the view, rate and window are the reader's).  A register that is no preset reads '—'. */
@@ -320,13 +320,14 @@ export function createSpectrum(host, api) {
 
   /* the eigenvalue ladder: E_n drawn at physical height (the Rydberg bunching is the point),
      populated levels lit in their shell colour (levelLine: plain, no bar since iteration 008), the fraction of the norm in the hover */
-  function paintLadder() {
-    const reg = api.reg;
+  function paintLadder() { for (const c of views) ladderOn(c); ladderOn(lcv); }   // 037 V3 THE SEAM: each SPECTRUM widget's canvas (the lit levels alone), then the window's
+  function ladderOn(c) {
+    const reg = api.reg, bare = c !== lcv;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const W = ladder.clientWidth, H = ladder.clientHeight;
+    const W = c.clientWidth, H = c.clientHeight;
     if (W < 32 || H < 32) return;                       // folded: no size, nothing to paint
-    if (lcv.width !== W * dpr || lcv.height !== H * dpr) { lcv.width = W * dpr; lcv.height = H * dpr; }
-    const g = lcv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    if (c.width !== W * dpr || c.height !== H * dpr) { c.width = W * dpr; c.height = H * dpr; }
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const INK = readRGB(g, '--dim', '#b8b8b8'), FG = readRGB(g, '--fg', '#ffffff');   // the theme's own ink: this canvas used to be white-only
     const ink = (a) => `rgba(${INK[0]},${INK[1]},${INK[2]},${a})`, fg = (a) => `rgba(${FG[0]},${FG[1]},${FG[2]},${a})`;
     /* --n1…--n6 are ONE palette for both themes (lab.css:29), pastels chosen against a dark ground, and as 8 px
@@ -337,12 +338,12 @@ export function createSpectrum(host, api) {
        ("50%  −0.1250"), one more coloured number in the middle of the picture.  The line, the bar and the
        shell colour say WHICH level and HOW MUCH; the number itself is one hover away, in the single tip.
        The gutter keeps the level's name and the footer keeps the law: both are outside the plot rectangle. */
-    const pad = 10, left = 44, right = W - 12, top = 10, bot = H - 14;
+    const pad = 10, left = bare ? 6 : 44, right = W - (bare ? 6 : 12), top = 10, bot = H - (bare ? 10 : 14);
     const plot = { x0: left, y0: top, x1: right, y1: bot };
     hovers = [];
     const HS = api.hamiltonian ? api.hamiltonian() : null;                    // null = the built-in hydrogen ladder
     eigenHits = [];
-    if (HS && HS.eigen) { paintEigen(g, HS, W, H, left, right, top, bot, ink, fg, plot); return; }   // W-STURMIAN: the eigen ladder
+    if (HS && HS.eigen) { if (!bare) paintEigen(g, HS, W, H, left, right, top, bot, ink, fg, plot); return; }   // W-STURMIAN: the eigen ladder
     const Emin = HS ? HS.Emin : energy(1), Etop = HS ? HS.Etop : 0;
     const y = (E) => bot - (E - Emin) / (Etop - Emin) * (bot - top);
     g.font = '8px ui-monospace, monospace'; g.textBaseline = 'middle';
@@ -366,6 +367,7 @@ export function createSpectrum(host, api) {
        "E = 0" as one smear.  A name is placed only when its row is FREE (9 px: the 8 px face's own line box),
        the LIT levels claim their rows first and in order of population, and a level that loses its name still
        has its line, its bar and its hover.  Nothing is nudged: a name away from its own level would lie. */
+    if (bare) return;
     const usedY = [];
     const freeRow = (yy) => !usedY.some((q) => Math.abs(q - yy) < 9);
     g.textAlign = 'right';
@@ -457,7 +459,7 @@ export function createSpectrum(host, api) {
   window.addEventListener('resize', () => paintLadder());
   /* the DIALS fold is project state (a demo opens with its lanes shown or folded as it was saved) */
   const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); };
-  return { update, rebuild, select, energyText, preset, get selected() { return selected; }, lanes, get building() { return pending.length; },
+  return { update, rebuild, select, energyText, preset, views, redraw: paintLadder, get selected() { return selected; }, lanes, get building() { return pending.length; },
     get dials() { return !rowsEl.hidden; }, setDials,
     openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; },
     /** iteration 008 A7: the folded shells (WORKSPACE, read and written by rack-wiring.js through the presses' aria-expanded) */
