@@ -16,8 +16,8 @@ THE DRAWING (IUPAC Recommendations 2006, Brecher, "Graphical representation of s
   The bonds come from the volume's SMILES or its bond table when the record carries them, else rdDetermineBonds from the coordinates and
   the molecule's charge (bond orders and formal charges by the xyz2mol rules; connectivity alone when no Lewis structure fits).
 THE ACCEPTANCE RULE (038 D1): a drawing is kept at ≤ 2 crossings and no clash (quality()); what no layout draws cleanly — a cage no
-  plane holds (C₆₀, dodecahedrane), a lettered cluster (B₁₂H₁₂²⁻, Li₄F₄), a neutral cluster (the ice hexamer) — is rejected, and each run
-  prints the count by road and names the rejected.
+  plane holds (C₆₀, dodecahedrane), a lettered cluster (B₁₂H₁₂²⁻, Li₄F₄), a neutral cluster (the ice hexamer) — is THE INK STICKS (038 D2,
+  sticks()): its 3-D skeleton, no letters, depth-cued. Each run prints the count by road and names the molecules that took the sticks.
 THE INK: every colour is `currentColor` and the letters are drawn as outlines in the app's UI face (lab/fonts/Roboto-ui.woff2 at
   weight 500), so one file serves both themes: the app draws it as a mask in the tile's own ink (lab/picker-fx.js setPic). 160 × 160
   viewBox, no background, no size. """
@@ -211,23 +211,69 @@ def skeletal(m):
         rdDepictor.StraightenDepiction(m, minimizeRotation=True)   # CoordGen's own layouts are straight already
     return m
 
+def sticks(rec):
+    """038 D2 · THE INK STICKS (Josh 11-06: "If something is really hard then just use no chemicals and just show the stick diagrams"): the
+    molecule's 3-D skeleton, no letters — its heavy atoms (a cluster keeps its hydrogens, whose hydrogen bonds H···N/O/F under 2.2 Å are
+    dashed) seen from the view whose nearest pair — two atoms, or an atom and a bond not its own — lies farthest apart (C₆₀ on a pentagon,
+    B₁₂ down a triangle's axis), the long axis across, depth-cued in six bands (the nearest bonds full and 2.6 px, the farthest 28 % and
+    1.2 px, thinner where the bonds are short), far first; each band one path at a tenth of a pixel"""
+    m, _ = bonded(rec)
+    X = np.array(m.GetConformer().GetPositions()); Zs = [a.GetAtomicNum() for a in m.GetAtoms()]
+    cluster = len(Chem.GetMolFrags(m, sanitizeFrags=False)) > 1
+    bonds = [(b.GetBeginAtomIdx(), b.GetEndAtomIdx()) for b in m.GetBonds()]
+    keep = [i for i, z in enumerate(Zs) if z > 1]
+    if cluster or not any(Zs[i] > 1 and Zs[j] > 1 for i, j in bonds): keep = list(range(len(Zs)))   # a cluster, or one heavy atom: the hydrogens too
+    at = {a: k for k, a in enumerate(keep)}
+    B = [(at[i], at[j], 0) for i, j in bonds if i in at and j in at]
+    X, Zs = X[keep], [Zs[i] for i in keep]; n = len(keep)
+    if cluster: B += [(i, j, 1) for i in range(n) if Zs[i] == 1 for j in range(n) if Zs[j] in (7, 8, 9) and not m.GetBondBetweenAtoms(keep[i], keep[j]) and np.linalg.norm(X[i] - X[j]) < 2.2]
+    if not B: return None
+    E = np.array([b[:2] for b in B]); k = np.arange(n)[:, None]; other = (k != E[:, 0][None]) & (k != E[:, 1][None]); iu = np.triu_indices(n, 1)
+    best, bv = -1.0, None
+    for v in fib(600):
+        u = np.cross(v, [0.0, 0.0, 1.0] if abs(v[2]) < 0.9 else [1.0, 0.0, 0.0]); u /= np.linalg.norm(u); w = np.cross(v, u)
+        P = X @ np.stack([u, w], 1); A, d = P[E[:, 0]], P[E[:, 1]] - P[E[:, 0]]
+        t = np.clip(((P[:, None] - A[None]) * d[None]).sum(2) / ((d * d).sum(1)[None] + 1e-12), 0, 1)
+        off = np.linalg.norm(P[:, None] - (A[None] + t[..., None] * d[None]), axis=2)
+        gap = min(np.linalg.norm(P[:, None] - P[None], axis=2)[iu].min(initial=9.0), off[other].min(initial=9.0))
+        if gap > best + 1e-6: best, bv = gap, (v, u, w)
+    v, u, w = bv
+    P = X @ np.stack([u, w], 1); depth = X @ v
+    e, V = np.linalg.eigh(np.cov(P.T))
+    if e[1] > 1.3 * e[0]: P = P @ V[:, ::-1]   # an elongated skeleton lies across; a round one keeps its view
+    lo, hi = P.min(0), P.max(0); s = (SIZE - 28) / max(float((hi - lo).max()), 1e-6); c = (lo + hi) / 2
+    xy = lambda k: (SIZE / 2 + (P[k][0] - c[0]) * s, SIZE / 2 - (P[k][1] - c[1]) * s)
+    d0, d1 = depth.min(), depth.max(); near = lambda k: (depth[k] - d0) / ((d1 - d0) or 1)   # 0 far … 1 near
+    Lpx = float(np.median([np.linalg.norm(X[i] - X[j]) for i, j, _ in B])) * s; f = min(1.0, max(0.5, Lpx / 24))
+    bands = {}
+    for i, j, hb in B:
+        band = min(5, int((near(i) + near(j)) / 2 * 6)); (x1, y1), (x2, y2) = xy(i), xy(j)
+        bands.setdefault((band, hb), []).append(path_d('M%.2f %.2fL%.2f %.2f' % (x1, y1, x2, y2)))
+    out = []
+    for (band, hb) in sorted(bands):
+        q = (band + 0.5) / 6; op = ('%.2f' % (0.28 + 0.72 * q)).rstrip('0').lstrip('0'); sw = num((1.2 + 1.4 * q) * f)
+        out.append("<path d='%s' stroke-opacity='%s' stroke-width='%s'%s/>" % (''.join(bands[(band, hb)]), op, sw, " stroke-dasharray='2 3'" if hb else ''))
+    return "<g fill='none' stroke='currentColor' stroke-linecap='round'>" + ''.join(out) + '</g>'
+
 def depict(rec):
-    """(the inner markup, its road: 'perspective' · 'skeletal'), (None, 'rejected') when no drawing is accepted, (None, None) for a row
-    without coordinates"""
+    """(the inner markup, its road: 'perspective' · 'skeletal' · 'sticks'), or (None, None) for a row without coordinates"""
     if not rec.get('ang'): return None, None
     heavy = sum(1 for a in rec['ang'] if a[0] > 1)
     # the volume's PubChem SMILES (bonds, charges, stereo) — save a transition metal's complex, which PubChem writes disconnected ([Ni].[C-]#[O+]…)
     tm = '.' in (rec.get('smiles') or '') and any(21 <= a[0] <= 30 or 39 <= a[0] <= 48 or 57 <= a[0] <= 80 or 89 <= a[0] <= 112 for a in rec['ang'])
-    m = Chem.MolFromSmiles(rec['smiles']) if heavy > 2 and rec.get('smiles') and not tm else None
-    if m is not None: m, wedge = skeletal(m), True
-    else:
-        b, lewis = bonded(rec)
-        if heavy <= 2 or not lewis:   # a small molecule, or one no Lewis structure fits (a complex, a cluster): every atom lettered
-            m, wedge = perspective(b), False
-            if not accepted(m, every=True): m = None
-        else: m, wedge = skeletal(b), True
-    if m is None: return None, 'rejected'
-    return drawn(m, wedge), ('skeletal' if wedge else 'perspective')
+    try:
+        m = Chem.MolFromSmiles(rec['smiles']) if heavy > 2 and rec.get('smiles') and not tm else None
+        if m is not None: m, wedge = skeletal(m), True
+        else:
+            b, lewis = bonded(rec)
+            if heavy <= 2 or not lewis:   # a small molecule, or one no Lewis structure fits (a complex, a cluster): every atom lettered
+                m, wedge = perspective(b), False
+                if not accepted(m, every=True): m = None
+            else: m, wedge = skeletal(b), True
+        if m is not None: return drawn(m, wedge), ('skeletal' if wedge else 'perspective')
+    except Exception as e:   # a layout or drawing RDKit refuses: the sticks too, named apart in the count
+        return sticks(rec), 'sticks (%s)' % type(e).__name__
+    return sticks(rec), 'sticks'
 
 def drawn(m, wedge):
     d = rdMolDraw2D.MolDraw2DSVG(SIZE, SIZE)
