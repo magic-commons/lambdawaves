@@ -702,6 +702,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const row = vis.filter((t) => t.offsetTop === vis[0].offsetTop).length;   // a row of tiles (the strip is one row: ↑ ↓ step as ← →)
       vis[clamp(i + Math.sign(d) * (Math.abs(d) > 1 && row < vis.length ? row : 1), 0, vis.length - 1)].focus();
     });
+    /* 037 U3 DECK II: an empty deck is the same face with nothing in it — the player a quiet still ground (skin.css `.mm-player-main:empty`), the
+       scroller empty, no words.  Its rows go in TUTORIAL with `deck: 2` (tools/tutorial-heroes.mjs --deck 2) and it plays as deck I does */
     if (rows.length) choose(rows[0], false);
     return { id: deck.id, root, play: () => hero && hero.play(), stop: () => hero && hero.stop() };
   }

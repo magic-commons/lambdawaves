@@ -1210,6 +1210,7 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
 #lwMenu .mm-player[hidden], #lwMenu .mm-player-tile[hidden] { display: none; }
 #lwMenu .mm-player-main { grid-area: main; align-self: start; position: relative; height: min(calc(100cqh - var(--cap)), calc(58cqw * 16 / 9)); aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; isolation: isolate; background: hsl(var(--glass-tint) / .5); }
 #lwMenu .mm-player-clip { position: absolute; inset: 0; }
+#lwMenu .mm-player-main:empty { background: radial-gradient(90% 60% at 50% 38%, hsl(var(--glass-tint) / .7), hsl(var(--glass-tint) / .32)); }   /* 037 U3: an empty deck's quiet still ground */
 #lwMenu .mm-player-cap { grid-area: cap; }
 #lwMenu .mm-player-list { grid-area: list; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent;
   display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); grid-auto-rows: max-content; align-content: start; gap: 14px 12px;
