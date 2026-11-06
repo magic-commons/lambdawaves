@@ -63,23 +63,10 @@
 .nodes-foot > .nodes-knobs { padding-top: 4px; }
 .nodes-card.fold > .nodes-foot { display: none; }
 .nodes-box { display: none; position: absolute; z-index: 1; pointer-events: none; border: 1px dashed var(--acc); background: color-mix(in srgb, var(--acc) 8%, transparent); }
-.nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: flex; flex-direction: column; min-width: 200px; max-height: calc(100% - 44px); overflow: auto; padding: 4px; border-radius: var(--r-md); }   /* 022 P3: a menu pane (.glass[data-mir-surface=menu]) — the skin's, no control's raise */
-.nodes-item { padding: 6px 12px; border: 0; background: transparent; box-shadow: none; color: var(--fg); font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui);
-  letter-spacing: var(--tr-wide); text-align: left; cursor: pointer; }
-.nodes-item:hover:not(:disabled) { color: var(--acc); }
-.nodes-item:disabled { opacity: .45; cursor: default; }
-/* 019 N5 · the + menu by class (each class's cost mark), the graphs, the foot's passes, the rack card's column */
-.nodes-head { display: flex; gap: 6px; padding: 4px 12px 2px; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--fg-soft); }
-.nodes-item { display: flex; align-items: center; gap: 8px; }
-.nodes-item .nodes-mark { margin-left: auto; }
-/* 020 X0 · the + menu is one list: a search line, a hairline with the class's icon between classes (no word), the empty graph's one line */
-.nodes-sep { display: flex; align-items: center; gap: 6px; padding: 6px 12px 2px; color: var(--fg-soft); }
-.nodes-sep::after { content: ''; flex: 1 1 auto; border-top: 1px solid var(--glass-hairline); }
-.nodes-find { margin: 2px 4px 4px; padding: 5px 8px; border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); color: var(--fg); box-shadow: var(--relief-well, var(--neu-inset)); font: var(--fs-tiny) / 1.2 var(--font-ui); }
+/* 038 N1 · the + menu is the kit's contextMenu pane (its rows, its plate): the search line on top; the empty graph's one line */
+.nodes-find { flex: none; margin: 2px 2px 4px; padding: 5px 8px; border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); color: var(--fg); box-shadow: var(--relief-well, var(--neu-inset)); font: var(--fs-tiny) / 1.2 var(--font-ui); }
 .nodes-empty { position: absolute; translate: -50% 0; z-index: 1; padding: 3px 8px; border-radius: var(--r-sm); background: var(--glass-well); white-space: nowrap; pointer-events: none; font: var(--fs-tiny) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-faint); opacity: .7; }
 .nodes-column .nodes-empty { position: static; translate: none; align-self: center; }
-.nodes-heavy { font-style: normal; font-size: .8em; color: var(--acc); }
-.nodes-menu .sp-prex { margin-left: auto; }
 .nodes-passes { position: absolute; left: 8px; bottom: 6px; z-index: 1; pointer-events: none; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
 .dev .nodes-ground.nodes-column { height: auto; cursor: default; }
 .nodes-column .nodes-plane { position: static; width: auto; height: auto; display: flex; flex-direction: column; gap: 18px; padding: 40px 8px 26px; translate: none !important; }

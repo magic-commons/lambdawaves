@@ -1,9 +1,9 @@
 /* lab/nodes-view.js — NODES' one VIEW (iteration 020 X0, split out of lab/nodes.js; the model is there).  Built twice over one graph: kind
  * 'win' (the MIR window: the free ground — it pans; a card moves by its title bar; the wires are one SVG layer) and kind 'card' (the rack
  * card: the chain as a column, no pan, no drag).  STAGE IN → the nodes → STAGE OUT; THE DEFAULT GRAPH IS EMPTY and says so in one faint line.
- * The + menu is ONE list: a search line (type to filter, Enter adds the first match, Escape closes), the types by class with a hairline
- * divider carrying the class's icon between classes (no word), each item its icon + its name + its cost mark (HEAVY as 019), then a divider
- * and the GRAPHS.  Icons: the one table's `node<Type>` glyphs (lab/icons.js, 021 V2; the sprite retired).
+ * 038 N1 THE + MENU IS THE KIT'S: contextMenu under the +, on the page (its plate, its blur, never clipped): a search line (typed: the matches,
+ * Enter adds the first, Escape closes), the GROUPS (each a submenu: an item is its icon + its name + its cost mark, HEAVY as 019), GRAPHS ›.
+ * Icons: the one table's `node<Type>` glyphs (lab/icons.js, 021 V2; the sprite retired).
  * 020 X1 THE GROUND (the window only; the rack column never zooms or selects): ctrl/⌘ + wheel and a pinch zoom 0.5–2× about the pointer
  * (`scale` on the plane with the pan; the wires, the ports and the dot grid follow), FIT (the button beside +, Home) fits the cards with a
  * 24 px margin; a click on a title selects (shift adds), shift + drag on the empty ground draws a box (a plain drag still pans), Ctrl-A all,
@@ -19,7 +19,7 @@
  * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
  * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
-import { el, label, ariaLabel, chip, onContext } from './mir/kit.js'; import { contextMenu } from './mir/shell/menubar.js';
+import { el, label, ariaLabel, chip, onContext, placeholder } from './mir/kit.js'; import { contextMenu } from './mir/shell/menubar.js'; import { openDialog } from './mir/shell/dialog.js';
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun, over } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
@@ -32,7 +32,8 @@ const SPAN = 250;                                                    // the colu
 const GAP = 36;
 const NOTE = 'Grades the screen only — pictures and films are untouched.';
 const MARK = { table: '·', matrix: '·', prim: '···', layer: '··', shader: '····' };   // THE COST IS ON THE CARD: · folds for free, ·· a layer, ··· a pass, ···· a GPU pass (024 S)
-const CLASSES = ['table', 'matrix', 'prim', 'layer', 'shader'];
+/** 038 N1 · the + menu's groups, in order: [id, its word] — a kind is in `T.group` (else its class); a group with no kind is not shown */
+const GROUPS = [['table', 'TONE'], ['matrix', 'COLOUR'], ['prim', 'PASSES'], ['layer', 'LAYERS'], ['shader', 'SHADERS']];
 const markOf = (q, T) => MARK[!over(T) && ownRun(q, T) ? 'prim' : T.cls];
 const NS = 'http://www.w3.org/2000/svg';
 const hueAt = (h) => [Math.abs(h * 6 - 3) - 1, 2 - Math.abs(h * 6 - 2), 2 - Math.abs(h * 6 - 4)].map((x) => Math.min(1, Math.max(0, x)));
@@ -136,15 +137,15 @@ export function createView(parent, kind, M) {
     f.addEventListener('blur', () => end(false)); f.focus(); f.select();
   }
   /* THE RIGHT-CLICK MENUS (022 P2: the kit's contextMenu — a right-click, the ContextMenu key or a still hold, onContext; ✓ where a row is a state) */
-  let pop = null;
-  const popup = (x, y, rows) => { menu.hidden = true; pop = contextMenu({ x, y, entries: rows.map((r) => (r ? [r[0], r[1], false, '', r.length > 2 ? { checked: !!r[2] } : {}] : null)), onClose: () => { pop = null; } }); };
+  let pop = null;                                                    // the kit menu open from this view (a right-click's, or the + menu)
+  const popup = (x, y, rows) => { const m = pop = contextMenu({ x, y, entries: rows.map((r) => (r ? [r[0], r[1], false, '', r.length > 2 ? { checked: !!r[2] } : {}] : null)), onClose: () => { if (pop === m) pop = null; } }); };
   const folded = () => M.list().length > 0 && M.list().every((q) => q.fold);
   const foldAll = () => M.setFold(M.list().map((q) => q.id), !folded());
   const cardRows = (q) => [['VIEW HERE', () => M.setView(q.id), M.flags.view === q.id], ['SOLO', () => M.setSolo(q.id), M.flags.solo === q.id], ['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'EXPAND' : 'COLLAPSE', () => M.setFold(q.id, !q.fold)],
     ['DUPLICATE', () => pick(M.duplicate(q.id, at()))], ['RENAME', () => renameAt(q.id)], ['RESET', () => M.reset(q.id)], null,
     ['MOVE UP', () => M.move(q.id, -1)], ['MOVE DOWN', () => M.move(q.id, 1)], null, ['REMOVE', () => M.remove(q.id)]];
-  const groundRows = () => [['ADD…', () => openMenu(true)], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()]].filter((r) => r !== false);
-  onContext(ground, ({ x, y, target }) => { if (target.closest('.nodes-menu, input')) return; const c = target.closest('.nodes-card[data-node]'), q = c && M.byId(c.dataset.node); popup(x, y, q ? cardRows(q) : groundRows()); });
+  const groundRows = () => [['ADD…', () => openMenu()], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()]].filter((r) => r !== false);
+  onContext(ground, ({ x, y, target }) => { if (target.closest('input')) return; const c = target.closest('.nodes-card[data-node]'), q = c && M.byId(c.dataset.node); popup(x, y, q ? cardRows(q) : groundRows()); });
   if (!W) ground.classList.add('nodes-column');
   else {
     /* THE GROUND'S HAND: a drag pans, shift + drag draws a box, two fingers pinch; ctrl/⌘ + wheel zooms about the pointer */
@@ -154,7 +155,7 @@ export function createView(parent, kind, M) {
     const span = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
     ground.addEventListener('pointerdown', (e) => {
       if (!(e.target === ground || e.target === plane || e.target === svg)) return;
-      ground.focus({ preventScroll: true }); menu.hidden = true; pts.set(e.pointerId, local(e));
+      ground.focus({ preventScroll: true }); pts.set(e.pointerId, local(e));
       if (pts.size === 2) { const [a, b] = pts.values(); pinch = { d: span(a, b), m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], pan, z }; drag = null; return; }
       if (e.button !== 0) return;
       e.preventDefault(); try { ground.setPointerCapture(e.pointerId); } catch (_) { /* a pointer already gone */ }
@@ -188,56 +189,58 @@ export function createView(parent, kind, M) {
       nudge(dx, dy, a) { const ids = [...sel]; if (!ids.length) return; const s = a && a.shift ? 10 : 1;
         for (const id of ids) { const n = cards[id].c, p = xy(n); n.style.left = p[0] + dx * s + 'px'; n.style.top = p[1] + dy * s + 'px'; } moved(true); },
       remove() { M.remove([...sel]); sel.clear(); }, duplicate() { pick(M.duplicate([...sel], at())); }, all() { pick(M.list().map((q) => q.id)); },
-      undo: () => M.undo(), redo: () => M.redo(), off: () => M.setOff(!M.off()), add: () => openMenu(true), fit: () => fit(),
+      undo: () => M.undo(), redo: () => M.redo(), off: () => M.setOff(!M.off()), add: () => openMenu(), fit: () => fit(),
       bypass() { const ids = [...sel]; if (ids.length) M.setBypass(ids, ids.some((id) => !M.byId(id).bypass)); }, solo() { const ids = [...sel]; if (ids.length) M.setSolo(ids[0]); },
       fold() { const ids = [...sel]; if (ids.length) M.setFold(ids, ids.some((id) => !M.byId(id).fold)); },
-      escape() { if (!menu.hidden || pop) { menu.hidden = true; if (pop) pop.close(); } else pick([]); } });
+      escape() { if (pop) pop.close(); else pick([]); } });
   }
 
-  /* + : ONE list — the search line, the classes split by an icon divider, then the GRAPHS; the view's other door: the window ↔ the rack card */
+  /* + · THE ADD MENU (038 N1, Josh: "Nodes dropdown seems to be missing it's background"): the kit's contextMenu under the + — a pane on the page,
+     so its plate reads over the stage and its blur takes what lies behind (inside the card or the window it blurred nothing and the card clipped it
+     to a scroller) — with the kit's ↑ ↓ → ←, Enter, Escape and a press outside.  The kinds by GROUP, each group a submenu (no scroller); GRAPHS a
+     submenu (the shipped ones, the reader's, SAVE THIS GRAPH, REMOVE ›); a search line on top: typed, the matches as one list, Enter adds the first.
+     A kind joins a group by `group` (else its class); a new group is a GROUPS row.  The view's other door: the window ↔ the rack card (the bar) */
   const tools = el('div', 'nodes-tools', ground), tool = (cls, g, word, run) => { const b = el('button', cls, tools); b.type = 'button'; chip(b, g, word); b.addEventListener('click', run); return b; };
-  tool('nodes-add', 'plus', 'ADD NODE', () => openMenu(true));
+  const addB = tool('nodes-add', 'plus', 'ADD NODE', () => openMenu());
   if (W) tool('nodes-fit', 'home', 'FIT — every card in view (Home)', () => fit());
   const foldB = tool('nodes-folds', 'compact', 'COLLAPSE ALL', () => foldAll());
   const offB = tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
-  const menu = el('div', 'nodes-menu glass', ground); menu.hidden = true; menu.dataset.mirSurface = 'menu';   // 022 P3: a menu pane, the skin's
-  const sep = (cls) => { const s = el('div', 'nodes-sep', menu); if (cls) icon(s, cls); return s; };
-  const item = (text, title, run, cls = 'nodes-item') => { const it = el('button', cls, menu); it.type = 'button'; label(el('span', '', it), text); it.title = title;
-    it.addEventListener('click', () => { menu.hidden = true; run(); }); return it; };
-  function fill() {
-    menu.replaceChildren();
-    const find = el('input', 'nodes-find', menu); find.type = 'search'; find.placeholder = 'search'; ariaLabel(find, 'find a node');
-    for (const cls of CLASSES) {
-      sep(cls);
-      for (const [type, t] of Object.entries(T)) if (t.cls === cls) {
-        const it = item(t.label, t.label + ' — ' + t.hint, () => M.add(type)); it.dataset.type = type; icon(it, type, true);
-        el('i', 'nodes-mark', it, MARK[cls]); if (t.heavy) label(el('i', 'nodes-heavy', it), 'HEAVY');
-        if (type === 'curves') it.disabled = M.has();
-      }
-    }
-    sep(); label(el('div', 'nodes-head', menu), 'GRAPHS');
-    for (const [name, list] of Object.entries(M.SHIPPED)) item(name, name + ' — a shipped graph: every node but CURVES replaced', () => M.applyGraph(list)).dataset.graph = name;
-    for (const u of M.graphs.list()) { const it = item(u.name, u.name + ' — your graph', () => M.applyGraph(u.data && u.data.nodes)); it.dataset.graph = 'user:' + u.name;
-      const x = el('span', 'sp-prex', it, '×'); x.setAttribute('role', 'button'); ariaLabel(x, 'remove {name}', { name: u.name });
-      x.addEventListener('click', (e) => { e.stopPropagation(); M.graphs.remove(u.name); fill(); }); }
-    const sv = item('SAVE THIS GRAPH', 'SAVE · the nodes as your own graph (kept on this device)', () => {}, 'nodes-item nodes-save');
-    sv.addEventListener('click', (e) => { e.stopImmediatePropagation();
-      const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'graph name'); f.value = 'My graph'; sv.replaceWith(f);
-      let done = false; const end = (keep) => { if (done) return; done = true; const n = f.value.trim(); if (keep && n) M.graphs.add(n, { nodes: M.graphOf() }); fill(); };
-      f.addEventListener('keydown', (ev) => { ev.stopPropagation(); if (ev.key === 'Enter') { ev.preventDefault(); end(true); } else if (ev.key === 'Escape') { ev.preventDefault(); end(false); } });
-      f.addEventListener('blur', () => end(false)); f.focus(); f.select(); }, true);
-    /* the search: every row whose name holds the words; the dividers and GRAPHS' head step aside while a search is typed */
-    const shown = () => [...menu.querySelectorAll('.nodes-item')].filter((i) => !i.hidden && !i.disabled);
-    find.addEventListener('input', () => { const s = find.value.trim().toUpperCase();
-      for (const i of menu.querySelectorAll('.nodes-item')) i.hidden = !!s && !i.textContent.toUpperCase().includes(s);
-      for (const h of menu.querySelectorAll('.nodes-sep, .nodes-head')) h.hidden = !!s; });
-    find.addEventListener('keydown', (e) => { e.stopPropagation();
-      if (e.key === 'Enter') { e.preventDefault(); const f = shown()[0]; if (f) f.click(); }
-      else if (e.key === 'Escape') { e.preventDefault(); menu.hidden = true; if (W) ground.focus({ preventScroll: true }); } });
-    return find;
+  const back = () => { if (W) ground.focus({ preventScroll: true }); };   // a pick or an Escape gives the ground its keys back
+  const kindRow = (type, t) => [t.label + '\t' + MARK[t.cls] + (t.heavy ? ' HEAVY' : ''), () => { M.add(type); back(); }, type === 'curves' && M.has(), t.hint, { icon: nodeGlyph(type), id: type }];
+  const kinds = (g) => Object.entries(T).filter(([, t]) => (t.group || t.cls) === g).map(([type, t]) => kindRow(type, t));
+  const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list); back(); }, false, hint, { id: 'graph:' + name, raw }];
+  const graphRows = () => { const U = M.graphs.list();
+    return [...Object.entries(M.SHIPPED).map(([name, list]) => graph(name, list, 'a shipped graph: every node but CURVES replaced')),
+      ...(U.length ? [null, ...U.map((u) => graph(u.name, u.data && u.data.nodes, 'your graph (kept on this device)', true))] : []),
+      null, ['SAVE THIS GRAPH', saveGraph, false, 'the nodes as your own graph (kept on this device)', { icon: 'saveInto', id: 'save' }],
+      ...(U.length ? [['REMOVE', () => U.map((u) => [u.name, () => M.graphs.remove(u.name), false, 'remove this graph', { raw: true, id: 'remove:' + u.name }]), null, '', { sub: true, icon: 'trash', id: 'remove' }]] : [])]; };
+  const found = (s) => { const S = s.toUpperCase();
+    return [...Object.entries(T).filter(([, t]) => t.label.includes(S)).map(([type, t]) => kindRow(type, t)),
+      ...Object.entries(M.SHIPPED).filter(([n]) => n.includes(S)).map(([n, list]) => graph(n, list, 'a shipped graph')),
+      ...M.graphs.list().filter((u) => u.name.toUpperCase().includes(S)).map((u) => graph(u.name, u.data && u.data.nodes, 'your graph', true))].slice(0, 10); };
+  let find = null;
+  /** open the + menu, its caret on the search line; a typed search reopens it with the matches (the line kept, the caret where it was) */
+  function openMenu(s = '') {
+    if (!find) { find = el('input', 'nodes-find'); find.type = 'search'; placeholder(find, 'search'); ariaLabel(find, 'find a node');
+      find.addEventListener('input', () => openMenu(find.value.trim()));
+      find.addEventListener('keydown', (e) => { e.stopPropagation(); const r = pop && pop.pane.querySelector('.mb-item:not(:disabled)');
+        if (r && (e.key === 'Enter' || e.key === 'ArrowDown')) { e.preventDefault(); if (e.key === 'Enter') r.click(); else r.focus(); } }); }
+    if (!s) find.value = '';
+    const at = [find.selectionStart, find.selectionEnd], rows = s ? found(s) : [...GROUPS.filter(([g]) => kinds(g).length).map(([g, word]) => [word, () => kinds(g), null, '', { sub: true, icon: nodeGlyph(g), id: 'group:' + g }]),
+      null, ['GRAPHS', graphRows, null, '', { sub: true, icon: 'nodes', id: 'graphs' }]];
+    const m = pop = contextMenu({ anchor: addB, label: 'Add a node', entries: rows.length ? rows : [['NO MATCH', null, true]], onClose: () => { if (pop === m) pop = null; } });
+    if (!m) return;
+    m.pane.classList.add('nodes-add-menu'); m.pane.prepend(find); find.focus({ preventScroll: true }); if (s) find.setSelectionRange(at[0], at[1]);
+    m.host.addEventListener('keydown', (e) => { if (e.key !== 'Escape' || e.target.closest('.mb-sub-list')) return; e.preventDefault(); e.stopPropagation(); m.close(); back(); }, true);
   }
-  /** open (or shut) the + menu; `focus` puts the caret on its search line */
-  const openMenu = (focus) => { if (!menu.hidden) { menu.hidden = true; return; } const f = fill(); menu.hidden = false; if (focus) f.focus(); };
+  /** SAVE THIS GRAPH: its name in the kit's dialog (Enter keeps it, Escape does not) */
+  function saveGraph() {
+    const f = el('input', 'sp-prename'); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'graph name'); f.value = 'My graph';
+    const d = openDialog({ title: 'SAVE THIS GRAPH', body: f, actions: [{ label: 'CANCEL', value: null }, { label: 'SAVE', kind: 'primary', run: () => f.value.trim() || null }] });
+    f.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); d.close(f.value.trim() || null); } });
+    requestAnimationFrame(() => { f.focus(); f.select(); });
+    d.result.then((n) => { if (n) M.graphs.add(n, { nodes: M.graphOf() }); back(); });
+  }
   const foot = el('div', 'nodes-passes', ground);
   const door = el('button', 'nodes-door', ground); door.type = 'button';
   chip(door, W ? 'dock' : 'popOut', W ? 'DOCK IN THE RACK' : 'OPEN AS A WINDOW'); door.addEventListener('click', () => M.door(kind));
@@ -275,7 +278,7 @@ export function createView(parent, kind, M) {
       paintSel(); api.place();
     },
     place() {
-      const L = M.list(); menu.hidden = true; if (pop) pop.close(); api.foot(); empty.hidden = L.length > 0;
+      const L = M.list(); if (pop) pop.close(); api.foot(); empty.hidden = L.length > 0;
       if (!W) { plane.append(cards.in.c, empty, ...L.map((q) => cards[q.id].c), cards.out.c); return; }   // the rack card: the chain as a column, in order
       const set = (n, l, t) => { n.style.left = l + 'px'; n.style.top = t + 'px'; };
       const A = M.rec().at || {}, pin = A.in || AT.in;
