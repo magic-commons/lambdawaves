@@ -6,7 +6,7 @@
  * img/menu/<id>.diagram.svg in the ink, picker-fx.js setPic; a molecule without one draws ball and stick).  The bonds are elements.js' one rule.
  * A paint only when the camera, the molecule, its pose, the box, the style or the theme moved; under hydrogen or an atom a quiet empty frame. */
 import { el, seg } from './mir/kit.js'; import { cameraBasis, cameraKey } from './field.js'; import { CPK, bondsOf, vdwRadius } from './elements.js';
-import { setPic } from './picker-fx.js'; import { registerKind } from './widgets.js';
+import { setPic } from './picker-fx.js'; import { registerKind } from './widgets.js'; import { motionPolicy } from './mir/core/motion.js';
 export const STYLES = [{ id: 'balls', label: 'BALLS', title: 'Each atom its van der Waals sphere' }, { id: 'ballstick', label: 'BALL + STICK', title: 'Small disks and the bonds' },
   { id: 'sticks', label: 'STICKS', title: 'The bonds in their atoms’ colours' }, { id: 'diagram', label: 'DIAGRAM', title: 'The chemist’s wedge-and-dash drawing' }];
 export const STYLE_GLYPH = { balls: 'balls', ballstick: 'sticks', sticks: 'bonds', diagram: 'wedge' };   // 038 S3: the bar's style chip wears the style shown
@@ -51,6 +51,7 @@ registerKind({ kind: 'mol', label: 'MINI-VIEWER', glyph: 'molecule', hint: 'The 
       }
       g.globalAlpha = 1;
     }
-    return { tick: (now, force) => paint(force), set: () => paint(true) };
+    /* 038 S4: a new style comes up over 180 ms (a hand's press, the bar's cell, an undo), never under reduced motion */
+    return { tick: (now, force) => paint(force), set: () => { paint(true); if (motionPolicy() === 'full' && host.clientWidth) host.animate([{ opacity: 0.15 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' }); } };
   },
   controls(bar, api) { bar.append(seg({ aria: 'Mini-viewer style', value: api.opts().style || 'ballstick', options: STYLES, onChange: (v) => api.set({ style: v }, 'WIDGET STYLE') }).root); } });

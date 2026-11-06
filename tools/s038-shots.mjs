@@ -96,5 +96,70 @@ try {
     await g.ev(`document.getElementById('transport').classList.add('at-top'); return 1;`); await wait(300);   // the dodge's class alone: the seat rule is what is looked at
     out.log.push(await mini('.at-top'));
   }
+  if (scene === 's4') {   /* the widgets' faces: CLOCK · PLAYHEAD in the logo face, TEXT, MINI-VIEWER and LATTICE over cubane; the figures' cells hold their width while playing */
+    await g.ev(`__LW.look.set({ theme: 'dark' }); __LW.chem.setOn(true); await __LW.settle(); await __LW.chem.pick('cubane'); await __LW.settle();
+      __LW.widgets.restore({ items: [{ id: 'w1', kind: 'clock', x: 0.3, y: 0.16, w: 0.24, h: 0.08, opts: {} }, { id: 'w2', kind: 'playhead', x: 0.58, y: 0.16, w: 0.12, h: 0.08, opts: {} },
+        { id: 'w3', kind: 'text', x: 0.3, y: 0.3, w: 0.26, h: 0.2, opts: { source: 'own', size: 'm', text: '# Cubane\\nEight carbons on the corners of a cube, $\\\\mathrm{C_8H_8}$.' } },
+        { id: 'w4', kind: 'mol', x: 0.58, y: 0.28, w: 0.13, h: 0.22, opts: { style: 'balls' } }, { id: 'w5', kind: 'lattice', x: 0.3, y: 0.52, w: 0.16, h: 0.2, opts: {} }] }); return 1;`);
+    await wait(1500);
+    const faces = () => g.ev(`return [...document.querySelectorAll('#widgets .lw-w-face')].map((f) => { const l = f.querySelector('.lw-w-line'), b = f.parentElement; return { kind: b.parentElement.dataset.kind, text: l.textContent, w: Math.round(l.getBoundingClientRect().width * 10) / 10, fit: l.getBoundingClientRect().width <= b.clientWidth + 0.5, font: getComputedStyle(l.querySelector('.lw-w-n')).fontFamily, beat: (b.parentElement.querySelector('.lw-w-beat') || { getAnimations: () => [] }).getAnimations().length }; });`);
+    out.log.push({ rest: await faces() });
+    const R = await g.ev(`const r = document.getElementById('widgets').getBoundingClientRect(); return [r.left + r.width * 0.27, r.top + r.height * 0.1, r.left + r.width * 0.74, r.top + r.height * 0.75];`);
+    await shot('038-S4-faces-dark', R);
+    await g.ev(`__LW.mod.clock.setBpm(120); __LW.run('transport.play'); return 1;`); const seen = [];
+    for (let k = 0; k < 14; k++) { await wait(170); seen.push(await faces()); }
+    await g.ev(`__LW.run('transport.play'); return 1;`);
+    const byKind = (kd) => seen.map((s) => s.find((x) => x.kind === kd)).filter(Boolean);
+    const steady = (kd) => { const m = new Map(); for (const x of byKind(kd)) { const n = x.text.replace(/\D/g, '').length; if (!m.has(n)) m.set(n, new Set()); m.get(n).add(x.w); } return [...m].map(([n, ws]) => n + ' figures: ' + [...ws].join('/')); };
+    out.log.push({ played: { clock: byKind('clock').map((x) => x.text), playhead: byKind('playhead').map((x) => x.text), clockWidths: steady('clock'), playheadWidths: steady('playhead'), beats: byKind('playhead').some((x) => x.beat > 0), fit: seen.flat().every((x) => x.fit) } });
+    await g.ev(`__LW.look.set({ theme: 'light' }); return 1;`); await wait(900);
+    await shot('038-S4-faces-light', R);
+    await g.ev(`__LW.widgets.edit(true); return 1;`); await wait(500);
+    await shot('038-S4-edit-words', R);
+    await g.ev(`__LW.widgets.edit(false); __LW.look.set({ theme: 'dark' }); return 1;`);
+    out.log.push({ arrive: await g.ev(`const L = __LW.widgets, items = L.list().map(({ label, ...q }) => q); items.find((q) => q.id === 'w3').opts.text = '# Cubane\\nA new line of words.\\n\\nAnd a second.';
+      L.restore({ items }); await new Promise((r) => requestAnimationFrame(() => r())); const kids = [...document.querySelectorAll('#widgets [data-id="w3"] .lw-w-text > *')];
+      return kids.map((n) => n.tagName + ':' + n.getAnimations().length);`), errors: (await g.errors()).errs });
+  }
+  if (scene === 's5') {   /* THE FINISH: the bar in its places in both themes, the mini-viewer's four styles, the keyboard on the new controls, hydrogen and H, the widgets' faces at S · M · L */
+    const crop = async (sel, pad = [110, 40, 130, 30]) => { const b = await g.ev(`const r = document.querySelector(${JSON.stringify(sel)}).getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom];`); return [b[0] - pad[0], b[1] - pad[1], b[2] + pad[2], b[3] + pad[3]]; };
+    const key = async (sel, k) => { await g.ev(`document.querySelector(${JSON.stringify(sel)}).focus(); return 1;`); await g.press(k); await wait(600); };
+    await g.ev(`__LW.chem.setOn(true); await __LW.settle(); await __LW.chem.pick('cubane'); await __LW.settle(); return 1;`); await wait(1200);
+    for (const th of ['dark', 'light']) {
+      await g.ev(`__LW.look.set({ theme: '${th}' }); return 1;`); await wait(700);
+      await shot(`038-S5-stage-${th}`, await crop('#transport'));
+      await g.tap('#transport .tr-expand'); await wait(800);
+      for (let k = 0; k < 4; k++) { const m = await mini('style'); await shot(`038-S5-${th}-mini-${k}-${m.rec && m.rec.mini ? m.rec.mini.style : 'ballstick'}`, await crop('#transport > .csb-mini', [6, 6, 6, 6])); await g.tap('#transport .csb-mini-b'); await wait(500); }
+      await shot(`038-S5-expanded-${th}`, await crop('#transport'));
+      await g.tap('#transport .tr-expand'); await wait(600);
+    }
+    await g.ev(`__LW.look.set({ theme: 'dark' }); return 1;`); await wait(500);
+    await g.tap('#transport .tr-expand'); await wait(700);
+    const before = (await mini('kb')).rec; await key('#transport .csb-mini-b', ''); out.log.push({ enterOnCell: [before && before.mini ? before.mini.style : 'ballstick', ((await mini('kb')).rec.mini || { style: 'ballstick' }).style] });
+    await key('#transport .csb-mini-b', ''); await key('#transport .csb-mini-b', ''); await key('#transport .csb-mini-b', '');   // round to the start
+    await g.tap('#transport .tr-expand'); await wait(600);
+    out.log.push({ dock: await g.tap('#transport .dock-btn') }); await wait(900); out.log.push(await mini('docked'));
+    await shot('038-S5-docked-dark', [0, 0, 320, 330]);
+    const head = await g.ev(`const r = document.querySelector('.dev[data-id="transport"] .dev-head').getBoundingClientRect(); return [Math.round(r.left + 110), Math.round(r.top + r.height / 2)];`);
+    await drag(head[0], head[1], 700, 540); await wait(900); out.log.push(await state('detached'));
+    await shot('038-S5-detached-dark', await crop('.dev[data-id="transport"]', [20, 20, 20, 20]));
+    await key('.dev[data-id="transport"] .dev-pop', ''); await wait(500); out.log.push(await state('Enter on BACK TO THE STAGE'));
+    await g.ev(`__LW.look.set({ theme: 'light' }); return 1;`); await g.tap('#transport .dock-btn'); await wait(900);
+    const head2 = await g.ev(`const r = document.querySelector('.dev[data-id="transport"] .dev-head').getBoundingClientRect(); return [Math.round(r.left + 110), Math.round(r.top + r.height / 2)];`);
+    await drag(head2[0], head2[1], 700, 540); await wait(900);
+    await shot('038-S5-detached-light', await crop('.dev[data-id="transport"]', [20, 20, 20, 20]));
+    await g.tap('.dev[data-id="transport"] .dev-close'); await wait(900); out.log.push(await state('closed with ×')); out.log.push(await mini('closed'));
+    await shot('038-S5-closed-light', null);
+    await g.ev(`document.querySelector('#lwMode [data-id="hydrogen"]').click(); return 1;`); await wait(1200); out.log.push(await mini('hydrogen'));
+    await g.ev(`document.querySelector('#lwMode [data-id="molecules"]').click(); await __LW.settle(); return 1;`); await wait(1500);
+    await g.ev(`document.activeElement && document.activeElement.blur(); return 1;`); await g.press('h'); await wait(600); out.log.push({ H: await g.ev(`return { uiHidden: document.body.classList.contains('ui-hidden'), mini: getComputedStyle(document.querySelector('#transport > .csb-mini')).display, bar: getComputedStyle(document.getElementById('transport')).display };`) });
+    await g.press('h'); await wait(600);
+    await g.ev(`__LW.widgets.restore({ items: [{ id: 'w1', kind: 'clock', x: 0.3, y: 0.12, w: 0.14, h: 0.05, opts: {} }, { id: 'w2', kind: 'playhead', x: 0.47, y: 0.12, w: 0.08, h: 0.05, opts: {} },
+        { id: 'w3', kind: 'text', x: 0.3, y: 0.2, w: 0.2, h: 0.12, opts: { source: 'own', size: 's', text: '# S\\nThe body, $\\\\pi$.' } }, { id: 'w4', kind: 'text', x: 0.3, y: 0.34, w: 0.2, h: 0.16, opts: { source: 'own', size: 'm', text: '# M\\nThe body, $\\\\pi$.' } },
+        { id: 'w5', kind: 'text', x: 0.52, y: 0.2, w: 0.2, h: 0.3, opts: { source: 'own', size: 'l', text: '# L\\nThe body, $\\\\pi$.' } }] }); return 1;`); await wait(1000);
+    const R = await g.ev(`const r = document.getElementById('widgets').getBoundingClientRect(); return [r.left + r.width * 0.27, r.top + r.height * 0.08, r.left + r.width * 0.76, r.top + r.height * 0.55];`);
+    for (const th of ['light', 'dark']) { await g.ev(`__LW.look.set({ theme: '${th}' }); return 1;`); await wait(700); await shot(`038-S5-faces-sml-${th}`, R); }
+    out.log.push({ errors: (await g.errors()).errs });
+  }
 } catch (e) { out.error = String(e && e.stack || e); }
 finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }

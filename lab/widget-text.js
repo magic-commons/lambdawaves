@@ -2,17 +2,22 @@
  * no fancy window CSS, just straight up text on the stage)"): the notebook's text, live (opts.source 'notebook', the default), or the widget's own
  * words (WRITE, through the kit's dialog), rendered by the notebook's own road (the kit's renderNotebook: marked, KaTeX, the sanitiser) in the
  * words' serif and ink — no plate, no shadow; SIZE S · M · L is the notebook's body, heading and title (14 · 22 · 34 px), INFORMATIONAL's scale. */
-import { el, seg, trig } from './mir/kit.js'; import { openDialog } from './mir/shell/dialog.js'; import { renderNotebook } from './mir/shell/notebook-render.js';
+import { el, seg, trig } from './mir/kit.js'; import { openDialog } from './mir/shell/dialog.js'; import { renderNotebook } from './mir/shell/notebook-render.js'; import { motionPolicy } from './mir/core/motion.js';
 import { registerKind } from './widgets.js';
 const PX = { s: 14, m: 22, l: 34 };
 registerKind({ kind: 'text', label: 'TEXT', glyph: 'words', hint: 'Words on the stage: the notebook’s or your own', size: { w: 0.3, h: 0.16 }, opts: { source: 'notebook', size: 'm' },
   mount(host, api) {
     const view = el('div', 'lw-w-text', host), nbEl = document.getElementById('notebook'); let shown = null;
     const words = () => { const o = api.opts(), nb = api.app.sh.layout && api.app.sh.layout.notebook; return o.source === 'own' ? String(o.text || '') : nb ? nb.text : ''; };
-    const paint = (force) => { const md = words(); if (md === shown && !force) return; shown = md; view.style.fontSize = (PX[api.opts().size] || PX.m) + 'px'; view.innerHTML = md.trim() ? renderNotebook(md) : ''; };
+    /* 038 S4: a block that ARRIVES fades in from a soft blur (220 ms) — a new paragraph as it is typed, every block of new words (WRITE, NOTEBOOK); never the
+       first paint, never a block typed in place, a size or a theme; nothing under reduced motion.  The words are rendered only when they changed (a size is the
+       box's font size alone), so a forced tick never rebuilds a block mid-fade */
+    const paint = (arrive) => { view.style.fontSize = (PX[api.opts().size] || PX.m) + 'px'; const md = words(); if (md === shown) return;
+      const was = shown === null ? null : [...view.children].map((n) => n.outerHTML); shown = md; view.innerHTML = md.trim() ? renderNotebook(md) : '';
+      if (was && motionPolicy() === 'full') [...view.children].forEach((n, i) => { if ((arrive || i >= was.length) && !was.includes(n.outerHTML)) n.animate([{ opacity: 0, filter: 'blur(3px)' }, { opacity: 1, filter: 'none' }], { duration: 220, easing: 'ease-out' }); }); };
     const heard = () => paint(false);   // the notebook's typing draws no frame of the rack's: the widget hears it (capture: a scripted input does not bubble)
     if (nbEl) nbEl.addEventListener('input', heard, true);
-    return { tick: (now, force) => paint(force), set: () => paint(true), destroy: () => { if (nbEl) nbEl.removeEventListener('input', heard, true); } };
+    return { tick: () => paint(false), set: () => paint(true), destroy: () => { if (nbEl) nbEl.removeEventListener('input', heard, true); } };
   },
   controls(bar, api) {
     const size = seg({ aria: 'Text size', value: api.opts().size || 'm', onChange: (v) => api.set({ size: v }, 'WIDGET TEXT SIZE'),
