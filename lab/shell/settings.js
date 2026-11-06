@@ -45,7 +45,7 @@ export function createSettings(app) {
          four times.  Now what this function owns is written over what is there, and only the keys an older build wrote and nothing reads
          (RETIRED, settings-store.js) leave.  An owned value of undefined still drops its key (JSON), as before. */
       const S0 = readSettings(), owned = {
-        nativeLayout: useCompactDefaults ? 1 : S0.nativeLayout, captions: !document.body.classList.contains('no-captions'),   // iteration 007: INFORMATIONAL's six keys left for their own record, lambdawaves.q0.info (shell/stage-words.js)
+        nativeLayout: useCompactDefaults ? (S0.nativeLayout === 2 ? 2 : 1) : S0.nativeLayout, captions: !document.body.classList.contains('no-captions'),   // iteration 007: INFORMATIONAL's six keys left for their own record, lambdawaves.q0.info (shell/stage-words.js) · 038 M5: nativeLayout 2 (the face's ADVANCED) is kept
         auto: app.sh.quality.auto, governor: app.ctl.gov.on, keepFrames: app.ctl.keep.frames, perfMode: app.ctl.perf.mode, perfTier: app.ctl.perf.tier, playLock: app.ctl.fieldRate.lock || undefined, playHz: app.ctl.fieldRate.hz || undefined,   // 020 L2: PLAYBACK LOCK, written only when not WALL · DISPLAY
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning
            by itself when you open it is a surprise, not a setting. */

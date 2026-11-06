@@ -34,6 +34,9 @@ export const FIRST_RUN_RACKS = Object.freeze({
   simple: rackOf(['spectrum', 'chem', 'informational'], ['settings', 'palette', 'observer', 'camera', 'clip']),
   advanced: rackOf(['spectrum', 'chem', 'informational', 'nodes'], ['settings', 'stage', 'palette', 'observer', 'camera', 'light', 'clip']),
 });
+/** 038 M5 · THE CHOICE KEEPS: the arrangement a browser's `nativeLayout` names — 2 once the face's ADVANCED was pressed, else SIMPLE (rack.js lays
+ *  it at every compact boot and NEW's DEFAULT is captured from it, so NEW keeps the choice) */
+export const firstRunRacks = (nativeLayout) => (nativeLayout === 2 ? FIRST_RUN_RACKS.advanced : FIRST_RUN_RACKS.simple);
 const FOLD_ALL = Object.freeze([...FIRST_RUN_RACKS.advanced.left, ...FIRST_RUN_RACKS.advanced.right]);
 /* iteration 016 W3 (Josh, call 6: "H on touch: Yan's choice (give it the kit's edge handle)") · `handle`: the kit rack's edge handle — the on-screen way
    back to a hidden rack — on a phone or tablet only (rack-wiring.js hands it createRack); a desktop keeps none, its keys and the edge peek */
