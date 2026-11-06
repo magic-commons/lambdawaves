@@ -768,6 +768,12 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 #widgets .lw-w-ro > .ro-lbl, #widgets .lw-w-ro > .ro-sub { display: none; }
 #widgets .lw-w-ro > .ro-val { color: inherit; font: 400 clamp(10px, min(60cqh, 8cqw), 96px)/1 var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
 #widgets [data-kind="playhead"] .lw-w-ro > .ro-val { font-size: clamp(10px, min(66cqh, 26cqw), 140px); }
+/* 037 W6: TEXT — the notebook's words in the words' serif and ink, no plate, no shadow, the headings held near the body; WRITE's box in the kit's dialog */
+#widgets .lw-w-text { font-family: var(--font-info-body, "Spectral", Georgia, serif); line-height: 1.3; overflow-wrap: anywhere; }
+#widgets .lw-w-text > :first-child { margin-top: 0; }
+#widgets .lw-w-text :is(h1, h2, h3, h4, p, ul, ol, blockquote) { margin: 0 0 .35em; }
+#widgets .lw-w-text h1 { font-size: 1.5em; } #widgets .lw-w-text h2 { font-size: 1.25em; } #widgets .lw-w-text :is(h3, h4) { font-size: 1.1em; }
+.lw-w-ask { display: block; box-sizing: border-box; width: min(440px, 72vw); min-height: 120px; padding: 8px; resize: vertical; font: 14px/1.4 var(--font-ui); color: var(--fg); background: var(--glass-well); border: 1px solid var(--glass-hairline); border-radius: 8px; }
 body.ui-hidden #widgets { display: none; }
 body.menu-open #widgets { visibility: hidden; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */

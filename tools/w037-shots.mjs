@@ -106,5 +106,42 @@ try {
     await shot('037-W5-clock-playhead', [400, 180, 1100, 330]);
     out.ok = out.run.after[0] !== out.run.before[0] && /^t = .* a\.u\. · lap \d+$/.test(out.run.after[0]) && /^\d+:\d\d\.\d$/.test(out.run.after[1]) && out.run.writes > 0 && out.run.writes <= 14;
   }
+  if (scene === 'w6') {   /* TEXT: the notebook's typing shows at once (markdown and KaTeX); WRITE through the kit's dialog sets its own words (one WIDGET TEXT row); L is 34 px */
+    out.nb = await g.ev(`__LW.widgets.restore(null); const id = __LW.widgets.add('text'); await new Promise((r) => setTimeout(r, 300));
+      __LW.layout.notebook.text = '**Benzene**: six carbons, $\\\\pi$ shared'; await new Promise((r) => setTimeout(r, 200));
+      const v = document.querySelector('#widgets .lw-widget[data-id="' + id + '"] .lw-w-text'); return { id, strong: !!v.querySelector('strong'), katex: !!v.querySelector('.katex'), px: getComputedStyle(v).fontSize, ink: getComputedStyle(v).color, bg: getComputedStyle(v.closest('.lw-widget')).backgroundColor };`);
+    await g.ev(`__LW.widgets.edit(true); await new Promise((r) => setTimeout(r, 200)); return 1;`);
+    await g.tap('#widgets .lw-widget-bar .trig');   // WRITE
+    await g.waitFor(`document.querySelector('.mir-dialog .lw-w-ask')`, 50, 100);
+    await g.ev(`document.querySelector('.mir-dialog .lw-w-ask').value = 'Own *words*'; return 1;`);
+    await g.tap('.mir-dialog .trig[data-kind="primary"]');
+    await g.tap('#widgets .lw-widget-bar .seg-b:last-child');   // L
+    out.own = await g.ev(`await new Promise((r) => setTimeout(r, 600)); const q = __LW.widgets.list()[0], v = document.querySelector('#widgets .lw-w-text');
+      return { opts: q.opts, html: v.innerHTML, px: getComputedStyle(v).fontSize, rows: __LW.history.entries().slice(-2).map((e) => e.label) };`);
+    await g.ev(`__LW.widgets.edit(false); return 1;`);
+    out.ok = out.nb.strong && out.nb.katex && out.nb.px === '22px' && out.nb.bg === 'rgba(0, 0, 0, 0)' && out.own.opts.source === 'own' && out.own.opts.text === 'Own *words*' && /<em>words<\/em>/.test(out.own.html) && out.own.px === '34px' && out.own.rows.includes('WIDGET TEXT');
+  }
+  if (scene === 'w7') {   /* the pictures: four widgets over SOLID, dark and light; the manager listing them; EDIT mid-drag with a guide on another widget's edge */
+    const place = `__LW.widgets.restore({ items: [{ id: 'w1', kind: 'mol', x: 0.21, y: 0.1, w: 0.16, h: 0.28, opts: { style: 'ballstick' } }, { id: 'w2', kind: 'text', x: 0.58, y: 0.12, w: 0.22, h: 0.2, opts: { source: 'notebook', size: 'm' } },
+      { id: 'w3', kind: 'clock', x: 0.25, y: 0.64, w: 0.22, h: 0.07, opts: {} }, { id: 'w4', kind: 'playhead', x: 0.66, y: 0.64, w: 0.12, h: 0.07, opts: {} }] });`;
+    await g.ev(`await __LW.chem.solve('C6H6'); __LW.chem.setOn(true); __LW.setStyle('solid'); __LW.look.set({ theme: 'dark' });
+      __LW.layout.notebook.text = '## Benzene\\nSix carbons in a ring; its $\\\\pi$ electrons are shared by all six.'; ${place}
+      __LW.play(); await new Promise((r) => setTimeout(r, 1300)); __LW.pause(); await __LW.settle(); await new Promise((r) => setTimeout(r, 800)); return 1;`);
+    await shot('037-W7-four-solid-dark');
+    await g.ev(`__LW.look.set({ theme: 'light' }); await new Promise((r) => setTimeout(r, 1000)); return 1;`);
+    await shot('037-W7-four-solid-light');
+    await g.ev(`__LW.look.set({ theme: 'dark' }); __LW.actions.run('window.widgets.open'); await new Promise((r) => setTimeout(r, 700)); __LW.widgets.edit(true); await new Promise((r) => setTimeout(r, 300)); return 1;`);
+    await shot('037-W7-manager-dark', await g.ev(`const r = document.querySelector('.dev[data-id="widgets"]').getBoundingClientRect(); return [r.left - 8, r.top - 8, r.right + 8, r.bottom + 8];`));
+    const R = await g.ev(`const q = (id) => { const r = document.querySelector('#widgets .lw-widget[data-id="' + id + '"]').getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; }; return { mol: q('w1'), clock: q('w3') };`);
+    const from = [R.clock[0] + R.clock[2] / 2, R.clock[1] + R.clock[3] / 2], dx = (R.mol[0] + 3) - R.clock[0];
+    await drv.actions(g.s, [{ type: 'pointer', id: 'p' + (++pid), parameters: { pointerType: 'mouse' }, actions: [
+      { type: 'pointerMove', duration: 0, origin: 'viewport', x: Math.round(from[0]), y: Math.round(from[1]) }, { type: 'pointerDown', button: 0 },
+      { type: 'pointerMove', duration: 200, origin: 'viewport', x: Math.round(from[0] + dx), y: Math.round(from[1] - 30) }] }]);
+    out.guide = await g.ev(`const gx = document.querySelector('#widgets .lw-guide:not(.lw-guide-y)'); return { shown: !gx.hidden, at: gx.style.left };`);
+    await shot('037-W7-edit-guide-dark');
+    await drv.actions(g.s, [{ type: 'pointer', id: 'p' + (++pid), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerUp', button: 0 }] }]); await drv.relActions(g.s);
+    out.after = await g.ev(`await new Promise((r) => setTimeout(r, 500)); const L = __LW.widgets.list(); return { molX: L[0].x, clockX: L[2].x, n: L.length };`);
+    out.ok = out.guide.shown && out.after.molX === out.after.clockX;
+  }
   out.errs = (await g.errors()).errs;
 } finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }

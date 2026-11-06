@@ -1010,22 +1010,23 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 #widgets.edit .lw-widget::before { content: attr(data-word); position: absolute; left: -3px; bottom: 100%; margin-bottom: 6px; font: 600 10px/1 var(--font-ui); letter-spacing: .1em; opacity: .7; white-space: nowrap; }
 #widgets.edit .lw-widget-x { display: grid; place-items: center; position: absolute; right: -14px; top: -14px; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: var(--acc); color: #fff; cursor: pointer; }
 #widgets.edit .lw-widget-grip { display: block; position: absolute; right: -7px; bottom: -7px; width: 12px; height: 12px; cursor: nwse-resize; border: solid currentColor; border-width: 0 2px 2px 0; }
-#widgets.edit .lw-widget-bar:not(:empty) { display: flex; position: absolute; left: 50%; top: 100%; margin-top: 10px; transform: translateX(-50%); gap: 4px; white-space: nowrap; cursor: default; }
+#widgets.edit .lw-widget-bar:not(:empty) { display: flex; position: absolute; left: 50%; top: 100%; width: max-content; margin-top: 10px; transform: translateX(-50%); gap: 4px; align-items: center; white-space: nowrap; cursor: default; }
+#widgets .lw-widget-bar .seg { flex-wrap: nowrap; }
 #widgets .lw-guide { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -.5px; background: var(--acc); }
 #widgets .lw-guide-y { top: auto; bottom: auto; left: 0; right: 0; width: auto; height: 1px; margin: -.5px 0 0; }
 #widgets .lw-guide[hidden] { display: none; }
 /* 037 W3 · WIDGETS, the manager (lab/widgets-window.js): the gallery four across, each kind a tile with its glyph over its word; the placed list a short
    column of rows with its own scroller past six (the one allowed, FOLDERS' manner); EDIT · SNAP · CLEAR one fit row */
-.lw-widgets-card .wg-gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0 0 8px; }
-.lw-widgets-card .wg-kind { flex-direction: column; justify-content: center; gap: 5px; height: 58px; min-width: 0; padding: 4px 2px; }
+.lw-widgets-card .wg-gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 0 0 8px; }
+.lw-widgets-card .wg-kind { flex-direction: column; justify-content: center; gap: 5px; height: 58px; min-width: 0; min-height: 0; padding: 4px 0; }
 .lw-widgets-card .wg-kind .trig-g .gly { width: 22px; height: 22px; }
-.lw-widgets-card .wg-kind .trig-l { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; letter-spacing: .06em; }
+.lw-widgets-card .wg-kind .trig-l { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8px; letter-spacing: .02em; }
 .lw-widgets-card .wg-list { max-height: 157px; margin: 0 0 8px; overflow: hidden auto; overscroll-behavior: contain; border-top: 1px solid var(--glass-hairline); }
 .lw-widgets-card .wg-list[hidden] { display: none; }
 .lw-widgets-card .wg-row { display: flex; align-items: center; gap: 6px; height: 26px; border-bottom: 1px solid var(--glass-hairline); font-size: 11px; letter-spacing: .06em; }
 .lw-widgets-card .wg-word { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-widgets-card .wg-n { opacity: .6; font-variant-numeric: tabular-nums; }
-.lw-widgets-card .wg-x { flex: 0 0 24px; width: 24px; height: 22px; padding: 0; }
+.lw-widgets-card .wg-x { flex: 0 0 24px; width: 24px; height: 22px; min-width: 0; min-height: 0; padding: 0; }
 .lw-widgets-card .wg-acts { margin: 0; }
 /* CAMERA: AUTO-ROTATE needs two cells */
 .native-clean[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
