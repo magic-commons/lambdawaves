@@ -636,7 +636,9 @@ fn rigSpot(L: vec3<f32>, p: vec3<f32>) -> f32 {
    KEY and FILL two-sided as litAt (the old key turned to face the eye: the same shading, a highlight that can be seen) */
 fn rigShade(c: vec3<f32>, uvw: vec3<f32>, k: f32, m: f32) -> vec3<f32> {
   let n = densN(uvw); let half = V.cam.w; let p = uvw * (2.0 * half) - vec3<f32>(half);
-  let E = normalize(V.cam.xyz - p);
+  /* 038 F1 · THE BLACK PIXELS: with the eye inside the box (ZOOM's near end) a ray whose jitter is exactly 0 samples ON the eye, and normalize(0) is
+     NaN — the RIM carried it even at 0 and the output's max(…, 0) turned it black.  A zero-length view vector takes the view direction */
+  let dE = V.cam.xyz - p; let E = select(-V.fwd.xyz, normalize(dE), dot(dE, dE) > 1e-12);
   let L = rigKey(-V.fwd.xyz - vec3<f32>(0.35, 0.2, 0.5));
   let w = 0.5 * V.p16.y; let s = rigSpot(L, p) * V.p12.w;
   let e = (abs(dot(n, L)) + w) / (1.0 + w) * s * V.p13.rgb
@@ -646,7 +648,7 @@ fn rigShade(c: vec3<f32>, uvw: vec3<f32>, k: f32, m: f32) -> vec3<f32> {
   if (k == 0.0) { o = mix(c * c * fl, c + (1.0 - c) * 0.35, smoothstep(vec3<f32>(0.0), vec3<f32>(1.0), e)); }
   let nf = select(n, -n, dot(n, E) < 0.0);
   let g = max(V.p15.y - 0.32, 0.0) / 0.68 * pow(max(dot(reflect(-L, nf), E), 0.0), V.p15.z / (1.0 + 4.0 * V.p16.y)) * (1.0 - 0.5 * V.p16.y) * s;
-  return o + (g + V.p15.w * pow(1.0 - abs(dot(n, E)), 3.0)) * V.p13.rgb;
+  return o + (g + V.p15.w * pow(max(1.0 - abs(dot(n, E)), 0.0), 3.0)) * V.p13.rgb;   // 038 F1: |n·E| can round past 1, and pow of a negative base is NaN
 }
 
 /* ORDERED DITHER — the recursive Bayer 8x8 threshold matrix, closed form, no table and no texture.
@@ -777,7 +779,7 @@ fn rigAtom(c: vec3<f32>, n: vec3<f32>, rd: vec3<f32>, p: vec3<f32>) -> vec3<f32>
   let w = 0.5 * V.p16.y; let s = rigSpot(L, p) * V.p12.w; let a = V.p15.x;
   let e = max((dot(n, L) + w) / (1.0 + w), 0.0) * s * V.p13.rgb + vec3<f32>(max((dot(n, rigDir(V.p14.xyz)) + w) / (1.0 + w), 0.0) * V.p14.w);
   let g = V.p15.y * pow(max(dot(reflect(-L, n), -rd), 0.0), V.p15.z / (1.0 + 4.0 * V.p16.y)) * (1.0 - 0.5 * V.p16.y) * s;
-  return c * (a + (1.0 - a) * e) + (g + V.p15.w * pow(1.0 - abs(dot(n, rd)), 3.0)) * V.p13.rgb;
+  return c * (a + (1.0 - a) * e) + (g + V.p15.w * pow(max(1.0 - abs(dot(n, rd)), 0.0), 3.0)) * V.p13.rgb;   // 038 F1: the base clamped (a ball's centre can round |n·rd| past 1)
 }
 fn atomLit(c: vec3<f32>, n: vec3<f32>, rd: vec3<f32>, p: vec3<f32>) -> vec3<f32> {
   if (V.p17.w == 1.0) { return rigAtom(c, n, rd, p); }
