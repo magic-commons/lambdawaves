@@ -28,7 +28,7 @@ export function createMaterial(app) {
        Re+Im was two pictures in one volume (PHASE carries both as hue); Δρ is MOLECULES' Δ beside KICK.  A saved one maps by waveView. */
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
       { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density (palette θ = 0; off: the old blue)' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
-      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: palette ±π/2 or original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>' }],
+      { id: 'real', label: '<m>Re ψ</m>', title: 'signed: palette 0 and π, or the original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>', title: 'signed: palette ±π/2, a quarter turn from Re' }],   // 038 F4
       onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('view', ui.viewSeg.button(v).textContent); } });
     r1.appendChild(ui.viewSeg.root).dataset.keyAction = 'view';
     const r2 = el('div', 'row tight', gSpace);
@@ -148,6 +148,7 @@ export function createMaterial(app) {
       modeMute(ui.viewSeg, 'imag', A('wave.view.imag'));
       { const b = ui.styleSeg.button('esp'), hide = A('wave.style.esp').hide; if (b && b.hidden !== hide) { b.hidden = hide; if (app.state.tl) app.state.tl.editor.paint(); } }   // 032 O1: ESP the one MOLECULES-only style; W3: STYLE's bands moved, an EVENT clip drawn for the other count shows ⚠ now
       const esp = A('wave.esp').hide; for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = esp;
+      if (ui.sliceCut) ui.sliceCut.row.hidden = esp;   // 038 F3: CLIP's CUT BALLS · CUT STICKS, MOLECULES' as SIZE · RADIUS
       if (ui.espBarRow) ui.espBarRow.hidden = A('info.espBar').hide;   // 018 B10: INFORMATIONAL's ESP BAR · SIDE · PAD   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
     }
     ui.availSync = modeSync;
@@ -218,6 +219,15 @@ export function createMaterial(app) {
       set: (n) => { mat.slice.normal = n; schedule(TIER.PRESENT); } }, home: () => { mat.slice.normal = [0, 0, 1]; schedule(TIER.PRESENT); } });
     hint(mini.root, 'PLANE · drag to turn it; double-tap or Home resets'); planeRow.append(mini.root, ui.sliceFrameSeg.root);
     ui.sliceMini = mini;
+    /* 038 F3 · THE CLIP'S TOGGLE (Josh: "include a toggle to include or not include the balls and/or sticks so that it only cuts the waves"): CUT BALLS ·
+       CUT STICKS under the plane, lit = cut (as always); off writes `mat.slice.balls` / `mat.slice.sticks` = false, a hand's only, so NEW, a link and every
+       older file open cut.  The row is MOLECULES' (hidden under hydrogen, as WAVE's SIZE · RADIUS: modeSync); a restore sets it (persist.js) */
+    const cutRow = el('div', 'row tight fit clip-cut', gs);
+    const cutSw = (k, o) => sw({ ...o, value: true, onChange: (on) => { if (on) delete mat.slice[k]; else mat.slice[k] = false; schedule(TIER.PRESENT); } });
+    ui.sliceCut = { row: cutRow, balls: cutSw('balls', { label: 'CUT BALLS', title: 'Cut the balls too; off, the plane cuts only the wave' }),
+      sticks: cutSw('sticks', { label: 'CUT STICKS', title: 'Cut the sticks too; off, the plane cuts only the wave' }),
+      sync() { ui.sliceCut.balls.set(mat.slice.balls !== false); ui.sliceCut.sticks.set(mat.slice.sticks !== false); } };
+    cutRow.append(ui.sliceCut.balls.root, ui.sliceCut.sticks.root); cutRow.hidden = availability('wave.esp', app).hide;
     ui.sliceAxisSeg.root.hidden = true;
     /* WAVE 106 · THESE TWO KEEP THEIR HANDLES NOW, and that is what makes them modulatable.  Both
        were built inline — `knob({...}).root` appended straight into the row — so the objects went
