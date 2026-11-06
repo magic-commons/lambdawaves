@@ -770,7 +770,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 #widgets [data-kind="playhead"] .lw-w-face { font-size: clamp(10px, min(62cqh, 24cqw), 140px); }
 #widgets .lw-w-c { display: inline-block; width: .62em; text-align: center; } #widgets .lw-w-c.p { width: .3em; }
 #widgets :is(.lw-w-w, .lw-w-s) { font-family: var(--font-ui); opacity: .62; }
-#widgets .lw-w-w { font-size: .38em; letter-spacing: .08em; margin: 0 .7em; } #widgets .lw-w-w:first-child { margin-left: 0; }
+#widgets .lw-w-w { font-size: max(9px, .38em); letter-spacing: .08em; margin: 0 .7em; } #widgets .lw-w-w:first-child { margin-left: 0; }
 #widgets .lw-w-s { font-size: .72em; margin: 0 .06em; } #widgets .lw-w-d { font-size: .62em; opacity: .55; }
 #widgets .lw-w-beat { position: absolute; left: 24%; right: 24%; bottom: 10%; height: 1px; background: currentColor; opacity: 0; pointer-events: none; }
 /* 037 W6: TEXT — the notebook's words in the words' serif and ink, no plate, the headings held near the body; WRITE's box in the kit's dialog.  038 S4: the headings in
