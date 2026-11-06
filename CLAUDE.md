@@ -76,7 +76,7 @@ A law a gate enforces is cited by its gate, not restated: THE LOCK (the field's 
 - the three scopes, records, projects and FOLDERS, NEW, the undo ring, `lw:` links → `scopes-and-records.md`
 - MOLECULES, the mode, the chem worker, the volumes and their pipeline, THE DIAGRAMS' PIPELINE (`tools/diagrams/`, `tools/volume-thumbs.mjs`) → `chemistry.md`
 - the register, the paint gesture, SPECTRUM, ATOMS, n = 7, the scale, emission, the physics of 005 → `register-and-systems.md`
-- the stage text, captions, INFORMATIONAL, THE HEAD, the ESP bar, the furniture law → `stage-words.md`
+- the stage text, captions, INFORMATIONAL, THE HEAD, the ESP bar, the furniture law, WIDGETS (the stage layer, the WIDGETS window, EDIT and SNAP, the kinds) → `stage-words.md`
 - THE MAIN MENU (the face, the tutorial player (two decks I · II, placeholder names) and its heroes), THE LOADING SCREEN (`lab/loader.js`), the Picker's decks, the library's words and installs, the looks (THE DIAGRAM LOOK, THE PAGES' PICTURES) → `picker.md`
 - the field, WAVE's styles, ESP, PLAYBACK LOCK, THE LOCK's leaves → `field-and-lock.md`
 - the modulation port and window, the clock, curves, the flash guard, THE ENVELOPE TRIGGER (ENV + PATTERN), FOLLOW PLAYHEAD and AUTO-COLOR → `modulation-and-timeline.md`
