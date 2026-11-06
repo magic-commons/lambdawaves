@@ -28,7 +28,7 @@ export function createMaterial(app) {
        Re+Im was two pictures in one volume (PHASE carries both as hue); Δρ is MOLECULES' Δ beside KICK.  A saved one maps by waveView. */
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
       { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density (palette θ = 0; off: the old blue)' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
-      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: palette ±π/2 or original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>' }],
+      { id: 'real', label: '<m>Re ψ</m>', title: 'signed: palette 0 and π, or the original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>', title: 'signed: palette ±π/2, a quarter turn from Re' }],   // 038 F4
       onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('view', ui.viewSeg.button(v).textContent); } });
     r1.appendChild(ui.viewSeg.root).dataset.keyAction = 'view';
     const r2 = el('div', 'row tight', gSpace);

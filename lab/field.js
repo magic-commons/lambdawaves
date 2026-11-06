@@ -698,7 +698,7 @@ fn dustTint(s: vec2<f32>, uvw: vec3<f32>, mode: u32, rhoMax: f32, ampMax: f32, r
     if (V.p2.z > 0.5) { let u = fract(h) * 256.0; let i0 = u32(floor(u)) % 256u; c = mix(pal[i0].rgb, pal[(i0 + 1u) % 256u].rgb, fract(u)); } else { c = hsv(h, 0.85, 1.0); }
   } else if (mode == 2u || mode == 3u) {
     let v = select(s.y, s.x, mode == 2u) / ampMax; w = pow(v * v, soft);
-    if (V.p2.z > 0.5) { c = select(pal[u32(fract(0.75 + V.p2.x) * 256.0) % 256u].rgb, pal[u32(fract(0.25 + V.p2.x) * 256.0) % 256u].rgb, v > 0.0); }
+    if (V.p2.z > 0.5) { let b = select(0.5, 0.75, mode == 3u); c = select(pal[u32(fract(b + 0.5 + V.p2.x) * 256.0) % 256u].rgb, pal[u32(fract(b + V.p2.x) * 256.0) % 256u].rgb, v > 0.0); }   // 038 F4: the march's quarter turn
     else { c = select(vec3<f32>(0.22, 0.50, 1.0), vec3<f32>(1.0, 0.58, 0.16), v > 0.0); }
   } else {
     let rf = textureSampleLevel(refTex, samp, uvw, 0.0).rg;
@@ -1077,8 +1077,9 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
     } else if (mode == 2u || mode == 3u) {
       var v = 0.0; if (mode == 2u) { v = s.x / ampMax; } else { v = s.y / ampMax; }
       w = pow(v * v, soft);
-      if (V.p2.z > 0.5) {                                  // the PALETTE, polar: + and − take opposite points of the wheel (¼ and ¾ turn, shifted by HUE)
-        let i0 = u32(fract(0.25 + V.p2.x) * 256.0) % 256u; let i1 = u32(fract(0.75 + V.p2.x) * 256.0) % 256u;
+      if (V.p2.z > 0.5) {                                  // the PALETTE, polar: + and − take opposite points of the wheel, shifted by HUE — 038 F4 IM IS RE A QUARTER TURN ROUND THE WHEEL: Re ± at arg 0 · π (u ½ · 0), Im ± at +π/2 · −π/2 (u ¾ · ¼), so Re, Im and arg ψ agree on every lobe
+        let b = select(0.5, 0.75, mode == 3u);
+        let i0 = u32(fract(b + V.p2.x) * 256.0) % 256u; let i1 = u32(fract(b + 0.5 + V.p2.x) * 256.0) % 256u;
         c = select(pal[i1].rgb, pal[i0].rgb, v > 0.0);
       } else { c = select(vec3<f32>(0.22, 0.50, 1.0), vec3<f32>(1.0, 0.58, 0.16), v > 0.0); }
     } else {

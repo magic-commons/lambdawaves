@@ -75,6 +75,23 @@ try {
     }
     const H = out.hash; out.ok = H.plain === H.hue && H.plain === H.invert && H.plain === H.both && H.plain !== H.rim;
   }
+  if (scene === 'f4') {
+    /* the check: hydrogen 2p₀ alone, PALETTE ON, CLOUD — at t = 0 (ψ real) Re ψ's picture is arg ψ's to the level (+ at arg 0, − at π); at t = 4π
+       (ψ = iφ) Im ψ's is arg ψ's (+ at +π/2, − at −π/2); before, both took −π/2 · +π/2.  Then the picture: t = 2π (ψ = e^{iπ/4}φ), arg ψ · Re ψ · Im ψ */
+    const tag = process.argv[4] || 'after';
+    await g.ev(`const L = __LW; L.loadPreset('2pz'); L.pause(); L.clock.scrub(0); await L.settle(); return { palette: L.paletteId, lut: !!L.field.paletteLUT().lut };`);
+    const at = (t) => g.ev(`const L = __LW; L.pause(); L.clock.scrub(${t}); L.schedule(4); await L.settle(); await L.settle();
+      const m = { ...L.mat, paletteOn: true, style: 0, frame: false, axis: false, dither: 0, hueShift: 0, invert: false }; delete m.light;
+      const o = {}; for (const [k, v] of [['arg', 1], ['re', 2], ['im', 3]]) { const r = await __F.px(L.obs, { ...m, view: v }, 400, 400); o[k] = { px: Array.from(r.px), bpr: r.bpr, hash: r.hash }; } return o;`);
+    const maxd = (a, b) => { let d = 0; for (let i = 0; i < a.px.length; i++) if ((i & 3) !== 3) d = Math.max(d, Math.abs(a.px[i] - b.px[i])); return d; };
+    const t0 = await at(0), t4 = await at(4 * Math.PI), t2 = await at(2 * Math.PI);
+    out.check = { reVsArgAt0: maxd(t0.re, t0.arg), imVsArgAt4pi: maxd(t4.im, t4.arg), reVsImAt2pi: maxd(t2.re, t2.im) };
+    /* the three side by side (arg · Re · Im), 1200 × 400 */
+    const W3 = 1200, bpr = t2.arg.bpr, row = new Uint8Array(W3 * 400 * 4);
+    [t2.arg, t2.re, t2.im].forEach((p, k) => { for (let y = 0; y < 400; y++) for (let x = 0; x < 400 * 4; x++) row[y * W3 * 4 + k * 1600 + x] = p.px[y * bpr + x]; });
+    out.pic = jpeg('038-F4-2p0-arg-re-im-' + tag, row, W3, 400, W3 * 4);
+    out.ok = out.check.reVsArgAt0 <= 2 && out.check.imVsArgAt4pi <= 2;
+  }
   if (scene === 'f3') {
     /* the check: benzene's balls and sticks at EXPOSURE 0 (the picture is the atoms alone) — the CLIP on cuts them as before; CUT BALLS and CUT STICKS off
        draw them exactly as the CLIP off does (CLIP and SLAB); one kind off leaves the other cut.  The switches: hidden under hydrogen, shown under
