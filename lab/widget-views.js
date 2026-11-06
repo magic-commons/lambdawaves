@@ -35,3 +35,4 @@ view({ kind: 'spectrum', label: 'SPECTRUM', hint: 'The eigenvalue ladder, its po
   const m = app.w.spectrum; let v = -1; m.views.add(cv);   // the ladder moves with the register's version alone
   return { tick: (force) => { if (force || app.reg.version !== v) { v = app.reg.version; m.redraw(); } }, off: () => m.views.delete(cv) };
 });
+view({ kind: 'orbitals', label: 'ORBITALS', glyph: 'orbitals', hint: 'MOLECULES’ orbital ladder, the register’s levels lit', size: { w: 0.11, h: 0.24 } }, 'orbitals', of((app) => app.state.orbitals, () => {}));   // pushed by its own paints

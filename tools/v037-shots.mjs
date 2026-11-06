@@ -33,15 +33,16 @@ try {
   if (scene === 'v1') {   /* the four windows open at t = 0, then t = 3: each window canvas hashed (equal before and after the seam) */
     const CV = { shadow: '.shadow-c', bloch: '.ladder-c canvas', lattice: '.ladder-c canvas', orbit: '.orbit-c', wigner: '.wig-c', slice: '.slice-c', emission: '.em-strip', equalizer: '.eq-grid', spectrum: '.ladder canvas', chem: process.env.V_SEL || 'canvas.mol-c:not(.reg-ladder)' };
     const wins = (process.env.V_WINS || 'shadow,bloch,lattice,orbit').split(',');
-    out.win = await g.ev(`${PIX} __LW.windowActivity.presentOffscreen(true); __LW.seek(0); ${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ${JSON.stringify(wins)}) __LW.actions.run('window.' + id + '.open');
-      await new Promise((r) => setTimeout(r, 1500)); __LW.seek(3); await __LW.settle(); await new Promise((r) => setTimeout(r, 1500)); const o = {};
+    out.win = await g.ev(`${PIX} __LW.windowActivity.presentOffscreen(true); __LW.seek(0); ${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ${JSON.stringify(wins)}) __LW.actions.run('window.' + id + '.open'); ${process.env.V_STATES ? `__LW.register.setMode('states');` : ''}
+      await new Promise((r) => setTimeout(r, ${+process.env.V_WAIT || 1500})); __LW.seek(3); await __LW.settle(); await new Promise((r) => setTimeout(r, 1500)); const o = {};
       for (const id of ${JSON.stringify(wins)}) o[id] = pix(document.querySelector('.dev[data-id="' + id + '"] ' + ${JSON.stringify(CV)}[id])); return o;`);
     out.ok = Object.values(out.win).every((p) => p.ink > 0);
   }
   if (scene === 'v2') {   /* every window closed: each kind's widget paints, a second of play moves its picture, H stands it down */
     out.add = await g.ev(`${PIX} __LW.seek(0); ${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}) __LW.actions.run('window.' + id + (id === 'chem' ? '.fold' : '.close'));   // MOLECULES folds: its close turns the molecule off
       __LW.widgets.restore(null); const ids = {}; for (const k of ${JSON.stringify(KINDS)}) ids[k] = __LW.widgets.add(k);
-      await new Promise((r) => setTimeout(r, 1500)); await __LW.settle(); await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 1500)); await __LW.settle(); const ch = document.querySelector('.dev[data-id="chem"]');
+      if (${KINDS.some((k) => WIN[k] === 'chem')} && ch && !ch.classList.contains('folded')) __LW.actions.run('window.chem.fold'); await new Promise((r) => setTimeout(r, 900));
       const cv = (k) => document.querySelector('#widgets .lw-widget[data-id="' + ids[k] + '"] canvas'), a = {}; for (const k in ids) a[k] = pix(cv(k));
       __LW.play(); await new Promise((r) => setTimeout(r, 1500)); __LW.pause(); await __LW.settle(); await new Promise((r) => setTimeout(r, 600));
       const b = {}; for (const k in ids) b[k] = pix(cv(k));
