@@ -48,7 +48,7 @@ export function createMaterial(app) {
       { id:'additive',label:'ADD',title:'Additive emission through the field' },
       { id: 'bands', label: 'BANDS', title: 'One level surface per octave of the density, anchored at ISO' },
       { id: 'esp', label: 'ESP', title: 'ESP map on the surface (red −, blue +)' }],   // B3 (STYLE 11); 032 O1: BALLS (9) and STICKS (10) are SIZE and RADIUS > 0 now (the ids reserved)
-      onChange: (v) => { mat.style = STYLE[drawStyle(v)]; styleSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
+      onChange: (v) => { const from = mat.style | 0; mat.style = STYLE[drawStyle(v)]; ui.styleRecall(from, mat.style); styleSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE · 038 K1: the hand's switch recalls
     rd.appendChild(ui.styleSeg.root).dataset.keyAction = 'style';
     /** 032 O1: the styles the seg offers now, in its order, with their words — the STYLE menus (the stage's, VIEW's) and the STYLE target's bands */
     ui.styleList = () => ui.styleSeg.spec.options.filter((o) => o.id !== 'esp' || !availability('wave.style.esp', app).hide).map((o) => [o.id, ui.styleSeg.button(o.id).textContent]);   // the law, not the DOM: a restore asks before the seg repaints
@@ -122,6 +122,24 @@ export function createMaterial(app) {
     const S_ = STYLE, VOL = [S_.cloud, S_.solid, S_.signed, S_.bands, S_.dust, S_.glass, S_.glassSigned];
     const STYLE_READS = { isoK: [S_.solid, S_.signed, S_.bands, S_.glass, S_.glassSigned, S_.esp], kneeK: VOL, softK: [S_.cloud, S_.bands, S_.dust, S_.additive, S_.esp], grainK: [S_.dust],
       atomSizeK: [...VOL, S_.additive], stickK: [...VOL, S_.additive, S_.esp], espBareSw: [S_.esp], probeK: [S_.esp], espRangeK: [S_.esp], espSurfSeg: [S_.esp], espLiveSw: [S_.esp] };   // 032 O1: SIZE in every style but ESP (its sticks alone), RADIUS in every one
+    /* 038 K1 · A STYLE REMEMBERS ITS KNOBS (Josh: "Each style mode … if not tethered to a macro/timeline clip should retain their information"): leaving a
+       style keeps the knobs it reads (EXPOSURE and HUE always, SOFT · ISO · GRAIN · KNEE as STYLE_READS has them) in `mat.styleMem[<style>]`, and entering
+       one puts its remembered values back.  A knob a route (the modulation window's list) or a timeline clip holds is TETHERED, skipped both ways: the route
+       owns it (`isModulated` is true only while a modulator writes, so the routes and the clips are read).  A hand's switch (the seg, C, the stage's STYLE ›)
+       and the STYLE target's set only; a restore, an undo, a demo and LW.setStyle keep the file's own values.  `styleMem` rides presentation.mat (absent:
+       nothing remembered; never in NEW; a link does not carry it); it is replaced, never mutated, because a restore hands it the history's own record */
+    const MEM = [['expK', 'exposure', 'material.exposure'], ['hueK', 'hueShift', 'material.hue'], ['softK', 'softness', 'material.softness'],
+      ['isoK', 'iso', 'material.iso'], ['grainK', 'grain', 'material.grain'], ['kneeK', 'knee', 'material.knee']];
+    const tethered = () => { const h = mod.host, ed = app.state.tl && app.state.tl.editor, T = new Set(h ? h.model.routeList().map((r) => r.targetId) : []);
+      if (ed && ed.model) { const doc = ed.model.state(), on = new Set(doc.clips.map((c) => c.curveId)); for (const c of doc.curves) if (on.has(c.id)) T.add(c.targetId); }
+      return T; };
+    ui.styleRecall = (from, to) => {
+      if (from === to) return;
+      const T = tethered(), M = { ...mat.styleMem }, keep = {}, back = M[drawStyle(to)] || {};
+      for (const [k, key, id] of MEM) if ((k === 'expK' || k === 'hueK' || STYLE_READS[k].includes(from)) && !T.has(id) && Number.isFinite(mat[key])) keep[key] = mat[key];
+      if (Object.keys(keep).length) { M[drawStyle(from)] = { ...M[drawStyle(from)], ...keep }; mat.styleMem = M; }   // a tethered knob keeps its last hand-set number for when it is let go
+      for (const [k, key, id] of MEM) if (Number.isFinite(back[key]) && !T.has(id) && back[key] !== mat[key]) { mat[key] = back[key]; ui[k].set(back[key]); if (k === 'hueK') { applyAccent(); paintBar(); } }
+    };
     /* the kit's muted look on the three shapes: a knob's own setDisabled, a switch's button, a seg's buttons */
     const mute = (c, off, why) => { if (c.setDisabled) c.setDisabled(off); else { c.root.classList.toggle('disabled', off); c.root.setAttribute('aria-disabled', String(off));
       for (const b of c.root.matches('button') ? [c.root] : c.root.querySelectorAll('button')) b.disabled = off; }
