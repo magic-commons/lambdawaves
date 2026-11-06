@@ -552,7 +552,7 @@ struct View {
   p8: vec4<f32>,     // THE POTENTIAL MAP: surface (0 ISO · 1 SAS · 2 SES), probe radius (bohr), RANGE (±φ, a.u.), the palette's stop span (LUT index first · 512 + last)
   p9: vec4<f32>,     // φ's grid: half-width, cells a side, valid (0 · 1), the ISO surface's ρ (a.u.)
   p10: vec4<f32>,    // the atoms' bounding sphere (centre xyz, radius w)
-  p11: vec4<f32>,    // iteration 016 S: ESP's SOFT edge (0 = the hard ISO surface … 1), MAP ONLY (0 · 1)
+  p11: vec4<f32>,    // iteration 016 S: ESP's SOFT edge (0 = the hard ISO surface … 1), MAP ONLY (0 · 1); z 038 F3: the bits — 1 the balls and 2 the sticks the CLIP does not cut
   p12: vec4<f32>,    // 037 W0 THE VIEW GROWS · chain L: KEY light direction xyz (in the FRAME), w KEY intensity
   p13: vec4<f32>,    // KEY colour rgb, w SPOT cone (degrees; 180 = none)
   p14: vec4<f32>,    // FILL direction xyz, w FILL intensity
@@ -845,11 +845,14 @@ fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -
   if (best >= 1e30) { return vec4<f32>(0.0, 0.0, 0.0, 1e30); }
   return vec4<f32>(atomLit(col, nrm, rd, ro + rd * best), best);
 }
-/* 032 O1 · THE ATOMS OVER ANY STYLE: SIZE > 0 the balls, RADIUS > 0 the sticks — the nearer of the two on the ray (t = 1e30: none) */
-fn atomsOver(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32) -> vec4<f32> {
+/* 038 F3 · THE CLIP'S TOGGLE: is this kind (1 the balls, 2 the sticks) one the plane does NOT cut (p11.z's bits; 0 = both cut, every file before 038) */
+fn uncut(bit: u32) -> bool { return (u32(V.p11.z) & bit) != 0u; }
+/* 032 O1 · THE ATOMS OVER ANY STYLE: SIZE > 0 the balls, RADIUS > 0 the sticks — the nearer of the two on the ray (t = 1e30: none); 038 F3: a kind the
+   plane does not cut is met on the box's own interval [b0, bf], a cut one on the plane's [t0, tf] */
+fn atomsOver(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32) -> vec4<f32> {
   var m = vec4<f32>(0.0, 0.0, 0.0, 1e30);
-  if (V.p7.z > 0.0) { m = ballsOrSticks(ro, rd, t0, tf, false); }
-  if (V.p7.w > 0.0) { let k = ballsOrSticks(ro, rd, t0, tf, true); if (k.w < m.w) { m = k; } }
+  if (V.p7.z > 0.0) { let u = uncut(1u); m = ballsOrSticks(ro, rd, select(t0, b0, u), select(tf, bf, u), false); }
+  if (V.p7.w > 0.0) { let u = uncut(2u); let k = ballsOrSticks(ro, rd, select(t0, b0, u), select(tf, bf, u), true); if (k.w < m.w) { m = k; } }
   return m;
 }
 /* THE SURFACES' distance: SAS = min_A |p − R_A| − (r_A + probe); SES = −k·ln Σ e^{−(|p − R_A| − r_A)/k}, k = 0.3·probe (1-Lipschitz: sphere-traceable) */
@@ -921,9 +924,9 @@ fn espSoft(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, tEnd: f32, half: f32,
   let am = clamp(0.8 * V.p0.y, 0.05, 1.0);                                            // EXPOSURE's translucency, as the hard surface's
   return back * (1.0 - (1.0 - T) * am) + col * am;
 }
-fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<f32>, jit: f32) -> vec3<f32> {
+fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, half: f32, bg: vec3<f32>, jit: f32) -> vec3<f32> {
   var inner = vec4<f32>(0.0, 0.0, 0.0, 1e30);
-  if (V.p11.y < 0.5) { inner = ballsOrSticks(ro, rd, t0, tf, true); }   // iteration 016 S2 · MAP ONLY: no sticks inside, the stage alone beneath the map
+  if (V.p11.y < 0.5) { let u = uncut(2u); inner = ballsOrSticks(ro, rd, select(t0, b0, u), select(tf, bf, u), true); }   // iteration 016 S2 · MAP ONLY: no sticks inside, the stage alone beneath the map; 038 F3: uncut, the box's interval
   let surf = u32(V.p8.x);
   if (surf == 0u && V.p11.x > 0.0) { return espSoft(ro, rd, t0, tf, min(tf, inner.w), half, select(bg, inner.rgb, inner.w < 1e30), jit); }
   var th = 1e30; var n = vec3<f32>(0.0);
@@ -993,6 +996,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
   let tmn = min(t1, t2); let tmx = max(t1, t2);
   var t0 = max(max(tmn.x, tmn.y), tmn.z); var tf = min(min(tmx.x, tmx.y), tmx.z);
   t0 = max(t0, 0.0);
+  let b0 = t0; let bf = tf;                                        // 038 F3: the box's own interval, kept for a kind the CLIP does not cut
   // slice
   let smode = u32(V.p1.x); let axis = u32(V.p1.y); let spos = V.p1.z * half; let thick = max(V.p1.w * half, 0.6 * (2.0 * half) / 96.0);
   if (smode != 0u) {
@@ -1002,7 +1006,21 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
     if (smode == 1u) { iv = slabInterval(rok, rdk, -1e30, spos); } else { iv = slabInterval(rok, rdk, spos - thick, spos + thick); }
     t0 = max(t0, iv.x); tf = min(tf, iv.y);
   }
-  if (tf <= t0) { return vec4<f32>(bgOut, 1.0); }
+  if (tf <= t0) {
+    /* 038 F3 · THE CLIP'S TOGGLE: the plane left this ray no volume, but a kind it does not cut may still stand on it — drawn over the stage, the gamma
+       and the dither the march's ending gives it (an uncut stick inside ESP the same; the map is cut) */
+    if ((u32(V.p11.z) & 3u) != 0u && bf > b0 && V.p7.x > 0.5) {
+      var m = vec4<f32>(0.0, 0.0, 0.0, 1e30);
+      if (u32(V.p3.x) != 11u) { if (V.p7.z > 0.0 || V.p7.w > 0.0) { m = atomsOver(ro, rd, t0, tf, b0, bf); } }
+      else if (V.p11.y < 0.5 && uncut(2u)) { m = ballsOrSticks(ro, rd, b0, bf, true); }
+      if (m.w < 1e30) {
+        var oa = pow(max(m.rgb, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
+        oa = select(oa, bgOut, oa != oa);
+        return vec4<f32>(oa + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
+      }
+    }
+    return vec4<f32>(bgOut, 1.0);
+  }
   let steps = max(V.fwd.w, 8.0);
   let ds = (tf - t0) / steps;
   let mode = u32(V.p0.x);
@@ -1015,15 +1033,15 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
   /* 032 O1 · THE ATOMS COMPOSITE: with MOLECULES' atoms set, SIZE > 0 (balls) or RADIUS > 0 (sticks) draws them under every style but ESP (its own
      sticks): the march stops at the nearest hit, which is its ground.  None set (hydrogen, THE LOCK) or both 0: back = bg, tEnd = tf — the old picture */
   var back = bg; var tEnd = tf;
-  if (style != 11u && V.p7.x > 0.5 && (V.p7.z > 0.0 || V.p7.w > 0.0)) { let m = atomsOver(ro, rd, t0, tf); if (m.w < 1e30) { back = m.rgb; tEnd = m.w; } }
+  if (style != 11u && V.p7.x > 0.5 && (V.p7.z > 0.0 || V.p7.w > 0.0)) { let m = atomsOver(ro, rd, t0, tf, b0, bf); if (m.w < 1e30) { back = m.rgb; tEnd = m.w; } }   // 038 F3: an uncut kind's t may lie past tf (the march still ends at steps)
   if (style == 2u || style == 5u) {                               // DUST (a retired GRAIN, 2, draws as DUST)
-    let d = dustPixel(ro, rd, t0, tEnd, half, mode, soft, rhoMax, ampMax, refMax, pxA);
+    let d = dustPixel(ro, rd, t0, min(tEnd, tf), half, mode, soft, rhoMax, ampMax, refMax, pxA);
     var od = pow(max(d.rgb + back * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     od = select(od, bgOut, od != od);
     return vec4<f32>(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
   }
   if (style == 11u && V.p7.x > 0.5) {                               // iteration 014 B: ESP draws the map over its sticks (none set: the march below, as CLOUD); 032 O1: BALLS · STICKS are the composite above
-    let oc = espPixel(ro, rd, t0, tf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
+    let oc = espPixel(ro, rd, t0, tf, b0, bf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
     var om = pow(max(oc, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     om = select(om, bgOut, om != om);
     return vec4<f32>(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
@@ -1927,6 +1945,7 @@ export async function createField(canvas, opts = {}) {
     v[52] = phi.half; v[53] = phi.M; v[54] = phi.ok ? 1 : 0; v[55] = (mat.iso === undefined ? 0.06 : mat.iso) / 30;
     v[56] = atomsBound[0]; v[57] = atomsBound[1]; v[58] = atomsBound[2]; v[59] = atomsBound[3] + Math.max(atomsBound[4] * Math.max(asz, 1), srad) + 0.01;
     v[60] = espSoftOf(mat.softness); v[61] = mat.espBare ? 1 : 0;   // iteration 016 S1 · S2
+    v[62] = (mat.slice?.balls === false ? 1 : 0) + (mat.slice?.sticks === false ? 2 : 0);   // 038 F3: the kinds the CLIP does not cut (absent = cut)
     const ps = mat.stage;   // 037 T4 · PULSE: p16.w AMOUNT, p17.x SHAPE, p17.y RATE, p17.z the phase; absent = the homes (AMOUNT 0: bg untouched). p16.xyz and p17.w are chain L's
     v[83] = ps ? ps.pulse : 0; v[84] = ps && ps.shape === 'edge' ? 1 : 0; v[85] = ps ? ps.rate : 0; v[86] = ps && ps.rate > 0 ? pulsePhase(ps.rate) : 0;
     v[87] = lightView(v, mat.light);   // 037 L2: THE LIGHT (p12 … p16.xyz) and THE LEGACY GATE (p17.w)
