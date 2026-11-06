@@ -1,7 +1,8 @@
 /* v037-shots.mjs — iteration 037 chain V's light checks and pictures (a diagnostic, not a gate).
  *   LW_PORT=9699 GD_PORT=5699 node tools/v037-shots.mjs <scene> [out-dir]
  * Scenes: v1 (the windows' own pictures, hashed at a fixed t: the seam changes nothing a window shows) · v2 (the visualizer kinds paint on the
- * stage with every window closed, follow the clock, and stand down under H) · v4 (each widget over SOLID and CLOUD, dark and light).
+ * stage with every window closed, follow the clock, and stand down under H) · v4 (each widget over SOLID and CLOUD, dark and light) · mgr (the
+ * manager's gallery).  V_KINDS picks the kinds, V_WINS the windows (v1), V_MOL=1 solves benzene first, V_STATES=1 shows the REGISTRY's STATES pane.
  * JPEGs into <out-dir> (default .tmp/V-shots). */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -53,14 +54,21 @@ try {
     out.ok = KINDS.every((k) => out.add.a[k].ink > 0) && out.add.bg === 'rgba(0, 0, 0, 0)';
   }
   if (scene === 'v4') {   /* every kind in a grid over the stage (windows closed), SOLID and CLOUD, dark and light; V_MOL=1 puts benzene in MOLECULES first */
-    const n = KINDS.length, cols = Math.min(4, n), rows = Math.ceil(n / cols), W = 0.8 / cols, H = Math.min(0.26, 0.8 / rows);
-    const items = KINDS.map((k, i) => ({ id: 'w' + (i + 1), kind: k, x: +(0.1 + (i % cols) * W + 0.01).toFixed(4), y: +(0.08 + Math.floor(i / cols) * (H + 0.02)).toFixed(4), w: +(W - 0.02).toFixed(4), h: +H.toFixed(4), opts: {} }));
-    await g.ev(`${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ['shadow', 'bloch', 'lattice', 'orbit', 'wigner', 'slice', 'emission', 'equalizer', 'spectrum', 'widgets']) __LW.actions.run('window.' + id + '.close'); ${process.env.V_MOL ? `__LW.actions.run('window.chem.fold');` : ''}
-      __LW.widgets.restore({ items: ${JSON.stringify(items)} }); __LW.play(); await new Promise((r) => setTimeout(r, 1500)); __LW.pause(); await __LW.settle(); return 1;`);
+    const n = KINDS.length, cols = n > 4 ? 3 : n, rows = Math.ceil(n / cols), W = 0.62 / cols, H = Math.min(0.24, 0.68 / rows - 0.02);   // clear of the racks and the transport
+    const items = KINDS.map((k, i) => ({ id: 'w' + (i + 1), kind: k, x: +(0.17 + (i % cols) * W + 0.01).toFixed(4), y: +(0.09 + Math.floor(i / cols) * (H + 0.02)).toFixed(4), w: +(W - 0.02).toFixed(4), h: +H.toFixed(4), opts: {} }));
+    await g.ev(`${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} ${process.env.V_STATES ? `__LW.register.setMode('states'); await new Promise((r) => setTimeout(r, 8000));` : ''} for (const id of ['shadow', 'bloch', 'lattice', 'orbit', 'wigner', 'slice', 'emission', 'equalizer', 'spectrum', 'widgets']) __LW.actions.run('window.' + id + '.close'); ${process.env.V_MOL ? `__LW.actions.run('window.chem.fold');` : ''}
+      __LW.widgets.restore({ items: ${JSON.stringify(items)} }); __LW.play(); await new Promise((r) => setTimeout(r, 1500)); __LW.pause(); await __LW.settle();
+      const ch = document.querySelector('.dev[data-id="chem"]'); if (${!!process.env.V_MOL} && ch && !ch.classList.contains('folded')) __LW.actions.run('window.chem.fold'); await new Promise((r) => setTimeout(r, 600)); return 1;`);
     for (const style of ['solid', 'cloud']) for (const theme of ['dark', 'light']) {
       await g.ev(`__LW.setStyle('${style}'); __LW.look.set({ theme: '${theme}' }); await __LW.settle(); await new Promise((r) => setTimeout(r, 1200)); return 1;`);
       out[style + '-' + theme] = await shot(`037-V4-${process.env.V_TAG || 'all'}-${style}-${theme}`);
     }
+  }
+  if (scene === 'mgr') {   /* the manager's gallery with every kind registered: its tiles and the card's height */
+    out.card = await g.ev(`__LW.widgets.restore(null); __LW.actions.run('window.widgets.open'); await new Promise((r) => setTimeout(r, 900));
+      const c = document.querySelector('.dev[data-id="widgets"]'), r = c.getBoundingClientRect();
+      return { tiles: [...c.querySelectorAll('.wg-kind')].map((t) => t.textContent.trim()), h: Math.round(r.height), box: [r.left - 8, r.top - 8, r.right + 8, r.bottom + 8] };`);
+    out.pic = await shot('037-V4-manager', out.card.box);
   }
   out.errs = (await g.errors()).errs;
 } finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }
