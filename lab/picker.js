@@ -214,7 +214,16 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     b.addEventListener('click', go); return b; };
   const doorBtns = [door('tutorial', 'TUTORIAL', [['mir-interface.webp']], 0, () => showTutorial()),
     door('library', 'LIBRARY', [['library-dark.webp', 'dark'], ['library-light.webp', 'light']], 1, () => showDecks('molecular'))];
-  const labB = el('button', 'mm-face-lab', face, 'CONTINUE'); labB.type = 'button'; labB.title = 'Continue to the lab'; labB.addEventListener('click', () => close());   // 035 G1: was ENTER THE LAB
+  const way = el('div', 'mm-face-way', face);
+  const labB = el('button', 'mm-face-lab', way, 'CONTINUE'); labB.type = 'button'; labB.title = 'Continue to the lab'; labB.addEventListener('click', () => close());   // 035 G1: was ENTER THE LAB
+  /* 038 M1 · THE FIRST RUN CHOOSES (Josh 11-06: "if the cache is cleared/brand new … instead of 'continue' show an option to go for an 'advanced'
+     layout, or a 'simple' layout"): a fresh install's open (rack.js hands `choose`) puts SIMPLE · ADVANCED in CONTINUE's seat, CONTINUE's ink and
+     shadow; a press lays the rack and enters the lab as CONTINUE does.  Any way out of that open is the answer (SIMPLE when no door said) */
+  let choose = null;
+  const answer = (kind) => { const c = choose; choose = null; if (c) c(kind); };
+  const firstBs = [['simple', 'SIMPLE', 'The rack as it is'], ['advanced', 'ADVANCED', 'Adds NODES, LIGHTING and STAGE']].map(([kind, word, hint]) => {
+    const b = el('button', 'mm-face-lab', way, word); b.type = 'button'; b.dataset.layout = kind; b.title = hint; b.hidden = true;
+    b.addEventListener('click', () => { answer(kind); close(); }); return b; });
   /* 035 G2 · THE CORNERS (Josh 11-03: "a Light/Dark Toggle and a settings … reveal", "the MIR logo … Kinda small in the bottom right", "3 Icon
      Logos of Claude, OpenAI's Emblem, and Gemini's Star … During mouseover, It expands towards the right to show the names"): the face's own —
      top right THEME (the action's: the sun in LIGHT, the moon in DARK) and ⚙ (THE SHEET, G3); bottom right the MIR wordmark (both themes'
@@ -1025,6 +1034,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function open(o) {
     if (!root.hidden) return;
     const first = !!(o && o.first), toDecks = !!(o && o.decks);
+    choose = (o && o.choose) || null; labB.hidden = !!choose; for (const b of firstBs) b.hidden = !choose;
     const r = home.getBoundingClientRect();
     root.style.setProperty('--ox', r.width ? r.left + r.width / 2 + 'px' : '50%'); root.style.setProperty('--oy', r.width ? r.top + r.height / 2 + 'px' : '50%');
     root.classList.toggle('first', first); if (first) firstDeal = true;
@@ -1037,7 +1047,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (first) { setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700); setTimeout(() => { root.classList.remove('first'); }, 2600); }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); if (at === 'decks') enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; dropAbout(); closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; answer('simple'); dropAbout(); closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = (o) => (root.hidden ? open(o) : close());
   /* M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET; 036 G3 (Josh, FOR JOSH 035 answer 5): then it STEPS BACK — off the face
      to the face, on the face out to the lab (the inner Escapes — the look drop's, the isomer deck's, the tip sheet's — still stop first) */
