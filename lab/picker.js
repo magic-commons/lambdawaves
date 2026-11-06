@@ -17,7 +17,7 @@
  * molecules' pictures round the colour wheel), THEME (032) and LOOK.  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
 import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
-import { el, chip, mathPlain, stepper } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
+import { el, chip, mathPlain, stepper, seg } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
 import { CHEM_PRESETS } from './chemview.js';
 import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
@@ -42,33 +42,35 @@ export const HEROES = { 'vol-1': 'dark light' };   // 036 G7: lab/loader.js keep
 export const WALLS = [];
 /* 034 M3 THE TUTORIAL DECK: one card a row, in this order — its id (`tut-<slug>`), its title, its caption ('' until Josh's words come) and the
    themes its hero has files in (img/menu/tut/<id>.<theme>.mp4 and the still .webp; a theme not named shows the other's), written by
-   tools/tutorial-heroes.mjs, one row a line */
+   tools/tutorial-heroes.mjs, one row a line.  037 U1: and its deck — 1 or 2, TUTORIAL_DECKS' first or second (deck II's rows go here too:
+   a row with `deck: 2`; none yet) */
+export const TUTORIAL_DECKS = [{ id: 'one', label: 'I' }, { id: 'two', label: 'II' }];   // 037 U1: placeholder labels, Josh's to rename (the ids are saved nowhere)
 export const TUTORIAL = [   // 036 G7: lab/loader.js keeps their files
-  { id: 'tut-hero-1', title: 'HERO 1', caption: '', themes: 'light' },
-  { id: 'tut-hero-2', title: 'HERO 2', caption: '', themes: 'light' },
-  { id: 'tut-hero-3', title: 'HERO 3', caption: '', themes: 'light' },
-  { id: 'tut-hero-4', title: 'HERO 4', caption: '', themes: 'light' },
-  { id: 'tut-hero-5', title: 'HERO 5', caption: '', themes: 'light' },
-  { id: 'tut-hero-6', title: 'HERO 6', caption: '', themes: 'light' },
-  { id: 'tut-impulse', title: 'IMPULSE', caption: '', themes: 'light' },
-  { id: 'tut-lfo', title: 'LFO', caption: '', themes: 'dark' },
-  { id: 'tut-macros', title: 'MACROS', caption: '', themes: 'dark' },
-  { id: 'tut-molecules', title: 'MOLECULES', caption: '', themes: 'dark' },
-  { id: 'tut-notebook', title: 'NOTEBOOK', caption: '', themes: 'dark' },
-  { id: 'tut-palette', title: 'PALETTE', caption: '', themes: 'light' },
-  { id: 'tut-projects', title: 'PROJECTS', caption: '', themes: 'dark' },
-  { id: 'tut-spectrum', title: 'SPECTRUM', caption: '', themes: 'light' },
-  { id: 'tut-themes', title: 'THEMES AND CUSTOMS', caption: '', themes: 'light' },
-  { id: 'tut-wave', title: 'WAVE', caption: '', themes: 'light' },
-  { id: 'tut-wave-2', title: 'WAVE 2', caption: '', themes: 'light' },
-  { id: 'tut-audio', title: 'AUDIO', caption: '', themes: 'dark' },
-  { id: 'tut-env', title: 'ENV', caption: '', themes: 'dark' },
-  { id: 'tut-mod-hero-1', title: 'MOD HERO 1', caption: '', themes: 'dark' },
-  { id: 'tut-mod-hero-2', title: 'MOD HERO 2', caption: '', themes: 'dark' },
-  { id: 'tut-mod-hero-3', title: 'MOD HERO 3', caption: '', themes: 'dark' },
-  { id: 'tut-mod-hero-4', title: 'MOD HERO 4', caption: '', themes: 'dark' },
-  { id: 'tut-mod-hero-5', title: 'MOD HERO 5', caption: '', themes: 'dark' },
-  { id: 'tut-mod-hero-6', title: 'MOD HERO 6', caption: '', themes: 'dark' },
+  { id: 'tut-hero-1', title: 'HERO 1', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-hero-2', title: 'HERO 2', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-hero-3', title: 'HERO 3', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-hero-4', title: 'HERO 4', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-hero-5', title: 'HERO 5', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-hero-6', title: 'HERO 6', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-impulse', title: 'IMPULSE', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-lfo', title: 'LFO', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-macros', title: 'MACROS', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-molecules', title: 'MOLECULES', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-notebook', title: 'NOTEBOOK', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-palette', title: 'PALETTE', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-projects', title: 'PROJECTS', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-spectrum', title: 'SPECTRUM', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-themes', title: 'THEMES AND CUSTOMS', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-wave', title: 'WAVE', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-wave-2', title: 'WAVE 2', caption: '', themes: 'light', deck: 1 },
+  { id: 'tut-audio', title: 'AUDIO', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-env', title: 'ENV', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-mod-hero-1', title: 'MOD HERO 1', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-mod-hero-2', title: 'MOD HERO 2', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-mod-hero-3', title: 'MOD HERO 3', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-mod-hero-4', title: 'MOD HERO 4', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-mod-hero-5', title: 'MOD HERO 5', caption: '', themes: 'dark', deck: 1 },
+  { id: 'tut-mod-hero-6', title: 'MOD HERO 6', caption: '', themes: 'dark', deck: 1 },
 ];
 
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
@@ -669,15 +671,21 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      the current landing page in the magic commons site looks like … although much more packed"): a grid of 9:16 cards in THE CARD'S LIGHT, one
      per TUTORIAL row in its order, the number and the title at the art's foot and the caption under it ("caption to come" until Josh's words);
      the hero loops while the mouse is on it or a key's focus (the landing page's player: looping, one at a time), a press plays or pauses it
-     (a touch's way), as many columns as fit off the racks and two on a phone.  Built at its first showing. ── */
+     (a touch's way), as many columns as fit off the racks and two on a phone.  Built at its first showing.
+     037 U1 THE DECKS (Josh 11-05: "Just build placeholders for now"): the door opens on TUTORIAL_DECKS' two tabs (kit seg cells, `data-deck`,
+     no other words) over one pane per deck, its rows those whose `deck` is its number; the deck shown is kept for the menu's life only. ── */
   let tutBuilt = false;
   function showTutorial() {
     showView('tutorial');
     if (!tutBuilt) {
       tutBuilt = true;
-      const head = el('div', 'mm-tut-head', tutEl); icon(head, 'film'); el('b', '', head, 'TUTORIAL');
-      const grid = el('div', 'mm-tgrid', tutEl);
-      TUTORIAL.forEach((t, k) => {
+      const head = el('div', 'mm-tut-head', tutEl);
+      const panes = TUTORIAL_DECKS.map((d) => { const p = el('div', 'mm-tdeck', tutEl); p.dataset.deck = d.id; p.hidden = d !== TUTORIAL_DECKS[0]; return p; });
+      const tabs = seg({ aria: 'tutorial decks', options: TUTORIAL_DECKS, value: TUTORIAL_DECKS[0].id, onChange: (id) => { for (const p of panes) p.hidden = p.dataset.deck !== id; } });
+      for (const d of TUTORIAL_DECKS) tabs.button(d.id).dataset.deck = d.id;
+      head.append(tabs.root);
+      const grid = el('div', 'mm-tgrid', panes[0]);
+      TUTORIAL.filter((t) => t.deck === 1).forEach((t, k) => {
         const c = el('div', 'mm-tcard', grid), o = el('button', 'mm-tcard-open mm-holo', c); o.type = 'button'; o.style.setProperty('--k', String(k % 2));
         const num = String(k + 1).padStart(2, '0'); o.setAttribute('aria-label', num + ' · ' + t.title + (t.caption ? ' — ' + t.caption : ''));   // the words in aria only: no hover hint (034 F1's law)
         el('span', 'mm-halo', o); const art = el('span', 'mm-lit', o); el('span', 'mm-rim', o);

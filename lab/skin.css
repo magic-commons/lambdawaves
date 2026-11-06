@@ -1192,8 +1192,14 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
 #lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; padding: 6px 24px 32px; box-sizing: border-box; }
 #lwMenu .mm-tut[hidden] { display: none; }
 #lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="back"], .mm-themeb)) { display: none; }   /* 035 G1: the tutorial's way back is ← */
-#lwMenu .mm-tut-head { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 0 0 20px; color: var(--acc); font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; }
-#lwMenu .mm-tut-head b { font-weight: 400; } #lwMenu .mm-tut-head .mm-ico { width: 18px; height: 18px; }
+/* 037 U1 THE DECKS: the head is TUTORIAL_DECKS' two tabs alone — kit seg cells dressed as the decks' tabs (LW Title, .45 → 1, the chosen one
+   in the accent on the decks' pill), no well, no word */
+#lwMenu .mm-tut-head { display: flex; justify-content: center; margin: 0 0 18px; }
+#lwMenu .mm-tut-head .seg { gap: 8px; padding: 0; background: none; }
+#lwMenu .mm-tut-head .seg-b { min-width: 52px; min-height: 0; padding: 5px 16px; border-radius: 999px; font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; color: var(--fg); opacity: .45;
+  transition: opacity .12s ease, color .12s ease, background-color var(--t-relocate) var(--ease); }
+#lwMenu .mm-tut-head .seg-b:is(:hover, :focus-visible) { opacity: .8; }
+#lwMenu .mm-tut-head .seg-b.on { opacity: 1; color: var(--acc); background: hsl(var(--glass-tint) / .5); }
 #lwMenu .mm-tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 28px 18px; width: min(1500px, 100%); margin: 0 auto; }
 @media (min-width: 1100px) { #lwMenu .mm-tgrid { width: min(1500px, 100%, calc(100vw - 2 * (var(--rack-w, 300px) + 20px))); } }
 #lwMenu .mm-tcard { display: grid; gap: 10px; align-content: start; }
