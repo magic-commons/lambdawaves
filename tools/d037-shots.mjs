@@ -38,6 +38,19 @@ try {
       console.log(t, JSON.stringify(r));
       await shot('037-D3-csb-' + t, [Math.max(0, r.row[0] - 24), Math.max(0, r.row[1] - 24), r.row[2] + 48, r.row[3] + 48]); }
   }
+  if (scene === 'vol') {   // VOL. III's view (the dev link lab/volumes): $LOOKS (default labels) in turn, dark then light for the first
+    const looks = (process.env.LOOKS || 'labels').split(',');
+    await decks(); await wait(900); await tab(2); await wait(1500);
+    await g.ev(`const o = [...document.querySelectorAll('#lwMenu .mm-vol-open')].find((b) => /VOL\\. III\\b/.test(b.getAttribute('aria-label'))); o.click(); return 1;`); await wait(3000);
+    for (const [k, l] of looks.entries()) {
+      await look(l); await wait(3500);
+      for (const t of k ? ['dark'] : ['dark', 'light']) { await theme(t); await wait(1200);
+        console.log(l, t, JSON.stringify(await g.ev(`const i = [...document.querySelectorAll('#lwMenu .mm-volview .mm-pic')].filter((x) => x.getClientRects().length);
+          return { n: i.length, ink: i.filter((x) => x.classList.contains('pic-ink')).length, cell: i.filter((x) => x.classList.contains('pic-cell')).length, plain: i.filter((x) => !x.classList.contains('pic-ink') && !x.classList.contains('pic-cell')).length,
+            first: i[0] && i[0].getAttribute('src').slice(0, 90), hint: document.querySelector('#lwMenu .mm-lookb').getAttribute('aria-label') };`)));
+        await shot(`037-D${l === 'labels' ? 4 : 6}-vol3-${l}-${t}`); }
+    }
+  }
   console.log(JSON.stringify((await g.errors()).errs.filter((e) => !/ResizeObserver/.test(e))));
 } catch (e) { console.log('FAIL ' + (e && e.message)); process.exitCode = 1; }
 await g.close();

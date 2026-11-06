@@ -18,7 +18,7 @@ THE DRAWING (IUPAC Recommendations 2006, Brecher, "Graphical representation of s
 THE INK: every colour is `currentColor` and the letters are drawn as outlines in the app's UI face (lab/fonts/Roboto-ui.woff2 at
   weight 500), so one file serves both themes: the app draws it as a mask in the tile's own ink (lab/picker-fx.js setPic). 160 × 160
   viewBox, no background, no size. """
-import json, math, os, re, sys, tempfile
+import hashlib, json, math, os, re, sys, tempfile
 import numpy as np
 from rdkit import Chem, RDLogger
 from rdkit.Chem import rdDepictor, rdDetermineBonds
@@ -169,7 +169,9 @@ def skeletal(m):
 def depict(rec):
     if not rec.get('ang'): return None
     heavy = sum(1 for a in rec['ang'] if a[0] > 1)
-    m = Chem.MolFromSmiles(rec['smiles']) if heavy > 2 and rec.get('smiles') else None   # the volume's PubChem SMILES: bonds, charges, stereo
+    # the volume's PubChem SMILES (bonds, charges, stereo) — save a transition metal's complex, which PubChem writes disconnected ([Ni].[C-]#[O+]…)
+    tm = '.' in (rec.get('smiles') or '') and any(21 <= a[0] <= 30 or 39 <= a[0] <= 48 or 57 <= a[0] <= 80 or 89 <= a[0] <= 112 for a in rec['ang'])
+    m = Chem.MolFromSmiles(rec['smiles']) if heavy > 2 and rec.get('smiles') and not tm else None
     if m is not None: m, wedge = skeletal(m), True
     else:
         b, lewis = bonded(rec)
@@ -246,7 +248,7 @@ def svg_file(markup):
     return "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 %d %d'>%s</svg>\n" % (SIZE, SIZE, markup)
 
 def write_atomic(path, text):
-    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.tmp-'); os.write(fd, text.encode('utf-8')); os.close(fd); os.replace(tmp, path)
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.tmp-'); os.write(fd, text.encode('utf-8')); os.close(fd); os.chmod(tmp, 0o644); os.replace(tmp, path)
 
 def sheet(prefix):
     """the contact sheet of the catalogue's pictured molecules (an <id>.webp exists): the shipped files in each theme's ink on its ground"""
@@ -281,7 +283,7 @@ def main():
     T = os.path.join(SHELF, vol, 't'); os.makedirs(T, exist_ok=True)
     pages = range(math.ceil(len(mols) / size))
     if '--page' in sys.argv: pages = [int(sys.argv[sys.argv.index('--page') + 1])]
-    done, total, fails = [], 0, []
+    done, total, fails = {}, 0, []
     for p in pages:
         page = {}
         for rec in mols[p * size:(p + 1) * size]:
@@ -290,13 +292,18 @@ def main():
                 if mk: page[rec['id']] = mk
             except Exception as e: fails.append(rec['id'])
         text = json.dumps(page, separators=(',', ':'), ensure_ascii=False)
-        write_atomic(os.path.join(T, 'diagrams-%d.json' % p), text); done.append(p); total += len(text.encode('utf-8'))
+        write_atomic(os.path.join(T, 'diagrams-%d.json' % p), text); total += len(text.encode('utf-8'))
+        done[str(p)] = hashlib.sha256(text.encode('utf-8')).hexdigest()[:8]
         print('  page %d: %d diagrams, %.1f kB' % (p, len(page), len(text) / 1024), flush=True)
+    """THE PAGES' MANIFEST (t/pages.json, read by lab/volumes.js): the catalogue it was made from (`index`, the shelf's indexSha256 — another
+    pack's manifest is ignored), each page's ids in the index's order (named, never inferred: the page filters its rows), the diagram pages
+    and the sheets (tools/volume-thumbs.mjs), each with a version `v` the page asks for (?v=), so a kept copy is never another pack's"""
     man_path = os.path.join(T, 'pages.json')
     man = json.load(open(man_path)) if os.path.exists(man_path) else {}
     if man.get('index') != src['indexSha256']: man = {}   # a new pack: every page is new
-    man.update({'schema': 1, 'index': src['indexSha256'], 'size': size, 'tile': SIZE, 'cols': 10})
-    man['diagrams'] = sorted(set(man.get('diagrams', [])) | set(done))
+    man.update({'schema': 1, 'index': src['indexSha256'], 'tile': SIZE, 'cols': 10,
+                'pages': [[r['id'] for r in mols[p * size:(p + 1) * size]] for p in range(math.ceil(len(mols) / size))]})
+    man['diagrams'] = {**man.get('diagrams', {}), **done}
     man.setdefault('sheets', {})
     write_atomic(man_path, json.dumps(man, separators=(',', ':')) + '\n')
     print('%s: %d pages, %.1f kB, %d without a diagram%s' % (vol, len(done), total / 1024, len(fails), (' (' + ', '.join(fails[:8]) + ('…' if len(fails) > 8 else '') + ')') if fails else ''))

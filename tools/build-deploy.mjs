@@ -226,8 +226,9 @@ if (SHELF) {
   const shelf = JSON.parse(readFileSync(path.resolve(SHELF), 'utf8')), srcDir = path.dirname(path.resolve(SHELF));
   /* 030 V (findings 2–4): the shelf is data. Every field is held to the app's own shapes (lab/volumes.js SAFE and RELATIVE), a shipped
      volume's index.json is re-hashed against indexSha256, and the folder is copied file by file through lstat — index.json, m/<id>.lwm and
-     t/<id>[.<look>].webp and nothing else: a symlink, a dotfile or any other name FAILS the build and is named. */
-  const SAFE = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,95}$/, HEX = /^[0-9a-f]{64}$/, PART = /^(index\.json|m\/[A-Za-z0-9._+-]+\.lwm|t\/[A-Za-z0-9._+-]+\.webp)$/;
+     t/<id>[.<look>].webp and nothing else: a symlink, a dotfile or any other name FAILS the build and is named.  037 D4 · D5: and the pages'
+     pictures beside them — t/pages.json, t/diagrams-<page>.json, t/<look>-<page>.webp (tools/diagrams, tools/volume-thumbs.mjs). */
+  const SAFE = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,95}$/, HEX = /^[0-9a-f]{64}$/, PART = /^(index\.json|m\/[A-Za-z0-9._+-]+\.lwm|t\/[A-Za-z0-9._+-]+\.webp|t\/pages\.json|t\/diagrams-\d+\.json)$/;
   const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
   const bad = !shelf || shelf.schema !== 1 || !Array.isArray(shelf.volumes) ? ['not a schema-1 shelf'] : shelf.volumes.flatMap((v) => {
     if (!v || typeof v !== 'object' || !SAFE.test(String(v.id))) return [`an entry's id is not a plain name: ${JSON.stringify(v && v.id)}`];
@@ -257,7 +258,7 @@ if (SHELF) {
         const r = rel ? rel + '/' + e.name : e.name, f = path.join(dir, e.name), st = lstatSync(f);
         if (st.isSymbolicLink()) { console.error(`--ship ${v.id}: ${r} is a symlink; a volume holds files alone`); process.exit(2); }
         if (st.isDirectory()) { if (r !== 'm' && r !== 't') { console.error(`--ship ${v.id}: ${r}/ is not a volume folder (m/ and t/ alone)`); process.exit(2); } walkVol(f, r); continue; }
-        if (!st.isFile() || !PART.test(r)) { console.error(`--ship ${v.id}: ${r} is not a volume file (index.json, m/<id>.lwm, t/<id>[.<look>].webp)`); process.exit(2); }
+        if (!st.isFile() || !PART.test(r)) { console.error(`--ship ${v.id}: ${r} is not a volume file (index.json, m/<id>.lwm, t/<id>[.<look>].webp, t/pages.json, t/diagrams-<page>.json)`); process.exit(2); }
         parts.push(r);
       }
     };

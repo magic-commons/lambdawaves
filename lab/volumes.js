@@ -33,7 +33,8 @@
  *                                 cache — MOLECULES' pages and lamps follow the Picker's INSTALL / REMOVE without a poll; → unwatch
  *   remove(volId)                 the whole cache (the basis records stay: another volume may read them)
  *   file(volId, molId, { network })   the .lwm as an ArrayBuffer, from this device or (network, the default) the network, checked either way
- *   picture(volId, molId)         a URL for the molecule's picture: the device's copy (an object URL) when installed, else the network's
+ *   picture(volId, molId, style)  a URL for the molecule's picture: its page's DIAGRAM (style 'labels') when t/pages.json names one (037 D4),
+ *                                 else the device's copy (an object URL) when installed, else the network's
  *   storageInfo()                 library.js': persisted, usage, quota
  * The reader (lab/volumes-format.js parseLwm · rungRecord) and the open (chemview.js openVolume, THE RECORD ROAD's chem.open) are row V2's. */
 import { persistOnce, storageInfo, keepData } from './library.js';
@@ -69,6 +70,30 @@ const indexUrl = (v) => new URL(v.index || v.id + '/index.json', VOLUME_BASE).hr
 const inVolume = (v, rel) => new URL(rel, indexUrl(v)).href;   // the catalogue's paths are relative to its own folder
 /** pictureUrl(v, m) — a molecule's picture on the network, synchronously (022 P3: the MOLECULES list's rows; a miss is the row's onerror) */
 export const pictureUrl = (v, m) => inVolume(v, m.thumb || 't/' + m.id + '.webp');
+/* 037 D4 · THE PAGES' PICTURES: t/pages.json beside a volume's pictures (tools/diagrams/draw.py) names the catalogue it was made from (`index`,
+   the shelf's indexSha256: another pack's manifest is not read), each page's ids in the index's order, and the pages that carry DIAGRAMS
+   (t/diagrams-<page>.json: id → the SVG's inner markup), each with a version the page asks for (?v=), so a page kept as DATA (library.js
+   keepData) is never another pack's.  The manifest is read once a volume and never kept (it grows while the sheets are drawn); none, or
+   unreadable, and every picture is the plain one as before */
+const pagesMemo = new Map(), pageFiles = new Map();
+function pagesOf(v) {
+  if (!pagesMemo.has(v.id)) pagesMemo.set(v.id, fetch(inVolume(v, 't/pages.json'), { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((man) => {
+    if (!man || man.schema !== 1 || !Array.isArray(man.pages) || (v.indexSha256 && man.index !== v.indexSha256)) return null;
+    const at = new Map(); man.pages.forEach((ids, p) => ids.forEach((id, n) => at.set(id, [p, n])));
+    return { man, at };
+  }).catch(() => null));
+  return pagesMemo.get(v.id);
+}
+/** a molecule's picture from its page — `labels`: its DIAGRAM as an SVG data: URL (drawn in the ink: picker-fx.js setPic) — or null */
+async function pagePicture(v, molId, style) {
+  const P = await pagesOf(v), w = P && P.at.get(molId); if (!w) return null;
+  const [p] = w, { man } = P;
+  if (style !== 'labels' || !man.diagrams || !man.diagrams[p]) return null;
+  const url = inVolume(v, `t/diagrams-${p}.json?v=${man.diagrams[p]}`);
+  if (!pageFiles.has(url)) pageFiles.set(url, fetch(url).then((r) => { if (!r.ok) return null; keepData(url, r.clone()); return r.json(); }).catch(() => null));
+  const mk = ((await pageFiles.get(url)) || {})[molId];
+  return mk ? 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${man.tile} ${man.tile}">${mk}</svg>`) : null;
+}
 
 /* ── THE SHELF ── the network's, else (offline) the entries the installed volumes keep */
 let shelfMemo = null;
@@ -329,7 +354,9 @@ export async function file(volId, molId, { network = true } = {}) {   // network
   return b;
 }
 export async function picture(volId, molId, style = null) {   // iteration 014 B4: `style` (im · balls · sticks · esp) when the row names it in `thumbs`, else the one picture
-  const { v, m } = await molecule(volId, molId), thumb = m.thumb || 't/' + m.id + '.webp';   // iteration 018 A3: a row the index does not name still has its t/<id>.webp (the next pack names it); a miss is the caller's onerror
+  const { v, m } = await molecule(volId, molId), page = await pagePicture(v, molId, style).catch(() => null);   // 037 D4: the page's picture first
+  if (page) return page;
+  const thumb = m.thumb || 't/' + m.id + '.webp';   // iteration 018 A3: a row the index does not name still has its t/<id>.webp (the next pack names it); a miss is the caller's onerror
   const url = inVolume(v, style && (m.thumbs || []).includes(style) ? thumb.replace(/\.webp$/, '.' + style + '.webp') : thumb), c = await store(volId), hit = c && await c.match(url).catch(() => null);
   return hit ? URL.createObjectURL(await hit.blob()) : url;
 }

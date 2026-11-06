@@ -471,10 +471,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const key = kind === 'el' ? b : a, fb = kind === 'el' ? MENU + 'el-' + a + '.webp' : MENU + 'orb-' + key + '.webp';
     return { src: look === 'density' || look === 'phase' ? MENU + 'orb-' + key + '.' + look + '.webp' : fb, fb };
   };
-  const hold = (host, i) => { if (i) i.remove(); if (!host.querySelector('.mm-ph')) el('b', 'mm-ph', host, (host.querySelector('.mm-lbl') || {}).textContent || '');  };   // A3: no picture — the formula holds the square
+  const hold = (host, i) => { if (i) i.hidden = true; if (!host.querySelector('.mm-ph')) el('b', 'mm-ph', host, (host.querySelector('.mm-lbl') || {}).textContent || '');  };   // A3: no picture — the formula holds the square
+  /* 037 D4: the picture is hidden, not removed, so another look that has one (a volume page's diagram or sheet) still reaches it; its load takes the formula away */
+  const unhold = (host, i) => { if (!i.hidden) return; i.hidden = false; const ph = host.querySelector('.mm-ph'); if (ph) ph.remove(); };
   const pic = (host, src, ref) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = hot ? 'eager' : 'lazy'; if (hot) i.fetchPriority = 'high'; i.draggable = false;
     let fb = null; if (ref) { i.dataset.menu = ref; ({ src, fb } = picOf(ref)); }
     i.addEventListener('error', () => { const f = i.dataset.menu ? picOf(i.dataset.menu).fb : null; if (f && i.getAttribute('src') !== f) setPic(i, f); else hold(host, i); });
+    i.addEventListener('load', () => unhold(host, i));
     if (src) { develop(i); i.addEventListener('load', () => { const u = i.getAttribute('src'); if (u && u.startsWith(MENU)) keepData(u); }); setPic(i, src); } return i; };
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
