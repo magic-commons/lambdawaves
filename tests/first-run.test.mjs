@@ -8,7 +8,7 @@
  * the device's material is the look store's defaults.  And the wiring: rack.js asks with its own crossings and feeds these
  * into the look store (a source read, because rack.js needs a DOM). */
 import { readFileSync, readdirSync } from 'node:fs';
-import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING, FIRST_RUN_RACKS } from '../lab/first-run.js';
+import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING, FIRST_RUN_RACKS, firstRunRacks } from '../lab/first-run.js';
 import { liftLook, LOOK_ROWS, BLOB_LOOK, LOOK_VERSION, frostText } from '../lab/look.js';
 import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
 import { repair, createPrefs } from '../lab/mir/core/prefs.js';
@@ -75,7 +75,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 {
   const src = appSource();
   const wires = {
-    imported: /import \{ firstRunMaterial, firstRunQuality, FIRST_RUN_RACKS \} from '\.\/first-run\.js'/.test(src) && /import \{ deviceQuality \} from '\.\.\/first-run\.js'/.test(src),   // 0.5.2 R3a: restore()'s deviceQuality left with it (lab/shell/persist.js)
+    imported: /import \{ firstRunMaterial, firstRunQuality, FIRST_RUN_RACKS, firstRunRacks \} from '\.\/first-run\.js'/.test(src) && /import \{ deviceQuality \} from '\.\.\/first-run\.js'/.test(src),   // 0.5.2 R3a: restore()'s deviceQuality left with it (lab/shell/persist.js)
     asksCrossings: /const FIRST_RUN = firstRunMaterial\(isPhone\(\) \|\| isTablet\(\)\);/.test(src),
     tabletBeforeAsk: src.indexOf('const isTablet = () =>') > 0 && src.indexOf('const isTablet = () =>') < src.indexOf('const FIRST_RUN = '),
     oneTabletPredicate: src.split('const isTablet = () =>').length === 2,
@@ -85,9 +85,9 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
     phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
     foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
-    /* 018 C4 (Josh): the right rack is the basic look controls; the docked transport always seats at the left rack's top.  038 M1: SIMPLE open,
-       laid in ADVANCED's order (rack.js), and a fresh install's face is handed the choice */
-    racks: src.includes("const { simple, advanced } = FIRST_RUN_RACKS, open = [...simple.left, ...simple.right];") && src.includes("for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])"),
+    /* 018 C4 (Josh): the right rack is the basic look controls; the docked transport always seats at the left rack's top.  038 M1 · M5: the
+       arrangement this browser chose is laid (rack.js), and a fresh install's face is handed the choice */
+    racks: src.includes("const racks = firstRunRacks(readSettings().nativeLayout), open = [...racks.left, ...racks.right];") && src.includes("for(const [host,ids] of [[rackL,racks.left],[rack,racks.right]])"),
     chooses: src.includes('const freshInstall = !Array.isArray(readSettings().closed);') && src.includes('...(freshInstall ? { choose } : {})'),
     transportTop: src.includes('if (layout.docked) layout.seatTransport();') && !src.includes('layout.dockIndex = '),
   };
@@ -105,6 +105,21 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     eq(simple, { left: ['spectrum', 'chem', 'informational'], right: ['settings', 'palette', 'observer', 'camera', 'clip'] })
     && eq(advanced, { left: ['spectrum', 'chem', 'informational', 'nodes'], right: ['settings', 'stage', 'palette', 'observer', 'camera', 'light', 'clip'] })
     && [FIRST_RUN_RACKS, simple, advanced, simple.left, advanced.right].every(Object.isFrozen), rows);
+}
+{
+  /* 038 M5 · THE CHOICE KEEPS (Yan 11-06: "NEW must keep an ADVANCED reader's rack"): the door writes `nativeLayout` 2 and takes NEW's DEFAULT again
+     with the three laid; saveSettings keeps the 2; every compact boot lays firstRunRacks(nativeLayout) and captures DEFAULT right after it — so
+     ADVANCED → NEW → still ADVANCED, on that visit and every later one, and SIMPLE stays SIMPLE */
+  const src = appSource(), block = src.indexOf('const racks = firstRunRacks(readSettings().nativeLayout)'), capture = src.indexOf('layout.DEFAULT = layout.captureLayout();   // 036 S3');
+  const rows = { two: firstRunRacks(2) === FIRST_RUN_RACKS.advanced, one: firstRunRacks(1) === FIRST_RUN_RACKS.simple, none: firstRunRacks(undefined) === FIRST_RUN_RACKS.simple,
+    compactTwo: src.includes('const useCompactDefaults = [1, 2].includes(readSettings().nativeLayout) || freshInstall;'),
+    defaultAfterBlock: block > 0 && capture > block && !src.slice(block, capture).includes('applySettings('),
+    doorWrites: src.includes('settingsStore.write({ ...readSettings(), nativeLayout: 2 });'),
+    doorRecaptures: /rk\.fold\(id, true\);\s*\}\);\s*layout\.DEFAULT = layout\.captureLayout\(\);/.test(src),
+    savedKept: src.includes('nativeLayout: useCompactDefaults ? (S0.nativeLayout === 2 ? 2 : 1) : S0.nativeLayout'),
+    newRestoresDefault: src.includes('if (layout.DEFAULT) layout.applyLayout(layout.DEFAULT);') };
+  judge('THE CHOICE KEEPS (038 M5): ADVANCED → NEW → still ADVANCED — the door writes nativeLayout 2 and retakes NEW\'s DEFAULT, saveSettings keeps the 2, a compact boot lays firstRunRacks(nativeLayout) and captures DEFAULT from it before the settings apply; SIMPLE stays SIMPLE',
+    Object.values(rows).every(Boolean), rows);
 }
 {
   const rows = { desktop: firstRunMaterial(false).more, mobile: firstRunMaterial(true).more, wired: appSource().includes('moreOpen: FIRST_RUN.more') };
