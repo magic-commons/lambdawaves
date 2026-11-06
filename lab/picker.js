@@ -379,6 +379,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const LOOKS = [['density', 'ρ', 'Density · ρ = |ψ|²'], ['phase', 'arg ψ', 'Phase · arg ψ on the colour wheel'], ['im', 'Im ψ', 'Imaginary part · Im ψ, signed'],
     ['balls', '●', 'Balls · space-filling CPK spheres'], ['sticks', '⊸', 'Sticks · the bonds'], ['esp', 'φ', 'Electrostatic potential · φ on the surface'], ['labels', '◣', 'Diagram · a wedge comes toward you, a hash goes away']];
   const ATOM_LOOKS = new Set(['density', 'phase', 'im']);
+  /* 037 D6: while a volume is open THE LOOK button's hint says which looks its pages carry (volumes.js looks); the rest draw its plain picture */
+  const LOOK_WORD = { density: 'ρ', phase: 'arg ψ', im: 'Im ψ', balls: 'balls', sticks: 'sticks', esp: 'φ', labels: 'diagram' };
+  let volLooks = '';
   /** the look a deck draws: the reader's pick, else (016 P3) Im ψ on ATOMIC and arg ψ on a molecule (MOLECULAR, a volume, the search) */
   const lookFor = (atomic) => prefs.look || (atomic ? 'im' : 'phase');
   /* the glyph in the math face; ● and ⊸ are not in the shipped STIX subset (lab/fonts is never touched), so they are drawn, in the ink, at the em */
@@ -394,7 +397,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     for (const b of lookTiles) { const id = b.dataset.look, on = id === cur, off = atomic && !ATOM_LOOKS.has(id), word = LOOKS.find((x) => x[0] === id)[2];
       b.classList.toggle('on', on); b.classList.toggle('off', off); b.setAttribute('aria-checked', String(on)); b.setAttribute('aria-disabled', String(off));
       b.title = off ? word.split(' · ')[0] + ': none for a lone atom' : word; b.setAttribute('aria-label', b.title); b.tabIndex = on ? 0 : -1; }
-    const L = LOOKS.find((x) => x[0] === cur) || LOOKS[0]; glyph(lookG, L[1]); lookB.title = 'Look of the pictures · ' + L[2]; lookB.setAttribute('aria-label', lookB.title);
+    const L = LOOKS.find((x) => x[0] === cur) || LOOKS[0]; glyph(lookG, L[1]); lookB.title = volLooks ? 'Look · ' + volLooks : 'Look of the pictures · ' + L[2]; lookB.setAttribute('aria-label', lookB.title);
   }
   function setLook(id) {
     if (prefs.look === id) return; prefs.look = id; prefs.lookHand = true; writePrefs(prefs); paintLooks();   // P3: the first write is the reader's
@@ -827,7 +830,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       }
     }
     async function paintShelf() {
-      shelfEl.textContent = ''; shelfEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume');
+      shelfEl.textContent = ''; shelfEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume'); volLooks = ''; paintLooks();
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'EXPANSIONS');
@@ -840,6 +843,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     async function enter(v) {
       rest(); cur = v; on.clear(); query = ''; shelfEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = ''; root.classList.add('in-volume');   // the head's SHOW LABELS stands for the one under the tabs
+      volLooks = ''; paintLooks(); V.looks(v.id).then((ls) => { if (cur !== v) return; volLooks = volName(v) + ': ' + (ls.length ? ls.map((l) => LOOK_WORD[l] || l).join(', ') : 'the plain picture'); paintLooks(); }, () => {});
       const back = el('button', 'mm-back', vhead); back.type = 'button'; icon(back, 'arrow-left'); back.setAttribute('aria-label', 'back to the volumes'); back.title = 'back to the volumes'; back.addEventListener('click', () => paintShelf());
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
       const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).filter((x) => x.count || x.index || x.archive).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',

@@ -127,12 +127,16 @@ export function develop(img) {
   img.addEventListener('load', () => { if (performance.now() - t0 > 60) animate(img, [{ opacity: 0.3, scale: '.988' }], 500); }, { once: true });
 }
 /* 037 D2 · A PICTURE INTO ITS <img>: an SVG (a DIAGRAM — img/menu/<id>.diagram.svg, or a volume page's `data:` one) is drawn as a mask in
-   the element's own ink (`color`), so one file serves both themes (skin.css img.pic-ink); its picture is moved out of the box, while its
-   load and error still drive develop() and the fallbacks */
+   the element's own ink (`color`), so one file serves both themes (skin.css img.pic-ink); D6: a URL ending `#c=<n>,<cols>,<rows>` is cell n
+   of a volume page's SHEET (volumes.js picture), the sheet the element's background scaled so the one cell fills it (img.pic-cell).  The
+   picture itself is moved out of the box in both, while its load and error still drive develop() and the fallbacks */
 export function setPic(img, url) {
-  const svg = /^data:image\/svg|\.svg$/.test(url);
-  img.classList.toggle('pic-ink', svg);
-  if (svg) img.style.setProperty('--pic', `url("${new URL(url, document.baseURI).href}")`); else img.style.removeProperty('--pic');
+  const svg = /^data:image\/svg|\.svg$/.test(url), cell = /#c=(\d+),(\d+),(\d+)$/.exec(url), abs = (u) => `url("${new URL(u, document.baseURI).href}")`;
+  img.classList.toggle('pic-ink', svg); img.classList.toggle('pic-cell', !!cell);
+  if (cell) { const [n, cols, rows] = cell.slice(1).map(Number), x = n % cols, y = Math.floor(n / cols);
+    img.style.setProperty('--pic', abs(url.slice(0, cell.index)));
+    img.style.setProperty('--cell', `${cols > 1 ? x / (cols - 1) * 100 : 0}% ${rows > 1 ? y / (rows - 1) * 100 : 0}% / ${cols * 100}% ${rows * 100}%`); }
+  else if (svg) img.style.setProperty('--pic', abs(url)); else img.style.removeProperty('--pic');
   img.src = url;
 }
 

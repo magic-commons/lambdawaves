@@ -33,8 +33,10 @@
  *                                 cache — MOLECULES' pages and lamps follow the Picker's INSTALL / REMOVE without a poll; → unwatch
  *   remove(volId)                 the whole cache (the basis records stay: another volume may read them)
  *   file(volId, molId, { network })   the .lwm as an ArrayBuffer, from this device or (network, the default) the network, checked either way
- *   picture(volId, molId, style)  a URL for the molecule's picture: its page's DIAGRAM (style 'labels') when t/pages.json names one (037 D4),
+ *   picture(volId, molId, style)  a URL for the molecule's picture: its page's DIAGRAM (style 'labels') or its page's SHEET cell for the look
+ *                                 (`<sheet>?v=…#c=n,cols,rows`, picker-fx.js setPic) when t/pages.json names one (037 D4 · D6),
  *                                 else the device's copy (an object URL) when installed, else the network's
+ *   looks(volId)                  the looks its pages carry (037 D6: 'labels' for the diagrams, then each sheet's look), [] when none
  *   storageInfo()                 library.js': persisted, usage, quota
  * The reader (lab/volumes-format.js parseLwm · rungRecord) and the open (chemview.js openVolume, THE RECORD ROAD's chem.open) are row V2's. */
 import { persistOnce, storageInfo, keepData } from './library.js';
@@ -72,7 +74,8 @@ const inVolume = (v, rel) => new URL(rel, indexUrl(v)).href;   // the catalogue'
 export const pictureUrl = (v, m) => inVolume(v, m.thumb || 't/' + m.id + '.webp');
 /* 037 D4 · THE PAGES' PICTURES: t/pages.json beside a volume's pictures (tools/diagrams/draw.py) names the catalogue it was made from (`index`,
    the shelf's indexSha256: another pack's manifest is not read), each page's ids in the index's order, and the pages that carry DIAGRAMS
-   (t/diagrams-<page>.json: id → the SVG's inner markup), each with a version the page asks for (?v=), so a page kept as DATA (library.js
+   (t/diagrams-<page>.json: id → the SVG's inner markup) and, D6, the SHEETS of the field's looks (t/<look>-<page>.webp, tools/volume-thumbs.mjs:
+   `cols` tiles a row, cell n the page's n-th id, the ids a sheet lacks named), each with a version the page asks for (?v=), so a file kept as DATA (library.js
    keepData) is never another pack's.  The manifest is read once a volume and never kept (it grows while the sheets are drawn); none, or
    unreadable, and every picture is the plain one as before */
 const pagesMemo = new Map(), pageFiles = new Map();
@@ -84,11 +87,18 @@ function pagesOf(v) {
   }).catch(() => null));
   return pagesMemo.get(v.id);
 }
-/** a molecule's picture from its page — `labels`: its DIAGRAM as an SVG data: URL (drawn in the ink: picker-fx.js setPic) — or null */
+/** a molecule's picture from its page — `labels`: its DIAGRAM as an SVG data: URL (drawn in the ink: picker-fx.js setPic); another look: its
+    SHEET's cell, `<sheet>?v=…#c=n,cols,rows` (the sheet as the tile's background) — or null */
 async function pagePicture(v, molId, style) {
   const P = await pagesOf(v), w = P && P.at.get(molId); if (!w) return null;
-  const [p] = w, { man } = P;
-  if (style !== 'labels' || !man.diagrams || !man.diagrams[p]) return null;
+  const [p, n] = w, { man } = P;
+  if (style !== 'labels') {
+    const look = style || 'density', s = man.sheets && man.sheets[look] && man.sheets[look][p];
+    if (!s || (s.missing || []).includes(molId)) return null;
+    const url = inVolume(v, `t/${look}-${p}.webp?v=${s.v}`); if (!pageFiles.has(url)) pageFiles.set(url, keepData(url));
+    return `${url}#c=${n},${man.cols},${s.rows}`;
+  }
+  if (!man.diagrams || !man.diagrams[p]) return null;
   const url = inVolume(v, `t/diagrams-${p}.json?v=${man.diagrams[p]}`);
   if (!pageFiles.has(url)) pageFiles.set(url, fetch(url).then((r) => { if (!r.ok) return null; keepData(url, r.clone()); return r.json(); }).catch(() => null));
   const mk = ((await pageFiles.get(url)) || {})[molId];
@@ -341,6 +351,10 @@ async function molecule(volId, molId) {
   const v = await volume(volId), idx = await index(volId), m = idx.molecules.find((x) => x.id === molId);
   if (!m) throw new Error('no molecule ' + molId + ' in ' + volId);
   return { v, m };
+}
+export async function looks(volId) {
+  const P = await pagesOf(await volume(volId)).catch(() => null), m = P && P.man; if (!m) return [];
+  return [...(Object.keys(m.diagrams || {}).length ? ['labels'] : []), ...Object.keys(m.sheets || {}).filter((l) => Object.keys(m.sheets[l]).length)];
 }
 export async function file(volId, molId, { network = true } = {}) {   // network: false — this device's copy or nothing (a project's re-open)
   const { v, m } = await molecule(volId, molId), url = inVolume(v, m.file), c = await store(volId);

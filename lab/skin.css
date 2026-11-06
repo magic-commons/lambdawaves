@@ -604,6 +604,7 @@ body.frost #lwMenu .mm-edge { display: block; }
 /* 037 D2 · A DIAGRAM IN THE INK (picker-fx.js setPic): the SVG is a mask over the element's own colour and its picture is moved out of the
    box — one file serves both themes, wherever a picture is (the decks, the CSB's suggestions, MOLECULES' thumbnail) */
 img.pic-ink { object-position: -9999px 0; background: currentColor; -webkit-mask: var(--pic) center / contain no-repeat; mask: var(--pic) center / contain no-repeat; }
+img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no-repeat; }   /* D6: a volume page's sheet, one cell filling the box */
 /* "the element underneath": the name, under the tile, on a hover or a focus */
 #lwMenu .mm-under { position: absolute; left: 50%; top: 100%; translate: -50% 0; white-space: nowrap; pointer-events: none; font-size: 12px; letter-spacing: .06em; opacity: 0;
   text-shadow: 0 0 6px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 160ms ease, translate 160ms var(--ease); }
