@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 038
+
+THE MENUS' ROWS (038 M2 · M3, Josh 11-06: "For Window Dropdown menu, it should move the 'Main Menu' option to the 'File' section"; "MIR Options should be available in the 'Window' dropdown menu"; CALLS 4: MAIN MENU at FILE's foot): FILE ends QUICK ›, a rule, MAIN MENU (the `menu` action — its id, its key L, its glyph and the KEYBOARD window's row unchanged; a plain row, no ✓, since the bar is hidden while the menu is up); WINDOW opens FINDER… · MIR OPTIONS… (the `gui` action, the kit's OPTIONS window — LOOK · LIGHT · WINDOWS — its hint and glyph the registry's), then RACKS › and TOOLS ›, which no longer lists MAIN MENU. The stage's right-click and the CSB's ⚙ still reach MIR OPTIONS. THE FIRST RUN CHOOSES (SIMPLE · ADVANCED, the folded eleven) is picker.md's.
+
 ## The laws of 036
 
 ABOUT'S TWO SIZES (036 P4, Josh 2026-11-03: "switching to MIR have the fitted window (which is usually shorter than the lambdawaves one) while
