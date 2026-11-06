@@ -87,6 +87,12 @@ body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo { grid-area: auto / 1 / auto / -1; justify-self: stretch; order: 3; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo:not([hidden]) { grid-template-columns: minmax(0, 1fr); }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]):has(#lwMode [data-id="hydrogen"][aria-pressed="true"]) .csb-mid > .mol-pick { display: none; }
+/* 038 S1 · BACK TO THE STAGE (Josh: "Compact window button for the detatched rack window … is quite useless … replace it with the icon to return it to
+   normal on the center stage above/below"): popped off the rack, the card's corner wears its pop chip in COMPACT's seat — λWAVES' press puts the bar on the
+   stage (rack-wiring.js popFace) — flat and sized as the × beside it; COMPACT (the kit's hand never reaches an app card's rail) is gone */
+.dev[data-id="transport"].floating .dev-util > .dev-rail { display: none; }
+.dev[data-id="transport"].floating .dev-util > .dev-pop { display: inline-flex; border: 0; background: transparent; color: var(--dim); }
+.dev[data-id="transport"].floating .dev-util > .dev-pop:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
 /* the FREE window (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack */
 html body #transport[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
 html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }

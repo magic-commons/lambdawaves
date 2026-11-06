@@ -96,6 +96,7 @@ const ICONS = {
   palette: dot(19, 12, 2.3) + dot(15.5, 18.06, 2.3) + dot(8.5, 18.06, 2.3) + dot(5, 12, 2.3) + dot(8.5, 5.94, 2.3) + dot(15.5, 5.94, 2.3),   // a ring of swatches
   lens: p('M3 8.5A1.5 1.5 0 0 1 4.5 7h3L9 4.5h6L16.5 7h3A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z') + c(12, 13, 3.6),   // CAMERA: a lens
   stage: box(3, 4.5, 18, 15, 2.5) + c(12, 12, 2.6) + p('M7 8.5 8.8 10M17 8.5 15.2 10M7 15.5 8.8 14M17 15.5 15.2 14'),   // 037 T1 STAGE: the frame, its centre and the wash between
+  toStage: box(3, 4.5, 18, 15, 2.5) + fill(7, 14.6, 10, 2.4, 1.2) + p('M12 7.5v4.2M9.8 9.6l2.2 2.2 2.2-2.2'),   // 038 S1 BACK TO THE STAGE: the stage, the bar at its foot and the way down to it
   widgets: box(3, 3, 8, 8, 2) + box(13, 3, 8, 8, 2) + box(3, 13, 8, 8, 2) + c(17, 17, 4),   // 037 W3 WIDGETS: a home screen's tiles, one of them round
   clock: c(12, 12, 9) + p('M12 7v5l3.5 2.2'),   // 037 W5 CLOCK: ψ's time
   playhead: p('M3 19.5h18M6 19.5V17M9 19.5V17M15 19.5V17M18 19.5V17M12 8v11.5') + solid('M8.5 3.5h7L12 8Z'),   // 037 W5 PLAYHEAD: the ruler and its head

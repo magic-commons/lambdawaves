@@ -12,11 +12,13 @@ export function createRackWiring(app) {
   const devById = (id) => document.querySelector('.dev[data-id="' + id + '"]');
   /** a rack card's width, from the RACK's own content box — the scrollbar is already out of clientWidth */
   const rackCardWidth = () => { const cs = getComputedStyle(rack); return Math.max(180, Math.round(rack.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0))); };
-  /** the TRANSPORT's pop chip wears the act its next press performs (its floating mode is the pill); every other card's is the kit's */
+  /** the TRANSPORT's pop chip wears the act its next press performs; every other card's is the kit's.  038 S1 BACK TO THE STAGE: popped off the rack
+   *  its corner shows it (csb.css) and it puts the bar on the stage — repainted after the kit's own face on every persisted change (onChange) */
   function popFace(d) {
     const b = d && d.querySelector('.dev-pop'); if (!b) return;
-    chip(b, layout.docked ? 'north' : 'reopen', layout.docked ? 'undock the control surface' : 'dock the control surface');
-    b.title = 'Dock or undock the control surface';
+    const out = d.classList.contains('floating'), g = out ? 'toStage' : layout.docked ? 'north' : 'reopen'; if (b.dataset.gly === g) return;
+    chip(b, g, out ? 'put the bar on the stage' : layout.docked ? 'undock the control surface' : 'dock the control surface');
+    b.title = out ? 'Put the bar on the stage' : 'Dock or undock the control surface';
   }
   /* ── 0.5.0 C3 · THE RACK IS THE KIT'S (lab/mir/shell/rack.js createRack; research/release-0.5.0/C3-DESIGN.md §2–3) ──────────
    * #rack, #rackL, #floats and the ◧ + ☆ chrome are adopted BY ID (their classes, sheets and listeners kept) and every .dev is
@@ -40,7 +42,7 @@ export function createRackWiring(app) {
         if (JSON.stringify(m) !== JSON.stringify(was)) settingsStore.write({ ...S, layouts: m });
       },
     },
-    onChange: () => occlusion.dirty() });   // a kit-side act moved a window: the mask follows (what is remembered is saveSettings', on its own edges)
+    onChange: () => { occlusion.dirty(); popFace(devById('transport')); } });   // a kit-side act moved a window: the mask follows (what is remembered is saveSettings', on its own edges); 038 S1: the TRANSPORT's pop chip says where it is
   for (const [id, g] of [['rackToggle', 'rackToggle'], ['rackFav', 'heart']]) { const b = document.getElementById(id); if (b) setGlyph(b, g); }   // 021 V2: the kit wrote its text ◧ ☆ into λWAVES' own nodes; the table's glyphs (no kit seat needed)
   const devTitle = (d) => ((d.querySelector('.dev-eyebrow') || {}).textContent || d.dataset.id).trim();
   for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), glyph: WINDOW_GLYPH[d.dataset.id], hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
