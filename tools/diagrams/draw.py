@@ -33,7 +33,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 MENU = os.path.join(ROOT, 'lab', 'img', 'menu')
 SHELF = os.path.join(os.environ.get('LW_VOLUMES', os.path.expanduser('~/Documents/LAMBDAWAVES-VOLUMES')), 'dist')
-SIZE = 160
+SIZE, BOND = 160, 34   # the viewBox, and a drawn bond's length in it (the drawer's fixedBondLength; the ink sticks keep it where they fit)
 
 def ui_face():
     """the UI face as a static TTF RDKit's FreeType can read (the woff2 instanced at weight 500), cached beside the venv"""
@@ -215,8 +215,9 @@ def sticks(rec):
     """038 D2 · THE INK STICKS (Josh 11-06: "If something is really hard then just use no chemicals and just show the stick diagrams"): the
     molecule's 3-D skeleton, no letters — its heavy atoms (a cluster keeps its hydrogens, whose hydrogen bonds H···N/O/F under 2.2 Å are
     dashed) seen from the view whose nearest pair — two atoms, or an atom and a bond not its own — lies farthest apart (C₆₀ on a pentagon,
-    B₁₂ down a triangle's axis), the long axis across, depth-cued in six bands (the nearest bonds full and 2.6 px, the farthest 28 % and
-    1.2 px, thinner where the bonds are short), far first; each band one path at a tenth of a pixel"""
+    B₁₂ down a triangle's axis), the long axis across, at the skeletal formula's bond length where it fits, depth-cued in six bands (the
+    nearest bonds full and 2.6 px, the farthest 28 % and 1.2 px, thinner where the bonds are short), far first; each band one path at a
+    tenth of a pixel"""
     m, _ = bonded(rec)
     X = np.array(m.GetConformer().GetPositions()); Zs = [a.GetAtomicNum() for a in m.GetAtoms()]
     cluster = len(Chem.GetMolFrags(m, sanitizeFrags=False)) > 1
@@ -241,10 +242,12 @@ def sticks(rec):
     P = X @ np.stack([u, w], 1); depth = X @ v
     e, V = np.linalg.eigh(np.cov(P.T))
     if e[1] > 1.3 * e[0]: P = P @ V[:, ::-1]   # an elongated skeleton lies across; a round one keeps its view
-    lo, hi = P.min(0), P.max(0); s = (SIZE - 28) / max(float((hi - lo).max()), 1e-6); c = (lo + hi) / 2
+    # the skeletal formula's scale (a drawn bond BOND px) where it fits, so a cube beside cubane is cubane's size
+    Lp = float(np.median([np.linalg.norm(P[i] - P[j]) for i, j, hb in B if not hb] or [1.0]))
+    lo, hi = P.min(0), P.max(0); s = min((SIZE - 28) / max(float((hi - lo).max()), 1e-6), BOND / max(Lp, 1e-6)); c = (lo + hi) / 2
     xy = lambda k: (SIZE / 2 + (P[k][0] - c[0]) * s, SIZE / 2 - (P[k][1] - c[1]) * s)
     d0, d1 = depth.min(), depth.max(); near = lambda k: (depth[k] - d0) / ((d1 - d0) or 1)   # 0 far … 1 near
-    Lpx = float(np.median([np.linalg.norm(X[i] - X[j]) for i, j, _ in B])) * s; f = min(1.0, max(0.5, Lpx / 24))
+    f = min(1.0, max(0.5, Lp * s / 24))
     bands = {}
     for i, j, hb in B:
         band = min(5, int((near(i) + near(j)) / 2 * 6)); (x1, y1), (x2, y2) = xy(i), xy(j)
@@ -278,7 +281,7 @@ def depict(rec):
 def drawn(m, wedge):
     d = rdMolDraw2D.MolDraw2DSVG(SIZE, SIZE)
     o = d.drawOptions()
-    o.clearBackground = False; o.useBWAtomPalette(); o.bondLineWidth = 2; o.padding = 0.07; o.fixedBondLength = 34
+    o.clearBackground = False; o.useBWAtomPalette(); o.bondLineWidth = 2; o.padding = 0.07; o.fixedBondLength = BOND
     o.fontFile = ui_face(); o.minFontSize = 9; o.maxFontSize = 17; o.multipleBondOffset = 0.18
     o.includeRadicals = False; o.prepareMolsBeforeDrawing = False   # prepared here, once: the drawer would add a hydrogen at every tagged centre
     try: m = rdMolDraw2D.PrepareMolForDrawing(m, kekulize=True, addChiralHs=False, wedgeBonds=wedge)
