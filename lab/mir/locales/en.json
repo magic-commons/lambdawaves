@@ -370,7 +370,7 @@
   "FL — Zoom in": "FL — Zoom in",
   "FL — Zoom out": "FL — Zoom out",
   "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it": "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it",
-  "FL — drag a clip’s edge": "FL — drag a clip’s edge",
+  "FL — drag a clip’s edge; a selection resizes together": "FL — drag a clip’s edge; a selection resizes together",
   "FL — drag a node or a tension handle": "FL — drag a node or a tension handle",
   "FL — dragging the bar-ruler selects time": "FL — dragging the bar-ruler selects time",
   "FL — pattern clips move from their body": "FL — pattern clips move from their body",
@@ -986,7 +986,7 @@
   "Store the window's dials as they stand (their bases) into the next empty slot": "Store the window's dials as they stand (their bases) into the next empty slot",
   "Strength of the pane shadow. {:DROP SHADOW} can switch it off.": "Strength of the pane shadow. {:DROP SHADOW} can switch it off.",
   "Stretch it finely (⅛, free of Snap)": "Stretch it finely (⅛, free of Snap)",
-  "Stretch it: the curve keeps its shape": "Stretch it: the curve keeps its shape",
+  "Stretch it: the curve keeps its shape; several selected close their gaps, then stretch as one": "Stretch it: the curve keeps its shape; several selected close their gaps, then stretch as one",
   "Stutter: hold the beat at this note value": "Stutter: hold the beat at this note value",
   "Surfaces that blur what is behind them: one compositor pass each": "Surfaces that blur what is behind them: one compositor pass each",
   "Surfaces that draw a shadow, and shine layers": "Surfaces that draw a shadow, and shine layers",
@@ -1079,7 +1079,7 @@
   "Transport": "Transport",
   "Trigger": "Trigger",
   "Trigger this envelope. Start modulation to advance it.": "Trigger this envelope. Start modulation to advance it.",
-  "Trim it: the curve keeps its beats": "Trim it: the curve keeps its beats",
+  "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start": "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start",
   "Trim the clip end": "Trim the clip end",
   "Turn this window on or off": "Turn this window on or off",
   "Type the tempo in BPM": "Type the tempo in BPM",
@@ -2875,7 +2875,7 @@
   "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it": [
    "mir/timeline/shortcuts.js"
   ],
-  "FL — drag a clip’s edge": [
+  "FL — drag a clip’s edge; a selection resizes together": [
    "mir/timeline/shortcuts.js"
   ],
   "FL — drag a node or a tension handle": [
@@ -4750,7 +4750,7 @@
   "Stretch it finely (⅛, free of Snap)": [
    "mir/timeline/shortcuts.js"
   ],
-  "Stretch it: the curve keeps its shape": [
+  "Stretch it: the curve keeps its shape; several selected close their gaps, then stretch as one": [
    "mir/timeline/shortcuts.js"
   ],
   "Stutter: hold the beat at this note value": [
@@ -5034,7 +5034,7 @@
   "Trigger this envelope. Start modulation to advance it.": [
    "mir/modulation/window.js"
   ],
-  "Trim it: the curve keeps its beats": [
+  "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start": [
    "mir/timeline/shortcuts.js"
   ],
   "Trim the clip end": [

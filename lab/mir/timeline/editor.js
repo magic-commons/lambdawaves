@@ -42,7 +42,7 @@ import { frame } from '../core/frame.js';
 import { isField } from '../core/pointer.js';
 import { t, tn } from '../core/i18n.js';
 import { coalesce } from './readout.js';
-import { TIMELINE_TAB_HEIGHT, TIMELINE_ROW_GAP, TIMELINE_CURVE_GRAB, TIMELINE_TENSION_TRAVEL, resizeTimelineClip, createClipCoordinates, snapTimelineBeat, timelineResizeDelta, nearestTimelineLane } from './geometry.js';
+import { TIMELINE_TAB_HEIGHT, TIMELINE_ROW_GAP, TIMELINE_CURVE_GRAB, TIMELINE_TENSION_TRAVEL, resizeTimelineClip, glueTimelineClips, createClipCoordinates, snapTimelineBeat, timelineResizeDelta, nearestTimelineLane } from './geometry.js';
 import { createTimelinePlot } from './curve-view.js';
 import { evaluateTimelineSource, normalizeTimelinePoints } from './source.js';
 import { clipKind } from './kinds.js';
@@ -306,10 +306,20 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       const lane=nearestTimelineLane(pos.y,doc.lanes.length,view.height()),anchorLane=doc.lanes.findIndex(l=>l.id===c.laneId);
       model.moveClips(drag.ids,{beatDelta:beat-anchor.start,laneDelta:lane-anchorLane,originals:drag.originals});return;
     }
-    if(drag.kind==='trim'){const delta=timelineResizeDelta(c,drag.edge,(pos.x-drag.startWorld.x)/px,snap,e.altKey);model.updateClip(c.id,resizeTimelineClip(c,drag.edge,delta,e.altKey?.0625:(snap||.0625)));return;}
-    // THE STRETCH (T17): the edge moves and the curve keeps its shape (model.stretchClip); Shift is ⅛ and free of Snap (T18).
-    if(drag.kind==='stretch'){const free=e.altKey||e.shiftKey,o=drag.original,g=drag.gear.step(pos,e),d=timelineResizeDelta(o,drag.edge,(g.x-drag.startWorld.x)/px,snap,free);
-      model.stretchClip(c.id,drag.edge==='right'?'end':'start',Math.max(free?.0625:(snap||.0625),drag.edge==='right'?o.duration+d:o.duration-d),{original:o});return;}
+    // THE TRIM: the pressed clip's edge snaps; with several selected (1.5.7-alpha.11) every one's same edge moves by that delta, each from its press-time snapshot.
+    if(drag.kind==='trim'){const delta=timelineResizeDelta(c,drag.edge,(pos.x-drag.startWorld.x)/px,snap,e.altKey),min=e.altKey?.0625:(snap||.0625);
+      for(const o of drag.originals||[c])model.updateClip(o.id,resizeTimelineClip(o,drag.edge,delta,min));return;}
+    // THE STRETCH (T17): the edge moves and the curve keeps its shape (model.stretchClip); Shift is ⅛ and free of Snap (T18).  With several
+    // selected (1.5.7-alpha.11) the glued block [start, end] scales by f about its other edge — the pressed clip's glued edge moves with the
+    // hand (snapped), f = its new distance from the pivot / its old one: start' = pivot + (start − pivot)·f, duration·f, scale / f (each curve
+    // keeps its shape, touching clips stay touching); the pressed clip never shrinks under the least length, the block never crosses beat 0.
+    if(drag.kind==='stretch'){const free=e.altKey||e.shiftKey,g=drag.gear.step(pos,e),raw=(g.x-drag.startWorld.x)/px,min=free?.0625:(snap||.0625);
+      if(drag.glued){const{list,start,end}=drag.glued,right=drag.edge==='right',me=list.find(o=>o.id===c.id)||list[0],pivot=right?start:end;
+        const d=timelineResizeDelta(me,drag.edge,raw,snap,free),span=right?me.start+me.duration-pivot:pivot-me.start;
+        const f=Math.min(right?Infinity:end/(end-start),Math.max(min/me.duration,(span+(right?d:-d))/span));
+        for(const o of list)model.updateClip(o.id,{start:Math.max(0,pivot+(o.start-pivot)*f),duration:o.duration*f,scale:o.scale/f});return;}
+      const o=drag.original,d=timelineResizeDelta(o,drag.edge,raw,snap,free);
+      model.stretchClip(c.id,drag.edge==='right'?'end':'start',Math.max(min,drag.edge==='right'?o.duration+d:o.duration-d),{original:o});return;}
     const plot=view.plot(c.id);if(!plot)return;const rect=plot.getBoundingClientRect(),{width,height}=plot.viewBox.baseVal,geometry=createClipCoordinates(c,curve.length,px,height),x=(e.x-rect.left)/rect.width*width,y=(e.y-rect.top)/rect.height*height;
     if(drag.kind==='step'){drawStep({beat:geometry.sourceBeatAtX(bounded(x,0,width)),value:bounded(geometry.valueAtY(y))},e.shiftKey);return;}
     if(drag.kind==='point'||drag.kind==='points'){
@@ -372,8 +382,13 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     // A kind without points has no curve gestures: its body handles like its tab (move, Ctrl-copy, right-delete).
     const grab=handle||(kind?plot||target.closest('.tl-clip'):null);
     // AN EDGE: a plain drag trims; Ctrl stretches (the shape keeps); Ctrl+Shift stretches at ⅛.  Shift alone selects (below).
-    const stretchFrom=(edgeName)=>{selectOnly(clip.id);begin(e,{kind:'stretch',edge:edgeName,clip,curve,original:{start:clip.start,duration:clip.duration,scale:clip.scale},gear:fineGear(view.world(e))},true);paintSelection();};
-    if(e.button===0&&edge&&clip&&tool==='edit'&&!hit?.kind&&(cmd||!shift)){if(cmd){stretchFrom(edge.dataset.trim);return;}selectOnly(clip.id);begin(e,{kind:'trim',edge:edge.dataset.trim,clip,curve},true);paintSelection();return;}
+    // THE SELECTION RESIZES TOGETHER (1.5.7-alpha.11, λWAVES 038 T5): an edge pressed on a clip inside a selection of several keeps the
+    // selection — a trim moves that edge of every selected clip by the same snapped beats (each keeps its own start on a right edge);
+    // a stretch first closes the gaps between them (glueTimelineClips: lane by lane), then scales the block about its other edge.
+    const edgeFrom=(edgeName,stretch)=>{const many=selection.has(clip.id)&&selection.size>1;if(many){selected=clip.id;pointSelection=null;}else selectOnly(clip.id);
+      const originals=many?doc.clips.filter(c=>selection.has(c.id)):null;
+      begin(e,{kind:stretch?'stretch':'trim',edge:edgeName,clip,curve,originals,glued:stretch&&many?glueTimelineClips(originals):null,original:{start:clip.start,duration:clip.duration,scale:clip.scale},gear:fineGear(view.world(e))},true);paintSelection();};
+    if(e.button===0&&edge&&clip&&tool==='edit'&&!hit?.kind&&(cmd||!shift)){edgeFrom(edge.dataset.trim,cmd);return;}
     // SHIFT SELECTS: on empty space a drag is the marquee (Ctrl+Shift adds to the selection), a click on a clip toggles it; the
     // SELECT tool's plain drag is the same marquee (and its Shift adds).  A Shift press on a point or a handle is the fine gear.
     if(e.button===0&&(tool==='select'||shift&&!(plot&&hit?.kind)&&!(cmd&&trimZone))){
@@ -386,9 +401,9 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       // other tabs deletes each of those too, the whole sweep as one undo transaction (begin here,
       // commit/cancel in finish()). The MIR plot curve law and the tab's ⋯ menu are untouched.
       if(e.button===2){e.preventDefault();lastTap=null;closeMenu();begin(e,{kind:'delete',clip,curve},true);if(doc.clips.some(x=>x.id===clip.id))model.deleteClip(clip.id);return;}if(e.button!==0)return;
-      if(cmd&&trimZone){stretchFrom(trimZone.dataset.trim);return;}
+      if(trimZone){edgeFrom(trimZone.dataset.trim,cmd);return;}
       // CTRL CLONES (call 1): a Ctrl-drag on a title (or a kind's body) duplicates the selection while moving it.
-      if(!selection.has(clip.id))selectOnly(clip.id);else selected=clip.id;begin(e,{kind:trimZone?'trim':'move',edge:trimZone?.dataset.trim,copy:cmd&&!trimZone,clip,curve,ids:[...selection],originals:doc.clips.filter(c=>selection.has(c.id))},true);paintSelection();return;
+      if(!selection.has(clip.id))selectOnly(clip.id);else selected=clip.id;begin(e,{kind:'move',copy:cmd,clip,curve,ids:[...selection],originals:doc.clips.filter(c=>selection.has(c.id))},true);paintSelection();return;
     }
     if(plot&&!kind){
       selected=clip.id;if(!selection.has(clip.id))selection=new Set([clip.id]);const action=curveAction(e,hit);
