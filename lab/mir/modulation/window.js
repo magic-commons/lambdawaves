@@ -52,7 +52,7 @@ import { createProximity } from '../core/proximity.js';
 import { rect as rectOf, setText, setAttr, setVar } from '../core/perf.js';
 import { t, tn, phrase, onLanguage } from '../core/i18n.js';
 import { clipKinds } from '../timeline/kinds.js';
-import { normalizeTimelinePoints } from '../timeline/source.js';
+import { normalizeTimelinePoints, TIMELINE_MAX_SOURCE_POINTS } from '../timeline/source.js';
 import { STEP_BEATS } from '../pattern/model.js';
 import { createReadoutLayer } from '../timeline/readout.js';
 import { createModCursor } from './mod-cursor.js';
@@ -2270,6 +2270,23 @@ export function createModulation(host, port) {
   const routedTarget = (s) => { for (const m of M.macroList()) if (m.sourceId === s.id) for (const r of M.routesOfMacro(m.id)) if (!r.dormant && registry.has(r.targetId)) return r.targetId; return null; };
   const hexInk = (rec) => { const m = rec && /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(getComputedStyle(rec.dev.ed.path).stroke || ''); return m ? '#' + [m[1], m[2], m[3]].map((v) => (+v).toString(16).padStart(2, '0')).join('') : undefined; };
   const warn = (msg) => { if (typeof port.toast === 'function') port.toast(msg); else status(msg, 'warn'); return null; };
+  /* THE MEASURE IS THE LEAST LOOP (1.5.7-alpha.10, λWAVES 038 T4; Josh: "if a modulation rate is set to 1/16, then when placing it
+     onto the timeline, it should loop for a whole measure"): an LFO faster than a bar is sent as n = ⌈bar / period⌉ whole cycles, so
+     its clip is at least a bar long and holds a whole number of cycles (a period of a bar or longer stays one cycle, as before).  A
+     source holds at most TIMELINE_MAX_SOURCE_POINTS (256) points, so a cycle's samples shrink with n: a curve shape is tiled as its
+     own points (tensions kept) while n of them fit, else resampled; a wave takes k = min(64, ⌊256 / n⌋) samples a cycle — both ends
+     while k ≥ 4, so a seam keeps a saw's drop vertical; at 65 … 128 cycles (1/128) its k phases 0, 1/k …, so the kit's raised sine
+     keeps its trough and its peak — and each cycle draws its own random step (cycles: i); past 128 cycles (beyond a frame's Nyquist
+     at any tempo) the clip is 256 even samples of the running wave.  n = 1 sends exactly what it always did. */
+  function lfoCycles(s, n) {
+    const curve = s.shapeMode === 'curve', max = TIMELINE_MAX_SOURCE_POINTS;
+    if (curve && n * s.points.length <= max) return Array.from({ length: n }, (_, i) => s.points.map((p) => ({ t: (i + p.t) / n, v: p.v, tension: p.tension || 0 }))).flat();
+    const at = (u, i) => (curve ? curveEval(s.points, u) : M.waveAt(s.wave, u, { cycles: i, seed: s.rseed }));
+    const k = Math.min(64, Math.floor(max / n)), out = [], ends = k >= 4 ? k - 1 : k;
+    if (k >= 2) { for (let i = 0; i < n; i++) for (let j = 0; j < k; j++) out.push({ t: (i + j / ends) / n, v: at(j / ends, i), tension: 0 }); return out; }
+    for (let j = 0; j < max; j++) { const x = j / (max - 1) * n, i = Math.floor(x); out.push({ t: j / (max - 1), v: at(x - i, i), tension: 0 }); }
+    return out;
+  }
   function sendToTimeline(s) {
     const tlh = timelineOf(); if (!tlh) return warn(t('add the timeline first — a device is sent to it'));
     /* the clip lands at the start of the playhead's bar (1.5.7-alpha.8, as createClip does): an empty timeline rests in bar 1, so the first send starts at 1.1 */
@@ -2288,13 +2305,12 @@ export function createModulation(host, port) {
     }
     const targetId = routedTarget(s);
     if (!targetId) return warn(t('Route {name} to a control first — its clip needs a target', { name }));
-    let points, beats;
+    let points, beats, cycles = 1;
     if (s.kind === 'env') { points = M.envPoints(s); beats = s.timeScale * bpm / 60; }
     else {
-      const hz = M.lfoHz(s);
-      beats = s.sync ? M.beatsPerCycle(s) : hz > 0 ? bpm / (60 * hz) : 0;
-      points = s.shapeMode === 'curve' ? s.points.map((p) => ({ t: p.t, v: p.v, tension: p.tension || 0 }))
-        : Array.from({ length: 64 }, (_, i) => ({ t: i / 63, v: M.waveAt(s.wave, i / 63, { cycles: 0, seed: s.rseed }), tension: 0 }));
+      const hz = M.lfoHz(s), period = s.sync ? M.beatsPerCycle(s) : hz > 0 ? bpm / (60 * hz) : 0;
+      cycles = period > 0 && period < meter - 1e-9 ? Math.ceil(meter / period - 1e-9) : 1;   // THE MEASURE IS THE LEAST LOOP (lfoCycles, above)
+      beats = period * cycles; points = lfoCycles(s, cycles);
     }
     if (s.invert) points = points.map((p) => ({ ...p, v: 1 - p.v }));
     points = normalizeTimelinePoints(points);
@@ -2304,7 +2320,7 @@ export function createModulation(host, port) {
     /* THE SEND DISARMS (1.5.6-alpha.27, λWAVES 032 T26): the shape now lives on the timeline, so the device is bypassed (its
        power off, its settings kept; the hand turns it back on).  A pattern send keeps its ENV on: the clip fires through it. */
     if (id && s.on) { M.setSource(s.id, { on: false }); clock.recomputeRunning(); apply(); sync(); }
-    const msg = done(id, s.kind === 'env' ? t('the envelope') : t('one cycle'), beats);
+    const msg = done(id, s.kind === 'env' ? t('the envelope') : tn(cycles, 'one cycle', '{n} cycles', { n: cycles }), beats);   // tr: what → TL sent of an LFO: its whole cycles (at least a bar's worth)
     return id ? t('{sent} · the device is bypassed', { sent: msg }) : msg;
   }
 

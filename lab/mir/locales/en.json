@@ -1319,7 +1319,6 @@
   "nothing to export — save first": "nothing to export — save first",
   "nothing to read": "nothing to read",
   "numbered lossless PNG frames": "numbered lossless PNG frames",
-  "one cycle": "one cycle",
   "opal": "opal",
   "open {path} in your notes tab": "open {path} in your notes tab",
   "opened {name}": "opened {name}",
@@ -1565,6 +1564,10 @@
    "one": "{n} clip selected · {target}",
    "other": "{n} clips selected · {target}"
   },
+  "{n} cycles": {
+   "one": "one cycle",
+   "other": "{n} cycles"
+  },
   "{n} devices could not be built and are not on the rack: {list}. The rest of the rack is unaffected.": {
    "one": "One device could not be built and is not on the rack: {list}. The rest of the rack is unaffected.",
    "other": "{n} devices could not be built and are not on the rack: {list}. The rest of the rack is unaffected."
@@ -1741,6 +1744,7 @@
   "search windows": "the finder's search field: type part of a window's name",
   "text ink::SAMPLED": "TEXT (the label ink) set by the app itself, from the picture under each label: \"measured\", not \"a sample\"",
   "the audio graph could not be built": "the microphone's state: a fault",
+  "the envelope": "what → TL sent of an LFO: its whole cycles (at least a bar's worth)",
   "the expander": "the transport bar's expander: the panel under the bar with the macros, the clock and the app's own rows",
   "the gate opens here and stays open until hysteresis below it": "hysteresis: a small margin below the opening level, so the gate does not flicker open and shut",
   "the left rack": "the RACK: the column of docked windows at the screen’s edge (not the SHELF, where notes are kept)",
@@ -1760,6 +1764,7 @@
   "{kind} {id}": "a device's name: its kind and its id (LFO s2); reorder if your language puts the id first",
   "{kind} {name}": "what drives a macro: a device (its kind and name, e.g. LFO 2), or HAND — the value set by hand, nothing modulating it",
   "{kind} — {message}": "a status line: the device kind (LFO, ENV, AUDIO), then a message that is already a whole sentence",
+  "{n} cycles": "what → TL sent of an LFO: its whole cycles (at least a bar's worth)",
   "{verb} — {what}": "a button's name: its label, then what it acts on (SAVE — this project)",
   "{what} {i} name — type your own": "the name field of a macro or a trigger: {what} is Macro or Trigger, {i} its number",
   "{what} · TIMELINE": "a history row: what was done, then the window it was done in",
@@ -5820,9 +5825,6 @@
   "numbered lossless PNG frames": [
    "mir/render/panel.js"
   ],
-  "one cycle": [
-   "mir/modulation/window.js"
-  ],
   "opal": [
    "mir/palette.js"
   ],
@@ -6498,6 +6500,9 @@
   ],
   "{n} clips selected · {target}": [
    "mir/timeline/editor.js"
+  ],
+  "{n} cycles": [
+   "mir/modulation/window.js"
   ],
   "{n} devices could not be built and are not on the rack: {list}. The rest of the rack is unaffected.": [
    "mir/modulation/window.js"
