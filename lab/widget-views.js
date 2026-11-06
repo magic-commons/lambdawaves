@@ -9,13 +9,13 @@ import { el } from './mir/kit.js'; import { registerKind } from './widgets.js'; 
 import { createShadowView } from './shadowview.js'; import { BL } from './bloch.js'; import { LAT } from './lattice.js';
 let F = null;   // the last frame's { c, ids, may, tick } (rack.js: its c, its labels, the reader law); a forced tick between the rack's frames reads it
 /** a visualizer kind: `make(cv, app)` → { tick(force, F), off() }, ticked under the reader law of the window `name` */
-const view = (def, name, make) => registerKind({ ...def, glyph: WINDOW_GLYPH[name], mount(host, api) {
+const view = (def, name, make) => registerKind({ glyph: WINDOW_GLYPH[name], ...def, mount(host, api) {
   const cv = el('canvas', 'lw-w-cv', host), app = api.app, s = make(cv, app); let due = true;   // a repaint owed (a mount, a resize, the theme) until the gate lets one through
   return { tick(now, force, ctx) { if (ctx) F = ctx; due = due || force; if (F && F.may(name, host)) { const f = due; due = false; F.tick(name, () => s.tick(f, F)); } },
     destroy: () => s.off && s.off() };
 } });
 /** a second view of the window's one model: the canvas joins its views; a tick steps it, a forced tick repaints every view */
-const of = (M, step) => (cv, app) => { const m = M(app); m.views.add(cv); return { tick: (force) => (force ? m.redraw(app.obs) : step(m, app)), off: () => m.views.delete(cv) }; };
+const of = (M, step) => (cv, app) => { const m = M(app); m.views.add(cv); return { tick: (force) => (force ? (m.redraw || m.paint)(app.obs) : step(m, app)), off: () => m.views.delete(cv) }; };
 const t = (m, app) => m.update(app.clock.t);
 
 view({ kind: 'shadow', label: 'SHADOW', hint: 'The modes as phasors, in the window’s picture', size: { w: 0.18, h: 0.25 } }, 'shadow', (cv, app) => {
@@ -29,3 +29,4 @@ view({ kind: 'wigner', label: 'WIGNER', hint: 'The (z, p_z) slice of W, signed i
   const G = app.host.hydroReader(); m.update(app.reg, app.clock.t, app.clock.playing, G.on, G.why, app.ctl.domain.half); }));   // its own 2 Hz while playing (wignerview.js)
 view({ kind: 'plane', label: 'PLANE', hint: 'ψ on PLANE’s cut: arg the hue, |ψ| the brightness', size: { w: 0.14, h: 0.22 } }, 'slice',
   of((app) => app.w.slice, (m, app) => m.update(app.reg, app.clock.t, app.clock.playing)));   // its chunked job on its own pump (sliceview.js)
+view({ kind: 'emission', label: 'EMISSION', hint: 'EMISSION’s comb, the state’s own lines lit', size: { w: 0.26, h: 0.1 } }, 'emission', of((app) => app.w.emissionView, (m) => m.update()));

@@ -31,7 +31,7 @@ const out = {};
 try {
   await boot();
   if (scene === 'v1') {   /* the four windows open at t = 0, then t = 3: each window canvas hashed (equal before and after the seam) */
-    const CV = { shadow: '.shadow-c', bloch: '.ladder-c canvas', lattice: '.ladder-c canvas', orbit: '.orbit-c', wigner: '.wig-c', slice: '.slice-c', emission: '.em-strip', equalizer: '.eq-grid', spectrum: '.lcv', chem: '.reg-ladder' };
+    const CV = { shadow: '.shadow-c', bloch: '.ladder-c canvas', lattice: '.ladder-c canvas', orbit: '.orbit-c', wigner: '.wig-c', slice: '.slice-c', emission: '.em-strip', equalizer: '.eq-grid', spectrum: '.ladder canvas', chem: process.env.V_SEL || 'canvas.mol-c:not(.reg-ladder)' };
     const wins = (process.env.V_WINS || 'shadow,bloch,lattice,orbit').split(',');
     out.win = await g.ev(`${PIX} __LW.windowActivity.presentOffscreen(true); __LW.seek(0); ${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ${JSON.stringify(wins)}) __LW.actions.run('window.' + id + '.open');
       await new Promise((r) => setTimeout(r, 1500)); __LW.seek(3); await __LW.settle(); await new Promise((r) => setTimeout(r, 1500)); const o = {};
@@ -39,7 +39,7 @@ try {
     out.ok = Object.values(out.win).every((p) => p.ink > 0);
   }
   if (scene === 'v2') {   /* every window closed: each kind's widget paints, a second of play moves its picture, H stands it down */
-    out.add = await g.ev(`${PIX} __LW.seek(0); for (const id of ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}) __LW.actions.run('window.' + id + '.close');
+    out.add = await g.ev(`${PIX} __LW.seek(0); ${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}) __LW.actions.run('window.' + id + (id === 'chem' ? '.fold' : '.close'));   // MOLECULES folds: its close turns the molecule off
       __LW.widgets.restore(null); const ids = {}; for (const k of ${JSON.stringify(KINDS)}) ids[k] = __LW.widgets.add(k);
       await new Promise((r) => setTimeout(r, 1500)); await __LW.settle(); await new Promise((r) => setTimeout(r, 600));
       const cv = (k) => document.querySelector('#widgets .lw-widget[data-id="' + ids[k] + '"] canvas'), a = {}; for (const k in ids) a[k] = pix(cv(k));
@@ -48,13 +48,13 @@ try {
       const bg = getComputedStyle(document.querySelector('#widgets .lw-widget')).backgroundColor, P = __LW.perf || {}, work = {}; for (const k in ids) work[k] = +((P.profile || {})[${JSON.stringify(WIN)}[k] || k] || 0).toFixed(3);
       document.body.classList.add('ui-hidden'); __LW.widgets.root.querySelector('canvas').getContext('2d').clearRect(0, 0, 1e4, 1e4); __LW.play(); await new Promise((r) => setTimeout(r, 600)); __LW.pause();
       const hid = pix(cv(${JSON.stringify(KINDS[0])})).ink; document.body.classList.remove('ui-hidden');
-      return { ids, a, b, bg, work, hid, closed: ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}.map((id) => document.querySelector('.dev[data-id="' + id + '"]').classList.contains('closed')) };`);
+      return { ids, a, b, bg, work, hid, closed: ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}.map((id) => document.querySelector('.dev[data-id="' + id + '"]').classList.contains(id === 'chem' ? 'folded' : 'closed')) };`);
     out.ok = KINDS.every((k) => out.add.a[k].ink > 0) && out.add.bg === 'rgba(0, 0, 0, 0)';
   }
   if (scene === 'v4') {   /* every kind in a grid over the stage (windows closed), SOLID and CLOUD, dark and light; V_MOL=1 puts benzene in MOLECULES first */
     const n = KINDS.length, cols = Math.min(4, n), rows = Math.ceil(n / cols), W = 0.8 / cols, H = Math.min(0.26, 0.8 / rows);
     const items = KINDS.map((k, i) => ({ id: 'w' + (i + 1), kind: k, x: +(0.1 + (i % cols) * W + 0.01).toFixed(4), y: +(0.08 + Math.floor(i / cols) * (H + 0.02)).toFixed(4), w: +(W - 0.02).toFixed(4), h: +H.toFixed(4), opts: {} }));
-    await g.ev(`${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ['shadow', 'bloch', 'lattice', 'orbit', 'wigner', 'slice', 'emission', 'equalizer', 'spectrum', 'chem', 'widgets']) __LW.actions.run('window.' + id + '.close');
+    await g.ev(`${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ['shadow', 'bloch', 'lattice', 'orbit', 'wigner', 'slice', 'emission', 'equalizer', 'spectrum', 'widgets']) __LW.actions.run('window.' + id + '.close'); ${process.env.V_MOL ? `__LW.actions.run('window.chem.fold');` : ''}
       __LW.widgets.restore({ items: ${JSON.stringify(items)} }); __LW.play(); await new Promise((r) => setTimeout(r, 1500)); __LW.pause(); await __LW.settle(); return 1;`);
     for (const style of ['solid', 'cloud']) for (const theme of ['dark', 'light']) {
       await g.ev(`__LW.setStyle('${style}'); __LW.look.set({ theme: '${theme}' }); await __LW.settle(); await new Promise((r) => setTimeout(r, 1200)); return 1;`);
