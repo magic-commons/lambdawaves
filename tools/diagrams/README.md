@@ -2,8 +2,9 @@
 
 A chemist's perspective diagram of every molecule, drawn by RDKit from the molecule's own coordinates: the Picker's DIAGRAM look
 (`lab/img/menu/<id>.diagram.svg`), MOLECULES' thumbnail, and a volume's pages (`<shelf>/dist/<vol>/t/diagrams-<page>.json`).
-A drawing is kept only when it reads (THE ACCEPTANCE RULE: ≤ 2 crossings, no clash); what no layout draws cleanly — C₆₀, B₁₂H₁₂²⁻,
-Li₄F₄, the ice hexamer, a crowded bridged skeleton — is THE INK STICKS, its 3-D skeleton with no letters, in the same file.
+A drawing is kept only when it reads (THE ACCEPTANCE RULE: a skeletal formula, the better of CoordGen's and RDKit's template layout,
+at ≤ 3 crossings and at most one clash that touches no letter; a perspective drawing at ≤ 2 and none); what no layout draws cleanly —
+C₆₀, B₁₂H₁₂²⁻, Li₄F₄, the ice hexamer, the diamondoids — is THE INK STICKS, its 3-D skeleton with no letters, in the same file.
 Each run prints its count by road and names the molecules that took the sticks (`docs/laws/chemistry.md` THE DIAGRAMS' PIPELINE).
 The app ships none of this: Python lives in `tools/diagrams/.venv` (git-ignored), made once with
 `uv venv --python 3.12 tools/diagrams/.venv && uv pip install --python tools/diagrams/.venv/bin/python -r tools/diagrams/requirements.txt`

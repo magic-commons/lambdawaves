@@ -15,9 +15,10 @@ THE DRAWING (IUPAC Recommendations 2006, Brecher, "Graphical representation of s
     every stereocentre (its configuration from the 3-D coordinates, or from the volume's PubChem SMILES).
   The bonds come from the volume's SMILES or its bond table when the record carries them, else rdDetermineBonds from the coordinates and
   the molecule's charge (bond orders and formal charges by the xyz2mol rules; connectivity alone when no Lewis structure fits).
-THE ACCEPTANCE RULE (038 D1): a drawing is kept at ≤ 2 crossings and no clash (quality()); what no layout draws cleanly — a cage no
-  plane holds (C₆₀, dodecahedrane), a lettered cluster (B₁₂H₁₂²⁻, Li₄F₄), a neutral cluster (the ice hexamer) — is THE INK STICKS (038 D2,
-  sticks()): its 3-D skeleton, no letters, depth-cued. Each run prints the count by road and names the molecules that took the sticks.
+THE ACCEPTANCE RULE (038 D1 · D5): a drawing is kept when it reads (accepted(): a perspective drawing at ≤ 2 crossings and no clash, a
+  skeletal formula — the better of two layouts — at ≤ 3 crossings and one clash that touches no letter); what no layout draws cleanly — a
+  cage no plane holds (C₆₀, dodecahedrane), a lettered cluster (B₁₂H₁₂²⁻, Li₄F₄), a neutral cluster (the ice hexamer) — is THE INK STICKS
+  (038 D2, sticks()): its 3-D skeleton, no letters, depth-cued. Each run prints the count by road and names the molecules that took the sticks.
 THE INK: every colour is `currentColor` and the letters are drawn as outlines in the app's UI face (lab/fonts/Roboto-ui.woff2 at
   weight 500), so one file serves both themes: the app draws it as a mask in the tile's own ink (lab/picker-fx.js setPic). 160 × 160
   viewBox, no background, no size. """
@@ -158,13 +159,14 @@ def perspective(m):
     return m2
 
 def quality(m, every=False):
-    """038 D1 · THE ACCEPTANCE RULE: (crossings, clashes) of a 2-D drawing, in units of its median bond L. A crossing is two bonds that share
-    no atom and whose segments cross. A clash is two atoms nearer than 0.4 L, an atom on a bond not its own (within 0.2 L), two letters
-    nearer than half a bond, or a crossing at a lettered atom's bond (a line through a letter). Lettered: every atom in perspective
-    (`every`), every atom but carbon in the skeletal formula"""
+    """038 D1 · D5: (crossings, clashes) of a 2-D drawing, L its median bond. A crossing is two bonds that share no atom and whose segments
+    cross. A clash is (kind, its atoms): AA two atoms nearer than 0.4 L · AB an atom on a bond not its own (within 0.2 L; the atom, then
+    the bond's two) · LL two letters nearer than half a bond · XL a crossing at a lettered atom's bond (the two bonds' atoms) · CH a CH₂
+    laid straight through (two like single bonds at > 162°), which the drawer letters 'C'. Lettered: every atom in perspective (`every`),
+    every atom but carbon in the skeletal formula"""
     P = np.array(m.GetConformer().GetPositions())[:, :2]; n = len(P)
     B = np.array([(b.GetBeginAtomIdx(), b.GetEndAtomIdx()) for b in m.GetBonds()], dtype=int).reshape(-1, 2)
-    if not len(B): return 0, 0
+    if not len(B): return 0, []
     lab = np.array([every or a.GetAtomicNum() != 6 for a in m.GetAtoms()])
     A, Z = P[B[:, 0]], P[B[:, 1]]; d = Z - A
     L = float(np.median(np.linalg.norm(d, axis=1))) or 1.0
@@ -175,28 +177,38 @@ def quality(m, every=False):
     bl = lab[B[:, 0]] | lab[B[:, 1]]
     D = np.linalg.norm(P[:, None] - P[None], axis=2) + np.eye(n) * 1e9
     t = ((P[:, None] - A[None]) * d[None]).sum(2) / ((d * d).sum(1)[None] + 1e-12)   # each atom's foot on each bond
-    off = np.linalg.norm(P[:, None] - (A[None] + t[..., None] * d[None]), axis=2); k = np.arange(n)[:, None]
-    clashes = (np.triu(D < 0.4 * L, 1).sum() + ((t > 0.05) & (t < 0.95) & (off < 0.2 * L) & (k != B[:, 0][None]) & (k != B[:, 1][None])).sum()
-               + np.triu((D < 0.5 * L) & lab[:, None] & lab[None], 1).sum() + (X & (bl[:, None] | bl[None])).sum())
-    for a in ([] if every else m.GetAtoms()):   # a CH₂ laid straight through (two like single bonds at > 162°): the drawer letters it 'C'
+    off = np.linalg.norm(P[:, None] - (A[None] + t[..., None] * d[None]), axis=2); at = np.arange(n)[:, None]
+    pairs = lambda M: [tuple(int(v) for v in ij) for ij in zip(*np.nonzero(M))]
+    cl = [('AA', ij) for ij in pairs(np.triu(D < 0.4 * L, 1))]
+    cl += [('AB', (k, *map(int, B[b]))) for k, b in pairs((t > 0.05) & (t < 0.95) & (off < 0.2 * L) & (at != B[:, 0][None]) & (at != B[:, 1][None]))]
+    cl += [('LL', ij) for ij in pairs(np.triu((D < 0.5 * L) & lab[:, None] & lab[None], 1))]
+    cl += [('XL', (*map(int, B[p]), *map(int, B[q]))) for p, q in pairs(X & (bl[:, None] | bl[None]))]
+    for a in ([] if every else m.GetAtoms()):
         bs = a.GetBonds()
         if a.GetAtomicNum() == 6 and len(bs) == 2 and bs[0].GetBondType() == bs[1].GetBondType() != Chem.BondType.DOUBLE:
             u, w = (P[b.GetOtherAtomIdx(a.GetIdx())] - P[a.GetIdx()] for b in bs)
-            clashes += np.dot(u, w) < -0.95 * np.linalg.norm(u) * np.linalg.norm(w)
-    return int(X.sum()), int(clashes)
+            if np.dot(u, w) < -0.95 * np.linalg.norm(u) * np.linalg.norm(w): cl.append(('CH', (a.GetIdx(),)))
+    return int(X.sum()), cl
 
 def accepted(m, every=False):
-    """a drawing is ACCEPTED at ≤ 2 crossings and no clash (the textbook cube and adamantane draw their one or two), and in one piece —
-    or every piece an ion (a salt); a neutral cluster (the ice hexamer) is the ink sticks' with its hydrogen bonds"""
+    """THE ACCEPTANCE RULE: in one piece, or every piece an ion (a salt) — a neutral cluster (the ice hexamer) is the ink sticks' with its
+    hydrogen bonds. A perspective drawing (every atom lettered) is kept at ≤ 2 crossings and no clash. A skeletal formula (038 D5, THE RULE
+    R2 of the fresh eyes) at ≤ 3 crossings (the textbook cube and adamantane draw one or two, 037's ring-over-ring morphinans three), no
+    two letters touching, and at most ONE other clash, which runs through no letter (an atom clash or a bond on an atom at a lettered atom
+    — phaseic acid's OH, norloline's NH₂, verkade base's N — or a CH₂ the drawer letters 'C', quadricyclane's) — camphor's methyl tip near
+    its bridge is that one clash; a crossing at a lettered atom's bond may be it (hexamine, the P₄O₁₀ and As₄O₆ cages)"""
     fs = Chem.GetMolFrags(m, sanitizeFrags=False)
     if len(fs) > 1 and not all(any(m.GetAtomWithIdx(i).GetFormalCharge() for i in f) for f in fs): return False
-    c, x = quality(m, every)
-    return c <= 2 and x == 0
+    c, cl = quality(m, every)
+    if every: return c <= 2 and not cl
+    at_letter = lambda kind, ats: kind in ('LL', 'CH') or any(m.GetAtomWithIdx(i).GetAtomicNum() != 6 for i in (ats if kind == 'AA' else ats[:1] if kind == 'AB' else ()))
+    return c <= 3 and len(cl) <= 1 and not any(at_letter(*x) for x in cl)
 
 def skeletal(m):
-    """the skeletal formula: hydrogens folded into their heavy atoms, the true stereocentres kept, CoordGen's layout (its templates are
-    built in) — else RDKit's own with its ring templates (the tropanes' bridge, triethanolamine borate's cage), turned the least way that
-    lays most bonds at 0°, 30°, 60° or 90°; None when neither is accepted"""
+    """the skeletal formula: hydrogens folded into their heavy atoms, the true stereocentres kept, laid out twice — CoordGen (its templates
+    built in) and RDKit's own with its ring templates (the tropanes' bridge, triethanolamine borate's cage), turned the least way that lays
+    most bonds at 0°, 30°, 60° or 90° — and the better kept (fewest clashes, then fewest crossings; CoordGen on a tie); None when it is
+    not accepted"""
     if m.GetNumConformers() and m.GetConformer().Is3D():
         try: Chem.AssignStereochemistryFrom3D(m)
         except Exception: pass
@@ -205,19 +217,19 @@ def skeletal(m):
         except Exception: pass
     rdDepictor.SetPreferCoordGen(True)
     rdDepictor.Compute2DCoords(m)
-    if not accepted(m):
-        rdDepictor.Compute2DCoords(m, forceRDKit=True, useRingTemplates=True)
-        if not accepted(m): return None
-        rdDepictor.StraightenDepiction(m, minimizeRotation=True)   # CoordGen's own layouts are straight already
-    return m
+    t = Chem.Mol(m); rdDepictor.Compute2DCoords(t, forceRDKit=True, useRingTemplates=True)
+    rdDepictor.StraightenDepiction(t, minimizeRotation=True)   # CoordGen's own layouts are straight already
+    (cm, km), (ct, kt) = quality(m), quality(t)
+    if (len(kt), ct) < (len(km), cm): m = t   # fewest clashes, then fewest crossings
+    return m if accepted(m) else None
 
 def sticks(rec):
     """038 D2 · THE INK STICKS (Josh 11-06: "If something is really hard then just use no chemicals and just show the stick diagrams"): the
     molecule's 3-D skeleton, no letters — its heavy atoms (a cluster keeps its hydrogens, whose hydrogen bonds H···N/O/F under 2.2 Å are
     dashed) seen from the view whose nearest pair — two atoms, or an atom and a bond not its own — lies farthest apart (C₆₀ on a pentagon,
     B₁₂ down a triangle's axis), the long axis across, at the skeletal formula's bond length where it fits, depth-cued in six bands (the
-    nearest bonds full and 2.6 px, the farthest 28 % and 1.2 px, thinner where the bonds are short), far first; each band one path at a
-    tenth of a pixel"""
+    nearest bonds full and 2.6 px, the farthest 45 % and 1.4 px — 038 D6's floor, so the faintest band still reads in the 680-px deck —
+    short bonds thinned to no less than three quarters), far first; each band one path at a tenth of a pixel"""
     m, _ = bonded(rec)
     X = np.array(m.GetConformer().GetPositions()); Zs = [a.GetAtomicNum() for a in m.GetAtoms()]
     cluster = len(Chem.GetMolFrags(m, sanitizeFrags=False)) > 1
@@ -247,15 +259,15 @@ def sticks(rec):
     lo, hi = P.min(0), P.max(0); s = min((SIZE - 28) / max(float((hi - lo).max()), 1e-6), BOND / max(Lp, 1e-6)); c = (lo + hi) / 2
     xy = lambda k: (SIZE / 2 + (P[k][0] - c[0]) * s, SIZE / 2 - (P[k][1] - c[1]) * s)
     d0, d1 = depth.min(), depth.max(); near = lambda k: (depth[k] - d0) / ((d1 - d0) or 1)   # 0 far … 1 near
-    f = min(1.0, max(0.5, Lp * s / 24))
+    f = min(1.0, max(0.75, Lp * s / 24))
     bands = {}
     for i, j, hb in B:
         band = min(5, int((near(i) + near(j)) / 2 * 6)); (x1, y1), (x2, y2) = xy(i), xy(j)
         bands.setdefault((band, hb), []).append(path_d('M%.2f %.2fL%.2f %.2f' % (x1, y1, x2, y2)))
     out = []
     for (band, hb) in sorted(bands):
-        q = (band + 0.5) / 6; op = ('%.2f' % (0.28 + 0.72 * q)).rstrip('0').lstrip('0'); sw = num((1.2 + 1.4 * q) * f)
-        out.append("<path d='%s' stroke-opacity='%s' stroke-width='%s'%s/>" % (''.join(bands[(band, hb)]), op, sw, " stroke-dasharray='2 3'" if hb else ''))
+        q = (band + 0.5) / 6; op = ('%.2f' % (0.45 + 0.55 * q)).rstrip('0').lstrip('0'); sw = num((1.4 + 1.2 * q) * f)
+        out.append("<path d='%s' stroke-opacity='%s' stroke-width='%s'%s/>" % (''.join(bands[(band, hb)]), op, sw, " stroke-dasharray='3 2'" if hb else ''))
     return "<g fill='none' stroke='currentColor' stroke-linecap='round'>" + ''.join(out) + '</g>'
 
 def depict(rec):
