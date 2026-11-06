@@ -1169,6 +1169,7 @@ body.menu-open.about-over #floats > .lw-about { visibility: visible; background:
 body.menu-open.about-over #lwMenu::after { content: ''; position: absolute; inset: 0; z-index: 9; background: hsl(var(--glass-tint) / .6); }   /* the face steps back under ABOUT; a press on it puts ABOUT away (picker.js) */
 #lwMenu .mm-face-lab { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(17px, 1.5vw, 22px); letter-spacing: .22em; margin-right: -.22em; padding: 6px 14px; opacity: .9; transition: opacity 140ms, color 140ms; }   /* 037 M4: the serif, no plate, no border */
 #lwMenu .mm-face-lab:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
+#lwMenu .mm-face-way { display: flex; justify-content: center; gap: clamp(28px, 4vw, 56px); } #lwMenu .mm-face-lab[hidden] { display: none; }   /* 038 M1: CONTINUE's seat, or SIMPLE · ADVANCED there on a fresh install */
 #lwMenu .mm-face.in .mm-face-logo { animation: mm-drop 820ms var(--ease) both; }
 #lwMenu .mm-face.in .mm-door { animation: mm-up 620ms var(--ease) both; animation-delay: calc(220ms + var(--i, 0) * 90ms); }
 #lwMenu .mm-face.in .mm-face-lab { animation: mm-up 620ms var(--ease) 440ms both; }

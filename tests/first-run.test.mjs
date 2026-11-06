@@ -8,7 +8,7 @@
  * the device's material is the look store's defaults.  And the wiring: rack.js asks with its own crossings and feeds these
  * into the look store (a source read, because rack.js needs a DOM). */
 import { readFileSync, readdirSync } from 'node:fs';
-import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING } from '../lab/first-run.js';
+import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING, FIRST_RUN_RACKS } from '../lab/first-run.js';
 import { liftLook, LOOK_ROWS, BLOB_LOOK, LOOK_VERSION, frostText } from '../lab/look.js';
 import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
 import { repair, createPrefs } from '../lab/mir/core/prefs.js';
@@ -75,7 +75,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 {
   const src = appSource();
   const wires = {
-    imported: /import \{ firstRunMaterial, firstRunQuality \} from '\.\/first-run\.js'/.test(src) && /import \{ deviceQuality \} from '\.\.\/first-run\.js'/.test(src),   // 0.5.2 R3a: restore()'s deviceQuality left with it (lab/shell/persist.js)
+    imported: /import \{ firstRunMaterial, firstRunQuality, FIRST_RUN_RACKS \} from '\.\/first-run\.js'/.test(src) && /import \{ deviceQuality \} from '\.\.\/first-run\.js'/.test(src),   // 0.5.2 R3a: restore()'s deviceQuality left with it (lab/shell/persist.js)
     asksCrossings: /const FIRST_RUN = firstRunMaterial\(isPhone\(\) \|\| isTablet\(\)\);/.test(src),
     tabletBeforeAsk: src.indexOf('const isTablet = () =>') > 0 && src.indexOf('const isTablet = () =>') < src.indexOf('const FIRST_RUN = '),
     oneTabletPredicate: src.split('const isTablet = () =>').length === 2,
@@ -85,8 +85,10 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
     phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
     foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
-    /* 018 C4 (Josh): the right rack is the basic look controls; the docked transport always seats at the left rack's top */
-    racks: src.includes("const left=['informational','spectrum','chem'],right=['settings','palette','observer','camera','clip'];"),
+    /* 018 C4 (Josh): the right rack is the basic look controls; the docked transport always seats at the left rack's top.  038 M1: SIMPLE open,
+       laid in ADVANCED's order (rack.js), and a fresh install's face is handed the choice */
+    racks: src.includes("const { simple, advanced } = FIRST_RUN_RACKS, open = [...simple.left, ...simple.right];") && src.includes("for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])"),
+    chooses: src.includes('const freshInstall = !Array.isArray(readSettings().closed);') && src.includes('...(freshInstall ? { choose } : {})'),
     transportTop: src.includes('if (layout.docked) layout.seatTransport();') && !src.includes('layout.dockIndex = '),
   };
   judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds the look store\'s card and frost defaults (0.5.0 C2: LOOK_DEFAULTS → createLook, mir.gui) and the furniture\'s folds from the answer, an unnamed card is the device\'s, and the phone crossing\'s FROST OFF override is kept',
@@ -94,8 +96,15 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 }
 {
   const rows = { desktop: firstRunMaterial(false).folded, mobile: firstRunMaterial(true).folded };
-  judge('THE FIRST-RUN FOLDS (2026-10-16, iteration 001): every first-visit window arrives folded on every device, INFORMATIONAL in SHADOW\'s seat, MO-REGISTRY inside MOLECULES (iteration 008 U), no STATE (018 C1: retired into SPECTRUM); frozen',
-    eq(rows.desktop, rows.mobile) && rows.desktop.length === 8 && !rows.desktop.includes('state') && rows.desktop.includes('informational') && !rows.desktop.includes('orbitals') && !rows.desktop.includes('shadow') && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
+  judge('THE FIRST-RUN FOLDS (2026-10-16, iteration 001): every first-visit window arrives folded on every device, INFORMATIONAL in SHADOW\'s seat, MO-REGISTRY inside MOLECULES (iteration 008 U), no STATE (018 C1: retired into SPECTRUM), and 038 M1 ADVANCED\'s three; frozen',
+    eq(rows.desktop, rows.mobile) && rows.desktop.length === 11 && ['nodes', 'light', 'stage'].every((id) => rows.desktop.includes(id)) && !rows.desktop.includes('state') && rows.desktop.includes('informational') && !rows.desktop.includes('orbitals') && !rows.desktop.includes('shadow') && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
+}
+{
+  const { simple, advanced } = FIRST_RUN_RACKS, rows = { simple, advanced };
+  judge('THE FIRST RUN CHOOSES (038 M1, Josh 11-06): SIMPLE is left SPECTRUM · MOLECULES › INFORMATIONAL, right SETTINGS › PALETTE › WAVE › CAMERA › CLIP; ADVANCED adds STAGE under SETTINGS, LIGHTING under CAMERA and NODES\' card under INFORMATIONAL; frozen',
+    eq(simple, { left: ['spectrum', 'chem', 'informational'], right: ['settings', 'palette', 'observer', 'camera', 'clip'] })
+    && eq(advanced, { left: ['spectrum', 'chem', 'informational', 'nodes'], right: ['settings', 'stage', 'palette', 'observer', 'camera', 'light', 'clip'] })
+    && [FIRST_RUN_RACKS, simple, advanced, simple.left, advanced.right].every(Object.isFrozen), rows);
 }
 {
   const rows = { desktop: firstRunMaterial(false).more, mobile: firstRunMaterial(true).more, wired: appSource().includes('moreOpen: FIRST_RUN.more') };

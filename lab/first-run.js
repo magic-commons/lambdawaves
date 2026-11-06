@@ -24,8 +24,17 @@
  * (n ≤ 6 open, n = 7 folded: they are what the window is for).
  * Iteration 018 C1/C4 (Josh: the right rack is 'settings', palette, wave, camera, clip — the basic look controls): STATE is retired into SPECTRUM, so the
  * folded set is the eight first-run windows; the docked transport always seats at the top of the left rack (rack-wiring.js seatTransport).
+ * 038 M1 · THE FIRST RUN CHOOSES (Josh 11-06: "Simple will be as it is right now … Advanced simply adds nodes (rack version), lighting and stage
+ * to the defaults … simple is Molecules/spectrum > Informational on the left side … and settings > palette > wave > camera > clip on the right"):
+ * FIRST_RUN_RACKS, the two arrangements in rack order (a rack's own order, the mode hiding SPECTRUM or MOLECULES); ADVANCED is SIMPLE with
+ * STAGE under SETTINGS and LIGHTING under CAMERA (THE SUMMONS' seats) and NODES' card under INFORMATIONAL.  Every window of either arrives folded.
  * Node-testable: tests/first-run.test.mjs. */
-const FOLD_ALL = Object.freeze(['informational', 'spectrum', 'chem', 'settings', 'palette', 'observer', 'camera', 'clip']);
+const rackOf = (left, right) => Object.freeze({ left: Object.freeze(left), right: Object.freeze(right) });
+export const FIRST_RUN_RACKS = Object.freeze({
+  simple: rackOf(['spectrum', 'chem', 'informational'], ['settings', 'palette', 'observer', 'camera', 'clip']),
+  advanced: rackOf(['spectrum', 'chem', 'informational', 'nodes'], ['settings', 'stage', 'palette', 'observer', 'camera', 'light', 'clip']),
+});
+const FOLD_ALL = Object.freeze([...FIRST_RUN_RACKS.advanced.left, ...FIRST_RUN_RACKS.advanced.right]);
 /* iteration 016 W3 (Josh, call 6: "H on touch: Yan's choice (give it the kit's edge handle)") · `handle`: the kit rack's edge handle — the on-screen way
    back to a hidden rack — on a phone or tablet only (rack-wiring.js hands it createRack); a desktop keeps none, its keys and the edge peek */
 export const FIRST_RUN_MATERIAL = Object.freeze({

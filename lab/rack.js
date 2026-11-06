@@ -1,6 +1,6 @@
 import { installWakeLock } from './mir/core/wakelock.js';   // 0.5.0 C6b: the screen stays on while THE play plays
 import { reworkNative } from './native-ui.js';
-import { firstRunMaterial, firstRunQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
+import { firstRunMaterial, firstRunQuality, FIRST_RUN_RACKS } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
 /* rack.js — the instrument: the windows, the work-tier router, one clock, the transport.
  *
  *   STATE → EVOLUTION → OBSERVABLE FIELD → OBSERVER → RENDER        (§52)
@@ -79,7 +79,8 @@ export async function boot(dom) {
      browser HAD chosen was read as no choice at all and the default won every reload.  One declaration, at the top,
      above the first reader. */
   const settingsStore = createSettingsStore();   // 0.5.0 A1: `lambdawaves.q0.settings` through lab/settings-store.js (read / write / remove)
-  const useCompactDefaults = readSettings().nativeLayout === 1 || !Array.isArray(readSettings().closed);
+  const freshInstall = !Array.isArray(readSettings().closed);   // 038 M1: no layout ever saved in this browser — the face offers SIMPLE · ADVANCED (the notice's `warned` is not it: PHOTOSENSITIVITY re-arms that)
+  const useCompactDefaults = readSettings().nativeLayout === 1 || freshInstall;
   /* 0.3.1 · S1 (D2, docs/STATE-SCOPES.md): THE PALETTE IS PROJECT STATE.  The boot wears the shipped default and a project
      (or a link) brings its own; a `palette` an older build left in this browser's settings is never read. */
   const PAL_DEF = DEFAULT_PALETTE;
@@ -934,10 +935,12 @@ export async function boot(dom) {
   // First-visit furniture. Existing saved visibility and layouts are restored below.
   // 2026-10 (Josh): MOLECULES (with its register since iteration 008 U) opens on the LEFT rack under SPECTRUM.  No `devopen` fires here, so neither
   // solves at boot — MOLECULES pays its solve when it is switched on or a molecule is picked.
+  /* 038 M1 · THE FIRST RUN CHOOSES: SIMPLE's windows open, laid in ADVANCED's order with its three closed in their seats — the face's ADVANCED
+     opens them there, and on a later boot the saved `closed[]` (applySettings) opens a chosen one where it belongs */
   if(useCompactDefaults) {
-    const left=['informational','spectrum','chem'],right=['settings','palette','observer','camera','clip'];
-    for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',![...left,...right].includes(d.dataset.id));
-    for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
+    const { simple, advanced } = FIRST_RUN_RACKS, open = [...simple.left, ...simple.right];
+    for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',!open.includes(d.dataset.id));
+    for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
     /* iteration 011 Q2 (Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside every window closed (first-run.js `inner`); a record that loads after (rack-wiring.js `folds`) wins */
     if(FIRST_RUN.inner===false)for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]'))b.click();
   }
@@ -964,7 +967,18 @@ export async function boot(dom) {
   /* 036 G7 · THE LOADING SCREEN (lab/loader.js) stands before the face on an open whose set is not all on the device (or a new build's) —
      never for a test driver unless ?loader=1 (the worker is not registered there without ?sw=1) */
   const loaderOn = navigator.webdriver !== true || q.get('loader') === '1';
-  dom.start.warning.onAccept(() => { if (!pickerAtBoot || !app.state.picker) return; const go = () => app.state.picker.open(firstRun ? { first: true } : undefined);
+  /* 038 M1 · THE FIRST RUN CHOOSES: a fresh install's face asks SIMPLE or ADVANCED once; ADVANCED opens its three, folded, each directly below the
+     window before it in its list (a seat that is not on a rack: that rack's foot); either answer is saved at once, so the next visit says CONTINUE */
+  const choose = (kind) => {
+    const seen = (d) => d.classList.contains('dev') && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating');
+    if (kind === 'advanced') for (const side of ['left', 'right']) FIRST_RUN_RACKS.advanced[side].forEach((id, i, ids) => {
+      if (FIRST_RUN_RACKS.simple[side].includes(id)) return;
+      const a = document.querySelector('.dev[data-id="' + ids[i - 1] + '"]'), host = a && seen(a) && /^rackL?$/.test(a.parentElement.id) ? a.parentElement : null;
+      rk.open(id, host ? { side: host === rackL ? 'left' : 'right', index: [...host.children].filter((c) => seen(c) && c.dataset.id !== id).indexOf(a) + 1 } : { side, index: Infinity });
+    });
+    saveSettings();
+  };
+  dom.start.warning.onAccept(() => { if (!pickerAtBoot || !app.state.picker) return; const go = () => app.state.picker.open({ first: firstRun, ...(freshInstall ? { choose } : {}) });
     if (loaderOn) runLoader({ sw: app.host.swClient }).then(go, go); else go(); });
   /* the fragment is a live address, not only a start.  WAVE 133 (found by its verifier; the hole is wave 56's): a link pasted
      over an EDITED session replaced the edit and wiped the undo ring without a question, and over an unedited one left the page
