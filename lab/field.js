@@ -766,8 +766,8 @@ fn dustPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, mode: u3
  * BALLS: the CPK spheres (r_vdW × SIZE), ray-traced exactly, no sticks.  STICKS: a capsule per bond, each half in its own atom's colour,
  * RADIUS wide (an atom with no bond is a ball of that radius).  ESP: THE POTENTIAL MAP — a surface (the density's ISO at ρ = ISO/30 a.u.; the
  * SAS, r_vdW + PROBE; the SES, the vdW spheres' log-sum-exp union filleted by the probe) coloured by φ(r) read from phiG (the Poisson pass or
- * a volume's grid), translucent by EXPOSURE over the STICKS inside it.  One key light; HUE rotates the colours.  All return before the march,
- * whose text is untouched (THE LOCK). */
+ * a volume's grid), translucent by EXPOSURE over the STICKS inside it.  One key light; HUE turns the map's colours, never the atoms' (038 F2).
+ * All return before the march, whose text is untouched (THE LOCK). */
 fn hueRot(c: vec3<f32>, h: f32) -> vec3<f32> {
   if (h == 0.0) { return c; }
   let k = vec3<f32>(0.57735027); let a = h * 6.283185307; let ca = cos(a);
@@ -806,7 +806,9 @@ fn capsuleHit(ro: vec3<f32>, rd: vec3<f32>, pa: vec3<f32>, pb: vec3<f32>, r: f32
   }
   return -1.0;
 }
-fn atomColour(i: u32) -> vec3<f32> { return hueRot(atm[2u * i + 1u].rgb, V.p2.x); }
+/* 038 F2 · THE SKELETON KEEPS ITS COLOUR (Josh: "Don't let wave OR palette's hue/invert affect the balls and stick diagrams. Lighting can …
+   Let the effects in Node do that"): an atom is its CPK colour — WAVE's HUE and PALETTE's INVERT never reach it (ROTATE never did); the light does */
+fn atomColour(i: u32) -> vec3<f32> { return atm[2u * i + 1u].rgb; }
 /* the nearest ball or stick on the ray inside [t0, tf]: (lit rgb, t), t = 1e30 when none */
 fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -> vec4<f32> {
   let nA = u32(V.p7.x); let nB = u32(V.p7.y);
@@ -841,9 +843,7 @@ fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -
     }
   }
   if (best >= 1e30) { return vec4<f32>(0.0, 0.0, 0.0, 1e30); }
-  var c = atomLit(col, nrm, rd, ro + rd * best);
-  if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
-  return vec4<f32>(c, best);
+  return vec4<f32>(atomLit(col, nrm, rd, ro + rd * best), best);
 }
 /* 032 O1 · THE ATOMS OVER ANY STYLE: SIZE > 0 the balls, RADIUS > 0 the sticks — the nearer of the two on the ray (t = 1e30: none) */
 fn atomsOver(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32) -> vec4<f32> {

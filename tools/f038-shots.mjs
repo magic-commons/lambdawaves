@@ -61,6 +61,43 @@ try {
     out.total = Object.values(out.hydrogen).concat(Object.values(out.benzene)).reduce((a, b) => a + b, 0);
     out.ok = out.total === 0;
   }
+  if (scene === 'f2') {
+    /* the check: benzene's balls and sticks with the cloud at EXPOSURE 0 (the march adds nothing, the pixel is the atom or the stage): HUE 0.5 and INVERT
+       leave the picture's hash as it was; a light off its home (RIM 0.4) moves it.  Then the picture: the cloud on, HUE 0.5 + INVERT (the cloud turns, the atoms are CPK) */
+    await molecule('C6H6');
+    await g.ev(`__LW.mat.atomSize = 0.35; __LW.mat.stickR = 0.3; __LW.schedule(4); await __LW.settle(); await __LW.settle(); return 1;`);
+    out.hash = await g.ev(`const L = __LW, base = { ...L.mat, view: 1, style: 0, exposure: 0, frame: false, axis: false, dither: 0, hueShift: 0, invert: false }; delete base.light;
+      const h = async (m) => (await __F.px(L.obs, { ...base, ...m }, 640, 400)).hash;
+      return { plain: await h({}), hue: await h({ hueShift: 0.5 }), invert: await h({ invert: true }), both: await h({ hueShift: 0.5, invert: true }), rim: await h({ light: { rim: 0.4 } }) };`);
+    for (const [tag, m] of [['plain', '{ hueShift: 0, invert: false }'], ['hue-invert', '{ hueShift: 0.25, invert: true }']]) {
+      const r = await g.ev(`const L = __LW, mm = { ...L.mat, view: 1, style: 0, frame: false, axis: false, dither: 0, ...${m} }; delete mm.light; const r = await __F.px({ ...L.obs, dist: 1.7 }, mm, 640, 400); return { px: Array.from(r.px), bpr: r.bpr };`);
+      out['pic-' + tag] = jpeg('038-F2-benzene-' + tag, r.px, 640, 400, r.bpr);
+    }
+    const H = out.hash; out.ok = H.plain === H.hue && H.plain === H.invert && H.plain === H.both && H.plain !== H.rim;
+  }
+  if (scene === 'f3') {
+    /* the check: benzene's balls and sticks at EXPOSURE 0 (the picture is the atoms alone) — the CLIP on cuts them as before; CUT BALLS and CUT STICKS off
+       draw them exactly as the CLIP off does (CLIP and SLAB); one kind off leaves the other cut.  The switches: hidden under hydrogen, shown under
+       MOLECULES, a real press writes the key and a second press takes it away.  Then the pictures: the cloud on, CLIP on, cut and uncut */
+    out.hydrogenRow = await g.ev(`__LW.layout.reopen('clip'); await new Promise((r) => setTimeout(r, 300)); const r = document.querySelector('.dev[data-id="clip"] .clip-cut'); return r ? r.hidden : 'missing';`);
+    await molecule('C6H6');
+    await g.ev(`__LW.mat.atomSize = 0.35; __LW.mat.stickR = 0.3; __LW.schedule(4); await __LW.settle(); await __LW.settle(); return 1;`);
+    out.hash = await g.ev(`const L = __LW, base = { ...L.mat, view: 1, style: 0, exposure: 0, frame: false, axis: false, dither: 0 }; delete base.light;
+      const h = async (slice) => (await __F.px({ ...L.obs, dist: 1.7 }, { ...base, slice }, 640, 400)).hash, clip = { mode: 1, axis: 2, pos: 0.02, thick: 0.03, normal: [0.6, 0, 0.8] };
+      return { off: await h({ ...clip, mode: 0 }), cut: await h(clip), uncut: await h({ ...clip, balls: false, sticks: false }), slabCut: await h({ ...clip, mode: 2, thick: 0.05 }),
+        slabUncut: await h({ ...clip, mode: 2, thick: 0.05, balls: false, sticks: false }), ballsOnly: await h({ ...clip, balls: false }), sticksOnly: await h({ ...clip, sticks: false }) };`);
+    out.press = await g.ev(`const d = document.querySelector('.dev[data-id="clip"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click(); await new Promise((r) => setTimeout(r, 300));
+      const row = d.querySelector('.clip-cut'), [b, s] = row.querySelectorAll('button.sw'); const seen = { shown: !row.hidden, words: [b.textContent, s.textContent], hints: [b.title, s.title], lit: [b.classList.contains('on'), s.classList.contains('on')] };
+      b.click(); seen.afterBalls = { ...__LW.mat.slice }; s.click(); seen.afterSticks = { ...__LW.mat.slice }; b.click(); s.click(); seen.back = { ...__LW.mat.slice }; return seen;`);
+    for (const [tag, cut] of [['cut', '{}'], ['uncut', '{ balls: false, sticks: false }']]) {
+      const r = await g.ev(`const L = __LW, mm = { ...L.mat, view: 1, style: 0, frame: false, axis: false, dither: 0, slice: { mode: 1, axis: 2, pos: 0.02, thick: 0.03, normal: [0.6, 0, 0.8], ...${cut} } }; delete mm.light;
+        const r = await __F.px({ ...L.obs, dist: 1.7 }, mm, 640, 400); return { px: Array.from(r.px), bpr: r.bpr };`);
+      out['pic-' + tag] = jpeg('038-F3-benzene-clip-' + tag, r.px, 640, 400, r.bpr);
+    }
+    const H = out.hash, P = out.press;
+    out.ok = out.hydrogenRow === true && H.cut !== H.off && H.uncut === H.off && H.slabUncut === H.off && H.slabCut !== H.off && H.ballsOnly !== H.cut && H.ballsOnly !== H.off && H.sticksOnly !== H.cut && H.sticksOnly !== H.off
+      && P.shown && P.lit.every(Boolean) && P.afterBalls.balls === false && P.afterSticks.sticks === false && !('balls' in P.back) && !('sticks' in P.back);
+  }
 } catch (e) { out.error = String(e && e.stack || e); }
 finally { await g.close(); }
 console.log(JSON.stringify(out, null, 1));
