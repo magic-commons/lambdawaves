@@ -917,6 +917,23 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .native-clean[data-id="camera"] .mir-camsphere-body { align-items: center; }
 .native-clean[data-id="camera"] .mir-camsphere .cs-svg { width: calc(100% + 128px); max-width: none; margin: 0 -64px; clip-path: inset(0 64px round var(--r-md)); }
 .native-clean[data-id="camera"] .mir-camsphere-side { position: relative; z-index: 1; row-gap: var(--sp-1); }
+/* 037 L1 · LIGHTING (lab/light-window.js): FRAME · RESET · MORE on one row; the SUN pad — the kit's XY pad as a disc (its lattice clipped round, its
+   two hidden knobs the disc's x · y), the horizon dashed at half the radius, the sun its point (the key's colour when tinted, faint behind) — beside
+   KEY · RADIUS / HUE · TINT; then AMBIENT · SPECULAR · SHINE · RIM.  The visible body stays near 300 px; FILL and SPOT fold away */
+.lw-light .lw-light-verbs .lw-light-frame { flex: 1 1 auto; }
+.lw-light .lw-light-key { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 10px; align-items: center; margin: 6px 0; }
+.lw-light .lw-sun { width: 128px; }
+.lw-light .lw-sun .mir-xy-body { display: block; }
+.lw-light .lw-sun .mir-xy-side { display: none; }
+.lw-light .lw-sun .xy-pad { border-radius: 50%; --xy-dot: 24px; }
+.lw-light .lw-sun .xy-pad .xy-dot, .lw-light .lw-sun .xy-pad:is(.drag, :focus-visible, .mod) .xy-dot { display: grid; place-items: center; background: hsl(var(--glass-tint) / .92);
+  box-shadow: 0 0 0 1px var(--glass-hairline); color: var(--lw-sun, var(--acc)); }
+.lw-light .lw-sun .xy-pad.behind .xy-dot { opacity: .45; }
+.lw-light .lw-sun-rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; fill: none; stroke: var(--glass-hairline); stroke-width: .8; }
+.lw-light .lw-sun-rings .lw-sun-horizon { stroke: var(--fg-soft); stroke-dasharray: 2 2.4; opacity: .55; }
+.lw-light .lw-light-side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 4px; justify-items: center; }
+/* 037 L4: CAMERA's LIGHTING trigger, the extended body's last row — the sun beside its word, the row's width */
+.mir-camera .cam-light .cam-light-open { flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 /* 018 B3 · 020 S3: the verbs in TWO rows — PAN HOME · HOME, then LOCK · FLIP · AUTO-ROTATE (.cam-switches); each row shares its width evenly */
 /* PALETTE: ADD is the kit's plus, REVERSE (iteration 015 P2) the table's two counter-pointing arrows — 021 V2: SVG glyphs (material.js), no masks */
 .native-clean[data-id="palette"] :is(.pal-add, .pal-rev) > svg { width: 18px; height: 18px; }

@@ -47,6 +47,27 @@ play (t ÷ the clock's rate, re-anchored when either rate moves, so a turn never
 `bg` untouched (THE LOCK). Uniforms p16.w (AMOUNT), p17.x (SHAPE), p17.y (RATE), p17.z (the phase, written by `writeView`). `mat.stage
 { pulse, shape, rate }`, absent at home; PROJECT `presentation.stage` (absent = homes, never in NEW; the history keeps it); targets
 `stage.pulse` (flash-guarded, its own `flash` step) and `stage.rate` under the `stage` root.
+THE LIGHTING WINDOW (037 L, Josh: "I see that light shine/shadow in solid and ESP; let me edit/modulate it!" and "powerful like Blender's or
+Houdini's … no scrolling … don't make the window too tall"): the rack card `light` (`lab/light-window.js`, at the lab root; glyph sun; first run
+closed; in the FINDER; `window.light.*`) is a three-point rig on the old light. THE SUN PAD is the kit's XY pad dressed as a disc — its lattice
+swells under the sun, its two hidden knobs are the disc's x · y — showing the sphere of directions azimuthal-equidistant: the centre faces the
+eye, the dashed ring is the horizon, the rim is straight behind (a sun past the ring is a back light, drawn faint). Beside it KEY (strength),
+RADIUS (the lamp's size: a wrapped terminator, a wider and lower highlight), HUE · TINT (the key's colour; TINT 0 is white); under them AMBIENT ·
+SPECULAR · SHINE · RIM; behind MORE (the CAMERA window's fold) the FILL (strength, FILL AZ, FILL EL; no colour, no highlight) and the SPOT (CONE
+10–180°, 180 = none; BLEND its edge). FRAME is CAMERA (a headlight: right · up · toward the eye, as CLIP's frame) or WORLD (a lamp fixed to the
+object); a press re-reads the key and the fill through `cameraBasis`, so the light stays where it stands and only what an orbit does changes.
+RESET returns every home. THE WORDS: a direction is two degrees of freedom, azimuth and elevation; a quaternion's third, roll about the light's own
+axis, does nothing to a light, so there are no "quaternion knobs". THE HOMES are the old light (`field.js` LIGHT_HOME: the key at the atoms' old
+upper-right direction, AMBIENT and SPECULAR at their 0.32, SHINE 40, FILL 0, CONE 180): the KEY at its home numbers in CAMERA means the old
+light's own vector per style, so a hand on any other dial keeps the old direction, and the rig is continuous with the old picture (THE LEGACY
+GATE, field-and-lock.md). AMBIENT above its home is light from everywhere, below it a darker floor; SOLID, SIGNED and SHELL begin to shine above
+SPECULAR's 0.32 (they had none), the atoms and ESP shine at it. KEY and FILL are two-sided on the lit styles as the old light was (a light from
+the left lights both flanks of a lobe), one-sided on the balls, sticks and ESP. MATTE stays unlit; CLOUD, BANDS, DUST and ADD are unlit as before.
+THE RECORD `mat.light` holds only the values a hand moved off their homes (absent = the old light), PROJECT inside `presentation.mat`, in the
+history with the look, never in NEW; a file without it opens on the old light and a `lw:` link does not carry it. THE TARGETS are `light.az` ·
+`light.el` (the pad's, no dial) and `light.key` · `ambient` · `specular` · `shine` · `rim` · `hue` · `tint` · `fill` · `cone` · `softness`
+(RADIUS) under the root `light`, the dials' own ranges, seated at `presentation.mat.light[key]`. CAMERA's extended body ends with LIGHTING,
+which opens the card directly below CAMERA (`summonLight`; from the FINDER it opens as any card).
 
 ## The standing paragraphs
 

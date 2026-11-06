@@ -64,6 +64,34 @@ export const SLICE = { off: 0, clip: 1, slab: 2 };
  *  surface exactly — up to 1 at γ 0.3; the default γ 0.7 reads e ≈ 0.79 */
 export const espSoftOf = (g) => Math.min(1, Math.max(0, (2.2 - (Number.isFinite(g) ? g : 0.7)) / 1.9));
 export const STICK_R = 0.38, PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.1, ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
+/** 037 L · THE LIGHTING WINDOW's homes (lab/light-window.js): `mat.light` holds only the values a hand moved off these (absent = the old light, THE
+ *  LEGACY GATE shut).  KEY az/el in degrees in the FRAME (CAMERA: right · up · toward the eye; WORLD: the box's axes), its home the atoms' old
+ *  upper-right light; AMBIENT and SPECULAR at the atoms' old 0.32, SHINE their Phong 40; FILL off, CONE 180° (no spot) */
+export const LIGHT_HOME = Object.freeze({ az: 57.5, el: 57, key: 1, hue: 0, tint: 0, ambient: 0.32, specular: 0.32, shine: 40, rim: 0, softness: 0,
+  fill: 0, fillAz: -135, fillEl: 30, cone: 180, blend: 0.2, frame: 'camera' });
+/** the KEY's colour: hue (turns) at tint (saturation), full value — white at tint 0 — into out[at…at+2] */
+export function lightRgb(h, s, out = [0, 0, 0], at = 0) {
+  for (let i = 0, n = 5; i < 3; i++, n -= 2) { const k = ((n + h * 6) % 6 + 6) % 6; out[at + i] = 1 - s * Math.max(0, Math.min(k, 4 - k, 1)); }
+  return out;
+}
+const lv = (L, k) => (Number.isFinite(L[k]) ? L[k] : LIGHT_HOME[k]), LRAD = Math.PI / 180;
+/** 037 L2: mat.light into the View — p12 the KEY's direction in the FRAME (0 at its home numbers in CAMERA: the old light's own vector) and strength,
+ *  p13 its colour and CONE, p14 the FILL, p15 AMBIENT · SPECULAR · SHINE · RIM, p16.xyz BLEND · RADIUS · FRAME — and → THE LEGACY GATE (p17.w): 0
+ *  while every value is at its home, so the shader runs the old light's text.  p16.w and p17.xyz are the STAGE's PULSE and are never written here. */
+function lightView(v, L) {
+  if (!L || typeof L !== 'object') return 0;
+  const world = L.frame === 'world'; let off = world;
+  for (const k in LIGHT_HOME) if (!off && k !== 'frame' && lv(L, k) !== LIGHT_HOME[k]) off = true;
+  if (!off) return 0;
+  const az = lv(L, 'az') * LRAD, el = lv(L, 'el') * LRAD, old = !world && lv(L, 'az') === LIGHT_HOME.az && lv(L, 'el') === LIGHT_HOME.el;
+  v[64] = old ? 0 : Math.cos(el) * Math.cos(az); v[65] = old ? 0 : Math.cos(el) * Math.sin(az); v[66] = old ? 0 : Math.sin(el); v[67] = lv(L, 'key');
+  lightRgb(lv(L, 'hue'), lv(L, 'tint'), v, 68); v[71] = lv(L, 'cone');
+  const fa = lv(L, 'fillAz') * LRAD, fe = lv(L, 'fillEl') * LRAD;
+  v[72] = Math.cos(fe) * Math.cos(fa); v[73] = Math.cos(fe) * Math.sin(fa); v[74] = Math.sin(fe); v[75] = lv(L, 'fill');
+  v[76] = lv(L, 'ambient'); v[77] = lv(L, 'specular'); v[78] = lv(L, 'shine'); v[79] = lv(L, 'rim');
+  v[80] = lv(L, 'blend'); v[81] = lv(L, 'softness'); v[82] = world ? 1 : 0;
+  return 1;
+}
 export const MAX_MODES = 320;                                 // the whole 140-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr
 
@@ -569,18 +597,57 @@ fn slabInterval(ro: f32, rd: f32, lo: f32, hi: f32) -> vec2<f32> {
   let a = (lo - ro) / rd; let b = (hi - ro) / rd;
   return vec2<f32>(min(a, b), max(a, b));
 }
-/* the lit fraction at a point, from the density gradient (SOLID and SIGNED read as lit surfaces) */
-fn litAt(uvw: vec3<f32>) -> f32 {
+/* the density's normal at a point, from its gradient (litAt's; since 037 L2 the rig's too) */
+fn densN(uvw: vec3<f32>) -> vec3<f32> {
   let e = 1.2 / f32(textureDimensions(psiTex).x);
   let gx = rhoAt(psiTex, samp, uvw + vec3<f32>(e, 0.0, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(e, 0.0, 0.0));
   let gy = rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, e, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, e, 0.0));
   let gz = rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, 0.0, e)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, 0.0, e));
-  let n = normalize(vec3<f32>(gx, gy, gz) + vec3<f32>(1e-9));
+  return normalize(vec3<f32>(gx, gy, gz) + vec3<f32>(1e-9));
+}
+/* the lit fraction at a point, from the density gradient (SOLID and SIGNED read as lit surfaces) */
+fn litAt(uvw: vec3<f32>) -> f32 {
+  let n = densN(uvw);
   return abs(dot(n, normalize(V.fwd.xyz + vec3<f32>(0.35, 0.2, 0.5))));
 }
 /* OVERLAY shading: the dark side is the colour burnt into itself (c², darker but MORE saturated), the lit side is the
    colour lifted toward white — never a grey multiplied in, which is what read as "a dark grey cast on the colours" */
 fn overlay(c: vec3<f32>, l: f32) -> vec3<f32> { return mix(c * c, c + (1.0 - c) * 0.35, smoothstep(0.0, 1.0, l)); }
+/* 037 L2 · THE RIG — the LIGHTING window's key, fill and rim (lab/light-window.js), read only while THE LEGACY GATE is open (V.p17.w == 1: a light
+   value is off its home); shut, every lit line runs its old text.  A direction lives in the FRAME (p16.z: 0 CAMERA — right · up · toward the eye, as
+   CLIP's eyeTurn — 1 WORLD, the box's axes); the KEY at its home numbers in CAMERA arrives as 0 and means the old light's own vector ('old'), so a hand
+   on any other value keeps the old direction.  RADIUS (p16.y) wraps the terminator, widens the highlight and lowers its peak; AMBIENT (p15.x) above its
+   home 0.32 is light from everywhere, below it a darker floor; the surfaces' SPECULAR begins above the atoms' 0.32; RIM a Fresnel lift; the SPOT a cone
+   about the key from the box's centre (CONE p13.w, 180 = none; BLEND p16.x).  At every home the arithmetic is the old light's. */
+fn rigDir(d: vec3<f32>) -> vec3<f32> {
+  if (V.p16.z > 0.5) { return normalize(d); }
+  return normalize(d.x * V.right.xyz + d.y * V.up.xyz - d.z * V.fwd.xyz);
+}
+fn rigKey(old: vec3<f32>) -> vec3<f32> {
+  if (all(V.p12.xyz == vec3<f32>(0.0))) { return normalize(old); }
+  return rigDir(V.p12.xyz);
+}
+fn rigSpot(L: vec3<f32>, p: vec3<f32>) -> f32 {
+  if (V.p13.w >= 179.5) { return 1.0; }
+  let h = radians(V.p13.w) * 0.5; let c0 = cos(h);
+  return smoothstep(c0, max(cos(h * (1.0 - V.p16.x)), c0 + 1e-4), dot(normalize(p + vec3<f32>(1e-6)), L));
+}
+/* the rig on a lit style's sample: k = 0 SOLID's and SIGNED's overlay (the burn under, the lift over), else SHELL's and GLASS's toward-white by k up to m;
+   KEY and FILL two-sided as litAt (the old key turned to face the eye: the same shading, a highlight that can be seen) */
+fn rigShade(c: vec3<f32>, uvw: vec3<f32>, k: f32, m: f32) -> vec3<f32> {
+  let n = densN(uvw); let half = V.cam.w; let p = uvw * (2.0 * half) - vec3<f32>(half);
+  let E = normalize(V.cam.xyz - p);
+  let L = rigKey(-V.fwd.xyz - vec3<f32>(0.35, 0.2, 0.5));
+  let w = 0.5 * V.p16.y; let s = rigSpot(L, p) * V.p12.w;
+  let e = (abs(dot(n, L)) + w) / (1.0 + w) * s * V.p13.rgb
+        + vec3<f32>((abs(dot(n, rigDir(V.p14.xyz))) + w) / (1.0 + w) * V.p14.w + max(V.p15.x - 0.32, 0.0));
+  let fl = min(V.p15.x / 0.32, 1.0);
+  var o = mix(c * fl, vec3<f32>(1.0), clamp(e * k, vec3<f32>(0.0), vec3<f32>(m)));
+  if (k == 0.0) { o = mix(c * c * fl, c + (1.0 - c) * 0.35, smoothstep(vec3<f32>(0.0), vec3<f32>(1.0), e)); }
+  let nf = select(n, -n, dot(n, E) < 0.0);
+  let g = max(V.p15.y - 0.32, 0.0) / 0.68 * pow(max(dot(reflect(-L, nf), E), 0.0), V.p15.z / (1.0 + 4.0 * V.p16.y)) * (1.0 - 0.5 * V.p16.y) * s;
+  return o + (g + V.p15.w * pow(1.0 - abs(dot(n, E)), 3.0)) * V.p13.rgb;
+}
 
 /* ORDERED DITHER — the recursive Bayer 8x8 threshold matrix, closed form, no table and no texture.
  * M_{2n} = [[4M, 4M+2],[4M+3, 4M+1]] means each level contributes two bits, and the TOP level's pair are the
@@ -704,7 +771,16 @@ fn hueRot(c: vec3<f32>, h: f32) -> vec3<f32> {
   let k = vec3<f32>(0.57735027); let a = h * 6.283185307; let ca = cos(a);
   return clamp(c * ca + cross(k, c) * sin(a) + k * dot(k, c) * (1.0 - ca), vec3<f32>(0.0), vec3<f32>(1.0));
 }
-fn atomLit(c: vec3<f32>, n: vec3<f32>, rd: vec3<f32>) -> vec3<f32> {
+/* 037 L2: the rig on a ball, a stick or ESP's map — one-sided, the old key's ambient 0.32, diffuse 0.68 and Phong 0.32 · 40 at every home */
+fn rigAtom(c: vec3<f32>, n: vec3<f32>, rd: vec3<f32>, p: vec3<f32>) -> vec3<f32> {
+  let L = rigKey(-rd + 0.55 * V.up.xyz + 0.35 * V.right.xyz);
+  let w = 0.5 * V.p16.y; let s = rigSpot(L, p) * V.p12.w; let a = V.p15.x;
+  let e = max((dot(n, L) + w) / (1.0 + w), 0.0) * s * V.p13.rgb + vec3<f32>(max((dot(n, rigDir(V.p14.xyz)) + w) / (1.0 + w), 0.0) * V.p14.w);
+  let g = V.p15.y * pow(max(dot(reflect(-L, n), -rd), 0.0), V.p15.z / (1.0 + 4.0 * V.p16.y)) * (1.0 - 0.5 * V.p16.y) * s;
+  return c * (a + (1.0 - a) * e) + (g + V.p15.w * pow(1.0 - abs(dot(n, rd)), 3.0)) * V.p13.rgb;
+}
+fn atomLit(c: vec3<f32>, n: vec3<f32>, rd: vec3<f32>, p: vec3<f32>) -> vec3<f32> {
+  if (V.p17.w == 1.0) { return rigAtom(c, n, rd, p); }
   let L = normalize(-rd + 0.55 * V.up.xyz + 0.35 * V.right.xyz);
   let d = max(dot(n, L), 0.0); let sp = pow(max(dot(reflect(-L, n), -rd), 0.0), 40.0);
   return c * (0.32 + 0.68 * d) + vec3<f32>(0.32 * sp);
@@ -763,7 +839,7 @@ fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -
     }
   }
   if (best >= 1e30) { return vec4<f32>(0.0, 0.0, 0.0, 1e30); }
-  var c = atomLit(col, nrm, rd);
+  var c = atomLit(col, nrm, rd, ro + rd * best);
   if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
   return vec4<f32>(c, best);
 }
@@ -832,7 +908,7 @@ fn espSoft(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, tEnd: f32, half: f32,
           let n = -normalize(vec3<f32>(rhoAt(psiTex, samp, uvw + vec3<f32>(g, 0.0, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(g, 0.0, 0.0)),
                                        rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, g, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, g, 0.0)),
                                        rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, 0.0, g)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, 0.0, g))) + vec3<f32>(1e-12));
-          c = atomLit(c, n, rd);
+          c = atomLit(c, n, rd, p);
         }
         col += T * a * c; T *= 1.0 - a;
         if (T < 0.01) { break; }
@@ -883,7 +959,7 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   var c = vec3<f32>(0.62);                                           // φ not ready: a grey surface
   if (V.p9.z > 0.5) { c = espColour(phiAt(ro + rd * th)); }
   if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
-  if (V.p6.w < 1.5) { c = atomLit(c, n, rd); }                       // MATTE: the map's colour unlit
+  if (V.p6.w < 1.5) { c = atomLit(c, n, rd, ro + rd * th); }        // MATTE: the map's colour unlit
   return mix(back, c, clamp(0.8 * V.p0.y, 0.05, 1.0));
 }
 /* 037 T4 · PULSE (lab/stage-window.js), the first STAGE FX: a radial wash of the stage — × 2.2 + 0.035 on a dark stage, × 0.7 on a light one (by
@@ -1012,7 +1088,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
       let rho = dot(s, s) / rhoMax;
       let band = smoothstep(iso * 0.55, iso, rho) * (1.0 - smoothstep(iso * 6.0, iso * 14.0, rho));
       wEff = band * 2.2;
-      if (band > 0.02) { if (V.p6.w < 1.5) { c = overlay(c, litAt(uvw)); } }   // shade the plateau by its own gradient, as an overlay
+      if (band > 0.02) { if (V.p6.w < 1.5) { if (V.p17.w == 1.0) { c = rigShade(c, uvw, 0.0, 1.0); } else { c = overlay(c, litAt(uvw)); } } }   // shade the plateau by its own gradient, as an overlay (037 L2: the rig while THE LEGACY GATE is open)
     } else if (style == 3u) {
 
 
@@ -1020,7 +1096,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
       let mag = select(sqrt(dot(s, s) / rhoMax), abs(sv), mode == 2u || mode == 3u);
       let iso = max(V.p3.y, 1e-6);
       wEff = smoothstep(iso * 1.5, iso * 5.0, mag) * 2.2;
-      if (wEff > 0.02) { if (V.p6.w < 1.5) { c = overlay(c, litAt(uvw)); } }
+      if (wEff > 0.02) { if (V.p6.w < 1.5) { if (V.p17.w == 1.0) { c = rigShade(c, uvw, 0.0, 1.0); } else { c = overlay(c, litAt(uvw)); } } }
     } else if (style == 4u) {
       /* BANDS (iteration 008 G): the field's own level surfaces, ONE PER OCTAVE of the density (ρ, or (Re ψ)², (Im ψ)² under
          the signed views) and anchored at ISO — a line at ρ = ISO·2^k for every k — so the band SOLID and SHELL draw is one of
@@ -1040,14 +1116,16 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
       // Skip lighting only when this sample contributes nothing. A 0.02
       // cutoff changes visible shell colour and is not an exact optimisation.
       if (shell > 0.0) {
+        if (V.p17.w == 1.0) { c = rigShade(c, uvw, .65, 1.0); } else {
         let light = litAt(uvw);
         c = mix(c, vec3<f32>(1.0), clamp(light * .65, 0.0, 1.0));
+        }
       }
     }
     if (V.p6.w > .5 && V.p6.w < 1.5 && style != 6u) {
       // A glass finish on the selected shape, including signed nodal lobes.
       wEff *= .22;
-      if (wEff > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); }
+      if (wEff > 0.0) { if (V.p17.w == 1.0) { c = rigShade(c, uvw, .45, .65); } else { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); } }
     }
     if (style == 8u) {
       /* SHELL ± (iteration 010 X7, Josh 10-19: "Shell look with the Signed geometry"): SIGNED's measure — |ψ| under DENSITY and
@@ -1063,7 +1141,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
       let shell = exp(-pow((mag * mag - l2) / (l2 * .32), 2.0));
       wEff = shell * .7;
       c = baseColour;
-      if (shell > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .65, 0.0, 1.0)); }
+      if (shell > 0.0) { if (V.p17.w == 1.0) { c = rigShade(c, uvw, .65, 1.0); } else { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .65, 0.0, 1.0)); } }
     }
     if (V.p6.w > 1.5) { c = baseColour; }
     let a = 1.0 - exp(-wEff * sigma * stepN * 4.0);
@@ -1110,7 +1188,7 @@ const RENDER_BOW = '    if (V.p4.w > 0.5) { let ph = dot(V.p4.xyz, p); let cs = 
 const RENDER_GLASS_FINISH = `    if (V.p6.w > .5 && V.p6.w < 1.5 && style != 6u) {
       // A glass finish on the selected shape, including signed nodal lobes.
       wEff *= .22;
-      if (wEff > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); }
+      if (wEff > 0.0) { if (V.p17.w == 1.0) { c = rigShade(c, uvw, .45, .65); } else { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); } }
     }`;
 export const SPEC_STYLES = Object.freeze([STYLE.cloud, STYLE.grain, STYLE.bands, STYLE.dust]);
 /** one anchored substitution: `from` must occur exactly once, or the derived text throws (a moved anchor never derives silently) */
@@ -1849,6 +1927,7 @@ export async function createField(canvas, opts = {}) {
     v[60] = espSoftOf(mat.softness); v[61] = mat.espBare ? 1 : 0;   // iteration 016 S1 · S2
     const ps = mat.stage;   // 037 T4 · PULSE: p16.w AMOUNT, p17.x SHAPE, p17.y RATE, p17.z the phase; absent = the homes (AMOUNT 0: bg untouched). p16.xyz and p17.w are chain L's
     v[83] = ps ? ps.pulse : 0; v[84] = ps && ps.shape === 'edge' ? 1 : 0; v[85] = ps ? ps.rate : 0; v[86] = ps && ps.rate > 0 ? pulsePhase(ps.rate) : 0;
+    v[87] = lightView(v, mat.light);   // 037 L2: THE LIGHT (p12 … p16.xyz) and THE LEGACY GATE (p17.w)
     perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
     device.queue.writeBuffer(viewBuf, 0, v);
     lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);

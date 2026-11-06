@@ -1,7 +1,8 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
+import { el, knob, sw, seg, group, readout, chip, hint, trig } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
+import { createLight, summonLight } from '../light-window.js';   // 037 L1: THE LIGHTING WINDOW, CAMERA's sibling (lab/, not windows/); L4 its summons
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel, directionSphere } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, obs, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
@@ -352,6 +353,9 @@ export function createMaterial(app) {
          one under it (also .cam-verbs, so skin.css and a reader of the verbs see both) */
       const v0 = q('.cam-verbs'), v = v0 ? el('div', 'cam-row cam-verbs cam-switches') : more; if (v0) v0.after(v);
       for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); fold(q('.cam-mode') || R, more, { what: 'pan and hand' });
+      /* 037 L4 (Josh: "the button in Camera window can summon the Lighting window aside from the finder"): LIGHTING — the sun and its word — at the
+         foot of the extended body opens the LIGHTING card directly below CAMERA (light-window.js summonLight; from the FINDER it opens as any card) */
+      el('div', 'cam-row cam-light row fit', more).appendChild(trig({ label: 'LIGHTING', glyph: 'sun', cls: 'cam-light-open', title: 'LIGHTING · open the light below CAMERA', onFire: () => summonLight(app, wCam.root) }).root);
       for (const r of R.querySelectorAll('.cam-verbs, .cam-handrow')) r.classList.add('row', 'fit'); }   // 022 F2: the two verb rows (020 S3) and the hand's dials are fit rows; the sphere's column and the PAN pad are not
     /* iteration 012 R3 (Josh 10-20: "Remove text that says 'control' and 'direction' in camera … Increase the size of the 3D thingy while moving Zoom
        and FOV under 'YAW' and 'PITCH' … Rename 'Hand' to 'Controls'"): the kit's two labels leave its DOM, ZOOM · FOV join the sphere's knob column
@@ -361,6 +365,7 @@ export function createMaterial(app) {
       if (side && view) { side.append(...view.children); view.remove(); }
       const t = R.querySelector('.cam-hand .cam-title'); if (t) { t.textContent = 'CONTROLS'; t.dataset.t = 'CONTROLS'; } }
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt(+Shift)+Drag, two fingers or the PAN pad slide the picture 1:1 (Shift does not make the pan finer); the molecule stays the pivot. Double-click, double-tap or HOME restores the camera. LOCK is the classic camera: the pan stays at the centre and every zoom is from the centre.';
+    createLight(app);   // 037 L1: the LIGHTING card (first run closed; in the FINDER; `window.light.*` with every registered card)
   }
   return { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera };
 }
