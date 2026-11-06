@@ -26,7 +26,7 @@ import { valenceOf } from './valence.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { BASIS } from './hydrogen.js';
 import { L_LETTERS } from './names.js';
-import { RM, still, animate, pointerFrame, tiltPictures, holoCards, enterTiles, develop, swapLine, installRing, clamp } from './picker-fx.js';
+import { RM, still, animate, pointerFrame, tiltPictures, holoCards, enterTiles, develop, setPic, swapLine, installRing, clamp } from './picker-fx.js';
 import { createCollage } from './picker-collage.js';   // 035 THE COLLAGE: the face's wall of clips
 import * as V from './volumes.js';
 import { keepData, installed, safariTab } from './library.js';
@@ -375,13 +375,19 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* iteration 016 L1 · THE SEVENTH TILE, ATOM LABELS (Josh, call 1: "the element letters drawn over the picture, very small, barely readable,
      overlaps allowed"): Aa in STIX, the density picture with each nucleus' symbol (menu-thumbs --style labels); the drop is two centred rows,
      the wave's three looks over the structure's four (● · ⊸ · φ · Aa) */
+  /* 037 D2 · THE DIAGRAM (Josh 11-05: "instead of just being p probability with atom letters on it, it should be the Perspective Diagrams …
+     light and dark dependant"): the seventh tile keeps its saved id `labels`; its glyph is a wedge and its picture the chemist's perspective
+     diagram (tools/diagrams, RDKit), one SVG drawn in the tile's own ink (picker-fx.js setPic), so it follows the theme */
   const LOOKS = [['density', 'ρ', 'Density · ρ = |ψ|²'], ['phase', 'arg ψ', 'Phase · arg ψ on the colour wheel'], ['im', 'Im ψ', 'Imaginary part · Im ψ, signed'],
-    ['balls', '●', 'Balls · space-filling CPK spheres'], ['sticks', '⊸', 'Sticks · the bonds'], ['esp', 'φ', 'Electrostatic potential · φ on the surface'], ['labels', 'Aa', 'Atom labels · each nucleus\u2019 symbol over ρ']];
+    ['balls', '●', 'Balls · space-filling CPK spheres'], ['sticks', '⊸', 'Sticks · the bonds'], ['esp', 'φ', 'Electrostatic potential · φ on the surface'], ['labels', '◣', 'Diagram · a wedge comes toward you, a hash goes away']];
   const ATOM_LOOKS = new Set(['density', 'phase', 'im']);
+  /* 037 D6: while a volume is open THE LOOK button's hint says which looks its pages carry (volumes.js looks); the rest draw its plain picture */
+  const LOOK_WORD = { density: 'ρ', phase: 'arg ψ', im: 'Im ψ', balls: 'balls', sticks: 'sticks', esp: 'φ', labels: 'diagram' };
+  let volLooks = '';
   /** the look a deck draws: the reader's pick, else (016 P3) Im ψ on ATOMIC and arg ψ on a molecule (MOLECULAR, a volume, the search) */
   const lookFor = (atomic) => prefs.look || (atomic ? 'im' : 'phase');
   /* the glyph in the math face; ● and ⊸ are not in the shipped STIX subset (lab/fonts is never touched), so they are drawn, in the ink, at the em */
-  const SHAPES = { '●': 'balls', '⊸': 'sticks' };   // 021 V2: the table's `balls` and `sticks` (lab/icons.js)
+  const SHAPES = { '●': 'balls', '⊸': 'sticks', '◣': 'wedge' };   // 021 V2: the table's `balls` and `sticks` (lab/icons.js) · 037 D2: `wedge`
   const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = glyphSvg(SHAPES[g], 'gly'); else host.textContent = g; return host; };
   const lookOf = () => { const l = lookFor(false); return l !== 'density' ? l : null; };   // a volume tile's style (V.picture), a molecule's look
   const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu';   // 022 P3: a menu pane drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');
@@ -393,12 +399,12 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     for (const b of lookTiles) { const id = b.dataset.look, on = id === cur, off = atomic && !ATOM_LOOKS.has(id), word = LOOKS.find((x) => x[0] === id)[2];
       b.classList.toggle('on', on); b.classList.toggle('off', off); b.setAttribute('aria-checked', String(on)); b.setAttribute('aria-disabled', String(off));
       b.title = off ? word.split(' · ')[0] + ': none for a lone atom' : word; b.setAttribute('aria-label', b.title); b.tabIndex = on ? 0 : -1; }
-    const L = LOOKS.find((x) => x[0] === cur) || LOOKS[0]; glyph(lookG, L[1]); lookB.title = 'Look of the pictures · ' + L[2]; lookB.setAttribute('aria-label', lookB.title);
+    const L = LOOKS.find((x) => x[0] === cur) || LOOKS[0]; glyph(lookG, L[1]); lookB.title = volLooks ? 'Look · ' + volLooks : 'Look of the pictures · ' + L[2]; lookB.setAttribute('aria-label', lookB.title);
   }
   function setLook(id) {
     if (prefs.look === id) return; prefs.look = id; prefs.lookHand = true; writePrefs(prefs); paintLooks();   // P3: the first write is the reader's
-    for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) i.src = u; }, () => {});
-    for (const i of root.querySelectorAll('img.mm-pic[data-menu]')) { const { src } = picOf(i.dataset.menu); if (i.getAttribute('src') !== src) i.src = src; }   // M2: every deck of ours
+    for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) setPic(i, u); }, () => {});
+    for (const i of root.querySelectorAll('img.mm-pic[data-menu]')) { const { src } = picOf(i.dataset.menu); if (i.getAttribute('src') !== src) setPic(i, src); }   // M2: every deck of ours
   }
   let dropT = 0;
   const outside = (e) => { if (!drop.contains(e.target) && !lookB.contains(e.target)) closeDrop(); };
@@ -466,15 +472,18 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const MENU = './img/menu/';
   const picOf = (ref, look) => {
     const [kind, a, b] = ref.split(':'); if (look === undefined) look = lookFor(kind !== 'mol');   // P3: Im ψ for an element or a state, arg ψ for a molecule
-    if (kind === 'mol') return { src: look && look !== 'density' ? MENU + a + '.' + look + '.webp' : MENU + a + '.webp', fb: MENU + a + '.webp' };
+    if (kind === 'mol') return { src: look === 'labels' ? MENU + a + '.diagram.svg' : look && look !== 'density' ? MENU + a + '.' + look + '.webp' : MENU + a + '.webp', fb: MENU + a + '.webp' };   // 037 D2: the 7th look is the DIAGRAM
     const key = kind === 'el' ? b : a, fb = kind === 'el' ? MENU + 'el-' + a + '.webp' : MENU + 'orb-' + key + '.webp';
     return { src: look === 'density' || look === 'phase' ? MENU + 'orb-' + key + '.' + look + '.webp' : fb, fb };
   };
-  const hold = (host, i) => { if (i) i.remove(); if (!host.querySelector('.mm-ph')) el('b', 'mm-ph', host, (host.querySelector('.mm-lbl') || {}).textContent || '');  };   // A3: no picture — the formula holds the square
+  const hold = (host, i) => { if (i) i.hidden = true; if (!host.querySelector('.mm-ph')) el('b', 'mm-ph', host, (host.querySelector('.mm-lbl') || {}).textContent || '');  };   // A3: no picture — the formula holds the square
+  /* 037 D4: the picture is hidden, not removed, so another look that has one (a volume page's diagram or sheet) still reaches it; its load takes the formula away */
+  const unhold = (host, i) => { if (!i.hidden) return; i.hidden = false; const ph = host.querySelector('.mm-ph'); if (ph) ph.remove(); };
   const pic = (host, src, ref) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = hot ? 'eager' : 'lazy'; if (hot) i.fetchPriority = 'high'; i.draggable = false;
     let fb = null; if (ref) { i.dataset.menu = ref; ({ src, fb } = picOf(ref)); }
-    i.addEventListener('error', () => { const f = i.dataset.menu ? picOf(i.dataset.menu).fb : null; if (f && i.getAttribute('src') !== f) i.src = f; else hold(host, i); });
-    if (src) { develop(i); i.addEventListener('load', () => { const u = i.getAttribute('src'); if (u && u.startsWith(MENU)) keepData(u); }); i.src = src; } return i; };
+    i.addEventListener('error', () => { const f = i.dataset.menu ? picOf(i.dataset.menu).fb : null; if (f && i.getAttribute('src') !== f) setPic(i, f); else hold(host, i); });
+    i.addEventListener('load', () => unhold(host, i));
+    if (src) { develop(i); i.addEventListener('load', () => { const u = i.getAttribute('src'); if (u && u.startsWith(MENU)) keepData(u); }); setPic(i, src); } return i; };
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
     if (off) { b.classList.add('off'); b.setAttribute('aria-disabled', 'true'); }
@@ -851,7 +860,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       }
     }
     async function paintShelf() {
-      shelfEl.textContent = ''; shelfEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume');
+      shelfEl.textContent = ''; shelfEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume'); volLooks = ''; paintLooks();
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'EXPANSIONS');
@@ -864,6 +873,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     async function enter(v) {
       rest(); cur = v; on.clear(); query = ''; shelfEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = ''; root.classList.add('in-volume');   // the head's SHOW LABELS stands for the one under the tabs
+      volLooks = ''; paintLooks(); V.looks(v.id).then((ls) => { if (cur !== v) return; volLooks = volName(v) + ': ' + (ls.length ? ls.map((l) => LOOK_WORD[l] || l).join(', ') : 'the plain picture'); paintLooks(); }, () => {});
       const back = el('button', 'mm-back', vhead); back.type = 'button'; icon(back, 'arrow-left'); back.setAttribute('aria-label', 'back to the volumes'); back.title = 'back to the volumes'; back.addEventListener('click', () => paintShelf());
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
       const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).filter((x) => x.count || x.index || x.archive).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
@@ -912,7 +922,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
       if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + SYM[atom - 1] + ':' + v.nl + '_' + v.m); return t; }
       const i = pic(t, null), ph = () => hold(t, i); i.dataset.vol = cur.id; i.dataset.mol = m.id;
-      V.picture(cur.id, m.id, lookOf()).then((u) => { develop(i); i.src = u; }, ph);
+      V.picture(cur.id, m.id, lookOf()).then((u) => { develop(i); setPic(i, u); }, ph);
       return t;
     }
     const wordsOf = (m) => (m.geo ? [...(m.tags || []), ...m.geo] : m.tags || []);   // C3: a molecule's chips, what it is and its shape
@@ -1043,7 +1053,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const info = { formula: mathPlain(r.formula), name: cap(r.name), sub: r.vol ? r.vol.toUpperCase() : '' };
     const t = tile(host, 'mm-mol', info, () => (r.vol ? goVolume(r.v, r.m) : goMolecule(r.id)));
     const i = pic(t, null, r.vol ? null : 'mol:' + r.id); el('b', 'mm-lbl', t, info.formula);
-    if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { i.src = u; }, () => hold(t, i)); }
+    if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { setPic(i, u); }, () => hold(t, i)); }
     return t;
   };
   /* 037 M1: the sheet's COLLAGE row reads and sets the wall's switch here (settings-card.js never imports this module) */

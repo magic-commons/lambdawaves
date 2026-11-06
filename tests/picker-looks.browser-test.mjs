@@ -1,7 +1,7 @@
 // iteration 016 L1 · L2 · L3 · P3 · THE PICKER'S LOOKS, in the real page (research/iteration-016/L-BUILD.md):
 //   P3 · with no `look` stored the ATOMIC deck draws Im ψ (its button reads `Im ψ`, an element tile its one picture) and the MOLECULAR deck arg ψ
 //        (`<id>.phase.webp`); nothing is written until the reader picks;
-//   L1 · THE LOOK DROP holds seven tiles, the seventh ATOM LABELS (`Aa`), and a pick of it draws `<id>.labels.webp`;
+//   L1 · THE LOOK DROP holds seven tiles, the seventh DIAGRAM (037 D2: a drawn wedge), and a pick of it draws `<id>.diagram.svg` in the ink;
 //   L2 · one wheel detent over the drop steps one look, and the pick is the reader's (`look` + `lookHand` stored);
 //   L3 · HYDROGEN is the 140 on one page: 140 tiles, fourteen columns, ten rows, every tile on screen, no page arrows.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
@@ -28,17 +28,17 @@ try {
   pass(`P3: no look stored → ATOMIC ${p3.atomic.look} (${p3.atomic.src}), MOLECULAR ${p3.molecular.look} (${p3.molecular.src}); nothing written`);
 
   const l12 = await ev(`const w = (n) => new Promise((r) => setTimeout(r, n)); document.querySelector('.mm-lookb').click(); await w(500);
-    const tiles = [...document.querySelectorAll('.mm-lk')].map((b) => b.dataset.look), aa = document.querySelector('.mm-lk[data-look="labels"]').textContent;
+    const tiles = [...document.querySelectorAll('.mm-lk')].map((b) => b.dataset.look), aa = document.querySelector('.mm-lk[data-look="labels"] svg') ? 'wedge' : document.querySelector('.mm-lk[data-look="labels"]').textContent;
     const dr = document.querySelector('.mm-lookdrop'), before = document.querySelector('.mm-lk.on').dataset.look;
     dr.dispatchEvent(new WheelEvent('wheel', { deltaY: 3, deltaMode: 1, bubbles: true, cancelable: true }));
     const after = document.querySelector('.mm-lk.on').dataset.look, stored = JSON.parse(localStorage.getItem('lambdawaves.q0.picker'));
     document.querySelector('.mm-lk[data-look="labels"]').click(); await w(1500);
-    return { tiles, aa, before, after, stored, src: document.querySelector('.mm-mol img.mm-pic').getAttribute('src') };`);
+    const im = document.querySelector('.mm-mol img.mm-pic'); return { tiles, aa, before, after, stored, src: im.getAttribute('src'), ink: im.classList.contains('pic-ink') && getComputedStyle(im).maskImage.startsWith('url(') };`);
   assert.deepEqual(l12.tiles, ['density', 'phase', 'im', 'balls', 'sticks', 'esp', 'labels'], 'the drop: ' + JSON.stringify(l12.tiles));
-  assert.equal(l12.aa, 'Aa');
+  assert.equal(l12.aa, 'wedge');
   assert.ok(l12.before === 'phase' && l12.after === 'im' && l12.stored.look === 'im' && l12.stored.lookHand === true, 'one detent did not step one look: ' + JSON.stringify(l12));
-  assert.ok(/\.labels\.webp$/.test(l12.src), 'ATOM LABELS drew ' + l12.src);
-  pass(`L1 · L2: seven tiles (${l12.tiles.join(' · ')}), the seventh "${l12.aa}"; one detent ${l12.before} → ${l12.after}, stored as the reader's; ATOM LABELS draws ${l12.src}`);
+  assert.ok(/\.diagram\.svg$/.test(l12.src) && l12.ink, 'DIAGRAM drew ' + l12.src + (l12.ink ? '' : ', not as a mask in the ink'));
+  pass(`L1 · L2: seven tiles (${l12.tiles.join(' · ')}), the seventh "${l12.aa}"; one detent ${l12.before} → ${l12.after}, stored as the reader's; DIAGRAM draws ${l12.src} in the ink`);
 
   const l3 = await ev(`const w = (n) => new Promise((r) => setTimeout(r, n)); document.querySelectorAll('.mm-tab')[0].click(); await w(900); document.querySelector('[data-amode="hydrogen"]').click(); await w(1200);
     const r = [...document.querySelectorAll('.mm-htable .mm-tile')].map((t) => t.getBoundingClientRect());

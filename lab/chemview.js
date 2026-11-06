@@ -31,7 +31,7 @@ import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; imp
 import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
 import { planePoints } from './slice.js';   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
-import * as V from './volumes.js'; import { parseLwm, rungRecord, espOf, espGrid } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
+import * as V from './volumes.js'; import { setPic } from './picker-fx.js'; import { parseLwm, rungRecord, espOf, espGrid } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -219,11 +219,13 @@ export function createChem(host, api) {
      it (checked against its sha-256 name, persist asked once) and opens it: the same road a DOWNLOAD row's pick takes */
   const dlB = el('button', 'trig mol-dl'); dlB.type = 'button'; chip(dlB, 'download', 'Download this molecule’s record'); dlB.hidden = true;
   /* iteration 008 V: the glyph sits in the PICTURE's seat (left of the name) and wears the kit's ring (arcRing) while a molecule is kept; the
-     picture is the molecule's own (a volume's t/<id>.webp, the catalogue's img/menu/<id>.webp), read for the molecule chosen only */
+     picture is the molecule's own (a volume's t/<id>.webp, the catalogue's img/menu/<id>.webp), read for the molecule chosen only.  037 D3 (Josh 11-05: "Let it
+     show the perspective diagram instead"): it is the molecule's DIAGRAM — the catalogue's img/menu/<id>.diagram.svg, a volume page's when the page
+     carries one (volumes.js picture 'labels'), else the plain picture — drawn in the CSB's ink (picker-fx.js setPic) */
   const pic = el('img', 'mol-thumb'); pic.alt = ''; pic.decoding = 'async'; pic.hidden = true;
   const ring = arcRing(dlB); mStep.name.replaceChildren(pic, dlB, mList.root);
   let picFor = null, picUrl = null, dlBusy = false, near = false;   // near: the hand has come to the pickers (or picked) — no picture is fetched before, so a boot reads nothing (a DATA fetch would make lw-data-v1)
-  pic.addEventListener('load', () => { if (pic.getAttribute('src')) pic.hidden = false; }); pic.addEventListener('error', () => { pic.hidden = true; });
+  pic.addEventListener('load', () => { if (pic.getAttribute('src')) pic.hidden = false; }); pic.addEventListener('error', () => { const u = pic.getAttribute('src') || ''; if (u.endsWith('.diagram.svg')) setPic(pic, u.slice(0, -12) + '.webp'); else pic.hidden = true; });
   const ringTo = (r) => { if (r === null) { delete dlB.dataset.busy; ring.set(0); return; } dlB.dataset.busy = ''; ring.set(360 * Math.min(1, Math.max(0.02, r))); };
   dlB.addEventListener('click', (e) => { e.stopPropagation(); const id = mSel.value; if (!id || dlBusy) return; const k = vKey(id);
     if (k) { keepMolecule(k); return; }
@@ -239,14 +241,14 @@ export function createChem(host, api) {
     } else if (P) {
       const r = P.recordOnly && P.records && P.records['sto-3g'];
       if (r && !have.get(r.hash) && !safariTab()) { glyph = true; hint(dlB, `${P.name} · ${(r.bytes / 1048576).toFixed(1)} MB`); }
-      else src = './img/menu/' + P.id + '.webp';
+      else src = './img/menu/' + P.id + '.diagram.svg';
     }
     dlB.hidden = !glyph && !dlBusy;
     if (!src || glyph || !near) { pic.hidden = true; picFor = null; return; }
     if (picFor === id) return;
     picFor = id; pic.hidden = true; pic.removeAttribute('src'); if (picUrl) { URL.revokeObjectURL(picUrl); picUrl = null; }
-    if (src !== 'vol') { pic.src = src; return; }
-    V.picture(k.volume, k.id).then((u) => { if (picFor !== id) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) picUrl = u; pic.src = u; }, () => {});
+    if (src !== 'vol') { setPic(pic, src); return; }
+    V.picture(k.volume, k.id, 'labels').then((u) => { if (picFor !== id) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) picUrl = u; setPic(pic, u); }, () => {});
   }
   const dlShow = rowPic;
   mList.button.title = mList.button.dataset.help = 'The cap is benzene: a slower entry is disabled';   // 022 H1: one line; the rule in full is the window's note (below)

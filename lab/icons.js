@@ -106,6 +106,7 @@ const ICONS = {
   /* ── the Picker's look tiles (picker.js SHAPES) and the ladders' FILL ALL / EMPTY (paint-stroke.js, Gemini's 008 U drawings) ── */
   balls: dot(12, 12, 6.5),
   sticks: p('M3 12h11.3') + c(17.5, 12, 3.2),                                   // was 1.6 wide
+  wedge: solid('M4.5 12.5 19.2 3.4 21 6.8Z') + p('M10.1 14.7l-.4 1.1M13.4 15.7l-.8 1.8M16.6 16.6l-1 2.6M19.9 17.5l-1.4 3.4'),   // 037 D2 DIAGRAM: a solid wedge toward you, a hashed one away
   fillAll: '<rect ' + S + ' x="5" y="2.5" width="14" height="19" rx="3"/>' + p('M8.5 6.5h7M8.5 10h7M8.5 13.5h7') + dot(12, 17.6, 1.9),
   emptyAll: '<rect ' + S + ' x="5" y="2.5" width="14" height="19" rx="3"/>' + c(12, 12, 3.6) + p('M8.6 16.4 15.4 7.6'),
   /* 036 P1 · BUTTONS · PAINT (paint-stroke.js strokeButton, 037 H6: one toggle button whose glyph swaps): a hand pointing up (a click toggles one) · a paintbrush (drag adds, right-drag removes) */
