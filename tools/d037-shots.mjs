@@ -30,6 +30,14 @@ try {
     const r = await g.ev(`const r = document.querySelector('#lwMenu .mm-lookdrop').getBoundingClientRect(); return [r.left, r.top, r.width, r.height].map(Math.round);`);
     await shot('037-D2-drop-light', [Math.max(0, r[0] - 160), Math.max(0, r[1] - 90), r[2] + 320, r[3] + 130]);
   }
+  if (scene === 'csb') {   // a catalogue molecule picked by the hand road: MOLECULES' thumbnail in the CSB is its DIAGRAM, in the ink
+    await g.ev(`const M = document.getElementById('lwMenu'); if (M && !M.hidden) document.getElementById('lwHome').click(); __LW.chem.setOn(true); await __LW.chem.pick('C6H6'); return 1;`); await wait(4000);
+    for (const t of ['dark', 'light']) { await theme(t); await wait(1200);
+      const r = await g.ev(`const i = document.querySelector('.mol-pick .mol-thumb'), b = i.getBoundingClientRect(), row = i.closest('.mol-pick').getBoundingClientRect();
+        return { src: i.getAttribute('src'), hidden: i.hidden, ink: i.classList.contains('pic-ink'), colour: getComputedStyle(i).backgroundColor, box: [b.left, b.top, b.width, b.height].map(Math.round), row: [row.left, row.top, row.width, row.height].map(Math.round) };`);
+      console.log(t, JSON.stringify(r));
+      await shot('037-D3-csb-' + t, [Math.max(0, r.row[0] - 24), Math.max(0, r.row[1] - 24), r.row[2] + 48, r.row[3] + 48]); }
+  }
   console.log(JSON.stringify((await g.errors()).errs.filter((e) => !/ResizeObserver/.test(e))));
 } catch (e) { console.log('FAIL ' + (e && e.message)); process.exitCode = 1; }
 await g.close();
