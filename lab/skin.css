@@ -579,9 +579,9 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
    so the bands share the scroller's cell; the head stays above them; FOLDERS and the face have none. */
 @property --mm-edge { syntax: '<length>'; inherits: false; initial-value: 0px; }
 #lwMenu .mm-top { grid-row: 1; } #lwMenu .mm-scroll { grid-row: 2; grid-column: 1; } #lwMenu .mm-caption { grid-row: 3; }
-#lwMenu :is(.mm-scroll, .mm-tut) { --mm-edge: 0px; transition: --mm-edge 260ms var(--ease);
+#lwMenu .mm-scroll { --mm-edge: 0px; transition: --mm-edge 260ms var(--ease);
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); }
-#lwMenu.mm-moving > :is(.mm-scroll, .mm-tut) { --mm-edge: 72px; }
+#lwMenu.mm-moving > .mm-scroll { --mm-edge: 72px; }
 #lwMenu .mm-edge { grid-row: 2; grid-column: 1; position: relative; z-index: 2; --mm-edge: 0px; height: var(--mm-edge); transition: --mm-edge 260ms var(--ease); pointer-events: none; display: none; }   /* it grows from the edge: an opacity under 1 would cut its blur off from the backdrop */
 #lwMenu.mm-moving > .mm-edge { --mm-edge: 72px; }
 #lwMenu .mm-edge.top { align-self: start; } #lwMenu .mm-edge.foot { align-self: end; }
@@ -593,7 +593,7 @@ body.frost #lwMenu .mm-edge { display: block; }
 #lwMenu .mm-edge.top > i:last-child { -webkit-mask-image: linear-gradient(to bottom, #000, transparent 55%); mask-image: linear-gradient(to bottom, #000, transparent 55%); }
 #lwMenu .mm-edge.foot > i:first-child { -webkit-mask-image: linear-gradient(to top, #000 25%, transparent); mask-image: linear-gradient(to top, #000 25%, transparent); }
 #lwMenu .mm-edge.foot > i:last-child { -webkit-mask-image: linear-gradient(to top, #000, transparent 55%); mask-image: linear-gradient(to top, #000, transparent 55%); }
-#lwMenu.at-face > .mm-edge, #lwMenu[data-sec="folders"] > .mm-edge { visibility: hidden; }
+#lwMenu.at-face > .mm-edge, #lwMenu:is([data-sec="folders"], [data-sec="tutorial"]) > .mm-edge { visibility: hidden; }   /* 037 U2: the tutorial's scroller fades its own ends */
 /* a tile: the picture alone moves */
 #lwMenu .mm-tile { position: relative; display: block; aspect-ratio: 1; border-radius: 10px; }
 #lwMenu .mm-tile:hover, #lwMenu .mm-tile:focus-visible { z-index: 3; }
@@ -1186,10 +1186,9 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-face.in .mm-corner { animation: none; } #lwMenu :is(.mm-cr-name, .mm-cr-name > span > *) { transition: none; translate: none; } }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-face.in .mm-corner { animation: none; }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu :is(.mm-cr-name, .mm-cr-name > span > *) { transition: none; translate: none; }
-/* 034 M3 · THE TUTORIAL DECK (picker.js showTutorial): in the decks' seat, a grid of 9:16 cards as many across as fit off the racks (two on a
-   phone), each the volume card's album art (its still, its hero, THE CARD'S LIGHT), its number and title at the art's foot, the caption under
-   it; the head keeps the logo, ← and THEME */
-#lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; padding: 6px 24px 32px; box-sizing: border-box; }
+/* 034 M3 · THE TUTORIAL (picker.js showTutorial) in the decks' seat; the head keeps the logo, ← and THEME.  037 U2 THE PLAYER: nothing in it
+   scrolls but the scroller of tiles */
+#lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; padding: 6px 24px 28px; box-sizing: border-box; }
 #lwMenu .mm-tut[hidden] { display: none; }
 #lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="back"], .mm-themeb)) { display: none; }   /* 035 G1: the tutorial's way back is ← */
 /* 037 U1 THE DECKS: the head is TUTORIAL_DECKS' two tabs alone — kit seg cells dressed as the decks' tabs (LW Title, .45 → 1, the chosen one
@@ -1200,17 +1199,35 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
   transition: opacity .12s ease, color .12s ease, background-color var(--t-relocate) var(--ease); }
 #lwMenu .mm-tut-head .seg-b:is(:hover, :focus-visible) { opacity: .8; }
 #lwMenu .mm-tut-head .seg-b.on { opacity: 1; color: var(--acc); background: hsl(var(--glass-tint) / .5); }
-#lwMenu .mm-tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 28px 18px; width: min(1500px, 100%); margin: 0 auto; }
-@media (min-width: 1100px) { #lwMenu .mm-tgrid { width: min(1500px, 100%, calc(100vw - 2 * (var(--rack-w, 300px) + 20px))); } }
-#lwMenu .mm-tcard { display: grid; gap: 10px; align-content: start; }
-#lwMenu .mm-tcard-open { position: relative; display: block; width: 100%; aspect-ratio: 9 / 16; border-radius: 18px; }
-#lwMenu .mm-tcard .mm-art-foot { gap: 5px; padding: 48px 8px 16px; }
-#lwMenu .mm-tnum { font-style: normal; font-size: 10px; letter-spacing: .23em; opacity: .7; font-variant-numeric: tabular-nums; }
-#lwMenu .mm-ttitle { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(17px, 1.4vw, 23px); line-height: 1.05; letter-spacing: .04em; text-align: center; transition: color 160ms; }
-#lwMenu .mm-tcard-open:is(:hover, :focus-visible) .mm-ttitle { color: var(--acc); }
-#lwMenu .mm-tcap { margin: 0; padding: 0 4px; font-size: 12px; line-height: 1.45; text-align: center; opacity: .75; }
-#lwMenu .mm-tcap.soon { font-size: 11px; font-style: italic; letter-spacing: .06em; opacity: .35; }
-@media (max-width: 700px) { #lwMenu .mm-tut { padding: 6px 12px 24px; } #lwMenu .mm-tgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; } }
+/* 037 U2 THE PLAYER (picker.js tutPlayer): a deck's face fills the seat off the racks and is a size container — the clip as tall as the seat
+   leaves over THE CAPTION'S SEAT (--cap, kept empty until Josh's words, so nothing jumps when they come) at its own 9:16, never wider than
+   58 % of the seat; beside it the scroller, the deck's other rows as 9:16 tiles (≥ 96 px, as many across as fit), their stills alone — a title
+   rises over its tile on a hover or a key's focus (120 ms).  While the scroller moves its ends fade (--mm-edge, THE DECKS' EDGES).  ≤ 1000 px
+   the scroller is a strip under the player and the caption's seat. */
+#lwMenu .mm-player { --cap: 72px; flex: 1 1 0; min-height: 0; width: min(1500px, 100%); margin: 0 auto; container-type: size;
+  display: grid; grid-template: "main list" minmax(0, 1fr) "cap list" var(--cap) / auto minmax(0, 1fr); gap: 0 28px; }
+@media (min-width: 1100px) { #lwMenu .mm-player { width: min(1500px, 100%, calc(100vw - 2 * (var(--rack-w, 300px) + 20px))); } }
+#lwMenu .mm-player[hidden], #lwMenu .mm-player-tile[hidden] { display: none; }
+#lwMenu .mm-player-main { grid-area: main; align-self: start; position: relative; height: min(calc(100cqh - var(--cap)), calc(58cqw * 16 / 9)); aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; isolation: isolate; background: hsl(var(--glass-tint) / .5); }
+#lwMenu .mm-player-clip { position: absolute; inset: 0; }
+#lwMenu .mm-player-cap { grid-area: cap; }
+#lwMenu .mm-player-list { grid-area: list; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); grid-auto-rows: max-content; align-content: start; gap: 14px 12px;
+  --mm-edge: 0px; transition: --mm-edge 260ms var(--ease); -webkit-mask-image: linear-gradient(var(--mm-dir, to bottom), transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); mask-image: linear-gradient(var(--mm-dir, to bottom), transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); }
+#lwMenu.mm-moving .mm-player-list { --mm-edge: 40px; }
+#lwMenu .mm-player-tile { position: relative; display: block; aspect-ratio: 9 / 16; border-radius: 10px; overflow: hidden; background: hsl(var(--glass-tint) / .5); }
+#lwMenu .mm-player-title { position: absolute; inset: auto 0 0; z-index: 2; padding: 24px 6px 8px; font-size: 10px; line-height: 1.2; letter-spacing: .14em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
+  background: linear-gradient(to top, hsl(var(--glass-tint) / .85), transparent); opacity: 0; transition: opacity 120ms ease; pointer-events: none; }
+#lwMenu .mm-player-tile:is(:hover, :focus-visible) .mm-player-title { opacity: 1; }
+@media (max-width: 1000px) {
+  #lwMenu .mm-tut { padding: 4px 12px 16px; }
+  #lwMenu .mm-player { --cap: 52px; --strip: 150px; grid-template: "main" minmax(0, 1fr) "cap" var(--cap) "list" var(--strip) / minmax(0, 1fr); justify-items: center; }
+  #lwMenu .mm-player-main { height: min(calc(100cqh - var(--cap) - var(--strip)), calc(100cqw * 16 / 9)); }
+  #lwMenu .mm-player-list { --mm-dir: to right; width: 100%; overflow: auto hidden; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: calc((var(--strip) - 12px) * 9 / 16); justify-content: start; padding-bottom: 12px; box-sizing: border-box; }
+}
+@media (max-width: 700px) { #lwMenu .mm-player { --strip: 128px; } }
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-player-title { transition: none; } }
+:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-player-title { transition: none; }
 /* 035 G3 · THE SHEET (picker.js openSheet; its rows lab/windows/settings-card.js createMenuSheet): a slide-over from the menu's right edge, full
    height, its head (SETTINGS, ×) over a body that scrolls.  The rows are the kit's own controls in a plain dress — no card chrome: the label left
    in its column, the control right, filling the row (THE ROW LAW: as much on a row as fits, even, aligned column to column, no added height),

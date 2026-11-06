@@ -667,37 +667,57 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     o.addEventListener('focus', () => { if (o.matches(':focus-visible')) hero.play(); }); o.addEventListener('blur', hero.stop);
   };
 
-  /* ── 034 M3 · THE TUTORIAL DECK (Josh 11-02: "If clicking tutorial, it opens a 'hero' video collection you can scroll through. Kind of like how
-     the current landing page in the magic commons site looks like … although much more packed"): a grid of 9:16 cards in THE CARD'S LIGHT, one
-     per TUTORIAL row in its order, the number and the title at the art's foot and the caption under it ("caption to come" until Josh's words);
-     the hero loops while the mouse is on it or a key's focus (the landing page's player: looping, one at a time), a press plays or pauses it
-     (a touch's way), as many columns as fit off the racks and two on a phone.  Built at its first showing.
+  /* ── 034 M3 · THE TUTORIAL (Josh 11-02: "it opens a 'hero' video collection"; 034's grid of cards gave way to 037's player).  Built at its
+     first showing; the deck shown and its choice are kept for the menu's life only.
      037 U1 THE DECKS (Josh 11-05: "Just build placeholders for now"): the door opens on TUTORIAL_DECKS' two tabs (kit seg cells, `data-deck`,
-     no other words) over one pane per deck, its rows those whose `deck` is its number; the deck shown is kept for the menu's life only. ── */
-  let tutBuilt = false;
+     no other words) over one player per deck, its rows those whose `deck` is its number.
+     037 U2 THE PLAYER (Josh 11-05: "similar to YouTube's layout but super minimalist, no text; Mouseover will show text on video titles on the
+     right scroller"): LEFT the chosen row's hero at its own 9:16 (artOf: the still in the theme in use, the loop playing while the view and its
+     deck are up and nothing asks for stillness — still ONE HERO in the menu), RIGHT the deck's other rows as tiles in a scroller (their stills;
+     a title only over its tile under a hover or a key's focus), BELOW the player the caption's seat.  A tile's press (Enter, Space) plays its
+     row: the clip cross-fades in 240 ms (none under reduced motion), its tile leaves the scroller and the row it replaced returns to its place;
+     ← → step through the tiles, ↑ ↓ a row of them.  ≤ 1000 px the scroller is a strip under the player (skin.css). ── */
+  let tut = null;
+  function tutPlayer(deck, rows) {
+    const root = el('div', 'mm-player', tutEl); root.dataset.deck = deck.id; root.hidden = deck !== TUTORIAL_DECKS[0];
+    const main = el('div', 'mm-player-main', root); main.setAttribute('aria-hidden', 'true');   // the playing row's words are its tile's
+    /* THE CAPTION'S SEAT: a row's `caption` will stand here, under the player, once Josh's words come; empty until then, at its own height so
+       nothing moves when they land */
+    el('div', 'mm-player-cap', root);
+    const list = el('div', 'mm-player-list', root); list.addEventListener('scroll', edging, { passive: true });
+    let hero = null;
+    const tiles = rows.map((r) => { const b = el('button', 'mm-player-tile', list); b.type = 'button'; b.setAttribute('aria-label', r.title);   // no hover hint: the title rises over the tile
+      artOf(b, './img/menu/tut/', r.id, r.themes); el('span', 'mm-player-title', b, r.title); b.addEventListener('click', () => choose(r, true)); return b; });
+    function choose(r, fade) {
+      const was = [...main.children], clip = el('span', 'mm-player-clip', main), k = rows.indexOf(r);
+      if (hero) hero.stop(); hero = artOf(clip, './img/menu/tut/', r.id, r.themes); if (hero && !root.hidden) hero.play();
+      const a = fade && !still() ? animate(clip, [{ opacity: 0 }], 240) : null, drop = () => { for (const c of was) c.remove(); };
+      if (a) a.finished.then(drop, drop); else drop();
+      const f = tiles[k] === document.activeElement; tiles.forEach((t, i) => { t.hidden = i === k; });
+      if (f) (tiles.slice(k + 1).find((t) => !t.hidden) || tiles.filter((t) => !t.hidden).pop())?.focus({ preventScroll: true });   // the key's place: the next row
+    }
+    list.addEventListener('keydown', (e) => {
+      const d = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -2, ArrowDown: 2 }[e.key], vis = tiles.filter((t) => !t.hidden), i = vis.indexOf(document.activeElement);
+      if (!d || i < 0) return; e.preventDefault(); e.stopPropagation();
+      const row = vis.filter((t) => t.offsetTop === vis[0].offsetTop).length;   // a row of tiles (the strip is one row: ↑ ↓ step as ← →)
+      vis[clamp(i + Math.sign(d) * (Math.abs(d) > 1 && row < vis.length ? row : 1), 0, vis.length - 1)].focus();
+    });
+    if (rows.length) choose(rows[0], false);
+    return { id: deck.id, root, play: () => hero && hero.play(), stop: () => hero && hero.stop() };
+  }
   function showTutorial() {
     showView('tutorial');
-    if (!tutBuilt) {
-      tutBuilt = true;
-      const head = el('div', 'mm-tut-head', tutEl);
-      const panes = TUTORIAL_DECKS.map((d) => { const p = el('div', 'mm-tdeck', tutEl); p.dataset.deck = d.id; p.hidden = d !== TUTORIAL_DECKS[0]; return p; });
-      const tabs = seg({ aria: 'tutorial decks', options: TUTORIAL_DECKS, value: TUTORIAL_DECKS[0].id, onChange: (id) => { for (const p of panes) p.hidden = p.dataset.deck !== id; } });
+    if (!tut) {
+      const head = el('div', 'mm-tut-head', tutEl), decks = TUTORIAL_DECKS.map((d, n) => tutPlayer(d, TUTORIAL.filter((r) => r.deck === n + 1)));
+      const tabs = seg({ aria: 'tutorial decks', options: TUTORIAL_DECKS, value: TUTORIAL_DECKS[0].id,
+        onChange: (id) => { for (const p of decks) { p.root.hidden = p.id !== id; if (p.root.hidden) p.stop(); else (tut.cur = p).play(); } } });
       for (const d of TUTORIAL_DECKS) tabs.button(d.id).dataset.deck = d.id;
-      head.append(tabs.root);
-      const grid = el('div', 'mm-tgrid', panes[0]);
-      TUTORIAL.filter((t) => t.deck === 1).forEach((t, k) => {
-        const c = el('div', 'mm-tcard', grid), o = el('button', 'mm-tcard-open mm-holo', c); o.type = 'button'; o.style.setProperty('--k', String(k % 2));
-        const num = String(k + 1).padStart(2, '0'); o.setAttribute('aria-label', num + ' · ' + t.title + (t.caption ? ' — ' + t.caption : ''));   // the words in aria only: no hover hint (034 F1's law)
-        el('span', 'mm-halo', o); const art = el('span', 'mm-lit', o); el('span', 'mm-rim', o);
-        const hero = artOf(art, './img/menu/tut/', t.id, t.themes); el('span', 'mm-foil', art);
-        const foot = el('span', 'mm-art-foot', art); el('i', 'mm-tnum', foot, num); el('b', 'mm-ttitle', foot, t.title);
-        el('p', 'mm-tcap' + (t.caption ? '' : ' soon'), c, t.caption || 'caption to come');
-        if (hero) { bindHero(o, hero); o.addEventListener('click', hero.toggle); }
-      });
-    }
+      head.append(tabs.root); tut = { cur: decks[0] };
+    } else tut.cur.play();
     animate(tutEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
-    enterTiles([...tutEl.querySelectorAll('.mm-tcard')].slice(0, 12));
-    const f = tutEl.querySelector('.mm-tcard-open'); if (f) f.focus({ preventScroll: true });
+    const vis = [...tut.cur.root.querySelectorAll('.mm-player-tile:not([hidden])')];
+    enterTiles(vis.slice(0, 12));
+    (vis[0] || tutEl.querySelector('.mm-tut-head .seg-b.on')).focus({ preventScroll: true, focusVisible: false });   // the keys' seat, no title shown until a key moves it
   }
 
   /* ── LIBRARY: the shelf of volumes; a volume's molecules by their tags ── */
