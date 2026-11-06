@@ -74,10 +74,10 @@ A law a gate enforces is cited by its gate, not restated: THE LOCK (the field's 
 - the CONTROL SURFACE (the bar, its seats, the expander, search, favourites, the scroll pill) → `control-surface.md`
 - the look store, the blur, the CAMERA card, WASD, THE STAGE WINDOW (FRAME · AXES · STAGE colour · GAMMA · PULSE), THE SUMMONS (a window opens another below itself), THE LIGHTING WINDOW → `look-and-camera.md`
 - the three scopes, records, projects and FOLDERS, NEW, the undo ring, `lw:` links → `scopes-and-records.md`
-- MOLECULES, the mode, the chem worker, the volumes and their pipeline → `chemistry.md`
+- MOLECULES, the mode, the chem worker, the volumes and their pipeline, THE DIAGRAMS' PIPELINE (`tools/diagrams/`, `tools/volume-thumbs.mjs`) → `chemistry.md`
 - the register, the paint gesture, SPECTRUM, ATOMS, n = 7, the scale, emission, the physics of 005 → `register-and-systems.md`
 - the stage text, captions, INFORMATIONAL, THE HEAD, the ESP bar, the furniture law → `stage-words.md`
-- THE MAIN MENU (the face, the tutorial deck and its heroes), THE LOADING SCREEN (`lab/loader.js`), the Picker's decks, the library's words and installs, the looks → `picker.md`
+- THE MAIN MENU (the face, the tutorial deck and its heroes), THE LOADING SCREEN (`lab/loader.js`), the Picker's decks, the library's words and installs, the looks (THE DIAGRAM LOOK, THE PAGES' PICTURES) → `picker.md`
 - the field, WAVE's styles, ESP, PLAYBACK LOCK, THE LOCK's leaves → `field-and-lock.md`
 - the modulation port and window, the clock, curves, the flash guard, THE ENVELOPE TRIGGER (ENV + PATTERN), FOLLOW PLAYHEAD and AUTO-COLOR → `modulation-and-timeline.md`
 - RENDER, the recorder, the time law → `film.md`
