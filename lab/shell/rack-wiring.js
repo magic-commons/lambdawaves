@@ -256,6 +256,7 @@ export function createRackWiring(app) {
       const d = barDock(); if (d.open) d.open({ body: wTr.body });
     },
     onClose: () => {
+      if (rk.floatOf('transport')) rk.dock('transport');   // 038 S2: a closed card is never floating — its float state outlived the close, a later open reopened it in place and the seat put a floating node in #rackL (the empty slot)
       const d = barDock(); if (d.close) d.close();
     } });
   popFace(wTr.root);

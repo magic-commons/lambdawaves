@@ -48,7 +48,8 @@ try {
       await shot('038-S1-corner-chips', c);
       out.log.push({ pop: await g.tap('.dev[data-id="transport"] .dev-pop') }); await wait(1000); out.log.push(await state('after the corner chip'));
       await shot('038-S1-bar-on-stage');
-      out.ok = out.log[2].chips[0] === 'dev-pop:Put the bar on the stage' && out.log[2].chips.length === 2 && out.log[4].place === 'stage' && !out.log[4].floatOf && out.log[4].card.cls.includes('closed');
+      out.log.push({ dock: await g.tap('#transport .dock-btn') }); await wait(1200); out.log.push(await state('docked after the corner chip'));
+      out.ok = out.log[6].card.parent === 'rackL' && out.log[6].card.box[1] < 20 && !out.log[6].card.cls.includes('floating') &&out.log[2].chips[0] === 'dev-pop:Put the bar on the stage' && out.log[2].chips.length === 2 && out.log[4].place === 'stage' && !out.log[4].floatOf && out.log[4].card.cls.includes('closed');
     } else {
       out.log.push({ close: await g.tap('.dev[data-id="transport"] .dev-close') }); await wait(900); out.log.push(await state('detached, closed with ×'));
       await shot('038-S2-closed-bar-on-stage');
