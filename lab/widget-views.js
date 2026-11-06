@@ -27,3 +27,5 @@ view({ kind: 'lattice', label: 'LATTICE', hint: 'LATTICE’s sites, |ψ|² tall 
 view({ kind: 'orbit', label: 'ORBIT', hint: 'Each shell’s two rotors and its Kepler ellipse', size: { w: 0.24, h: 0.16 } }, 'orbit', of((app) => app.w.orbit, (m, app) => m.update(app.obs)));
 view({ kind: 'wigner', label: 'WIGNER', hint: 'The (z, p_z) slice of W, signed in the two accents', size: { w: 0.16, h: 0.2 } }, 'wigner', of((app) => app.w.wignerView, (m, app) => {
   const G = app.host.hydroReader(); m.update(app.reg, app.clock.t, app.clock.playing, G.on, G.why, app.ctl.domain.half); }));   // its own 2 Hz while playing (wignerview.js)
+view({ kind: 'plane', label: 'PLANE', hint: 'ψ on PLANE’s cut: arg the hue, |ψ| the brightness', size: { w: 0.14, h: 0.22 } }, 'slice',
+  of((app) => app.w.slice, (m, app) => m.update(app.reg, app.clock.t, app.clock.playing)));   // its chunked job on its own pump (sliceview.js)
