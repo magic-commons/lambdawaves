@@ -15,6 +15,9 @@ THE DRAWING (IUPAC Recommendations 2006, Brecher, "Graphical representation of s
     every stereocentre (its configuration from the 3-D coordinates, or from the volume's PubChem SMILES).
   The bonds come from the volume's SMILES or its bond table when the record carries them, else rdDetermineBonds from the coordinates and
   the molecule's charge (bond orders and formal charges by the xyz2mol rules; connectivity alone when no Lewis structure fits).
+THE ACCEPTANCE RULE (038 D1): a drawing is kept at ≤ 2 crossings and no clash (quality()); what no layout draws cleanly — a cage no
+  plane holds (C₆₀, dodecahedrane), a lettered cluster (B₁₂H₁₂²⁻, Li₄F₄), a neutral cluster (the ice hexamer) — is rejected, and each run
+  prints the count by road and names the rejected.
 THE INK: every colour is `currentColor` and the letters are drawn as outlines in the app's UI face (lab/fonts/Roboto-ui.woff2 at
   weight 500), so one file serves both themes: the app draws it as a mask in the tile's own ink (lab/picker-fx.js setPic). 160 × 160
   viewBox, no background, no size. """
@@ -154,8 +157,46 @@ def perspective(m):
     m2.RemoveAllConformers(); m2.AddConformer(c, assignId=True)
     return m2
 
+def quality(m, every=False):
+    """038 D1 · THE ACCEPTANCE RULE: (crossings, clashes) of a 2-D drawing, in units of its median bond L. A crossing is two bonds that share
+    no atom and whose segments cross. A clash is two atoms nearer than 0.4 L, an atom on a bond not its own (within 0.2 L), two letters
+    nearer than half a bond, or a crossing at a lettered atom's bond (a line through a letter). Lettered: every atom in perspective
+    (`every`), every atom but carbon in the skeletal formula"""
+    P = np.array(m.GetConformer().GetPositions())[:, :2]; n = len(P)
+    B = np.array([(b.GetBeginAtomIdx(), b.GetEndAtomIdx()) for b in m.GetBonds()], dtype=int).reshape(-1, 2)
+    if not len(B): return 0, 0
+    lab = np.array([every or a.GetAtomicNum() != 6 for a in m.GetAtoms()])
+    A, Z = P[B[:, 0]], P[B[:, 1]]; d = Z - A
+    L = float(np.median(np.linalg.norm(d, axis=1))) or 1.0
+    side = lambda p, q, r: np.sign(np.round(((q[..., 0] - p[..., 0]) * (r[..., 1] - p[..., 1]) - (q[..., 1] - p[..., 1]) * (r[..., 0] - p[..., 0])) / (L * L), 6))
+    a1, z1, a2, z2 = A[:, None], Z[:, None], A[None], Z[None]
+    i1, j1, i2, j2 = B[:, 0][:, None], B[:, 1][:, None], B[:, 0][None], B[:, 1][None]
+    X = np.triu((side(a1, z1, a2) * side(a1, z1, z2) < 0) & (side(a2, z2, a1) * side(a2, z2, z1) < 0) & (i1 != i2) & (i1 != j2) & (j1 != i2) & (j1 != j2), 1)
+    bl = lab[B[:, 0]] | lab[B[:, 1]]
+    D = np.linalg.norm(P[:, None] - P[None], axis=2) + np.eye(n) * 1e9
+    t = ((P[:, None] - A[None]) * d[None]).sum(2) / ((d * d).sum(1)[None] + 1e-12)   # each atom's foot on each bond
+    off = np.linalg.norm(P[:, None] - (A[None] + t[..., None] * d[None]), axis=2); k = np.arange(n)[:, None]
+    clashes = (np.triu(D < 0.4 * L, 1).sum() + ((t > 0.05) & (t < 0.95) & (off < 0.2 * L) & (k != B[:, 0][None]) & (k != B[:, 1][None])).sum()
+               + np.triu((D < 0.5 * L) & lab[:, None] & lab[None], 1).sum() + (X & (bl[:, None] | bl[None])).sum())
+    for a in ([] if every else m.GetAtoms()):   # a CH₂ laid straight through (two like single bonds at > 162°): the drawer letters it 'C'
+        bs = a.GetBonds()
+        if a.GetAtomicNum() == 6 and len(bs) == 2 and bs[0].GetBondType() == bs[1].GetBondType() != Chem.BondType.DOUBLE:
+            u, w = (P[b.GetOtherAtomIdx(a.GetIdx())] - P[a.GetIdx()] for b in bs)
+            clashes += np.dot(u, w) < -0.95 * np.linalg.norm(u) * np.linalg.norm(w)
+    return int(X.sum()), int(clashes)
+
+def accepted(m, every=False):
+    """a drawing is ACCEPTED at ≤ 2 crossings and no clash (the textbook cube and adamantane draw their one or two), and in one piece —
+    or every piece an ion (a salt); a neutral cluster (the ice hexamer) is the ink sticks' with its hydrogen bonds"""
+    fs = Chem.GetMolFrags(m, sanitizeFrags=False)
+    if len(fs) > 1 and not all(any(m.GetAtomWithIdx(i).GetFormalCharge() for i in f) for f in fs): return False
+    c, x = quality(m, every)
+    return c <= 2 and x == 0
+
 def skeletal(m):
-    """the skeletal formula: hydrogens folded into their heavy atoms, RDKit's 2-D layout, the true stereocentres kept"""
+    """the skeletal formula: hydrogens folded into their heavy atoms, the true stereocentres kept, CoordGen's layout (its templates are
+    built in) — else RDKit's own with its ring templates (the tropanes' bridge, triethanolamine borate's cage), turned the least way that
+    lays most bonds at 0°, 30°, 60° or 90°; None when neither is accepted"""
     if m.GetNumConformers() and m.GetConformer().Is3D():
         try: Chem.AssignStereochemistryFrom3D(m)
         except Exception: pass
@@ -164,10 +205,16 @@ def skeletal(m):
         except Exception: pass
     rdDepictor.SetPreferCoordGen(True)
     rdDepictor.Compute2DCoords(m)
+    if not accepted(m):
+        rdDepictor.Compute2DCoords(m, forceRDKit=True, useRingTemplates=True)
+        if not accepted(m): return None
+        rdDepictor.StraightenDepiction(m, minimizeRotation=True)   # CoordGen's own layouts are straight already
     return m
 
 def depict(rec):
-    if not rec.get('ang'): return None
+    """(the inner markup, its road: 'perspective' · 'skeletal'), (None, 'rejected') when no drawing is accepted, (None, None) for a row
+    without coordinates"""
+    if not rec.get('ang'): return None, None
     heavy = sum(1 for a in rec['ang'] if a[0] > 1)
     # the volume's PubChem SMILES (bonds, charges, stereo) — save a transition metal's complex, which PubChem writes disconnected ([Ni].[C-]#[O+]…)
     tm = '.' in (rec.get('smiles') or '') and any(21 <= a[0] <= 30 or 39 <= a[0] <= 48 or 57 <= a[0] <= 80 or 89 <= a[0] <= 112 for a in rec['ang'])
@@ -175,8 +222,14 @@ def depict(rec):
     if m is not None: m, wedge = skeletal(m), True
     else:
         b, lewis = bonded(rec)
-        if heavy <= 2 or not lewis: m, wedge = perspective(b), False   # a small molecule, or one no Lewis structure fits (a complex, a cluster)
+        if heavy <= 2 or not lewis:   # a small molecule, or one no Lewis structure fits (a complex, a cluster): every atom lettered
+            m, wedge = perspective(b), False
+            if not accepted(m, every=True): m = None
         else: m, wedge = skeletal(b), True
+    if m is None: return None, 'rejected'
+    return drawn(m, wedge), ('skeletal' if wedge else 'perspective')
+
+def drawn(m, wedge):
     d = rdMolDraw2D.MolDraw2DSVG(SIZE, SIZE)
     o = d.drawOptions()
     o.clearBackground = False; o.useBWAtomPalette(); o.bondLineWidth = 2; o.padding = 0.07; o.fixedBondLength = 34
@@ -269,16 +322,20 @@ def main():
     if sys.argv[1] == '--sheet': return sheet(sys.argv[2])
     src = json.load(open(sys.argv[1]))
     only = set(sys.argv[sys.argv.index('--only') + 1].split(',')) if '--only' in sys.argv else None
+    roads = {}   # THE ACCEPTANCE COUNT: the molecules by road — the accepted drawings counted, every other road's molecules named
+    tell = lambda: print('  ' + ' · '.join('%d %s%s' % (len(v), k, '' if k in ('perspective', 'skeletal') else ': ' + ' '.join(v)) for k, v in sorted(roads.items())))
     if isinstance(src, list):   # THE CATALOGUE
         n, total, worst = 0, 0, (0, '')
         for rec in src:
             if only and rec['id'] not in only: continue
-            try: mk = depict(rec)
+            try: mk, road = depict(rec)
             except Exception as e: print('  ✗', rec['id'], e); continue
+            if road: roads.setdefault(road, []).append(rec['id'])
+            if not mk: continue
             text = svg_file(mk); write_atomic(os.path.join(MENU, rec['id'] + '.diagram.svg'), text)
             n += 1; total += len(text); worst = max(worst, (len(text), rec['id']))
         print('%d diagrams → lab/img/menu/<id>.diagram.svg, %.1f kB, the largest %s at %d B' % (n, total / 1024, worst[1], worst[0]))
-        return
+        return tell()
     vol, size, mols = src['volume'], src['size'], src['molecules']   # A VOLUME: one JSON per page
     T = os.path.join(SHELF, vol, 't'); os.makedirs(T, exist_ok=True)
     pages = range(math.ceil(len(mols) / size))
@@ -287,10 +344,11 @@ def main():
     for p in pages:
         page = {}
         for rec in mols[p * size:(p + 1) * size]:
-            try:
-                mk = depict(rec)
-                if mk: page[rec['id']] = mk
-            except Exception as e: fails.append(rec['id'])
+            try: mk, road = depict(rec)
+            except Exception: mk, road = None, 'failed'
+            if rec.get('ang'): roads.setdefault(road, []).append(rec['id'])
+            if mk: page[rec['id']] = mk
+            elif rec.get('ang'): fails.append(rec['id'])
         text = json.dumps(page, separators=(',', ':'), ensure_ascii=False)
         write_atomic(os.path.join(T, 'diagrams-%d.json' % p), text); total += len(text.encode('utf-8'))
         done[str(p)] = hashlib.sha256(text.encode('utf-8')).hexdigest()[:8]
@@ -307,6 +365,7 @@ def main():
     man.setdefault('sheets', {})
     write_atomic(man_path, json.dumps(man, separators=(',', ':')) + '\n')
     print('%s: %d pages, %.1f kB, %d without a diagram%s' % (vol, len(done), total / 1024, len(fails), (' (' + ', '.join(fails[:8]) + ('…' if len(fails) > 8 else '') + ')') if fails else ''))
+    tell()
 
 if __name__ == '__main__':
     main()
