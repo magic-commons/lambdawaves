@@ -2,6 +2,18 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 037
+
+THE LEGACY GATE (037 L2, PLAN §1 THE DEFAULT LIGHT IS THE OLD LIGHT): every lit line of RENDER_WGSL — SOLID's and SIGNED's overlay, SHELL's and
+SHELL ±'s toward-white, the GLASS finish (both copies of its text: the march's and the RENDER_GLASS_FINISH anchor, changed alike), and `atomLit`
+(the balls, the sticks, ESP soft and hard) — is `if (V.p17.w == 1.0) { the rig } else { the old text }`, a UNIFORM BRANCH, not a `select` (a
+select evaluates both arms, and the home picture would pay the rig's second gradient). `writeView` → `lightView(v, mat.light)` writes p12 … p16.xyz
+and p17.w = 1 only while a light value is off its home (`field.js` LIGHT_HOME), so a record that is absent, empty or at every home draws the old
+picture to the byte: THE LOCK reads 843 · 0 and 987 · 0 by construction (no leaf carries a light; `light` is in digest-lock's MAT_KEYS). The
+rig at the homes is the old arithmetic (the KEY at its home numbers in CAMERA arrives as p12.xyz = 0 = the old light's own vector per style), so
+opening the gate moves a pixel by ≤ 1 level (`tools/l037-shots.mjs l2`). litAt's normal is `densN`; p16.w and p17.xyz are the STAGE's PULSE,
+never written by the light.
+
 ## The laws of 032
 
 THE ATOMS ARE KNOBS (032 O1, Josh 11-01: "sticks by RADIUS > 0, balls by SIZE > 0 in every style"): under MOLECULES, WAVE's SIZE > 0 draws the atoms and RADIUS > 0 the bonds inside ANY style — `field.js` `atomsOver` is the nearer of the two on the ray, the march stops there and the hit is its ground (`back`, `tEnd`; DUST the same) — and ESP keeps its sticks alone (an untouched RADIUS reads STICK_R there, `stickROf`). SIZE and RADIUS default 0 (`atomSizeOf`), so no picture moved and THE LOCK reads 843 · 0 and 987 · 0 (no leaf sets atoms). BALLS (9) and STICKS (10) left the STYLE seg (nine styles: CLOUD SOLID SIGNED DUST SHELL SHELL ± ADD BANDS ESP; GRAIN joined DUST in 008 G); the ids stay reserved, never renumbered. An older project, link or `LW.setStyle('balls' | 'sticks')` opens as SHELL (GLASS, 6) with SIZE (100 %) or RADIUS (STICK_R) raised when the file never set it — `liftAtomStyle`, on persist's open road (said once: "BALLS and STICKS are SIZE and RADIUS now: opened as SHELL") and the facade; the conductor's `balls` / `sticks` are SHELL with the knob raised. `STYLE_READS`: SIZE in every style but ESP, RADIUS in every one; the stage's and VIEW's STYLE menus list the seg's visible set (`ui.styleList`). The rack's field tick sets the atoms while MOLECULES is on and ESP is drawn or SIZE or RADIUS is above 0, else none.
