@@ -47,12 +47,18 @@ try {
 
   /* 3 · a grade reaches the screen, not a picture, and is no undo row */
   const before = await g.ev('await __LW.settle(); return { pic: await __pic(), rows: __LW.history.entries().length };');
-  const shot0 = await g.snapHash();
+  /* 038 Z2: both screenshots are of a SETTLED screen — the first once two in a row agree (the veil's fade, a late frame), the second once it
+     shows the grade or ten tries have passed: a loaded compositor paints the new filter a beat after the frame that set it (the red read
+     the same hash, and 1.5 s later the graded one) */
+  const pause = () => new Promise((r) => setTimeout(r, 300));
+  let shot0 = await g.snapHash();
+  for (let i = 0, s; i < 10 && (s = await g.snapHash()) !== shot0; i++) { shot0 = s; await pause(); }
   /* 020 X0: THE DEFAULT GRAPH IS EMPTY — a first run has no CURVES node: add one (the rack's door), then grade */
   assert.deepEqual(await g.ev(`return __LW.nodes.nodes().map((q) => q.type);`), []);
   await g.ev(`__LW.nodes.setHas(true); __LW.curves.preset('MASTER', 'S'); await __w(300); await __LW.settle(); return 1;`);
   const graded = await g.ev(`return { filter: __filter(), table: __LW.nodes.filter.describe().table, pic: await __pic(), rows: __LW.history.entries().length };`);
-  const shot1 = await g.snapHash();
+  let shot1 = await g.snapHash();
+  for (let i = 0; i < 10 && shot1 === shot0; i++) { await pause(); shot1 = await g.snapHash(); }
   assert.match(graded.filter, /^url\(/); assert.equal(graded.table, true);
   assert.notEqual(shot0, shot1);
   assert.equal(graded.pic, before.pic);

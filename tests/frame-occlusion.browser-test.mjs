@@ -26,13 +26,17 @@ const inspect = () => g.ev(`
     errors:__e.slice()};`);
 try {
   assert.equal((await g.waitFor('window.__LW?.ready', 300, 100)).ok, 1);
+  /* 038 Z2: __landed() waits on a STATE — every finite animation done (a window's entrance, a float's travel, a fold), then two frames, the
+     second after the landing's own re-dirty (ink.js landing()) — never a fixed 100–300 ms: under load the mask was read mid-travel (the
+     floated SHADOW's head-body gap read masked, line 100) */
   await g.ev(`
     const field=__LW.field, original=field.setOcclusion;
     window.__frameMasks=[];
     field.setOcclusion=function(rects){ window.__frameMasks=rects.map(r=>r.slice()); return original.call(field,rects); };
+    window.__landed=async()=>{ const moving=()=>document.getAnimations().some(a=>a.playState==='running'&&a.effect&&a.effect.getTiming().iterations!==Infinity);
+      for(let i=0;i<200&&moving();i++) await new Promise(r=>setTimeout(r,50)); await __LW.settle(); await __LW.settle(); };
     __LW.mat.frame=true;__LW.mat.frameMode='lattice';__LW.setStyle('cloud');
-    __LW.layout.modulation.expand();await __LW.settle();
-    await new Promise(r=>setTimeout(r,300));return true;`);
+    __LW.layout.modulation.expand();await __landed();return true;`);
   let s = await inspect();
   assert.ok(s.count > 0);
   assert.equal(s.fullRoot, false);
@@ -43,7 +47,7 @@ try {
   console.log('PASS lattice clears only modulation cards, work bars and chips, not their empty gaps');
   for (const mode of ['box', 'dots']) {
     await g.ev(`__LW.mat.frameMode=${JSON.stringify(mode)};__LW.setStyle('cloud');
-      await new Promise(r=>setTimeout(r,100));return true;`);
+      await __landed();return true;`);
     s = await inspect();
     assert.equal(s.gap, false); assert.equal(s.below, false);
     assert.equal(s.lfo, true); assert.equal(s.env, true);
@@ -59,7 +63,7 @@ try {
     {type:'pointerUp',button:0}
   ] }]);
   await relActions(g.s);
-  await g.ev('await __LW.settle();return true;');
+  await g.ev('await __landed();return true;');
   const moved = await inspect();
   assert.ok(moved.root[0] > s.root[0] + 80 && moved.root[1] > s.root[1] + 50);
   assert.equal(moved.fullRoot, false); assert.equal(moved.gap, false); assert.equal(moved.below, false);
@@ -68,11 +72,12 @@ try {
 
   const scrolled = await g.ev(`
     for(let i=0;i<4;i++) __LW.mod.addSource('lfo');
-    await new Promise(r=>setTimeout(r,300));
+    await __landed();
     const run=document.querySelector('[data-mir-window="modulation"] .m2run'),before=JSON.stringify(__frameMasks);
     const overflow=run.scrollWidth-run.clientWidth;
-    run.scrollLeft=overflow;
-    await new Promise(r=>setTimeout(r,250));
+    run.scrollLeft=overflow;   /* the scroll's OWN refresh (no gate frame): wait for the block to move, then two bare rAFs */
+    for(let i=0;i<60&&before===JSON.stringify(__frameMasks);i++) await new Promise(r=>setTimeout(r,50));
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     const b=run.getBoundingClientRect();
     const overshoot=__frameMasks.filter(r=>Math.abs(r[1]-b.top)<1&&r[3]<=b.bottom+1&&r[0]>=b.left-1&&r[0]<b.right)
       .map(r=>r[2]-b.right).filter(n=>n>1);
@@ -84,7 +89,7 @@ try {
   /* SHADOW is closed on the first run since iteration 001 (INFORMATIONAL took its seat): open it before it is popped out, or the
      floated card is 0×0 and this row measures nothing (iteration 006 R) */
   await g.ev(`__LW.layout.modulation.collapse();__LW.layout.reopen('shadow');__LW.layout.popOut('shadow',{x:700,y:160,w:280});
-    await __LW.settle();return true;`);
+    await __landed();return true;`);
   const detached = await g.ev(`
     const card=document.querySelector('.dev[data-id="shadow"]'),h=card.querySelector('.dev-head'),v=card.querySelector('.dev-body');
     const r=e=>{const b=e.getBoundingClientRect();return [b.left,b.top,b.right,b.bottom]};
@@ -109,7 +114,9 @@ try {
     {type:'pointerUp',button:0}
   ] }]);
   await relActions(g.s);
-  const draggedRack = await g.ev(`await new Promise(r=>setTimeout(r,150));
+  const draggedRack = await g.ev(`/* the drag's OWN frame, never one the gate asks for (settle would schedule it): wait for frames to move, then two bare rAFs */
+    for(let i=0;i<100&&__LW.stats.frames<=${headGrip.frames};i++) await new Promise(r=>setTimeout(r,50));
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     const e=document.querySelector('.dev[data-id="shadow"]'),h=e.querySelector('.dev-head').getBoundingClientRect();
     const m=[(h.left+h.right)/2,(h.top+h.bottom)/2];
     return {x:e.getBoundingClientRect().left,y:e.getBoundingClientRect().top,frames:__LW.stats.frames,
@@ -118,8 +125,7 @@ try {
   assert.ok(draggedRack.frames > headGrip.frames); assert.equal(draggedRack.headMasked, true);
   console.log('PASS detached rack drag refreshes frame ink while paused');
 
-  await g.ev(`__LW.setDisconnected(false);await __LW.settle();
-    await new Promise(r=>setTimeout(r,100));return true;`);
+  await g.ev(`__LW.setDisconnected(false);await __landed();return true;`);
   const joined = await g.ev(`const e=document.querySelector('.dev[data-id="shadow"]'),b=e.getBoundingClientRect();
     const r=[b.left,b.top,b.right,b.bottom];return {joined:!__LW.disconnected,
       whole:__frameMasks.some(q=>q.every((n,i)=>Math.abs(n-r[i])<1))};`);
