@@ -39,7 +39,7 @@ try {
     out.ok = Object.values(out.win).every((p) => p.ink > 0);
   }
   if (scene === 'v2') {   /* every window closed: each kind's widget paints, a second of play moves its picture, H stands it down */
-    out.add = await g.ev(`${PIX} __LW.seek(0); ${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}) __LW.actions.run('window.' + id + (id === 'chem' ? '.fold' : '.close'));   // MOLECULES folds: its close turns the molecule off
+    out.add = await g.ev(`${PIX} __LW.seek(0); ${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} ${process.env.V_STATES ? `__LW.register.setMode('states'); await new Promise((r) => setTimeout(r, ${+process.env.V_WAIT || 1500}));` : ''} for (const id of ${JSON.stringify([...new Set(KINDS.map((k) => WIN[k] || k))])}) __LW.actions.run('window.' + id + (id === 'chem' ? '.fold' : '.close'));   // MOLECULES folds: its close turns the molecule off
       __LW.widgets.restore(null); const ids = {}; for (const k of ${JSON.stringify(KINDS)}) ids[k] = __LW.widgets.add(k);
       await new Promise((r) => setTimeout(r, 1500)); await __LW.settle(); const ch = document.querySelector('.dev[data-id="chem"]');
       if (${KINDS.some((k) => WIN[k] === 'chem')} && ch && !ch.classList.contains('folded')) __LW.actions.run('window.chem.fold'); await new Promise((r) => setTimeout(r, 900));

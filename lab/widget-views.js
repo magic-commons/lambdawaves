@@ -36,3 +36,4 @@ view({ kind: 'spectrum', label: 'SPECTRUM', hint: 'The eigenvalue ladder, its po
   return { tick: (force) => { if (force || app.reg.version !== v) { v = app.reg.version; m.redraw(); } }, off: () => m.views.delete(cv) };
 });
 view({ kind: 'orbitals', label: 'ORBITALS', glyph: 'orbitals', hint: 'MOLECULES’ orbital ladder, the register’s levels lit', size: { w: 0.11, h: 0.24 } }, 'orbitals', of((app) => app.state.orbitals, () => {}));   // pushed by its own paints
+view({ kind: 'states', label: 'STATES', glyph: 'states', hint: 'MOLECULES’ excited-state ladder, its lit lines', size: { w: 0.11, h: 0.24 } }, 'states', of((app) => app.state.states, () => {}));   // pushed by its own paints
