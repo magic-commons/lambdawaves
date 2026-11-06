@@ -5,7 +5,7 @@
  *     addLane, removeLane, create, updateClip, updateCurve, addPoint, movePoint, movePoints, removePoints, drawPoints,
  *     removePoint, setTension, setSegment, deleteClip, deleteClips, copyClips, pasteClips, duplicateClips, moveClips,
  *     duplicate, makeUnique, value(targetId, beat), setActive, activeClips(beat, kind?), needsClock(has), signature,
- *     rederive(patches), lastRefusal, extent({ unmuted }), stretchClip(id, edge, duration, { original }),
+ *     rederive(patches), lastRefusal, extent({ unmuted }), meter(), stretchClip(id, edge, duration, { original }),
  *     placeClip(curveId, { laneId, start, duration, offset, scale }), retarget(clipId, targetId, { name }) }
  *   value(targetId, beat) is the automation the modulation clock samples (host.clock.setAutomation({ value })).
  *   THE ARRANGEMENT'S LAW (1.5.6-alpha.21, λWAVES 032 T12): of the unmuted clips under the beat on one target, the
@@ -260,6 +260,8 @@ export function createTimelineModel() {
     /** extent({ unmuted = true }) → { start, end } over the clips (the first start … the last end; muted clips too with
      *  unmuted: false), or null with none: the arrangement's span (THE LOOP's fallback, FIT, ACTIVE). */
     extent(options) { return timelineExtent(data.clips, options); },
+    /** meter() → beats in a bar (1.5.7-alpha.8: THE EMPTY TIMELINE RESTS — the loop's one bar with no clips), no clone */
+    meter: () => data.meter,
     /** stretchClip(id, 'start' | 'end', duration, { original }) — THE STRETCH (λWAVES 032 T17): the clip takes `duration`
      *  and its scale changes with it so the source's shape keeps (the source span duration · scale is held: scale' =
      *  scale · oldDuration / newDuration, since a clip reads source beat (beat − start) · scale + offset); the start edge

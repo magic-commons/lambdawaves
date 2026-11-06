@@ -68,12 +68,14 @@ export function timelineActions(get) {
 // (1.5.6-alpha.23, λWAVES 032): one modifier table — Shift selects and fines, Ctrl shapes, Alt bypasses Snap and deletes.
 export const TIMELINE_POINTER = [   // tr: the timeline's pointer gestures: the gesture, what it does, its FL Studio counterpart
   { label: 'Middle button, hold + drag', hint: 'Pan time and tracks', t: 'FL — Middle-Mouse-Click pans' },
+  { label: 'Wheel over the timeline', hint: 'Scroll time (Shift + wheel too; with more lanes than fit, the wheel scrolls the lanes); Ctrl/Cmd + wheel zooms', t: 'FL — the wheel scrolls the playlist, Ctrl + wheel zooms' },
+  { label: 'Drag past the left or right edge', hint: 'Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)', t: 'FL — the playlist scrolls under a drag held at its edge' },
   { label: 'Shift + drag (empty)', hint: 'Rectangle-select clips or points', t: 'adapted — FL’s Ctrl+drag; in MIR Shift selects' },
   { label: 'Ctrl/Cmd + Shift + drag', hint: 'Add to the rectangle selection', t: 'FL — Ctrl+Shift+drag adds' },
   { label: 'Shift + click a clip', hint: 'Toggle it in the selection', t: 'adapted — FL’s Ctrl+click toggles' },
   { label: 'Ctrl/Cmd + drag a clip', hint: 'Duplicate the selection while moving it (title or body)', t: 'adapted — FL’s Shift-drag clones; in MIR Ctrl shapes' },
-  { label: 'Drag a clip’s edge', hint: 'Trim it: the curve keeps its beats', t: 'FL — drag a clip’s edge' },
-  { label: 'Ctrl/Cmd + drag a clip’s edge', hint: 'Stretch it: the curve keeps its shape', t: 'MIR — length and speed change together' },
+  { label: 'Drag a clip’s edge', hint: 'Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start', t: 'FL — drag a clip’s edge; a selection resizes together' },
+  { label: 'Ctrl/Cmd + drag a clip’s edge', hint: 'Stretch it: the curve keeps its shape; several selected close their gaps, then stretch as one', t: 'MIR — length and speed change together' },
   { label: 'Ctrl/Cmd + Shift + drag a clip’s edge', hint: 'Stretch it finely (⅛, free of Snap)', t: 'MIR — Shift is the fine gear' },
   { label: 'Edit tool: click empty lane space', hint: 'Place the clip last pressed there (the same curve, shared)', t: 'FL — the pencil places the last clip; MAKE UNIQUE detaches it' },
   { label: 'Shift + drag the ruler', hint: 'Select a time range; + Ctrl/Cmd extends it', t: 'adapted — FL selects by dragging the bar-ruler' },

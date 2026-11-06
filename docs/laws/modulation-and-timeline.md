@@ -2,6 +2,42 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 038 (chain T, MIR 1.5.7-alpha.8 … 12)
+
+THE EMPTY TIMELINE RESTS AT ONE (038 T1, alpha.8; Josh 11-06: "If there are no clips in the timeline, the timeline shouldn't play all the way
+to 200+ measures … That way an added new clip will start at beat 1 measure 1"; Yan's call: a loop, not a freeze): with no clip playing, THE LOOP
+(032) is the first bar — the ruler's range › ACTIVE › the clips' extent › bar 1 (`model.meter()` beats), never a free run — so the clock lives
+(every synced LFO keeps its phase) and the readout cycles 1.1 … 1.4; a playing tick already at or past the loop's end (a seek there, the clips cut
+away under the head) lands on its start; CREATE CLIP and → TL place at the playhead's bar start, so the first clip starts at 1.1. A seek, a scrub, a
+paused clock and a film still never loop. Under PLAYBACK LOCK the clock is stepped (`host.clock.step`, rack.js), which never loops: the arrangement
+runs free there, empty or not (a FOR-YAN line of 038 T, not this law).
+
+A CLIP LOOPS A WHOLE MEASURE AT LEAST (038 T4, alpha.10; Josh: "if a modulation rate is set to 1/16, then when placing it onto the timeline, it
+should loop for a whole measure"): → TL sends an LFO faster than a bar as n = ⌈bar / period⌉ whole cycles (a 1/16 LFO: 16 cycles over 4 beats); a
+period of a bar or longer stays one cycle. A curve source holds at most 256 points (`TIMELINE_MAX_SOURCE_POINTS`), so a cycle's samples shrink with
+n (64 at one cycle, 16 at 1/16, 2 at 1/128 — the raised sine's trough and peak); an ENV and a PATTERN send as before. No new field.
+
+THE SELECTION RESIZES TOGETHER (038 T5, alpha.11; Josh: "let them all resize while keeping their position while the key-combo that stretches will
+glue their edges together then stretch accordingly"; Yan's call: glue = close the gaps, then scale the block): an edge pressed on a clip inside a
+selection of several keeps the selection — a trim moves that edge of every selected clip by the same snapped beats (each keeps its own start on a
+right edge); the stretch (Ctrl/Cmd on an edge, Ctrl+Shift ⅛) first closes the gaps between them lane by lane (an overlap stays), then scales the
+glued block about its other edge, every curve keeping its shape. One gesture, one undo row; the arrows and Delete still act on the selection.
+
+THE TIMELINE SCROLLS UNDER THE POINTER (038 T3, alpha.9; Josh: "Scroll on timeline doesn't seem to work. If I drag the playhead back or forward,
+it should scroll the timeline as well"): a plain wheel over the timeline scrolls time while the lanes fit (more lanes than fit: it scrolls the
+lanes), Shift + wheel always scrolls time, Ctrl/Cmd + wheel zooms; a scrub (the playhead's drag), a range, a move, a trim or a stretch held within
+28 px of the lanes' left or right edge, or past it, scrolls time while it holds and the gesture follows. The wheel lands on the element under the
+pointer: no window registry. FOLLOW PLAYHEAD still ends on a wheel.
+
+THE LANES WEAR THE FROST (038 T2; Josh 11-06 reversed 10-19's crisp lanes): each lane is a house `.glass` pane, so GLASS BLUR, FROST · STILL and
+CARD STYLE reach it as they reach the ruler and the tool strip; the window's own slab stays clear (lab/skin.css § 012 B1, 014 A5).
+
+A MACRO FOLLOWS ITS DIAL, AS THE RING (038 T6, alpha.12; Josh: "The old macros from the modulation window seems to be reversed!"; Yan's call: the
+ring, not the data): ISO, KNEE, SOFT (014 D5) and ZOOM (037 H2) are reversed on screen only — their values, routes, presets and demo curves were
+always right — but the modulation window's route ring drew in value space and sat mirrored from the needle. A reversed knob's root wears `k-rev` and
+the ring's arcs, tick and spur mirror with it; a rise on the ring grows the arc clockwise, as a rise turns the dial. No file, preset or demo
+changes; no migration (WAVE DANCER and STAR LOOP play as before).
+
 ## The law of 036
 
 THE ENVELOPE TRIGGER (036 P6, Josh 2026-11-03: "the event's envelope-trigger feature (I think it's built in Basins) is missing in Lambdawaves,
@@ -30,7 +66,7 @@ tint; one undo row (the model's begin/commit).
 
 ## The laws of 032 (TIMELINE REDUX, MIR 1.5.6-alpha.21 … 28)
 
-THE ARRANGEMENT WINS WHERE IT PLAYS (alpha.21 · alpha.27): two clips on one target — the highest lane, then the earliest start; under a clip its value is the target's (a device's routes on it stand aside; a hand macro still layers); off a clip the device plays as before; →TL bypasses the device it sent. THE LOOP (alpha.25): the timeline loops while it plays — the ruler's range › ACTIVE › the clips' extent › free run; a film never loops (λWAVES passes no controller of its own: the kit's loops). ONE MODIFIER TABLE (alpha.23): Shift selects and fine-tunes (⅛ on curves, tension and knobs), Ctrl shapes (the ruler's vertical drag zooms about the pointer, its horizontal half scrubs snapped; Ctrl on a clip's body clones, on its edge stretches keeping the shape, Ctrl+Shift at ⅛; Ctrl locks a point's time), Alt bypasses Snap and deletes a point; the value lock is gone; the pencil stamps the clip last pressed. THE WORK BAR (032 T8 · T4): its power seat wears MOD (the kit's word face, dressed as its door is; the modulation window keeps the power ring) and beside t a second reader, TIME, the playhead's beat as m:ss.d at the tempo in force (`formatSeconds`), painted with t.
+THE ARRANGEMENT WINS WHERE IT PLAYS (alpha.21 · alpha.27): two clips on one target — the highest lane, then the earliest start; under a clip its value is the target's (a device's routes on it stand aside; a hand macro still layers); off a clip the device plays as before; →TL bypasses the device it sent. THE LOOP (alpha.25): the timeline loops while it plays — the ruler's range › ACTIVE › the clips' extent › free run (038 T1: › bar 1, never a free run); a film never loops (λWAVES passes no controller of its own: the kit's loops). ONE MODIFIER TABLE (alpha.23): Shift selects and fine-tunes (⅛ on curves, tension and knobs), Ctrl shapes (the ruler's vertical drag zooms about the pointer, its horizontal half scrubs snapped; Ctrl on a clip's body clones, on its edge stretches keeping the shape, Ctrl+Shift at ⅛; Ctrl locks a point's time), Alt bypasses Snap and deletes a point; the value lock is gone; the pencil stamps the clip last pressed. THE WORK BAR (032 T8 · T4): its power seat wears MOD (the kit's word face, dressed as its door is; the modulation window keeps the power ring) and beside t a second reader, TIME, the playhead's beat as m:ss.d at the tempo in force (`formatSeconds`), painted with t.
 
 AN EVENT IS A STEP CLIP ON A BANDED TARGET (032 T23): a segmented row, a switch or the 140 grid that offers CREATE EVENT names a target (`data-event`, its options `data-v`; lab/shell/modulation.js) — `material.style` (the seg's visible styles: nine under MOLECULES, eight off), `material.view`, `material.space`, `material.slice.mode`, `state.scale`, `state.index` (the register as one of the 140 — written only where a TIMELINE clip says that state, so a base, a restore or a film's frozen look never empties the register), `palette.index`, and the toggles `action.view.frame` · `action.view.axis` · INFORMATIONAL's `action.view.*`; an `integer` row's `options` cut its 0…1 into equal bands (an option's value is its band's centre), a set takes the control's own road. CREATE EVENT (`event.create`) is the kit's `createClip`: a HOLD clip at the band in force that remembers its band count; when the count moves (MOLECULES off takes ESP away) the clip wears ⚠ until a point is edited (the seam repaints at once). COPY VALUE (`event.copy`) puts the pressed option's band centre where a point's PASTE VALUE reads it. An older curve on a banded target (no `steps`) is re-read on the open road (`liftBands`: its k / (max − min) integers, BALLS / STICKS as SHELL), and the conductor writes `steps` on its banded lanes.
 

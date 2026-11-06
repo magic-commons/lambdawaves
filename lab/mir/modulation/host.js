@@ -225,7 +225,9 @@ export function createModClock(opts) {
   let automation = null;           /* optional beat-sampled moving baseline, never an authored write */
   /* THE LOOP (1.5.6-alpha.25, λWAVES 032 T1): an optional provider () → { start, end } | null, read on the REALTIME pump
      only.  A tick whose beat crosses `end` (from before it) lands at start + the overshoot, before anything is applied, so
-     no frame is drawn at `end`; a seek, a paused move and the recorder's deterministic step never loop (a film is exact). */
+     no frame is drawn at `end`; a playing tick already at or past `end` lands on `start` (1.5.7-alpha.8, λWAVES 038 T1: a
+     play past the end comes home, never a free run); a seek, a paused move and the recorder's deterministic step never
+     loop (a film is exact). */
   let loopProvider = null;
   const readLoop = () => { let r = null; try { r = loopProvider(); } catch (_) { return null; }
     return r && Number.isFinite(r.start) && Number.isFinite(r.end) && r.start >= 0 && r.end > r.start ? r : null; };
@@ -468,9 +470,10 @@ export function createModClock(opts) {
       stats.seconds += dt;
       const from = M.transport.beats;
       M.advance(dt, w);
-      const L = loopProvider && readLoop(), b = M.transport.beats, looped = !!L && from < L.end && b >= L.end;
-      if (looped) {                  /* THE LOOP: the model's own road, as the resume moves the beat (setTransport, re-anchor, a dt-0 edit) */
-        M.setTransport({ beats: L.start + ((b - L.end) % (L.end - L.start)) }); M.reanchorTransport(w); M.advance(0, w); stats.loops++;
+      const L = loopProvider && readLoop(), b = M.transport.beats, looped = !!L && b >= L.end;
+      if (looped) {                  /* THE LOOP: the model's own road, as the resume moves the beat (setTransport, re-anchor, a dt-0 edit);
+                                        a beat already past the end (a play or a seek there, clips cut away under it) comes home to the start */
+        M.setTransport({ beats: from < L.end ? L.start + ((b - L.end) % (L.end - L.start)) : L.start }); M.reanchorTransport(w); M.advance(0, w); stats.loops++;
       }
       if (applyAll(false)) requestPresentation('modulation-output');
       if (advanceWatchers.size) { if (looped) advanced('seek'); advanced('tick'); }

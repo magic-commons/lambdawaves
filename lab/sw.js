@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '595fcca1e97a'],
-  ['./build-id.js',                                                 '55ecbfb34808'],
+  ['./build-id.js',                                                 'a29b32e677fe'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '41922d244a06'],
@@ -217,7 +217,7 @@ const PRECACHE = [
   ['./mir/info/seats.js',                                           'b0f0ecdbd8f6'],
   ['./mir/keyboard/keyboard.css',                                   '03e23a55ff47'],
   ['./mir/keyboard/keyboard.js',                                    '5570b4a40d73'],
-  ['./mir/kit.js',                                                  '700858a0eda4'],
+  ['./mir/kit.js',                                                  '8c7ce3db0d93'],
   ['./mir/locales/locales.css',                                     'cd2925eb7e5a'],
   ['./mir/locales/pseudo.js',                                       '152dbb0290ec'],
   ['./mir/mir.css',                                                 'ba4542bd7f58'],
@@ -225,7 +225,7 @@ const PRECACHE = [
   ['./mir/modulation/bind.js',                                      'b13a5b0cc6b8'],
   ['./mir/modulation/curve-gesture.js',                             '6e28c520bb89'],
   ['./mir/modulation/curve.js',                                     'f5ccc9c84f11'],
-  ['./mir/modulation/host.js',                                      '8b8e4074bee7'],
+  ['./mir/modulation/host.js',                                      '3eb0b2cab075'],
   ['./mir/modulation/layout-motion.js',                             'bad0ef731bcc'],
   ['./mir/modulation/mod-cursor.js',                                '4984041d0263'],
   ['./mir/modulation/mod.js',                                       '8c7a02ad2c33'],
@@ -234,7 +234,7 @@ const PRECACHE = [
   ['./mir/modulation/modwindow/modwindow.js',                       '11980fef3cc0'],
   ['./mir/modulation/project.js',                                   '39e2c203e3ed'],
   ['./mir/modulation/registry.js',                                  '21afa29220c1'],
-  ['./mir/modulation/window.js',                                    '9614bbba051b'],
+  ['./mir/modulation/window.js',                                    '618a7ae6cf25'],
   ['./mir/notes/notes.css',                                         'cbe347e37ed0'],
   ['./mir/notes/shelf.js',                                          '9c3d2bc9f67c'],
   ['./mir/palette.js',                                              '36dfda19e93d'],
@@ -320,7 +320,10 @@ const PRECACHE = [
   ['./mir/shell/vendor/katex/fonts/KaTeX_Size4-Regular.woff2',      'a4af7d414440'],
   ['./mir/shell/vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2', '71d517d67827'],
   ['./mir/shell/vendor/katex/fonts/OFL.txt',                        'fda55663cd51'],
+  ['./mir/shell/vendor/katex/katex.min.css',                        '717bc9ae7853'],
+  ['./mir/shell/vendor/katex/katex.min.js',                         'e6bfe5deebd4'],
   ['./mir/shell/vendor/marked-LICENSE.md',                          '8e3a3f82f59a'],
+  ['./mir/shell/vendor/marked.min.js',                              '15fabce5b658'],
   ['./mir/shell/window-picker.css',                                 '8cf89be05212'],
   ['./mir/shell/window-picker.js',                                  '93cfa2c1ae7b'],
   ['./mir/shell/wordmark.js',                                       'f47ed2744692'],
@@ -329,31 +332,31 @@ const PRECACHE = [
   ['./mir/timeline/audio-drop.js',                                  'af9b12bc53f2'],
   ['./mir/timeline/audio-kind.js',                                  '71ea92197244'],
   ['./mir/timeline/audio-playback.js',                              '81c9e930fe20'],
-  ['./mir/timeline/bind.js',                                        '924e460da7a3'],
-  ['./mir/timeline/controller.js',                                  'fa45d73f98f5'],
+  ['./mir/timeline/bind.js',                                        'a13b23558418'],
+  ['./mir/timeline/controller.js',                                  '7e57c530ef59'],
   ['./mir/timeline/cursor.js',                                      '2c4a4bd2063b'],
   ['./mir/timeline/curve-view.js',                                  '8432d7c7a10d'],
   ['./mir/timeline/draw.js',                                        'b6997dd5222f'],
-  ['./mir/timeline/editor.js',                                      'f1c30843c336'],
-  ['./mir/timeline/geometry.js',                                    '10f7f6b22701'],
+  ['./mir/timeline/editor.js',                                      '5c3bc266c12e'],
+  ['./mir/timeline/geometry.js',                                    '6d194f8b4ff6'],
   ['./mir/timeline/history.js',                                     '5f23e118ee32'],
   ['./mir/timeline/icons.js',                                       'afad9a14ee12'],
   ['./mir/timeline/kinds.js',                                       'aec89844d05a'],
   ['./mir/timeline/knobs.js',                                       '295ba7075b6d'],
-  ['./mir/timeline/model.js',                                       '834790a904b8'],
+  ['./mir/timeline/model.js',                                       'f13c33a66f21'],
   ['./mir/timeline/pattern-kind.js',                                '3b1f2f328c3f'],
   ['./mir/timeline/playhead.js',                                    'b918e4f78f01'],
   ['./mir/timeline/project.js',                                     '5333447c0b76'],
   ['./mir/timeline/readout.js',                                     'fd140292555d'],
   ['./mir/timeline/selection.js',                                   '12ffcdb73b0f'],
-  ['./mir/timeline/shortcuts.js',                                   '3225199ea557'],
+  ['./mir/timeline/shortcuts.js',                                   'e89259df8ffc'],
   ['./mir/timeline/slice.js',                                       '54c15da61852'],
   ['./mir/timeline/source.js',                                      '436e3fecb0ae'],
   ['./mir/timeline/time-format.js',                                 'bace74d4a020'],
   ['./mir/timeline/timeline.css',                                   '76e0b291313f'],
   ['./mir/timeline/view.js',                                        '103eb65723c0'],
-  ['./mir/timeline/window.js',                                      '2cd5a53454c8'],
-  ['./mir/version.js',                                              '787cad1fcc26'],
+  ['./mir/timeline/window.js',                                      '61fb95be784e'],
+  ['./mir/version.js',                                              '497a7065ea90'],
   ['./mir/window-activity.js',                                      '8eb6cefdf972'],
   ['./mir/window/dock.js',                                          '6b678fe06223'],
   ['./mir/window/rail.js',                                          '1f0ced983947'],
@@ -425,7 +428,7 @@ const PRECACHE = [
   ['./shell/stage-words.js',                                        'f30b967a9069'],
   ['./shell/transport.js',                                          '989ce97d7dd6'],
   ['./skeleton.js',                                                 '521904b4e851'],
-  ['./skin.css',                                                    'b1ce3c9aba5b'],
+  ['./skin.css',                                                    'a96b3bc2dd91'],
   ['./slice.js',                                                    '0fbaa89ce784'],
   ['./sliceview.js',                                                '1a14cc894e5e'],
   ['./spectrum.js',                                                 'f8e5a4514ba9'],
@@ -504,14 +507,10 @@ const PRECACHE = [
  * changed demo still reaches every browser (its `saved` stamp is the DEMOS refresh revision).
  * THE MEASURED LINES (iteration 016 E3) are DATA by the same rule: vendor/nist/ (NIST ASD's neutral lines, 330 KB, tools/nist-lines.py) — read when
  * EMISSION SPECTRA first meets the ATOM, kept by the page after that answer and swept with the pictures; HYDROGEN's lines are computed
- * and never need it.
- * THE PARSERS (038 Z3) are DATA by the same rule: the notebook's marked and KaTeX and KaTeX's sheet (mir/shell/vendor/, 327 KiB every install
- * carried) — index.html loads them as before, and the page keeps what loaded once the worker is registered (main.js), so an installed app sets
- * maths offline from its second open; a kit adoption may change them under the same names, so every new build sweeps them and the next open
- * keeps the new bytes.  KaTeX's twenty faces stay precached (each is a @font-face's first source). */
-const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/', 'mir/shell/vendor/marked.min.js', 'mir/shell/vendor/katex/katex.min.js', 'mir/shell/vendor/katex/katex.min.css'];
+ * and never need it. */
+const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/'];
 const DATA_CACHE = 'lw-data-v1';
-const SWEEP = ['demos/covers/', 'vendor/nist/', 'mir/shell/vendor/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4); img/menu/ left it in 036 G7 — the page's loader validates what it keeps
+const SWEEP = ['demos/covers/', 'vendor/nist/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4); img/menu/ left it in 036 G7 — the page's loader validates what it keeps
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */
@@ -521,7 +520,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
-  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/, the notebook\'s parsers)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures, the demo covers, the measured lines and the notebook\'s parsers, kept as the page first shows or loads them until the next build sweeps them (their names carry no hash), and the demo files FOLDERS seeds from.'],
+  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures, the demo covers and the measured lines, kept as the page first shows them until the next build sweeps them (their names carry no hash), and the demo files FOLDERS seeds from.'],
   ['a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)', 'kit data an adoption brings that the running lab fetches only when a language is chosen, or never: deployed, never precached, never cached (offline, a language other than English stays English).'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
   ['an adopted kit module no root reaches (R5-W1)', '0.5.0 C0: MIR is adopted whole, so lab/mir/ holds modules for consumers λWAVES has not reached yet. tests/wiring.test.mjs walks the roots and names them (--unreached-kit); tests/pwa.test.mjs and tools/build-deploy.mjs READ that set, so a kit module joins this precache the day a consumer imports it. Deployed, never precached, never failed (PLAN §9).'],
@@ -612,7 +611,7 @@ self.addEventListener('install', (event) => {
  * dropped, a 404.  That is why §6 refuses any take while a second window is open unless the user said UPDATE ALL,
  * and why the page tells each other window at once (sw-client.js: one holding no work reloads, one holding work
  * is told RELOAD NOW).
- * THE SWEEP (iteration 028 R-08): the covers, the measured lines and the parsers (038 Z3) are kept under names a re-render does not change, so a kept copy
+ * THE SWEEP (iteration 028 R-08): the covers and the measured lines are kept under names a re-render does not change, so a kept copy
  * would answer for the deployed one forever; each new build deletes them from DATA_CACHE and the page keeps the new bytes on their next
  * view (img/menu/ is the loader's, 036 G7).  library/<sha>.json, the basis records and lw-vol-* are untouched. */
 self.addEventListener('activate', (event) => {

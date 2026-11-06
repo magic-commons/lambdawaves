@@ -19,7 +19,8 @@
  *   THE LOOP (1.5.6-alpha.25, λWAVES 032 T1).  loop() → { start, end } | null: the ruler's range, else the ACTIVE range, else
  *   the clips' extent (unmuted), else null (free run) — loopFrom({ range, active, extent }) hands it those three readers
  *   (createTimeline does) and seats it on the clock (host.clock.setLoop): a playing tick that passes the end lands on the
- *   start; a seek, a scrub and a film never loop. */
+ *   start; a seek, a scrub and a film never loop.  THE EMPTY TIMELINE RESTS (1.5.7-alpha.8): createTimeline's extent
+ *   reader answers the first bar when no clip plays, and a playing tick already past the end comes home to the start. */
 import { snapTimelineBeat } from './geometry.js';
 
 const SCRUB_LEVELS = ['live', 'light', 'release'];

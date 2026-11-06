@@ -52,7 +52,7 @@ import { createProximity } from '../core/proximity.js';
 import { rect as rectOf, setText, setAttr, setVar } from '../core/perf.js';
 import { t, tn, phrase, onLanguage } from '../core/i18n.js';
 import { clipKinds } from '../timeline/kinds.js';
-import { normalizeTimelinePoints } from '../timeline/source.js';
+import { normalizeTimelinePoints, TIMELINE_MAX_SOURCE_POINTS } from '../timeline/source.js';
 import { STEP_BEATS } from '../pattern/model.js';
 import { createReadoutLayer } from '../timeline/readout.js';
 import { createModCursor } from './mod-cursor.js';
@@ -1040,6 +1040,10 @@ export function createModulation(host, port) {
     if (!q || !registry.has(id)) { hide(rec.edit); hide(rec.stack); hide(rec.tick); hide(rec.spur); return; }
     const st = registry.state(id), wrap = st.wrap, g = ringGeom(wrap);
     const b = wrap ? ((st.baseNorm % 1) + 1) % 1 : st.baseNorm;
+    /* THE RING FOLLOWS THE DIAL (1.5.7-alpha.12, λWAVES 038 T6): a reversed knob (`k-rev`, knob({ reverse })) draws its needle at
+       1 − u, so the ring's arcs, tick and spur — drawn in value space — mirror with it (they sat mirrored from the needle) */
+    const rv = !wrap && rec.host.classList.contains('k-rev'), at = (u) => (rv ? 1 - u : u);
+    const arc = (lo, hi, r) => (rv ? arcD(1 - hi, 1 - lo, r, g) : arcD(lo, hi, r, g));
     const er = editRouteOf(id);
     if (er) {
       const sp = routeSpan(er);
@@ -1048,13 +1052,13 @@ export function createModulation(host, port) {
       if (!wrap) { lo = clamp01(lo); hi = clamp01(hi); }
       if (Math.abs(sp.hi - sp.lo) < 0.001) {
         /* ZERO DEPTH IS A REAL STATE and it keeps its handle: a 4-px radial TICK at the base. */
-        hide(rec.edit); rec.tick.setAttribute('d', radialD(b, R_TICK0, R_TICK1, g));
+        hide(rec.edit); rec.tick.setAttribute('d', radialD(at(b), R_TICK0, R_TICK1, g));
       } else if (wrap && hi - lo >= 1) {
         hide(rec.tick); rec.edit.setAttribute('d', fullD(R_EDIT));
       } else {
-        hide(rec.tick); rec.edit.setAttribute('d', arcD(lo, hi, R_EDIT, g));
+        hide(rec.tick); rec.edit.setAttribute('d', arc(lo, hi, R_EDIT));
       }
-      if (overLo || overHi) rec.spur.setAttribute('d', radialD(overLo ? 0 : 1, R_EDIT, R_SPUR, g));
+      if (overLo || overHi) rec.spur.setAttribute('d', radialD(at(overLo ? 0 : 1), R_EDIT, R_SPUR, g));
       else hide(rec.spur);
       rec.svg.classList.toggle('is-dormant', !liveSpan(er));
     } else { hide(rec.edit); hide(rec.tick); hide(rec.spur); rec.svg.classList.remove('is-dormant'); }
@@ -1067,7 +1071,7 @@ export function createModulation(host, port) {
     if (sn && Math.abs(shi - slo) > 1e-9) {
       let lo = b + slo, hi = b + shi;
       if (!wrap) { lo = clamp01(lo); hi = clamp01(hi); }
-      rec.stack.setAttribute('d', (wrap && hi - lo >= 1) ? fullD(R_STACK) : arcD(lo, hi, R_STACK, g));
+      rec.stack.setAttribute('d', (wrap && hi - lo >= 1) ? fullD(R_STACK) : arc(lo, hi, R_STACK));
     } else hide(rec.stack);
     rec.svg.classList.toggle('has-stack', sn > 0);
   }
@@ -1308,7 +1312,8 @@ export function createModulation(host, port) {
       if (!drag) return;
       if (!moved && Math.abs(e.clientY - drag.y0) < 4 && Math.abs(e.clientX - drag.x0) < 4) return;
       if (!moved) { moved = true; cancelHold(); }
-      let d = drag.d0 + (drag.y0 - e.clientY) / TRAVEL(e, drag.touch);
+      /* a rise grows the arc clockwise, as a rise turns the dial — on a reversed dial (`k-rev`, 1.5.7-alpha.12) that is toward the lower values */
+      let d = drag.d0 + (rec.host.classList.contains('k-rev') ? -1 : 1) * (drag.y0 - e.clientY) / TRAVEL(e, drag.touch);
       d = d < -1 ? -1 : d > 1 ? 1 : d;
       M.setRouteRange(drag.r.id, { min: Math.max(0, -d), max: Math.max(0, d) });
       apply(); paintRings();
@@ -2265,14 +2270,33 @@ export function createModulation(host, port) {
     for (const rec of devRows.values()) if (rec.dev.patt) { const on = !!pt && pt.model.isLive(rec.id); rec.dev.patt.classList.toggle('on', on); rec.dev.patt.setAttribute('aria-pressed', on ? 'true' : 'false'); }
   }
   /* → TL, THE EXPERIMENT (BASINS LANE P): an LFO = one cycle of its shape, an ENV = its stages over timeScale seconds, an ENV
-     with a live lit row = a PATTERN clip of that row.  It lands at the playhead's beat on the timeline's active lane
-     (editor.addClip); a curve clip targets the device's first live route. */
+     with a live lit row = a PATTERN clip of that row.  It lands at the start of the playhead's bar on the timeline's active
+     lane (editor.addClip; 1.5.7-alpha.8 — it was the playhead's beat); a curve clip targets the device's first live route. */
   const routedTarget = (s) => { for (const m of M.macroList()) if (m.sourceId === s.id) for (const r of M.routesOfMacro(m.id)) if (!r.dormant && registry.has(r.targetId)) return r.targetId; return null; };
   const hexInk = (rec) => { const m = rec && /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(getComputedStyle(rec.dev.ed.path).stroke || ''); return m ? '#' + [m[1], m[2], m[3]].map((v) => (+v).toString(16).padStart(2, '0')).join('') : undefined; };
   const warn = (msg) => { if (typeof port.toast === 'function') port.toast(msg); else status(msg, 'warn'); return null; };
+  /* THE MEASURE IS THE LEAST LOOP (1.5.7-alpha.10, λWAVES 038 T4; Josh: "if a modulation rate is set to 1/16, then when placing it
+     onto the timeline, it should loop for a whole measure"): an LFO faster than a bar is sent as n = ⌈bar / period⌉ whole cycles, so
+     its clip is at least a bar long and holds a whole number of cycles (a period of a bar or longer stays one cycle, as before).  A
+     source holds at most TIMELINE_MAX_SOURCE_POINTS (256) points, so a cycle's samples shrink with n: a curve shape is tiled as its
+     own points (tensions kept) while n of them fit, else resampled; a wave takes k = min(64, ⌊256 / n⌋) samples a cycle — both ends
+     while k ≥ 4, so a seam keeps a saw's drop vertical; at 65 … 128 cycles (1/128) its k phases 0, 1/k …, so the kit's raised sine
+     keeps its trough and its peak — and each cycle draws its own random step (cycles: i); past 128 cycles (beyond a frame's Nyquist
+     at any tempo) the clip is 256 even samples of the running wave.  n = 1 sends exactly what it always did. */
+  function lfoCycles(s, n) {
+    const curve = s.shapeMode === 'curve', max = TIMELINE_MAX_SOURCE_POINTS;
+    if (curve && n * s.points.length <= max) return Array.from({ length: n }, (_, i) => s.points.map((p) => ({ t: (i + p.t) / n, v: p.v, tension: p.tension || 0 }))).flat();
+    const at = (u, i) => (curve ? curveEval(s.points, u) : M.waveAt(s.wave, u, { cycles: i, seed: s.rseed }));
+    const k = Math.min(64, Math.floor(max / n)), out = [], ends = k >= 4 ? k - 1 : k;
+    if (k >= 2) { for (let i = 0; i < n; i++) for (let j = 0; j < k; j++) out.push({ t: (i + j / ends) / n, v: at(j / ends, i), tension: 0 }); return out; }
+    for (let j = 0; j < max; j++) { const x = j / (max - 1) * n, i = Math.floor(x); out.push({ t: j / (max - 1), v: at(x - i, i), tension: 0 }); }
+    return out;
+  }
   function sendToTimeline(s) {
     const tlh = timelineOf(); if (!tlh) return warn(t('add the timeline first — a device is sent to it'));
-    const T = M.transport, bpm = T.bpm, start = Math.max(0, Math.floor(T.beats + 1e-9)), rec = devRows.get(s.id);
+    /* the clip lands at the start of the playhead's bar (1.5.7-alpha.8, as createClip does): an empty timeline rests in bar 1, so the first send starts at 1.1 */
+    const T = M.transport, bpm = T.bpm, meter = typeof tlh.model?.meter === 'function' ? tlh.model.meter() : 4;
+    const start = Math.max(0, Math.floor(T.beats / meter + 1e-9) * meter), rec = devRows.get(s.id);
     const editor = tlh.editor, name = (s.label || (KIND_WORD[s.kind] ? KIND_WORD[s.kind].t : s.kind)) + ' ' + s.id;   // a clip's name is data: the English kind, as BASINS saves it
     const add = (kind, source, o) => (editor && editor.addClip ? editor.addClip(kind, source, { start, ...o })
       : tlh.model.create({ targetId: o.targetId || kind + ':' + s.id, name: o.name, value: 0, start, duration: o.duration, source: kind === 'curve' ? source : { ...source, kind } }));
@@ -2286,13 +2310,12 @@ export function createModulation(host, port) {
     }
     const targetId = routedTarget(s);
     if (!targetId) return warn(t('Route {name} to a control first — its clip needs a target', { name }));
-    let points, beats;
+    let points, beats, cycles = 1;
     if (s.kind === 'env') { points = M.envPoints(s); beats = s.timeScale * bpm / 60; }
     else {
-      const hz = M.lfoHz(s);
-      beats = s.sync ? M.beatsPerCycle(s) : hz > 0 ? bpm / (60 * hz) : 0;
-      points = s.shapeMode === 'curve' ? s.points.map((p) => ({ t: p.t, v: p.v, tension: p.tension || 0 }))
-        : Array.from({ length: 64 }, (_, i) => ({ t: i / 63, v: M.waveAt(s.wave, i / 63, { cycles: 0, seed: s.rseed }), tension: 0 }));
+      const hz = M.lfoHz(s), period = s.sync ? M.beatsPerCycle(s) : hz > 0 ? bpm / (60 * hz) : 0;
+      cycles = period > 0 && period < meter - 1e-9 ? Math.ceil(meter / period - 1e-9) : 1;   // THE MEASURE IS THE LEAST LOOP (lfoCycles, above)
+      beats = period * cycles; points = lfoCycles(s, cycles);
     }
     if (s.invert) points = points.map((p) => ({ ...p, v: 1 - p.v }));
     points = normalizeTimelinePoints(points);
@@ -2302,7 +2325,7 @@ export function createModulation(host, port) {
     /* THE SEND DISARMS (1.5.6-alpha.27, λWAVES 032 T26): the shape now lives on the timeline, so the device is bypassed (its
        power off, its settings kept; the hand turns it back on).  A pattern send keeps its ENV on: the clip fires through it. */
     if (id && s.on) { M.setSource(s.id, { on: false }); clock.recomputeRunning(); apply(); sync(); }
-    const msg = done(id, s.kind === 'env' ? t('the envelope') : t('one cycle'), beats);
+    const msg = done(id, s.kind === 'env' ? t('the envelope') : tn(cycles, 'one cycle', '{n} cycles', { n: cycles }), beats);   // tr: what → TL sent of an LFO: its whole cycles (at least a bar's worth)
     return id ? t('{sent} · the device is bypassed', { sent: msg }) : msg;
   }
 

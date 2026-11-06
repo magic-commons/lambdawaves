@@ -7,6 +7,7 @@
  *   installTimeline({ mount, mod, model?, present?, say?, dock?, storageKey?, store?, initial?, keys?, history?,
  *                     project?, automation?, remap?, transport?, audio?, controller?, scrubLevel?, busy?, moved?, onWindow?,
  *                     loop?, moreRows? }) → tl      (loop: false keeps the clock free-running past the clips: THE LOOP, 1.5.6-alpha.25;
+ *                     else an empty arrangement loops its first bar and a play past the end comes home, 1.5.7-alpha.8;
  *                     moreRows() → [[word, fn, id, chosen?], …], the app's rows at the foot of ⋯ after a separator, 1.5.7-alpha.4)
  *   tl = createTimeline's { win, root, rail, editor, model, controller, transport, actions, open, close, toggle, isOpen,
  *        paintHead, presentation, restore, shortcuts, destroy } + { keys, automation(id, beat), dispose }

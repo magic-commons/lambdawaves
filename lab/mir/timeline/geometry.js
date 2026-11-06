@@ -62,6 +62,19 @@ export function resizeTimelineClip(clip, edge, delta, minimum = 1 / 16) {
   return { start: clip.start + movement, duration: clip.duration - movement };
 }
 
+/* THE GLUE (1.5.7-alpha.11, λWAVES 038 T5; Josh: "the key-combo that stretches will glue their edges together then stretch"): lane by
+   lane, the clips in start order close the gaps between them — a clip after a gap moves left to the end of the one before (the first
+   keeps its start; an overlap stays an overlap).  PURE.  → { list: [{ id, start, duration, scale }], start, end } (the glued block) */
+export function glueTimelineClips(clips) {
+  const lanes = new Map(), list = [];
+  for (const c of clips) { if (!lanes.has(c.laneId)) lanes.set(c.laneId, []); lanes.get(c.laneId).push(c); }
+  for (const run of lanes.values()) {
+    let end = -Infinity;
+    for (const c of run.sort((a, b) => a.start - b.start)) { const start = end === -Infinity ? c.start : Math.min(c.start, end); list.push({ id: c.id, start, duration: c.duration, scale: c.scale }); end = Math.max(end, start + c.duration); }
+  }
+  return { list, start: Math.min(...list.map((c) => c.start)), end: Math.max(...list.map((c) => c.start + c.duration)) };
+}
+
 // Chrome's early tabs: rounded shoulders, sloping sides, a flat joined foot.
 // Use CSS pixel geometry so the corners stay rounded as clips grow or shrink.
 export function timelineTabPath(width, height = TIMELINE_TAB_HEIGHT) {
