@@ -125,6 +125,44 @@ h = d.convert('L').histogram(); print(max(i for i, n in enumerate(h) if n), sum(
     out.ok = M.was === true && Object.keys(M.off).join() === '255' && Object.keys(M.on).sort().join() === '254,255' && Math.abs(M.on['255'] - M.cover) <= 0.005 * M.cover
       && M.onLines['255'] === M.on['255'] && (M.esp['255'] || 0) > 0 && M.dmax <= 2 && M.dObj === 0 && !M.gpu && M.back === false && M.same;
   }
+  if (scene === 'f6') {
+    /* THE FINISH: (a) no black at ZOOM max with a light — arg ψ · Re ψ · Im ψ × SOLID · SHELL ± · CLOUD + GLASS × two lights, hydrogen then benzene;
+       (b) CLIP: hydrogen (the row hidden) and benzene (shown) in light and dark, docked in the rack and floated wide — no scroll, the height, the words,
+       the hints, the keyboard (Tab from THICK reaches CUT BALLS then CUT STICKS, Space toggles) */
+    const LIGHTS = [{ rim: 0.2 }, { az: 180, el: 10, ambient: 0.4, specular: 0.6 }];
+    const sweep = () => g.ev(`const L = __LW, o = { ...L.obs, dist: 1 }, res = {};
+      for (const [v, vn] of [[1, 'arg'], [2, 're'], [3, 'im']]) for (const [k, m] of Object.entries({ solid: { style: 1 }, shellPM: { style: 8 }, glass: { style: 0, finish: 'glass' } }))
+        for (let j = 0; j < ${LIGHTS.length}; j++) { const mm = { ...L.mat, view: v, frame: false, axis: false, dither: 0, ...m, light: ${JSON.stringify(LIGHTS)}[j] };
+          res[vn + '/' + k + '/L' + j] = __F.black(await __F.px(o, mm, 960, 600)); }
+      return res;`);
+    out.blackH = await sweep();
+    const card = (theme, tag) => g.ev(`__LW.look.set({ theme: ${JSON.stringify(theme)} }); await new Promise((r) => setTimeout(r, 400));
+      const d = document.querySelector('.dev[data-id="clip"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click(); await new Promise((r) => setTimeout(r, 300));
+      const b = d.querySelector('.dev-body'), row = d.querySelector('.clip-cut'), r = d.getBoundingClientRect(), sws = row ? [...row.querySelectorAll('button.sw')] : [];
+      const wave = document.querySelector('.dev[data-id="observer"]');
+      return { tag: ${JSON.stringify(tag)}, rect: [r.left, r.top, r.right, r.bottom].map(Math.round), h: Math.round(r.height), scroll: b.scrollHeight - b.clientHeight, rowHidden: row ? row.hidden : 'missing',
+        words: sws.map((s) => s.textContent), upper: sws.every((s) => s.textContent === s.textContent.toUpperCase()), keys: sws.map((s) => s.querySelector('.sw-lbl')?.dataset.t), hints: sws.map((s) => s.dataset.tTitle || s.dataset.helpEn || s.dataset.help || s.title),
+        rowFits: row && !row.hidden ? Math.round(row.scrollWidth - row.clientWidth) : null, waveH: wave ? Math.round(wave.getBoundingClientRect().height) : null };`);
+    const pic = async (c) => shot('038-F6-clip-' + c.tag, [c.rect[0] - 8, c.rect[1] - 8, c.rect[2] + 8, c.rect[3] + 8]);
+    out.cards = [];
+    for (const [theme, tag] of [['light', 'hydrogen-light-rack']]) { const c = await card(theme, tag); out.cards.push(c); out['pic-' + tag] = await pic(c); }
+    await molecule('C6H6');
+    await g.ev(`__LW.mat.atomSize = 0.35; __LW.mat.stickR = 0.3; __LW.schedule(4); await __LW.settle(); return 1;`);
+    out.blackMol = await sweep();
+    for (const [theme, tag] of [['light', 'benzene-light-rack'], ['dark', 'benzene-dark-rack']]) { const c = await card(theme, tag); out.cards.push(c); out['pic-' + tag] = await pic(c); }
+    await g.ev(`__LW.layout.raise('clip'); __LW.layout.popOut('clip', { x: 480, y: 90, w: 560 }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+    { const c = await card('dark', 'benzene-dark-wide'); out.cards.push(c); out['pic-benzene-dark-wide'] = await pic(c); }
+    /* the keyboard: focus THICK, a real Tab twice, a real Space on each */
+    out.keys = [];
+    await g.ev(`document.querySelector('.dev[data-id="clip"] .k[data-param="material.slice.thick"], .dev[data-id="clip"] .clip-plane ~ * .k, .dev[data-id="clip"] .row .k:last-of-type')?.focus(); return document.activeElement && document.activeElement.className;`);
+    for (let i = 0; i < 4; i++) { await g.press(''); out.keys.push(await g.ev(`const a = document.activeElement; return a ? (a.textContent || a.getAttribute('aria-label') || a.className).trim().slice(0, 24) : null;`)); if (/CUT BALLS/.test(out.keys[out.keys.length - 1] || '')) break; }
+    /* Space is the transport's (PLAY) app-wide, so a focused switch takes Enter */
+    await g.press(''); out.afterSpace = await g.ev(`return { ...__LW.mat.slice };`); await g.press(''); out.afterSpace2 = await g.ev(`return { ...__LW.mat.slice };`);
+    await g.ev(`__LW.look.set({ theme: 'light' }); return 1;`);
+    const allBlack = [...Object.values(out.blackH), ...Object.values(out.blackMol)].reduce((a, b) => a + b, 0);
+    out.ok = allBlack === 0 && out.cards[0].rowHidden === true && out.cards.slice(1).every((c) => c.rowHidden === false && c.scroll <= 0 && c.upper && c.hints.every(Boolean) && c.rowFits <= 0)
+      && out.afterSpace.balls === false && !('balls' in out.afterSpace2);
+  }
   if (scene === 'f3') {
     /* the check: benzene's balls and sticks at EXPOSURE 0 (the picture is the atoms alone) — the CLIP on cuts them as before; CUT BALLS and CUT STICKS off
        draw them exactly as the CLIP off does (CLIP and SLAB); one kind off leaves the other cut.  The switches: hidden under hydrogen, shown under

@@ -2,6 +2,14 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 038
+
+THE CLIP'S TOGGLE (038 F3, Josh: "In clip, include a toggle to include or not include the balls and/or sticks so that it only cuts the waves"): under
+the plane, CLIP's row CUT BALLS · CUT STICKS (the kit's switches, lit = cut, as every CLIP before 038 cut both). Off, that kind stands whole while the
+plane cuts the wave (field-and-lock.md). `mat.slice.balls` / `mat.slice.sticks` = `false` is written by a hand only (absent = cut), PROJECT inside
+`presentation.mat`, in the history with the look, never in NEW; a `lw:` link does not carry them, nor a modulation target (the slice targets take no
+bools). The row is MOLECULES' — hidden under hydrogen and an atom with WAVE's SIZE · RADIUS rows (`availability('wave.esp')`) — and a restore sets it.
+
 ## The laws of 037
 
 THE RANGES OF 037 (037 H1–H3, Josh 11-05): FOV spans 5°–90° (`CAM.FOV`, radians; the readout prints degrees) and ZOOM spans [1, 12] (`CAM.DIST`,
