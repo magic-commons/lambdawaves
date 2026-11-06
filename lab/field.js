@@ -552,7 +552,7 @@ struct View {
   p8: vec4<f32>,     // THE POTENTIAL MAP: surface (0 ISO · 1 SAS · 2 SES), probe radius (bohr), RANGE (±φ, a.u.), the palette's stop span (LUT index first · 512 + last)
   p9: vec4<f32>,     // φ's grid: half-width, cells a side, valid (0 · 1), the ISO surface's ρ (a.u.)
   p10: vec4<f32>,    // the atoms' bounding sphere (centre xyz, radius w)
-  p11: vec4<f32>,    // iteration 016 S: ESP's SOFT edge (0 = the hard ISO surface … 1), MAP ONLY (0 · 1); z 038 F3: the bits — 1 the balls and 2 the sticks the CLIP does not cut
+  p11: vec4<f32>,    // iteration 016 S: ESP's SOFT edge (0 = the hard ISO surface … 1), MAP ONLY (0 · 1); z 038 F3 · F5: the bits — 1 the balls and 2 the sticks the CLIP does not cut, 4 THE OBJECT MASK
   p12: vec4<f32>,    // 037 W0 THE VIEW GROWS · chain L: KEY light direction xyz (in the FRAME), w KEY intensity
   p13: vec4<f32>,    // KEY colour rgb, w SPOT cone (degrees; 180 = none)
   p14: vec4<f32>,    // FILL direction xyz, w FILL intensity
@@ -847,6 +847,9 @@ fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -
 }
 /* 038 F3 · THE CLIP'S TOGGLE: is this kind (1 the balls, 2 the sticks) one the plane does NOT cut (p11.z's bits; 0 = both cut, every file before 038) */
 fn uncut(bit: u32) -> bool { return (u32(V.p11.z) & bit) != 0u; }
+/* 038 F5 · THE OBJECT MASK (p11.z bit 4, field.setObjectMask): the pixel's alpha — 1 (code 255) where the skeleton is on the ray, 254/255 on the rest
+   of the stage, the colour premultiplied by it (the canvas is premultiplied while the mask lives); off, 1 everywhere as before */
+fn objA(hit: bool) -> f32 { if ((u32(V.p11.z) & 4u) == 0u) { return 1.0; } return select(254.0 / 255.0, 1.0, hit); }
 /* 032 O1 · THE ATOMS OVER ANY STYLE: SIZE > 0 the balls, RADIUS > 0 the sticks — the nearer of the two on the ray (t = 1e30: none); 038 F3: a kind the
    plane does not cut is met on the box's own interval [b0, bf], a cut one on the plane's [t0, tf] */
 fn atomsOver(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32) -> vec4<f32> {
@@ -924,11 +927,11 @@ fn espSoft(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, tEnd: f32, half: f32,
   let am = clamp(0.8 * V.p0.y, 0.05, 1.0);                                            // EXPOSURE's translucency, as the hard surface's
   return back * (1.0 - (1.0 - T) * am) + col * am;
 }
-fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, half: f32, bg: vec3<f32>, jit: f32) -> vec3<f32> {
+fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, half: f32, bg: vec3<f32>, jit: f32) -> vec4<f32> {   // rgb, w 1 where the inner sticks are on the ray (038 F5)
   var inner = vec4<f32>(0.0, 0.0, 0.0, 1e30);
   if (V.p11.y < 0.5) { let u = uncut(2u); inner = ballsOrSticks(ro, rd, select(t0, b0, u), select(tf, bf, u), true); }   // iteration 016 S2 · MAP ONLY: no sticks inside, the stage alone beneath the map; 038 F3: uncut, the box's interval
-  let surf = u32(V.p8.x);
-  if (surf == 0u && V.p11.x > 0.0) { return espSoft(ro, rd, t0, tf, min(tf, inner.w), half, select(bg, inner.rgb, inner.w < 1e30), jit); }
+  let surf = u32(V.p8.x); let hit = select(0.0, 1.0, inner.w < 1e30);
+  if (surf == 0u && V.p11.x > 0.0) { return vec4<f32>(espSoft(ro, rd, t0, tf, min(tf, inner.w), half, select(bg, inner.rgb, inner.w < 1e30), jit), hit); }
   var th = 1e30; var n = vec3<f32>(0.0);
   if (surf == 0u) {                                                  // the density's ISO surface: march, then bisect
     let rs = V.p9.w; let steps = max(V.fwd.w, 8.0); let ds = (tf - t0) / steps; var ta = t0;
@@ -960,12 +963,12 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, ha
                                                                                    surfDist(p + vec3<f32>(0.0, 0.0, e), ses) - surfDist(p - vec3<f32>(0.0, 0.0, e), ses)) + vec3<f32>(1e-12)); }
   }
   let back = select(bg, inner.rgb, inner.w < 1e30);
-  if (th >= 1e30 || inner.w < th) { return back; }
+  if (th >= 1e30 || inner.w < th) { return vec4<f32>(back, hit); }
   var c = vec3<f32>(0.62);                                           // φ not ready: a grey surface
   if (V.p9.z > 0.5) { c = espColour(phiAt(ro + rd * th)); }
   if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
   if (V.p6.w < 1.5) { c = atomLit(c, n, rd, ro + rd * th); }        // MATTE: the map's colour unlit
-  return mix(back, c, clamp(0.8 * V.p0.y, 0.05, 1.0));
+  return vec4<f32>(mix(back, c, clamp(0.8 * V.p0.y, 0.05, 1.0)), hit);
 }
 /* 037 T4 · PULSE (lab/stage-window.js), the first STAGE FX: a radial wash of the stage — × 2.2 + 0.035 on a dark stage, × 0.7 on a light one (by
    the stage colour's own luminance) — weighted from the centre outward (CENTRE, p17.x 0) or from the edge inward (EDGE, 1); r is 0 at the centre and 1
@@ -1016,10 +1019,10 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
       if (m.w < 1e30) {
         var oa = pow(max(m.rgb, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
         oa = select(oa, bgOut, oa != oa);
-        return vec4<f32>(oa + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
+        return vec4<f32>(oa + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);   // the skeleton: alpha 1 whether or not THE OBJECT MASK lives
       }
     }
-    return vec4<f32>(bgOut, 1.0);
+    let a0 = objA(false); return vec4<f32>(bgOut * a0, a0);
   }
   let steps = max(V.fwd.w, 8.0);
   let ds = (tf - t0) / steps;
@@ -1032,19 +1035,19 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
   let refMax = max(bitcast<f32>(stats[1]), 1e-30);
   /* 032 O1 · THE ATOMS COMPOSITE: with MOLECULES' atoms set, SIZE > 0 (balls) or RADIUS > 0 (sticks) draws them under every style but ESP (its own
      sticks): the march stops at the nearest hit, which is its ground.  None set (hydrogen, THE LOCK) or both 0: back = bg, tEnd = tf — the old picture */
-  var back = bg; var tEnd = tf;
-  if (style != 11u && V.p7.x > 0.5 && (V.p7.z > 0.0 || V.p7.w > 0.0)) { let m = atomsOver(ro, rd, t0, tf, b0, bf); if (m.w < 1e30) { back = m.rgb; tEnd = m.w; } }   // 038 F3: an uncut kind's t may lie past tf (the march still ends at steps)
+  var back = bg; var tEnd = tf; var onObj = false;                 // 038 F5: onObj, the skeleton is on this ray (THE OBJECT MASK's alpha)
+  if (style != 11u && V.p7.x > 0.5 && (V.p7.z > 0.0 || V.p7.w > 0.0)) { let m = atomsOver(ro, rd, t0, tf, b0, bf); if (m.w < 1e30) { back = m.rgb; tEnd = m.w; onObj = true; } }   // 038 F3: an uncut kind's t may lie past tf (the march still ends at steps)
   if (style == 2u || style == 5u) {                               // DUST (a retired GRAIN, 2, draws as DUST)
     let d = dustPixel(ro, rd, t0, min(tEnd, tf), half, mode, soft, rhoMax, ampMax, refMax, pxA);
     var od = pow(max(d.rgb + back * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     od = select(od, bgOut, od != od);
-    return vec4<f32>(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
+    let ad = objA(onObj); return vec4<f32>((od + bayer8(in.pos.xy) * (V.p2.w / 255.0)) * ad, ad);
   }
   if (style == 11u && V.p7.x > 0.5) {                               // iteration 014 B: ESP draws the map over its sticks (none set: the march below, as CLOUD); 032 O1: BALLS · STICKS are the composite above
     let oc = espPixel(ro, rd, t0, tf, b0, bf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
-    var om = pow(max(oc, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
+    var om = pow(max(oc.rgb, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     om = select(om, bgOut, om != om);
-    return vec4<f32>(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
+    let ae = objA(oc.w > 0.5); return vec4<f32>((om + bayer8(in.pos.xy) * (V.p2.w / 255.0)) * ae, ae);
   }
   let kq = V.p3.w;                                                // THE KNEE's q (0 at the shipped 0.6: the old compositing, untouched)
   var tau = 0.0;
@@ -1192,7 +1195,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
      default and it never touches the physics — the readback path renders through the same shader, so a gate
      that compares pixels compares the same numbers as long as the strength is zero. */
   o = o + bayer8(in.pos.xy) * (V.p2.w / 255.0);
-  return vec4<f32>(o, 1.0);
+  let ao = objA(onObj); return vec4<f32>(o * ao, ao);                // 038 F5: THE OBJECT MASK (off: × 1, the old bits)
 }`;
 
 /* ── THE SPECIALISED PRESENT (optimization 2026-09-24, K2 · AUDIT-A FA3, REFUTE-E/F, PLAN §0) ─────────────────────────
@@ -1626,7 +1629,8 @@ export async function createField(canvas, opts = {}) {
     const key = specKey(fmt, mat);
     return key ? specEntry(key, fmt, mat.view | 0, mat.style | 0).pipeline || generic : generic;
   }
-  const lineTarget = (fmt) => ({ module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } } }] });
+  /* 038 F5: a line keeps the destination's alpha (THE OBJECT MASK's code under it; 1 on an opaque canvas, as the old blend left it) */
+  const lineTarget = (fmt) => ({ module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'zero', dstFactor: 'one' } } }] });
   /** { line, lattice }: the box/axes/slice/corner pipeline (xyz + rgba) and the lattice/dots one (xyz + alpha, ink uniform) */
   const makeLinePipeline = (fmt) => ({
     line: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
@@ -1946,7 +1950,7 @@ export async function createField(canvas, opts = {}) {
     v[52] = phi.half; v[53] = phi.M; v[54] = phi.ok ? 1 : 0; v[55] = (mat.iso === undefined ? 0.06 : mat.iso) / 30;
     v[56] = atomsBound[0]; v[57] = atomsBound[1]; v[58] = atomsBound[2]; v[59] = atomsBound[3] + Math.max(atomsBound[4] * Math.max(asz, 1), srad) + 0.01;
     v[60] = espSoftOf(mat.softness); v[61] = mat.espBare ? 1 : 0;   // iteration 016 S1 · S2
-    v[62] = (mat.slice?.balls === false ? 1 : 0) + (mat.slice?.sticks === false ? 2 : 0);   // 038 F3: the kinds the CLIP does not cut (absent = cut)
+    v[62] = (mat.slice?.balls === false ? 1 : 0) + (mat.slice?.sticks === false ? 2 : 0) + (objMask ? 4 : 0);   // 038 F3: the kinds the CLIP does not cut (absent = cut); F5: THE OBJECT MASK
     const ps = mat.stage;   // 037 T4 · PULSE: p16.w AMOUNT, p17.x SHAPE, p17.y RATE, p17.z the phase; absent = the homes (AMOUNT 0: bg untouched). p16.xyz and p17.w are chain L's
     v[83] = ps ? ps.pulse : 0; v[84] = ps && ps.shape === 'edge' ? 1 : 0; v[85] = ps ? ps.rate : 0; v[86] = ps && ps.rate > 0 ? pulsePhase(ps.rate) : 0;
     v[87] = lightView(v, mat.light);   // 037 L2: THE LIGHT (p12 … p16.xyz) and THE LEGACY GATE (p17.w)
@@ -2182,7 +2186,7 @@ export async function createField(canvas, opts = {}) {
   /* ── THE TAP (024 S1): `tap(fn | null)` — while set, the canvas carries COPY_SRC and frame() copies the presented texture into one kept
      texture (same format, TEXTURE_BINDING) in the SAME submit, then calls fn(texture, w, h).  A reader on the device (lab/node-shader.js)
      draws from it; no WGSL, no pixel and no readback changes (readPixels renders its own texture).  Null clears it and frees the copy. */
-  let tapFn = null, tapTex = null;
+  let tapFn = null, tapTex = null, objMask = false;   // objMask: 038 F5 THE OBJECT MASK (below)
   const canvasUsage = () => GPUTextureUsage.RENDER_ATTACHMENT | (tapFn ? GPUTextureUsage.COPY_SRC : 0);
   function tapCopy(enc, cur, w, h) {
     if (!tapTex || tapTex.width !== w || tapTex.height !== h) { if (tapTex) tapTex.destroy(); tapTex = device.createTexture({ size: [w, h], format, usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST }); }
@@ -2191,12 +2195,17 @@ export async function createField(canvas, opts = {}) {
   /** the context as the field owns it: the gamut in force and COPY_SRC while a tap reads.  A borrower (capture.js configureCopy, a picture
    *  or a film) hands it back through here, never with a usage of its own — 028 R-01: a plain RENDER_ATTACHMENT under a live tap failed
    *  every present's copy until the tap flipped. */
-  function reconfigure() { ctx.configure({ device, format, alphaMode: 'opaque', usage: canvasUsage(), ...(gamut !== 'srgb' && { colorSpace: 'display-p3' }) }); }
+  function reconfigure() { ctx.configure({ device, format, alphaMode: objMask ? 'premultiplied' : 'opaque', usage: canvasUsage(), ...(gamut !== 'srgb' && { colorSpace: 'display-p3' }) }); }
   function tap(fn) {
     const f = typeof fn === 'function' ? fn : null, flip = !!f !== !!tapFn; tapFn = f;
     if (flip) reconfigure();
     if (!f && tapTex) { tapTex.destroy(); tapTex = null; }
   }
+  /* 038 F5 · THE OBJECT MASK (the field's side of A NODE HAS A TARGET): `setObjectMask(on)` → the state in force.  On, the canvas is `premultiplied`
+     and every pixel's alpha says where the skeleton is — code 255 on a ball or stick on the ray (ESP's inner sticks too), 254 on the rest, the colour
+     premultiplied by it (the page behind the canvas is the stage colour: nothing shows); the line pass keeps the destination's alpha.  The tap
+     copies it (a SHADER node reads `.a`), an SVG node thresholds SourceAlpha.  Off (the boot, THE LOCK) the canvas is `opaque` and alpha is 1 */
+  function setObjectMask(on) { const m = !!on; if (m !== objMask) { objMask = m; reconfigure(); } return objMask; }
 
   /* ── readbacks (tests and diagnostics; never on the frame path) ───────── */
   /** the ink the LINE buffer is carrying right now — the box and the three axes, as written by the last writeLines.
@@ -2540,6 +2549,7 @@ export async function createField(canvas, opts = {}) {
     renderPipelines: { get: () => { let ready = 0, pending = 0, failed = 0; for (const e of specCache.values()) { if (e.pipeline) ready++; else if (e.failed) failed++; else pending++; } return { ready, pending, failed, pinned: pinDepth > 0 }; }, enumerable: true },
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
     dprCap: { get: () => dprCap, enumerable: true },      // LIVE getters: Object.assign below would freeze these at their boot values
+    objectMask: { get: () => objMask, enumerable: true },   // 038 F5: THE OBJECT MASK in force (setObjectMask)
     stepCap: { get: () => stepCap, enumerable: true },
     paced: { get: () => paced, enumerable: true }, inFlight: { get: () => inFlight, enumerable: true }, queueMs: { get: () => queueMs, enumerable: true },
     inFlightCap: { get: () => (paced ? 4 : queueMs > HEAVY_MS ? 2 : Infinity), enumerable: true },   // PACE (P1, P3): read-only
@@ -2554,7 +2564,7 @@ export async function createField(canvas, opts = {}) {
     moleculeTiers: { get: () => ({ granted: device.limits.maxComputeWorkgroupStorageSize, caps: MOL_CAPS, wg: molWg, orbitalFrom: MOL_ORB_FROM }), enumerable: true } });
   Object.assign(out, {
     ok: !b.lost, device, adapter, format, stats,
-    frame, tap, reconfigure, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, errorField, lineColors, linePixels,
+    frame, tap, reconfigure, setObjectMask, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, errorField, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
     /** iteration 014 B: the atoms BALLS · STICKS · ESP draw ([{ Z, x, y, z }] in bohr, or null) and the molecule's charge; a volume's φ grid
      *  ({ n, half, data: Float32Array(n³) }, cell centres, x fastest — volumes-format.js espGrid) or null for the Poisson pass; φ's state */

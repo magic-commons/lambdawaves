@@ -92,6 +92,39 @@ try {
     out.pic = jpeg('038-F4-2p0-arg-re-im-' + tag, row, W3, 400, W3 * 4);
     out.ok = out.check.reVsArgAt0 <= 2 && out.check.imVsArgAt4pi <= 2;
   }
+  if (scene === 'f5') {
+    /* the check: benzene's balls and sticks over CLOUD and over ESP.  Mask off: alpha 255 everywhere.  setObjectMask(true): alpha 255 exactly on the
+       pixels the atoms cover (the atoms-on minus atoms-off picture, at EXPOSURE 0) and 254 on the rest; the colour moves by ≤ 1 level (premultiplied);
+       the frame and axes drawn over it change no alpha; the presented frame raises no GPU error; off again, the picture is the first one to the bit */
+    await molecule('C6H6');
+    await g.ev(`__LW.mat.atomSize = 0.35; __LW.mat.stickR = 0.3; __LW.schedule(4); await __LW.settle(); await __LW.settle(); return 1;`);
+    out.mask = await g.ev(`const L = __LW, F = L.field, o = { ...L.obs, dist: 1.7 }, base = { ...L.mat, view: 1, style: 0, frame: false, axis: false, dither: 0 }; delete base.light;
+      const a = (r) => { const n = {}; for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) { const v = r.px[y * r.bpr + x * 4 + 3]; n[v] = (n[v] || 0) + 1; } return n; };
+      const off0 = await __F.px(o, base, 480, 300), noAtoms = await __F.px(o, { ...base, exposure: 0, atomSize: 0, stickR: 0 }, 480, 300), atoms0 = await __F.px(o, { ...base, exposure: 0 }, 480, 300);
+      let cover = 0; for (let i = 0; i < noAtoms.px.length; i += 4) if (noAtoms.px[i] !== atoms0.px[i] || noAtoms.px[i + 1] !== atoms0.px[i + 1] || noAtoms.px[i + 2] !== atoms0.px[i + 2]) cover++;
+      const was = F.setObjectMask(true); const on = await __F.px(o, base, 480, 300), onLines = await __F.px(o, { ...base, frame: true, axis: true }, 480, 300), esp = await __F.px(o, { ...base, style: 11 }, 480, 300);
+      let dmax = 0, dObj = 0; for (let y = 0; y < on.h; y++) for (let x = 0; x < on.w; x++) for (let c = 0; c < 3; c++) { const i = y * on.bpr + x * 4; const d = Math.abs(on.px[i + c] - off0.px[i + c]); dmax = Math.max(dmax, d); if (on.px[i + 3] === 255) dObj = Math.max(dObj, d); }
+      L.schedule(4); await L.settle(); await L.settle(); const gpu = F.lastGpuError || null;
+      const back = F.setObjectMask(false); const off1 = await __F.px(o, base, 480, 300);
+      return { was, state: F.objectMask, off: a(off0), on: a(on), onLines: a(onLines), esp: a(esp), cover, dmax, dObj, gpu, back, same: off1.hash === off0.hash };`);
+    { await g.ev(`__LW.field.setObjectMask(true); return 1;`);
+      const r = await g.ev(`const L = __LW, mm = { ...L.mat, view: 1, style: 0, frame: false, axis: false, dither: 0 }; delete mm.light; const r = await __F.px({ ...L.obs, dist: 1.7 }, mm, 480, 300);
+        const px = Array.from(r.px); for (let i = 0; i < px.length; i += 4) { const k = px[i + 3] === 255; px[i] = px[i + 1] = px[i + 2] = k ? 255 : 30; px[i + 3] = 255; } return { px, bpr: r.bpr };`);
+      await g.ev(`__LW.field.setObjectMask(false); return 1;`);
+      out.pic = jpeg('038-F5-benzene-object-mask', r.px, 480, 300, r.bpr); }
+    /* the page as the reader sees it (the driver composites the real canvas): the mask on and off, compared level by level */
+    const page = async (on) => { await g.ev(`__LW.field.setObjectMask(${on}); __LW.schedule(4); await __LW.settle(); await __LW.settle(); await new Promise((r) => setTimeout(r, 300)); return 1;`);
+      const p = `.tmp/f-page-${on}.png`; writeFileSync(p, Buffer.from(await g.snap(), 'base64')); return p; };
+    const pOff = await page(false), pOn = await page(true); await g.ev(`__LW.field.setObjectMask(false); return 1;`);
+    out.pageDiff = execFileSync('python3', ['-I', '-c', `import sys
+from PIL import Image, ImageChops
+a = Image.open(sys.argv[1]).convert('RGB'); b = Image.open(sys.argv[2]).convert('RGB'); d = ImageChops.difference(a, b)
+h = d.convert('L').histogram(); print(max(i for i, n in enumerate(h) if n), sum(n for i, n in enumerate(h) if i > 2))`, pOff, pOn]).toString().trim();
+    const M = out.mask;
+    /* `cover` is the atoms' footprint read by colour (a pixel whose atom matches the stage is missed), so it may fall a few pixels short of the mask's own */
+    out.ok = M.was === true && Object.keys(M.off).join() === '255' && Object.keys(M.on).sort().join() === '254,255' && Math.abs(M.on['255'] - M.cover) <= 0.005 * M.cover
+      && M.onLines['255'] === M.on['255'] && (M.esp['255'] || 0) > 0 && M.dmax <= 2 && M.dObj === 0 && !M.gpu && M.back === false && M.same;
+  }
   if (scene === 'f3') {
     /* the check: benzene's balls and sticks at EXPOSURE 0 (the picture is the atoms alone) — the CLIP on cuts them as before; CUT BALLS and CUT STICKS off
        draw them exactly as the CLIP off does (CLIP and SLAB); one kind off leaves the other cut.  The switches: hidden under hydrogen, shown under
