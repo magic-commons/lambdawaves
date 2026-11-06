@@ -96,5 +96,15 @@ try {
     out.diagram = await g.ev(`const p = document.querySelector('#widgets .lw-widget[data-id="w4"] img'); return { shown: !p.hidden, cls: p.className, src: p.getAttribute('src') };`);
     out.ok = out.one.a.n > 500 && out.one.a.h !== out.one.b.h && out.style.length === 4 && out.balls.opts.style === 'balls' && out.balls.last === 'WIDGET STYLE' && out.diagram.shown && /pic-ink/.test(out.diagram.cls);
   }
+  if (scene === 'w5') {   /* CLOCK and PLAYHEAD: two seconds of play move both, the clock's value is written at most ~5 times a second */
+    out.run = await g.ev(`__LW.widgets.restore(null); const a = __LW.widgets.add('clock'), b = __LW.widgets.add('playhead'); await new Promise((r) => setTimeout(r, 400));
+      const v = (id) => document.querySelector('#widgets .lw-widget[data-id="' + id + '"] .ro-val').textContent, before = [v(a), v(b)];
+      let writes = 0; const mo = new MutationObserver((m) => { writes += m.length; }); mo.observe(document.querySelector('#widgets .lw-widget[data-id="' + a + '"] .ro-val'), { childList: true, characterData: true, subtree: true });
+      __LW.play(); await new Promise((r) => setTimeout(r, 2000)); __LW.pause(); await new Promise((r) => setTimeout(r, 300)); mo.disconnect();
+      return { before, after: [v(a), v(b)], writes };`);
+    await g.ev(`__LW.widgets.restore({ items: [{ id: 'w1', kind: 'clock', x: 0.3, y: 0.25, w: 0.24, h: 0.08 }, { id: 'w2', kind: 'playhead', x: 0.58, y: 0.25, w: 0.12, h: 0.08 }] }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+    await shot('037-W5-clock-playhead', [400, 180, 1100, 330]);
+    out.ok = out.run.after[0] !== out.run.before[0] && /^t = .* a\.u\. · lap \d+$/.test(out.run.after[0]) && /^\d+:\d\d\.\d$/.test(out.run.after[1]) && out.run.writes > 0 && out.run.writes <= 14;
+  }
   out.errs = (await g.errors()).errs;
 } finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }
