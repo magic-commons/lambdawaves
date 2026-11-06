@@ -9,7 +9,7 @@
  * THE RECORD is `mat.light`, written only by a hand and only with the values off their homes (field.js LIGHT_HOME; absent = the old light: THE
  * LEGACY GATE in the shader stays shut and every lit line runs its old text).  It rides the project inside `presentation.mat` and the history
  * with the look; never in NEW.  In lab/, not windows/: rack-deps admits only rack.js's planned modules there (informational.js' precedent). */
-import { el, knob, seg, trig } from './mir/kit.js'; import { xyPad } from './mir/controls/xy.js'; import { glyphEl } from './mir/glyph.js'; import { fold } from './fold.js'; import { summon } from './summon.js';
+import { el, knob, seg, trig, chip } from './mir/kit.js'; import { xyPad } from './mir/controls/xy.js'; import { glyphEl } from './mir/glyph.js'; import { fold } from './fold.js'; import { summon } from './summon.js';
 import { TIER } from './tier.js'; import { LIGHT_HOME as HOME, lightRgb, cameraBasis } from './field.js';
 const RAD = Math.PI / 180, deg = (v) => v.toFixed(0) + '°', two = (v) => v.toFixed(2);
 /** every dial: key → [label, min, max, fmt, hint, log, wrap]; the modulation targets (L3) take these ranges, so a route never disagrees with its dial */
@@ -68,7 +68,7 @@ export function createLight(app) {
     { id: 'camera', label: 'CAMERA', title: 'A headlight: the light turns with your eye' },
     { id: 'world', label: 'WORLD', title: 'A lamp fixed to the object as you orbit' }], onChange: (f) => reframe(f) });
   verbs.appendChild(frameSeg.root);
-  verbs.appendChild(trig({ label: 'RESET', cls: 'lw-light-reset', title: 'RESET · every light value home: the old light', onFire: reset }).root);
+  verbs.appendChild(chip(trig({ label: 'RESET', cls: 'lw-light-reset', title: 'RESET · every light value home: the old light', onFire: reset }).root, 'reload', 'RESET'));   // 038 K2: the reload glyph, as PALETTE's RELOAD
 
   /* ── the KEY: the SUN pad (the kit's XY pad dressed as a disc, its lattice swelling under the sun) and its dials ── */
   const top = el('div', 'lw-light-key', w.body), hp = padOf(HOME.az, HOME.el);

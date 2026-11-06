@@ -304,7 +304,7 @@ export function createMaterial(app) {
        the 'reload' and 'Reverse' to the top … and vice versa"; "Make 'Add' a plus sign icon"): the top row is PALETTE · RELOAD (the kit's RESET,
        "reload the chosen preset") · REVERSE; the bottom row was ADD (the plus icon) · INVERT · the selected stop's swatch and × · ROTATE, and is ADD · ROTATE · … · INVERT since 016 P1 */
     const resetEl = rv.root.querySelector('.mir-ramp-reset'), [addEl, revEl] = verbs.querySelectorAll(':scope > .trig'), rotEl = verbs.querySelector(':scope > .k');
-    chip(resetEl, 'undo', 'RELOAD'); rowOn.append(resetEl, revEl);
+    chip(resetEl, 'reload', 'RELOAD'); rowOn.append(resetEl, revEl);   // 038 K2 (Josh: "reset (can be a reload icon; palette needs to update this as well)"): ↺, as LIGHTING's RESET
     revEl.classList.add('pal-rev'); chip(revEl, 'reverse'); revEl.setAttribute('aria-label', 'REVERSE'); revEl.title = 'REVERSE · run the ramp backwards';   // iteration 015 P2: the word is the hint
     rotEl.appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; paintBar(); saveSettings(); schedule(TIER.PRESENT); } });
