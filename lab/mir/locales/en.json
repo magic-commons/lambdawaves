@@ -283,6 +283,7 @@
   "Download, then share from Files.": "Download, then share from Files.",
   "Drag a clip’s edge": "Drag a clip’s edge",
   "Drag a pattern / audio clip body": "Drag a pattern / audio clip body",
+  "Drag past the left or right edge": "Drag past the left or right edge",
   "Drag sideways to set; double-tap the row grip to rename": "Drag sideways to set; double-tap the row grip to rename",
   "Drag the ruler": "Drag the ruler",
   "Drag to reorder": "Drag to reorder",
@@ -375,6 +376,8 @@
   "FL — pattern clips move from their body": "FL — pattern clips move from their body",
   "FL — the Slice tool cuts at the click": "FL — the Slice tool cuts at the click",
   "FL — the pencil places the last clip; MAKE UNIQUE detaches it": "FL — the pencil places the last clip; MAKE UNIQUE detaches it",
+  "FL — the playlist scrolls under a drag held at its edge": "FL — the playlist scrolls under a drag held at its edge",
+  "FL — the wheel scrolls the playlist, Ctrl + wheel zooms": "FL — the wheel scrolls the playlist, Ctrl + wheel zooms",
   "FLAT": "FLAT",
   "FLING": "FLING",
   "FLING — the speed a released view keeps; at 0 it stops dead": "FLING — the speed a released view keeps; at 0 it stops dead",
@@ -901,6 +904,8 @@
    "one": "Saved — {name} · made room by deleting {n} project",
    "other": "Saved — {name} · made room by deleting {n} projects"
   },
+  "Scroll time (Shift + wheel too; with more lanes than fit, the wheel scrolls the lanes); Ctrl/Cmd + wheel zooms": "Scroll time (Shift + wheel too; with more lanes than fit, the wheel scrolls the lanes); Ctrl/Cmd + wheel zooms",
+  "Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)": "Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)",
   "Scrub the timeline playhead": "Scrub the timeline playhead",
   "Scrub tool": "Scrub tool",
   "Scrub: the playhead follows the hand, free of Snap": "Scrub: the playhead follows the hand, free of Snap",
@@ -1112,6 +1117,7 @@
   "What the look costs, measured after the last change": "What the look costs, measured after the last change",
   "What this app is, for a visiting model: windows, parameters, keys and shared pages": "What this app is, for a visiting model: windows, parameters, keys and shared pages",
   "What this theme cost when it was applied: surfaces that blur, shadows drawn, shine layers, the mean frame time": "What this theme cost when it was applied: surfaces that blur, shadows drawn, shine layers, the mean frame time",
+  "Wheel over the timeline": "Wheel over the timeline",
   "Where the transport sits": "Where the transport sits",
   "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar": "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar",
   "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar": "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar",
@@ -2602,6 +2608,9 @@
   "Drag a pattern / audio clip body": [
    "mir/timeline/shortcuts.js"
   ],
+  "Drag past the left or right edge": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Drag sideways to set; double-tap the row grip to rename": [
    "mir/modulation/window.js"
   ],
@@ -2877,6 +2886,12 @@
    "mir/timeline/shortcuts.js"
   ],
   "FL — the pencil places the last clip; MAKE UNIQUE detaches it": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — the playlist scrolls under a drag held at its edge": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — the wheel scrolls the playlist, Ctrl + wheel zooms": [
    "mir/timeline/shortcuts.js"
   ],
   "FLAT": [
@@ -4482,6 +4497,12 @@
   "Saved — {name} · made room by deleting {n} projects": [
    "mir/folders/gallery.js"
   ],
+  "Scroll time (Shift + wheel too; with more lanes than fit, the wheel scrolls the lanes); Ctrl/Cmd + wheel zooms": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Scrub the timeline playhead": [
    "mir/timeline/view.js"
   ],
@@ -5125,6 +5146,9 @@
   ],
   "What this theme cost when it was applied: surfaces that blur, shadows drawn, shine layers, the mean frame time": [
    "mir/shell/gui.js"
+  ],
+  "Wheel over the timeline": [
+   "mir/timeline/shortcuts.js"
   ],
   "Where the transport sits": [
    "mir/shell/transport.js"

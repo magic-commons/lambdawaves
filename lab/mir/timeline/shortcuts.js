@@ -68,6 +68,8 @@ export function timelineActions(get) {
 // (1.5.6-alpha.23, λWAVES 032): one modifier table — Shift selects and fines, Ctrl shapes, Alt bypasses Snap and deletes.
 export const TIMELINE_POINTER = [   // tr: the timeline's pointer gestures: the gesture, what it does, its FL Studio counterpart
   { label: 'Middle button, hold + drag', hint: 'Pan time and tracks', t: 'FL — Middle-Mouse-Click pans' },
+  { label: 'Wheel over the timeline', hint: 'Scroll time (Shift + wheel too; with more lanes than fit, the wheel scrolls the lanes); Ctrl/Cmd + wheel zooms', t: 'FL — the wheel scrolls the playlist, Ctrl + wheel zooms' },
+  { label: 'Drag past the left or right edge', hint: 'Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)', t: 'FL — the playlist scrolls under a drag held at its edge' },
   { label: 'Shift + drag (empty)', hint: 'Rectangle-select clips or points', t: 'adapted — FL’s Ctrl+drag; in MIR Shift selects' },
   { label: 'Ctrl/Cmd + Shift + drag', hint: 'Add to the rectangle selection', t: 'FL — Ctrl+Shift+drag adds' },
   { label: 'Shift + click a clip', hint: 'Toggle it in the selection', t: 'adapted — FL’s Ctrl+click toggles' },
