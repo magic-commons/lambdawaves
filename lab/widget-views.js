@@ -31,3 +31,7 @@ view({ kind: 'plane', label: 'PLANE', hint: 'ψ on PLANE’s cut: arg the hue, |
   of((app) => app.w.slice, (m, app) => m.update(app.reg, app.clock.t, app.clock.playing)));   // its chunked job on its own pump (sliceview.js)
 view({ kind: 'emission', label: 'EMISSION', hint: 'EMISSION’s comb, the state’s own lines lit', size: { w: 0.26, h: 0.1 } }, 'emission', of((app) => app.w.emissionView, (m) => m.update()));
 view({ kind: 'equalizer', label: 'EQUALIZER', hint: 'The beat grid: each pair of shells, its beat’s third', size: { w: 0.11, h: 0.17 } }, 'equalizer', of((app) => app.state.eq, () => {}));   // pushed by syncEq; read-only
+view({ kind: 'spectrum', label: 'SPECTRUM', hint: 'The eigenvalue ladder, its populated levels lit', size: { w: 0.12, h: 0.2 } }, 'spectrum', (cv, app) => {
+  const m = app.w.spectrum; let v = -1; m.views.add(cv);   // the ladder moves with the register's version alone
+  return { tick: (force) => { if (force || app.reg.version !== v) { v = app.reg.version; m.redraw(); } }, off: () => m.views.delete(cv) };
+});
