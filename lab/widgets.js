@@ -41,7 +41,7 @@ export const loadWidgets = (rec) => { if (L) L.restore(rec); };
 export function createWidgets(app) {
   if (L) return L;
   const root = el('div', '', app.dom.stage.parentElement); root.id = 'widgets'; root.setAttribute('aria-hidden', 'true');
-  const live = new Map(), fans = new Set();   // id → { it, box, body, inst, force }
+  const live = new Map(), fans = new Set();   // id → { it, box, body, bar, K, view, inst, force }
   let items = [], editOn = false, snapOn = true, raf = 0;
   try { items = clean(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (_) {}
   const theme = () => (document.body.dataset.theme === 'light' ? 'light' : 'dark');
@@ -60,13 +60,13 @@ export function createWidgets(app) {
     const body = el('div', 'lw-widget-body', box), bar = el('div', 'lw-widget-bar', box), x = el('button', 'lw-widget-x', box);
     x.type = 'button'; x.append(glyphEl('close', 'gly', 16)); hint(x, 'Remove this widget'); x.addEventListener('click', () => api.remove(it.id));
     el('i', 'lw-widget-grip', box);
-    const W = { it, box, body, inst: {}, force: false };
+    const W = { it, box, body, bar, K, inst: {}, force: false };
     const view = { app, id: it.id, kind: it.kind, el: body, opts: () => W.it.opts, theme, ink: () => getComputedStyle(root).color, editing: () => editOn,
       size: () => ({ w: body.clientWidth, h: body.clientHeight }),
       set: (patch, name = 'WIDGET ' + K.label) => { W.it.opts = { ...W.it.opts, ...patch }; if (W.inst.set) W.inst.set(W.it.opts); kick(W); commit(name); } };
     place(W); live.set(it.id, W); box.tabIndex = editOn ? 0 : -1;
     W.inst = K.mount(body, view) || {};
-    if (K.controls) K.controls(bar, view);
+    W.view = view; if (K.controls) K.controls(bar, view);
     if (sized) sized.observe(body);
     kick(W); return W;
   }
@@ -142,7 +142,8 @@ export function createWidgets(app) {
       for (const [id, W] of [...live]) { const n = by.get(id); if (!n || n.kind !== W.it.kind) unmount(id); }
       items = next;
       for (const it of items) { const W = live.get(it.id); if (!W) { mount(it); continue; }
-        const moved = !same(W.it.opts, it.opts); W.it = it; place(W); if (moved && W.inst.set) W.inst.set(it.opts); kick(W); }
+        const moved = !same(W.it.opts, it.opts); W.it = it; place(W);
+        if (moved) { if (W.inst.set) W.inst.set(it.opts); if (W.K.controls) { W.bar.textContent = ''; W.K.controls(W.bar, W.view); } } kick(W); }   // an undo's opts: the picture and the kind's controls follow
       save(); fan();
     },
     serialize: () => (items.length ? { items: items.map((it) => ({ ...it, opts: { ...it.opts } })) } : null),

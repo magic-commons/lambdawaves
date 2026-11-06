@@ -761,6 +761,8 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 #widgets .lw-widget { position: absolute; box-sizing: border-box; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; outline: 0; }
 #widgets .lw-widget-body { position: absolute; inset: 0; container-type: size; overflow: hidden; }
 #widgets .lw-widget-bar, #widgets .lw-widget-x, #widgets .lw-widget-grip { display: none; }
+#widgets .lw-w-mol, #widgets .lw-w-pic { position: absolute; inset: 0; width: 100%; height: 100%; }   /* 037 W4: the mini-viewer's canvas and its diagram (a mask in the ink) */
+#widgets .lw-w-pic[hidden] { display: none; }
 body.ui-hidden #widgets { display: none; }
 body.menu-open #widgets { visibility: hidden; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */

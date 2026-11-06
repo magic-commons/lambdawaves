@@ -79,5 +79,22 @@ try {
     out.removed = await g.ev(`await new Promise((r) => setTimeout(r, 400)); return { n: __LW.widgets.list().length, rows: document.querySelectorAll('.dev[data-id="widgets"] .wg-row').length, h: Math.round(document.querySelector('.dev[data-id="widgets"]').getBoundingClientRect().height) };`);
     out.ok = out.open.acts >= 3 && out.open.open && out.open.tiles.includes('PROBE') && out.added.n === 1 && out.added.centre[0] === 0.5 && out.added.rows === 1 && out.edit === true && out.removed.n === 0;
   }
+  if (scene === 'w4') {   /* the mini-viewer: benzene drawn, a camera turn repaints it, a real press on the EDIT seg changes the style (one WIDGET STYLE row), all four styles side by side */
+    const sig = `const sig = (id) => { const c = document.querySelector('#widgets .lw-widget[data-id="' + id + '"] canvas'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0, h = 2166136261;
+      for (let i = 3; i < d.length; i += 4) if (d[i]) { n++; h = Math.imul(h ^ (d[i - 3] + 7 * d[i - 2] + 13 * d[i - 1] + i), 16777619) >>> 0; } return { n, h }; };`;
+    out.one = await g.ev(`${sig} await __LW.chem.solve('C6H6'); __LW.chem.setOn(true); await __LW.settle(); __LW.widgets.restore(null); const id = __LW.widgets.add('mol');
+      await new Promise((r) => setTimeout(r, 500)); const a = sig(id); __LW.orbitBy(0.6, 0.25); await new Promise((r) => setTimeout(r, 600)); const b = sig(id); return { id, a, b };`);
+    out.style = await g.ev(`__LW.widgets.edit(true); await new Promise((r) => setTimeout(r, 200)); return [...document.querySelectorAll('#widgets .lw-widget-bar .seg-b')].map((b) => b.textContent);`);
+    await g.tap('#widgets .lw-widget-bar .seg-b:first-child');
+    out.balls = await g.ev(`await new Promise((r) => setTimeout(r, 600)); return { opts: __LW.widgets.list()[0].opts, last: __LW.history.entries().slice(-1)[0].label };`);
+    await g.ev(`__LW.widgets.edit(false); __LW.widgets.restore({ items: ['balls', 'ballstick', 'sticks', 'diagram'].map((s, i) => ({ id: 'w' + (i + 1), kind: 'mol', x: 0.2 + i * 0.15, y: 0.3, w: 0.14, h: 0.22, opts: { style: s } })) });
+      await new Promise((r) => setTimeout(r, 900)); return 1;`);
+    await g.ev(`__LW.look.set({ theme: 'dark' }); await new Promise((r) => setTimeout(r, 900)); return 1;`);
+    await shot('037-W4-mol-styles-dark', [270, 260, 1230, 500]);
+    await g.ev(`__LW.look.set({ theme: 'light' }); await new Promise((r) => setTimeout(r, 900)); return 1;`);
+    await shot('037-W4-mol-styles-light', [270, 260, 1230, 500]);
+    out.diagram = await g.ev(`const p = document.querySelector('#widgets .lw-widget[data-id="w4"] img'); return { shown: !p.hidden, cls: p.className, src: p.getAttribute('src') };`);
+    out.ok = out.one.a.n > 500 && out.one.a.h !== out.one.b.h && out.style.length === 4 && out.balls.opts.style === 'balls' && out.balls.last === 'WIDGET STYLE' && out.diagram.shown && /pic-ink/.test(out.diagram.cls);
+  }
   out.errs = (await g.errors()).errs;
 } finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }
