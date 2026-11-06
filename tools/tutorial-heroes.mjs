@@ -1,17 +1,20 @@
 #!/usr/bin/env node
-/* tools/tutorial-heroes.mjs — 034 M3 THE TUTORIAL DECK's pictures: a card's hero (the loop a hover or a focus plays) and its still.
+/* tools/tutorial-heroes.mjs — 034 M3 THE TUTORIAL's pictures: a row's hero (037 U2: the loop its player plays) and its still.
  *
- *   node tools/tutorial-heroes.mjs <id> <clip> [--theme dark|light] [--title "WORDS"] [--caption "WORDS"] [--x 0…1]
+ *   node tools/tutorial-heroes.mjs <id> <clip> [--theme dark|light] [--title "WORDS"] [--caption "WORDS"] [--x 0…1] [--deck 1|2]
  *        the clip (any video ffmpeg reads) → lab/img/menu/tut/<id>.<theme>.mp4 — 720 × 1280, 30 fps, H.264 yuv420p, no sound, faststart,
  *        the volume heroes' recipe (tools/volume-heroes.mjs) — and the mp4's own first frame → <id>.<theme>.webp (540 × 960), so the still is
  *        exactly the hero's crop and its first picture; then the card's row in TUTORIAL (lab/picker.js): a new id is appended, its title the
  *        clip's file name (HERO1 → HERO 1) unless --title; an id already there keeps its place, its title and its caption unless they are given.
+ *        THE DECK (037 U4): the row's `deck` — 1 or 2, TUTORIAL_DECKS' first or second (lab/picker.js) — a new row's --deck, else 1; a row
+ *        already there keeps its deck unless --deck is given.
  *        THE CROP: the clip is COVER-CROPPED to 9:16 — scaled to 1280 high and cut to a 720-wide strip at --x (0 the left edge … 1 the right,
  *        0.5 the centre, the default).  A 16:9 screen recording keeps its middle 32 % (the field; the racks at its sides are lost), so a
  *        portrait recording is the honest source; a 9:16 clip keeps everything.
  *        THE THEME is the one the clip was recorded in: --theme, else measured (the whole first frame's mean luma over half → light).  A card shows
  *        its one clip in both themes until the other theme's comes (the row's `themes` names the files that exist).
  *   node tools/tutorial-heroes.mjs --caption <id> "WORDS"   the caption alone (Josh's words, as they come)
+ *   node tools/tutorial-heroes.mjs --deck <id> 1|2          the card moves to the other deck (it keeps its place in the table)
  *   node tools/tutorial-heroes.mjs --drop <id>               the card leaves: its files and its row
  * id: tut-<slug> (a–z, 0–9, hyphens).  Needs ffmpeg (libx264, libwebp) at tool time only.  img/menu/ is a DATA root (sw.js §1b): deployed,
  * never precached; a still is fetched with its card, a hero on its first play.  Then: node tests/pwa.test.mjs --write
@@ -33,19 +36,22 @@ if (!m) fail('lab/picker.js has no `export const TUTORIAL = [` … `];` block');
 const rows = Function('return [' + m[3] + ']')();
 const q = (s) => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ') + "'";
 const write = () => writeFileSync(PICKER, src.replace(block, (m[1] || '') + 'const TUTORIAL = [' + m[2] + '\n' + rows.map((r) =>
-  `  { id: ${q(r.id)}, title: ${q(r.title)}, caption: ${q(r.caption || '')}, themes: ${q(THEMES.filter((t) => String(r.themes).split(' ').includes(t)).join(' '))} },\n`).join('') + '];'));
+  `  { id: ${q(r.id)}, title: ${q(r.title)}, caption: ${q(r.caption || '')}, themes: ${q(THEMES.filter((t) => String(r.themes).split(' ').includes(t)).join(' '))}, deck: ${r.deck || 1} },\n`).join('') + '];'));
+const DECKS = ['1', '2'];   // 037 U4: TUTORIAL_DECKS' numbers
 const next = 'Next: node tests/pwa.test.mjs --write';
 
-if (argv[0] === '--drop' || argv[0] === '--caption') {
+if (argv[0] === '--drop' || argv[0] === '--caption' || argv[0] === '--deck') {
   const [cmd, id, words] = argv, r = rows.find((x) => x.id === id);
   if (!r) fail(`no TUTORIAL row ${id || ''}`);
   if (cmd === '--drop') { for (const t of THEMES) for (const x of ['mp4', 'webp']) rmSync(join(DIR, `${id}.${t}.${x}`), { force: true }); rows.splice(rows.indexOf(r), 1); }
+  else if (cmd === '--deck') { if (!DECKS.includes(words)) fail('usage: --deck <id> 1|2'); r.deck = +words; }
   else { if (words === undefined) fail('usage: --caption <id> "WORDS"'); r.caption = words; }
-  write(); console.log(`tutorial-heroes: ${id} ${cmd === '--drop' ? 'left the deck' : 'has its caption'}. ${next}`);
+  write(); console.log(`tutorial-heroes: ${id} ${cmd === '--drop' ? 'left the deck' : cmd === '--deck' ? 'is in deck ' + words : 'has its caption'}. ${next}`);
   process.exit(0);
 }
-const title = flag('--title'), caption = flag('--caption'), x = flag('--x'), themeArg = flag('--theme'), [id, clip] = argv;
-if (!ID.test(id || '') || !clip) fail('usage: <tut-id> <clip> [--theme dark|light] [--title …] [--caption …] [--x 0…1]  ·  --caption <id> "…"  ·  --drop <id>');
+const title = flag('--title'), caption = flag('--caption'), x = flag('--x'), themeArg = flag('--theme'), deck = flag('--deck'), [id, clip] = argv;
+if (!ID.test(id || '') || !clip) fail('usage: <tut-id> <clip> [--theme …] [--title …] [--caption …] [--x 0…1] [--deck 1|2]  ·  --caption <id> "…"  ·  --deck <id> 1|2  ·  --drop <id>');
+if (deck !== undefined && !DECKS.includes(deck)) fail('--deck is 1 or 2');
 if (!existsSync(clip)) fail('no such clip: ' + clip);
 if (themeArg && !THEMES.includes(themeArg)) fail('--theme is dark or light');
 const fx = x === undefined ? 0.5 : Number(x); if (!(fx >= 0 && fx <= 1)) fail('--x is 0…1');
@@ -66,9 +72,9 @@ ff(['-i', mp4, '-frames:v', '1', '-vf', 'scale=540:960', '-c:v', 'libwebp', '-qu
 
 const named = basename(clip, extname(clip)).toUpperCase().replace(/([A-Z])(\d)/g, '$1 $2').replace(/\s+/g, ' ').trim();
 let r = rows.find((y) => y.id === id);
-if (!r) rows.push(r = { id, title: title || named, caption: caption || '', themes: theme });
-else { if (title) r.title = title; if (caption !== undefined) r.caption = caption; r.themes = [...new Set([...String(r.themes).split(' ').filter(Boolean), theme])].join(' '); }
+if (!r) rows.push(r = { id, title: title || named, caption: caption || '', themes: theme, deck: deck ? +deck : 1 });
+else { if (title) r.title = title; if (caption !== undefined) r.caption = caption; if (deck) r.deck = +deck; r.themes = [...new Set([...String(r.themes).split(' ').filter(Boolean), theme])].join(' '); }
 write();
 const kb = (f) => Math.round(statSync(f).size / 1024);
 console.log(`tutorial-heroes: ${id} ${theme}${luma != null ? ` (measured, luma ${luma.toFixed(0)})` : ''} → lab/img/menu/tut/${id}.${theme}.mp4 (${kb(mp4)} KB) + .webp (${kb(webp)} KB), the crop at x ${fx}; `
-  + `TUTORIAL row ${rows.indexOf(r) + 1}: ${r.title} · ${r.themes}.` + (kb(mp4) > 4096 ? ' The hero is over 4 MB: a shorter loop fetches faster on a hover.' : '') + ' ' + next);
+  + `TUTORIAL row ${rows.indexOf(r) + 1}: ${r.title} · ${r.themes} · deck ${r.deck}.` + (kb(mp4) > 4096 ? ' The hero is over 4 MB: a shorter loop fetches faster on a hover.' : '') + ' ' + next);
