@@ -341,7 +341,7 @@ assert.ok(listed.includes('manifest.webmanifest'), 'sw.js: the manifest itself m
 
 /* The prose in sw.js must name every rule the walk actually applies, so the two cannot drift apart silently. */
 const never = SW.LW_SW.NEVER_PRECACHE.map(([k]) => k).join(' ');
-for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'an adopted kit module no root reaches (R5-W1)', 'a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
+for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'an adopted kit module no root reaches (R5-W1)', 'a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/, the notebook\'s parsers)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
   assert.ok(never.includes(rule), `sw.js: NEVER_PRECACHE does not document the rule "${rule}" that the walk applies`);
 /* and the exception must be REAL, not merely written: every licence text in lab/ is in the precache list. */
 const licences = onDisk.filter(LICENCE);
@@ -355,9 +355,8 @@ console.log(`PASS precache list == lab/ on disk: ${listed.length} files, ${(byte
    lab/library.json — the catalogue lab/molecules.js reads — is precached like any file; each row names lab/library/<sha-256>.json,
    which must exist and hash to its name; and nothing sits in library/ that no row reaches (precache what a root reaches, and
    ship nothing a root does not).  tools/orbital-library.mjs --check proves the bytes are the solver's. */
-assert.deepEqual(DATA, ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/'],
-  'sw.js §1b: the DATA roots are exactly library/, volumes/, the ladder\'s four basis records (iteration 004 V1), the Picker\'s pictures (iteration 005 A), the demos with their covers (iteration 026: demos/ whole, the precache ceiling) and the measured lines (iteration 016 E3) — one rule, these members');
-assert.ok(listed.includes('library.json'), 'sw.js: the catalogue lab/library.json must be precached — offline, the menu could not name a record');
+assert.deepEqual(DATA, ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/', 'mir/shell/vendor/marked.min.js', 'mir/shell/vendor/katex/katex.min.js', 'mir/shell/vendor/katex/katex.min.css'],
+  'sw.js §1b: the DATA roots are exactly library/, volumes/, the ladder\'s four basis records (iteration 004 V1), the Picker\'s pictures (iteration 005 A), the demos with their covers (iteration 026: demos/ whole, the precache ceiling), the measured lines (iteration 016 E3) and the notebook\'s three parsers (038 Z3: marked, KaTeX, KaTeX\'s sheet — kept by main.js, swept each build) — one rule, these members');assert.ok(listed.includes('library.json'), 'sw.js: the catalogue lab/library.json must be precached — offline, the menu could not name a record');
 const CAT = JSON.parse(text('library.json')), dataFiles = onDisk.filter((f) => f.startsWith('library/'));
 assert.ok(Array.isArray(CAT.rows) && CAT.rows.length >= 2, 'lab/library.json: no rows');
 for (const r of [...CAT.rows, ...(CAT.vibrations || [])]) {   // 0.7.0 V1: the normal-mode records too
@@ -376,7 +375,7 @@ const SKIP_FIX = { 'mir/locales/en.json': true, 'mir/locales/pt-BR.json': true, 
 assert.deepEqual(Object.fromEntries(Object.keys(SKIP_FIX).map((r) => [r, IS_KIT_SKIP(r)])), SKIP_FIX, 'sw.js §1b SKIP: the rule matches exactly the fixture');
 assert.deepEqual(listed.filter(IS_KIT_SKIP), [], 'a SKIP file is in the precache');
 const kitSkipped = onDisk.filter(IS_KIT_SKIP), kitSkipBytes = kitSkipped.reduce((n, r) => n + statSync(path.join(LAB, r)).size, 0);
-console.log(`PASS the kit SKIP (§1b: ${KIT_SKIP.join(', ')}): the fixture's ${Object.keys(SKIP_FIX).length} paths classified exactly; on disk ${kitSkipped.length} file(s), ${kitSkipBytes} B, deployed and never precached; precache ${(bytes / 1048576).toFixed(2)} MiB, ${((8 * 1048576 - bytes) / 1048576).toFixed(2)} MiB under the ceiling.`);
+console.log(`PASS the kit SKIP (§1b: ${KIT_SKIP.join(', ')}): the fixture's ${Object.keys(SKIP_FIX).length} paths classified exactly; on disk ${kitSkipped.length} file(s), ${kitSkipBytes} B, deployed and never precached; precache ${(bytes / 1048576).toFixed(2)} MiB, ${((8.5 * 1048576 - bytes) / 1048576).toFixed(2)} MiB under the 8.5 MiB ceiling.`);
 console.log(`PASS the library: ${CAT.rows.length} catalogue rows, each record on disk under its own sha-256 (${CAT.rows.reduce((n, r) => n + r.bytes, 0)} B, none precached); library/ holds nothing else; the catalogue is precached.`);
 
 /* ══ D.  NOTHING EXTERNAL, AND NOTHING MISSING ═══════════════════════════════════════════════════════════ */
@@ -786,8 +785,8 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
   /* iteration 028 R-08: a cover kept under a name no hash is in is swept by the new build's activate; the record stays — and since 036 G7 a
      kept menu film stays too (the loader validates img/menu/), and a Range on it is answered from the kept body: a 206 with the slice */
   const pic = 'https://host.invalid/lab/demos/covers/' + readdirSync(path.join(LAB, 'demos/covers'))[0];
-  const film = 'https://host.invalid/lab/img/menu/collage/dark.mp4';
-  await dc.put(pic, new Response('a cover of the last build'));
+  const film = 'https://host.invalid/lab/img/menu/collage/dark.mp4', kx = 'https://host.invalid/lab/mir/shell/vendor/katex/katex.min.js';   // 038 Z3: a kept parser is swept too
+  await dc.put(pic, new Response('a cover of the last build')); await dc.put(kx, new Response('the last build\'s KaTeX'));
   await dc.put(film, new Response('0123456789', { headers: { 'content-type': 'video/mp4' } }));
   const ranged = async (u, r) => { let a = null; await W.handlers.fetch[0]({ request: { method: 'GET', url: u, mode: 'no-cors', headers: { get: (k) => (k === 'range' ? r : null) } }, respondWith: (q) => { a = q; } }); return a === null ? null : await a; };
   const part = await ranged(film, 'bytes=2-5'), tail = await ranged(film, 'bytes=7-'), far = await ranged(film, 'bytes=40-');
@@ -798,8 +797,8 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
   assert.ok(away && awayAsked === 1 && !dc.m.has('https://host.invalid/lab/img/menu/collage/light.mp4'), 'sw.js: a Range on a DATA path the page has not kept must go to the network and store nothing');
   let p; await W.handlers.activate[0]({ waitUntil: (x) => { p = x; } }); await p;
   assert.ok(W.caches.has(W.LW_SW.DATA_CACHE) && !W.caches.has('lw-lab-anolderbuild'), 'sw.js: activate must collect a stale build and keep lw-data-v1');
-  assert.deepEqual([dc.m.has(url), dc.m.has(film), dc.m.has(pic)], [true, true, false], 'sw.js: a new build\'s activate must keep the record and the kept menu film and sweep the kept cover (R-08; 036 G7)');
-  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there; a Range on a kept DATA body is its 206 slice (416 past its end) and an unkept one the network's; a new build's activate keeps the record and the kept menu film and sweeps a kept cover (demos/covers/, vendor/nist/).`);
+  assert.deepEqual([dc.m.has(url), dc.m.has(film), dc.m.has(pic), dc.m.has(kx)], [true, true, false, false], 'sw.js: a new build\'s activate must keep the record and the kept menu film and sweep the kept cover and parser (R-08; 036 G7; 038 Z3)');
+  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there; a Range on a kept DATA body is its 206 slice (416 past its end) and an unkept one the network's; a new build's activate keeps the record and the kept menu film and sweeps a kept cover and a kept parser (demos/covers/, vendor/nist/, mir/shell/vendor/).`);
 }
 
 console.log(`PASS update policy executed, not described: install precaches ${pc.length} files with cache:'reload' + ?__rev=<content hash> and does NOT skipWaiting; ` +

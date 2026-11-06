@@ -6,6 +6,7 @@ import { createSettingsStore } from './settings-store.js';   // 0.5.0 C6b: the n
 import { STARTERS } from './project-store.js';   // the demos' ids are `?starter=`'s (iteration 009: one, wave-dancer) (their covers are FOLDERS' DEMOS pictures, iteration 004)
 import { installBanner } from './mir/shell/banner.js';   // 0.5.0 C6b: THE BANNER is the kit's
 import { bootVeil } from './mir/shell/boot.js';   // 0.5.0 C6b: THE BOOT VEIL, down at the first real frame
+import { keepData } from './library.js';   // 038 Z3: the notebook's parsers are DATA (sw.js §1b): the page keeps what index.html loaded
 window.__e = window.__e || [];
 addEventListener('error', (e) => __e.push('ERR ' + e.message));
 addEventListener('unhandledrejection', (e) => __e.push('REJ ' + String(e.reason && e.reason.message || e.reason)));
@@ -116,6 +117,13 @@ function installLayer(LW) {
     catch (e) { sw.mode = 'failed'; sw.error = String(e && e.message || e); return; }
     sw.registration = reg; sw.mode = 'registered';
     if (sw.repairBoot) sw.repairBoot(reg);                                   // 033 REPAIR: the second reload of the repair road, and its verdict
+    /* 038 Z3 · THE PARSERS ARE DATA (sw.js §1b): marked, KaTeX and its sheet are never precached; what index.html loaded is kept here, so
+       this install sets maths offline from its next open.  Every activate sweeps them (a new build's bytes may differ), a first install's
+       too: so on a first install they are kept once that worker is ACTIVATED, else at once (a controlled open keeps the new build's) */
+    const keepParsers = () => { if (window.marked && window.katex) for (const f of ['marked.min.js', 'katex/katex.min.js', 'katex/katex.min.css']) keepData('./mir/shell/vendor/' + f); };
+    const first = !reg.active && (reg.installing || reg.waiting);
+    if (!first) keepParsers();
+    else first.addEventListener('statechange', function on() { if (first.state === 'activated') { first.removeEventListener('statechange', on); keepParsers(); } });
 
     /** OFFER a waiting worker to the interface.  Nothing here takes it; accept() does — on a press, or quietly
         (`alone`) for an untouched session.  ONCE PER WORKER (wave 133): `reg.waiting`, the install's statechange and §3's
