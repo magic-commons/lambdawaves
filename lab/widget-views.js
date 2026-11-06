@@ -25,3 +25,5 @@ view({ kind: 'shadow', label: 'SHADOW', hint: 'The modes as phasors, in the wind
 view({ kind: 'bloch', label: 'BLOCH', hint: 'BLOCH’s qubit on its sphere', size: { w: 0.14, h: 0.2 } }, 'bloch', of(() => BL, t));
 view({ kind: 'lattice', label: 'LATTICE', hint: 'LATTICE’s sites, |ψ|² tall in the phase’s hue', size: { w: 0.2, h: 0.2 } }, 'lattice', of(() => LAT, t));
 view({ kind: 'orbit', label: 'ORBIT', hint: 'Each shell’s two rotors and its Kepler ellipse', size: { w: 0.24, h: 0.16 } }, 'orbit', of((app) => app.w.orbit, (m, app) => m.update(app.obs)));
+view({ kind: 'wigner', label: 'WIGNER', hint: 'The (z, p_z) slice of W, signed in the two accents', size: { w: 0.16, h: 0.2 } }, 'wigner', of((app) => app.w.wignerView, (m, app) => {
+  const G = app.host.hydroReader(); m.update(app.reg, app.clock.t, app.clock.playing, G.on, G.why, app.ctl.domain.half); }));   // its own 2 Hz while playing (wignerview.js)

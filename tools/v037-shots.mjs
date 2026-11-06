@@ -31,10 +31,11 @@ const out = {};
 try {
   await boot();
   if (scene === 'v1') {   /* the four windows open at t = 0, then t = 3: each window canvas hashed (equal before and after the seam) */
-    out.win = await g.ev(`${PIX} __LW.windowActivity.presentOffscreen(true); __LW.seek(0); for (const id of ['shadow', 'bloch', 'lattice', 'orbit']) __LW.actions.run('window.' + id + '.open');
-      await new Promise((r) => setTimeout(r, 1500)); __LW.seek(3); await __LW.settle(); await new Promise((r) => setTimeout(r, 1200));
-      const q = (s) => document.querySelector(s);
-      return { shadow: pix(q('.dev[data-id="shadow"] .shadow-c')), bloch: pix(q('.dev[data-id="bloch"] .ladder-c canvas')), lattice: pix(q('.dev[data-id="lattice"] .ladder-c canvas')), orbit: pix(q('.dev[data-id="orbit"] .orbit-c')) };`);
+    const CV = { shadow: '.shadow-c', bloch: '.ladder-c canvas', lattice: '.ladder-c canvas', orbit: '.orbit-c', wigner: '.wig-c', slice: '.slice-c', emission: '.em-strip', equalizer: '.eq-grid', spectrum: '.lcv', chem: '.reg-ladder' };
+    const wins = (process.env.V_WINS || 'shadow,bloch,lattice,orbit').split(',');
+    out.win = await g.ev(`${PIX} __LW.windowActivity.presentOffscreen(true); __LW.seek(0); ${process.env.V_MOL ? `await __LW.chem.solve('C6H6'); __LW.chem.setOn(true);` : ''} for (const id of ${JSON.stringify(wins)}) __LW.actions.run('window.' + id + '.open');
+      await new Promise((r) => setTimeout(r, 1500)); __LW.seek(3); await __LW.settle(); await new Promise((r) => setTimeout(r, 1500)); const o = {};
+      for (const id of ${JSON.stringify(wins)}) o[id] = pix(document.querySelector('.dev[data-id="' + id + '"] ' + ${JSON.stringify(CV)}[id])); return o;`);
     out.ok = Object.values(out.win).every((p) => p.ink > 0);
   }
   if (scene === 'v2') {   /* every window closed: each kind's widget paints, a second of play moves its picture, H stands it down */
