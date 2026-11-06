@@ -30,7 +30,22 @@ function clean(o) {
   return out;
 }
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const theme = () => (document.body.dataset.theme === 'light' ? 'light' : 'dark');
 let L = null;   // the one layer
+/* 038 S3 · AN ADOPTED PAINTER: a kind drawn in a host a surface owns (the bar's mini-viewer, shell/transport.js) — no record, no EDIT, no history row;
+   ticked with the layer from the rack's one CPU frame while its host has a box, and forced (its box, the theme, its opts) in its own animation frame */
+const PINNED = new Set(); let pinRaf = 0;
+const pinKick = (P) => { P.force = true; if (!pinRaf) pinRaf = requestAnimationFrame(() => { pinRaf = 0; for (const Q of PINNED) if (Q.force && Q.host.clientWidth) { Q.force = false; if (Q.inst.tick) Q.inst.tick(performance.now(), true); } }); };
+/** adopt(kind, host, { app, opts }) → { set(opts) } | null — `opts()` is read at every paint, as an item's are */
+export function adopt(kind, host, { app, opts }) {
+  const K = KINDS.get(kind); if (!K) return null;
+  const P = { host, force: false, inst: {} };
+  P.inst = K.mount(host, { app, id: kind, kind, el: host, opts, theme, ink: () => getComputedStyle(host).color, editing: () => false,
+    size: () => ({ w: host.clientWidth, h: host.clientHeight }), set: () => {} }) || {};
+  PINNED.add(P); onThemeChange(() => pinKick(P));
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => pinKick(P)).observe(host);
+  return { set: (o) => { if (P.inst.set) P.inst.set(o); pinKick(P); } };
+}
 /** the rack's one call a CPU frame (rack.js); `ctx` is the frame's own, handed to every widget's tick as it came */
 export const tickWidgets = (now, ctx) => { if (L) L.tick(now, ctx); };
 /** the project's record (persist.js serialize, both scopes), or null when no widget stands */
@@ -44,7 +59,6 @@ export function createWidgets(app) {
   const live = new Map(), fans = new Set();   // id → { it, box, body, bar, K, view, inst, force }
   let items = [], editOn = false, snapOn = true, raf = 0;
   try { items = clean(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (_) {}
-  const theme = () => (document.body.dataset.theme === 'light' ? 'light' : 'dark');
   const place = (W) => { const s = W.box.style, it = W.it; s.left = it.x * 100 + '%'; s.top = it.y * 100 + '%'; s.width = it.w * 100 + '%'; s.height = it.h * 100 + '%'; };
   /* a FORCED tick (a mount, a resize, the theme, an opts change, EDIT) runs in the next animation frame, whether or not the rack is drawing */
   const kick = (W) => { for (const V of W ? [W] : live.values()) V.force = true;
@@ -132,7 +146,8 @@ export function createWidgets(app) {
       kick(); fan(); return editOn; },
     snap(on) { if (on === undefined) return snapOn; snapOn = !!on; fan(); return snapOn; },
     tick(now, ctx) {
-      if (document.hidden || app.state.uiHidden || !live.size) return;
+      if (document.hidden || app.state.uiHidden) return;
+      for (const P of PINNED) if (P.inst.tick && P.host.clientWidth) { const f = P.force; P.force = false; P.inst.tick(now, f, ctx); }   // 038 S3: an adopted painter, while its host has a box
       for (const W of live.values()) if (W.inst.tick) { const f = W.force; W.force = false; W.inst.tick(now, f, ctx); }
     },
     /** a project's record in place (absent: none): the widgets that stay keep their mount, the rest come and go; never a history row */

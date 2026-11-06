@@ -14,7 +14,10 @@ export function createWidgetsWindow(app) {
   const gal = el('div', 'wg-gallery', w.body), list = el('div', 'wg-list', w.body), acts = el('div', 'row tight fit wg-acts', w.body);
   const edit = sw({ label: 'EDIT', title: 'Move and size the widgets on the stage', onChange: (v) => L.edit(v) });
   const snap = sw({ label: 'SNAP', value: true, title: 'Snap to edges and centres while dragging', onChange: (v) => L.snap(v) });
-  acts.append(edit.root, snap.root, trig({ label: 'CLEAR', title: 'Remove every widget from the stage', onFire: () => L.clear() }).root);
+  /* 038 S3 · BY THE BAR: the mini-viewer beside the control surface (shell/transport.js), the favourites' record's (csb-favs.js mini) — not a widget of the stage's record */
+  const csb = app.sh.csb, bar = csb && sw({ label: 'BY THE BAR', cls: 'wg-bar', value: csb.mini().on, title: 'A mini-viewer beside the control surface', onChange: (v) => csb.setMini({ on: v }) });
+  acts.append(edit.root, snap.root, ...(bar ? [bar.root] : []), trig({ label: 'CLEAR', title: 'Remove every widget from the stage', onFire: () => L.clear() }).root);
+  if (bar) csb.onMini(() => bar.set(csb.mini().on));
   const paintGallery = () => { gal.textContent = ''; for (const K of kinds()) gal.append(trig({ label: K.label, glyph: K.glyph, title: K.hint, cls: 'wg-kind', onFire: () => L.add(K.kind) }).root); };
   const paintList = () => {
     const n = {}, items = L.list(); list.textContent = ''; list.hidden = !items.length;

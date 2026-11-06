@@ -25,6 +25,9 @@ export function createCsbFavs(app, { panel }) {
   const store = jsonStore(CSB_KEY);
   const st = store.get(), ok = st && st.v === 1 && Array.isArray(st.items);
   let items = ok ? st.items.filter((x) => typeof x === 'string') : [];
+  /* 038 S3 · THE MINI-VIEWER BY THE BAR's { on, style } rides this record (`mini`, written only off its default: absent = on, BALL + STICK) */
+  const m0 = ok && st.mini && typeof st.mini === 'object' ? st.mini : {}, miniFans = new Set();
+  let mini = { on: m0.on !== false, style: typeof m0.style === 'string' ? m0.style : 'ballstick' };
   const offers = new Map();                                            // id → { control, width }
   const move = (id, to) => { items = items.filter((x) => x !== id); items.splice(Math.min(to, items.length), 0, id); save(); };
   const bank = knobBank({ slots: 8, page: ok && Number.isFinite(st.page) ? st.page : 0, parent: panel, label: 'favourite controls', onMove: move, onPage: () => save() });
@@ -93,7 +96,7 @@ export function createCsbFavs(app, { panel }) {
     bank.set(items.filter((id) => faces.has(id)).map((id) => ({ id, root: faces.get(id).root, span: offers.has(id) && !offers.get(id).build ? 4 : 1 })));   // the list's order, eight a page; a segment takes four slots
     strip.classList.toggle('empty', !faces.size); hint(strip, faces.size ? '' : 'Right-click a knob (hold on touch) to add it here');
   }
-  const save = () => { store.set({ v: 1, items, page: bank.page() }); if (built) paint(); };
+  const save = () => { store.set({ v: 1, items, page: bank.page(), ...(mini.on && mini.style === 'ballstick' ? {} : { mini }) }); if (built) paint(); };
   function add(id) { if (isFav(id) || !eligible(id)) return false; items = items.concat(id); save(); return true; }
   function remove(id) { if (!isFav(id)) return false; items = items.filter((x) => x !== id); save(); return true; }
   const rowsFor = (id) => (isFav(id) ? [{ label: 'REMOVE FROM CONTROL SURFACE', run: () => remove(id) }] : eligible(id) ? [{ label: 'ADD TO CONTROL SURFACE', run: () => add(id) }] : []);
@@ -145,6 +148,8 @@ export function createCsbFavs(app, { panel }) {
 
   return {
     strip, add, remove, rowsFor, swFace, float, get items() { return items.slice(); },
+    /** 038 S3 · the mini-viewer by the bar: mini() its { on, style }, setMini(patch) writes the record and tells onMini's listeners */
+    mini: () => ({ ...mini }), setMini(p) { mini = { ...mini, ...p }; save(); for (const f of miniFans) f(); }, onMini(fn) { miniFans.add(fn); return () => miniFans.delete(fn); },
     /** offer(id, control, { width, build }) — an owner's segment that may become a favourite; its row answers a right click.  `build(control)` makes a
      *  face that is not a segment (iteration 014 D4: PALETTE's INVERT, a knob-sized switch) and returns { root, destroy } */
     offer(id, control, { width = HALF_CARD, build = null } = {}) { if (!control || !control.root) return; offers.set(id, { control, width, build }); const row = control.root; row.dataset.fav = id; },

@@ -762,15 +762,22 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 #widgets .lw-widget-body { position: absolute; inset: 0; container-type: size; overflow: hidden; }
 #widgets .lw-widget-bar, #widgets .lw-widget-x, #widgets .lw-widget-grip { display: none; }
 #widgets .lw-w-mol, #widgets .lw-w-pic, #widgets .lw-w-cv { position: absolute; inset: 0; width: 100%; height: 100%; }   /* 037 W4: the mini-viewer's canvas and its diagram (a mask in the ink) */
-#widgets .lw-w-cv { object-fit: contain; }   /* 037 V3 a visualizer's canvas: a square picture (EQUALIZER) stays square, centred */
+#widgets .lw-w-cv { object-fit: contain; mask-image: linear-gradient(90deg, #0000, #000 7% 93%, #0000), linear-gradient(#0000, #000 7% 93%, #0000); mask-composite: intersect; }   /* 037 V3 a visualizer's canvas: a square picture (EQUALIZER) stays square, centred; 038 S4: its rim dissolves into the stage, no hard cut */
 #widgets .lw-w-pic[hidden] { display: none; }
-/* 037 W5: CLOCK and PLAYHEAD are the kit's readout without its well — the value alone (the word is EDIT's, above the box), the UI face's tabular digits as large as the box holds */
-#widgets .lw-w-ro { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0; background: none; border: 0; box-shadow: none; }
-#widgets .lw-w-ro > .ro-lbl, #widgets .lw-w-ro > .ro-sub { display: none; }
-#widgets .lw-w-ro > .ro-val { color: inherit; font: 400 clamp(10px, min(60cqh, 8cqw), 96px)/1 var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
-#widgets [data-kind="playhead"] .lw-w-ro > .ro-val { font-size: clamp(10px, min(66cqh, 26cqw), 140px); }
-/* 037 W6: TEXT — the notebook's words in the words' serif and ink, no plate, no shadow, the headings held near the body; WRITE's box in the kit's dialog */
-#widgets .lw-w-text { font-family: var(--font-info-body, "Spectral", Georgia, serif); line-height: 1.3; overflow-wrap: anywhere; }
+/* 037 W5 · 038 S4 THE FACE: CLOCK and PLAYHEAD in the logo face (widget-clock.js), as large as the box holds — each figure in its own fixed cell (the face has no tabular
+   figures: the widest is .59 em), the words and separators in the UI face, small and soft; PLAYHEAD's tenths small and soft, its beat a hairline under it */
+#widgets .lw-w-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; font: 400 clamp(10px, min(58cqh, 10.5cqw), 96px)/1 'LW Title', var(--font-num); letter-spacing: 0; }
+#widgets [data-kind="playhead"] .lw-w-face { font-size: clamp(10px, min(62cqh, 24cqw), 140px); }
+#widgets .lw-w-c { display: inline-block; width: .62em; text-align: center; } #widgets .lw-w-c.p { width: .3em; }
+#widgets :is(.lw-w-w, .lw-w-s) { font-family: var(--font-ui); opacity: .62; }
+#widgets .lw-w-w { font-size: max(9px, .38em); letter-spacing: .08em; margin: 0 .7em; } #widgets .lw-w-w:first-child { margin-left: 0; }
+#widgets .lw-w-s { font-size: .72em; margin: 0 .06em; } #widgets .lw-w-d { font-size: .62em; opacity: .55; }
+#widgets .lw-w-beat { position: absolute; left: 24%; right: 24%; bottom: 10%; height: 1px; background: currentColor; opacity: 0; pointer-events: none; }
+/* 037 W6: TEXT — the notebook's words in the words' serif and ink, no plate, the headings held near the body; WRITE's box in the kit's dialog.  038 S4: the headings in
+   the logo face (the notebook title's), a soft halo of the ground's colour under the words so they read over a bright field, an arriving block fades in (widget-text.js) */
+#widgets .lw-w-text { font-family: var(--font-info-body, "Spectral", Georgia, serif); line-height: 1.3; overflow-wrap: anywhere; text-shadow: 0 0 .35em rgb(0 0 0 / .5); }
+[data-theme="light"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(255 255 255 / .75); }
+#widgets .lw-w-text :is(h1, h2) { font-family: 'LW Title', var(--font-ui); font-weight: 400; letter-spacing: .04em; }
 #widgets .lw-w-text > :first-child { margin-top: 0; }
 #widgets .lw-w-text :is(h1, h2, h3, h4, p, ul, ol, blockquote) { margin: 0 0 .35em; }
 #widgets .lw-w-text h1 { font-size: 1.5em; } #widgets .lw-w-text h2 { font-size: 1.25em; } #widgets .lw-w-text :is(h3, h4) { font-size: 1.1em; }

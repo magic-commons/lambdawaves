@@ -1,9 +1,9 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
+import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp, label } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
-import { cssZoom } from '../mir/core/zoom.js';
+import { cssZoom } from '../mir/core/zoom.js'; import { adopt } from '../widgets.js'; import { STYLES as MOL_STYLES, STYLE_GLYPH } from '../widget-mol.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
@@ -116,6 +116,18 @@ export function createTransport(app) {
     /* 036 W1 · THE FLOATING FAVOURITES: the collapsed bar's hover lifts the strip into a layer beside it (csb-favs.js float); EXPAND puts it home */
     const floatFavs = favs.float(T, { home: sec.fav ? sec.fav.body : P, open: () => !!(P && !P.hidden) });
     if (bar.parts.panel) bar.parts.panel.onToggle((v) => { if (v) { floatFavs.hide(); favs.show(); } });
+    /* 038 S3 · THE MINI-VIEWER RIDES THE BAR (Josh: "have the mini-viewer be always by the right side (similar to the play pause) of the CSB … on by default for
+       molecules. If the CSB goes to the rack, it needs not to be shown anymore … In the expanded CSB, let there be a toggle in the area where the transport is to
+       cycle between the different view modes"): the MINI-VIEWER kind's painter (widgets.js adopt) in a child of the bar that csb.css seats beside its right edge
+       as PLAY sits beside its left — it rides every move, dodge and expand and goes with the bar (docked, hidden, H) with no observer, in MOLECULAR alone.  Its
+       { on, style } is a field of the favourites' PREFERENCE record (csb-favs.js mini; absent = on, BALL + STICK): BY THE BAR is the WIDGETS manager's switch,
+       this cell TRANSPORT's — read as REPEATS and BPM are (its word over the style shown, with its glyph), a press the next style */
+    const miniEl = el('div', 'csb-mini', T), miniView = adopt('mol', miniEl, { app, opts: () => favs.mini() }), miniB = btn('csb-mini-b', '', '', 'mini-viewer style');
+    label(el('span', 'ro-lbl', miniB), 'MINI-VIEWER'); const miniV = el('span', 'ro-val', miniB), miniG = el('i', 'csb-mini-g', miniV), miniW = el('span', '', miniV);
+    const paintMini = () => { const m = favs.mini(), i = Math.max(0, MOL_STYLES.findIndex((s) => s.id === m.style)), s = MOL_STYLES[i], n = MOL_STYLES[(i + 1) % MOL_STYLES.length];
+      miniEl.hidden = miniB.hidden = !m.on; setGlyph(miniG, STYLE_GLYPH[s.id]); label(miniW, s.label); ariaLabel(miniB, 'mini-viewer: ' + s.label); hint(miniB, ['The mini-viewer by the bar · press for {b}', { b: n.label }]); if (miniView) miniView.set(m); };
+    miniB.addEventListener('click', () => { const i = MOL_STYLES.findIndex((s) => s.id === favs.mini().style); favs.setMini({ style: MOL_STYLES[(i + 1) % MOL_STYLES.length].id }); });
+    favs.onMini(paintMini); paintMini(); if (sec.tr) sec.tr.body.insertBefore(miniB, mt.bpm.root);
     for (const [id, c] of [['spectrum.scale', ui.scaleSeg], ['wave.space', ui.spaceSeg], ['wave.view', ui.viewSeg]]) favs.offer(id, c, { width: 150 });
     /* iteration 014 D4 (Josh: "Let Invert also be a custom button that's a 'Knob' size for the CSB"): PALETTE's INVERT, offered as a knob-sized switch */
     favs.offer('palette.invert', ui.invertSw, { width: 44, build: (c) => favs.swFace('palette.invert', c, { label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ' }) });

@@ -1010,7 +1010,7 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
    above it, × at its top-right, the grip at its bottom-right, its kind's controls under it; SNAP's guide is a 1-px accent line across the stage */
 #widgets.edit .lw-widget { pointer-events: auto; cursor: move; touch-action: none; outline: 1px dashed color-mix(in srgb, currentColor 55%, transparent); outline-offset: 3px; }
 #widgets.edit .lw-widget:focus { outline: 1px solid var(--acc); }
-#widgets.edit .lw-widget::before { content: attr(data-word); position: absolute; left: -3px; bottom: 100%; margin-bottom: 6px; font: 600 10px/1 var(--font-ui); letter-spacing: .1em; opacity: .7; white-space: nowrap; }
+#widgets.edit .lw-widget::before { content: attr(data-word); position: absolute; left: -3px; bottom: 100%; margin-bottom: 6px; font: 400 11px/1 'LW Title', var(--font-ui); letter-spacing: .1em; opacity: .7; white-space: nowrap; }   /* 038 S4: the kind's word in the logo face */
 #widgets.edit .lw-widget-x { display: grid; place-items: center; position: absolute; right: -14px; top: -14px; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: var(--acc); color: #fff; cursor: pointer; }
 #widgets.edit .lw-widget-grip { display: block; position: absolute; right: -7px; bottom: -7px; width: 12px; height: 12px; cursor: nwse-resize; border: solid currentColor; border-width: 0 2px 2px 0; }
 #widgets.edit .lw-widget-bar:not(:empty) { display: flex; position: absolute; left: 50%; top: 100%; width: max-content; margin-top: 10px; transform: translateX(-50%); gap: 4px; align-items: center; white-space: nowrap; cursor: default; }
@@ -1031,6 +1031,8 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-widgets-card .wg-n { opacity: .6; font-variant-numeric: tabular-nums; }
 .lw-widgets-card .wg-x { flex: 0 0 24px; width: 24px; height: 22px; min-width: 0; min-height: 0; padding: 0; }
 .lw-widgets-card .wg-acts { margin: 0; }
+.lw-widgets-card .wg-acts:has(.wg-bar) { grid-template-columns: 1fr 1fr auto 1fr; }   /* 038 S3: BY THE BAR takes its word's width, on one line */
+.lw-widgets-card .wg-bar { padding-inline: 8px; white-space: nowrap; }
 /* CAMERA: AUTO-ROTATE needs two cells */
 .native-clean[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
 /* SPECTRUM: HYDROGEN's two rows keep ONE column rhythm (017 R4) — three columns for both, filled or not */
