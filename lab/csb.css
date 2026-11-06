@@ -50,6 +50,26 @@ body[data-theme="light"] #transport .csb-theme > .gly-moon, body:not([data-theme
 :where(:root:not(.kbm-touch)) #transport[data-layout="csb"] .csb-play > .tbtn.play:hover { box-shadow: var(--relief-raise, var(--neu-raise)), var(--state-hover-wash); scale: var(--chip-hover-scale); }
 #transport[data-layout="csb"] .csb-play > .tbtn.play:is(:active, .press) { background: var(--state-press, var(--glass-press)); box-shadow: var(--trig-press-relief); scale: var(--chip-press-scale); }
 #transport[data-layout="csb"] .csb-play > .tbtn.play > svg { width: 26px; height: 26px; }
+/* 038 S3 · THE MINI-VIEWER RIDES THE BAR (lab/shell/transport.js): beside the bar's right edge as PLAY is beside its left — its mirror seat, the bar's row
+   square, level with the row whichever way the panel opens — no chrome, the stage words' ink, never a pointer target; only while the bar is on the stage,
+   in MOLECULAR, BY THE BAR on; the bar's hiding (B, H, a dodge under a window) is its own */
+#transport > .csb-mini { display: none; color: hsl(40 33% 96%); }
+#transport.mini[data-layout="csb"] > .csb-mini:not([hidden]) { display: block; position: absolute; left: calc(100% + 16px); bottom: -1px; width: 92px; height: 92px; pointer-events: none; }   /* -1px: the bar's rim, so the square is the bar's own height */
+#transport.mini[data-layout="csb"].at-top > .csb-mini { top: -1px; bottom: auto; }
+[data-theme="light"] #transport > .csb-mini { color: hsl(232 22% 10%); }
+#transport:has(#lwMode [data-id="hydrogen"][aria-pressed="true"]) > .csb-mini { display: none; }
+#transport > .csb-mini > :is(canvas, img) { position: absolute; inset: 0; width: 100%; height: 100%; }
+#transport > .csb-mini > img[hidden] { display: none; }
+/* its style cell, in the expander's TRANSPORT between REPEATS and BPM: read as they are (the word over the style, its glyph before it), flat until hovered;
+   the stage bar's only */
+#transport[data-layout="csb"] .csb-sec-tr .csb-mini-b { display: inline-flex; flex: 0 0 auto; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; width: auto; min-width: 0; height: var(--xport-grid); margin-right: 10px; padding: 0 8px; border: 0; border-radius: var(--r-md); background: transparent; box-shadow: none; color: var(--fg); font: inherit; text-align: left; }
+#transport[data-layout="csb"] .csb-sec-tr .csb-mini-b:hover { background: var(--state-hover, var(--glass-raise)); }
+#transport[data-layout="csb"] .csb-sec-tr .csb-mini-b > .ro-val { display: inline-flex; align-items: center; gap: 4px; }
+#transport[data-layout="csb"] .csb-sec-tr .csb-mini-g { display: inline-grid; color: var(--ink-key); }
+#transport[data-layout="csb"] .csb-sec-tr .csb-mini-g > svg { width: 14px; height: 14px; }
+#transport[data-layout="csb"]:not(.mini) .csb-sec-tr .csb-mini-b, #transport[data-layout="csb"] .csb-sec-tr .csb-mini-b[hidden],
+#transport[data-layout="csb"]:has(#lwMode [data-id="hydrogen"][aria-pressed="true"]) .csb-sec-tr .csb-mini-b { display: none; }
+@media (max-width: 860px) { #transport.mini[data-layout="csb"] > .csb-mini:not([hidden]), #transport[data-layout="csb"] .csb-sec-tr .csb-mini-b { display: none; } }   /* the narrow stage seats the bar under the top rack: no room beside it */
 /* LEFT: RATE over the BPM pill (a click types it: the kit's `typed`), MOD over EXPAND */
 #transport[data-layout="csb"] .csb-mod > .tbtn.modb { background: transparent; border-color: transparent; box-shadow: none; width: 48px; height: 26px; min-width: 0; min-height: 0; border-radius: var(--r-pill); font-size: var(--fs-tiny); }
 #transport[data-layout="csb"] .csb-tempo > .k { width: 44px; }

@@ -7,8 +7,9 @@
  * A paint only when the camera, the molecule, its pose, the box, the style or the theme moved; under hydrogen or an atom a quiet empty frame. */
 import { el, seg } from './mir/kit.js'; import { cameraBasis, cameraKey } from './field.js'; import { CPK, bondsOf, vdwRadius } from './elements.js';
 import { setPic } from './picker-fx.js'; import { registerKind } from './widgets.js';
-const STYLES = [{ id: 'balls', label: 'BALLS', title: 'Each atom its van der Waals sphere' }, { id: 'ballstick', label: 'BALL + STICK', title: 'Small disks and the bonds' },
+export const STYLES = [{ id: 'balls', label: 'BALLS', title: 'Each atom its van der Waals sphere' }, { id: 'ballstick', label: 'BALL + STICK', title: 'Small disks and the bonds' },
   { id: 'sticks', label: 'STICKS', title: 'The bonds in their atoms’ colours' }, { id: 'diagram', label: 'DIAGRAM', title: 'The chemist’s wedge-and-dash drawing' }];
+export const STYLE_GLYPH = { balls: 'balls', ballstick: 'sticks', sticks: 'bonds', diagram: 'wedge' };   // 038 S3: the bar's style chip wears the style shown
 const RGB = (Z) => { const h = (CPK[Z] || '#ff1493').slice(1), f = h.length === 3 ? h.split('').map((c) => c + c) : h.match(/../g); return f.map((x) => parseInt(x, 16)); };
 const rgb = (c, k = 1, a = 1) => `rgba(${c.map((v) => Math.round(Math.min(255, v * k))).join(',')},${a})`;
 registerKind({ kind: 'mol', label: 'MINI-VIEWER', glyph: 'molecule', hint: 'The molecule, turning with the camera', size: { w: 0.16, h: 0.24 }, opts: { style: 'ballstick' },
