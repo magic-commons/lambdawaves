@@ -762,6 +762,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 #widgets .lw-widget-body { position: absolute; inset: 0; container-type: size; overflow: hidden; }
 #widgets .lw-widget-bar, #widgets .lw-widget-x, #widgets .lw-widget-grip { display: none; }
 #widgets .lw-w-mol, #widgets .lw-w-pic, #widgets .lw-w-cv { position: absolute; inset: 0; width: 100%; height: 100%; }   /* 037 W4: the mini-viewer's canvas and its diagram (a mask in the ink) */
+#widgets .lw-w-cv { object-fit: contain; }   /* 037 V3 a visualizer's canvas: a square picture (EQUALIZER) stays square, centred */
 #widgets .lw-w-pic[hidden] { display: none; }
 /* 037 W5: CLOCK and PLAYHEAD are the kit's readout without its well — the value alone (the word is EDIT's, above the box), the UI face's tabular digits as large as the box holds */
 #widgets .lw-w-ro { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0; background: none; border: 0; box-shadow: none; }

@@ -20,7 +20,7 @@ export function createEqualizerCard(app) {
      skin.css tokens (--eq-near · --eq-mid · --eq-far) and the ink is the card's.  AUDIO IN takes the faders from the MODULATION window's first
      AUDIO device (eq.audioTick, called by rack.js right after the model's feed). */
   const wEq = device({ id: 'equalizer', eyebrow: 'EQUALIZER', title: 'beat equalizer', status: '' }); wEq.root.classList.add('closed'); rack.appendChild(wEq.root);
-  const eq = app.state.eq = createEqualizer(), gEq = group(wEq.body, ''), eqHead = el('div', 'row tight eq-head', gEq), mix = el('div', 'eq-mix', gEq), eqCv = el('canvas', 'eq-grid', mix), eqG = eqCv.getContext('2d');
+  const eq = app.state.eq = createEqualizer(), gEq = group(wEq.body, ''), eqHead = el('div', 'row tight eq-head', gEq), mix = el('div', 'eq-mix', gEq), eqCv = el('canvas', 'eq-grid', mix);
   const eqStep = stepper({ aria: 'Equalizer preset', items: EQ_PRESETS.map((p) => ({ id: p.id, label: p.label })), value: eq.preset, cls: 'mol-step', onChange: (id) => { eq.setPreset(id); syncEq(true); hNote(); } });
   ui.eqPick = (id) => { eqStep.set(id); eq.setPreset(id); syncEq(true); hNote(); };   // 0.6.6 G1: the stepper's road for THE VERB TABLE's switch
   const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'eq-faders', mix);
@@ -53,15 +53,19 @@ export function createEqualizerCard(app) {
     drawGrid(cell, top);
   }
   /** the 7 × 7 grid at device pixels: n along the top and the left, a faint well per cell, the beat's third as its colour at |cell| / max, the diagonal ringed */
-  function drawGrid(cell, top) {
-    const cs = getComputedStyle(eqCv), css = eqCv.clientWidth || parseFloat(cs.getPropertyValue('--eq-size')), dpr = Math.min(2, devicePixelRatio || 1), px = Math.round(css * dpr);
-    if (eqCv.width !== px) eqCv.width = eqCv.height = px;
-    const C = ['--eq-near', '--eq-mid', '--eq-far'].map((v) => cs.getPropertyValue(v).trim() || '#888'), pad = 14 * dpr, K = EQ_SHELLS, sz = (px - pad) / K, gap = Math.max(1, 2 * dpr), r = 3 * dpr;
+  /* 037 V3 THE SEAM: each EQUALIZER widget's canvas takes the cells alone (a square in the stage's ink; read-only — the effect is the window's), drawn before the window's */
+  const views = new Set(); let last = null; eq.views = views; eq.redraw = () => { if (last) drawGrid(...last); };
+  function drawGrid(cell, top) { last = [cell, top]; for (const c of views) gridOn(c, cell, top); gridOn(eqCv, cell, top); }
+  function gridOn(cv, cell, top) {
+    const bare = cv !== eqCv, eqG = cv.getContext('2d'), cs = getComputedStyle(eqCv), ink = getComputedStyle(cv).color, dpr = Math.min(2, devicePixelRatio || 1);
+    const css = bare ? Math.min(cv.clientWidth, cv.clientHeight) : eqCv.clientWidth || parseFloat(cs.getPropertyValue('--eq-size')), px = Math.round(css * dpr);
+    if (cv.width !== px) cv.width = cv.height = px;
+    const C = ['--eq-near', '--eq-mid', '--eq-far'].map((v) => cs.getPropertyValue(v).trim() || '#888'), pad = bare ? 0 : 14 * dpr, K = EQ_SHELLS, sz = (px - pad) / K, gap = Math.max(1, 2 * dpr), r = 3 * dpr;
     const box = (x, y, w, h) => { eqG.beginPath(); if (eqG.roundRect) eqG.roundRect(x, y, w, h, r); else eqG.rect(x, y, w, h); };
-    eqG.clearRect(0, 0, px, px); eqG.globalAlpha = 1; eqG.fillStyle = eqG.strokeStyle = cs.color; eqG.font = `${9 * dpr}px ${cs.fontFamily}`; eqG.textAlign = 'center'; eqG.textBaseline = 'middle';
-    for (let i = 0; i < K; i++) { eqG.globalAlpha = 0.5; eqG.fillText(String(i + 1), pad + (i + 0.5) * sz, pad / 2); eqG.fillText(String(i + 1), pad / 2, pad + (i + 0.5) * sz); }
+    eqG.clearRect(0, 0, px, px); eqG.globalAlpha = 1; eqG.fillStyle = eqG.strokeStyle = ink; eqG.font = `${9 * dpr}px ${cs.fontFamily}`; eqG.textAlign = 'center'; eqG.textBaseline = 'middle';
+    if (!bare) for (let i = 0; i < K; i++) { eqG.globalAlpha = 0.5; eqG.fillText(String(i + 1), pad + (i + 0.5) * sz, pad / 2); eqG.fillText(String(i + 1), pad / 2, pad + (i + 0.5) * sz); }
     cell.forEach((s, i) => { const n = (i / K | 0) + 1, k = i % K + 1, dE = getZ() ** 2 * Math.abs(1 / (n * n) - 1 / (k * k)) / 2, x = pad + (k - 1) * sz + gap / 2, y = pad + (n - 1) * sz + gap / 2, w = sz - gap;
-      eqG.globalAlpha = 0.07; eqG.fillStyle = cs.color; box(x, y, w, w); eqG.fill();
+      eqG.globalAlpha = 0.07; eqG.fillStyle = ink; box(x, y, w, w); eqG.fill();
       if (s > 0) { eqG.globalAlpha = s / top; eqG.fillStyle = dE < 0.0263 ? C[0] : dE < 0.113 ? C[1] : C[2]; box(x, y, w, w); eqG.fill(); }
       if (n === k) { eqG.globalAlpha = 0.35; eqG.lineWidth = dpr; box(x + dpr / 2, y + dpr / 2, w - dpr, w - dpr); eqG.stroke(); } });
     eqG.globalAlpha = 1;
