@@ -2265,14 +2265,16 @@ export function createModulation(host, port) {
     for (const rec of devRows.values()) if (rec.dev.patt) { const on = !!pt && pt.model.isLive(rec.id); rec.dev.patt.classList.toggle('on', on); rec.dev.patt.setAttribute('aria-pressed', on ? 'true' : 'false'); }
   }
   /* → TL, THE EXPERIMENT (BASINS LANE P): an LFO = one cycle of its shape, an ENV = its stages over timeScale seconds, an ENV
-     with a live lit row = a PATTERN clip of that row.  It lands at the playhead's beat on the timeline's active lane
-     (editor.addClip); a curve clip targets the device's first live route. */
+     with a live lit row = a PATTERN clip of that row.  It lands at the start of the playhead's bar on the timeline's active
+     lane (editor.addClip; 1.5.7-alpha.8 — it was the playhead's beat); a curve clip targets the device's first live route. */
   const routedTarget = (s) => { for (const m of M.macroList()) if (m.sourceId === s.id) for (const r of M.routesOfMacro(m.id)) if (!r.dormant && registry.has(r.targetId)) return r.targetId; return null; };
   const hexInk = (rec) => { const m = rec && /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(getComputedStyle(rec.dev.ed.path).stroke || ''); return m ? '#' + [m[1], m[2], m[3]].map((v) => (+v).toString(16).padStart(2, '0')).join('') : undefined; };
   const warn = (msg) => { if (typeof port.toast === 'function') port.toast(msg); else status(msg, 'warn'); return null; };
   function sendToTimeline(s) {
     const tlh = timelineOf(); if (!tlh) return warn(t('add the timeline first — a device is sent to it'));
-    const T = M.transport, bpm = T.bpm, start = Math.max(0, Math.floor(T.beats + 1e-9)), rec = devRows.get(s.id);
+    /* the clip lands at the start of the playhead's bar (1.5.7-alpha.8, as createClip does): an empty timeline rests in bar 1, so the first send starts at 1.1 */
+    const T = M.transport, bpm = T.bpm, meter = typeof tlh.model?.meter === 'function' ? tlh.model.meter() : 4;
+    const start = Math.max(0, Math.floor(T.beats / meter + 1e-9) * meter), rec = devRows.get(s.id);
     const editor = tlh.editor, name = (s.label || (KIND_WORD[s.kind] ? KIND_WORD[s.kind].t : s.kind)) + ' ' + s.id;   // a clip's name is data: the English kind, as BASINS saves it
     const add = (kind, source, o) => (editor && editor.addClip ? editor.addClip(kind, source, { start, ...o })
       : tlh.model.create({ targetId: o.targetId || kind + ':' + s.id, name: o.name, value: 0, start, duration: o.duration, source: kind === 'curve' ? source : { ...source, kind } }));
