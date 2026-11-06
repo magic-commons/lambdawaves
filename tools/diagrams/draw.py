@@ -228,8 +228,8 @@ def sticks(rec):
     molecule's 3-D skeleton, no letters — its heavy atoms (a cluster keeps its hydrogens, whose hydrogen bonds H···N/O/F under 2.2 Å are
     dashed) seen from the view whose nearest pair — two atoms, or an atom and a bond not its own — lies farthest apart (C₆₀ on a pentagon,
     B₁₂ down a triangle's axis), the long axis across, at the skeletal formula's bond length where it fits, depth-cued in six bands (the
-    nearest bonds full and 2.6 px, the farthest 28 % and 1.2 px, thinner where the bonds are short), far first; each band one path at a
-    tenth of a pixel"""
+    nearest bonds full and 2.6 px, the farthest 45 % and 1.4 px — 038 D6's floor, so the faintest band still reads in the 680-px deck —
+    short bonds thinned to no less than three quarters), far first; each band one path at a tenth of a pixel"""
     m, _ = bonded(rec)
     X = np.array(m.GetConformer().GetPositions()); Zs = [a.GetAtomicNum() for a in m.GetAtoms()]
     cluster = len(Chem.GetMolFrags(m, sanitizeFrags=False)) > 1
@@ -259,15 +259,15 @@ def sticks(rec):
     lo, hi = P.min(0), P.max(0); s = min((SIZE - 28) / max(float((hi - lo).max()), 1e-6), BOND / max(Lp, 1e-6)); c = (lo + hi) / 2
     xy = lambda k: (SIZE / 2 + (P[k][0] - c[0]) * s, SIZE / 2 - (P[k][1] - c[1]) * s)
     d0, d1 = depth.min(), depth.max(); near = lambda k: (depth[k] - d0) / ((d1 - d0) or 1)   # 0 far … 1 near
-    f = min(1.0, max(0.5, Lp * s / 24))
+    f = min(1.0, max(0.75, Lp * s / 24))
     bands = {}
     for i, j, hb in B:
         band = min(5, int((near(i) + near(j)) / 2 * 6)); (x1, y1), (x2, y2) = xy(i), xy(j)
         bands.setdefault((band, hb), []).append(path_d('M%.2f %.2fL%.2f %.2f' % (x1, y1, x2, y2)))
     out = []
     for (band, hb) in sorted(bands):
-        q = (band + 0.5) / 6; op = ('%.2f' % (0.28 + 0.72 * q)).rstrip('0').lstrip('0'); sw = num((1.2 + 1.4 * q) * f)
-        out.append("<path d='%s' stroke-opacity='%s' stroke-width='%s'%s/>" % (''.join(bands[(band, hb)]), op, sw, " stroke-dasharray='2 3'" if hb else ''))
+        q = (band + 0.5) / 6; op = ('%.2f' % (0.45 + 0.55 * q)).rstrip('0').lstrip('0'); sw = num((1.4 + 1.2 * q) * f)
+        out.append("<path d='%s' stroke-opacity='%s' stroke-width='%s'%s/>" % (''.join(bands[(band, hb)]), op, sw, " stroke-dasharray='3 2'" if hb else ''))
     return "<g fill='none' stroke='currentColor' stroke-linecap='round'>" + ''.join(out) + '</g>'
 
 def depict(rec):
