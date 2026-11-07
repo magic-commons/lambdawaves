@@ -2,7 +2,8 @@
  *
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --write    record the lock on THIS tree
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --check    re-run and compare, exit 1 on any difference
- *   options:  --fixture <path>   (default tests/fixtures/digest-lock-base.json)
+ *   options:  --fixture <path>   (default tests/fixtures/digest-lock-base.json, the 843; the shipped other is tests/fixtures/digest-lock-s4a.json,
+ *                                the 987 — those two are the lock, and THE LOCK is never re-baked)
  *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=0'   (appended to the lab URL; THE DEFAULT since 038 Z4 for
  *             --check AND --write — a fresh capture records `gastab=0` in its url unless `--query ''`; W125 made the gas table the app's
  *             default, and both shipped fixtures (base, s4a) predate it)
@@ -11,8 +12,8 @@
  *                        on a tree that has the new ones; tests/fixtures/digest-lock-s4a.json is the lock
  *                        S4c checks: the 1004 values plus benzene, lysine and lysine's HOMO, recorded on the S4a base tree)
  *   THE COUNTS ON THE 0.5.0 TREE (each retired state is 48 values: 3 grids × 16; the fixtures are never re-baked):
- *             `--check --query gastab=0` compares 860 values, and the same plus `--fixture research/release-0.4.0/measure/
- *             digest-lock-s4a.json` 1004, both 0/0, since D9b retired `h2` (908 / 1052 after D9's h2plus and helium).
+ *             `--check --query gastab=0` compares 860 values, and the same plus `--fixture tests/fixtures/digest-lock-s4a.json`
+ *             1004, both 0/0, since D9b retired `h2` (908 / 1052 after D9's h2plus and helium).
  *             ITERATION 008 W: Re+Im left the shader, and its 17 style rows (8 VIEW × STYLE, 9 flags on reim/glass) left both fixtures
  *             by name — nothing else re-baked — so the counts are 843 and 987.
  *             ITERATION 008 G: GRAIN joined DUST (world-locked grains) and BANDS became octave bands, so the 15 particle-style rows
@@ -55,6 +56,10 @@
  *   grid pairing     64/96/128 with the GRID segment's steps 110/160/240; the canvas size never changes.
  * Every state@grid is digested twice with a forced reconstruct between (`repeat`), so a kernel that is not a pure
  * function of its inputs shows inside one run; `--check` run twice on an untouched tree is the cross-run proof.
+ * 039 S1 · THE LOCK RETRIES THE UNREPEATED LEAF ONCE: when the two disagree a third digest is taken after one more forced reconstruct;
+ * the leaf is the majority of the three, `repeat` holds when two agree, and the run prints `RETRIED <state>@<grid>: 1 of 3 digests
+ * differed (<the odd hash>)` and names it on its last line (`retried …`).  Three that all differ are `repeat: false`, as before.  The
+ * compare is untouched: a leaf that still differs from the fixture is RED (a one-ulp fault under load flipped one `repeat` leaf alone).
  * Machine-specific (adapter, driver, browser build): a fixture recorded here is compared only on this machine.
  * THE LOCK'S SCOPE (0.5.4 R7, one sentence): it is SAME-MACHINE, holds the 843 + 987 values (once 860 + 1004; ≤ 64 AO tile states, no time-dependent molecular packet, STATES run, FLOW or
  * `record()`), and is NEVER re-baked by a maths row — a moved digest is a defect to report; machines are COMPARED by the device report's
@@ -184,9 +189,20 @@ async function state(name, grids) {
     const dg = await F.fieldDigest();
     const gen = F.generation; LW.schedule(2); await settle(2);
     const dg2 = await F.fieldDigest();
-    const a = await rp(320, 240), b = await rp(1024, 640), pk = packHash();
-    out[g] = { digest: dg.hash, integral: dg.integral, maxRho: dg.maxRho, nan: dg.nan, half: dg.half, res: dg.res,
-      repeat: dg2.hash === dg.hash, digest2: dg2.hash, reconstructed: F.generation > gen, rp: a.hash, rpL: b.hash, nonBlack: b.nonBlack,
+    /* 039 S1 · THE LOCK RETRIES THE UNREPEATED LEAF ONCE: two in-run digests that disagree get a third after one more forced reconstruct;
+       the leaf is the majority (its digest and its integral · maxRho · nan · half · res) and \`repeat\` holds when two of three agree.  This
+       RTX in power state P5 faults one ulp under load (measured 10-01), which flipped one \`repeat\` leaf alone to RED; three that all
+       differ stay \`repeat: false\`.  The readbacks below are taken after the third, on the majority's own texture. */
+    let maj = dg, retry = null;
+    if (dg2.hash !== dg.hash) {
+      LW.schedule(2); await settle(2);
+      const dg3 = await F.fieldDigest();
+      maj = dg3.hash === dg.hash ? dg : dg3.hash === dg2.hash ? dg2 : null;
+      retry = maj ? { odd: maj === dg ? dg2.hash : dg.hash } : { all: [dg.hash, dg2.hash, dg3.hash] };
+    }
+    const a = await rp(320, 240), b = await rp(1024, 640), pk = packHash(), m = maj || dg;
+    out[g] = { digest: m.hash, integral: m.integral, maxRho: m.maxRho, nan: m.nan, half: m.half, res: m.res,
+      repeat: !!maj, digest2: dg2.hash, retry, reconstructed: F.generation > gen, rp: a.hash, rpL: b.hash, nonBlack: b.nonBlack,
       pack: pk.pack, count: pk.count, space: F.space, t: LW.clock.t, hamiltonian: LW.hamiltonian };
   }
   return out;
@@ -254,6 +270,7 @@ try {
     if (!o || o.E) throw new Error('state ' + s + ': ' + JSON.stringify(o));
     result.states[s] = o;
     console.log('state', s, GRIDS.map((gr) => gr + ':' + o[gr].digest + (o[gr].repeat ? '' : ' (NOT REPEATABLE: second ' + o[gr].digest2 + ')')).join(' '), ((Date.now() - t) / 1000).toFixed(1) + ' s');
+    for (const gr of GRIDS) { const rt = o[gr].retry; if (rt && rt.odd) console.log(`RETRIED ${s}@${gr}: 1 of 3 digests differed (${rt.odd})`); else if (rt) console.log(`RETRIED ${s}@${gr}: 3 of 3 digests differed (${rt.all.join(', ')}) — repeat false`); }
   }
   result.pageErrors = await g.ev('return (window.__e || []).slice(0, 10);');
   const ledger = await g.ev('return __LW.field.renderPipelines || null;');   // K2: which specialised present pipelines the run compiled
@@ -265,15 +282,17 @@ if (failed) { console.error('DIGEST LOCK: the run failed —', failed); process.
 /* ── compare / write ─────────────────────────────────────────────────────────────────────────────────────── */
 const sortKeys = (v) => Array.isArray(v) ? v.map(sortKeys) : (v && typeof v === 'object') ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortKeys(v[k])])) : v;
 const leaves = (o, pre = '', acc = {}) => { if (o && typeof o === 'object' && !Array.isArray(o)) { for (const k of Object.keys(o)) leaves(o[k], pre ? pre + '.' + k : k, acc); } else acc[pre] = JSON.stringify(o); return acc; };
-const unrepeatable = [], second = {};   // R-22: dg2's hash is printed beside a `repeat` DIFF, never kept as a leaf
+const unrepeatable = [], retried = [], second = {};   // R-22: dg2's hash is printed beside a `repeat` DIFF, never kept as a leaf (039 S1: nor the retry)
 for (const [s, o] of Object.entries(result.states)) for (const [gr, e] of Object.entries(o)) {
   second[`states.${s}.${gr}.repeat`] = e.digest2; delete e.digest2;
+  if (e.retry) retried.push(s + '@' + gr); delete e.retry;
   if (!e.repeat) unrepeatable.push(s + '@' + gr);
 }
+const retriedNote = ` · retried ${retried.length ? retried.join(', ') : 'none'}`;
 if (MODE === 'write') {
   fs.writeFileSync(FIXTURE, JSON.stringify(sortKeys(result), null, 1) + '\n');
   const n = Object.keys(leaves({ states: result.states, styles: result.styles, lines: result.lines })).length;
-  console.log(`DIGEST LOCK written: ${FIXTURE} · ${n} values · ${Object.keys(result.states).length} states × ${GRIDS.length} grids · ${result.styles ? Object.keys(result.styles).length : 0} style rows · ${result.lines ? Object.keys(result.lines).length : 0} line rows · unrepeatable: ${unrepeatable.length ? unrepeatable.join(', ') : 'none'} · page errors ${result.pageErrors.length} · ${((Date.now() - t0) / 1000).toFixed(0)} s`);
+  console.log(`DIGEST LOCK written: ${FIXTURE} · ${n} values · ${Object.keys(result.states).length} states × ${GRIDS.length} grids · ${result.styles ? Object.keys(result.styles).length : 0} style rows · ${result.lines ? Object.keys(result.lines).length : 0} line rows · unrepeatable: ${unrepeatable.length ? unrepeatable.join(', ') : 'none'}${retriedNote} · page errors ${result.pageErrors.length} · ${((Date.now() - t0) / 1000).toFixed(0)} s`);
   process.exit(0);
 }
 const fixture = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));
@@ -296,5 +315,5 @@ const gpu = diffs.filter((x) => !/\.pack$|\.count$/.test(x.k)), cpu = diffs.filt
 for (const x of diffs.slice(0, 60)) console.log('DIFF', x.k, 'base', x.base, 'now', x.now, ...(x.k in second ? ['· second digest', second[x.k]] : []));
 if (metaDiff.length) console.log('META DIFFERS (inputs, not outputs):', metaDiff.join(', '));
 if (!adapterSame) console.log('ADAPTER DIFFERS: the fixture is machine-specific', JSON.stringify(fixture.meta && fixture.meta.adapter), JSON.stringify(result.meta.adapter));
-console.log(`DIGEST LOCK ${diffs.length || metaDiff.length ? 'RED' : 'GREEN'}: ${Object.keys(A).length} values compared · ${gpu.length} readback differences · ${cpu.length} record-byte differences · unrepeatable now: ${unrepeatable.length ? unrepeatable.join(', ') : 'none'} · page errors ${result.pageErrors.length} · ${((Date.now() - t0) / 1000).toFixed(0)} s`);
+console.log(`DIGEST LOCK ${diffs.length || metaDiff.length ? 'RED' : 'GREEN'}: ${Object.keys(A).length} values compared · ${gpu.length} readback differences · ${cpu.length} record-byte differences · unrepeatable now: ${unrepeatable.length ? unrepeatable.join(', ') : 'none'}${retriedNote} · page errors ${result.pageErrors.length} · ${((Date.now() - t0) / 1000).toFixed(0)} s`);
 process.exit(diffs.length || metaDiff.length ? 1 : 0);
