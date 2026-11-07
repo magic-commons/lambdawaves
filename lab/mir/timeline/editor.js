@@ -268,9 +268,12 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   /* THE EDGE PUMP (1.5.7-alpha.9, λWAVES 038 T3; Josh: "If I drag the playhead back or forward, it should scroll the timeline"): a
      scrub (the playhead's drag), a range, a move, a trim or a stretch held within EDGE px of the viewport's left or right edge — or past
      it — scrolls time each frame while it holds, faster the deeper it goes; the scroll reposts the last pointer (viewportPaint), so the
-     gesture follows the view.  It stops on release, a cancel, or the pointer coming back in. */
+     gesture follows the view.  It stops on release, a cancel, or the pointer coming back in.  THE PUMP WAITS FOR A DRAG (1.5.7-alpha.14,
+     λWAVES 038 T8): it starts only once the gesture has MOVED past the 6-px slop (`drag.moved`), so a click or a tap near an edge — a
+     hand always jitters a pixel — never scrolls the view or carries the playhead off (measured: a ruler click 10 px inside the right edge
+     held ½ s scrolled 88 px and dropped the head 4.4 beats right of the click). */
   const EDGE=28,PUMPED=['scrub','range','move','trim','stretch'];let pumpId=0,pumpX=null;
-  function edgePump(){pumpId=0;if(!drag||!PUMPED.includes(drag.kind)||pumpX==null)return;const r=viewport.getBoundingClientRect(),z=Math.min(EDGE,r.width/4);
+  function edgePump(){pumpId=0;if(!drag||!drag.moved||!PUMPED.includes(drag.kind)||pumpX==null)return;const r=viewport.getBoundingClientRect(),z=Math.min(EDGE,r.width/4);
     const depth=pumpX<r.left+z?pumpX-(r.left+z):pumpX>r.right-z?pumpX-(r.right-z):0;if(!depth)return;
     const was=viewport.scrollLeft;viewport.scrollLeft=Math.max(0,was+Math.sign(depth)*Math.min(48,3+Math.abs(depth)*.5));
     if(viewport.scrollLeft===was&&(depth<0||drag.kind==='scrub'||drag.kind==='range'))return;   // at the start, or a scrub at the content's end: nothing more to scroll (a moved clip grows the content, so it keeps going)
@@ -285,7 +288,8 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(drag.kind==='zoom'){zoomAt(drag.px0*Math.exp((drag.y-e.y)*.01),drag.anchor,drag.anchorBeat);return;}
     const pos=view.world(e);
     if(drag.kind==='pan'){viewport.scrollLeft=drag.scrollX-(e.x-drag.x);viewport.scrollTop=drag.scrollY-(e.y-drag.y);return;}
-    if(drag.kind==='scrub'){controller.scrub(pos.x/px,{snap,alt:!!e.altKey,snapped:!!(e.ctrlKey||e.metaKey)});return;}
+    // a scrub's beat stays inside the lanes on view (1.5.7-alpha.14): past an edge the head waits at that edge while the pump scrolls, and where the content ends it stops there, never off the view
+    if(drag.kind==='scrub'){controller.scrub(bounded(pos.x,viewport.scrollLeft,viewport.scrollLeft+viewport.clientWidth)/px,{snap,alt:!!e.altKey,snapped:!!(e.ctrlKey||e.metaKey)});return;}
     if(drag.kind==='range'){const beat=snapBeat(pos.x/px,e),start=Math.min(beat,drag.startBeat),end=Math.max(beat,drag.startBeat);range=end-start>=.0625?{start:drag.addRange?Math.min(start,drag.addRange.start):start,end:drag.addRange?Math.max(end,drag.addRange.end):end}:null;view.setRange(range);paint();return;}
     if(drag.kind==='select'){
       const rect=selectionRect(drag.startWorld,pos);Object.assign(view.marquee.style,{display:'block',left:rect.left+'px',top:rect.top+'px',width:rect.right-rect.left+'px',height:rect.bottom-rect.top+'px'});
@@ -333,7 +337,9 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   function finish(e,cancel=false,rewind=false){
     if(!drag||e&&e.pointerId!==drag.pointerId)return;pumpStop();updates.flush();if(!drag)return;const held=drag;drag=null;delete surface.dataset.gesture;delete surface.dataset.dragClip;view.marquee.style.display='none';
     try{if(surface.hasPointerCapture(held.pointerId))surface.releasePointerCapture(held.pointerId);}catch(_){}
-    if(held.kind==='scrub')controller.endScrub({cancel:rewind});
+    if(held.kind==='scrub'){controller.endScrub({cancel:rewind});
+      // a scrub released past the loop's end while playing comes home on the next tick (alpha.8): the view goes home with it, so the head is never off-screen (1.5.7-alpha.14)
+      const L=controller.loop?.();if(L&&mod.host.clock.isPlaying()&&transportBeat()>=L.end&&L.start*px<viewport.scrollLeft)viewport.scrollLeft=Math.max(0,L.start*px-20);}
     if(held.kind==='range'&&cancel){range=held.oldRange;view.setRange(range);view.paint();}
     if(held.kind==='zoom'&&cancel)zoomAt(held.px0,held.anchor,held.anchorBeat);
     // A SELECT-tool tap on the strip (no drag, no Shift) clears the range and seeks there, as a ruler click does in FL.
@@ -436,7 +442,8 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   listen(viewport,'dragover',e=>{if(!dropHandlers.size)return;e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect='copy';});
   listen(viewport,'drop',e=>{if(!dropHandlers.size)return;e.preventDefault();const where=at(e.clientX,e.clientY),files=[...(e.dataTransfer?.files||[])];for(const fn of dropHandlers)if(fn({event:e,files,dataTransfer:e.dataTransfer,...where}))break;});
   listen(surface,'contextmenu',e=>e.preventDefault());listen(surface,'auxclick',e=>{if(e.button===1)e.preventDefault();});listen(surface,'lostpointercapture',e=>finish(e,true));
-  listen(document,'pointermove',e=>{if(drag&&e.pointerId===drag.pointerId){e.preventDefault();updates.post(pointer(e));if(PUMPED.includes(drag.kind)){pumpX=e.clientX;if(!pumpId)pumpId=requestAnimationFrame(edgePump);}}},{passive:false});listen(document,'pointerup',e=>finish(e));listen(document,'pointercancel',e=>finish(e,true));
+  listen(document,'pointermove',e=>{if(drag&&e.pointerId===drag.pointerId){e.preventDefault();updates.post(pointer(e));if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6)drag.moved=true;   // the slop, as updates reads it
+      if(drag.moved&&PUMPED.includes(drag.kind)){pumpX=e.clientX;if(!pumpId)pumpId=requestAnimationFrame(edgePump);}}},{passive:false});listen(document,'pointerup',e=>finish(e));listen(document,'pointercancel',e=>finish(e,true));
   listen(document,'pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!surface.contains(e.target))closeMenu();});
   /* ESCAPE is not a table action (the kit keeps it): it only ends what is in flight.  HIDE needs no key of its own here:
      whatever key the table gives it, the interface going out of paint (body.ui-hidden) ends it (hiddenObserver below) */

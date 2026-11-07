@@ -1914,7 +1914,7 @@ export function createModulation(host, port) {
     /* → TL (BASINS LANE P): this device as a clip on the timeline at the playhead — only while a timeline is attached */
     if (dev.kind !== 'audio' && timelineOf()) {
       const tl = label(el('button', 'm2ab m2tl'), '→TL'); tl.type = 'button'; dev.pst.after(tl); dev.tl = tl;   // tr: → TL: send to the timeline
-      tl.title = 'Send to the timeline: one cycle of the LFO, the ENV\'s stages, or its live pattern row';
+      tl.title = 'Send to the timeline: the LFO\'s whole cycles (a bar at least), the ENV\'s stages, or its live pattern row';   // 1.5.7-alpha.14: alpha.10 sends ⌈bar / period⌉ cycles
       tl.addEventListener('click', () => { const msg = sendToTimeline(s); if (msg) say(rec, msg); });
     }
     /* THE RUN ORDER IS THE FIRE ORDER, and the ◂ ▸ buttons that say so are `display: none` in
@@ -2269,7 +2269,8 @@ export function createModulation(host, port) {
     const pt = patternOf();
     for (const rec of devRows.values()) if (rec.dev.patt) { const on = !!pt && pt.model.isLive(rec.id); rec.dev.patt.classList.toggle('on', on); rec.dev.patt.setAttribute('aria-pressed', on ? 'true' : 'false'); }
   }
-  /* → TL, THE EXPERIMENT (BASINS LANE P): an LFO = one cycle of its shape, an ENV = its stages over timeScale seconds, an ENV
+  /* → TL, THE EXPERIMENT (BASINS LANE P): an LFO = its whole cycles, a bar's worth at least (lfoCycles, 1.5.7-alpha.10; one cycle
+     when its period is a bar or longer), an ENV = its stages over timeScale seconds, an ENV
      with a live lit row = a PATTERN clip of that row.  It lands at the start of the playhead's bar on the timeline's active
      lane (editor.addClip; 1.5.7-alpha.8 — it was the playhead's beat); a curve clip targets the device's first live route. */
   const routedTarget = (s) => { for (const m of M.macroList()) if (m.sourceId === s.id) for (const r of M.routesOfMacro(m.id)) if (!r.dormant && registry.has(r.targetId)) return r.targetId; return null; };

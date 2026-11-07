@@ -932,7 +932,7 @@
   "Selected audio band release time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": "Selected audio band release time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter",
   "Selected macro range; the large dial sets the base": "Selected macro range; the large dial sets the base",
   "Selection scope": "Selection scope",
-  "Send to the timeline: one cycle of the LFO, the ENV's stages, or its live pattern row": "Send to the timeline: one cycle of the LFO, the ENV's stages, or its live pattern row",
+  "Send to the timeline: the LFO's whole cycles (a bar at least), the ENV's stages, or its live pattern row": "Send to the timeline: the LFO's whole cycles (a bar at least), the ENV's stages, or its live pattern row",
   "Sends that are dead until their controls come back": "Sends that are dead until their controls come back",
   "Separate window headers from their bodies": "Separate window headers from their bodies",
   "Set free rate or a loop-clock division": "Set free rate or a loop-clock division",
@@ -4587,7 +4587,7 @@
   "Selection scope": [
    "mir/timeline/editor.js"
   ],
-  "Send to the timeline: one cycle of the LFO, the ENV's stages, or its live pattern row": [
+  "Send to the timeline: the LFO's whole cycles (a bar at least), the ENV's stages, or its live pattern row": [
    "mir/modulation/window.js"
   ],
   "Sends that are dead until their controls come back": [

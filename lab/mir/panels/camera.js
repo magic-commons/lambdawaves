@@ -18,6 +18,8 @@
  *
  *   createCameraPanel({ rack, mode, port | canvas, mod, history, project, … }) → { id, view(), port, params(), sync(), destroy() }   a rack card
  *   createCameraView(parent, options) → { root, port, params(), controls, sync(), northPress(), home(), destroy() }                the rows, anywhere
+ *     panWrap   1.5.7-alpha.13 THE PAD WRAPS: 'plane' — the PAN pad's drag and arrows past an edge come back in at the opposite edge (controls/xy.js
+ *               padWrap): a pan whose ±1 is the frame's edge carries the picture off one side and in at the other; absent, the pad stops at its edge
  *   createCssPort(canvas, { mode }) → a port that drives a CSS transform on the canvas: the zero-engine camera
  *   directionSphere(options) → { root, svg, yaw, pitch, paint(), destroy() }                                                      the sphere alone
  *
@@ -375,7 +377,7 @@ export function createCameraView(parent, o = {}) {
   if (has_('panX') && has_('panY')) {
     const dx = D('panX'), dy = D('panY');
     const axis = (id, d) => ({ id: modId(id), label: d.label, min: d.min, max: d.max, step: d.step, fmt: d.fmt, hint: d.hint, def: d.home, get: () => port.get(id), set: (v) => write(id, v) });
-    const c = control({ id: modId('pan'), label: 'PAN', pair: [axis('panX', dx), axis('panY', dy)], home: [dx.home, dy.home], hint: 'PAN — the view moved along the screen\'s axes, as a share of its width; drag the pad, or turn X and Y; double-tap to come home' });
+    const c = control({ id: modId('pan'), label: 'PAN', pair: [axis('panX', dx), axis('panY', dy)], home: [dx.home, dy.home], wrap: o.panWrap, hint: 'PAN — the view moved along the screen\'s axes, as a share of its width; drag the pad, or turn X and Y; double-tap to come home' });   // 1.5.7-alpha.13: `panWrap`
     c.widget.x.setDefault(dx.home); c.widget.y.setDefault(dy.home);
     add(row('cam-pan'), ['panX', 'panY'], c, () => [port.get('panX'), port.get('panY')]);
     padEntry = c;

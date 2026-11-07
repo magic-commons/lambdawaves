@@ -18,7 +18,8 @@
  *
  * descriptor: { id, label, hint, value, get?, set?, type?, options?: [{ id, label, coming?/disabled? }], min, max, step, log, wrap, hue, angle,
  *   cyclic, principal, list, ordered, colour, pair, ink, unit, digits, fmt, orient, lamp, reverse, onInput?, onChange? }.  `reverse` (1.5.7-alpha.6): the
- *   knob turns the other way (kit.js knob's own law; the value, the range and a modulation map unchanged).  `get` and `set` are the app's
+ *   knob turns the other way (kit.js knob's own law; the value, the range and a modulation map unchanged).  `wrap` on a `pair` (1.5.7-alpha.13 THE PAD
+ *   WRAPS) is the pad's: 'plane' or 'sphere' (xy.js padWrap); each axis keeps its own map.  `get` and `set` are the app's
  *   own road to the value (the registry's adapters): the control reads its first value from `get()`, and every hand writes `set(v)`.
  *   → { kind, root, widget, targets, get(), set(v), desc, params() }
  *     kind     one of KINDS
@@ -87,7 +88,7 @@ export function control(d, hooks = {}) {
     case 'xy': {
       const [ax, ay] = d.pair;
       const axis = (a, f) => ({ label: a.label, min: a.min, max: a.max, value: typeof a.get === 'function' ? a.get() : a.value, step: a.step, log: a.log, unit: a.unit, fmt: a.fmt, title: a.hint });
-      widget = xyPad({ label: d.label, aria: d.aria, x: axis(ax), y: axis(ay), home: d.home, tags: d.tags,
+      widget = xyPad({ label: d.label, aria: d.aria, x: axis(ax), y: axis(ay), home: d.home, tags: d.tags, wrap: d.wrap,   // 1.5.7-alpha.13: a pair's `wrap` is its pad's ('plane' | 'sphere')
         onInput: (x, y) => { if (typeof ax.set === 'function') ax.set(x); if (typeof ay.set === 'function') ay.set(y); if (d.onInput) d.onInput([x, y]); if (hooks.onInput) hooks.onInput([x, y]); },
         onChange: (x, y) => { if (typeof ax.set === 'function') ax.set(x); if (typeof ay.set === 'function') ay.set(y); if (d.onChange) d.onChange([x, y]); if (hooks.onChange) hooks.onChange([x, y]); } });
       targets = [widget.x, widget.y]; getter = () => widget.get(); setter = (v) => widget.set(v[0], v[1]);

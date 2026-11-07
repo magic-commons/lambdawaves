@@ -2,13 +2,16 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
-## The laws of 038 (chain T, MIR 1.5.7-alpha.8 … 12)
+## The laws of 038 (chain T, MIR 1.5.7-alpha.8 … 12; the fix T8, alpha.14)
 
 THE EMPTY TIMELINE RESTS AT ONE (038 T1, alpha.8; Josh 11-06: "If there are no clips in the timeline, the timeline shouldn't play all the way
 to 200+ measures … That way an added new clip will start at beat 1 measure 1"; Yan's call: a loop, not a freeze): with no clip playing, THE LOOP
-(032) is the first bar — the ruler's range › ACTIVE › the clips' extent › bar 1 (`model.meter()` beats), never a free run — so the clock lives
-(every synced LFO keeps its phase) and the readout cycles 1.1 … 1.4; a playing tick already at or past the loop's end (a seek there, the clips cut
-away under the head) lands on its start; CREATE CLIP and → TL place at the playhead's bar start, so the first clip starts at 1.1. A seek, a scrub, a
+(032) is the first bar — the ruler's range › ACTIVE › the clips' extent › bar 1 (`model.meter()` beats), never a free run — so the clock keeps
+running and the readout cycles 1.1 … 1.4. At each wrap a synced LFO whose period divides the bar is continuous; a dotted one (and 1/1 T) re-phases
+(a 1/4 dotted sine jumps from .642 to .003 of a cycle), a synced S&H or drift repeats its bar, and a free (Hz) LFO does not follow the bar (T8's
+words; alpha.8 claimed every synced LFO kept its phase). A playing tick already at or past the loop's end (a seek there, the clips cut away under
+the head) lands on its start — a ruler range or ACTIVE too: a play started past its end begins at its start (FL's way; Ableton plays through);
+CREATE CLIP and → TL place at the playhead's bar start, so the first clip starts at 1.1. A seek, a scrub, a
 paused clock and a film still never loop. Under PLAYBACK LOCK the clock is stepped (`host.clock.step`, rack.js), which never loops: the arrangement
 runs free there, empty or not (a FOR-YAN line of 038 T, not this law).
 
@@ -26,8 +29,11 @@ glued block about its other edge, every curve keeping its shape. One gesture, on
 THE TIMELINE SCROLLS UNDER THE POINTER (038 T3, alpha.9; Josh: "Scroll on timeline doesn't seem to work. If I drag the playhead back or forward,
 it should scroll the timeline as well"): a plain wheel over the timeline scrolls time while the lanes fit (more lanes than fit: it scrolls the
 lanes), Shift + wheel always scrolls time, Ctrl/Cmd + wheel zooms; a scrub (the playhead's drag), a range, a move, a trim or a stretch held within
-28 px of the lanes' left or right edge, or past it, scrolls time while it holds and the gesture follows. The wheel lands on the element under the
-pointer: no window registry. FOLLOW PLAYHEAD still ends on a wheel.
+28 px of the lanes' left or right edge, or past it, scrolls time while it holds and the gesture follows. THE PUMP WAITS FOR A DRAG (038 T8,
+alpha.14, from the fresh-eyes review): it starts only once the gesture has moved past the 6-px slop, so a click or a tap near an edge never scrolls
+(a ruler click 10 px inside the edge with 1 px of jitter had scrolled 88 px and dropped the head 4.4 beats right); a scrub's head stays inside the
+lanes on view (it waits at the edge while the view scrolls, and stops where the content ends). The wheel lands on the element under the pointer: no
+window registry. FOLLOW PLAYHEAD still ends on a wheel. The plain wheel's axis follows the lane count (they fit: time; one lane too many: the lanes).
 
 THE LANES WEAR THE FROST (038 T2; Josh 11-06 reversed 10-19's crisp lanes): each lane is a house `.glass` pane, so GLASS BLUR, FROST · STILL and
 CARD STYLE reach it as they reach the ruler and the tool strip; the window's own slab stays clear (lab/skin.css § 012 B1, 014 A5).
