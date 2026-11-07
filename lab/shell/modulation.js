@@ -406,13 +406,17 @@ export function createModSeam(app) {
     const spanOf = (rs) => (rs.length ? { left: Math.min(...rs.map((r) => r.left)), top: Math.min(...rs.map((r) => r.top)), right: Math.max(...rs.map((r) => r.right)), bottom: Math.max(...rs.map((r) => r.bottom)) } : null);
     const railOf = (n) => { const w = windowOf(n), r = w && w.pair && w.pair.rail; return r && !r.hidden && r.offsetWidth ? r : null; };
     const workRoots = () => [document.querySelector('[data-mir-window="timeline"]'), app.state.modView && app.state.modView.root].filter(Boolean);
+    /** a fold press `f` in a rack column: scroll the column so what it opened shows, never pushing the press above the column's top */
+    const bring = (f) => { const col = f.closest('#rack, #rackL'), body = document.getElementById((f.getAttribute('aria-controls') || '').split(' ')[0]); if (!col || !body || body.hidden) return;
+      const c = col.getBoundingClientRect(), p = f.getBoundingClientRect(), r = body.getBoundingClientRect(), b = r.height ? r.bottom : Math.max(0, ...[...body.children].map((k) => k.getBoundingClientRect().bottom));   // a `display: contents` body (RENDER's .sr-fold-box) is its children's
+      if (b > c.bottom) col.scrollTop += Math.max(0, Math.min(b - c.bottom + 8, p.top - c.top - 8)); };
     const nbEl = document.getElementById('notebook'), seated = new WeakSet();
     let pressed = false;   // a card added to the float layer under a pressed pointer is a hand's detach: never moved
     addEventListener('pointerdown', () => { pressed = true; }, true);
     for (const k of ['pointerup', 'pointercancel']) addEventListener(k, () => { pressed = false; }, true);
     const summoned = (n) => !!n && !n.hidden && n.offsetWidth > 0 && (n === nbEl || (n.classList.contains('mir-win') && !n.classList.contains('mir-transport-free'))
       || (n.classList.contains('dev') && n.classList.contains('floating') && !n.classList.contains('closed') && n.dataset.id !== 'transport')) && !workRoots().includes(n) && n.dataset.mirWindow !== 'pattern';
-    function seatOpen(n, floor = { h: 280, w: 280 }, again = false) {
+    function seatOpen(n, floor = { h: 280, w: 280 }, again = false, show = null) {
       const kit = n.classList.contains('mir-win') ? windowOf(n) : null; if (kit && typeof kit.place !== 'function') return;
       const pane = laid(n), rail = kit ? railOf(n) : null, box = spanOf([pane, ...(rail ? [laid(rail)] : [])]), s = barSpan(), title = document.getElementById('title');
       const open = workRoots().filter((r) => !r.hidden && r.offsetWidth), rails = open.map(railOf).filter(Boolean).map(laid);
@@ -425,6 +429,14 @@ export function createModSeam(app) {
          TIMELINE are 284–286 px and NODES, FOLDERS and the notebook lay on its controls) at the floor's width, 280 px, clear of everything and of all but
          the racks; then over the work bar's empty lanes, clear of its controls, its clips and its rail (full, then the floor's width); then — a stage too small for a work bar and a
          window beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without.  A floated card keeps its size */
+      /* 039 F3 · A FLOATED CARD TALLER THAN THE ROOM GOES TO ITS RACK (V-REVIEW 4 · 5: RENDER floated at 1000 × 700 was 609 px in the 566 below the
+         menu band — over the band and the bar — and 666–764 with a fold open, the opened PERIOD's PLAN off the foot, nothing scrolling, the card
+         unmoved): a floated card taller than the room below the menu row's band is seated in its home rack, whose column stops above the bar and
+         scrolls (V1), and `show` (the fold press that opened) and what it opened, or the card, are brought into view there.  Not folds: RENDER closed is
+         already taller than that room, and folding its DETERMINISTIC RENDER would hide RENDER, PREVIEW and CANCEL, the reason it was opened; a window
+         never scrolls inside */
+      if (!kit && n !== nbEl && ph > innerHeight - top - 8 && !document.body.classList.contains('rack-hidden') && !document.body.classList.contains('phone')) {
+        app.sh.layout.dockWindow(n.dataset.id); requestAnimationFrame(() => { if (show && n.contains(show)) { show.scrollIntoView({ block: 'nearest' }); bring(show); } else n.scrollIntoView({ block: 'nearest' }); }); return; }
       const sizes = (kit || n === nbEl) ? 12 * 4 : 1;
       const fit = (avoid, narrow = false) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = narrow ? floor.w : Math.floor(pw * (1 - j * 0.04));
         if (narrow ? j || ww >= pw * 0.88 || hh < floor.h : i && (hh < floor.h || ww < floor.w)) continue;
@@ -464,6 +476,12 @@ export function createModSeam(app) {
       const mo = new MutationObserver((list) => { const gone = []; for (const m of list) { for (const n of m.addedNodes || []) if (n.nodeType === 1) watch(n); gone.push(...(m.removedNodes || [])); } seatNew(gone); book(); });
       const watch = (n) => mo.observe(n, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
       mo.observe(floatsEl, { childList: true }); for (const n of floatsEl.children) watch(n);
+      /* 039 F3 · A FOLD'S OPEN RE-SEATS ITS FLOATING CARD (V-REVIEW 4: RENDER's opened section ran off the foot and the card stayed): a press that opens a
+         fold row (a hand's click or its key; a restore's set() is no press) asks a floating card's summons seat again — clear of the doors, or its rack
+         when it no longer fits the room — and in a rack column brings what it opened into view, never scrolling the press itself out of it (`bring`) */
+      for (const host of [floatsEl, ...racksEl]) host.addEventListener('click', (e) => { const f = e.target && e.target.closest ? e.target.closest('.lw-fold') : null; if (!f || f.getAttribute('aria-expanded') !== 'true') return;
+        const card = f.closest('.dev'); if (card && card.classList.contains('floating') && card.parentElement === floatsEl) { if (summoned(card)) try { seatOpen(card, undefined, false, f); } catch (_) {} }
+        else requestAnimationFrame(() => bring(f)); });
       addEventListener('resize', book);
     }
     function modDodge(rect, who = 'mod') {
