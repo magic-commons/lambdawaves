@@ -1533,6 +1533,8 @@ export function createChem(host, api) {
     get view() { return view; }, get delta() { return delta; }, setDelta,
     /** iteration 008 U · the card's two seats the register fills: the ON row (its ORBITAL | STATES seg) and the panes under it */
     slots: { top: rTop, register: regHost },
+    /** 039 X2 · a click on the ladder's level under VIEW ORBITAL: the dial's hand (orbInput), routed or not */
+    handOrbital(k) { if (Number.isFinite(k)) orbInput(k); },
     orbital(k) { if (Number.isFinite(k)) { if (api.wake) api.wake(); const [lo, hi] = span(); orbital = handK = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); baseHand(); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },

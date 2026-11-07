@@ -30,8 +30,8 @@ try {
     seg: [...document.querySelectorAll('.dev[data-id="chem"] .mol-top .reg-mode .seg-b')].map((b) => b.textContent),
     mode: __LW.register.mode, handles: typeof __LW.states.preset === 'function' && typeof __LW.register.setMode === 'function',
     rank: __LW.molsession.state().models.map((m) => m.id) };`);
-  judge('R0 the register is inside MOLECULES (no `orbitals` window), its ORBITAL | STATES seg on the ON row opens on ORBITAL, and the session knows the `states` model',
-    r0.errs.length === 0 && r0.eyebrow === 'MOLECULES' && r0.gone && r0.seg.join('|') === 'ORBITAL|STATES' && r0.mode === 'orbital' && r0.handles && r0.rank.includes('states'), r0);
+  judge('R0 the register is inside MOLECULES (no `orbitals` window), its ORBITALS | STATES seg on the ON row opens on ORBITALS, and the session knows the `states` model',
+    r0.errs.length === 0 && r0.eyebrow === 'MOLECULES' && r0.gone && r0.seg.join('|') === 'ORBITALS|STATES' && r0.mode === 'orbital' && r0.handles && r0.rank.includes('states'), r0);
 
   /* ── R1 · water: the ladder arrives, a preset is a rule, the session hands over the field ─────────────── */
   const r1 = await g.ev(`${HELP}
