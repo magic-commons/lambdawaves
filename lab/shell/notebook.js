@@ -377,7 +377,7 @@ export function createNotebook(app) {
       const abShow = (f) => {
         abFace = f === 'mir' ? 'mir' : 'lw'; faces.about.hidden = abFace !== 'lw'; mirFace.hidden = abFace !== 'mir';
         { const t = abWin.root.querySelector('.mir-win-title'); if (t) label(t, abFace === 'lw' ? 'ABOUT λWAVES' : 'ABOUT MIR'); }   // 039 X8: the title names the face shown
-        abI.title = abFace === 'lw' ? 'MIR ABOUT — the kit this app is built on' : 'ABOUT λWAVES — back to the app'; abI.setAttribute('aria-pressed', String(abFace === 'mir'));
+        abI.title = abFace === 'lw' ? 'ABOUT MIR — the toolkit this app is built on' : 'ABOUT λWAVES — back to the app'; abI.setAttribute('aria-pressed', String(abFace === 'mir'));
         if (abFace === 'mir') { const g = mirGui(), page = g && g.aboutPage ? g.aboutPage(mirFace) : null; if (page && abWatch) abWatch.observe(page); }   // lent again each time: the kit's own window may have taken it back
         const logo = faces.about.querySelector('.nb-logo');
         /* iteration 016 P5 (Josh: "the new λWAVES logo, much larger; the MIR logo shrunk"): the wordmark lab/img/lambdawaves-logo.svg, large — its word in the

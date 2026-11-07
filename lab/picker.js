@@ -76,7 +76,7 @@ export const TUTORIAL = [   // 036 G7: lab/loader.js keeps their files
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
   + 'Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og').split(' ');
-const NAMES = 'Hydrogen Helium Lithium Beryllium Boron Carbon Nitrogen Oxygen Fluorine Neon Sodium Magnesium Aluminium Silicon Phosphorus Sulfur Chlorine Argon Potassium Calcium Scandium Titanium Vanadium Chromium Manganese Iron Cobalt Nickel Copper Zinc Gallium Germanium Arsenic Selenium Bromine Krypton Rubidium Strontium Yttrium Zirconium Niobium Molybdenum Technetium Ruthenium Rhodium Palladium Silver Cadmium Indium Tin Antimony Tellurium Iodine Xenon Caesium Barium Lanthanum Cerium Praseodymium Neodymium Promethium Samarium Europium Gadolinium Terbium Dysprosium Holmium Erbium Thulium Ytterbium Lutetium Hafnium Tantalum Tungsten Rhenium Osmium Iridium Platinum Gold Mercury Thallium Lead Bismuth Polonium Astatine Radon Francium Radium Actinium Thorium Protactinium Uranium Neptunium Plutonium Americium Curium Berkelium Californium Einsteinium Fermium Mendelevium Nobelium Lawrencium Rutherfordium Dubnium Seaborgium Bohrium Hassium Meitnerium Darmastadtium Roentgenium Copernicium Nihonium Flerovium Moscovium Livermorium Tennessine Oganesson'.split(' ');   /* the 118 names (ASE's table), the caption's word for an element */
+const NAMES = 'Hydrogen Helium Lithium Beryllium Boron Carbon Nitrogen Oxygen Fluorine Neon Sodium Magnesium Aluminium Silicon Phosphorus Sulfur Chlorine Argon Potassium Calcium Scandium Titanium Vanadium Chromium Manganese Iron Cobalt Nickel Copper Zinc Gallium Germanium Arsenic Selenium Bromine Krypton Rubidium Strontium Yttrium Zirconium Niobium Molybdenum Technetium Ruthenium Rhodium Palladium Silver Cadmium Indium Tin Antimony Tellurium Iodine Xenon Caesium Barium Lanthanum Cerium Praseodymium Neodymium Promethium Samarium Europium Gadolinium Terbium Dysprosium Holmium Erbium Thulium Ytterbium Lutetium Hafnium Tantalum Tungsten Rhenium Osmium Iridium Platinum Gold Mercury Thallium Lead Bismuth Polonium Astatine Radon Francium Radium Actinium Thorium Protactinium Uranium Neptunium Plutonium Americium Curium Berkelium Californium Einsteinium Fermium Mendelevium Nobelium Lawrencium Rutherfordium Dubnium Seaborgium Bohrium Hassium Meitnerium Darmstadtium Roentgenium Copernicium Nihonium Flerovium Moscovium Livermorium Tennessine Oganesson'.split(' ');   /* the 118 names (ASE's table), the caption's word for an element */
 /** the 18-column seat: [row, column] (rows 1–7 the periods, 9–10 the f-block under them) */
 function seatOf(Z) {
   const P = [2, 10, 18, 36, 54, 86, 118], p = P.findIndex((e) => Z <= e) + 1, z0 = p > 1 ? P[p - 2] : 0, i = Z - z0;
@@ -183,7 +183,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* 036 G4 (Josh 11-03: "Clicking on logo shows the about window, and clicking on the MIR logo shows the MIR about window"): the face's logo
      and the MIR mark are buttons (no plate) onto ABOUT's door, `layout.about.open('lw' | 'mir')` — opened OVER the menu (openAbout below) */
   const faceLogo = el('button', 'mm-face-logo', face), doors = el('div', 'mm-doors', face);
-  faceLogo.type = 'button'; faceLogo.setAttribute('aria-label', 'ABOUT λWAVES'); faceLogo.title = 'ABOUT λWAVES'; faceLogo.addEventListener('click', () => openAbout('lw'));
+  faceLogo.type = 'button'; faceLogo.setAttribute('aria-label', 'ABOUT λWAVES'); faceLogo.title = 'ABOUT λWAVES — what this lab is, and who made it'; faceLogo.addEventListener('click', () => openAbout('lw'));
   fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { for (const host of [logo, faceLogo]) { host.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = host.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } } }).catch(() => { logo.textContent = faceLogo.textContent = 'λWAVES'; });
   /* iteration 015 M1 · THE HEAD (Josh: "Logo (a little bit bigger), Atomic, molecular, etc. Row, and then Home Folder, and Hue. Add a 4th
      button"): the logo, the tabs, then four round buttons — RETURN HOME (the lab), FOLDERS (the projects and the demos), THE HUE ring (a dial
@@ -211,7 +211,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       i.addEventListener('load', () => { i.classList.add('on'); keepData(i.src); }, { once: true }); i.src = './img/menu/face/' + file; }
     el('span', 'mm-foil', lit); el('span', 'mm-rim', b);
     const dw = el('span', 'mm-door-word', lit); dw.dataset.word = word; el('b', '', dw, word);   // 037 M4: the word's inverted copy is its ::after (data-word)
-    b.addEventListener('click', go); return b; };
+    b.title = DOOR_HINT[id]; b.addEventListener('click', go); return b; };
+  const DOOR_HINT = { tutorial: 'Watch short clips of what the lab can do', library: 'Open a molecule, an atom or one of hydrogen’s states' };   // 039 X16 (WALK-D #13)
   const doorBtns = [door('tutorial', 'TUTORIAL', [['mir-interface.webp']], 0, () => showTutorial()),
     door('library', 'LIBRARY', [['library-dark.webp', 'dark'], ['library-light.webp', 'light']], 1, () => showDecks('molecular'))];
   const way = el('div', 'mm-face-way', face);
@@ -221,7 +222,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      shadow; a press lays the rack and enters the lab as CONTINUE does.  Any way out of that open is the answer (SIMPLE when no door said) */
   let choose = null;
   const answer = (kind) => { const c = choose; choose = null; if (c) c(kind); };
-  const firstBs = [['simple', 'SIMPLE', 'The basics — SPECTRUM, PALETTE, WAVE, CAMERA, CLIP'], ['advanced', 'ADVANCED', 'The basics, plus NODES, LIGHTING and STAGE']].map(([kind, word, hint]) => {   // 038 M6: what each lays out, to a reader who has never seen the rack
+  const firstBs = [['simple', 'SIMPLE', 'A few windows to start: states, colours, wave, camera'], ['advanced', 'ADVANCED', 'SIMPLE’s windows plus effects, lighting and the stage']].map(([kind, word, hint]) => {   // 038 M6: what each lays out, to a reader who has never seen the rack; 039 X16 (WALK-D #1): in a newcomer's words, no window names
     const b = el('button', 'mm-face-lab', way, word); b.type = 'button'; b.dataset.layout = kind; b.title = hint; b.hidden = true;
     b.addEventListener('click', () => { answer(kind); close(); }); return b; });
   /* 035 G2 · THE CORNERS (Josh 11-03: "a Light/Dark Toggle and a settings … reveal", "the MIR logo … Kinda small in the bottom right", "3 Icon
@@ -232,9 +233,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const faceTop = el('div', 'mm-corner mm-tr', face);
   const faceTheme = el('button', 'mm-navb mm-themeb', faceTop); faceTheme.type = 'button'; faceTheme.title = 'Light or dark — the theme'; faceTheme.setAttribute('aria-label', faceTheme.title);
   icon(faceTheme, 'sun').classList.add('gly-sun'); icon(faceTheme, 'moon').classList.add('gly-moon'); faceTheme.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
-  { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'MIR ABOUT'); mir.title = 'MIR ABOUT — the kit this app is built on'; mir.addEventListener('click', () => openAbout('mir'));
+  { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'ABOUT MIR'); mir.title = 'ABOUT MIR — the toolkit this app is built on'; mir.addEventListener('click', () => openAbout('mir'));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
-  { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');
+  { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google'); credits.title = 'Built with Claude, Gemini and GPT · press for the names';   // 039 X16
     /* 036 G6 (Josh 11-03: "Claude Logo is incorrect; use the actual real logo. Checkout the screenshot of the correct font and logo styling. Also
        no need to show company who made it"): the about site's real marks and names — Claude's starburst (img/ai/claude-mark.svg, its
        terracotta) and its serif wordmark in the theme's ink (claude-word-{dark,light}.svg) in place of a typed name; GPT in OpenAI Sans and
@@ -261,7 +262,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* 036 G5 · THE FOCUS BLUR: the sheet's ground is five stacked blur layers and a thin wash, each masked from the sheet's left edge (skin.css) */
   { const fx = el('div', 'mm-sheet-fx', sheet); fx.setAttribute('aria-hidden', 'true'); for (let i = 0; i < 5; i++) el('i', '', fx); el('b', '', fx); }
   const sheetHead = el('div', 'mm-sheet-head', sheet); el('b', '', sheetHead, 'SETTINGS');
-  const sheetX = el('button', 'mm-sheet-x', sheetHead); sheetX.type = 'button'; sheetX.setAttribute('aria-label', 'Close the settings'); icon(sheetX, 'close');
+  const sheetX = el('button', 'mm-sheet-x', sheetHead); sheetX.type = 'button'; sheetX.setAttribute('aria-label', 'Close the settings'); sheetX.title = 'Close the settings'; icon(sheetX, 'close');
   const sheetBody = el('div', 'mm-sheet-body', sheet);
   let sheetRows = null, sheetT = 0;
   const sheetUp = () => !sheet.hidden && !sheet.classList.contains('out');
