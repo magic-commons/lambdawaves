@@ -36,7 +36,10 @@ reading. On, the canvas is configured `premultiplied` and the fragment writes al
 style, ESP's inner sticks, a kind the CLIP does not cut) and 254 on every other pixel, the colour premultiplied by it (the page behind the canvas is
 the stage colour, so nothing shows: the composited page moves ≤ 3 levels); the line pass keeps the destination's alpha. Off — the boot, NEW, THE
 LOCK, every frame without a scoped node — the canvas is `opaque` and alpha is 1 as before. A SHADER node reads the code in the tap's `.a`; an SVG
-node thresholds SourceAlpha (OBJECT: slope 255, intercept −254; STAGE: −255, 255) and its chain ends by forcing A = 1. p11.z bit 4.
+node thresholds SourceAlpha (OBJECT: slope 255, intercept −254; STAGE: −255, 255) and its chain ends by forcing A = 1. p11.z bit 4. THE BURIED
+ATOM (038 F7): a skeleton pixel is one the atom carries — the ray's transmittance to the hit (the march's `bgBlend`, DUST's 1 − a, the ESP map's
+1 − its opacity) is at least ½; an atom under a SOLID or SHELL surface or a dense cloud reads STAGE, so a STAGE node recolours the wave over it and an
+OBJECT node never draws a hard silhouette through the wave.
 
 ## The laws of 037
 

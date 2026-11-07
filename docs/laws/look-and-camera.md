@@ -8,7 +8,9 @@ THE CLIP'S TOGGLE (038 F3, Josh: "In clip, include a toggle to include or not in
 the plane, CLIP's row CUT BALLS · CUT STICKS (the kit's switches, lit = cut, as every CLIP before 038 cut both). Off, that kind stands whole while the
 plane cuts the wave (field-and-lock.md). `mat.slice.balls` / `mat.slice.sticks` = `false` is written by a hand only (absent = cut), PROJECT inside
 `presentation.mat`, in the history with the look, never in NEW; a `lw:` link does not carry them, nor a modulation target (the slice targets take no
-bools). The row is MOLECULES' — hidden under hydrogen and an atom with WAVE's SIZE · RADIUS rows (`availability('wave.esp')`) — and a restore sets it.
+bools). The row is MOLECULES': it is hidden under hydrogen and an ATOM, as WAVE's SIZE · RADIUS rows are (`availability('wave.esp')`), and a restore
+sets it. A kind the look does not draw greys its switch, the reason first in its hint (038 F7): CUT BALLS while SIZE is 0 or under ESP (ESP draws no
+balls), CUT STICKS while RADIUS is 0 or under ESP's MAP ONLY. The hints say what off does: "off, the balls stand whole" / "off, the sticks stand whole".
 
 ## The laws of 037
 

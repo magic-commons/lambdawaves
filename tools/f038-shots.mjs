@@ -163,6 +163,52 @@ h = d.convert('L').histogram(); print(max(i for i, n in enumerate(h) if n), sum(
     out.ok = allBlack === 0 && out.cards[0].rowHidden === true && out.cards.slice(1).every((c) => c.rowHidden === false && c.scroll <= 0 && c.upper && c.hints.every(Boolean) && c.rowFits <= 0)
       && out.afterSpace.balls === false && !('balls' in out.afterSpace2);
   }
+  if (scene === 'f7') {
+    /* F7 · THE BURIED ATOM: the mask on, benzene's balls and sticks — at EXPOSURE 0 every footprint pixel is 255; under SOLID at ISO 0.02 (the surface
+       wraps the carbons) a footprint pixel under the surface reads 254 and one the eye sees reads 255.  CLIP's switches: greyed with their reason while
+       the look draws no such kind.  FOR-JOSH: the cloud in front of the atoms under HUE 0 and 0.5 at the default EXPOSURE (one picture).
+       First THE TILE: orb-2p₀'s new tile against the same look on the live stage (menu-thumbs' ATOM_LOOK: Im ψ, SIGNED, ISO 0.03, EXPOSURE 0.5, HUE ⅛,
+       the wheel, the corner pose, the cut) — the mean colour of the upper and the lower lobe in each */
+    out.tile = await g.ev(`const L = __LW, H = await import('./hydrogen.js'), i = H.stateOf(2, 1, 0).index;
+      L.palette.select('wheel'); L.palette.setOn(true); L.reg.clear(); L.reg.set(i, 0, 1); L.setMute(i, false); L.setView('imag'); L.setStyle('signed');
+      L.mat.iso = 0.03; L.mat.exposure = 0.5; L.mat.hueShift = 0.125; L.mat.slice = Object.assign(L.mat.slice || {}, { mode: 1, pos: 0, normal: [1, 1, 1].map((x) => x / Math.sqrt(3)) });
+      L.obs.yaw = Math.PI / 4; L.obs.pitch = Math.asin(1 / Math.sqrt(3)); L.schedule(L.TIER.REBUILD); await L.settle(); await L.settle(); await new Promise((r) => setTimeout(r, 700));
+      const halves = (get, w, h, keep) => { const s = [[0, 0, 0, 0], [0, 0, 0, 0]]; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const p = get(x, y); if (!keep(p)) continue; const q = s[y < h / 2 ? 0 : 1]; q[0] += p[0]; q[1] += p[1]; q[2] += p[2]; q[3]++; }
+        return s.map((q) => q[3] ? [q[0] / q[3], q[1] / q[3], q[2] / q[3]].map(Math.round) : null); };
+      const r = await __F.px(L.obs, { ...L.mat, frame: false, axis: false, dither: 0 }, 400, 400);
+      const stage = halves((x, y) => { const o = y * r.bpr + x * 4; return [r.px[o], r.px[o + 1], r.px[o + 2]]; }, 400, 400, (p) => Math.max(...p) - Math.min(...p) > 60);
+      const bm = await createImageBitmap(await (await fetch('./img/menu/orb-2p_0.webp', { cache: 'reload' })).blob()), c = new OffscreenCanvas(bm.width, bm.height), cg = c.getContext('2d'); cg.drawImage(bm, 0, 0);
+      const d = cg.getImageData(0, 0, bm.width, bm.height).data;
+      const tile = halves((x, y) => { const o = (y * bm.width + x) * 4; return [d[o], d[o + 1], d[o + 2], d[o + 3]]; }, bm.width, bm.height, (p) => p[3] > 200);
+      L.mat.slice.mode = 0; delete L.mat.slice.normal; return { stage, tile };`);
+    { const T = out.tile, dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); out.tile.match = dist(T.stage[0], T.tile[0]) < dist(T.stage[0], T.tile[1]) && dist(T.stage[1], T.tile[1]) < dist(T.stage[1], T.tile[0]); }
+    await molecule('C6H6');
+    out.cut0 = await g.ev(`__LW.layout.reopen('clip'); await new Promise((r) => setTimeout(r, 300)); const d = document.querySelector('.dev[data-id="clip"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
+      const [b, s] = d.querySelectorAll('.clip-cut button.sw'); return { balls: [b.disabled, b.dataset.tTitle || b.dataset.helpEn || b.title], sticks: [s.disabled, s.dataset.tTitle || s.dataset.helpEn || s.title] };`);
+    const cutNow = (setup) => g.ev(`const L = __LW, d = document.querySelector('.dev[data-id="clip"]'); ${setup}; await new Promise((r) => setTimeout(r, 200));
+      const [b, s] = d.querySelectorAll('.clip-cut button.sw'); const h = (x) => x.title || x.dataset.help || ''; return { balls: [b.disabled, h(b)], sticks: [s.disabled, h(s)] };`);
+    out.cutSize = await cutNow(`L.mat.atomSize = 0.35; L.mat.stickR = 0.3; L.setStyle('cloud')`);
+    out.cutEsp = await cutNow(`L.setStyle('esp')`);
+    out.cutBare = await cutNow(`[...document.querySelectorAll('.dev[data-id="observer"] button.sw')].find((x) => /MAP ONLY/.test(x.textContent)).click()`);
+    await g.ev(`const x = [...document.querySelectorAll('.dev[data-id="observer"] button.sw')].find((x) => /MAP ONLY/.test(x.textContent)); if (x.classList.contains('on')) x.click(); __LW.setStyle('cloud'); __LW.schedule(4); await __LW.settle(); await __LW.settle(); return 1;`);
+    out.mask = await g.ev(`const L = __LW, F = L.field, o = { ...L.obs, dist: 1.7 }, base = { ...L.mat, view: 0, style: 0, frame: false, axis: false, dither: 0, atomSize: 0.35, stickR: 0.3 }; delete base.light;
+      F.setObjectMask(true);
+      const foot = await __F.px(o, { ...base, exposure: 0 }, 480, 300), solid = await __F.px(o, { ...base, style: 1, iso: 0.02 }, 480, 300), cloud = await __F.px(o, base, 480, 300);
+      F.setObjectMask(false);
+      const A = (r, i) => r.px[i + 3]; let n = 0, solid255 = 0, solid254 = 0, cloud255 = 0;
+      for (let y = 0; y < foot.h; y++) for (let x = 0; x < foot.w; x++) { const i = y * foot.bpr + x * 4; if (A(foot, i) !== 255) continue; n++; if (A(solid, i) === 255) solid255++; else solid254++; if (A(cloud, i) === 255) cloud255++; }
+      return { footprint: n, solid255, solid254, cloud255, keep: { px: Array.from(solid.px), bpr: solid.bpr } };`);
+    { const r = out.mask.keep; delete out.mask.keep; const px = r.px.slice(); for (let i = 0; i < px.length; i += 4) { const k = px[i + 3] === 255; px[i] = px[i + 1] = px[i + 2] = k ? 255 : 30; px[i + 3] = 255; }
+      out.picMask = jpeg('038-F7-benzene-solid-mask', px, 480, 300, r.bpr); }
+    /* FOR-JOSH: HUE 0 · HUE 0.5 side by side, the default EXPOSURE (1), CLOUD, the atoms on */
+    const two = await g.ev(`const L = __LW, o = { ...L.obs, dist: 1.7 }, m = { ...L.mat, view: 1, style: 0, exposure: 1, frame: false, axis: false, dither: 0, atomSize: 0.35, stickR: 0.3, invert: false }; delete m.light;
+      const a = await __F.px(o, { ...m, hueShift: 0 }, 480, 300), b = await __F.px(o, { ...m, hueShift: 0.5 }, 480, 300); return { a: Array.from(a.px), b: Array.from(b.px), bpr: a.bpr };`);
+    { const W2 = 960, row = new Uint8Array(W2 * 300 * 4); [two.a, two.b].forEach((p, k) => { for (let y = 0; y < 300; y++) for (let x = 0; x < 480 * 4; x++) row[y * W2 * 4 + k * 1920 + x] = p[y * two.bpr + x]; });
+      out.picHue = jpeg('038-F7-FOR-JOSH-benzene-hue-veil', row, W2, 300, W2 * 4); }
+    const M = out.mask;
+    out.ok = out.tile.match && M.footprint > 0 && M.solid254 > 0 && M.solid255 > 0 && M.solid255 < M.footprint && out.cut0.balls[0] && out.cut0.sticks[0] && !out.cutSize.balls[0] && !out.cutSize.sticks[0]
+      && out.cutEsp.balls[0] && !out.cutEsp.sticks[0] && out.cutBare.sticks[0];
+  }
   if (scene === 'f3') {
     /* the check: benzene's balls and sticks at EXPOSURE 0 (the picture is the atoms alone) — the CLIP on cuts them as before; CUT BALLS and CUT STICKS off
        draw them exactly as the CLIP off does (CLIP and SLAB); one kind off leaves the other cut.  The switches: hidden under hydrogen, shown under
