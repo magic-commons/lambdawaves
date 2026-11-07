@@ -249,8 +249,9 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 @media (max-width: 860px) {
   #rack { top: auto; bottom: 0; left: 0; right: 0; width: auto; height: 46vh; }
 }
-#title { position: absolute; left: calc(var(--rack-w) + 14px); top: 6px; z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-3);
+#title { position: absolute; left: calc(var(--rack-w) + 14px); top: 6px; z-index: calc(var(--z-chrome) + 2); display: flex; align-items: center; gap: var(--sp-3);
   padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); pointer-events: none; }
+/* 039 V7: the logo (the menus' door) over the scroll pills (chrome + 1, C #22: at 150 % CAMERA's pill lay on it), under #floats (the same z, later in the page) and the bar */
 #title .lam { color: var(--acc); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); }
 #title .word { color: var(--fg); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: .14em; }
 #title .mark { height: 1.05em; width: 1.05em; display: inline-block; vertical-align: -0.12em; }
@@ -930,6 +931,8 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .dev[data-id="emission"] .em-table th { color: var(--dim); font-weight: 500; }
 .dev[data-id="emission"] .em-table td:last-child, .dev[data-id="emission"] .em-table th:last-child { text-align: left; }
 .dev[data-id="emission"] .em-none { color: var(--dim); font-size: var(--fs-micro); margin: 4px 0; }
+/* 039 V7 · THE TOAST CLEARS THE BAR: the kit's toast stands where clearRack (shell/modulation.js) seats it — 8 px over the bar when the bar holds its band */
+.mir-toast { --toast-bottom: var(--lw-toast-bottom, 84px); }
 /* 017 R4 (call 14) · RENDER's self-test printout: no scroller in a rack window — the last six lines, the earlier ones behind a fold (film-card.js) */
 .dev[data-id="render"] .sr-lines { max-height: none; overflow: visible; }
 .dev[data-id="render"] .sr-fold { justify-content: flex-end; margin: 4px 0 0; }

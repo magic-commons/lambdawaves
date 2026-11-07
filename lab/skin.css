@@ -525,6 +525,8 @@ body[data-theme="dark"] .eq-grid { --eq-near: hsl(291 85% 68%); --eq-mid: hsl(33
 .eq-mix { display: grid; grid-template-columns: var(--eq-size) minmax(0, 1fr); gap: 10px; align-items: start; }
 .eq-faders { display: grid; grid-auto-rows: minmax(0, 1fr); gap: 2px; height: var(--eq-size); padding-top: 14px; box-sizing: border-box; }
 .eq-faders > .fd { min-height: 0; height: auto; }
+/* 039 V7 (C #22: n 1…n 7 sat on their 18-px faders): the grid's own row numbers name the shells, so the fader keeps its value alone (its hint and its aria name say n) */
+.eq-faders > .fd > .fd-lbl { display: none; }
 .eq-head { flex-wrap: nowrap; align-items: center; }
 .eq-head > .mol-step { flex: 1 1 auto; min-width: 0; }
 .eq-audio { flex-wrap: nowrap; align-items: center; }

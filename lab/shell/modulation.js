@@ -309,7 +309,7 @@ export function createModSeam(app) {
        rack's own px — so a tall column scrolls above the bar instead of running under it.  The top seat's clear reads the racks' CONTENT bottoms (the
        cards as laid out, never the stopped box: the stop follows the bar, the bar's clear follows the cards), so the two never chase each other */
     const contentBottom = (rk) => { let b = 0; for (const c of rk.children) if (c.offsetParent === rk) b = Math.max(b, c.offsetTop + c.offsetHeight); return b + (parseFloat(getComputedStyle(rk).paddingBottom) || 0); };
-    const stops = new Map();
+    const stops = new Map(); let toastPx = 0;
     /* 039 V4 · THE SCALE FITS THE PAGE (C #6: at UI SCALE 150 % on a 1000-px page PLAY sat at x −112, the bar ran −5…1005, HELP was a 27-px sliver
        of the menu row and the logo lay 49 px under the right rack's SETTINGS head): the bar on the stage (with its PLAY and mini-viewer), the logo and
        the menu row each take `--lw-fit` — skin.css: their zoom is UI SCALE × the fit — the largest ≤ 1 that keeps them on the page: the bar 8 px
@@ -341,6 +341,10 @@ export function createModSeam(app) {
         if (sp) setFit(t, fitOf(t) * Math.min((c - 8) / Math.max(1, c - sp.left), (innerWidth - 8 - c) / Math.max(1, sp.right - c)));
       } else setFit(t, 1);
       const s = barSpan();
+      /* 039 V7 · THE TOAST CLEARS THE BAR (C #22: "Saved — …" and "New — the empty project" sat on LIBRARY…FOLDERS): where the bar on the stage reaches
+         the kit toast's band (84 px over the foot), the toast stands 8 px above the bar's top — `--lw-toast-bottom` on <body>, lab.css' .mir-toast */
+      const tb = s && s.top < innerHeight - 84 && s.bottom > innerHeight - 84 - 44 ? Math.round(innerHeight - s.top + 8) : 0;
+      if (tb !== toastPx) { toastPx = tb; if (tb) document.body.style.setProperty('--lw-toast-bottom', tb + 'px'); else document.body.style.removeProperty('--lw-toast-bottom'); }
       let v = 0;
       const meet = s ? racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => ({ rk, r: rk.getBoundingClientRect() })).filter(({ r }) => r.width && r.right > s.left && r.left < s.right) : [];
       const hang = meet.filter(({ r }) => r.top < 52);
