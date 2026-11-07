@@ -1,5 +1,6 @@
 /* lab/nodes.css — NODES (lab/nodes.js, 018 D3): the ground (a dotted plane that pans), the node cards (a title bar, a top in-port, a bottom
-   out-port), the wires (one SVG layer under the cards), + and the window ↔ rack door in the ground's top corners.  Glass and ink from the skin. */
+   out-port), the wires (one SVG layer under the cards), the tools in the ground's top corner (the window ↔ rack door is in the bars, 038 N3).
+   Glass and ink from the skin. */
 .nodes-host { display: flex; flex-direction: column; gap: 6px; height: 100%; min-height: 0; }
 .nodes-ground { position: relative; overflow: hidden; touch-action: none; cursor: grab; border-radius: var(--r-md); box-shadow: var(--relief-well, var(--neu-inset));
   background: radial-gradient(circle, color-mix(in srgb, var(--ink-faint) 35%, transparent) 1px, transparent 1.5px) 0 0 / 22px 22px, var(--glass-well); }
@@ -28,16 +29,21 @@
 .nodes-port { position: absolute; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 2px var(--glass-well); }
 .nodes-port.in { top: -5px; }
 .nodes-port.out { bottom: -5px; }
-.nodes-tools button, :is(.nodes-x, .nodes-rm, .nodes-door) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
+.nodes-tools button, :is(.nodes-x, .nodes-rm) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
   background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
 .nodes-x, .nodes-rm { width: 18px; height: 18px; margin-right: -4px; }
 .nodes-x[aria-pressed="true"] { color: var(--dim); opacity: .6; }   /* 036 P3: ⏻ MUTE — a muted node's power reads OFF (dim), a live one the bar's ink */
-:is(.nodes-tools button, .nodes-x, .nodes-rm, .nodes-door):is(:hover, :focus-visible) { color: var(--acc); }
-:is(.nodes-tools button, .nodes-x, .nodes-rm, .nodes-door) svg { width: 16px; height: 16px; }
-.nodes-tools, .nodes-door { position: absolute; top: 6px; z-index: 1; }
-.nodes-tools { left: 6px; display: flex; gap: 2px; }
-:is(.nodes-tools button, .nodes-door) { border-radius: var(--r-sm); background: var(--glass-tint); }
-.nodes-door { right: 6px; }
+:is(.nodes-tools button, .nodes-x, .nodes-rm):is(:hover, :focus-visible) { color: var(--acc); }
+:is(.nodes-tools button, .nodes-x, .nodes-rm) svg { width: 16px; height: 16px; }
+.nodes-tools { position: absolute; top: 6px; left: 6px; z-index: 1; display: flex; gap: 2px; }
+.nodes-tools button { border-radius: var(--r-sm); background: var(--glass-tint); }
+/* 038 N3 · THE BAR: the window's dock door is a title-bar head button (the kit's .mir-win-btn), its glyph a size under the bar's 18; the card's
+   pop-out door wears × 's look before it (22 px, round, the dim ink, the head's 14-px glyph) — the seat's size under :where() so a finger's 44 still wins */
+.mir-win-btn.nodes-door > svg { width: 16px; height: 16px; }
+.dev-util > .nodes-door { padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--dim); cursor: pointer; }
+.dev-util > :where(.nodes-door) { width: 22px; height: 22px; }
+.dev-util > .nodes-door:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
+.dev-util > .nodes-door > svg { width: 14px; height: 14px; }
 /* 020 X1 · the ground: focus, the selection's accent outline, the shift-drag box */
 .nodes-ground:focus-visible { outline: 1px solid color-mix(in srgb, var(--acc) 50%, transparent); outline-offset: -1px; }
 .nodes-card.sel { outline: 2px solid var(--acc); outline-offset: 2px; }

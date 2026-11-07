@@ -254,6 +254,12 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'close', resizable: true, size: { w: 440, h: 640 }, min: { w: 300, h: 280 }, body: wbody,
     persist: { read: () => rec().win || null, write: (st) => put({ win: st }) },
     onOpen: () => { onWin(true); requestAnimationFrame(() => vWin.place()); }, onClose: () => onWin(false), onMoved: () => occlusion.dirty() });   // 021 I1: the bar's NODES seat lights on these
+  /* 038 N3 · THE BAR (Josh: "Move the dock to rack button besides the 'x' button and make the icon slightly smaller and match the styling of the nodes
+     icon and 'x' on the window bar"): the window's DOCK door beside × in its title bar (a head button, its glyph 16 px against the bar's 18), the
+     card's OPEN AS A WINDOW door before × in its head (× 's own look) — the ground keeps no door */
+  const door = (cls, glyph, word, run) => { const b = el('button', cls); b.type = 'button'; chip(b, glyph, word); b.addEventListener('click', run); return b; };
+  win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'DOCK IN THE RACK', () => M.door('win')));
+  const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'OPEN AS A WINDOW', () => M.door('card')), util.querySelector('.dev-close'));
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });

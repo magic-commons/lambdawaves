@@ -55,6 +55,10 @@ const ICONS = {
   moon: p('M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.6 6.6 0 0 0 10.7 10.7Z'),
   sun: c(12, 12, 4) + p('M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4'),
   nodes: c(5, 7, 2.5) + c(12, 17, 2.5) + c(19, 7, 2.5) + p('M6.4 9.1l4.2 5.8M13.4 14.9l4.2-5.8'),
+  /* 038 N3 · NODES' two doors drawn in the bar's own line (the kit's popOut / dock are its solid arrow, beside × they read heavy): out of the
+     rack as a window, and back into it */
+  rackOut: p('M6.5 17.5 17 7') + p('M9.5 6.5h8v8'),
+  rackIn: p('M17.5 6.5 7 17') + p('M14.5 17.5h-8v-8'),
   rackToggle: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/>' + p('M15 4v16'),   // ◧: hide or show the rack
   reverse: p('M4 8h15') + p('M15.5 4.5 19 8l-3.5 3.5') + p('M20 16H5') + p('M8.5 12.5 5 16l3.5 3.5'),
   trash: p('M3.5 6.5h17') + p('M9 6.5V4.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 4.5v2') + p('M5.5 6.5l1 13a2 2 0 0 0 2 1.5h7a2 2 0 0 0 2-1.5l1-13') + p('M10 10.5v6.5') + p('M14 10.5v6.5'),

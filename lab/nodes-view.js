@@ -250,8 +250,6 @@ export function createView(parent, kind, M) {
     d.result.then((n) => { if (n) M.graphs.add(n, { nodes: M.graphOf() }); back(); });
   }
   const foot = el('div', 'nodes-passes', ground);
-  const door = el('button', 'nodes-door', ground); door.type = 'button';
-  chip(door, W ? 'dock' : 'popOut', W ? 'DOCK IN THE RACK' : 'OPEN AS A WINDOW'); door.addEventListener('click', () => M.door(kind));
   if (!W) label(el('div', 'note', parent), NOTE);                   // the card's one line (window notes are a SETTINGS choice)
   const api = {
     get view() { return cards.curves && cards.curves.view; },

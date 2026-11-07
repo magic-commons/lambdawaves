@@ -36,7 +36,7 @@ const PRE = `const w = (n) => new Promise((r) => setTimeout(r, n)), N = __LW.nod
   const key = (t, k, o = {}) => t.dispatchEvent(new KeyboardEvent('keydown', { key: k, code: o.code || k, bubbles: true, cancelable: true, ...o }));
   const rect = (e) => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round); };
   const pane = () => $('.mir-ctx .nodes-add-menu'), rows = (p) => [...p.querySelectorAll(':scope > .mb-item')].map((b) => b.querySelector('.mb-lbl').textContent + (b.querySelector('.mb-key') ? ' ' + b.querySelector('.mb-key').textContent : ''));`;
-const ev = (body) => g.ev(PRE + body);
+const ev = (body) => g.ev(PRE + body), WIN = '[data-mir-window="nodes"] ';
 const out = {};
 try {
   if (!(await g.waitFor('window.__LW?.ready', 600, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify(await g.errors()));
@@ -100,6 +100,42 @@ try {
       return { win: N.win.isOpen(), card: !d.classList.contains('closed'), door: ${size('.dev[data-id="nodes"] .dev-util .nodes-door')}, x: ${size('.dev[data-id="nodes"] .dev-close')}, inGround: !!$('.dev[data-id="nodes"] .nodes-ground .nodes-door'), head: rect(d.querySelector('.dev-head')) };`);
     if (out.dock.head) await shot('038-N3-card-bar', [out.dock.head[0] - 6, out.dock.head[1] - 6, out.dock.head[2] + 6, out.dock.head[3] + 60]);
     out.pop = await ev(`$('.dev[data-id="nodes"] .dev-util .nodes-door').click(); await w(900); return { win: N.win.isOpen(), card: !$('.dev[data-id="nodes"]').classList.contains('closed') };`);
+  }
+  if (scene === 'n4') {
+    /* the wire's knob: three handles (LEVELS · HUE · GRAIN), none on the wire into STAGE OUT; a turn, the wheel, home; Delete unplugs (the filter
+       loses HUE, the wire dashed to the handle), undo / redo; a port carried onto a wire moves its node there and plugs it; an in-port let go off unplugs */
+    const H = (id) => `$(WIN + '.nodes-hand[data-node="${id}"]')`, ctr = (sel) => `(() => { const r = ${sel}.getBoundingClientRect(); return [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2)]; })()`;
+    out.start = await ev(`N.open(); await w(600); N.win.place({ x: 560, y: 40, w: 560, h: 800 }); await w(300); for (const t of ['levels', 'hue', 'grain']) N.add(t); N.set('n2', 'hue', 90); await w(500); N.views[1].place(); await w(300);
+      const hs = $$(WIN + '.nodes-hand').map((h) => h.dataset.node), mid = (() => { const h = ${H('n2')}, p = $$(WIN + '.nodes-wires path')[1].getAttribute('d').match(/-?[\\d.]+/g).map(Number); return { left: parseFloat(h.style.left), top: parseFloat(h.style.top), ends: [(p[0] + p[6]) / 2, (p[1] + p[7]) / 2] }; })();
+      return { hs, mid, at: ${ctr(H('n2'))}, lv: ${ctr(H('n1'))}, kids: document.getElementById(N.filter.id).children.length };`);
+    const [hx, hy] = out.start.at;
+    await drag([[hx, hy], [hx, hy + 40], [hx, hy + 80], [hx, hy + 110]]);
+    out.turn = await ev(`const q = () => N.nodes().find((n) => n.id === 'n2'); return { fade: +q().values.fade.toFixed(3), val: ${H('n2')}.dataset.val, sel: ${H('n2')}.classList.contains('sel'), focus: document.activeElement.className, arc: ${H('n2')}.querySelector('.v').getAttribute('stroke-dasharray') };`);
+    out.wheel = await ev(`const h = ${H('n1')}; h.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 100 })); await w(100); const a = N.nodes()[0].values.fade;
+      h.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 100, ctrlKey: true })); await w(100); return { fade: a, after: N.nodes()[0].values.fade, z: $(WIN + '.nodes-plane').style.scale };`);
+    await drag([[hx, hy]]); await drag([[hx, hy]]);
+    out.home = await ev(`return N.nodes().find((n) => n.id === 'n2').values.fade;`);
+    out.unplug = await ev(`const G = $(WIN + '.nodes-ground'); G.focus(); key(G, 'Delete', { code: 'Delete' }); await w(400); const p = $$(WIN + '.nodes-wires path')[1], h = ${H('n2')};
+      const d = p.getAttribute('d').match(/-?[\\d.]+/g).map(Number);
+      const o = { plug: JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')).list.map((q) => q.id + ':' + (q.plug === false ? 'off' : 'on')), dimmed: $(WIN + '[data-node="n2"]').classList.contains('unplug'), cut: p.classList.contains('cut'), end: d.slice(-2), handle: [parseFloat(h.style.left), parseFloat(h.style.top)], kids: document.getElementById(N.filter.id).children.length, nodes: N.nodes().length };
+      key(G, 'z', { code: 'KeyZ', ctrlKey: true }); await w(300); o.undo = $(WIN + '[data-node="n2"]').classList.contains('unplug'); key(G, 'z', { code: 'KeyZ', ctrlKey: true, shiftKey: true }); await w(300); o.redo = $(WIN + '[data-node="n2"]').classList.contains('unplug');
+      return o;`);
+    await shot('038-N4-wires-unplugged', [560, 40, 1120, 840]);
+    /* HUE's in-port onto the last wire (GRAIN → STAGE OUT): HUE moves after GRAIN, plugged */
+    const p1 = await ev(`const a = $(WIN + '[data-node="n2"] .nodes-port.in').getBoundingClientRect(), w3 = $$(WIN + '.nodes-wires path')[3].getBoundingClientRect(); return [[a.left + 5, a.top + 5], [w3.left + w3.width / 2, w3.top + w3.height / 2]].map((v) => v.map(Math.round));`);
+    await drag([p1[0], [p1[0][0] + 30, p1[0][1] + 20], [p1[1][0], p1[1][1] - 10], p1[1]]);
+    out.replug = await ev(`await w(300); const ids = N.nodes().map((q) => q.id), top = (id) => parseFloat($(WIN + '[data-node="' + id + '"]').style.top);
+      return { order: ids, plug: JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')).list.map((q) => q.id + (q.plug === false ? ':off' : '')), tops: [...ids, 'out'].map(top), dimmed: $(WIN + '[data-node="n2"]').classList.contains('unplug') };`);
+    /* LEVELS' out-port onto the wire GRAIN → HUE: LEVELS goes between them */
+    const p2 = await ev(`const a = $(WIN + '[data-node="n1"] .nodes-port.out').getBoundingClientRect(), h = ${H('n2')}.getBoundingClientRect(); return [[a.left + 5, a.top + 5], [h.left - 14, h.top + h.height / 2]].map((v) => v.map(Math.round));`);
+    await drag([p2[0], [p2[0][0] + 30, p2[0][1] + 30], p2[1]]);
+    out.splice = await ev(`await w(300); const ids = N.nodes().map((q) => q.id), top = (id) => parseFloat($(WIN + '[data-node="' + id + '"]').style.top); return { order: ids, tops: [...ids, 'out'].map(top) };`);
+    /* GRAIN's in-port let go on the empty ground: GRAIN unplugged */
+    const p3 = await ev(`const a = $(WIN + '[data-node="n3"] .nodes-port.in').getBoundingClientRect(); return [a.left + 5, a.top + 5].map(Math.round);`);
+    await drag([p3, [p3[0] - 60, p3[1] - 10], [p3[0] - 140, p3[1] - 20]]);
+    out.pullOff = await ev(`await w(300); return { plug: N.graph().list.map((q) => q.id + (q.plug === false ? ':off' : '')), menu: (() => { const h = $(WIN + '.nodes-hand[data-node="n3"]'); h.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, button: 2, clientX: 10, clientY: 10 })); return 1; })() };`);
+    out.menu = await ev(`await w(300); return [...document.querySelectorAll('.mir-ctx .mb-item .mb-lbl')].map((b) => b.textContent);`);
+    await shot('038-N4-wires-spliced', [560, 40, 1120, 840]);
   }
   out.errors = (await g.errors()).errs;
   console.log(JSON.stringify(out, null, 1));
