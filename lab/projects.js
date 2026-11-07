@@ -152,6 +152,7 @@ export function createProjects(port) {
        OPEN FILE and EXPORT left the toolbar for FILE › IMPORT and FILE › EXPORT (.json · .mir · picture); a drop still opens a file */
     actions: ['save', 'project', 'duplicate', 'fresh'], folderGlyph: 'folder', glyph: (name, cls, size) => glyphEl(name === 'save' ? 'saveInto' : name, cls, size),   // 021 V2: PROJECT wears λWAVES' saveInto (012 M1), not the floppy rack: port.rack, onMoved: port.onMoved,
     factory: () => api.restoreDemos(),
+    captions: true,   // 039 K7 (MIR 1.5.7-alpha.22 THE CARD SAYS HOW IT OPENS; WALK-A #9, WALK-B #2): every card wears its name beneath its picture at rest
     galleryCopy: { factory: 'RESTORE THE DEMOS', factoryNote: 'puts back the demos λWAVES ships with — adds only what is missing, and never touches anything you saved',
       /* 036 K5 (Josh: not 'DEMOS' and 'DEMOS' — greyed 'Name File' and 'Folder Name'; inside a folder of your own, SAVE TO names it): MIR 1.5.7-alpha.5 */
       namePlaceholder: 'NAME FILE', saveToPlaceholder: 'FOLDER NAME', proposeName: false },

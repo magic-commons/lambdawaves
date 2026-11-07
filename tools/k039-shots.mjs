@@ -10,7 +10,7 @@ import * as drv from './gate/drv.mjs';
 
 const scene = process.argv[2] || 'k1', DIR = process.argv[3] || '.tmp/K-shots';
 mkdirSync('.tmp', { recursive: true }); mkdirSync(DIR, { recursive: true });
-const W = 1500, H = 950;
+const W = +process.env.K_W || 1500, H = +process.env.K_H || 950;   // K_W / K_H: the narrow page (K9 FINISH)
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 9627}/lab/?starter=home&warn=0&sw=0`, { width: W, height: H,
   prefs: { 'ui.primaryPointerCapabilities': 6, 'ui.allPointerCapabilities': 6 } });
 const nap = (ms) => g.ev(`await new Promise((r) => setTimeout(r, ${ms})); return 1;`);
@@ -130,6 +130,37 @@ try {
     for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
       const box = await g.ev(`const r = (document.querySelector('.mir-folders').closest('[data-mir-window]') || document.querySelector('.mir-folders')).getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`);
       out['shot-' + t] = await shot(`039-K7-folders-${tag}-${t}`, box, 6); }
+  }
+  if (scene === 'k7v') {
+    /* THE OTHER TWO VIEWS of the one library with `captions`: the FOLDERS rack card (8 a page) and the MAIN MENU's FOLDERS page (picker.js
+       sizes its page). Nine saved projects (two pages of the card): every card's name shown and uncut or cut with …, the page buttons' top on
+       page 1 and page 2 (equal = the page reserves its rows), the card's height, what scrolls; pictures dark and light */
+    const tag = process.argv[4] || 'after';
+    await g.ev(`const names = ['PULSE LOOP', 'SLOW SPIN', 'A VERY LONG PROJECT NAME THAT RUNS ON', 'BENZENE', 'WATER', 'TWO', 'THREE', 'FOUR', 'NINE'];
+      for (const [i, n] of names.entries()) { __LW.loadPreset(i % 2 ? '3dz2' : '1s+2pz'); await __LW.settle(); __LW.projects.save(n); } return 1;`);
+    const readView = (sel) => g.ev(`const V = document.querySelector(${JSON.stringify(sel)}); if (!V) return null; const vis = (n) => !!n && getComputedStyle(n).display !== 'none' && n.getBoundingClientRect().height > 0;
+      const cards = [...V.querySelectorAll('.sv-card')], pages = V.querySelector('.sv-pages'), lab = V.querySelector('.sv-page-label');
+      return { cards: cards.length, named: cards.filter((c) => vis(c.querySelector('.sv-cap .sv-name'))).length, cut: cards.filter((c) => { const n = c.querySelector('.sv-name'); return n && n.scrollWidth > n.clientWidth + 1; }).map((c) => c.dataset.name),
+        capH: cards[0] ? Math.round(cards[0].querySelector('.sv-meta').getBoundingClientRect().height) : 0, card: cards[0] ? Math.round(cards[0].getBoundingClientRect().height) : 0,
+        grid: (() => { const G = V.querySelector('.sv-project-grid'), cs = getComputedStyle(G), f = V.querySelector('.mm-fgal') || V; return { w: Math.round(G.getBoundingClientRect().width), h: Math.round(G.getBoundingClientRect().height), fw: Math.round(f.getBoundingClientRect().width), gap: cs.columnGap, minH: cs.minHeight, rows: cs.gridTemplateRows, cols: cs.gridTemplateColumns }; })(),
+        pagesTop: pages && vis(pages) ? Math.round(pages.getBoundingClientRect().top) : null, page: lab ? lab.textContent : null, view: Math.round(V.getBoundingClientRect().height),
+        scrolls: [...V.querySelectorAll('*')].filter((n) => n.scrollHeight > n.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(n).overflowY)).map((n) => n.className.split(' ')[0]) };`);
+    const next = (sel) => g.ev(`const b = document.querySelector(${JSON.stringify(sel)} + ' .sv-pages button:last-child'); if (b && !b.disabled) b.click(); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+    const prev = (sel) => g.ev(`const b = document.querySelector(${JSON.stringify(sel)} + ' .sv-pages button:first-child'); if (b && !b.disabled) b.click(); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+    /* the rack card */
+    const CARD = '.dev[data-id="projects"]';
+    await g.ev(`__LW.actions.run('window.projects.open'); __LW.layout.raise('projects'); await new Promise((r) => setTimeout(r, 1200)); const d = document.querySelector('${CARD}'); d.scrollIntoView({ block: 'start' }); await new Promise((r) => setTimeout(r, 400)); return 1;`);
+    out.card1 = await readView(CARD); await next(CARD); out.card2 = await readView(CARD); await prev(CARD);
+    for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+      const box = await g.ev(`const r = document.querySelector('${CARD}').getBoundingClientRect(); return [r.left, r.top, r.right, Math.min(r.bottom, innerHeight)].map(Math.round);`);
+      out['card-' + t] = await shot(`039-K7-folders-card-${tag}-${t}`, box, 6); }
+    await g.ev(`__LW.actions.run('window.projects.close'); await new Promise((r) => setTimeout(r, 400)); return 1;`);
+    /* the MAIN MENU's FOLDERS page */
+    const PAGE = '#lwMenu .mm-folders';
+    await g.ev(`__LW.run('menu'); await new Promise((r) => setTimeout(r, 1500)); document.querySelector('#lwMenu .mm-navb[data-nav="folders"]').click(); await new Promise((r) => setTimeout(r, 2500)); return 1;`);
+    out.page1 = await readView(PAGE); await next(PAGE); out.page2 = await readView(PAGE); await prev(PAGE);
+    for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+      out['page-' + t] = await shot(`039-K7-folders-page-${tag}-${t}`, null); }
   }
   out.errs = (await g.errors()).errs;
 } catch (e) { out.E = String(e && e.stack || e); }

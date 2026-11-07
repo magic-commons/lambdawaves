@@ -259,7 +259,7 @@ export function createFolders(options = {}) {
   const settled = (from) => { for (const v of views) if (v !== from) v.markClean(); };
   const viewOptions = (self, extraOpts = {}) => ({
     files, adapter: galleryAdapter, say, glyph: o.glyph, kit: o.kit,
-    parts: o.parts || [], sorts, copy: { root: 'ROOT', ...(o.galleryCopy || {}) },
+    parts: o.parts || [], sorts, copy: { root: 'ROOT', ...(o.galleryCopy || {}) }, captions: !!o.captions,
     actions: o.actions || DEFAULT_ACTIONS, extraActions,
     current: () => current,
     onOpened: async (e) => {

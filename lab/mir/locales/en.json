@@ -926,7 +926,7 @@
   "Select tool": "Select tool",
   "Select tool: drag the ruler": "Select tool: drag the ruler",
   "Select {band} for {:ATTACK}, {:RELEASE} and {:peak hold::HOLD}": "Select {band} for {:ATTACK}, {:RELEASE} and {:peak hold::HOLD}",
-  "Select {name}": "Select {name}",
+  "Select {name} — tap again to open": "Select {name} — tap again to open",
   "Selected audio band attack time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": "Selected audio band attack time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter",
   "Selected audio band peak hold; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": "Selected audio band peak hold; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter",
   "Selected audio band release time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": "Selected audio band release time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter",
@@ -4569,7 +4569,7 @@
   "Select {band} for {:ATTACK}, {:RELEASE} and {:peak hold::HOLD}": [
    "mir/modulation/window.js"
   ],
-  "Select {name}": [
+  "Select {name} — tap again to open": [
    "mir/folders/gallery.js"
   ],
   "Selected audio band attack time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": [

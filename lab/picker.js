@@ -351,8 +351,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     showView('folders');
     if (!foldersView) {   // sized to the page once, at its first showing: the columns as the decks', the rows from the height
       const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
-      const W = Math.min(1500, foldersEl.clientWidth - 48, innerWidth >= 1100 ? innerWidth - 2 * (rackW + 20) : Infinity), H = foldersEl.clientHeight - 150, cols = Math.max(2, Math.min(8, Math.floor(W / 210))), rows = Math.max(1, Math.min(4, Math.floor(H / ((W / cols) * 0.75 + 56))));
-      foldersEl.style.setProperty('--fcols', String(cols)); foldersEl.style.setProperty('--sv-page-rows', String(rows));
+      const W = Math.min(1500, foldersEl.clientWidth - 48, innerWidth >= 1100 ? innerWidth - 2 * (rackW + 20) : Infinity), H = foldersEl.clientHeight - 150, cols = Math.max(2, Math.min(8, Math.floor(W / 210))), rows = Math.max(1, Math.min(4, Math.floor(H / ((W / cols) * 0.75 + 80))));   // 039 K7: + the card's name row
+      foldersEl.style.setProperty('--fcols', String(cols)); foldersEl.style.setProperty('--frows', String(rows));   // skin.css reserves the page's rows
       foldersView = P.folders.mountGallery(el('div', 'mm-fgal', foldersEl), { pageSize: cols * rows, prefsKey: 'pickerGallery', factory: () => P.restoreDemos() });
     }
     P.demosFirst(foldersView); foldersView.paint(); animate(foldersEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);

@@ -11,6 +11,7 @@ THE DOORS OF 039 · CHAIN K (THE KIT RETURN, Opus 5.5; the clone road on kit bra
 - alpha.20 THE POWER WORD PASSES THROUGH (`timeline/window.js`): `installTimeline({ transport: { powerWord } })` builds the work bar's power seat with the word face. λWAVES: `powerWord: 'MOD'` (shell/keys.js), no relabel after install.
 - A TARGET HAS ONE AUTOMATION (Josh 2026-10-18) is NOT a door yet: three 1.5.6 laws collide with it (→ TL sends a routed target by construction, alpha.27; a hand macro layers over a clip, alpha.27; ROUTE NEW PARAMETER… re-targets a clip, alpha.26), so its design waits for a word in docs/FOR-MIR.md § 039 and the number it was planned for, alpha.21, went to the next door.
 - alpha.21 THE HINT CLEARS THE ROW (`control-help.js` `hintSpot`): a control in a window's head is hinted above the bar, else beside the bar in its band, else below — never over the window's first row. λWAVES: nothing app-side.
+- alpha.22 THE CARD SAYS HOW IT OPENS (`folders/gallery.js`, `createFolders({ captions })`, `--sv-cap-h`): a card's hint says a second tap opens it and follows the choice; with `captions` every card of every view wears its name beneath its picture at rest, and a paged page reserves that row. λWAVES: `captions: true` (projects.js); the MAIN MENU's FOLDERS page reserves its own `--frows` of `--fcols` (skin.css, picker.js).
 Each door has its BUILT line in docs/FOR-MIR.md § 039.
 
 ## The laws of 038
