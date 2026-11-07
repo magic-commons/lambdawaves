@@ -614,7 +614,7 @@ export function configureCopy(f, canvas, withCopy) {
  * moment, before the await on the map can let anything else in: the present count, the generation step, the canvas size.
  * Returns { rgba, w, h, ms }; the caller puts the canvas' backing store back.
  */
-export async function readback(f, canvas, w, h, draw, wit = null) {
+export async function readback(f, canvas, w, h, draw, wit = null, opaque = true) {   // opaque false: the alpha as the field wrote it (038 N6: a film's target codes)
   const d = f.device, c = canvas.getContext('webgpu');
   const t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
   if (canvas.width !== w) canvas.width = w;             // assigning even the same value would reallocate the swapchain
@@ -638,7 +638,7 @@ export async function readback(f, canvas, w, h, draw, wit = null) {
   for (const b of bufs) {
     await b.buf.mapAsync(GPUMapMode.READ);
     const src = new Uint8Array(b.buf.getMappedRange());
-    rgba.set(toRGBA(src, w, b.rows, { bytesPerRow: bpr, bgra, opaque: true }), b.y0 * w * 4);
+    rgba.set(toRGBA(src, w, b.rows, { bytesPerRow: bpr, bgra, opaque }), b.y0 * w * 4);
     b.buf.unmap(); b.buf.destroy();
   }
   return { rgba, w, h, ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0 };

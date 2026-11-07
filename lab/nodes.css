@@ -99,6 +99,7 @@
 .nodes-foot-t { display: block; width: 100%; padding: 5px 0 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
 .nodes-foot-t.on, .nodes-foot-t:hover { color: var(--acc); }
 .nodes-foot > .nodes-knobs { padding-top: 4px; }
+.nodes-foot > .nodes-knobs > :is(.seg, .segw) { grid-column: 1 / -1; }   /* 038 N6: TARGET's three words on one line (two cells wrap OBJECT) */
 .nodes-card.fold > .nodes-foot { display: none; }
 .nodes-box { display: none; position: absolute; z-index: 1; pointer-events: none; border: 1px dashed var(--acc); background: color-mix(in srgb, var(--acc) 8%, transparent); }
 /* 038 N1 · the + menu is the kit's contextMenu pane (its rows, its plate): the search line on top; the empty graph's one line */

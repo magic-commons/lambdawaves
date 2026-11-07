@@ -171,6 +171,8 @@ n = sum(1 for p, q in zip(A.getdata(), B.getdata()) if max(abs(p[i] - q[i]) for 
     out.object = await ev(`const id = N.add('invert'); N.set(id, 'target', 'object'); await w(400); __LW.schedule(4); await __LW.settle(); await w(400); window.__id = id;
       const f = document.getElementById(N.filter.id); return { mask: __LW.field.objectMask, passes: N.passes(), alpha: !!f.querySelector('feComponentTransfer[in="SourceAlpha"]'), close: f.lastElementChild.outerHTML.slice(0, 120), mark: $(WIN.replace('window', 'window') + '.nodes-mark') ? 1 : 0 };`);
     out.object.px = diff(base, await png('object'));
+    if (process.env.N6_LATE) { await ev(`await w(1500); return 1;`); out.object.late = diff(base, await png('object-late')); await ev(`__LW.schedule(4); await __LW.settle(); await w(600); return 1;`); out.object.later = diff(base, await png('object-later'));
+      execFileSync('python3', ['-I', '-c', `import sys\nfrom PIL import Image\nImage.open(sys.argv[1]).convert('RGB').crop(tuple(map(int, sys.argv[3:7]))).save(sys.argv[2], quality=80)`, '.tmp/n6-object-later.png', '.tmp/n6-object-later.jpg', ...box.map(String)]); }
     out.stage = await ev(`N.set(__id, 'target', 'stage'); await w(400); __LW.schedule(4); await __LW.settle(); await w(400); return { mask: __LW.field.objectMask };`);
     out.stage.px = diff(base, await png('stage'));
     out.both = await ev(`N.set(__id, 'target', 'both'); await w(400); __LW.schedule(4); await __LW.settle(); await w(400); return { mask: __LW.field.objectMask, kids: document.getElementById(N.filter.id).children.length };`);
@@ -182,6 +184,23 @@ n = sum(1 for p, q in zip(A.getdata(), B.getdata()) if max(abs(p[i] - q[i]) for 
     for (const n of ['object', 'stage']) execFileSync('python3', ['-I', '-c', `import sys
 from PIL import Image
 Image.open(sys.argv[1]).convert('RGB').crop(tuple(map(int, sys.argv[3:7]))).save(sys.argv[2], quality=80)`, `.tmp/n6-${n}.png`, `${DIR}/038-N6-invert-${n}.jpg`, ...box.map(String)]);
+  }
+  if (scene === 'n6b') {
+    /* the experiment: an arithmetic copy of the source first (does it clamp the colour to the alpha?) */
+    await ev(`__LW.verbs.run([{ verb: 'molecule', args: { id: 'C6H6' } }], { who: 'SHOTS' }); return 1;`);
+    await g.waitFor('window.__LW.chem.on && window.__LW.chem.solution()', 900, 200);
+    const fb = await ev(`__LW.mat.atomSize = 0.35; __LW.mat.stickR = 0.3; __LW.schedule(4); await __LW.settle(); await w(400); const id = N.add('invert'); N.set(id, 'target', 'object'); await w(500); __LW.schedule(4); await __LW.settle(); await w(400); return rect(document.getElementById('field'));`);
+    const crop = (n) => execFileSync('python3', ['-I', '-c', `import sys\nfrom PIL import Image\nImage.open(sys.argv[1]).convert('RGB').crop(tuple(map(int, sys.argv[3:7]))).save(sys.argv[2], quality=80)`, `.tmp/n6b-${n}.png`, `.tmp/n6b-${n}.jpg`, ...fb.map(String)]);
+    writeFileSync('.tmp/n6b-plain.png', Buffer.from(await g.snap(), 'base64')); crop('plain');
+    out.mode = await ev(`const runs = N.compile().runs; N.filter.setChain([{ prim: [['feComposite', { in: 'SourceGraphic', in2: 'SourceGraphic', operator: 'arithmetic', k1: 0, k2: 1, k3: 0, k4: 0 }]] }, ...runs]).flush(); await w(400); return document.getElementById(N.filter.id).children.length;`);
+    writeFileSync('.tmp/n6b-arith.png', Buffer.from(await g.snap(), 'base64')); crop('arith');
+  }
+  if (scene === 'n6a') {
+    await ev(`__LW.verbs.run([{ verb: 'molecule', args: { id: 'C6H6' } }], { who: 'SHOTS' }); return 1;`);
+    await g.waitFor('window.__LW.chem.on && window.__LW.chem.solution()', 900, 200);
+    out.alpha = await ev(`__LW.mat.atomSize = 0.35; __LW.mat.stickR = 0.3; await __LW.settle(); const F = __LW.field; F.setObjectMask(true); const r = await F.readPixels(__LW.obs, __LW.mat, 300, 200, true);
+      const bands = []; for (let b = 0; b < 4; b++) { const n = {}; for (let y = b * 50; y < b * 50 + 50; y++) for (let x = 0; x < 300; x++) { const i = y * r.bpr + x * 4, v = r.px[i + 3]; n[v] = (n[v] || 0) + 1; } bands.push(Object.entries(n).sort((p, q) => q[1] - p[1]).slice(0, 6)); }
+      const i = 10 * r.bpr + 150 * 4; F.setObjectMask(false); return { bands, top: [...r.px.slice(i, i + 4)], style: __LW.mat.style, view: __LW.mat.view };`);
   }
   out.errors = (await g.errors()).errs;
   console.log(JSON.stringify(out, null, 1));

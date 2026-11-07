@@ -63,7 +63,10 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   let passes = 0, nodes = [];
   const flags = { view: null, solo: null };                          // 020 X3 · A FLAG IS NOT A RECORD: VIEW HERE and SOLO die with the session
   const how = () => ({ upTo: flags.view, solo: flags.solo, off: !!rec().off });
+  /* 038 N6 · A NODE HAS A TARGET: the field writes its object codes into the canvas's alpha (setObjectMask: premultiplied) only while a compiled run
+     reads them — off, the canvas is opaque as ever and costs nothing; a flip reconfigures the canvas, so a present follows at once */
   const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache, how()); filter.setChain(c.runs).flush(); layers.set(c.layers);
+    if (field && field.ok && field.setObjectMask && field.objectMask !== c.mask) { field.setObjectMask(c.mask); if (present) present(); }
     if (c.passes !== passes) { passes = c.passes; for (const v of views) v.foot(); } });
   const panel = createCurvesPanel({ port: { setTable() { const q = nodes.find((n) => n.type === 'curves'); if (q) { q.v++; for (const v of views) v.strip(q); } recompile(); } }, project: false, presets }), model = panel.model;
   const curveTables = () => Object.fromEntries(model.channels.map((ch) => [ch, isIdentity(model.points(ch)) || model.amount() === 0 ? null : Float32Array.from(model.table(ch))]));

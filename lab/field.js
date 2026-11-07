@@ -1022,7 +1022,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
         return vec4<f32>(oa + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);   // the skeleton: alpha 1 whether or not THE OBJECT MASK lives
       }
     }
-    let a0 = objA(false); return vec4<f32>(bgOut * a0, a0);
+    let a0 = objA(false); return vec4<f32>(min(bgOut, vec3<f32>(1.0)) * a0, a0);
   }
   let steps = max(V.fwd.w, 8.0);
   let ds = (tf - t0) / steps;
@@ -1041,13 +1041,13 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
     let d = dustPixel(ro, rd, t0, min(tEnd, tf), half, mode, soft, rhoMax, ampMax, refMax, pxA);
     var od = pow(max(d.rgb + back * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     od = select(od, bgOut, od != od);
-    let ad = objA(onObj); return vec4<f32>((od + bayer8(in.pos.xy) * (V.p2.w / 255.0)) * ad, ad);
+    let ad = objA(onObj); return vec4<f32>(min(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), vec3<f32>(1.0)) * ad, ad);
   }
   if (style == 11u && V.p7.x > 0.5) {                               // iteration 014 B: ESP draws the map over its sticks (none set: the march below, as CLOUD); 032 O1: BALLS · STICKS are the composite above
     let oc = espPixel(ro, rd, t0, tf, b0, bf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
     var om = pow(max(oc.rgb, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     om = select(om, bgOut, om != om);
-    let ae = objA(oc.w > 0.5); return vec4<f32>((om + bayer8(in.pos.xy) * (V.p2.w / 255.0)) * ae, ae);
+    let ae = objA(oc.w > 0.5); return vec4<f32>(min(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), vec3<f32>(1.0)) * ae, ae);
   }
   let kq = V.p3.w;                                                // THE KNEE's q (0 at the shipped 0.6: the old compositing, untouched)
   var tau = 0.0;
@@ -1195,7 +1195,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
      default and it never touches the physics — the readback path renders through the same shader, so a gate
      that compares pixels compares the same numbers as long as the strength is zero. */
   o = o + bayer8(in.pos.xy) * (V.p2.w / 255.0);
-  let ao = objA(onObj); return vec4<f32>(o * ao, ao);                // 038 F5: THE OBJECT MASK (off: × 1, the old bits)
+  let ao = objA(onObj); return vec4<f32>(min(o, vec3<f32>(1.0)) * ao, ao);   // 038 F5: THE OBJECT MASK (off: × 1, the old bits); N6: the colour clamped before the × a (an overbright 255 over a = 254 is no premultiplied pixel)
 }`;
 
 /* ── THE SPECIALISED PRESENT (optimization 2026-09-24, K2 · AUDIT-A FA3, REFUTE-E/F, PLAN §0) ─────────────────────────

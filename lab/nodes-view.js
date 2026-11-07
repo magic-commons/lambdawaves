@@ -125,7 +125,7 @@ export function createView(parent, kind, M) {
     if (q.type === 'curves') n.view = M.curvesIn(n.body);
     else { n.body.classList.add('nodes-knobs', 'row', 'fit'); n.ctl = nodeBody(n.body, q, t, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) }); }
     if (!over(t)) {                                                   // the foot fold: FADE · MASK · SOFT
-      const f = el('div', 'nodes-foot', n.c), tg = el('button', 'nodes-foot-t', f), fb = el('div', 'nodes-knobs row fit', f); tg.type = 'button'; label(tg, 'FADE · MASK'); fb.hidden = true;
+      const f = el('div', 'nodes-foot', n.c), tg = el('button', 'nodes-foot-t', f), fb = el('div', 'nodes-knobs row fit', f); tg.type = 'button'; label(tg, 'FADE · MASK · TARGET'); fb.hidden = true;
       tg.setAttribute('aria-expanded', 'false'); tg.addEventListener('click', () => { fb.hidden = !fb.hidden; tg.setAttribute('aria-expanded', String(!fb.hidden)); });
       n.foot = tg; n.fctl = nodeBody(fb, q, { knobs: FOOT }, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) });
     }
@@ -376,7 +376,7 @@ export function createView(parent, kind, M) {
     paint(q, k, v, shown) { const n = cards[q.id]; if (!n) return; for (const c of [n.ctl, n.fctl]) if (c) c.paint(k, v, shown); if (k === mixOf(T[q.type])) paintHand(q, v); api.mark(q); },
     /** the cost mark (a masked node is a pass) and the foot fold's light (FADE or MASK off home) */
     mark(q) { const n = cards[q.id]; if (!n) return; n.bar.querySelector('.nodes-mark').textContent = markOf(q, T[q.type]);
-      if (n.foot) n.foot.classList.toggle('on', q.values.fade < 1 || (q.values.mask || 'none') !== 'none'); },
+      if (n.foot) n.foot.classList.toggle('on', q.values.fade < 1 || (q.values.mask || 'none') !== 'none' || (q.values.target || 'both') !== 'both'); },
     /** the PREVIEW strip: a grey ramp over a hue ramp, each of the 128 columns through the node's own transfer (coalesced on the frame) */
     strip(q) { const n = cards[q.id]; if (!n || !n.strip) return; frame.coalesce('nodes.strip.' + kind + '.' + q.id, () => {
       const f = transfer(q, T[q.type]), g = n.strip.getContext('2d'), im = g.createImageData(128, 10);
