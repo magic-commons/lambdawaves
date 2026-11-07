@@ -957,6 +957,7 @@ export async function boot(dom) {
     /* iteration 011 Q2 (Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside every window closed (first-run.js `inner`); a record that loads after (rack-wiring.js `folds`) wins */
     if(FIRST_RUN.inner===false)for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]'))b.click();
   }
+  dom.start.arrangement = () => JSON.stringify({ ...layout.captureLayout(), at: 0 });   // 039 F1: the session's signature reads the arrangement here (main.js), without its stamp
   layout.DEFAULT = layout.captureLayout();   // 036 S3 · THE DEFAULT LAYOUT: the first-run arrangement as it stands here, before this browser's settings — NEW puts the windows back to it (notebook.js)
   initStageText(); LW.stageText = app.state.stageText;   // the gate reads its string, its render count and its announcements
   applySettings();
