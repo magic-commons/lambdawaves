@@ -13,6 +13,7 @@ THE DOORS OF 039 · CHAIN K (THE KIT RETURN, Opus 5.5; the clone road on kit bra
 - alpha.21 THE HINT CLEARS THE ROW (`control-help.js` `hintSpot`): a control in a window's head is hinted above the bar, else beside the bar in its band, else below — never over the window's first row. λWAVES: nothing app-side.
 - alpha.22 THE CARD SAYS HOW IT OPENS (`folders/gallery.js`, `createFolders({ captions })`, `--sv-cap-h`): a card's hint says a second tap opens it and follows the choice; with `captions` every card of every view wears its name beneath its picture at rest, and a paged page reserves that row. λWAVES: `captions: true` (projects.js); the MAIN MENU's FOLDERS page reserves its own `--frows` of `--fcols` (skin.css, picker.js).
 - alpha.23 THE EMPTY LANE SAYS HOW (`timeline/view.js` `.tl-empty`): with no clip one line over the lanes names the roads a clip arrives by (a knob's menu › CLIP › CREATE AUTOMATION CLIP, →TL); an empty lane is hinted how, a lane with a clip by its name. λWAVES: nothing app-side.
+- alpha.24 THE NAMED CARD KEEPS ITS HEIGHT (`folders/folders.css` `--sv-shot-k`; THE FINISH of alpha.22): with `captions` the picture is 16 : 10, so a named card keeps a 4 : 3 card's height and a fitted window does not scroll. λWAVES: the MAIN MENU page's reserve reads `--sv-shot-k` (skin.css, picker.js). The next door (MIR Focus's) is 1.5.7-alpha.25.
 Each door has its BUILT line in docs/FOR-MIR.md § 039.
 
 ## The laws of 038

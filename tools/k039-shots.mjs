@@ -207,7 +207,7 @@ try {
       out['tl-' + t] = await shot(`039-K9-timeline-empty-${tag}-${t}`, out.tl.win, 6); }
     out.knobMenu = await g.ev(`const k = [...document.querySelectorAll('.k[data-param]')].find((n) => n.getBoundingClientRect().height > 0 && __LW.mod.registry.has(n.dataset.param)); if (!k) return null;
       const f = k.matches('[tabindex]') ? k : k.querySelector('[tabindex]') || k; f.focus(); return { param: k.dataset.param, focused: document.activeElement === f };`);
-    await chord('\uE008', '\uE01A'); await nap(500);
+    await chord('\uE008', '\uE03A'); await nap(500);
     out.knobMenu.open = await g.ev(`const m = [...document.querySelectorAll('.glass[data-mir-surface="menu"]')].find((n) => !n.hidden && n.getBoundingClientRect().height > 0); return m ? [...m.querySelectorAll('button, [role="menuitem"]')].map((b) => b.textContent.trim()).filter(Boolean).slice(0, 10) : null;`);
     await key('\uE00C'); await nap(400);
     out.knobMenu.closed = await g.ev(`return ![...document.querySelectorAll('.glass[data-mir-surface="menu"]')].some((n) => !n.hidden && n.getBoundingClientRect().height > 0);`);

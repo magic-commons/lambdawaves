@@ -79,6 +79,9 @@ const ACCEPTED = {
   /* 039 K8 · MIR 1.5.7-alpha.23 THE EMPTY LANE SAYS HOW (kit-039 @ 247d5ec): an empty timeline's one line on how a clip arrives, an empty lane's
      hint says it (timeline/view.js); nothing app-side */
   '1.5.7-alpha.23': '95d138a95e3063d70266b73466f56ca6ce33c2abcf756610b79963c89595d500',
+  /* 039 K9 · MIR 1.5.7-alpha.24 THE NAMED CARD KEEPS ITS HEIGHT (kit-039 @ e061205): with captions the card's picture is 16 : 10, so FOLDERS at
+     1000 × 700 no longer scrolls; λWAVES: the MAIN MENU page's reserve reads --sv-shot-k (skin.css, picker.js) */
+  '1.5.7-alpha.24': '0a2bbd180ecd8ca79e0c3ca952026d932f29133c432ad5d8e674c0523b877cdd',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
