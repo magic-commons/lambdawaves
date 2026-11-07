@@ -56,7 +56,7 @@ export function createSettingsCard(app) {
       const a = themeGround(), b = mat.stageCustom;
       mat.bg = app.state.stageFollow ? a.slice() : [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * app.state.stageMix);
       /* 039 X4 · THE STAGE WORDS WEAR THE STAGE'S INK (WALK-A #11): the words on the stage (the caption, INFORMATIONAL's, WIDGETS, the ESP key) read
-         against this ground, not the theme's — dark ink over a ground whose relative luminance passes 0.2 (where the two inks' contrasts cross), else light (lab.css) */
+         against this ground, not the theme's — dark ink over a ground whose relative luminance passes 0.195 (about where the two inks' contrasts cross), else light (lab.css) */
       const L = 0.2126 * srgbToLinear(mat.bg[0]) + 0.7152 * srgbToLinear(mat.bg[1]) + 0.0722 * srgbToLinear(mat.bg[2]); document.body.dataset.stageInk = L > 0.195 ? 'dark' : 'light';
       look.paintInk(); schedule(TIER.PRESENT);
     }
@@ -69,7 +69,7 @@ export function createSettingsCard(app) {
     function setStageFollow(on) {
       app.state.stageFollow = !!on;
       if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', app.state.stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(app.state.stageFollow));
-        hint(ui.stageFollow, app.state.stageFollow ? 'On: the stage is the theme’s ground · press: your colour' : 'Off: the stage wears your colour · press: the theme’s'); }   // 039 X4: it said "Ignore the chosen stage colour", backwards
+        hint(ui.stageFollow, app.state.stageFollow ? 'On: the stage takes the theme’s colour · press: your colour' : 'Off: the stage wears your colour · press: the theme’s'); }   // 039 X4: it said "Ignore the chosen stage colour", backwards
       setStageMix(app.state.stageMix);
     }
     app.hooks.setStageColour = setStageColour;
@@ -210,7 +210,7 @@ export function createSettingsCard(app) {
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
     ui.keepSw = swS({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>Performance.</b> FIELD CLOCK cap limits how often ψ is reconstructed from the register; the picture still presents every frame, so it saves CPU time, not GPU time. AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE: FULL keeps everything as the look says; SMOOTH, the default, keeps the live glass and every motion and draws the canvas at 85 % while playing (full size at rest, in films and in pictures); BALANCED holds the frost while the picture moves (the look returns at rest); LEAN also draws the canvas at half size while playing (films and pictures keep their own size). READERS 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH ±0.50 is half a colour step. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    el('div', 'note', gq).innerHTML = '<b>Performance.</b> FIELD CLOCK cap limits how often ψ is reconstructed from the register; the picture still presents every frame, so it saves CPU time, not GPU time. AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE: FULL keeps everything as the look says; SMOOTH, the default, keeps the windows’ blur and every motion and draws the canvas at 85 % while playing (full size at rest, in films and in pictures); BALANCED rests the windows’ blur while the picture moves (it returns at rest); LEAN also draws the canvas at half size while playing (films and pictures keep their own size). READERS 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH ±0.50 is half a colour step. KEEP FRAMES updates the playhead every frame and may cost performance.';
     el('div', 'note', gq).innerHTML = '<b>Playback.</b> WALL follows the wall clock. LOCKED steps time by exactly one CADENCE step per frame and holds the render scale, so a recording never sees a skipped or doubled step; a slow frame slows time instead. LATENCY is the time from a knob to the picture.';
   }
   /* 035 G3 · THE MENU SHEET's rows (Josh 11-03: "a little slide-over which is a minimalist-CSS version of Settings rack window > Quality, among

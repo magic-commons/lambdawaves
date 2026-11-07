@@ -52,7 +52,7 @@ export function createOrbitals(host, api) {
 
   /* ── the ladder ───────────────────────────────────────────────────────────────────────────────── */
   const cv = el('canvas', 'mol-c', host), cfoot = footLine(cv), views = new Set();   // 016 R1: the law line, shown on a hover
-  watchStroke((m) => { cv.title = m === 'paint' ? 'MO ladder ε_k (Eh): drag adds, right-drag removes' : 'MO ladder (Eh): a click toggles a level; ORBITAL shows it'; });   // 036 P1
+  watchStroke((m) => { cv.title = m === 'paint' ? 'Orbitals by energy: drag adds levels, right-drag removes' : 'Orbitals by energy: a click shows one, or mixes it in'; });   // 036 P1; 039 F2 (X-REVIEW #5): no Eh, no "toggles" (under VIEW ORBITAL a click shows it)
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
   const head = el('div', 'row tight sp-head', host);
