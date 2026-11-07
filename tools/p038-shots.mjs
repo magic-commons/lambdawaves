@@ -57,6 +57,33 @@ try {
     const box = out.door.box, crop = [box[0] - 10, box[1] - 10, box[2] + 10, box[3] + 10];
     for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P1-door-' + t, crop, 2); }
   }
+  if (scene === 'p2') {
+    /* LEVELS: the bare face (two rows, no label, no number at rest or under a hover; the readout after a real drag and under the keys); its table is
+       `levels`' with the same values; the + menu offers one LEVELS (TONE), the old one opens but is never offered */
+    out.face = await ev(`N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 560 }); await w(300); const id = N.add('levels2'); await w(300);
+      N.set(id, 'inblack', 0.1); N.set(id, 'gamma', 1.6); N.set(id, 'outwhite', 0.9); await w(400);
+      const c = card('levels2'), rows = [...c.querySelectorAll('.nodes-face')].map((r) => [...r.children].map((k) => k.dataset.param.split('.').pop()));
+      const vis = [...c.querySelectorAll('.nodes-knobs .k')].map((k) => [getComputedStyle(k.querySelector('.k-lbl') || k).display, getComputedStyle(k.querySelector('.k-val')).opacity]);
+      const t2 = N.compile().runs[0].tables.r; N.remove(id); const id1 = N.add('levels'); N.set(id1, 'inblack', 0.1); N.set(id1, 'gamma', 1.6); N.set(id1, 'outwhite', 0.9); await w(200);
+      const t1 = N.compile().runs[0].tables.r, same = t1.length === t2.length && t1.every((x, i) => x === t2[i]); N.remove(id1); const id2 = N.add('levels2'); N.set(id2, 'inblack', 0.1); N.set(id2, 'gamma', 1.6); N.set(id2, 'outwhite', 0.9); await w(400);
+      const g = card('levels2').querySelector('[data-param$=".gamma"] .k-dial');
+      return { rows, vis, same, n: t1.length, strip: rect(card('levels2').querySelector('.nodes-strip')), gamma: rect(g), box: rect(card('levels2')), h: card('levels2').offsetHeight };`);
+    const [gx0, gy0, gx1, gy1] = out.face.gamma, gx = (gx0 + gx1) / 2, gy = (gy0 + gy1) / 2;
+    await drv.actions(g.s, [{ type: 'pointer', id: 'hv', parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', x: Math.round(gx), y: Math.round(gy), origin: 'viewport' }] }]); await drv.relActions(g.s);
+    out.hover = await ev(`const k = card('levels2').querySelector('[data-param$=".gamma"]'); await w(300); return { hover: k.matches(':hover'), op: getComputedStyle(k.querySelector('.k-val')).opacity };`);
+    await drag([[gx, gy], [gx, gy - 20], [gx, gy - 40]]);
+    out.drag = await ev(`const k = card('levels2').querySelector('[data-param$=".gamma"]'); await w(250); const o = { active: k.classList.contains('active'), op: getComputedStyle(k.querySelector('.k-val')).opacity, txt: k.querySelector('.k-val').textContent, gamma: N.nodes()[0].values.gamma };
+      await w(1200); o.after = getComputedStyle(k.querySelector('.k-val')).opacity; k.focus(); return o;`);
+    await g.press('');
+    out.keys = await ev(`const k = document.activeElement; await w(250); return { focusVisible: k.matches(':focus-visible'), op: getComputedStyle(k.querySelector('.k-val')).opacity, txt: k.querySelector('.k-val').textContent };`);
+    const b = out.face.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
+    for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); document.activeElement.blur(); await w(900); return 1;`); await shot('038-P2-levels-' + t, crop, 2); }
+    out.menu = await ev(`$(WIN + '.nodes-add').click(); await w(300); const p = $('.mir-ctx .nodes-add-menu'), rows = (q) => [...q.querySelectorAll(':scope > .mb-item')].map((x) => x.querySelector('.mb-lbl').textContent);
+      const o = { groups: rows(p) }, sub = async (gid) => { p.querySelector('[data-id="group:' + gid + '"]').click(); await w(250); const s = [...document.querySelectorAll('.mir-ctx .mb-sub-list')].pop(); return s ? rows(s) : null; };
+      o.tone = await sub('tone'); o.one = await sub('one');
+      const f = $('.mir-ctx .nodes-find'); f.value = 'lev'; f.dispatchEvent(new Event('input')); await w(250); o.find = rows($('.mir-ctx .nodes-add-menu')).filter(Boolean);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); $('.mir-ctx .nodes-find') && $('.mir-ctx .nodes-find').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return o;`);
+  }
   out.errors = (await g.errors()).errs;
   console.log(JSON.stringify(out, null, 1));
 } finally { await g.close(); }

@@ -18,9 +18,23 @@ const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const mix = (A, B, t) => A.map((a, i) => a + (B[i] - a) * t);
 const W = [0.2126, 0.7152, 0.0722];
 const AMOUNT = (home = 1) => ({ k: 'amount', label: 'AMOUNT', min: 0, max: 1, home });
+const BW = ['#000', '#fff'];
+/** a LEVELS value (0–1, read 0–255 as Photoshop does) on a black → white track, its name in the readout (the face is bare) */
+const lv = (k, label, home, what) => ({ k, label, min: 0, max: 1, home, stops: BW, hint: label + ' — ' + what, fmt: (x) => label + ' ' + Math.round(x * 255) });
+/** LEVELS' strip (038 P2): the input histogram's place, with no tap of the stage — the node's own curve (f, its transfer) as a silhouette, and
+ *  Photoshop's three input marks under it: black at IN BLACK, grey where mid-grey lands (ib + (iw − ib)·½^γ), white at IN WHITE */
+function levelsStrip(g, v, f) {
+  const c = g.canvas, W = (c.width = Math.round(2 * (c.clientWidth || 220))), H = (c.height = 48), B = 34;
+  g.fillStyle = 'rgba(150,150,150,.75)'; g.beginPath(); g.moveTo(0, B);
+  for (let i = 0; i <= 64; i++) g.lineTo((i / 64) * W, B - f([i / 64, i / 64, i / 64])[0] * (B - 2));
+  g.lineTo(W, B); g.closePath(); g.fill();
+  const mark = (x, fill) => { const p = 6 + Math.min(1, Math.max(0, x)) * (W - 12); g.beginPath(); g.moveTo(p, B + 3); g.lineTo(p - 6, H - 1.5); g.lineTo(p + 6, H - 1.5); g.closePath();
+    g.fillStyle = fill; g.fill(); g.lineWidth = 1.5; g.strokeStyle = 'rgba(128,128,128,.9)'; g.stroke(); };
+  mark(v.inblack, '#000'); mark(v.inblack + (v.inwhite - v.inblack) * Math.pow(0.5, v.gamma), '#808080'); mark(v.inwhite, '#fff');
+}
 
 export const TABLE_TYPES = {
-  levels: { cls: 'table', label: 'LEVELS', hint: 'input and output black/white, gamma (levels)',
+  levels: { cls: 'table', label: 'LEVELS', hint: 'input and output black/white, gamma (levels)', menu: false,   // 038 P2: kept for every saved graph; the + menu adds levels2
     knobs: [{ k: 'inblack', label: 'IN BLACK', min: 0, max: 1, home: 0 }, { k: 'inwhite', label: 'IN WHITE', min: 0, max: 1, home: 1 },
       { k: 'gamma', label: 'GAMMA', min: 0.1, max: 10, home: 1, log: true }, { k: 'outblack', label: 'OUT BLACK', min: 0, max: 1, home: 0 },
       { k: 'outwhite', label: 'OUT WHITE', min: 0, max: 1, home: 1 }],
@@ -37,6 +51,17 @@ export const TABLE_TYPES = {
     fn: (v) => { const m = Math.pow(2, v.stops); return (y) => y * m; } },
   contrast: { cls: 'table', label: 'CONTRAST', hint: 'about mid-grey', knobs: [{ k: 'contrast', label: 'CONTRAST', min: 0, max: 3, home: 1 }],
     fn: (v) => (y) => (y - 0.5) * v.contrast + 0.5 },
+  /* 038 P2 · LEVELS, Photoshop's (Josh: "design a new layout inspired by photoshop's level controls while still being compact. (no numbers or texts, only
+     during knob edit do they show)"): `levels`' five keys and table on a BARE face — IN BLACK · GAMMA · IN WHITE under the strip (the curve as a
+     silhouette over PS's three input marks), OUT BLACK · OUT WHITE below — every track the grey it stands for (GAMMA's: what mid-grey becomes); the
+     readout, in Photoshop's 0–255, only while a knob is edited */
+  levels2: { cls: 'table', group: 'tone', label: 'LEVELS', hint: 'Photoshop\'s levels: input black, gamma, white; output', bare: true,
+    face: [['inblack', 'gamma', 'inwhite'], ['outblack', 'outwhite']],
+    knobs: [lv('inblack', 'IN BLACK', 0, 'the input that turns black'), lv('inwhite', 'IN WHITE', 1, 'the input that turns white'),
+      { k: 'gamma', label: 'GAMMA', min: 0.1, max: 10, home: 1, log: true, hint: 'GAMMA — above 1 lifts the middle tones', stops: ['#000', '#1d1d1d', '#808080', '#cdcdcd', '#eee'],
+        fmt: (x) => 'GAMMA ' + x.toFixed(2) },
+      lv('outblack', 'OUT BLACK', 0, 'what black becomes'), lv('outwhite', 'OUT WHITE', 1, 'what white becomes')],
+    fn: (v) => TABLE_TYPES.levels.fn(v), draw: levelsStrip },
 };
 export const MATRIX_TYPES = {
   hue: { cls: 'matrix', label: 'HUE', hint: 'turn every colour round the wheel', knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, unit: '°' }],
@@ -64,11 +89,16 @@ for (const T of [...Object.values(TABLE_TYPES), ...Object.values(MATRIX_TYPES)])
 
 /** THE NODE FACTORY: the knob list of type T as MIR controls in `parent` */
 export function nodeBody(parent, node, T, { idOf, hand }) {
-  const ctls = {};
-  for (const K of T.knobs) {
+  const ctls = {}, at = {};
+  /* 038 P2 · A FULL NODE'S FACE: `face` lays the knobs out one fit row per line (a knob it does not name joins the last); `bare` hides the labels,
+     and the readout (its name in `fmt`) shows only while a knob is edited (nodes.css) */
+  if (T.face) for (const keys of T.face) { const r = document.createElement('div'); r.className = 'nodes-face row fit'; parent.appendChild(r); for (const k of keys) at[k] = r; at[''] = r; }
+  if (T.bare) parent.classList.add('nodes-bare');
+  const order = T.face ? [...T.face.flat(), ...T.knobs.map((K) => K.k)].filter((k, i, a) => a.indexOf(k) === i) : T.knobs.map((K) => K.k);
+  for (const K of order.map((k) => T.knobs.find((J) => J.k === k))) {
     const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: K.hint, min: K.min, max: K.max, step: K.step, log: K.log, home: K.home, unit: K.unit,
       fmt: K.fmt, colour: K.colour, options: K.options, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, v, false), onChange: (v) => hand(K.k, v, true) });
-    parent.appendChild(c.root);
+    (at[K.k] || at[''] || parent).appendChild(c.root);
     if (c.targets[0]) c.targets[0].root.dataset.param = idOf(K.k);
   }
   return {

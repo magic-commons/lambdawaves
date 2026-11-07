@@ -54,6 +54,14 @@
 .nodes-card.fold { padding-bottom: 6px; }
 .nodes-card.fold > .nodes-body { display: none; }
 .nodes-strip { display: block; width: 100%; height: 10px; margin: -2px 0 6px; border-radius: 2px; box-shadow: 0 0 0 1px var(--glass-hairline); }
+/* 038 P2 · THE FULL NODE'S FACE: a kind's `face` is one fit row per line, each the card's whole width; `bare` hides the labels and the readout shows
+   only while the knob is edited — a drag, its 700-ms tail, the keys (Josh: "no numbers or texts, only during knob edit do they show"); LEVELS' strip
+   is its curve over Photoshop's three marks, 24 px, no frame */
+.nodes-knobs > .nodes-face { grid-column: 1 / -1; }
+.nodes-knobs.nodes-bare { row-gap: 2px; }
+.nodes-bare .k > .k-lbl { display: none; }
+.nodes-bare .k:not(.drag, .active, :focus-visible) > .k-val { opacity: 0; }
+.nodes-strip.nodes-drawn { height: 24px; margin: 0 0 2px; box-shadow: none; }
 .nodes-rename { flex: 1 1 auto; min-width: 0; height: 18px; padding: 0 4px; font: inherit; letter-spacing: inherit; }
 /* 020 X3 · the flags: the eye (VIEW HERE) and SOLO lit in the accent; SOLO shows on a hover or while lit; a card past the view dims; graph off */
 :is(.nodes-eye, .nodes-solo) { display: grid; place-items: center; width: 18px; height: 18px; padding: 0; border: 0; background: transparent; box-shadow: none; color: var(--fg-soft); opacity: .55; cursor: pointer; }
