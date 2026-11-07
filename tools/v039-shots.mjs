@@ -33,6 +33,7 @@ const boot = async (w, h, q) => {
   g = await open(URL0 + (q || ''), { width: w, height: h, script: 180000, prefs: PREFS });
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify((await g.errors()).errs));
   await wait(1500);
+  if (process.env.V_SCALE) { await g.ev(`__LW.look.set({ scale: ${+process.env.V_SCALE} }); return 1;`); await wait(1500); }   // V4: UI SCALE
 };
 /* every bar control the hand can see: its centre must hit-test to itself (or inside it).  → { n, covered: [[name, by]] } */
 const BAR = `const t = document.getElementById('transport'); const cs = [...t.querySelectorAll('button, .k, [role="button"], .mir-sel-b, .tempo-pill')].filter((e) => {
@@ -60,7 +61,7 @@ try {
   if (scene === 'bar') {
     for (const [w, h] of SIZES) {
       await boot(w, h);
-      const tag = `${w}x${h}${process.env.V_TL ? '-tl' : ''}`;
+      const tag = `${w}x${h}${process.env.V_TL ? "-tl" : ""}${process.env.V_SCALE ? "-s" + process.env.V_SCALE : ""}`;
       if (process.env.V_TL) { await g.ev(`__LW.run('timeline'); return 1;`); await wait(1400); }   // the top seat under a docked TIMELINE
       out.log.push({ tag, folded: await g.ev(BAR) });
       /* one unfolded window per rack column: SPECTRUM (left, the tallest) and PALETTE (right) */

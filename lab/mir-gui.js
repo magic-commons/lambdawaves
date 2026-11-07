@@ -36,7 +36,11 @@ export function createMirGui(app) {
      look, INFORMATIONAL, the modulation's power and cadence, the grade, the graph, the CONTROL SURFACE's favourites, the Picker's choices,
      the keys, RENDER's choices and LEAN.  The reader's work stays (R6: their palettes, curves, graphs and PRESETs; the session, the projects,
      the quick save, the modulation presets a project SAVE writes) and so does the device's (the LIBRARY, the kit's own seats and calibration) */
-  const prefs = { ...look.prefs, forget() { look.prefs.forget(); infoPrefs().forget(); modStore.write({ modArm: undefined, modCadence: undefined }); forgetRecords(); settingsStore.remove(); curvesStore.remove(); } };
+  /* 039 V4 · UI SCALE APPLIES ON RELEASE (C #12: dragging UI SCALE re-laid MIR OPTIONS at every new scale — the window re-packs its columns, at 1000 px
+     one scrolling column — and the knob jumped 551 → 1369, to be found again): while a pointer is down in MIR OPTIONS the `scale` the knob writes is
+     held (the knob shows it) and written on the release; a key, a preset or FORGET writes it at once */
+  const scaleHold = { on: false, v: undefined };
+  const prefs = { ...look.prefs, set(k, v) { if (scaleHold.on && k === 'scale') { scaleHold.v = v; return; } return look.prefs.set(k, v); }, forget() { look.prefs.forget(); infoPrefs().forget(); modStore.write({ modArm: undefined, modCadence: undefined }); forgetRecords(); settingsStore.remove(); curvesStore.remove(); } };
   const tablet = document.body.classList.contains('touch-tablet');
   gui = createGui({ host: document.getElementById('floats') || document.getElementById('lab'), prefs, accent: look.accent, projectAccent: false,
     app: { name: 'λWAVES', version: BUILD_LINE },
@@ -56,5 +60,9 @@ export function createMirGui(app) {
   const wins = [gui.window, gui.about];
   occlusion.register('gui', () => wins.filter((w) => w.isOpen()).map((w) => paintedRect(w.root)));
   for (const w of wins) occlusion.watch(w.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
+  /* 039 V4: the held scale lands on the release, and the knob the hand let go is scrolled back into its window once the re-layout has run */
+  for (const w of [gui.window, gui.about]) w.root.addEventListener('pointerdown', (e) => { scaleHold.on = true; scaleHold.k = e.target.closest && e.target.closest('.k'); }, true);
+  for (const t of ['pointerup', 'pointercancel']) addEventListener(t, () => { scaleHold.on = false; if (scaleHold.v === undefined) return; const v = scaleHold.v, k = scaleHold.k; scaleHold.v = undefined;
+    look.prefs.set('scale', v); requestAnimationFrame(() => requestAnimationFrame(() => { if (k && k.isConnected) k.scrollIntoView({ block: 'nearest' }); })); }, true);
   return gui;
 }

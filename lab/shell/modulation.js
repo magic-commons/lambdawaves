@@ -310,9 +310,37 @@ export function createModSeam(app) {
        cards as laid out, never the stopped box: the stop follows the bar, the bar's clear follows the cards), so the two never chase each other */
     const contentBottom = (rk) => { let b = 0; for (const c of rk.children) if (c.offsetParent === rk) b = Math.max(b, c.offsetTop + c.offsetHeight); return b + (parseFloat(getComputedStyle(rk).paddingBottom) || 0); };
     const stops = new Map();
+    /* 039 V4 · THE SCALE FITS THE PAGE (C #6: at UI SCALE 150 % on a 1000-px page PLAY sat at x −112, the bar ran −5…1005, HELP was a 27-px sliver
+       of the menu row and the logo lay 49 px under the right rack's SETTINGS head): the bar on the stage (with its PLAY and mini-viewer), the logo and
+       the menu row each take `--lw-fit` — skin.css: their zoom is UI SCALE × the fit — the largest ≤ 1 that keeps them on the page: the bar 8 px
+       inside both edges about its centre, the logo 8 px left of the right rack's cards, the menu row 8 px inside the right edge (its left, the
+       kit's, re-written for the new zoom).  A phone's own layout is left alone; at 100 % on a desktop page wider than the bar every fit is 1 */
+    const fitOf = (e) => parseFloat(e.style.getPropertyValue('--lw-fit')) || 1;
+    const setFit = (e, f) => { f = Math.max(0.5, Math.min(1, Math.floor(f * 100) / 100)); if (Math.abs(f - fitOf(e)) < 0.01) return false;
+      if (f >= 1) e.style.removeProperty('--lw-fit'); else e.style.setProperty('--lw-fit', String(f)); return true; };
+    const menuRow = document.getElementById('menubar'), logoEl = document.getElementById('title');
+    function fitHead() {
+      const phone = document.body.classList.contains('phone');
+      if (logoEl && logoEl.offsetWidth) { const r = logoEl.getBoundingClientRect(), rk = document.getElementById('rack'), rr = !phone && rk && !document.body.classList.contains('rack-hidden') && [...rk.children].some(shownCard) ? rk.getBoundingClientRect() : null;
+        setFit(logoEl, phone ? 1 : fitOf(logoEl) * ((rr && rr.top < r.bottom && rr.left > r.left ? rr.left : innerWidth) - 8) / r.right); }   // its left and its width both scale with its zoom
+      if (!menuRow || menuRow.hidden || !menuRow.offsetWidth) return;
+      let rtl = false; try { rtl = menuRow.matches(':dir(rtl)'); } catch (_) {}
+      const r = menuRow.getBoundingClientRect();
+      if (setFit(menuRow, phone || rtl ? 1 : fitOf(menuRow) * (innerWidth - 8 - r.left) / (r.right - r.left)) && !phone && !rtl) {
+        const z = cssZoom(menuRow) || 1, l = logoEl ? logoEl.getBoundingClientRect() : r;   // the kit's place() in the new zoom: beside the logo, level with it
+        menuRow.style.left = (l.right + 8) / z + 'px'; menuRow.style.top = Math.max(0, l.top + l.height / 2 - menuRow.offsetHeight * z / 2) / z + 'px';
+      }
+    }
+    if (menuRow) new MutationObserver(fitHead).observe(menuRow, { attributes: true, attributeFilter: ['hidden'] });
     function clearRack() {
       clearBooked = 0;
-      const t = document.getElementById('transport'), s = barSpan(); if (!t) return;
+      const t = document.getElementById('transport'); if (!t) return;
+      fitHead();
+      if (t.parentElement && t.parentElement.id === 'stage' && t.offsetWidth && !document.body.classList.contains('phone')) {   // V4: the bar's fit, about its centre
+        const sp = barSpan(), b = t.getBoundingClientRect(), c = (b.left + b.right) / 2;
+        if (sp) setFit(t, fitOf(t) * Math.min((c - 8) / Math.max(1, c - sp.left), (innerWidth - 8 - c) / Math.max(1, sp.right - c)));
+      } else setFit(t, 1);
+      const s = barSpan();
       let v = 0;
       const meet = s ? racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => ({ rk, r: rk.getBoundingClientRect() })).filter(({ r }) => r.width && r.right > s.left && r.left < s.right) : [];
       const hang = meet.filter(({ r }) => r.top < 52);
