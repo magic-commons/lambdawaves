@@ -8,9 +8,9 @@ import { createTimelinePlot } from './curve-view.js';
 import { clipKind } from './kinds.js';
 import { timelineSteps } from './source.js';
 import { timelineExtent } from './model.js';
-import { el, svgNode as svg, label, ariaLabel } from '../kit.js';
+import { el, svgNode as svg, label, ariaLabel, hint } from '../kit.js';
 import { glyphSvg } from '../glyph.js';
-import { t } from '../core/i18n.js';
+import { t, phrase } from '../core/i18n.js';
 const BAND_MIN=4;   // px: an event clip draws its band hairlines only while they stand at least this far apart
 const clamp=(n,lo,hi)=>Math.min(hi,Math.max(lo,n));
 // Beat ticks never hide: alpha ramps with zoom (full at 12px, half at 8px) instead of cutting off
@@ -31,6 +31,11 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
   const viewport=el('div','tl-viewport',shell),content=el('div','tl-content',viewport),rows=el('div','tl-rows',content);
   const head=el('div','tl-playhead',shell),tail=el('div','tl-playhead-tail',head),marquee=el('div','tl-marquee',content);
   const status=el('div','tl-status',surface);status.setAttribute('role','status');
+  // THE EMPTY LANE SAYS HOW (1.5.7-alpha.23, λWAVES 039 K8): with no clip, one line over the lanes names the roads a clip arrives by; an empty
+  // lane's band and pane hint say it too (HOW, ≤ 60 characters in English); a lane with a clip is hinted by its name, as before
+  const empty=el('div','tl-empty',shell);empty.hidden=true;
+  label(empty,'No clips yet — right-click or hold a knob: {:CLIP} › {:CREATE AUTOMATION CLIP}; or {:→TL} on an LFO in {:MODULATION}');
+  const HOW=phrase('{lane} is empty — right-click a knob › {:CLIP} to make a clip');
   const laneNodes=new Map(),clipNodes=new Map();let doc,revision=0,curves=new Map(),byLane=new Map(),rulerKey='',height=48,range=null,active=null;
   function setDocument(value){doc=value;revision++;curves=new Map(doc.curves.map(c=>[c.id,c]));byLane=new Map(doc.lanes.map(l=>[l.id,[]]));for(const c of doc.clips)byLane.get(c.laneId)?.push(c);}
   const getClip=id=>doc.clips.find(c=>c.id===id),getCurve=id=>curves.get(id);
@@ -85,19 +90,21 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
     for(const[id,n]of laneNodes)if(!laneIds.has(id)){n.root.remove();laneNodes.delete(id);}
     for(const [laneIndex,lane] of doc.lanes.entries()){
       let row=laneNodes.get(lane.id);if(!row){const root=el('div','tl-row',rows);root.dataset.lane=lane.id;row={root,title:el('div','tl-titleband',root),pane:el('div','tl-pane glass',root)};row.pane.dataset.lane=lane.id;laneNodes.set(lane.id,row);}if(rows.children[laneIndex]!==row.root)rows.insertBefore(row.root,rows.children[laneIndex]||null);
-      row.title.title=lane.name;row.pane.style.setProperty('--tl-measure',px*doc.meter+'px');row.pane.style.setProperty('--tl-four-measures',px*doc.meter*4+'px');
+      const clips=byLane.get(lane.id)||[],said=(clips.length?'n:':'e:')+lane.name;   // the hints written only when they change (control-help hears every title)
+      if(row.said!==said){row.said=said;if(clips.length){row.title.title=lane.name;row.pane.title='';}else{hint(row.title,HOW,{lane:lane.name});hint(row.pane,HOW,{lane:lane.name});}}
+      row.pane.style.setProperty('--tl-measure',px*doc.meter+'px');row.pane.style.setProperty('--tl-four-measures',px*doc.meter*4+'px');
       row.pane.style.setProperty('--tl-beat-height',law.beatHeight+'px');row.pane.style.setProperty('--tl-beat-alpha',String(law.beatAlpha));   /* no sheet reads it: tests/timeline-ticks reads the ramp here */
       row.pane.style.setProperty('--tl-beat-tick',`color-mix(in srgb,currentColor ${(law.beatAlpha*100).toFixed(4)}%,transparent)`);
       row.pane.style.setProperty('--tl-beat-bevel',`color-mix(in srgb,var(--tl-tick-bevel-ink) ${(law.beatAlpha*50).toFixed(4)}%,transparent)`);
       row.pane.classList.toggle('subdivisions',law.subdivisions);
       row.pane.style.setProperty('--tl-beat-pattern',beatTicks);row.pane.style.setProperty('--tl-subdivision-pattern',subTicks);
-      const clips=byLane.get(lane.id)||[];
       row.pane.classList.toggle('clip-at-start',clips.some(c=>c.start*px-x<=radius&&(c.start+c.duration)*px>x));
       row.pane.classList.toggle('clip-at-end',clips.some(c=>(c.start+c.duration)*px-x>=width-radius&&c.start*px<x+width));
       for(const c of clips){if((c.start+c.duration)*px<x-80||c.start*px>x+width+80)continue;keep.add(c.id);const curve=curves.get(c.curveId),key=`${revision}:${px}:${height}:${lane.id}`;
         let entry=clipNodes.get(c.id);if(entry?.key!==key)entry=renderClip(c,curve,row,px,key);entry.title.style.left=entry.block.style.left=(c.start*px-x)+'px';}
     }
     for(const[id,n]of clipNodes)if(!keep.has(id)){n.title.remove();n.block.remove();clipNodes.delete(id);}
+    if(empty.hidden!==!!doc.clips.length)empty.hidden=!!doc.clips.length;
     const first=Math.max(0,Math.floor(x/(doc.meter*px))),last=Math.ceil((x+width)/(doc.meter*px))+1,stride=Math.max(1,Math.ceil(32/(doc.meter*px))),key=[first,last,px,doc.meter,stride,range?.start,range?.end,active?.start,active?.end].join(':');
     // THE ACTIVE RANGE is a faint band under the selection range; both live in the strip's ink.
     const band=(r,cls)=>{const n=el('div',cls,ink);n.style.left=r.start*px+'px';n.style.width=(r.end-r.start)*px+'px';};

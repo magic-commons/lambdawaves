@@ -345,6 +345,11 @@
 .mir-timeline .timeline-surface[data-tool="scrub"] .tl-viewport { cursor: ew-resize; }
 .mir-timeline .timeline-surface[data-tool="slice"] :is(.tl-viewport, .tl-clip svg, .tl-clip-title, .tl-point, .tl-tension) { cursor: col-resize; }
 
+/* ── THE EMPTY LANE SAYS HOW (1.5.7-alpha.23): with no clip, one line over the lanes on how a clip arrives (view.js); never in the way ── */
+.mir-timeline .tl-empty { position: absolute; inset: var(--tl-ruler-h) 0 0 0; z-index: 2; display: flex; align-items: center; justify-content: center; padding: 0 var(--sp-5);
+  pointer-events: none; text-align: center; text-wrap: balance; font: var(--w-semi) var(--fs-base)/1.4 var(--font-ui); color: var(--dim); }
+.mir-timeline .tl-empty[hidden] { display: none; }
+
 /* ── THE STATUS LINE (fix 6): no message, no row — laid over the lanes' foot only while it says something ── */
 .mir-timeline .tl-status { position: absolute; left: var(--tl-status-left); bottom: var(--tl-status-foot); max-width: calc(100% - 24px); height: auto; padding: 0; pointer-events: none; z-index: 3;
   font-size: var(--tl-status-size); opacity: var(--tl-status-fade); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

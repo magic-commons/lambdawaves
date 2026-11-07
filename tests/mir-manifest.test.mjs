@@ -76,6 +76,9 @@ const ACCEPTED = {
   /* 039 K7 · MIR 1.5.7-alpha.22 THE CARD SAYS HOW IT OPENS (kit-039 @ 42e8d20): a card's hint says a second tap opens it; createFolders({ captions })
      names every card beneath its picture (λWAVES: lab/projects.js) */
   '1.5.7-alpha.22': 'eb64ebbc0393a86f33bed9e2daa63edad29fd6a67d37cea976228115cdb758f4',
+  /* 039 K8 · MIR 1.5.7-alpha.23 THE EMPTY LANE SAYS HOW (kit-039 @ 247d5ec): an empty timeline's one line on how a clip arrives, an empty lane's
+     hint says it (timeline/view.js); nothing app-side */
+  '1.5.7-alpha.23': '95d138a95e3063d70266b73466f56ca6ce33c2abcf756610b79963c89595d500',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

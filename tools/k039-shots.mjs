@@ -1,7 +1,8 @@
 /* k039-shots.mjs — iteration 039 chain K's one check per door and its pictures (a diagnostic, not a gate).
  *   LW_PORT=9627 GD_PORT=5627 node tools/k039-shots.mjs <scene> [out-dir]
  * Scenes: k1 (THE STEPPED CLOCK LOOPS: PLAYBACK LOCK on, a 2-bar ACTIVE range, 20 s of play — the head wraps; a 3-bar film over the 2-bar
- * loop renders 3 bars).
+ * loop renders 3 bars) · k2 · k3m · k3 · k4 · k6 · k7 (FOLDERS' window) · k7v (its card and the MAIN MENU's page) · k8 (the empty TIMELINE) ·
+ * k9 (THE FINISH at K_W × K_H). [out-dir] [before|after] tag the pictures.
  * JPEGs into <out-dir> (default .tmp/K-shots). */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -161,6 +162,65 @@ try {
     out.page1 = await readView(PAGE); await next(PAGE); out.page2 = await readView(PAGE); await prev(PAGE);
     for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
       out['page-' + t] = await shot(`039-K7-folders-page-${tag}-${t}`, null); }
+  }
+  if (scene === 'k8') {
+    /* THE EMPTY TIMELINE: no clip; what the lanes say (the empty line, each lane's band and pane hint), then a real hover on an empty lane's pane
+       (the hint shown), dark and light; then one clip made by the knob road (CREATE AUTOMATION CLIP on a registered target): the empty line goes,
+       the laned lane's hint is its name again and the other lane still says how (argv[4] tags the pictures before / after) */
+    const tag = process.argv[4] || 'after';
+    out.open = await g.ev(`__LW.timeline.open(); await new Promise((r) => setTimeout(r, 1500)); const st = __LW.timeline.model.state(); if (st.lanes.length < 2) __LW.timeline.model.addLane(); await new Promise((r) => setTimeout(r, 400));
+      return { clips: __LW.timeline.model.state().clips.length, lanes: __LW.timeline.model.state().lanes.length };`);
+    const read = () => g.ev(`const W = document.querySelector('[data-mir-window="timeline"]'), e = W.querySelector('.tl-empty'), vis = (n) => !!n && getComputedStyle(n).display !== 'none' && n.getBoundingClientRect().height > 0;
+      return { empty: vis(e) ? e.textContent : null, emptyBox: vis(e) ? [...Object.values(e.getBoundingClientRect().toJSON())].slice(0, 4).map(Math.round) : null,
+        lanes: [...W.querySelectorAll('.tl-row')].map((r) => ({ band: r.querySelector('.tl-titleband').dataset.helpEn || r.querySelector('.tl-titleband').title || null, pane: r.querySelector('.tl-pane').dataset.helpEn || r.querySelector('.tl-pane').title || null })),
+        win: Math.round(W.getBoundingClientRect().height) };`);
+    out.rest = await read();
+    const hover = async () => {
+      const c = await g.ev(`const p = document.querySelectorAll('[data-mir-window="timeline"] .tl-row .tl-pane'); const r = p[p.length - 1].getBoundingClientRect(); return [Math.round(r.left + r.width * .7), Math.round(r.top + r.height / 2)];`);
+      await drv.actions(g.s, [{ type: 'pointer', id: 'hk8', parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: 5, y: 300 }, { type: 'pointerMove', duration: 120, origin: 'viewport', x: c[0], y: c[1] }] }]);
+      await nap(1100);
+      return g.ev(`const tip = document.getElementById('controlHelp'); return { shown: !!tip && !tip.hidden, text: tip ? tip.textContent : null };`);
+    };
+    for (const t of ['dark', 'light']) {
+      await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+      out['hint-' + t] = await hover();
+      const box = await g.ev(`const r = document.querySelector('[data-mir-window="timeline"]').getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`);
+      out['shot-' + t] = await shot(`039-K8-timeline-empty-${tag}-${t}`, box, 6);
+    }
+    out.made = await g.ev(`const id = 'observer.yaw', has = __LW.mod.registry.has(id); __LW.timeline.editor.createClip(id); await new Promise((r) => setTimeout(r, 800)); return { id, has, clips: __LW.timeline.model.state().clips.length };`);
+    out.full = await read();
+    const box = await g.ev(`const r = document.querySelector('[data-mir-window="timeline"]').getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`);
+    out['shot-full'] = await shot(`039-K8-timeline-one-clip-${tag}-light`, box, 6);
+  }
+  if (scene === 'k9') {
+    /* THE FINISH over K7's and K8's surfaces at this page's size (K_W × K_H), both themes: the empty TIMELINE (its line inside the window, how
+       many lines), the knob menu by the keyboard (Shift+F10 on a focused routable knob: CLIP › there; Escape closes it), the FOLDERS window with
+       two projects (names at rest; Tab reaches a card, Enter selects it and its hint turns, Escape lets go) */
+    const tag = W + 'x' + H, key = (k) => g.press(k);
+    const chord = async (a, b) => { await drv.actions(g.s, [{ type: 'key', id: 'k9c', actions: [{ type: 'keyDown', value: a }, { type: 'keyDown', value: b }, { type: 'pause', duration: 40 }, { type: 'keyUp', value: b }, { type: 'keyUp', value: a }] }]); await drv.relActions(g.s); };
+    await g.ev(`__LW.loadPreset('1s+2pz'); await __LW.settle(); __LW.projects.save('PULSE LOOP'); __LW.loadPreset('3dz2'); await __LW.settle(); __LW.projects.save('SLOW SPIN'); return 1;`);
+    await g.ev(`__LW.timeline.open(); await new Promise((r) => setTimeout(r, 1500)); return 1;`);
+    out.tl = await g.ev(`const W = document.querySelector('[data-mir-window="timeline"]'), e = W.querySelector('.tl-empty span') || W.querySelector('.tl-empty'), w = W.getBoundingClientRect();
+      const range = document.createRange(); range.selectNodeContents(W.querySelector('.tl-empty')); const rs = [...range.getClientRects()], tb = rs.reduce((a, r) => [Math.min(a[0], r.left), Math.min(a[1], r.top), Math.max(a[2], r.right), Math.max(a[3], r.bottom)], [1e9, 1e9, -1e9, -1e9]);
+      return { win: [w.left, w.top, w.right, w.bottom].map(Math.round), text: tb.map(Math.round), inside: tb[0] >= w.left && tb[2] <= w.right && tb[1] >= w.top && tb[3] <= w.bottom, lines: new Set(rs.map((r) => Math.round(r.top))).size };`);
+    for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+      out['tl-' + t] = await shot(`039-K9-timeline-empty-${tag}-${t}`, out.tl.win, 6); }
+    out.knobMenu = await g.ev(`const k = [...document.querySelectorAll('.k[data-param]')].find((n) => n.getBoundingClientRect().height > 0 && __LW.mod.registry.has(n.dataset.param)); if (!k) return null;
+      const f = k.matches('[tabindex]') ? k : k.querySelector('[tabindex]') || k; f.focus(); return { param: k.dataset.param, focused: document.activeElement === f };`);
+    await chord('\uE008', '\uE01A'); await nap(500);
+    out.knobMenu.open = await g.ev(`const m = [...document.querySelectorAll('.glass[data-mir-surface="menu"]')].find((n) => !n.hidden && n.getBoundingClientRect().height > 0); return m ? [...m.querySelectorAll('button, [role="menuitem"]')].map((b) => b.textContent.trim()).filter(Boolean).slice(0, 10) : null;`);
+    await key('\uE00C'); await nap(400);
+    out.knobMenu.closed = await g.ev(`return ![...document.querySelectorAll('.glass[data-mir-surface="menu"]')].some((n) => !n.hidden && n.getBoundingClientRect().height > 0);`);
+    await g.ev(`__LW.timeline.close(); await new Promise((r) => setTimeout(r, 600)); __LW.projects.folders.open(); await new Promise((r) => setTimeout(r, 1500)); document.activeElement && document.activeElement.blur && document.activeElement.blur(); return 1;`);
+    const card = () => g.ev(`const a = document.activeElement, c = a && a.closest && a.closest('.sv-card'); return c ? { name: c.dataset.name, pressed: a.getAttribute('aria-pressed'), hint: a.dataset.helpEn || a.title, ring: getComputedStyle(a).outlineStyle } : { at: a ? (a.className || a.tagName) : null };`);
+    await g.ev(`const t = document.querySelector('.mir-folders .sv-toolbar button, .mir-folders .sv-toolbar [tabindex]'); if (t) t.focus(); return !!t;`);
+    let tabs = 0; for (; tabs < 24; tabs++) { await key('\uE004'); const c = await card(); if (c.name) break; }
+    out.kbd = { tabs: tabs + 1, at: await card() };
+    await key('\uE007'); await nap(400); out.kbd.enter = await card();
+    await key('\uE00C'); await nap(400); out.kbd.escape = await card();
+    out.fold = await g.ev(`const W = document.querySelector('.mir-folders'), w = (W.closest('[data-mir-window]') || W).getBoundingClientRect(); return { win: [w.left, w.top, w.right, w.bottom].map(Math.round), names: [...W.querySelectorAll('.sv-card .sv-cap .sv-name')].map((n) => n.getBoundingClientRect().height > 0 ? n.textContent : null), scrolls: [...W.querySelectorAll('*')].filter((n) => n.scrollHeight > n.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(n).overflowY)).map((n) => n.className.split(' ')[0]), over: w.bottom > innerHeight || w.right > innerWidth };`);
+    for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+      out['folders-' + t] = await shot(`039-K9-folders-${tag}-${t}`, out.fold.win, 6); }
   }
   out.errs = (await g.errors()).errs;
 } catch (e) { out.E = String(e && e.stack || e); }
