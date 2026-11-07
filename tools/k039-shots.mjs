@@ -114,6 +114,23 @@ try {
       }
     }
   }
+  if (scene === 'k7') {
+    /* FOLDERS with two saved projects at ROOT: each card's name at rest (a caption row, shown), the card's hint, and after one press the chosen
+       card's; the window's height and whether its grid scrolls; pictures dark and light (argv[4] tags them before / after) */
+    const tag = process.argv[4] || 'after';
+    await g.ev(`__LW.loadPreset('1s+2pz'); await __LW.settle(); __LW.projects.save('PULSE LOOP'); __LW.loadPreset('3dz2'); await __LW.settle(); __LW.projects.save('SLOW SPIN');
+      __LW.projects.folders.open(); await new Promise((r) => setTimeout(r, 1500)); return 1;`);
+    const read = () => g.ev(`const W = document.querySelector('.mir-folders'), cards = [...W.querySelectorAll('.sv-card')], grid = W.querySelector('.sv-project-grid'), win = W.closest('[data-mir-window]') || W;
+      const vis = (n) => !!n && getComputedStyle(n).display !== 'none' && n.getBoundingClientRect().height > 0;
+      return { cards: cards.map((c) => ({ name: c.dataset.name, shown: vis(c.querySelector('.sv-name')), caption: !!c.querySelector('.sv-cap'), hint: c.querySelector('.sv-shot').dataset.helpEn || c.querySelector('.sv-shot').title, aria: c.querySelector('.sv-shot').getAttribute('aria-label') })),
+        win: Math.round(win.getBoundingClientRect().height), scrolls: [...W.querySelectorAll('*')].filter((n) => n.scrollHeight > n.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(n).overflowY)).map((n) => n.className.split(' ')[0]) };`);
+    out.rest = await read();
+    await g.tap('.mir-folders .sv-card[data-name="PULSE LOOP"] .sv-shot'); await nap(500);
+    out.chosen = await read();
+    for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+      const box = await g.ev(`const r = (document.querySelector('.mir-folders').closest('[data-mir-window]') || document.querySelector('.mir-folders')).getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`);
+      out['shot-' + t] = await shot(`039-K7-folders-${tag}-${t}`, box, 6); }
+  }
   out.errs = (await g.errors()).errs;
 } catch (e) { out.E = String(e && e.stack || e); }
 finally { await g.close(); }

@@ -70,6 +70,9 @@ const ACCEPTED = {
   '1.5.7-alpha.19': '9da2d21097bac38a0ab50dda78801780077587ec82737c02a6700acf97ed7290',
   /* 039 K4 · MIR 1.5.7-alpha.20 THE POWER WORD PASSES THROUGH (kit-039 @ 8a4c2d5): installTimeline({ transport: { powerWord } }) → the work bar's power seat */
   '1.5.7-alpha.20': '32eb37eae01196c6bfd2c03531570fa1770159de66c696296429675842dce31c',
+  /* 039 K6 · MIR 1.5.7-alpha.21 THE HINT CLEARS THE ROW (kit-039 @ 0104a0b): a window head's hint goes above the bar, else beside the bar (control-help.js
+     hintSpot); the number planned for A TARGET HAS ONE AUTOMATION, which waits on a ruling (docs/FOR-MIR.md § 039) */
+  '1.5.7-alpha.21': 'e7b50ad0353d4d000caf9f151fbd04373a9c0fe84adb6b12c9ef3c55a8387649',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
