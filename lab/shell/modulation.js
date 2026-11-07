@@ -363,6 +363,7 @@ export function createModSeam(app) {
         if (stops.get(rk) !== stop) { stops.set(rk, stop); if (stop) rk.style.setProperty('--rack-stop', stop + 'px'); else rk.style.removeProperty('--rack-stop'); }
       }
       under(blocked);
+      nbFollow();
     }
     /* no ResizeObserver on the racks (M7: a card another observer resized inside the racks left theirs undelivered — the browser's "loop" error):
        a card opened, closed or folded (its class, in either rack), the bar's class, the body's class and a resize ask once a frame, and once more when
@@ -443,7 +444,15 @@ export function createModSeam(app) {
         try { seatOpen(n); } catch (_) {}   // a seat is a courtesy: never a thrown open
       }
     };
-    if (nbEl) new MutationObserver(() => seatNew()).observe(nbEl, { attributes: true, attributeFilter: ['hidden'] });
+    /* 039 F3 · EVERY ROAD SEATS THE NOTEBOOK (V-REVIEW 2: WAVE DANCER's notebook, shown by the open before the bar rose above the docked MODULATION,
+       covered 14 of the bar's 23 controls; J twice seated it): the summons' seat is taken when the notebook shows (J), and again at every clearRack
+       where its size (a project or demo open, RESUME, a layout's `nb`) or the doors under it (the bar's seat, a work bar) have moved since; a hand's
+       press on its head, grip or corner keeps it where the hand puts it until it closes (a placement alone, the facade's moveTo, is never undone) */
+    let nbKey = '', nbHand = false;
+    const nbDoors = () => JSON.stringify([barSpan(), ...workRoots().filter((r) => !r.hidden && r.offsetWidth).map(laid)].map((r) => r && [r.left, r.top, r.right, r.bottom].map(Math.round)).concat([nbEl.offsetWidth, nbEl.offsetHeight]));
+    function nbFollow() { if (!nbEl || nbHand || !seated.has(nbEl) || !summoned(nbEl)) return; const k = nbDoors(); if (k === nbKey) return; try { seatOpen(nbEl); } catch (_) {} nbKey = nbDoors(); }
+    if (nbEl) { nbEl.addEventListener('pointerdown', (e) => { const g = e.target; if (g === nbEl || g.closest('.nb-grip') || (g.closest('.nb-head') && !g.closest('button, input'))) nbHand = true; }, true);
+      new MutationObserver(() => { if (nbEl.hidden) { nbHand = false; nbKey = ''; } seatNew(); if (!nbHand && !clearBooked) clearBooked = requestAnimationFrame(clearRack); }).observe(nbEl, { attributes: true, attributeFilter: ['hidden', 'style'] }); }
     if (floatsEl) {   // a float opened, closed, moved or resized: ask again, once a frame
       let booked = 0; const book = () => { if (!booked) booked = requestAnimationFrame(() => { booked = 0; if (!trMoving) under(blocked); }); };
       const mo = new MutationObserver((list) => { const gone = []; for (const m of list) { for (const n of m.addedNodes || []) if (n.nodeType === 1) watch(n); gone.push(...(m.removedNodes || [])); } seatNew(gone); book(); });
@@ -498,7 +507,7 @@ export function createModSeam(app) {
         t.style.animation = arriving + ' 160ms cubic-bezier(.23,1,.32,1) forwards';
         let ended = false;
         const done = () => { if (ended) return; ended = true;
-          t.removeEventListener('animationend', done); t.style.animation = ''; trMoving = false; under(blocked); };   // 021 V3: landed, the floats asked again
+          t.removeEventListener('animationend', done); t.style.animation = ''; trMoving = false; under(blocked); if (!clearBooked) clearBooked = requestAnimationFrame(clearRack); };   // 021 V3: landed, the floats asked again (F3: and the stops and the notebook's seat)
         t.addEventListener('animationend', done);
         setTimeout(done, 400);                                  // the belt: an animation that never fires must not wedge the flag
       };
