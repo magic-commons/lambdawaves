@@ -95,7 +95,32 @@ export const MATRIX_TYPES = {
       { k: 'lightness', label: 'LIGHTNESS', min: -100, max: 100, home: 0, stops: ['#000', 'hsl(0 0% 50%)', '#fff'], hint: 'LIGHTNESS — every colour toward black or white', fmt: signed }],
     matrix: (v) => { const L = v.lightness / 100, k = 1 - Math.abs(L);
       return colourMatrix(1 + v.saturation / 100, v.hue).map((x, i) => (i >= 15 ? x : x * k + (i % 5 === 4 && L > 0 ? L : 0))); } },
+  /* 038 P5 · BALANCE, Camera Raw's (Josh: "For Tint, use photohop's color & vibrance 4 sliders and also have their sliders color thingy wrapped around
+     as an arc around the knobss"): TEMPERATURE (the one-knob's warmth, T/100) · TINT (green ↔ magenta: diag(1 + .125m, 1 − .25m, 1 + .125m)) ·
+     SATURATION (saturate(1 + S/100)) are one matrix, folded free; VIBRANCE ≠ 0 adds its own run after it (vibrance(), below) — White Balance over
+     Presence, two rows as Camera Raw stacks them, each on its track */
+  balance: { cls: 'matrix', group: 'colour', label: 'BALANCE', hint: 'Camera Raw\'s temperature, tint, vibrance, saturation',
+    face: [['temperature', 'tint'], ['vibrance', 'saturation']],
+    knobs: [{ k: 'temperature', label: 'TEMPERATURE', min: -100, max: 100, home: 0, stops: ['#3b6cff', 'hsl(0 0% 62%)', '#ffd21a'], hint: 'TEMPERATURE — cool blue ↔ warm amber', fmt: signed },
+      { k: 'tint', label: 'TINT', min: -100, max: 100, home: 0, stops: ['#35c43f', 'hsl(0 0% 62%)', '#d63fd6'], hint: 'TINT — green ↔ magenta', fmt: signed },
+      { k: 'vibrance', label: 'VIBRANCE', min: -100, max: 100, home: 0, stops: ['hsl(0 0% 55%)', 'hsl(70 22% 55%)', 'hsl(42 80% 58%)', 'hsl(10 78% 55%)'], hint: 'VIBRANCE — the dull colours most, the vivid least', fmt: signed },
+      { k: 'saturation', label: 'SATURATION', min: -100, max: 100, home: 0, stops: ['hsl(0 0% 55%)', 'hsl(0 80% 52%)'], hint: 'SATURATION — every colour alike; −100 is grey', fmt: signed }],
+    matrix: (v) => { const w = v.temperature / 400, m = v.tint / 100, D = [(1 + w) * (1 + 0.125 * m), (1 + 0.15 * w) * (1 - 0.25 * m), (1 - w) * (1 + 0.125 * m)];
+      return colourMatrix(1 + v.saturation / 100, 0).map((x, i) => (i < 15 ? x * D[Math.floor(i / 5)] : x)); },
+    run: (v, id, src) => vibrance(v.vibrance / 100, id, src) },
 };
+/** VIBRANCE (038 P5), its own run after BALANCE's matrix, from `src`: per channel D = c − luma, encoded ½ + ½D; G = D(1 − |D|), a boost that fades as the
+ *  channel stands farther from grey (a dull colour gains most, a vivid one little, grey nothing); out = c + V·max(G, 0) − V·max(−G, 0) as two arithmetic
+ *  composites whose tables hold 1 − each part (k2 1, k3 ∓V, k4 ±V), so alpha stays exactly 1 in premultiplied space — five primitives */
+const VT = (sign) => Array.from({ length: 65 }, (_, i) => { const d = i / 32 - 1; return +(1 - Math.max(0, sign * d * (1 - Math.abs(d)))).toFixed(4); }).join(' ');
+const VIB = { d: [0, 1, 2].map((r) => [0, 1, 2].map((c) => +(0.5 * ((r === c) - W[c])).toFixed(5)).concat(0, 0.5).join(' ')).join(' ') + ' 0 0 0 0 1', p: VT(1), n: VT(-1) };
+const funcs = (t) => ['R', 'G', 'B'].map((c) => ['feFunc' + c, { type: 'table', tableValues: t }]);
+function vibrance(V, id, src) {
+  if (!V) return null;
+  return [['feColorMatrix', { in: src, type: 'matrix', values: VIB.d, result: id + 'd' }], ['feComponentTransfer', { in: id + 'd', result: id + 'p' }, funcs(VIB.p)],
+    ['feComponentTransfer', { in: id + 'd', result: id + 'q' }, funcs(VIB.n)], ['feComposite', { in: src, in2: id + 'p', operator: 'arithmetic', k1: 0, k2: 1, k3: -V, k4: V, result: id + 'v' }],
+    ['feComposite', { in: id + 'v', in2: id + 'q', operator: 'arithmetic', k1: 0, k2: 1, k3: V, k4: -V }]];
+}
 
 /** 020 X4 · FADE AND MASK: the foot of every node but a LAYER (whose AMOUNT is its fade) — lab/nodes-compile.js folds FADE; a MASK makes the
  *  node its own run.  FADE and SOFT are knobs, so modulation targets (`nodes.<node>.fade`, `.soft`) */

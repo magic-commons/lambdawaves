@@ -190,6 +190,30 @@ print(json.dumps({ 'mean': round(s.mean[0], 1), 'sd': round(s.stddev[0], 1), 'ce
     const b = out.card.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
     for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P8-grain-' + t, crop, 2); }
   }
+  if (scene === 'p10') {
+    /* THE FINISH: every new face in the window (all seven at once, the empty state first) and in the rack card, each kind's TARGET (on TABLE · MATRIX ·
+       PRIM, never a LAYER), every control hinted and every word upper-case, nothing scrolling, the knobs at home and at their ends, the keys on a knob */
+    const KINDS = ['levels2', 'exposure2', 'bc', 'color', 'balance', 'aberration', 'grain'];
+    out.empty = await ev(`N.open(); await w(600); N.win.place({ x: 40, y: 40, w: 1400, h: 880 }); await w(400); return { cards: $$(WIN + '.nodes-card[data-type]').length, empty: !$(WIN + '.nodes-empty').hidden };`);
+    out.win = await ev(`for (const t of ${JSON.stringify(KINDS)}) N.add(t); await w(500); const ids = N.nodes().map((q) => q.id);
+      ids.forEach((id, i) => { const c = $(WIN + '.nodes-card[data-node="' + id + '"]'); c.style.left = (20 + (i % 4) * 300) + 'px'; c.style.top = (60 + Math.floor(i / 4) * 330) + 'px'; }); await w(400);
+      const o = {};
+      for (const t of ${JSON.stringify(KINDS)}) { const c = card(t), foot = c.querySelector('.nodes-foot'), ctl = [...c.querySelectorAll('.nodes-body [data-control]')];
+        o[t] = { target: !!(foot && [...foot.querySelectorAll('button')].some((b) => b.textContent.trim() === 'OBJECT')), hinted: ctl.filter((k) => !(k.title || k.dataset.hint || k.getAttribute('aria-description') || (k.querySelector('[title]') || {}).title)).map((k) => k.dataset.control),
+          words: [...c.querySelectorAll('.nodes-body .k-lbl, .nodes-body .seg button, .nodes-name')].map((l) => l.textContent.trim()).filter((s) => s !== s.toUpperCase()), h: c.offsetHeight, w: c.offsetWidth,
+          scroll: [...c.querySelectorAll('*')].some((e) => e.scrollHeight > e.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(e).overflowY)) }; }
+      const body = $(WIN + '.mir-win-body'); o.winScroll = body.scrollHeight > body.clientHeight + 1; return o;`);
+    for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); N.set(N.nodes()[3].id, 'hue', 180); N.set(N.nodes()[0].id, 'inwhite', 0); await w(500); return 1;`); await shot('038-P10-win-all-' + t, [40, 40, 1440, 920]); }
+    out.keys = await ev(`const k = card('color').querySelector('[data-param$=".saturation"]'); k.focus(); return document.activeElement === k;`);
+    for (const key of ['', '', '']) await g.press(key);   // ↑ ↑ Home
+    out.keysAfter = await ev(`const q = N.nodes()[3]; return { saturation: q.values.saturation, focus: document.activeElement.dataset.param };`);
+    out.card = await ev(`N.win.close(); await w(300); __LW.layout.reopen('nodes'); __LW.layout.raise('nodes'); await w(1200); const d = document.querySelector('.dev[data-id="nodes"]');
+      const r = d.getBoundingClientRect(); return { side: d.parentElement.id, w: Math.round(r.width), cards: d.querySelectorAll('.nodes-card[data-type]').length, faces: d.querySelectorAll('.nodes-face').length,
+        scroll: [...d.querySelectorAll('*')].filter((e) => e.scrollHeight > e.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(e).overflowY)).map((e) => e.className).slice(0, 4),
+        box: [r.left, r.top, r.right, Math.min(r.bottom, innerHeight)].map(Math.round) };`);
+    const b = out.card.box;
+    for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P10-card-' + t, [b[0] - 4, b[1] - 4, b[2] + 4, b[3]]); }
+  }
   out.errors = (await g.errors()).errs;
   console.log(JSON.stringify(out, null, 1));
 } finally { await g.close(); }
