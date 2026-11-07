@@ -253,7 +253,8 @@ export function createStageWords(app) {
     const furniture = new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); });
     furniture.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     for (const r of [app.host.rackL, rack]) if (r) furniture.observe(r, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden'] });
-    { const n = document.getElementById('transport'); if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: ['class'] }); }
+    { const n = document.getElementById('transport'); let clear = '';   // 038 M6: and when the bar's top seat moves under the left rack (--csb-clear, shell/modulation.js clearRack)
+      if (n) new MutationObserver((ms) => { const c = n.style.getPropertyValue('--csb-clear'); if (c !== clear || ms.some((m) => m.attributeName === 'class')) { clear = c; place(); } }).observe(n, { attributes: true, attributeFilter: ['class', 'style'] }); }
 
     const labels = el('div', '', dom.stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
     let cssW = dom.canvas.clientWidth, cssH = dom.canvas.clientHeight;

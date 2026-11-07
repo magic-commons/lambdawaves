@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js'; import { lightDefs } from '../light-window.js';   // 037 L3: THE LIGHT's targets
+import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { cssZoom } from '../mir/core/zoom.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js'; import { lightDefs } from '../light-window.js';   // 037 L3: THE LIGHT's targets
 /** 032 W3 · AN OLDER CURVE ON A BANDED TARGET (the project open road, shell/persist.js): a curve drawn before its target had `options` carries no
  *  `steps` and meant the old integer line — k at k / (max − min) — so each point is read back as that integer (an older GRAIN as DUST, BALLS or
  *  STICKS as SHELL), seated at the centre of its option's band, and the curve remembers the count (WATER ESP's, STAR LOOP's and BENZENE π's STYLE
@@ -281,10 +281,37 @@ export function createModSeam(app) {
     function seatRect(where, w, h) {
       const vw = window.innerWidth, vh = window.innerHeight;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
-      const top = where === 'top' ? (narrowRack ? 112 : 52) : vh - 60 - h;
+      const top = where === 'top' ? Math.max(narrowRack ? 112 : 52, clearPx) : vh - 60 - h;
       const left = narrowRack ? vw - w - 10 : (vw - w) / 2;
       return { left, right: left + w, top, bottom: top + h };
     }
+    /* 038 M6 · THE BAR CLEARS THE LEFT RACK (the fresh eyes: at 820 px ADVANCED's third left card drew over the bar): the top seat — a narrow stage's
+       always, a wide one's `.at-top` — sits under the left rack's last card wherever the bar or its PLAY shares the rack's columns: `--csb-clear` on
+       the bar, read as max(the seat, the clear) by lab.css and csb.css, absent when nothing is in the way, and never lower than the room above the
+       foot (a narrow stage's bottom rack) leaves.  The left rack's box is its cards' (lab.css: top 0, bottom auto), so its ResizeObserver, the bar's
+       own box and class, the body's class (B, H) and a resize ask again, once a frame */
+    const rackLEl = document.getElementById('rackL'); let clearPx = 0, clearBooked = 0;
+    function clearRack() {
+      clearBooked = 0;
+      const t = document.getElementById('transport'); if (!t) return;
+      let v = 0;
+      const shown = (d) => d.classList.contains('dev') && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating');
+      if (rackLEl && t.classList.contains('mini') && t.dataset.place !== 'free' && !document.body.classList.contains('rack-hidden') && [...rackLEl.children].some(shown)) {
+        const r = rackLEl.getBoundingClientRect(), b = t.getBoundingClientRect(), p = t.querySelector(':scope > .csb-play'), left = Math.min(b.left, p ? p.getBoundingClientRect().left : b.left);
+        if (b.width && r.width && r.right > left && r.left < b.right) {
+          const foot = narrowNow() ? (document.getElementById('rack') || rackLEl).getBoundingClientRect().top : innerHeight - 60;
+          v = Math.max(0, Math.round((Math.min(r.bottom + 10, foot - b.height - 10) - (t.offsetParent || document.body).getBoundingClientRect().top) / (cssZoom(t) || 1)));
+        }
+      }
+      if (v === clearPx) return;
+      clearPx = v; if (v) t.style.setProperty('--csb-clear', v + 'px'); else t.style.removeProperty('--csb-clear');
+      occlusion.dirty();   // the line masks follow the bar, paused or not
+    }
+    { const book = () => { if (!clearBooked) clearBooked = requestAnimationFrame(clearRack); }, t = document.getElementById('transport');
+      if (typeof ResizeObserver === 'function') { const ro = new ResizeObserver(book); if (rackLEl) ro.observe(rackLEl); if (t) ro.observe(t); }
+      if (t) new MutationObserver(book).observe(t, { attributes: true, attributeFilter: ['class', 'data-place'] });
+      new MutationObserver(book).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      addEventListener('resize', book); }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
     /* 020 T3 · THE BAR IS ON TOP of every window (lab.css, chrome + 3) but these two: when no seat clears them it goes UNDER them for that time.

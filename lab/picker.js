@@ -221,7 +221,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      shadow; a press lays the rack and enters the lab as CONTINUE does.  Any way out of that open is the answer (SIMPLE when no door said) */
   let choose = null;
   const answer = (kind) => { const c = choose; choose = null; if (c) c(kind); };
-  const firstBs = [['simple', 'SIMPLE', 'The rack as it is'], ['advanced', 'ADVANCED', 'Adds NODES, LIGHTING and STAGE']].map(([kind, word, hint]) => {
+  const firstBs = [['simple', 'SIMPLE', 'The basics — SPECTRUM, PALETTE, WAVE, CAMERA, CLIP'], ['advanced', 'ADVANCED', 'The basics, plus NODES, LIGHTING and STAGE']].map(([kind, word, hint]) => {   // 038 M6: what each lays out, to a reader who has never seen the rack
     const b = el('button', 'mm-face-lab', way, word); b.type = 'button'; b.dataset.layout = kind; b.title = hint; b.hidden = true;
     b.addEventListener('click', () => { answer(kind); close(); }); return b; });
   /* 035 G2 · THE CORNERS (Josh 11-03: "a Light/Dark Toggle and a settings … reveal", "the MIR logo … Kinda small in the bottom right", "3 Icon
