@@ -93,6 +93,20 @@ try {
       }
     }
   }
+  if (scene === 'render') {   // V3: RENDER floating (FILE › RENDER…) and in the rack — the card's box, the RENDER button's, and what its centre hits
+    const RB = `const d = document.querySelector('.dev[data-id="render"]'); if (!d) return null; const c = d.getBoundingClientRect(), b = d.querySelector('.sv-primary'), r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const h = x >= 0 && y >= 0 && x < innerWidth && y < innerHeight ? document.elementFromPoint(x, y) : null, rk = d.parentElement && d.parentElement.closest('#rack, #rackL');
+      return { form: d.classList.contains('floating') ? 'floating' : 'rack', card: [c.left, c.top, c.width, c.height].map(Math.round), page: [innerWidth, innerHeight], render: [r.left, r.top].map(Math.round), hit: !!h && (h === b || b.contains(h)), by: h && !(h === b || b.contains(h)) ? (h.closest('[data-id], [data-mir-window]') || h).className.toString().split(' ')[0] : '',
+        rack: rk ? Math.round(rk.getBoundingClientRect().height) : 0, folds: [...d.querySelectorAll('.lw-fold[data-fold]')].map((f) => f.dataset.fold + (f.getAttribute('aria-expanded') === 'true' ? '+' : '-')).join(' '), seat: d.dataset.seat || '' };`;
+    for (const [w, h] of SIZES) {
+      await boot(w, h); const tag = `${w}x${h}`;
+      await g.ev(`__LW.run('render.open'); return 1;`); await wait(1500);
+      out.log.push({ tag, r: await g.ev(RB) }); await shot(`039-V3-${tag}-floating-${TAG}`);
+      await g.ev(`__LW.layout.dockWindow('render'); return 1;`); await wait(900); await g.ev(`__LW.run('render'); return 1;`); await wait(900);
+      await g.ev(`document.querySelector('.dev[data-id="render"] .sv-primary')?.scrollIntoView({ block: 'nearest' }); return 1;`); await wait(500);
+      out.log.push({ tag, r: await g.ev(RB) }); await shot(`039-V3-${tag}-rack-${TAG}`);
+    }
+  }
   out.errors = (await g.errors()).errs;
 } catch (e) { out.threw = String(e && e.stack || e); }
 finally { if (g) await g.close(); }

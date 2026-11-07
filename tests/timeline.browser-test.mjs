@@ -153,7 +153,9 @@ try {
     window.__fac = (r) => r && r.manifest ? { n: r.frames, d: r.manifest.frames.map((x) => x.digest), t: r.manifest.frames.map((x) => x.t), bytes: r.bytes } : { none: true };
     window.__same = (a, b) => !!(a && b && a.d && b.d && a.d.length === b.d.length && a.d.every((x, i) => x === b.d[i]) && a.t.every((x, i) => x === b.t[i]));
     window.__films = async () => { try { const d = await (await navigator.storage.getDirectory()).getDirectoryHandle('lambdawaves-recordings'); let n = 0; for await (const _ of d.keys()) n++; return n; } catch (_) { return 0; } };
-    window.__btn = (text) => [...document.querySelectorAll('.dev[data-id="render"] button')].find((b) => b.textContent.trim() === text && !b.disabled);
+    /* 039 V3: STORED RENDER is a fold row (film-card.js), closed until a hand opens it — a row found behind it opens its fold */
+    window.__unfold = (b) => { const f = b && b.closest('.lw-fold-body[hidden]'), t = f && document.querySelector('[aria-controls~="' + f.id + '"]'); if (t) t.click(); return b; };
+    window.__btn = (text) => __unfold([...document.querySelectorAll('.dev[data-id="render"] button')].find((b) => b.textContent.trim() === text && !b.disabled));
     if (__LW.mod.armed) __LW.mod.arm(false);   /* MOD off: the facade freezes, as the card's MODULATION OFF does */
     __LW.layout.raise('render'); tl.close(); await __w(800); await __LW.settle(); await __w(500); return 1;`);
   const tapRender0 = async () => { await ev(`__C.renderBtn.id = 'tl-render'; __C.renderBtn.scrollIntoView({ block: 'center', behavior: 'instant' }); await __w(500); await __LW.settle(); await __w(400); return 1;`); return g.tap('#tl-render'); };
@@ -235,7 +237,7 @@ try {
     Object.defineProperty(navigator, 'share', { configurable: true, value: (d) => { __H.shares.push({ names: d.files.map((f) => f.name), blob: d.files[0] }); return live() ? Promise.resolve() : Promise.reject(new DOMException('no gesture', 'NotAllowedError')); } });
     const click = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) { __H.downloads.push({ name: this.download, href: this.href }); return; } return click.call(this); };
     __LW.layout.raise('render'); await new Promise((r) => setTimeout(r, 1500)); const find = () => [...document.querySelectorAll('.dev[data-id="render"] button')].find((x) => x.textContent.trim() === 'RECOVER COMPLETED FRAMES');
-    for (let i = 0; i < 25 && !find(); i++) { __LW.render.view.paint(); await new Promise((r) => setTimeout(r, 500)); } const b = find(); if (b) { b.id = 'tl-recover'; b.scrollIntoView({ block: 'center', behavior: 'instant' }); }
+    for (let i = 0; i < 25 && !find(); i++) { __LW.render.view.paint(); await new Promise((r) => setTimeout(r, 500)); } const b = find(); if (b) { const f = b.closest('.lw-fold-body[hidden]'), t = f && document.querySelector('[aria-controls~="' + f.id + '"]'); if (t) t.click(); b.id = 'tl-recover'; b.scrollIntoView({ block: 'center', behavior: 'instant' }); }
     await new Promise((r) => setTimeout(r, 400)); return { recover: !!b, reloaded: !window.__before };`);
   const recoverTap = await g.tap('#tl-recover');
   const t11g = await ev(`for (let i = 0; i < 60 && !(__H.shares.length + __H.downloads.length); i++) await new Promise((r) => setTimeout(r, 250));

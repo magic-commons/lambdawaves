@@ -13,7 +13,7 @@ import { createRenderCard } from './mir/render/panel.js';
 import { fmtBytes } from './mir/render/plan.js';
 import { VIEW_NAMES } from './field.js';
 import { registerClipKind } from './mir/timeline/kinds.js';
-import { el, label, trig, svgNode, sw } from './mir/kit.js';
+import { el, label, hint, trig, svgNode, sw } from './mir/kit.js';
 import { handOver } from './capture.js';
 import { notice } from './mir/shell/notice.js';
 import { fold } from './fold.js';
@@ -107,6 +107,23 @@ export function createFilmCard(o) {
       mine = true; C.lines.textContent = all.slice(cut).join('\n'); queueMicrotask(() => { mine = false; });
     }).observe(C.lines, { childList: true, characterData: true, subtree: true });
   }
+  /* 039 V3 · RENDER FOLDS (the walks: floated by FILE › RENDER… the card was 280 × 1045 in a 626-px page — RENDER, PREVIEW and CANCEL below the
+     screen, nothing scrolled, no head folded): DETERMINISTIC RENDER stands open and every other section is a fold row (lab/fold.js: closed on a first
+     run, the open ones kept in the card's WORKSPACE record by `data-fold`) — THIS VIEW · IMAGE · STORED RENDER (while one is kept) · SELF-TEST ·
+     FILES (the kit's own) · PERIOD.  A section's parts move into one box laid out as `display: contents` (lab.css), so the kit's grid and its own
+     `hidden` flags are untouched; the subject repaints itself whole, so it goes inside a section of λWAVES' own and is that fold's body */
+  const W = view.root, headRow = (at, word, tip) => { const row = el('div', 'row tight sr-fold-head'); at.prepend(row); let t = at.querySelector(':scope > .sr-title');
+    if (t) row.append(t); else t = el('div', 'sv-title sr-title', row); if (word) label(t, word); if (tip) hint(t, tip); return row; };
+  const foldIn = (s, key, what, word, tip) => { if (!s) return null; const row = headRow(s, word, tip), box = el('div', 'sr-fold-box');
+    box.append(...[...s.children].filter((c) => c !== row)); s.append(box); return fold(row, box, { what, key }); };
+  const subj = W.querySelector(':scope > .sr-subject');
+  if (subj) { const s = el('section', 'sr-section sr-view'); subj.before(s); const f = fold(headRow(s, 'THIS VIEW', 'What the picture and the film are of: COPY · JSON'), subj, { what: 'what the picture is of', key: 'render-view' });
+    s.append(subj); new MutationObserver(() => { if (subj.querySelector('.sr-back')) f.set(true); }).observe(subj, { childList: true }); }   // FOLDERS' ⓘ inspected a project: say so
+  foldIn(W.querySelector(':scope > .sr-picture'), 'render-image', 'the picture');
+  if (C.recoveryRow) { const rr = C.recoveryRow, row = el('div', 'row tight sr-fold-head'); rr.before(row); label(el('div', 'sv-title sr-title', row), 'STORED RENDER');
+    fold(row, rr, { what: 'the films kept on this device', key: 'render-stored' }); const seen = () => { row.hidden = !rr.childElementCount; }; seen(); new MutationObserver(seen).observe(rr, { childList: true }); }
+  foldIn(W.querySelector(':scope > .sr-check'), 'render-check', 'the self-test', 'SELF-TEST', 'Check that saving a film works on this device');
+  foldIn(W.querySelector(':scope > .sr-period'), 'render-period', 'the loop plan');
   /* 025 C1 · THE RANGE FROM WHAT YOU HAVE (FILE › RENDER…, EXPORT FRAMES…, the TIMELINE's door): a timeline selection → SELECTION; the TIMELINE
      open with clips → ACTIVE (over every clip when no range is marked); a placed ONE PERIOD → PERIOD (the ACTIVE range over it, the modulation
      OFF, as PLACE ONE PERIOD leaves it); else STILL.  `format` 'png' is EXPORT FRAMES…; `range: 'timeline'` (the door) is SELECTION, else ACTIVE */

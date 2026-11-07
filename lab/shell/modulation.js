@@ -403,7 +403,7 @@ export function createModSeam(app) {
       else app.sh.layout.moveFloat(n.dataset.id, x, y);
     }
     const seatNew = (gone = []) => {
-      for (const n of gone) if (n.nodeType === 1 && n.parentElement !== floatsEl) seated.delete(n);
+      for (const n of gone) if (n.nodeType === 1 && n.parentElement !== floatsEl) { seated.delete(n); if (n.dataset && n.dataset.seat === 'over') delete n.dataset.seat; }   // docked: no float's mark
       for (const n of [...(floatsEl ? floatsEl.children : []), nbEl]) {
         if (!summoned(n)) { if (n) seated.delete(n); continue; }
         if (seated.has(n)) continue; seated.add(n);

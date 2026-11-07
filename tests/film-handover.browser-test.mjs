@@ -21,7 +21,8 @@ const pass = (m) => console.log('PASS ' + m);
 const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefined && r !== null && !r.E, 'page threw: ' + JSON.stringify(r)); return r; };
 const until = async (expr, ms) => { const t0 = Date.now(); for (;;) { if (await g.ev(`try { return !!(${expr}); } catch (_) { return false; }`)) return Date.now() - t0;
   assert.ok(Date.now() - t0 < ms, 'timed out waiting for ' + expr); await new Promise((r) => setTimeout(r, 500)); } };
-const mark = (id, find) => ev(`const n = (${find})(); if (!n) return { none: true }; n.id = ${JSON.stringify(id)}; n.scrollIntoView({ block: 'center', behavior: 'instant' }); await new Promise((r) => setTimeout(r, 300)); return { ok: 1 };`);
+/* 039 V3: RENDER's IMAGE, STORED RENDER, SELF-TEST and PERIOD are fold rows (film-card.js), closed until a hand opens them: a part behind one opens it first */
+const mark = (id, find) => ev(`const n = (${find})(); if (!n) return { none: true }; const f = n.closest('.lw-fold-body[hidden]'), t = f && document.querySelector('[aria-controls~="' + f.id + '"]'); if (t) { t.click(); await new Promise((r) => setTimeout(r, 200)); } n.id = ${JSON.stringify(id)}; n.scrollIntoView({ block: 'center', behavior: 'instant' }); await new Promise((r) => setTimeout(r, 300)); return { ok: 1 };`);
 try {
   assert.equal((await g.waitFor('window.__LW && __LW.ready', 3000, 20)).ok, 1);
   const setup = await ev(`
