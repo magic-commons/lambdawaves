@@ -131,7 +131,7 @@ export function createModSeam(app) {
       ...Array.from({ length: 7 }, (_, i, at = BASIS.flatMap((s, a) => (s.n === i + 1 ? [a] : []))) => ({ id: `shell.rate.n${i + 1}`, label: `SHELL ${i + 1} RATE`, unit: '×', map: 'log', min: 0.25, max: 4, def: 1, group: 'state', knob: () => null,
         hint: 'one shell’s per-label RATE (× its energies)',
         get: () => { for (const a of at) if (reg.re0[a] ** 2 + reg.im0[a] ** 2 > EPS_POP) return rates[a]; return rates[at[0]]; },   // its first populated label, else its first (017 P2: no populated() array per read — syncBases reads it every modulation tick)
-        set: (v) => { for (const s of BASIS) if (s.n === i + 1 && rates[s.index] !== v) api.setRate(s.index, v); } })),
+        set: (v) => reg.drive(() => { for (const s of BASIS) if (s.n === i + 1 && rates[s.index] !== v) api.setRate(s.index, v); }) })),   // 039 F1: the lane's re-anchoring is a DRIVE's (Register.drive)
 
       /* CHEMISTRY's targets: a κ and a RATE, both PRESENT-only setters that store a number and schedule nothing (the RT pump is
          already running a frame of its own when either matters) — and, since iteration 007 O, THE ORBITAL INDEX.
@@ -222,7 +222,7 @@ export function createModSeam(app) {
         get: () => { const p = reg.populated(); return p.length === 1 ? p[0] : NaN; },
         set: (v) => { const k = v | 0, p = reg.populated(), H = app.state.modHost, tl = app.state.tl; if ((app.state.chem && app.state.chem.on) || !(k >= 0 && k < BASIS.length) || (p.length === 1 && p[0] === k) || !H || !tl) return;
           const u = tl.model.value('state.index', H.model.transport.beats); if (!Number.isFinite(u) || H.registry.fromNorm('state.index', u) !== k) return;   // a clip says k here, or nothing moves
-          api.clear(); api.toggleMode(k); api.settle(); } },
+          reg.drive(() => { api.clear(); api.toggleMode(k); api.settle(); }); } },   // 039 F1: a clip's state is a DRIVE's
 
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
         hint: 'Set the A–B transition rate',

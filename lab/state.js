@@ -74,6 +74,7 @@ export class Register {
     this.field = { Bz: 0, Fz: 0 };      // magnetic (exact) and electric (exact within each shell)
     this.damping = 0;                   // the DRAG toy (see setDamping): 0 = off = the exact unitary register
     this.P = null;                      // the PROPAGATOR (W-STURMIAN, see setPropagator): null = the diagonal law above
+    this._driven = -1; this._hand = null;   // 039 F1: the version a drive left, and the modes the hand left before it (drive())
     /* scratch for the per-frame observables (wave 45): energy(), autocorrelation() and normalAmplitudes() used to
        allocate two Float64Array(140) and four arrays per call, several times a frame — the meters, the badges and the
        SHADOW readout — so the frame loop was a steady allocator.  They read c(t) into these instead. */
@@ -279,6 +280,11 @@ export class Register {
   }
   setMute(a, on) { this.muted[a] = on ? 1 : 0; this.version++; }
   setSolo(a, on) { this.solo[a] = on ? 1 : 0; this.version++; }
+  /** 039 F1 · A DRIVE IS NOT A HAND: `fn` moves the register as a DRIVE does (a rotation rate's turn, a lane's shell RATE or STATE).  The
+   *  modes as the hand last left them are kept at the drive's edge, so a project's unsaved mark reads them (handModes) while the last
+   *  mutation was a drive's — the drive's motion is never an edit, and a hand's MUTE, REMOVE or dial always is */
+  drive(fn) { if (this.version !== this._driven) this._hand = this.serialize().modes; try { return fn(); } finally { this._driven = this.version; } }
+  handModes() { return this.version === this._driven ? this._hand : null; }
   /**
    * STATE ROTATE about z by angle α (exact): c_{nlm} → e^{-imα} c_{nlm}.
    * This is D(R_z(α)) on the state — a physical operation, NOT a camera move.
