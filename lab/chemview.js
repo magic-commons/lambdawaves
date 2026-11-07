@@ -232,8 +232,11 @@ export function createChem(host, api) {
     dlBusy = true; dlB.disabled = true; ringTo(0); Promise.resolve(handPick(id)).then(() => lamps()).finally(() => { dlBusy = false; dlB.disabled = false; ringTo(null); rowPic(); }); });
   function rowPic() {
     const id = mSel.value, k = vKey(id), P = !k && id ? PRESET_BY_ID.get(id) : null;
-    if (P && !P.recordOnly && Number.isFinite(P.predictedMs)) hint(mList.button, '{name} · solves in ~{t} · the cap is benzene', { name: capName(P.name), t: showMs(P.predictedMs) });   // 039 X5: the time the chip's face left
-    else hint(mList.button, 'The cap is benzene: a slower entry is disabled');
+    /* 039 X5: the time the chip's face left.  039 F2 (X-REVIEW #4: "the cap is benzene" on all 64 chips, a phrase WALK-D could not read): a live
+       molecule's chip says its name and its time; the cap is said once, as the select's help where no time is (a record, a volume's molecule),
+       in a newcomer's words (022 H1: one line; the rule in full is the window's note, below) — fillSel's header() always comes here */
+    if (P && !P.recordOnly && Number.isFinite(P.predictedMs)) hint(mList.button, '{name} · computed in about {t}', { name: capName(P.name), t: showMs(P.predictedMs) });
+    else hint(mList.button, 'Over the cap (slower than benzene): greyed, or a download');
     let glyph = false, src = null;
     if (k) {
       const v = vShelf.get(k.volume), kept = vKept.get(k.volume);
@@ -253,7 +256,6 @@ export function createChem(host, api) {
     V.picture(k.volume, k.id, 'labels').then((u) => { if (picFor !== id) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) picUrl = u; setPic(pic, u); }, () => {});
   }
   const dlShow = rowPic;
-  mList.button.title = mList.button.dataset.help = 'The cap is benzene: a slower entry is disabled';   // 022 H1: one line; the rule in full is the window's note (below)
   /** the dropdown holds the page's section, in the table's groups; the molecule on screen stays chosen when it is on this page */
   function fillSel() {
     const rows = [], head = (w) => rows.push({ id: '#' + w, label: w, coming: true }), VP = vByPage.get(page);
@@ -268,7 +270,7 @@ export function createChem(host, api) {
       if (!list.length) continue;
       head(g.label);
       for (const p of list) rows.push({ id: p.id, label: optionLabel(p, !p.recordOnly || !!have.get(p.records['sto-3g'].hash)), coming: !!p.disabled,
-        title: p.name + (p.disabled ? ' — ' + p.reason : '') + (p.recordOnly ? '' : ' · solves in ~' + showMs(p.predictedMs)) + ' · ' + p.source, pic: './img/menu/' + p.id + '.webp' });
+        title: p.name + (p.disabled ? ' — ' + p.reason : '') + ' · ' + p.nAO + ' atomic orbitals' + (p.recordOnly || p.disabled ? '' : ' · computed in about ' + showMs(p.predictedMs)) + ' · ' + p.source, pic: './img/menu/' + p.id + '.webp' });   // 039 F2: the AO count the face left, in words
     }
     if (volRef && !(VP && vMolPage.get(volRef.key) === page)) { head('VOL. ' + volRef.numeral); rows.push({ id: volRef.key, label: volName(volRef), title: volRef.name + ' · ' + volRef.geometry }); }   // V2: the volume molecule on screen, until a catalogue pick
     mRows = rows; mList.setItems(rows); mSel.value = preset;   // turned away from the molecule on screen: nothing chosen here yet

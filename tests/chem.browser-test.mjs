@@ -229,7 +229,7 @@ try {
       groups: [...groups], turners: card.querySelectorAll('.mol-section .mir-step-b').length,
       help: btn && (btn.dataset.help || btn.title) || '', aria: btn && btn.getAttribute('aria-label'),
       value: (__molRows().find((o) => o.on) || {}).value, first: opts[0] && opts[0].text, benzene: opts.find((o) => o.value === 'C6H6')?.text, benzeneHelp: opts.find((o) => o.value === 'C6H6')?.help,
-      bad: opts.filter((o) => !/· [0-9]+ AO( · record( · DOWNLOAD)?| · [a-z][a-z ]*)?$/.test(o.text) || /~/.test(o.text) || !(o.disabled || / · record/.test(o.text) || /solves in ~([0-9]+ ms|[0-9]+[.][0-9] s)/.test(o.help))).map((o) => o.value + ' :: ' + JSON.stringify(o.text)),
+      bad: opts.filter((o) => !/^[^·]+( · record( · DOWNLOAD)?| · [a-z][a-z ]*)?$/.test(o.text) || / AO/.test(o.text) || /~/.test(o.text) || !/ [0-9]+ atomic orbitals/.test(o.help) || !(o.disabled || / · record/.test(o.text) || /computed in about ([0-9]+ ms|[0-9]+[.][0-9] s)/.test(o.help))).map((o) => o.value + ' :: ' + JSON.stringify(o.text)),
       records: opts.filter((o) => / · record/.test(o.text)).map((o) => o.value),
       seg: !!card.querySelector('.segw[data-nope]'), errs: window.__e.slice() };`);
   judge(`L6 the page turner: ${l6.pages.length} sections, each page holds exactly its own molecules and its header names it (${l6.pages.map((p) => p.s + ' ' + p.n).join(' · ')})`,
@@ -241,12 +241,13 @@ try {
     { options: l6.count, disabled: l6.disabled, groups: l6.groups, disabledText: l6.disabledText });
   /* 0.4.0 S4a: the COST refit (PLAN §10 N2) moved benzene's prediction from ~9.6 s to ~1.7 s; a row past the cap with a record
      says `record` (and DOWNLOAD until it is on this device) instead of a predicted time — never DISABLED.  039 X5 (WALK-A #18): the face says
-     the AO count alone (the bar's chip was cut) and the predicted time is the row's hint */
-  judge('L6 every option text carries its AO count, its hint the predicted time (a record-only row says record), and a disabled one says why',
-    l6.bad.length === 0 && /·\s*36 AO$/.test(l6.benzene || '') && /solves in ~1\.7 s/.test(l6.benzeneHelp || '') && JSON.stringify(l6.records) === JSON.stringify(RECORD_ONLY.filter((m) => m.recordOnly).map((m) => m.id))
+     the AO count alone (the bar's chip was cut) and the predicted time is the row's hint; 039 F2 (X-REVIEW #4): the face is the formula, the
+     AO count the hint's ("36 atomic orbitals"), the time "computed in about 1.7 s" */
+  judge('L6 every option text is its formula, its hint the AO count in words and the predicted time (a record-only row says record), and a disabled one says why',
+    l6.bad.length === 0 && l6.benzene === 'C₆H₆' && /36 atomic orbitals · computed in about 1\.7 s/.test(l6.benzeneHelp || '') && JSON.stringify(l6.records) === JSON.stringify(RECORD_ONLY.filter((m) => m.recordOnly).map((m) => m.id))
     && l6.disabledText.every((t) => /not a minimum|over the cap/.test(t) && /A−B|cap/.test(t)),
     { first: l6.first, benzene: l6.benzene, benzeneHelp: l6.benzeneHelp, malformed: l6.bad, disabledText: l6.disabledText.map((t) => t.split(' :: ')[0]) });
-  judge('L6 the select names the cap rule in its own help (039 X5: beside the chosen molecule\'s time; the rule whole is the window\'s note)', /cap is benzene/i.test(l6.help), { help: l6.help });
+  judge('L6 the chip\'s hint is the chosen molecule\'s name and time, never the cap (039 F2: the cap is the select\'s help where no time is; the rule whole is the window\'s note)', /^Water · computed in about [0-9]+ ms$/.test(l6.help), { help: l6.help });
   judge('L6 the library agrees with the menu on how many entries there are (every page summed), and the page went back to water\'s', l6.count === MOLECULES.length + RECORD_ONLY.length && l6.value === 'H2O',
     { menu: l6.count, library: MOLECULES.length, records: RECORD_ONLY.length, value: l6.value, errs: l6.errs });
   judge('L6 no page error', l6.errs.length === 0, l6.errs);

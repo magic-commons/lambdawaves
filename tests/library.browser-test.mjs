@@ -47,7 +47,7 @@ try {
     return { rows: rows.map((r) => [r.id, r.installed, r.recordOnly]), text: o.textContent, disabled: o.disabled, group: (() => { let g = null; for (const r of __molRows()) { if (r.head) g = r.textContent; if (r.value === 'lysine') return g; } return null; })(),   /* 022 P3: the kit list's group row */ store: (await caches.keys()).includes('lw-data-v1') && (await (await caches.open('lw-data-v1')).keys()).some((q) => q.url.includes('/library/')), errs: __e.slice() };`);   // 017 R2: the boot's demo cover (projects.js keepData, a DATA file) may land after the setup's delete — the law is that LOOKING keeps no record
   assert.ok(one.rows.length === CAT.rows.length && one.rows.every((r) => r[1] === false), 'nothing is installed at first: ' + JSON.stringify(one));
   assert.deepEqual(['C6H6', 'lysine', 'C60'].map((id) => one.rows.find((r) => r[0] === id)), [['C6H6', false, false], ['lysine', false, true], ['C60', false, true]], JSON.stringify(one));   // C60: S4c's frontier record
-  assert.equal(one.text, 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(one.disabled, false);
+  assert.equal(one.text, 'C₆H₁₄N₂O₂ · record · DOWNLOAD'); assert.equal(one.disabled, false);
   assert.equal(one.store, false, 'looking at the store kept a record in lw-data-v1 at boot'); assert.deepEqual(one.errs, []);
   pass(`DOWNLOAD, never DISABLED: lysine's row "${one.text}" (${one.group}) is enabled; nothing is installed and boot created no store`);
 
@@ -102,7 +102,7 @@ try {
   const w3 = JSON.stringify(three);
   assert.deepEqual(three.calls, [0, 0], 'a record past the cap ran the solver: ' + w3);
   assert.ok(three.st.nAO === 64 && three.st.nocc === 40 && Math.abs(three.st.energy - LYS_E) < 1e-8 && three.st.roots === 960 && three.st.record.from === 'network', w3);
-  assert.equal(three.label, 'C₆H₁₄N₂O₂ · 64 AO · record', 'the row still says DOWNLOAD after the install: ' + w3);
+  assert.equal(three.label, 'C₆H₁₄N₂O₂ · record', 'the row still says DOWNLOAD after the install: ' + w3);
   assert.ok(/downloaded/.test(three.statusOpen) && /persisted|not persisted|Safari/.test(three.statusOpen) && /MB used/.test(three.statusOpen), 'the persisted answer and the quota are shown: ' + w3);
   assert.ok(three.basisAfter === 'sto-3g' && /past the live cap and opens only from its STO-3G record/.test(three.basisStatus) && three.b6disabled === true, 'a basis change on a record-only molecule: ' + w3);
   assert.ok(three.kick === null && /TDHF/.test(three.kickStatus) && /past the live cap/.test(three.kickStatus) && three.running === false, 'a KICK past the cap: ' + w3);
@@ -141,7 +141,7 @@ try {
   assert.ok(five.removed && five.installed === false, w5);
   assert.equal(five.calls, 0, 'an evicted record past the cap was solved: ' + w5);
   assert.ok(/lysine's record is not open: the network refused it \(offline\)/.test(five.status) && /opens only from its record/.test(five.status), 'the refusal is not named: ' + w5);
-  assert.ok(five.preset === 'lysine' && five.nAO === 0 && five.label === 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD' && five.disabled === false, 'not installed, not broken: ' + w5);
+  assert.ok(five.preset === 'lysine' && five.nAO === 0 && five.label === 'C₆H₁₄N₂O₂ · record · DOWNLOAD' && five.disabled === false, 'not installed, not broken: ' + w5);
   assert.equal(five.pal, five.wantPal, 'the rest of the project did not restore: ' + w5); assert.deepEqual(five.errs, []);
   pass(`EVICT → NOT INSTALLED: lysine removed; offline, the project restored everything else (palette ${five.pal}) and MOLECULES says "${five.status.slice(0, 120)}…"; the row says DOWNLOAD again, enabled; no page error`);
   /* 6 · THE SECTIONS: the page turner, the header, INSTALLED for a whole section, and the three sizing entries opened, timed */
