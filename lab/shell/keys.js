@@ -25,7 +25,7 @@ export function createKeys(app) {
   const kt = createKeyTable({ rows: A.list().filter((r) => r.bind !== false).map(feed), stageHasFocus, keep: ASK_ENABLED ? [] : ['ask'] });   // 0.5.0 C3: the one listener, the save, the binding law
   A.setEdit(keyEdit);
   A.onAdd((rows) => kt.table.add(rows.filter((r) => r.bind !== false).map((r) => { const x = feed(r); return { id: x.id, label: x.label, group: x.group, short: x.short, keys: keysOf(x),
-    repeat: true, overControls: true, when: x.when, run: (e) => x.run(e && e.shiftKey ? 0.25 : 1), up: x.up }; })));   // a row the registry learns later (a window registered after boot)
+    repeat: true, when: x.when, run: (e) => x.run(e && e.shiftKey ? 0.25 : 1), up: x.up }; })));   // a row the registry learns later (a window registered after boot)
   /* ── 0.5.0 C3 · THE KEYBOARD WINDOW is the kit's createKeyboardWindow (keymap.js left): the drawn board, the platform switch, RECORD /
      RESET, the search and the list, the steal on a second press, Escape's three steps, the drag — on the float layer (UI space for the
      scene guard), its move telling the occlusion (CLAUDE.md).  Its paint is λWAVES' charcoal-blue skin (lab.css §KEYBOARD, R5-S3).  Its

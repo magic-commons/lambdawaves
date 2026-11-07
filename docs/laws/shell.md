@@ -70,7 +70,7 @@ The rack hide ◧ / B peeks ONE rack per edge (`rack-peek-left | right`, lab.css
 record; the menubar is `createMenubar` over MENUS (021 I3, above); the bar is the kit's
 `createTransport` (014 A0, control-surface.md). Keys are MIR's ONE KEY TABLE (`lab/mir/keyboard`) through `lab/key-table.js`, λWAVES' binding law over it (the rows of `lab/actions.js`: `ctrl:
 true` Mod, `'Ctrl'` the Control key; no `shift`: Shift is the fine step; every
-row `overControls`; an overlap binds only on an explicit steal;
+row yields to a control the KEYBOARD focused (039 W1 THE KEY PRESSES THE FOCUSED CONTROL: Enter and Space press a button, arrows turn a knob) and runs over one the POINTER focused (Space still plays after a click, wave 88); an overlap binds only on an explicit steal;
 `lambdawaves.q0.keys` lifts 0.4.0's shape). The KEYBOARD window is the kit's
 `createKeyboardWindow` (`lab/mir/keyboard`) on `#floats`, with λWAVES' MAPPING face (`lab/mapping.js`, 021 I2: KEY · MIDI · MOD for every surface action, one LEARN), painted by `lab/keymap.css` (021 G6;
 unlayered: five rows in 416 px, legend + switch on one row, centred RECORD /
