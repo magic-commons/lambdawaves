@@ -943,7 +943,8 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .lw-light .lw-sun .xy-pad { border-radius: 50%; --xy-dot: 24px; }
 .lw-light .lw-sun .xy-pad .xy-dot, .lw-light .lw-sun .xy-pad:is(.drag, :focus-visible, .mod) .xy-dot { display: grid; place-items: center; background: hsl(var(--glass-tint) / .92);
   box-shadow: 0 0 0 1px var(--glass-hairline); color: var(--lw-sun, var(--acc)); }
-.lw-light .lw-sun .xy-pad.behind .xy-dot { opacity: .45; }
+.lw-light .lw-sun .xy-pad.behind .xy-dot { opacity: .9; box-shadow: inset 0 0 0 2.5px var(--lw-sun, var(--acc)), 0 0 0 1px var(--glass-hairline); }   /* 039 X11 · THE SUN BEHIND THE HORIZON KEEPS A RING (K #4): hollow, never a .45 dot that vanishes */
+.lw-light .lw-sun .xy-pad.behind .xy-dot > .gly { visibility: hidden; }
 /* 038 K3 · THE PAD WRAPS: the sun crosses the rim (straight behind) and comes in on the far side, so the disc clips its lattice, never the sun */
 .lw-light .lw-sun .xy-pad { overflow: visible; }
 .lw-light .lw-sun .xy-lattice { border-radius: 50%; }
