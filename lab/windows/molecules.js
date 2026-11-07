@@ -152,7 +152,7 @@ export function createMolecules(app) {
   /* THE ONE SWITCH: a pane's public ON (a verb, a stick's press, a file) is MOLECULES ON with VIEW MIX (id `registry`); its OFF is MOLECULES OFF */
   const one = (v, hand) => { if (!v) { C.setOn(false); return; } if (C.view !== 'registry') C.setView('registry', hand); if (!C.on) C.setOn(true); else app.state.register.follow(hand); };
   app.state.register = createRegister(C.slots.register, { bar: C.slots.top, one, stroked: () => { C.setView('registry', true); },   // a hand that painted the ladder picked VIEW MIX
-    active: () => canPresent(wChem), modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): the STATES dials' hand law
+    active: () => canPresent(wChem), modHand: (id, v) => { wake(); return app.ctl.modHand(id, v); },   // iteration 007 (MIR check B2): the STATES dials' hand law; 039 R1 A HAND IS A HAND: every register dial's hand (a favourite's face too) wakes a quiet card, as ORBITAL's does
     stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, derived,   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },

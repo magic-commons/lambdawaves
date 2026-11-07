@@ -447,7 +447,7 @@ export function createChem(host, api) {
       is the base's.  An orbital not chosen (null: HOMO on the next landing) has the placeholder base 1, so a project's base table reads the same
       after an undo of MOLECULES ON as before it; stepApply never lets that placeholder choose an orbital */
   function baseHand() { if (api.modBase) api.modBase('chem.orbital', Number.isFinite(handK) ? handK : 1); }
-  let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
+  let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, step: 1, title: 'The molecular orbital index, ascending in ε; HOMO by default',   // 039 R1: one key, one orbital (unstepped, an arrow moved 1 % of the range and the rounding ate it)
     fmt: (v) => orbFmt(Math.round(v)), onInput: orbInput });
   rM.appendChild(orbKnob.root);
   /* 0.4.0 S4c · VALENCE, A SWITCH ON DENSITY (PLAN F5 iii): D − 2 Σ_core C_c C_cᵀ in f64, drawn by the density kind; the core is S1's
@@ -489,7 +489,7 @@ export function createChem(host, api) {
   /* iteration 005 P2 · THE CONTINUITY RECORD, CALCULUS's tile shape (readout + canvas) seated with FLOW — CALCULUS itself is hidden in MOLECULES mode (iteration 002) */
   const roCon = readout({ label: 'CONTINUITY  ‖∂ρ/∂t + ∇·j‖₂ / ‖∂ρ/∂t‖₂ on PLANE\'s sample · ∇·j the full 3-D divergence (the in-plane one would miss ∂j⊥/∂n)', cls: 'wide calc-ray', value: '—' }), conCv = el('canvas', '', roCon.root), conG = conCv.getContext('2d');
   conCv.style.height = '112px'; roCon.root.hidden = true;
-  const spdKnob = knob({ label: 'SPEED', min: 1, max: 50, value: 10, title: 'Propagation steps per frame',
+  const spdKnob = knob({ label: 'SPEED', min: 1, max: 50, value: 10, step: 1, title: 'Propagation steps per frame',   // 039 R1: one key, one step a frame
     fmt: (v) => Math.round(v) + '/frame', onInput: (v) => { if (api.wake) api.wake(); if (api.modHand && api.modHand('chem.speed', v)) return; speed = Math.max(1, Math.round(v)); } });
   r2.appendChild(spdKnob.root);
   const dSeg = seg({ label: '<m>STEP  Δt</m>', value: '0.01', options: DTS.map((d) => ({ id: d, label: d, title: 'Δt = ' + d + ' a.u. (0.01 the default)' })),
@@ -808,7 +808,7 @@ export function createChem(host, api) {
     views();
     const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
     const help = orbKnob.root.dataset.help || 'The molecular orbital index, ascending in ε; HOMO by default';
-    const next = knob({ label: 'ORBITAL', min: lo, max: n, value: k, title: help,
+    const next = knob({ label: 'ORBITAL', min: lo, max: n, value: k, step: 1, title: help,
       fmt: (v) => orbFmt(Math.round(v)), onInput: orbInput });
     /* iteration 007 O: the rebuilt dial keeps its target — the `data-param` stamp the TIMELINE and the drop read, and the held look (the
        port's restamp, after the re-registration this landing triggers, hands the new dial its base road) */
