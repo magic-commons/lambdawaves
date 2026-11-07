@@ -110,7 +110,7 @@ export function createNotebook(app) {
           sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get()), 'moon'),
           item('fullscreen', 'FULL SCREEN', { icon: 'expand' })],
         PLAY: () => [item('transport.play', 'PLAY / PAUSE', { icon: 'play' }), item('home', 't → 0', { icon: 'rewind' }), item('stepBack', 'STEP ◂'), item('stepFwd', 'STEP ▸'), null,
-          item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK'), item('settings.playLock', 'PLAYBACK LOCK'), null,
+          item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK', { on: A.get('modBar').get }), item('settings.playLock', 'PLAYBACK LOCK'), null,
           sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
         WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'search' }), item('gui', 'MIR OPTIONS…'), null,   // 038 M3 (Josh 11-06): the kit's OPTIONS window, a WINDOW row
           sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'MINIMIZE ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
