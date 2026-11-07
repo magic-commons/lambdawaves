@@ -940,6 +940,9 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .lw-light .lw-sun .xy-pad .xy-dot, .lw-light .lw-sun .xy-pad:is(.drag, :focus-visible, .mod) .xy-dot { display: grid; place-items: center; background: hsl(var(--glass-tint) / .92);
   box-shadow: 0 0 0 1px var(--glass-hairline); color: var(--lw-sun, var(--acc)); }
 .lw-light .lw-sun .xy-pad.behind .xy-dot { opacity: .45; }
+/* 038 K3 · THE PAD WRAPS: the sun crosses the rim (straight behind) and comes in on the far side, so the disc clips its lattice, never the sun */
+.lw-light .lw-sun .xy-pad { overflow: visible; }
+.lw-light .lw-sun .xy-lattice { border-radius: 50%; }
 .lw-light .lw-sun-rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; fill: none; stroke: var(--glass-hairline); stroke-width: .8; }
 .lw-light .lw-sun-rings .lw-sun-horizon { stroke: var(--fg-soft); stroke-dasharray: 2 2.4; opacity: .55; }
 .lw-light .lw-light-side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 4px; justify-items: center; }

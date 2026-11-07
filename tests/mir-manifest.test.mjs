@@ -40,6 +40,8 @@ const ACCEPTED = {
   '1.5.7-alpha.6': 'ba2858e350806fd75f029e2a4e9108227ac7126fc7173023563c8569709bbae2',
   /* 037 H5 · MIR 1.5.7-alpha.7 THE SPHERE TAKES A PLANE (kit-037 @ e377982): directionSphere({ plane }) — CLIP's plane on the camera's sphere */
   '1.5.7-alpha.7': 'e96b2fd75c2366682928665e0e5662bc6d5c282c20cdd7c4622853804368fc89',
+  /* 038 K3 · MIR 1.5.7-alpha.13 THE PAD WRAPS (kit-038 @ 25e0836, on chain T's alpha.8–12): xyPad({ wrap: 'plane' | 'sphere' }), createCameraView({ panWrap }) */
+  '1.5.7-alpha.13': 'cf06ef67fd087b44be639585f6cab73f779e05717388625b64e0f8ac6c725333',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

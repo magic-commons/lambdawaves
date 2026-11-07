@@ -31,7 +31,7 @@ if im.width > 1200: im = im.resize((1200, round(im.height * 1200 / im.width)))
 im.save(sys.argv[2], quality=84)`, png, `${DIR}/${name}.jpg`, box ? box.map((v, i) => Math.round(Math.max(0, v + (i < 2 ? -pad : pad)))).join(',') : '-']);
   return `${DIR}/${name}.jpg`;
 }
-const float = (id, x, y, w) => g.ev(`__LW.layout.reopen(${JSON.stringify(id)}); __LW.layout.raise(${JSON.stringify(id)}); __LW.layout.popOut(${JSON.stringify(id)}, { x: ${x}, y: ${y}, w: ${w} });
+const float = (id, x, y, w) => g.ev(`__LW.layout.reopen(${JSON.stringify(id)}); if (__LW.layout.isFloating(${JSON.stringify(id)})) __LW.layout.dockWindow(${JSON.stringify(id)}); __LW.layout.raise(${JSON.stringify(id)}); __LW.layout.popOut(${JSON.stringify(id)}, { x: ${x}, y: ${y}, w: ${w} });
   const d = document.querySelector('.dev[data-id="${id}"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click(); await new Promise((r) => setTimeout(r, 500)); return 1;`);
 const theme = (t) => g.ev(`__LW.look.set({ theme: ${JSON.stringify(t)} }); await new Promise((r) => setTimeout(r, 400)); return 1;`);
 const out = {};
@@ -68,6 +68,98 @@ try {
       && out.tethered.post.style === 8 && out.tethered.post.knee === out.tethered.pre.knee && out.tethered.post.iso === out.shellPM.iso
       && out.tethered.post.exposure === out.tethered.pre.exposure && +out.tethered.post.mem.signed.exposure.toFixed(4) === out.signed.exposure && out.signed.knee !== out.shellPM.knee;
     await shot('038-K1-wave-styles', await rectOf('.dev[data-id="observer"]'));
+  }
+  if (scene === 'k2') {
+    /* the check: LIGHTING's verbs row (FRAME · RESET · MORE's chevron) is ONE line at 262 and 300 px — every child's top within 2 px, each of the seg's
+       buttons one text line — and both resets wear the `reload` glyph, named and hinted; the pictures in both themes */
+    const row = () => g.ev(`const v = document.querySelector('.dev[data-id="light"] .lw-light-verbs'), R = (e) => e.getBoundingClientRect();
+      const kids = [...v.children].filter((e) => R(e).width > 0), tops = kids.map((e) => Math.round(R(e).top)), bs = [...v.querySelectorAll('.lw-light-frame .seg-b')];
+      const reset = v.querySelector('.lw-light-reset'), pal = document.querySelector('.dev[data-id="palette"] .mir-ramp-reset');
+      return { w: Math.round(R(v.closest('.dev')).width), h: Math.round(R(v).height), tops, kids: kids.map((e) => e.className.split(' ')[0] + ':' + Math.round(R(e).width)),
+        btnH: bs.map((b) => Math.round(R(b).height)), lines: bs.map((b) => { const q = document.createRange(); q.selectNodeContents(b); return new Set([...q.getClientRects()].filter((c) => c.width > 0).map((c) => Math.round(c.top))).size; }), words: bs.map((b) => b.textContent),
+        reset: reset && { gly: reset.dataset.gly || null, aria: reset.getAttribute('aria-label'), hint: reset.dataset.help || reset.title || '', text: reset.textContent.trim(), w: Math.round(R(reset).width), h: Math.round(R(reset).height) },
+        pal: pal && { gly: pal.dataset.gly || null, aria: pal.getAttribute('aria-label'), hint: pal.dataset.help || pal.title || '', w: Math.round(R(pal).width), h: Math.round(R(pal).height) } };`);
+    await float('palette', 1000, 40, 300);
+    for (const t of ['light', 'dark']) {
+      await theme(t);
+      for (const w of [262, 300]) {
+        await float('light', 600, 40, w); out[t + w] = await row();
+        await shot(`038-K2-lighting-${w}-${t}`, await rectOf('.dev[data-id="light"]'));
+      }
+      await shot(`038-K2-palette-${t}`, await rectOf('.dev[data-id="palette"] .palette-enable'));
+    }
+    const one = (r) => Math.max(...r.tops) - Math.min(...r.tops) <= 2 && r.lines.every((n) => n === 1) && r.reset && r.reset.gly === 'reload' && !r.reset.text && r.reset.hint;
+    out.ok = ['light262', 'light300', 'dark262', 'dark300'].every((k) => one(out[k])) && out.light300.pal.gly === 'reload';
+  }
+  if (scene === 'k3') {
+    /* the check: (a) a real drag from the sun straight up past the pad's top edge does not stop at the rim — the point comes in from the far side and
+       climbs on (its landing within 0.03 of padWrap's own walk); (b) ArrowUp walks the light over the back and round (el down to ≈ −90, then up again),
+       the sun never outside the disc; (c) three stage frames on that walk (SOLID: the light going round); (d) the PAN pad, unlocked: ArrowRight past the
+       edge and a drag past it bring the pivot in at the other side (pacman), and ±1 is the frame's edge */
+    await float('light', 40, 40, 300);
+    await g.ev(`__LW.setStyle('solid'); for (let i = 0; i < 6; i++) __LW.run('dollyIn'); await __LW.settle(); return 1;`);
+    const SUN = '.dev[data-id="light"] .lw-sun .xy-pad', at = () => g.ev(`const p = document.querySelector(${JSON.stringify(SUN)}), d = p.querySelector('.xy-dot').style, L = __LW.mat.light || {};
+      const x = +d.getPropertyValue('--x'), y = +d.getPropertyValue('--y'); return { x, y, r: +Math.hypot(2 * x - 1, 2 * y - 1).toFixed(4), az: +(L.az ?? 57.5).toFixed(1), el: +(L.el ?? 57).toFixed(1) };`);
+    const pad = await rectOf(SUN), H = pad[3] - pad[1], s0 = await at();
+    const dot = mid(await rectOf(SUN + ' .xy-dot')), pts = [dot]; for (let i = 1; i <= 40; i++) pts.push([dot[0], dot[1] - 1.25 * H * i / 40]);
+    await drag(pts, 15); await nap(300); out.drag = { from: s0, to: await at() };
+    { let u = s0.x, v = s0.y; for (let i = 0; i < 1250; i++) { const cx = 2 * u - 1, cy = 2 * (v + 0.001) - 1, r = Math.hypot(cx, cy); if (r <= 1) { v += 0.001; continue; } const sm = r % 2, k = (sm <= 1 ? sm : sm - 2) / r; u = (1 + cx * k) / 2; v = (1 + cy * k) / 2; }
+      out.drag.want = { x: +u.toFixed(4), y: +v.toFixed(4) }; }
+    /* (b) the arrows from the light's home, read every 10 presses; (c) a frame at three points of the walk */
+    const UP = '', RIGHT = '';
+    await g.ev(`document.querySelector('.dev[data-id="light"] .lw-light-reset').click(); await new Promise((r) => setTimeout(r, 200)); document.querySelector(${JSON.stringify(SUN)}).focus(); return 1;`);
+    const walk = [await at()], stage = await rectOf('#stage'), box = [stage[0] + (stage[2] - stage[0]) * 0.3, stage[1] + (stage[3] - stage[1]) * 0.18, stage[0] + (stage[2] - stage[0]) * 0.7, stage[1] + (stage[3] - stage[1]) * 0.82];
+    const frames = { 10: 'a-front', 40: 'b-behind', 70: 'c-round' };
+    for (let i = 1; i <= 110; i++) { await g.press(UP); if (i % 10 === 0 || frames[i]) walk.push({ i, ...(await at()) });
+      if (frames[i]) { await g.ev(`await __LW.settle(); return 1;`); await shot(`038-K3-light-round-${frames[i]}`, box, 0); await shot(`038-K3-sun-${frames[i]}`, await rectOf('.dev[data-id="light"] .lw-light-key'), 16); } }
+    out.walk = walk;
+    const els = walk.map((w) => w.el), lo = els.indexOf(Math.min(...els));
+    out.walkOk = Math.min(...els) < -80 && Math.max(...els.slice(lo)) > 60 && walk.every((w) => w.r <= 1.0001);   // over the back (el ≈ −90) and round to the front again, never off the disc
+    /* (d) the PAN pad: unlock, CONTROL's chevron open (the fold `pan and hand`), ArrowRight × 55 from the centre, then PAN HOME and a drag from the
+       centre 0.75 of the pad past the right edge: u 1.25 → 0.25, the pivot at −0.5 */
+    await float('camera', 1000, 40, 300);
+    out.panOpen = await g.ev(`if (__LW.actions.get('camera.lock').get()) __LW.run('camera.lock'); const R = document.querySelector('.dev[data-id="camera"] .mir-camera'), b = R.querySelector('button.lw-fold[data-fold="pan and hand"]');
+      if (b && b.getAttribute('aria-expanded') !== 'true') b.click(); await new Promise((r) => setTimeout(r, 400)); return { lock: __LW.actions.get('camera.lock').get(), open: b && b.getAttribute('aria-expanded') };`);
+    const PAN = '.dev[data-id="camera"] .cam-pan .xy-pad';
+    out.pan = { from: await g.ev(`const p = document.querySelector(${JSON.stringify(PAN)}); p.focus(); return [...__LW.obs.shift];`) };
+    for (let i = 0; i < 55; i++) await g.press(RIGHT);
+    out.pan.keys = await g.ev(`return [...__LW.obs.shift].map((v) => +v.toFixed(3));`);
+    await g.ev(`__LW.run('camera.panHome'); await new Promise((r) => setTimeout(r, 200)); return 1;`);
+    const pp = await rectOf(PAN), c = mid(pp), Wd = pp[2] - pp[0], q = [c]; for (let i = 1; i <= 30; i++) q.push([c[0] + 0.75 * Wd * i / 30, c[1]]);
+    await drag(q, 15); await nap(300);
+    out.pan.drag = await g.ev(`return [...__LW.obs.shift].map((v) => +v.toFixed(3));`);
+    await shot('038-K3-pan-wrapped', await rectOf('.dev[data-id="camera"] .cam-pan'));
+    out.ok = Math.abs(out.drag.to.x - out.drag.want.x) < 0.03 && Math.abs(out.drag.to.y - out.drag.want.y) < 0.03 && out.drag.to.y < 0.9 && out.walkOk
+      && out.pan.keys[0] < -0.8 && Math.abs(out.pan.drag[0] + 0.5) < 0.06;
+  }
+  if (scene === 'k4') {
+    /* the check: a real right-click on the free stage opens nine rows, AUTO-ROTATE (✓, on from the boot) directly after LOCK; its press turns it off and
+       the next menu shows it off; the menu stays on the screen at the stage's corners; pictures light (top-left) and dark (bottom-right) */
+    const ESC = '';
+    const menu = () => g.ev(`const p = document.querySelector('.mir-ctx-pane'); if (!p) return null; const R = p.getBoundingClientRect();
+      return { rows: [...p.querySelectorAll(':scope > .mb-item')].map((b) => ({ lbl: (b.querySelector('.mb-lbl') || b).textContent.trim(), checked: b.getAttribute('aria-checked'), hint: b.title || b.dataset.help || '' })),
+        box: [R.left, R.top, R.right, R.bottom].map(Math.round), vw: innerWidth, vh: innerHeight };`);
+    const free = (fx, fy) => g.ev(`const S = document.querySelector('#stage').getBoundingClientRect();
+      for (let k = 0; k < 60; k++) { const x = S.left + S.width * (${fx} + (0.5 - ${fx}) * k / 60), y = S.top + S.height * (${fy} + (0.5 - ${fy}) * k / 60), h = document.elementFromPoint(x, y);
+        if (h && h.tagName === 'CANVAS' && h.closest('#stage')) return [Math.round(x), Math.round(y)]; } return null;`);
+    const right = async (p) => { await drv.actions(g.s, [{ type: 'pointer', id: 'r' + (++pid), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: p[0], y: p[1] },
+      { type: 'pointerDown', button: 2 }, { type: 'pointerUp', button: 2 }] }]); await nap(400); return menu(); };
+    const auto = () => g.ev(`return __LW.actions.get('camera.autoRotate').get();`);
+    const c = await free(0.5, 0.5); out.centre = await right(c);
+    const L = out.centre.rows.map((r) => r.lbl), iLock = L.findIndex((l) => l.startsWith('LOCK')), iAuto = L.findIndex((l) => l.startsWith('AUTO-ROTATE'));
+    out.order = { L, iLock, iAuto, auto0: await auto() };
+    await g.tap('.mir-ctx-pane > .mb-item:nth-of-type(' + (iAuto + 1) + ')').catch(() => 0);
+    await nap(300); out.order.afterPress = await auto(); const again = await right(c); out.order.shownOff = again && again.rows[iAuto].checked; await g.press(ESC); await nap(200);
+    await g.ev(`if (!__LW.actions.get('camera.autoRotate').get()) __LW.run('camera.autoRotate'); return 1;`);
+    const shots = {};
+    for (const [t, fx, fy] of [['light', 0, 0], ['dark', 1, 1]]) {
+      await theme(t); const p = await free(fx, fy); const m = await right(p); shots[t] = { at: p, box: m && m.box, on: m && m.box[0] >= 0 && m.box[1] >= 0 && m.box[2] <= m.vw && m.box[3] <= m.vh };
+      if (m) await shot(`038-K4-stage-menu-${t}`, [Math.min(p[0], m.box[0]) - 20, Math.min(p[1], m.box[1]) - 20, Math.max(p[0], m.box[2]) + 20, Math.max(p[1], m.box[3]) + 20]);
+      await g.press(ESC); await nap(200);
+    }
+    out.shots = shots;
+    out.ok = L.length === 9 && iAuto === iLock + 1 && out.centre.rows[iAuto].checked === 'true' && out.order.auto0 === true && out.order.afterPress === false && out.order.shownOff === 'false'
+      && shots.light.on && shots.dark.on && /fling/i.test(out.centre.rows[iAuto].hint);
   }
 } catch (e) { out.error = String(e && e.stack || e); }
 finally { out.errors = (await g.errors()).errs; await g.close(); }

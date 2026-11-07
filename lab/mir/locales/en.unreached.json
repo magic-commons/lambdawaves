@@ -169,13 +169,13 @@
  },
  {
   "file": "mir/modulation/window.js",
-  "line": 1118,
+  "line": 1122,
   "why": "fragment",
   "text": "px,"
  },
  {
   "file": "mir/modulation/window.js",
-  "line": 1866,
+  "line": 1871,
   "why": "fragment",
   "text": " failed to build"
  },
@@ -187,7 +187,7 @@
  },
  {
   "file": "mir/panels/camera.js",
-  "line": 436,
+  "line": 438,
   "why": "fragment",
   "text": "NORTH · back to "
  },

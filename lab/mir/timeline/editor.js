@@ -28,7 +28,9 @@
  * one model transaction (begin … commit, or cancel on Escape, a lost capture, a blur, a hidden page or a hidden interface); a drag's last
  * pointer sample is flushed before its commit; the nearest lane is resolved from content coordinates, never from
  * elementFromPoint; the hand leads the scrub (controller.js); zoom keeps the beat under the anchor; the playhead paints by
- * transform from the clock's tick; idle costs nothing (the only listeners are events; no loop).
+ * transform from the clock's tick; idle costs nothing (the only listeners are events; no loop — the edge pump runs only while a
+ * drag is held at the viewport's edge).  THE TIMELINE SCROLLS UNDER THE POINTER (1.5.7-alpha.9): the wheel scrolls time, a drag
+ * at the edge scrolls it (the wheel listener and the edge pump, below).
  * CHANGED FOR THE KIT: words through label / ariaLabel / t (nothing is found by its words); the keyboard is the app's one
  * key table (keys.js timelineActions: this file only exposes the verbs); toasts through `say`; the frame coalescer is
  * core/frame.js; the popups are the house's menu pane; BASINS' CURVE_VIEW numbers live in geometry.js. */
@@ -40,7 +42,7 @@ import { frame } from '../core/frame.js';
 import { isField } from '../core/pointer.js';
 import { t, tn } from '../core/i18n.js';
 import { coalesce } from './readout.js';
-import { TIMELINE_TAB_HEIGHT, TIMELINE_ROW_GAP, TIMELINE_CURVE_GRAB, TIMELINE_TENSION_TRAVEL, resizeTimelineClip, createClipCoordinates, snapTimelineBeat, timelineResizeDelta, nearestTimelineLane } from './geometry.js';
+import { TIMELINE_TAB_HEIGHT, TIMELINE_ROW_GAP, TIMELINE_CURVE_GRAB, TIMELINE_TENSION_TRAVEL, resizeTimelineClip, glueTimelineClips, createClipCoordinates, snapTimelineBeat, timelineResizeDelta, nearestTimelineLane } from './geometry.js';
 import { createTimelinePlot } from './curve-view.js';
 import { evaluateTimelineSource, normalizeTimelinePoints } from './source.js';
 import { clipKind } from './kinds.js';
@@ -263,6 +265,17 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   function setActiveRange(value){model.setActive(validRange(value));
     view.setActive(activeRange());paint();win.root?.dispatchEvent(new CustomEvent('timeline-active-range',{detail:activeRange()}));return activeRange();}
   const pointer=e=>({x:e.clientX,y:e.clientY,clientX:e.clientX,clientY:e.clientY,altKey:e.altKey,shiftKey:e.shiftKey,ctrlKey:e.ctrlKey,metaKey:e.metaKey,pointerId:e.pointerId});
+  /* THE EDGE PUMP (1.5.7-alpha.9, λWAVES 038 T3; Josh: "If I drag the playhead back or forward, it should scroll the timeline"): a
+     scrub (the playhead's drag), a range, a move, a trim or a stretch held within EDGE px of the viewport's left or right edge — or past
+     it — scrolls time each frame while it holds, faster the deeper it goes; the scroll reposts the last pointer (viewportPaint), so the
+     gesture follows the view.  It stops on release, a cancel, or the pointer coming back in. */
+  const EDGE=28,PUMPED=['scrub','range','move','trim','stretch'];let pumpId=0,pumpX=null;
+  function edgePump(){pumpId=0;if(!drag||!PUMPED.includes(drag.kind)||pumpX==null)return;const r=viewport.getBoundingClientRect(),z=Math.min(EDGE,r.width/4);
+    const depth=pumpX<r.left+z?pumpX-(r.left+z):pumpX>r.right-z?pumpX-(r.right-z):0;if(!depth)return;
+    const was=viewport.scrollLeft;viewport.scrollLeft=Math.max(0,was+Math.sign(depth)*Math.min(48,3+Math.abs(depth)*.5));
+    if(viewport.scrollLeft===was&&(depth<0||drag.kind==='scrub'||drag.kind==='range'))return;   // at the start, or a scrub at the content's end: nothing more to scroll (a moved clip grows the content, so it keeps going)
+    pumpId=requestAnimationFrame(edgePump);}
+  function pumpStop(){if(pumpId)cancelAnimationFrame(pumpId);pumpId=0;pumpX=null;}
   function drawStep(position,shiftKey){const{clip:c,curve,previous}=drag,grid=(snap||.0625)*c.scale;const samples=timelineStepSamples(previous,position,{step:grid,origin:c.offset-c.start*c.scale,min:c.offset,max:c.offset+c.duration*c.scale}),result=samples&&model.drawPoints(curve.id,samples,{hold:shiftKey,tension:drawTension});if((!samples||result?.full)&&!drag.warned){drag.warned=true;say(t('Curve point limit reached. Use a wider Snap grid or remove points.'));}drag.previous=position;}
   const updates=coalesce(e=>{
     if(!drag)return;drag.last=e;if(Math.hypot(e.x-drag.x,e.y-drag.y)>6)drag.moved=true;
@@ -293,10 +306,20 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       const lane=nearestTimelineLane(pos.y,doc.lanes.length,view.height()),anchorLane=doc.lanes.findIndex(l=>l.id===c.laneId);
       model.moveClips(drag.ids,{beatDelta:beat-anchor.start,laneDelta:lane-anchorLane,originals:drag.originals});return;
     }
-    if(drag.kind==='trim'){const delta=timelineResizeDelta(c,drag.edge,(pos.x-drag.startWorld.x)/px,snap,e.altKey);model.updateClip(c.id,resizeTimelineClip(c,drag.edge,delta,e.altKey?.0625:(snap||.0625)));return;}
-    // THE STRETCH (T17): the edge moves and the curve keeps its shape (model.stretchClip); Shift is ⅛ and free of Snap (T18).
-    if(drag.kind==='stretch'){const free=e.altKey||e.shiftKey,o=drag.original,g=drag.gear.step(pos,e),d=timelineResizeDelta(o,drag.edge,(g.x-drag.startWorld.x)/px,snap,free);
-      model.stretchClip(c.id,drag.edge==='right'?'end':'start',Math.max(free?.0625:(snap||.0625),drag.edge==='right'?o.duration+d:o.duration-d),{original:o});return;}
+    // THE TRIM: the pressed clip's edge snaps; with several selected (1.5.7-alpha.11) every one's same edge moves by that delta, each from its press-time snapshot.
+    if(drag.kind==='trim'){const delta=timelineResizeDelta(c,drag.edge,(pos.x-drag.startWorld.x)/px,snap,e.altKey),min=e.altKey?.0625:(snap||.0625);
+      for(const o of drag.originals||[c])model.updateClip(o.id,resizeTimelineClip(o,drag.edge,delta,min));return;}
+    // THE STRETCH (T17): the edge moves and the curve keeps its shape (model.stretchClip); Shift is ⅛ and free of Snap (T18).  With several
+    // selected (1.5.7-alpha.11) the glued block [start, end] scales by f about its other edge — the pressed clip's glued edge moves with the
+    // hand (snapped), f = its new distance from the pivot / its old one: start' = pivot + (start − pivot)·f, duration·f, scale / f (each curve
+    // keeps its shape, touching clips stay touching); the pressed clip never shrinks under the least length, the block never crosses beat 0.
+    if(drag.kind==='stretch'){const free=e.altKey||e.shiftKey,g=drag.gear.step(pos,e),raw=(g.x-drag.startWorld.x)/px,min=free?.0625:(snap||.0625);
+      if(drag.glued){const{list,start,end}=drag.glued,right=drag.edge==='right',me=list.find(o=>o.id===c.id)||list[0],pivot=right?start:end;
+        const d=timelineResizeDelta(me,drag.edge,raw,snap,free),span=right?me.start+me.duration-pivot:pivot-me.start;
+        const f=Math.min(right?Infinity:end/(end-start),Math.max(min/me.duration,(span+(right?d:-d))/span));
+        for(const o of list)model.updateClip(o.id,{start:Math.max(0,pivot+(o.start-pivot)*f),duration:o.duration*f,scale:o.scale/f});return;}
+      const o=drag.original,d=timelineResizeDelta(o,drag.edge,raw,snap,free);
+      model.stretchClip(c.id,drag.edge==='right'?'end':'start',Math.max(min,drag.edge==='right'?o.duration+d:o.duration-d),{original:o});return;}
     const plot=view.plot(c.id);if(!plot)return;const rect=plot.getBoundingClientRect(),{width,height}=plot.viewBox.baseVal,geometry=createClipCoordinates(c,curve.length,px,height),x=(e.x-rect.left)/rect.width*width,y=(e.y-rect.top)/rect.height*height;
     if(drag.kind==='step'){drawStep({beat:geometry.sourceBeatAtX(bounded(x,0,width)),value:bounded(geometry.valueAtY(y))},e.shiftKey);return;}
     if(drag.kind==='point'||drag.kind==='points'){
@@ -308,7 +331,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(drag.kind==='tension'){const a=curve.points[drag.index],b=curve.points[drag.index+1],sign=b.v<a.v?-1:1;drawTension=bounded(drag.tension+sign*tensionDelta(drag.y,e.y,e,drag.gear)/TIMELINE_TENSION_TRAVEL,-1,1);model.setTension(curve.id,drag.index,drawTension);}
   });
   function finish(e,cancel=false,rewind=false){
-    if(!drag||e&&e.pointerId!==drag.pointerId)return;updates.flush();if(!drag)return;const held=drag;drag=null;delete surface.dataset.gesture;delete surface.dataset.dragClip;view.marquee.style.display='none';
+    if(!drag||e&&e.pointerId!==drag.pointerId)return;pumpStop();updates.flush();if(!drag)return;const held=drag;drag=null;delete surface.dataset.gesture;delete surface.dataset.dragClip;view.marquee.style.display='none';
     try{if(surface.hasPointerCapture(held.pointerId))surface.releasePointerCapture(held.pointerId);}catch(_){}
     if(held.kind==='scrub')controller.endScrub({cancel:rewind});
     if(held.kind==='range'&&cancel){range=held.oldRange;view.setRange(range);view.paint();}
@@ -359,8 +382,13 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     // A kind without points has no curve gestures: its body handles like its tab (move, Ctrl-copy, right-delete).
     const grab=handle||(kind?plot||target.closest('.tl-clip'):null);
     // AN EDGE: a plain drag trims; Ctrl stretches (the shape keeps); Ctrl+Shift stretches at ⅛.  Shift alone selects (below).
-    const stretchFrom=(edgeName)=>{selectOnly(clip.id);begin(e,{kind:'stretch',edge:edgeName,clip,curve,original:{start:clip.start,duration:clip.duration,scale:clip.scale},gear:fineGear(view.world(e))},true);paintSelection();};
-    if(e.button===0&&edge&&clip&&tool==='edit'&&!hit?.kind&&(cmd||!shift)){if(cmd){stretchFrom(edge.dataset.trim);return;}selectOnly(clip.id);begin(e,{kind:'trim',edge:edge.dataset.trim,clip,curve},true);paintSelection();return;}
+    // THE SELECTION RESIZES TOGETHER (1.5.7-alpha.11, λWAVES 038 T5): an edge pressed on a clip inside a selection of several keeps the
+    // selection — a trim moves that edge of every selected clip by the same snapped beats (each keeps its own start on a right edge);
+    // a stretch first closes the gaps between them (glueTimelineClips: lane by lane), then scales the block about its other edge.
+    const edgeFrom=(edgeName,stretch)=>{const many=selection.has(clip.id)&&selection.size>1;if(many){selected=clip.id;pointSelection=null;}else selectOnly(clip.id);
+      const originals=many?doc.clips.filter(c=>selection.has(c.id)):null;
+      begin(e,{kind:stretch?'stretch':'trim',edge:edgeName,clip,curve,originals,glued:stretch&&many?glueTimelineClips(originals):null,original:{start:clip.start,duration:clip.duration,scale:clip.scale},gear:fineGear(view.world(e))},true);paintSelection();};
+    if(e.button===0&&edge&&clip&&tool==='edit'&&!hit?.kind&&(cmd||!shift)){edgeFrom(edge.dataset.trim,cmd);return;}
     // SHIFT SELECTS: on empty space a drag is the marquee (Ctrl+Shift adds to the selection), a click on a clip toggles it; the
     // SELECT tool's plain drag is the same marquee (and its Shift adds).  A Shift press on a point or a handle is the fine gear.
     if(e.button===0&&(tool==='select'||shift&&!(plot&&hit?.kind)&&!(cmd&&trimZone))){
@@ -373,9 +401,9 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       // other tabs deletes each of those too, the whole sweep as one undo transaction (begin here,
       // commit/cancel in finish()). The MIR plot curve law and the tab's ⋯ menu are untouched.
       if(e.button===2){e.preventDefault();lastTap=null;closeMenu();begin(e,{kind:'delete',clip,curve},true);if(doc.clips.some(x=>x.id===clip.id))model.deleteClip(clip.id);return;}if(e.button!==0)return;
-      if(cmd&&trimZone){stretchFrom(trimZone.dataset.trim);return;}
+      if(trimZone){edgeFrom(trimZone.dataset.trim,cmd);return;}
       // CTRL CLONES (call 1): a Ctrl-drag on a title (or a kind's body) duplicates the selection while moving it.
-      if(!selection.has(clip.id))selectOnly(clip.id);else selected=clip.id;begin(e,{kind:trimZone?'trim':'move',edge:trimZone?.dataset.trim,copy:cmd&&!trimZone,clip,curve,ids:[...selection],originals:doc.clips.filter(c=>selection.has(c.id))},true);paintSelection();return;
+      if(!selection.has(clip.id))selectOnly(clip.id);else selected=clip.id;begin(e,{kind:'move',copy:cmd,clip,curve,ids:[...selection],originals:doc.clips.filter(c=>selection.has(c.id))},true);paintSelection();return;
     }
     if(plot&&!kind){
       selected=clip.id;if(!selection.has(clip.id))selection=new Set([clip.id]);const action=curveAction(e,hit);
@@ -408,14 +436,21 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   listen(viewport,'dragover',e=>{if(!dropHandlers.size)return;e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect='copy';});
   listen(viewport,'drop',e=>{if(!dropHandlers.size)return;e.preventDefault();const where=at(e.clientX,e.clientY),files=[...(e.dataTransfer?.files||[])];for(const fn of dropHandlers)if(fn({event:e,files,dataTransfer:e.dataTransfer,...where}))break;});
   listen(surface,'contextmenu',e=>e.preventDefault());listen(surface,'auxclick',e=>{if(e.button===1)e.preventDefault();});listen(surface,'lostpointercapture',e=>finish(e,true));
-  listen(document,'pointermove',e=>{if(drag&&e.pointerId===drag.pointerId){e.preventDefault();updates.post(pointer(e));}},{passive:false});listen(document,'pointerup',e=>finish(e));listen(document,'pointercancel',e=>finish(e,true));
+  listen(document,'pointermove',e=>{if(drag&&e.pointerId===drag.pointerId){e.preventDefault();updates.post(pointer(e));if(PUMPED.includes(drag.kind)){pumpX=e.clientX;if(!pumpId)pumpId=requestAnimationFrame(edgePump);}}},{passive:false});listen(document,'pointerup',e=>finish(e));listen(document,'pointercancel',e=>finish(e,true));
   listen(document,'pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!surface.contains(e.target))closeMenu();});
   /* ESCAPE is not a table action (the kit keeps it): it only ends what is in flight.  HIDE needs no key of its own here:
      whatever key the table gives it, the interface going out of paint (body.ui-hidden) ends it (hiddenObserver below) */
   listen(document,'keydown',e=>{if(e.code==='Escape'){closeMenu();finish(null,true,true);}});
   listen(document,'visibilitychange',()=>{if(document.hidden){closeMenu();finish(null,true);headPaint.reset();}});listen(globalThis,'blur',()=>{closeMenu();finish(null,true);});
-  listen(view.shell,'wheel',e=>{if(!(e.ctrlKey||e.metaKey)||!e.deltaY)return;e.preventDefault();e.stopPropagation();const anchor=bounded(e.clientX-viewport.getBoundingClientRect().left,0,viewport.clientWidth),delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?viewport.clientHeight:1);zoom(Math.exp(-bounded(delta,-120,120)*.003),anchor);},{passive:false});
-  const viewportPaint=coalesce(()=>{paint();if(drag?.last&&['select','point','points','move','trim','stretch'].includes(drag.kind))updates.post(drag.last);});
+  /* THE TIMELINE SCROLLS UNDER THE POINTER (1.5.7-alpha.9, λWAVES 038 T3; Josh: "Scroll on timeline doesn't seem to work"): Ctrl/Cmd +
+     wheel zooms about the pointer, as before; a plain wheel scrolls TIME while the lanes fit the height (they fill it, so a vertical
+     wheel had nothing to scroll), Shift + wheel always does (a trackpad's sideways swipe is the native scroll); with more lanes than
+     fit, the plain wheel scrolls the lanes.  The wheel lands on the element under the pointer: no window registry. */
+  listen(view.shell,'wheel',e=>{const unit=e.deltaMode===1?16:e.deltaMode===2?viewport.clientWidth:1;
+    if(e.ctrlKey||e.metaKey){if(!e.deltaY)return;e.preventDefault();e.stopPropagation();const anchor=bounded(e.clientX-viewport.getBoundingClientRect().left,0,viewport.clientWidth),delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?viewport.clientHeight:1);zoom(Math.exp(-bounded(delta,-120,120)*.003),anchor);return;}
+    const tall=viewport.scrollHeight>viewport.clientHeight+1,d=e.shiftKey?(e.deltaY||e.deltaX):tall||Math.abs(e.deltaX)>Math.abs(e.deltaY)?0:e.deltaY;
+    if(!d)return;e.preventDefault();e.stopPropagation();viewport.scrollLeft=Math.max(0,viewport.scrollLeft+d*unit);},{passive:false});
+  const viewportPaint=coalesce(()=>{paint();if(drag?.last&&['select','point','points','move','trim','stretch','scrub','range'].includes(drag.kind))updates.post(drag.last);});
   listen(viewport,'scroll',()=>viewportPaint.post(),{passive:true});const observer=new ResizeObserver(()=>viewportPaint.post());observer.observe(viewport);
   const hiddenObserver=new MutationObserver(()=>{if(document.body.classList.contains('ui-hidden')){closeMenu();finish(null,true);headPaint.reset();}else if(win.isOpen())viewportPaint.post();});hiddenObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
   const unsubscribe=model.subscribe(()=>{doc=model.state();view.setDocument(doc);view.setActive(activeRange());reconcile();if(win.isOpen()&&!document.body.classList.contains('ui-hidden'))paint();present();});

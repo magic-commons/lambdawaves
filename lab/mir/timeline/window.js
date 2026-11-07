@@ -9,7 +9,8 @@
  *   createTimeline(host, port) → tl
  *     host    the element the window and its rail go in (the app's float layer)
  *     port    { model, mod, controller?, present?, say?, dock?, store?, size?, min?, keys?, transport?, audio?, id?, title?,
- *               remap?, loop? }  (docs/TIMELINE.md: the port; loop: false keeps the clock free-running, 1.5.6-alpha.25)
+ *               remap?, loop? }  (docs/TIMELINE.md: the port; loop: false keeps the clock free-running, 1.5.6-alpha.25;
+ *               otherwise an empty arrangement loops its first bar, 1.5.7-alpha.8)
  *   tl: { win, root, rail, editor, model, controller, transport, open, close, toggle, isOpen, paintHead, presentation,
  *         restore, shortcuts(x, y), destroy }
  *
@@ -80,8 +81,10 @@ export function createTimeline(host, port) {
   function fit() { editor.act.zoomAll(); const r = win.rect(); if (!r) return;
     const n = model.state().lanes.length, lanes = n * (LANE_FIT + TIMELINE_TAB_HEIGHT) + (n - 1) * TIMELINE_ROW_GAP;
     win.resize({ h: Math.min(size.h, Math.max(min.h, r.height - editor.view.viewport.clientHeight + lanes)) }); }
-  /* THE LOOP (1.5.6-alpha.25): the ruler's range › the ACTIVE range › the clips' extent › free run, on the kit's controller */
-  if (port.loop !== false && typeof controller.loopFrom === 'function') controller.loopFrom({ range: () => editor.range(), active: () => editor.activeRange(), extent: () => model.extent() });
+  /* THE LOOP (1.5.6-alpha.25): the ruler's range › the ACTIVE range › the clips' extent, on the kit's controller.
+     THE EMPTY TIMELINE RESTS (1.5.7-alpha.8, λWAVES 038 T1): with no clip playing the loop is the first bar — never a free
+     run to bar 200 — so the clock lives (every synced LFO keeps its phase) and a first clip lands at 1.1 under the head */
+  if (port.loop !== false && typeof controller.loopFrom === 'function') controller.loopFrom({ range: () => editor.range(), active: () => editor.activeRange(), extent: () => model.extent() || { start: 0, end: model.meter() } });
 
   /* THE ONE PLAY, in the work bar: the kit's transport in BASINS' timeline form */
   const clock = {

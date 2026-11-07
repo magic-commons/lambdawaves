@@ -72,7 +72,7 @@ export function createLight(app) {
 
   /* ── the KEY: the SUN pad (the kit's XY pad dressed as a disc, its lattice swelling under the sun) and its dials ── */
   const top = el('div', 'lw-light-key', w.body), hp = padOf(HOME.az, HOME.el);
-  const sun = xyPad({ aria: 'the key light’s direction', cls: 'lw-sun', home: hp, onInput: fromPad, onChange: fromPad,
+  const sun = xyPad({ aria: 'the key light’s direction', cls: 'lw-sun', home: hp, wrap: 'sphere', onInput: fromPad, onChange: fromPad,   // 038 K3: MIR 1.5.7-alpha.13 THE PAD WRAPS
     x: { label: 'ACROSS', min: -1, max: 1, value: hp[0] }, y: { label: 'UP', min: -1, max: 1, value: hp[1] } });
   top.appendChild(sun.root);
   sun.pad.querySelector('.xy-lattice').insertAdjacentHTML('afterend', '<svg class="lw-sun-rings" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/><circle class="lw-sun-horizon" cx="50" cy="50" r="25"/></svg>');
@@ -81,7 +81,7 @@ export function createLight(app) {
   for (const k of ['key', 'softness', 'hue', 'tint']) side.appendChild(dial(k).root);
   function fromPad(u, v) {
     let r = Math.hypot(u, v);
-    if (r > 1) { u /= r; v /= r; r = 1; sun.set(u, v); }                  // the disc's rim is straight behind: the hand slides along it
+    if (r > 1) { u /= r; v /= r; r = 1; sun.set(u, v); }                  // the rim is straight behind: a drag past it comes round the far side (the pad's 'sphere' wrap); the two hidden knobs may still ask r > 1, and slide onto it
     const home = Math.abs(u - hp[0]) < 1e-9 && Math.abs(v - hp[1]) < 1e-9;   // Home or a double-tap: the old light's numbers exactly
     hand('az', home ? HOME.az : r < 1e-6 ? cur('az') : Math.atan2(v, u) / RAD); hand('el', home ? HOME.el : 90 - 180 * r);
   }
@@ -103,7 +103,7 @@ export function createLight(app) {
   for (const k of ['fill', 'fillAz', 'fillEl']) fillRow.appendChild(dial(k).root);
   for (const k of ['cone', 'blend']) spotRow.appendChild(dial(k).root);
   fold(verbs, more, { what: 'the fill and the spot', key: 'light-more' });
-  el('div', 'note', w.body).innerHTML = '<b>Lighting.</b> Drag the sun: the centre faces you, the dashed ring is the horizon, the rim is straight behind. CAMERA keeps the light on your eye as you orbit; WORLD leaves it on the object. RESET is the old light.';
+  el('div', 'note', w.body).innerHTML = '<b>Lighting.</b> Drag the sun: the centre faces you, the dashed ring is the horizon, the rim is straight behind, and a drag past the rim comes round the other side. CAMERA keeps the light on your eye as you orbit; WORLD leaves it on the object. RESET is the old light.';
 
   /* FRAME: the lights stay where they are as the frame changes (the eye's basis now), so the press changes what an orbit does, never the picture */
   function reframe(to) {

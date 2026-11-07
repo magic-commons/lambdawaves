@@ -270,7 +270,8 @@ export function dragTravel(e, { touch = false, travel, fine } = {}) {
  *   onReset: what a wheel's reset does; size: 'lg'; travel / fine: this knob's own drag law (see setKnobLaw).
  *   dragAxis: 'vertical' (the default: one law for every knob) or 'sum' (the 1.4 law, rise + sideways, for an app that has not moved).
  *   reverse: the dial turns the other way (1.5.0-alpha.25, λWAVES 014 D5): the needle reads max at the left, a rise or an arrow up moves it
- *   right and lowers the value; the value, min / max, aria-value* and a modulation map are unchanged (not on a wrap knob).
+ *   right and lowers the value; the value, min / max, aria-value* and a modulation map are unchanged (not on a wrap knob).  The root
+ *   wears `k-rev` (1.5.7-alpha.12), so the modulation window's route ring mirrors with the needle.
  *   → { root, get, set(x, silent = true), show(x), shown, setDefault(x), setDisabled(on), setBase(fn), paint }
  */
 export function knob(o) {
@@ -282,6 +283,7 @@ export function knob(o) {
   let v = o.value, def = o.value, dragging = false, disabled = false, fine = false;   // fine: the menu's FINE (half the drag gain, this session)
   let shown = null;                 // a value PAINTED over the base by a modulator (show()); the base v is what the hand owns
   const lo = o.min, hi = o.max, log = !!o.log, rev = !!o.reverse && !o.wrap;   // rev: the displayed direction flips (see reverse above)
+  if (rev) root.classList.add('k-rev');   // 1.5.7-alpha.12 THE RING FOLLOWS THE DIAL: an overlay drawn in value space (the route ring) mirrors with it
   const norm = (x) => log ? (Math.log(x) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) : (x - lo) / (hi - lo);
   const denorm = (p) => log ? Math.exp(Math.log(lo) + p * (Math.log(hi) - Math.log(lo))) : lo + p * (hi - lo);
   const fmt = o.fmt || ((x) => (Math.abs(x) >= 100 ? x.toFixed(0) : Math.abs(x) >= 10 ? x.toFixed(1) : x.toFixed(2)) + (o.unit || ''));
