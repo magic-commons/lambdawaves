@@ -281,36 +281,49 @@ export function createModSeam(app) {
     function seatRect(where, w, h) {
       const vw = window.innerWidth, vh = window.innerHeight;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
-      const top = where === 'top' ? Math.max(narrowRack ? 112 : 52, clearPx) : vh - 60 - h;
+      const z = cssZoom(document.getElementById('transport') || document.body) || 1;   // 038 M7: the seats are the bar's own px — at UI SCALE 150 % its 52 px top is 78 on the screen
+      const top = where === 'top' ? Math.max(narrowRack ? 112 : 52, clearPx) * z : vh - 60 - h;
       const left = narrowRack ? vw - w - 10 : (vw - w) / 2;
       return { left, right: left + w, top, bottom: top + h };
     }
-    /* 038 M6 · THE BAR CLEARS THE LEFT RACK (the fresh eyes: at 820 px ADVANCED's third left card drew over the bar): the top seat — a narrow stage's
-       always, a wide one's `.at-top` — sits under the left rack's last card wherever the bar or its PLAY shares the rack's columns: `--csb-clear` on
-       the bar, read as max(the seat, the clear) by lab.css and csb.css, absent when nothing is in the way, and never lower than the room above the
-       foot (a narrow stage's bottom rack) leaves.  The left rack's box is its cards' (lab.css: top 0, bottom auto), so its ResizeObserver, the bar's
-       own box and class, the body's class (B, H) and a resize ask again, once a frame */
-    const rackLEl = document.getElementById('rackL'); let clearPx = 0, clearBooked = 0;
+    /* 038 M6 · M7 · THE BAR CLEARS THE RACKS (the fresh eyes: at 820 px ADVANCED's third left card drew over the bar; at 1000 × 700 the bar sat on
+       the right rack's CAMERA and CLIP; at UI SCALE 150 % its PLAY and mini-viewer reached over both columns): the top seat — a narrow stage's
+       always, a wide one's `.at-top` — sits under the last card of every rack hanging from the stage's top whose columns the bar, its PLAY or its
+       mini-viewer shares: `--csb-clear` on the bar (the greater rack's end + 10 px), read as max(the seat, the clear) by lab.css and csb.css and by
+       `seatRect`, absent when nothing is in the way, and never lower than the room above the foot (a narrow stage's bottom rack) leaves.  Where no
+       seat clears a rack's cards (the foot's room is short of them), the bar goes UNDER the racks as it does under a float (`rackOver` in `under`).
+       A rack's box is its cards' (lab.css: top 0, bottom auto), so their ResizeObserver, the bar's own box and class, the body's class (B, H) and a
+       resize ask again, once a frame */
+    const racksEl = ['rackL', 'rack'].map((id) => document.getElementById(id)).filter(Boolean); let clearPx = 0, clearBooked = 0;
+    const shownCard = (d) => d.classList.contains('dev') && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating');
+    /** the bar on the stage and its columns: its box with PLAY beside its left edge and the mini-viewer beside its right (each when drawn), or null */
+    const barSpan = () => {
+      const t = document.getElementById('transport');
+      if (!t || !t.classList.contains('mini') || t.dataset.place === 'free' || document.body.classList.contains('rack-hidden') || !t.offsetWidth) return null;
+      const rs = [t, t.querySelector(':scope > .csb-play'), t.querySelector(':scope > .csb-mini')].filter((e) => e && e.offsetWidth).map((e) => e.getBoundingClientRect());
+      return { left: Math.min(...rs.map((r) => r.left)), right: Math.max(...rs.map((r) => r.right)), top: Math.min(...rs.map((r) => r.top)), bottom: Math.max(...rs.map((r) => r.bottom)) };
+    };
+    const rackOver = () => { const s = barSpan(); return !!s && racksEl.some((rk) => [...rk.children].some((d) => shownCard(d) && hits(d.getBoundingClientRect(), s))); };
     function clearRack() {
       clearBooked = 0;
-      const t = document.getElementById('transport'); if (!t) return;
+      const t = document.getElementById('transport'), s = barSpan(); if (!t) return;
       let v = 0;
-      const shown = (d) => d.classList.contains('dev') && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating');
-      if (rackLEl && t.classList.contains('mini') && t.dataset.place !== 'free' && !document.body.classList.contains('rack-hidden') && [...rackLEl.children].some(shown)) {
-        const r = rackLEl.getBoundingClientRect(), b = t.getBoundingClientRect(), p = t.querySelector(':scope > .csb-play'), left = Math.min(b.left, p ? p.getBoundingClientRect().left : b.left);
-        if (b.width && r.width && r.right > left && r.left < b.right) {
-          const foot = narrowNow() ? (document.getElementById('rack') || rackLEl).getBoundingClientRect().top : innerHeight - 60;
-          v = Math.max(0, Math.round((Math.min(r.bottom + 10, foot - b.height - 10) - (t.offsetParent || document.body).getBoundingClientRect().top) / (cssZoom(t) || 1)));
-        }
+      const hang = s ? racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => rk.getBoundingClientRect()).filter((r) => r.width && r.top < 52 && r.right > s.left && r.left < s.right) : [];
+      if (hang.length) {   // a narrow stage's right rack lies along the foot (its top is not the stage's): never one to clear by going lower
+        const b = t.getBoundingClientRect(), foot = narrowNow() ? (document.getElementById('rack') || t).getBoundingClientRect().top : innerHeight - 60;
+        v = Math.max(0, Math.round((Math.min(Math.max(...hang.map((r) => r.bottom)) + 10, foot - b.height - 10) - (t.offsetParent || document.body).getBoundingClientRect().top) / (cssZoom(t) || 1)));
       }
-      if (v === clearPx) return;
-      clearPx = v; if (v) t.style.setProperty('--csb-clear', v + 'px'); else t.style.removeProperty('--csb-clear');
-      occlusion.dirty();   // the line masks follow the bar, paused or not
+      if (v !== clearPx) { clearPx = v; if (v) t.style.setProperty('--csb-clear', v + 'px'); else t.style.removeProperty('--csb-clear'); occlusion.dirty(); }   // the line masks follow the bar, paused or not
+      if (!trMoving) under(blocked);   // a seat that still meets a rack's cards: the bar under them
     }
-    { const book = () => { if (!clearBooked) clearBooked = requestAnimationFrame(clearRack); }, t = document.getElementById('transport');
-      if (typeof ResizeObserver === 'function') { const ro = new ResizeObserver(book); if (rackLEl) ro.observe(rackLEl); if (t) ro.observe(t); }
-      if (t) new MutationObserver(book).observe(t, { attributes: true, attributeFilter: ['class', 'data-place'] });
-      new MutationObserver(book).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    /* no ResizeObserver on the racks (M7: a card another observer resized inside the racks left theirs undelivered — the browser's "loop" error):
+       a card opened, closed or folded (its class, in either rack), the bar's class, the body's class and a resize ask once a frame, and once more when
+       a fold's or a dodge's motion has landed */
+    { let settle = 0; const ask = () => { if (!clearBooked) clearBooked = requestAnimationFrame(clearRack); }, book = () => { ask(); clearTimeout(settle); settle = setTimeout(ask, 420); };
+      const mo = new MutationObserver(book), t = document.getElementById('transport');
+      for (const rk of racksEl) mo.observe(rk, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden'] });
+      if (t) mo.observe(t, { attributes: true, attributeFilter: ['class', 'data-place'] });
+      mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
       addEventListener('resize', book); }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
@@ -328,7 +341,7 @@ export function createModSeam(app) {
       const b = t.getBoundingClientRect(); if (!b.width) return false;
       return open.some((n) => { const r = n.getBoundingClientRect(); return r.width > 0 && hits(r, b); });
     };
-    const under = (on) => document.body.classList.toggle('transport-under', !!on || floatOver());
+    const under = (on) => document.body.classList.toggle('transport-under', !!on || floatOver() || rackOver());   // 038 M7: and under a rack's cards no seat cleared
     if (floatsEl) {   // a float opened, closed, moved or resized: ask again, once a frame
       let booked = 0; const book = () => { if (!booked) booked = requestAnimationFrame(() => { booked = 0; if (!trMoving) under(blocked); }); };
       const mo = new MutationObserver((list) => { for (const m of list) for (const n of m.addedNodes || []) if (n.nodeType === 1) watch(n); book(); });
