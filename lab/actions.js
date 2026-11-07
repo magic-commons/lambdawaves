@@ -12,7 +12,7 @@
 import { TIER } from './tier.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from './field.js'; import { CAM } from './camera-law.js'; import { STAGE_BINDINGS } from './stage-gestures.js';
 import { infoActions } from './mir/info/layer.js'; import { mirGui } from './mir-gui.js'; import { ASK_ENABLED } from './ask.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
 import { EXPORTS } from './export3d.js'; import { isField } from './mir/core/pointer.js';
-import { knobAct } from './mir/shell/menubar.js'; import { copyText } from './mir/shell/clipboard.js';
+import { knobAct } from './mir/shell/menubar.js'; import { copyText } from './mir/shell/clipboard.js'; import { notice } from './mir/shell/notice.js'; import { quickSaved } from './shell/persist.js';
 
 const F = (a) => (a && a.fine) || 1;   // the fine step a key's Shift asks for (1 bare, 0.25 with Shift)
 
@@ -40,7 +40,9 @@ export function createActions(app) {
   const IP = infoPrefs(), infoKeys = INFO_ROWS.filter((r) => r.type === 'bool').map((r) => r.key); let infoKept = null;
   /* 022 P2 · the rows a CONTEXT MENU runs (lab/context-menus.js hands the pressed element as `{ el }`; a key acts on the focus) */
   const at = (a) => (a && a.el) || document.activeElement || document.body, eventAt = (a) => { const t = at(a); return t.closest ? t.closest('[data-event]') : null; }, knobAt = (a) => at(a).closest && at(a).closest('.k'), tileAt = (a) => at(a).closest && at(a).closest('.mm-tile');
-  const said = (ok, what) => W().wState.setStatus(ok ? what + ' copied' : 'the clipboard refused the copy', ok ? 'live' : 'warn');
+  /* 039 W6 EVERY ROW ANSWERS: a row's result is said where it is seen — the toast — and kept on SPECTRUM's status line */
+  const tell = (line, ok = true) => { W().wState.setStatus(line, ok ? 'live' : 'warn'); notice(line, { kind: ok ? 'ok' : 'warn', ms: ok ? 3200 : 5000 }); };
+  const said = (ok, what) => tell(ok ? what + ' copied' : 'the clipboard refused the copy', ok);
   const copyOut = (text, what) => { if (!text) return false; copyText(String(text)).then((ok) => said(ok, what)); return true; };
   const wordOf = (k, a) => { const t = tileAt(a); if (t) return k === 'name' ? (t.getAttribute('aria-label') || '').split(' — ')[0] : (t.querySelector('.mm-lbl, .mm-sym') || {}).textContent;
     const q = (s) => (document.querySelector(s) || {}).textContent; return k === 'name' ? q('.mol-pick .mir-step-name') : q('.lw-stage .mir-info-text'); };
@@ -76,7 +78,7 @@ export function createActions(app) {
     ...[['panLeft', 'left', 'ArrowLeft', -1, 0], ['panRight', 'right', 'ArrowRight', 1, 0], ['panUp', 'up', 'ArrowUp', 0, 1], ['panDown', 'down', 'ArrowDown', 0, -1]].map(([id, w, k, x, y]) =>   // 0.4.0 S2: the lens shift, the nudge a press
       ({ id, group: C, short: 'pan ' + w, label: 'slide the picture ' + w + (x < 0 ? ' (the molecule stays the pivot)' : ''), hint: 'slide the picture ' + w, keys: ['Alt+' + k], run: (a) => H().panBy(STAGE_BINDINGS.nudge * F(a) * x, STAGE_BINDINGS.nudge * F(a) * y), surface: true })),
     { id: 'camera.panHome', icon: 'move', group: C, short: 'pan home', label: 'PAN HOME — the pivot back in the middle of the frame', hint: 'PAN HOME — the pivot to the middle', run: () => P().setShift(0, 0), surface: true },
-    ...[['lock', 'LOCK — the classic camera: the pan held at the centre', 'LOCK — pan and zoom at the centre'], ['flip', 'FLIP — the camera upside down'], ['autoRotate', 'AUTO-ROTATE — a fling never stops (no friction)']].map(([k, label, hint]) =>   // 038 K4: FRICTION read as 0, no ambient spin (CALLS 11-05 §3)
+    ...[['lock', 'LOCK — the classic camera: the pan held at the centre', 'LOCK — pan and zoom at the centre'], ['flip', 'FLIP — the view mirrored left ↔ right (a state round its own axis looks the same)', 'FLIP — mirror the view, left ↔ right'], ['autoRotate', 'AUTO-ROTATE — a fling never stops (no friction)']].map(([k, label, hint]) =>   // 038 K4: FRICTION read as 0, no ambient spin (CALLS 11-05 §3)
       ({ id: 'camera.' + k, icon: { lock: 'lock', flip: 'swap', autoRotate: 'loop' }[k], group: C, short: k === 'autoRotate' ? 'auto-rotate' : k, label, hint, kind: 'toggle', get: () => !!P().get(k), run: () => { P().set(k, !P().get(k)); if (k === 'lock') S().saveSettings(); }, surface: true })),
     ...['X', 'Y', 'Z'].map((x) => ({ id: 'axis' + x, group: ST, short: 'axis ' + x, label: 'rotation axis ' + x.toLowerCase(), keys: ['Key' + x], run: () => setAxis(x.toLowerCase()), surface: true })),
     ...[['rotorBoth', 'both', 'rotor both', 'rotor: both (spatial rotation)'], ['rotorPlus', '+', 'rotor +', 'rotor: plus alone'], ['rotorMinus', '−', 'rotor −', 'rotor: minus alone'], ['rotorK', 'K', 'rotor K', 'rotor: Runge–Lenz K']]
@@ -153,8 +155,9 @@ export function createActions(app) {
     /* 021 I1 · ONE ROAD TO NEW: FOLDERS asks its own "Save this first?" (SAVE & NEW · NEW WITHOUT SAVING); the key, the menu and the verb take it */
     { id: 'new', group: PJ, short: 'new', label: 'NEW — the empty project (FOLDERS asks first over unsaved work)', hint: 'NEW — the empty project', keys: ['Mod+Alt+KeyN'], exact: true, surface: true,
       async run() { proj().show(); const r = await proj().folders.fresh(); return r && r.ok ? undefined : r && r.asked ? 'NEW asks first: FOLDERS holds the question' : 'NEW did not open: the empty project could not be fetched'; } },
-    { id: 'quick.save', group: PJ, short: 'quick save', label: 'SAVE the experiment (quick)', run: () => S().save(), surface: true },
-    { id: 'quick.load', group: PJ, short: 'quick load', label: 'LOAD the last quick save', run: () => proj().openWith(() => S().restore() === true, 'quick load failed'), surface: true },
+    { id: 'quick.save', group: PJ, short: 'quick save', label: 'SAVE the experiment (quick)', run: () => { const ok = S().save(); tell(ok ? 'Quick save kept — QUICK › LOAD brings it back' : 'quick save failed', ok); }, surface: true },
+    { id: 'quick.load', group: PJ, short: 'quick load', label: 'LOAD the last quick save', hint: 'LOAD the last quick save — QUICK › SAVE keeps one', when: quickSaved,
+      run: () => { if (proj().openWith(() => S().restore() === true, 'quick load failed')) tell('Quick save loaded'); }, surface: true },
     { id: 'export.json', group: PJ, label: 'EXPORT the project (.json)', run: () => proj().download(), gesture: true, surface: true },
     { id: 'export.mir', group: PJ, label: 'EXPORT the project (.mir) — the selected one in FOLDERS, else the open one', hint: 'EXPORT the project (.mir)', run: () => proj().folders.exportProject('mir'), gesture: true, surface: true },
     { id: 'export.png', group: PJ, label: 'EXPORT the project as a PICTURE (.png), carrying the project inside it', hint: 'EXPORT the project as a picture', run: () => proj().folders.exportProject('png'), gesture: true, surface: true },
@@ -164,7 +167,7 @@ export function createActions(app) {
     { id: 'import', group: PJ, label: 'IMPORT a project (.json · .mir · picture)…', hint: 'IMPORT a project…', run: () => proj().pick(), gesture: true, surface: true },
     { id: 'copy.latex', group: PJ, label: 'COPY the state as LaTeX', run: () => W().copyLatex(), gesture: true, surface: true },
     { id: 'copy.json', group: PJ, label: 'COPY the experiment as JSON', run: () => S().copyJSON(), gesture: true, surface: true },
-    { id: 'copy.link', icon: 'link', group: PJ, label: 'COPY a LINK to this state', run: () => S().copyLink(), gesture: true, surface: true },
+    { id: 'copy.link', icon: 'link', group: PJ, label: 'COPY a LINK to this state', run: () => S().copyLink().then((e) => { if (e) tell(e.copied ? 'Link copied — ' + e.chars + ' characters' : 'the clipboard refused the link — SPECTRUM shows it to copy', e.copied); return e; }), gesture: true, surface: true },
     { id: 'copy.picture', group: PJ, short: 'copy picture', label: 'COPY the stage picture (PNG)', gesture: true, surface: true, undo: 'none',
       run: () => { const C = app.state.capApi && app.state.capApi.capture; if (!C || !globalThis.ClipboardItem) return false;
         navigator.clipboard.write([new ClipboardItem({ 'image/png': C.picture({ scale: 1 }).then((r) => r.blob) })]).then(() => said(true, 'the picture'), () => said(false)); } },
