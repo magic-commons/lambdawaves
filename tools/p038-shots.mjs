@@ -183,6 +183,11 @@ print(json.dumps({ 'mean': round(s.mean[0], 1), 'sd': round(s.stddev[0], 1), 'ce
     out.host = await ev(`const h = document.getElementById('nodeLayers'); return { host: getComputedStyle(h).zIndex, layer: getComputedStyle(h.firstElementChild).zIndex, sk: getComputedStyle(document.getElementById('skeleton')).zIndex };`);
     await ev(`for (const q of N.nodes()) N.remove(q.id); const id = N.add('grain'); N.set(id, 'amount', 1); await w(400); return 1;`);
     for (const t of [-1, 1]) { await ev(`N.set(N.nodes()[0].id, 'tone', ${t}); await w(400); return 1;`); out['tone' + t] = await stat('tone' + t); }
+    /* the film's road (paintLayer) on a flat grey of the stage's middle (217): its mean moves as the stage's did (tone 0 ≈ −1, tone ∓1 ≈ ∓24 / +17) */
+    out.film = await ev(`const { paintLayer } = await import('./node-layers.js'), m = (t) => { const c = document.createElement('canvas'); c.width = 400; c.height = 240; const g2 = c.getContext('2d');
+      g2.fillStyle = 'rgb(217,217,217)'; g2.fillRect(0, 0, 400, 240); paintLayer(g2, { type: 'grain', values: { amount: 1, size: 1, kind: 'mono', blend: 'soft-light', tone: t } }, 400, 240, 1, 7);
+      const d = g2.getImageData(0, 0, 400, 240).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; return +(s / (d.length / 4)).toFixed(1); };
+      return { base: 217, tone0: m(0), toneMinus1: m(-1), tonePlus1: m(1) };`);
     await ev(`const id = N.nodes()[0].id; N.set(id, 'tone', 0.4); N.set(id, 'amount', 0.35); N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 520 }); await w(400); return 1;`);
     out.card = await ev(`const c = card('grain'); return { rows: [...c.querySelectorAll('.nodes-face')].map((r) => [...r.children].map((k) => k.dataset.param ? k.dataset.param.split('.').pop() : k.className)),
       foot: !!c.querySelector('.nodes-foot'), box: rect(c), h: c.offsetHeight, bg: getComputedStyle(document.querySelector('.node-layer[data-type="grain"]')).backgroundImage.slice(0, 60) };`);
