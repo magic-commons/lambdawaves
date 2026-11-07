@@ -138,6 +138,19 @@ export function createNotebook(app) {
       layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu',
         open: reveal,
         can: (id) => { const d = document.querySelector('.dev[data-id="' + id + '"]'); return !d || !d.hidden ? true : MODE[id] === 'molecules' ? 'MOLECULES ONLY' : 'HYDROGEN ONLY'; } });   // 021 R5: the MODE table's word
+      /* 039 X7 · THE FINDER'S KEYWORDS (WALK-B #3: "grain", "film", "effects", "vignette" found nothing): until the kit's picker takes `keywords`
+         (FOR-KIT), a word a newcomer types also shows the window it names — the kit filters by title, then a row whose words begin with the typed
+         word comes back, and the first openable row is marked (the kit's own pointer road), so Enter opens it */
+      const FIND_WORDS = { nodes: 'effects fx grain film vignette curves colour color look blur glow bloom', render: 'film video movie mp4 export record',
+        light: 'lighting sun shadow lamp', stage: 'background colour color gamma axes frame', palette: 'colours colors gradient hue', observer: 'style look cloud',
+        camera: 'view zoom rotate orbit fov', clip: 'cut plane slice section', chem: 'molecule chemistry benzene water orbitals', spectrum: 'states hydrogen orbitals levels',
+        projects: 'save open files projects', history: 'undo redo', widgets: 'clock text', equalizer: 'audio sound music', informational: 'labels words captions text',
+        settings: 'quality performance theme', transport: 'play tempo bpm bar' };
+      { const F = layout.finder, q = F.root.querySelector('.wp-search');
+        if (q) q.addEventListener('input', () => { const s = q.value.trim().toLowerCase(); if (!s) return; let first = null;
+          for (const b of F.root.querySelectorAll('.wp-list [data-win]')) { if (b.hidden && (FIND_WORDS[b.dataset.win] || '').split(' ').some((w) => w.startsWith(s))) b.hidden = false;
+            if (!first && !b.hidden && !b.classList.contains('off')) first = b; }
+          if (first && !F.root.querySelector('.wp-list .on')) first.dispatchEvent(new PointerEvent('pointermove')); }); }
     }
     /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
     installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });
