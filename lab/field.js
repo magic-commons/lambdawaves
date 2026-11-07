@@ -1503,8 +1503,8 @@ export async function createField(canvas, opts = {}) {
   if (!navigator.gpu) { out.error = 'navigator.gpu is absent — WebGPU is not enabled in this browser'; return out; }
   /* OPTIMIZATION 2026-09-24 · M1 · THE ADAPTER AND THE DEVICE WERE ASKED FOR AT THE TOP OF <head> (lab/gpu-boot.js),
    * in parallel with the module graph — wave 58's `requiredLimits` block moved there whole.  This field takes that
-   * early request ONCE; any later createField asks for its own device through the same function, so one field's
-   * dispose() can never destroy another's.  The three sentences a failure says are this file's, as before. */
+   * early request ONCE; any later createField asks for its own device through the same function, so two fields never
+   * share a device (a loss or a test's destroy of one is not the other's).  The three sentences a failure says are this file's, as before. */
   const b = await (gpuBoot() || requestGpu());
   if (b.error) { out.error = 'WebGPU device request failed: ' + (b.error && b.error.message || b.error); return out; }
   if (!b.adapter) { out.error = 'no WebGPU adapter'; return out; }

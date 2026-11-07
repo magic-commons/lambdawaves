@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '595fcca1e97a'],
-  ['./build-id.js',                                                 '5e34f2e43c70'],
+  ['./build-id.js',                                                 '281bff592a8f'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '41922d244a06'],
@@ -72,7 +72,7 @@ const PRECACHE = [
   ['./eq-audio.js',                                                 '686716c5b301'],
   ['./equalizer.js',                                                'dd4a442671a6'],
   ['./export3d.js',                                                 'e239066523c5'],
-  ['./field.js',                                                    '74fcb4f2f3bc'],
+  ['./field.js',                                                    'a647cf907ba8'],
   ['./film-bake.js',                                                'c5897017b434'],
   ['./film-card.js',                                                '3631f6772c58'],
   ['./first-run.js',                                                'f50d77077982'],
@@ -150,7 +150,7 @@ const PRECACHE = [
   ['./linalg.js',                                                   'da2367cdcb97'],
   ['./loader.js',                                                   '5f3db87c55ea'],
   ['./look.js',                                                     '2bec6adca4f5'],
-  ['./main.js',                                                     '91aecb787ff4'],
+  ['./main.js',                                                     '015102de740e'],
   ['./manifest.webmanifest',                                        '3c7086f9dfa8'],
   ['./mapping.js',                                                  'af6824a8f2df'],
   ['./mathworker.js',                                               '24e51f82f922'],
@@ -397,7 +397,7 @@ const PRECACHE = [
   ['./project-store.js',                                            '22a3b1177f0c'],
   ['./projects.js',                                                 'ef2072401a66'],
   ['./qho.js',                                                      'c0dfa6e21c94'],
-  ['./rack.js',                                                     '8415321a44f6'],
+  ['./rack.js',                                                     '87fb187d5637'],
   ['./radiation.js',                                                '678be6f37657'],
   ['./radiationview.js',                                            '35acade8563e'],
   ['./register-morph.js',                                           'cf0e273be934'],
@@ -507,11 +507,15 @@ const PRECACHE = [
  * and never need it.
  * THE PARSERS (038 Z3) are DATA by the same rule: the notebook's marked and KaTeX and KaTeX's sheet (mir/shell/vendor/, 327 KiB every install
  * carried) — index.html loads them as before, and the page keeps what loaded once the worker is registered (main.js), so an installed app sets
- * maths offline from its second open; a kit adoption may change them under the same names, so every new build sweeps them and the next open
- * keeps the new bytes.  KaTeX's twenty faces stay precached (each is a @font-face's first source). */
+ * maths offline from its second open.  KaTeX's twenty faces stay precached (each is a @font-face's first source).
+ * 038 Z6 · THE KEPT PARSERS SURVIVE AN UPDATE: Z3 swept them at every activate, so an app reopened OFFLINE after a background update set its
+ * maths as raw TeX until the next online open.  KEPT is this build's bytes of each (sha-256's first 12 hex, stamped by tests/pwa.test.mjs
+ * --write as §1 is); the activate digests a kept copy and deletes it only when it differs — a kit adoption that changed it — and the next
+ * open keeps the new bytes. */
 const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/', 'mir/shell/vendor/marked.min.js', 'mir/shell/vendor/katex/katex.min.js', 'mir/shell/vendor/katex/katex.min.css'];
+const KEPT = [['mir/shell/vendor/katex/katex.min.css', '717bc9ae7853'], ['mir/shell/vendor/katex/katex.min.js', 'e6bfe5deebd4'], ['mir/shell/vendor/marked.min.js', '15fabce5b658']];
 const DATA_CACHE = 'lw-data-v1';
-const SWEEP = ['demos/covers/', 'vendor/nist/', 'mir/shell/vendor/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4); img/menu/ left it in 036 G7 — the page's loader validates what it keeps
+const SWEEP = ['demos/covers/', 'vendor/nist/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4); img/menu/ left it in 036 G7 — the page's loader validates what it keeps; the parsers are KEPT's
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
 /* WHAT IS DELIBERATELY *NOT* IN §1, and why.  The test asserts this list is exactly what the walk skips. */
@@ -521,7 +525,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
-  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/, the notebook\'s parsers)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures, the demo covers, the measured lines and the notebook\'s parsers, kept as the page first shows or loads them until the next build sweeps them (their names carry no hash), and the demo files FOLDERS seeds from.'],
+  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records, img/menu/, demos/, vendor/nist/, the notebook\'s parsers)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content, and so are the Picker\'s pictures, the demo covers, the measured lines and the notebook\'s parsers, kept as the page first shows or loads them — the covers and lines until the next build sweeps them (their names carry no hash), a parser while its bytes are the build\'s (KEPT) — and the demo files FOLDERS seeds from.'],
   ['a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)', 'kit data an adoption brings that the running lab fetches only when a language is chosen, or never: deployed, never precached, never cached (offline, a language other than English stays English).'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
   ['an adopted kit module no root reaches (R5-W1)', '0.5.0 C0: MIR is adopted whole, so lab/mir/ holds modules for consumers λWAVES has not reached yet. tests/wiring.test.mjs walks the roots and names them (--unreached-kit); tests/pwa.test.mjs and tools/build-deploy.mjs READ that set, so a kit module joins this precache the day a consumer imports it. Deployed, never precached, never failed (PLAN §9).'],
@@ -550,6 +554,8 @@ function digest(s) {
   }
   return a.toString(36) + b.toString(36);
 }
+/** a body's revision as §1 and KEPT record it: sha-256's first 12 hex (tests/pwa.test.mjs revOf) */
+async function rev12(body) { return [...new Uint8Array(await crypto.subtle.digest('SHA-256', body))].slice(0, 6).map((b) => b.toString(16).padStart(2, '0')).join(''); }
 const PREFIX = 'lw-lab-';
 const BUILD  = digest(PRECACHE.map(([u, h]) => u + '@' + h).join('\n'));
 const CACHE  = PREFIX + BUILD;
@@ -594,7 +600,7 @@ self.addEventListener('install', (event) => {
       const res = await fetch(new Request(wire + (wire.includes('?') ? '&' : '?') + '__rev=' + rev, { cache: 'reload' }));
       if (!res || !res.ok || res.redirected) throw new Error('precache ' + url + ' → ' + (res && (res.redirected ? 'redirected' : res.status)));
       const body = await res.arrayBuffer();
-      const got = [...new Uint8Array(await crypto.subtle.digest('SHA-256', body))].slice(0, 6).map((b) => b.toString(16).padStart(2, '0')).join('');
+      const got = await rev12(body);
       if (got !== rev) throw new Error('precache ' + url + ' → bytes ' + got + ', recorded ' + rev);
       await cache.put(new Request(href), new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers }));
     })); } catch (e) { await announce({ type: 'LW_SW_INSTALL_FAILED', build: BUILD, page: PAGE_BUILD, why: String(e && e.message || e) }); throw e; }
@@ -612,16 +618,20 @@ self.addEventListener('install', (event) => {
  * dropped, a 404.  That is why §6 refuses any take while a second window is open unless the user said UPDATE ALL,
  * and why the page tells each other window at once (sw-client.js: one holding no work reloads, one holding work
  * is told RELOAD NOW).
- * THE SWEEP (iteration 028 R-08): the covers, the measured lines and the parsers (038 Z3) are kept under names a re-render does not change, so a kept copy
+ * THE SWEEP (iteration 028 R-08): the covers and the measured lines are kept under names a re-render does not change, so a kept copy
  * would answer for the deployed one forever; each new build deletes them from DATA_CACHE and the page keeps the new bytes on their next
- * view (img/menu/ is the loader's, 036 G7).  library/<sha>.json, the basis records and lw-vol-* are untouched. */
+ * view (img/menu/ is the loader's, 036 G7).  A kept parser (038 Z6) goes only when its bytes are not KEPT's.  library/<sha>.json, the
+ * basis records and lw-vol-* are untouched. */
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const names = await caches.keys();
     await Promise.all(names.filter((n) => n.startsWith(PREFIX) && n !== CACHE).map((n) => caches.delete(n)));
     if (names.includes(DATA_CACHE)) {
-      const dc = await caches.open(DATA_CACHE);
-      await Promise.all((await dc.keys()).filter((r) => SWEEP.some((d) => new URL(r.url).pathname.startsWith(SCOPE + d))).map((r) => dc.delete(r)));
+      const dc = await caches.open(DATA_CACHE), kept = new Map(KEPT.map(([f, rev]) => [SCOPE + f, rev]));
+      await Promise.all((await dc.keys()).map(async (r) => { const p = new URL(r.url).pathname;
+        if (SWEEP.some((d) => p.startsWith(SCOPE + d))) return dc.delete(r);
+        if (kept.has(p)) { const hit = await dc.match(r); if (!hit || (await rev12(await hit.arrayBuffer())) !== kept.get(p)) return dc.delete(r); }
+      }));
     }
     await announce({ type: 'LW_SW_ACTIVE', build: BUILD, page: PAGE_BUILD, files: PRECACHE.length });
   })());
@@ -734,4 +744,4 @@ async function announce(msg) {
 }
 
 /* Read by tests/pwa.test.mjs, which loads this file for real and drives the handlers above. */
-self.LW_SW = { PREFIX, BUILD, PAGE_BUILD, CACHE, PRECACHE, NEVER_PRECACHE, NEVER_CACHE_AT_RUNTIME, SCOPE, INDEX, ENTRY, BY_PATH, DATA, DATA_CACHE, digest };
+self.LW_SW = { PREFIX, BUILD, PAGE_BUILD, CACHE, PRECACHE, NEVER_PRECACHE, NEVER_CACHE_AT_RUNTIME, SCOPE, INDEX, ENTRY, BY_PATH, DATA, KEPT, DATA_CACHE, digest };

@@ -328,6 +328,15 @@ assert.deepEqual(stale, [], `sw.js: ${stale.length} precache entr(y|ies) name a 
 assert.deepEqual(wrongHash.map(([u]) => u), [], 'sw.js: precache entries whose content hash no longer matches the file');
 assert.equal(listed.length, new Set(listed).size, 'sw.js: a duplicate precache entry');
 assert.deepEqual(listed, [...listed].sort(), 'sw.js: the precache list must stay sorted so a diff is readable');
+/* 038 Z6 · KEPT: this build's revision of each parser (the DATA under mir/shell/vendor/), the activate's yardstick for a kept copy; --write stamps it as §1 */
+const keptWant = DATA.filter((d) => d.startsWith('mir/shell/vendor/')).sort().map((r) => [r, revOf(r)]);
+if (JSON.stringify(SW.LW_SW.KEPT) !== JSON.stringify(keptWant) && process.argv.includes('--write')) {
+  const file = path.join(LAB, 'sw.js'), line = 'const KEPT = [' + keptWant.map(([r, h]) => `['${r}', '${h}']`).join(', ') + '];';
+  writeFileSync(file, readFileSync(file, 'utf8').replace(/\nconst KEPT = \[.*\];\n/, '\n' + line + '\n'));
+  console.log(`      --write: sw.js KEPT stamped — ${keptWant.length} parsers.`);
+  swSrc = text('sw.js'); SW = loadWorker();
+}
+assert.deepEqual(SW.LW_SW.KEPT, keptWant, 'sw.js KEPT: a parser\'s recorded revision is not its bytes — the activate would sweep a good keep or hold a stale one; run --write');
 
 const bytes = wanted.reduce((n, r) => n + statSync(path.join(LAB, r)).size, 0);
 /* 032 (Sos): the ceiling 8 → 8.5 MiB. The kit's eight doors of TIMELINE REDUX added 30 KB of code across 27 files to a precache 032 THE PORTRAIT SHELF had
@@ -785,8 +794,9 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
   /* iteration 028 R-08: a cover kept under a name no hash is in is swept by the new build's activate; the record stays — and since 036 G7 a
      kept menu film stays too (the loader validates img/menu/), and a Range on it is answered from the kept body: a 206 with the slice */
   const pic = 'https://host.invalid/lab/demos/covers/' + readdirSync(path.join(LAB, 'demos/covers'))[0];
-  const film = 'https://host.invalid/lab/img/menu/collage/dark.mp4', kx = 'https://host.invalid/lab/mir/shell/vendor/katex/katex.min.js';   // 038 Z3: a kept parser is swept too
-  await dc.put(pic, new Response('a cover of the last build')); await dc.put(kx, new Response('the last build\'s KaTeX'));
+  const film = 'https://host.invalid/lab/img/menu/collage/dark.mp4', kx = 'https://host.invalid/lab/mir/shell/vendor/katex/katex.min.js', mk = 'https://host.invalid/lab/mir/shell/vendor/marked.min.js';
+  /* 038 Z6: a kept parser whose bytes differ from KEPT's is swept; one holding this build's bytes survives the update (offline maths after it) */
+  await dc.put(pic, new Response('a cover of the last build')); await dc.put(kx, new Response('the last build\'s KaTeX')); await dc.put(mk, new Response(read('mir/shell/vendor/marked.min.js')));
   await dc.put(film, new Response('0123456789', { headers: { 'content-type': 'video/mp4' } }));
   const ranged = async (u, r) => { let a = null; await W.handlers.fetch[0]({ request: { method: 'GET', url: u, mode: 'no-cors', headers: { get: (k) => (k === 'range' ? r : null) } }, respondWith: (q) => { a = q; } }); return a === null ? null : await a; };
   const part = await ranged(film, 'bytes=2-5'), tail = await ranged(film, 'bytes=7-'), far = await ranged(film, 'bytes=40-');
@@ -797,8 +807,8 @@ assert.ok(!/self\.skipWaiting\(\)\s*;?\s*\}?\s*\)?\s*;?\s*$/m.test(swCode.split(
   assert.ok(away && awayAsked === 1 && !dc.m.has('https://host.invalid/lab/img/menu/collage/light.mp4'), 'sw.js: a Range on a DATA path the page has not kept must go to the network and store nothing');
   let p; await W.handlers.activate[0]({ waitUntil: (x) => { p = x; } }); await p;
   assert.ok(W.caches.has(W.LW_SW.DATA_CACHE) && !W.caches.has('lw-lab-anolderbuild'), 'sw.js: activate must collect a stale build and keep lw-data-v1');
-  assert.deepEqual([dc.m.has(url), dc.m.has(film), dc.m.has(pic), dc.m.has(kx)], [true, true, false, false], 'sw.js: a new build\'s activate must keep the record and the kept menu film and sweep the kept cover and parser (R-08; 036 G7; 038 Z3)');
-  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there; a Range on a kept DATA body is its 206 slice (416 past its end) and an unkept one the network's; a new build's activate keeps the record and the kept menu film and sweeps a kept cover and a kept parser (demos/covers/, vendor/nist/, mir/shell/vendor/).`);
+  assert.deepEqual([dc.m.has(url), dc.m.has(film), dc.m.has(pic), dc.m.has(kx), dc.m.has(mk)], [true, true, false, false, true], 'sw.js: a new build\'s activate must keep the record, the kept menu film and a parser holding this build\'s bytes, and sweep the kept cover and a parser whose bytes changed (R-08; 036 G7; 038 Z6)');
+  console.log(`PASS a DATA path (library/) is served cache-first from ${W.LW_SW.DATA_CACHE} and the network otherwise, the worker stores nothing there; a Range on a kept DATA body is its 206 slice (416 past its end) and an unkept one the network's; a new build's activate keeps the record, the kept menu film and a kept parser holding KEPT's bytes, and sweeps a kept cover (demos/covers/, vendor/nist/) and a parser whose bytes changed.`);
 }
 
 console.log(`PASS update policy executed, not described: install precaches ${pc.length} files with cache:'reload' + ?__rev=<content hash> and does NOT skipWaiting; ` +

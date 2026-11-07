@@ -100,9 +100,12 @@ and the code disagree, the code is right; please say so in an issue.
 - THE PRECACHE has a ceiling (8.5 MiB; the pwa line says the MiB and the room). What is never precached is a CLASS in `lab/sw.js` §1b, and a
   class change is a rule edit there with its fixture in `tests/pwa.test.mjs`: DATA (deployed, kept by the page in `lw-data-v1` after its
   first good answer — records, volumes, the ladder's bases, the menu's pictures, the demos, the measured lines and, since 038 Z3, the
-  notebook's parsers `mir/shell/vendor/marked.min.js`, `katex/katex.min.js`, `katex/katex.min.css`, which `lab/main.js` keeps once the worker
-  is active and every new build sweeps) and SKIP (deployed, never cached: the kit's language packs, its token schema). Offline, a page that
-  never reached the network once keeps nothing of DATA; one that did sets maths as before.
+  notebook's parsers `mir/shell/vendor/marked.min.js`, `katex/katex.min.js`, `katex/katex.min.css`) and SKIP (deployed, never cached: the
+  kit's language packs, its token schema). THE PARSERS: index.html loads them at every boot; `lab/main.js` keeps them once the worker is
+  registered; an activate deletes a kept one only when its bytes are not that build's (`KEPT` in sw.js, stamped by `pwa --write`; 038 Z6).
+  WHAT OFFLINE HOLDS: the precache (the whole app) and the DATA this browser kept. After one online open the maths sets offline, across a
+  background update too; only an update that changed a parser's bytes (a kit adoption) shows maths as its `$…$` source until the next
+  online open. The demo covers and the measured lines are swept by every build and kept again on their next view.
 - The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 843 values, and 987 with the s4a fixture since iteration 008 W — both runs with `--query gastab=0`; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
   `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (843) and the same with
   `--fixture tests/fixtures/digest-lock-s4a.json` (987), against a tree served by `tools/gate/server.py`. Since 038 Z4 `gastab=0` is the
