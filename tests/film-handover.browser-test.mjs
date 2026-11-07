@@ -11,6 +11,9 @@
 //   5  (028 R-01) a SHADER node live through a 1-s clip and a picture → 0 uncapturederror, the stage presents after each
 //   0  (027 D3) a 2-s STILL film with the clock paused and VORTEX raised gives the stage back: its screenshot hash before = after
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
+// 039 S4 · A RED MEANS A BUG: a wait before a read is on the state it means (__until in the page, 25 ms apart with a ceiling): a card open and
+// at rest, a save's share or download, the store's count, the last tap's activation expired, a node added; a screenshot is taken when two in
+// a row agree (the stage at rest), never after a fixed sleep.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
 
@@ -21,10 +24,16 @@ const pass = (m) => console.log('PASS ' + m);
 const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefined && r !== null && !r.E, 'page threw: ' + JSON.stringify(r)); return r; };
 const until = async (expr, ms) => { const t0 = Date.now(); for (;;) { if (await g.ev(`try { return !!(${expr}); } catch (_) { return false; }`)) return Date.now() - t0;
   assert.ok(Date.now() - t0 < ms, 'timed out waiting for ' + expr); await new Promise((r) => setTimeout(r, 500)); } };
-const mark = (id, find) => ev(`const n = (${find})(); if (!n) return { none: true }; n.id = ${JSON.stringify(id)}; n.scrollIntoView({ block: 'center', behavior: 'instant' }); await new Promise((r) => setTimeout(r, 300)); return { ok: 1 };`);
+const mark = (id, find) => ev(`const n = (${find})(); if (!n) return { none: true }; n.id = ${JSON.stringify(id)}; n.scrollIntoView({ block: 'center', behavior: 'instant' }); await new Promise((r) => requestAnimationFrame(r)); await __until(__rest); return { ok: 1 };`);
+/* the stage at rest by the driver's own screenshot: two in a row agree */
+const stillHash = async () => { let a = await g.snapHash(); for (let k = 0; k < 20; k++) { const b = await g.snapHash(); if (b === a) return a; a = b; } return a; };
 try {
   assert.equal((await g.waitFor('window.__LW && __LW.ready', 3000, 20)).ok, 1);
   const setup = await ev(`
+    window.__until = async (ok, ms = 15000) => { const t0 = performance.now(); for (;;) { let v = false; try { v = !!ok(); } catch (_) {}
+      if (v) return Math.round(performance.now() - t0); if (performance.now() - t0 > ms) return -1; await new Promise((r) => setTimeout(r, 25)); } };
+    window.__rest = () => !document.getAnimations().some((a) => a.playState === 'running' && a.effect && a.effect.getTiming().iterations !== Infinity);
+    window.__open = (id) => { const d = document.querySelector('.dev[data-id="' + id + '"]'); return !!d && !d.classList.contains('closed') && __rest(); };
     try { if (__LW.warning && __LW.warning.dismiss) __LW.warning.dismiss(); } catch (_) {}
     const live = () => !!(navigator.userActivation && navigator.userActivation.isActive);
     const H = window.__H = { shares: [], downloads: [], saves: [], clicks: [], timers: [] };
@@ -41,9 +50,11 @@ try {
         window.setTimeout = (fn, ms, ...a) => { timers.push({ fn, ms: +ms || 0, a }); return 0; };
         try { return s.call(this, r); } finally { window.setTimeout = st; H.saves.push({ who, live: l, name: r && r.name, timers, bytes: r && r.files ? r.files.reduce((n, x) => n + (x.blob ? x.blob.size : 0), 0) : 0 }); } }; }
     H.films = async () => { try { const d = await (await navigator.storage.getDirectory()).getDirectoryHandle('lambdawaves-recordings'); let n = 0; for await (const _ of d.keys()) n++; return n; } catch (_) { return 0; } };
+    H.filmsTo = async (n, ms = 15000) => { const t0 = performance.now(); let k = await H.films(); while (k !== n && performance.now() - t0 < ms) { await new Promise((r) => setTimeout(r, 25)); k = await H.films(); } return k; };
+    H.saved = () => H.shares.length + H.downloads.length > 0;
     H.button = (text) => [...document.querySelectorAll('.dev[data-id="render"] button')].find((b) => b.textContent.trim().startsWith(text) && !b.disabled);
     __LW.pause(); __LW.scrub(0); await __LW.settle(); await __LW.settle();
-    __LW.layout.raise('render'); await new Promise((r) => setTimeout(r, 500));
+    __LW.layout.raise('render'); await __until(() => __open('render'));
     const C = __LW.render.view.controls, set = (f, v) => { f.value = v; f.dispatchEvent(new Event('change')); };
     set(C.motion, 'still'); set(C.recFormat, 'mp4'); set(C.recDuration, '1'); set(C.recSize, 'current');
     return { userActivation: !!navigator.userActivation, open: !document.querySelector('.dev[data-id="render"]').classList.contains('closed') };`);
@@ -53,19 +64,19 @@ try {
   /* ── 0 · A FILM GIVES THE STAGE BACK (027 D3): the clock paused, VORTEX raised (LOCATE · OVERLAY, PARTICLES seeded), a 2-s STILL film →
          the stage after it is the stage before it, by the driver's screenshot, with no present forced (DUST: a style that reads no jitter
          seed, which the film's put-back honestly moves) ── */
-  await ev(`__LW.layout.raise('vortex'); await new Promise((r) => setTimeout(r, 300));
+  await ev(`__LW.layout.raise('vortex'); await __until(() => !!document.querySelector('.dev[data-id="vortex"]') && __rest());
     const w = document.querySelector('.dev[data-id="vortex"]'); w.classList.remove('closed', 'folded');
     const sw = (n) => [...w.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === n);
     for (const n of ['LOCATE', 'OVERLAY']) { const e = sw(n); if (e) (e.querySelector('button') || e).click(); }
     __LW.particles.setOn(true); __LW.particles.seed(120, __LW.reg, __LW.clock.t, __LW.domain.half); __LW.setStyle('dust');
-    await new Promise((r) => setTimeout(r, 800)); await __LW.settle(); await __LW.settle(); return 1;`);
-  const stage0 = await g.snapHash();
+    await __LW.settle(); await __LW.settle(); await __until(__rest); return 1;`);
+  const stage0 = await stillHash();
   const t0 = await ev(`const p = __LW.field.stats.presents, r = await __LW.captureUI.exact.take('clip', { fps: 30, seconds: 2, scale: 1 }).done;
-    await new Promise((r) => setTimeout(r, 600)); return { ok: r.ok, frames: r.frames || null, after: __LW.field.stats.presents - p, playing: __LW.clock.playing, vortex: !!__LW.vortex.last, errs: __e.slice() };`);
-  const stage1 = await g.snapHash();
+    await __LW.settle(); await __until(__rest); return { ok: r.ok, frames: r.frames || null, after: __LW.field.stats.presents - p, playing: __LW.clock.playing, vortex: !!__LW.vortex.last, errs: __e.slice() };`);
+  const stage1 = await stillHash();
   assert.equal(t0.ok, true, 'the 2-s STILL film failed: ' + JSON.stringify(t0)); assert.deepEqual(t0.errs, []);
   assert.equal(stage1, stage0, 'the stage after the film is not the stage before it: ' + JSON.stringify(t0));
-  await ev(`__LW.setStyle('cloud'); __LW.particles.setOn(false); __LW.layout.raise('render'); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+  await ev(`__LW.setStyle('cloud'); __LW.particles.setOn(false); __LW.layout.raise('render'); await __until(() => __open('render')); return 1;`);
   pass(`a 2-s STILL film with the clock paused and VORTEX raised gives the stage back: snapHash ${stage0} before and after (${t0.after} presents: the film's 60 and the put-back's one)`);
 
   /* ── 1 · a real RENDER tap, then a real SAVE tap: the card's save is inside the second tap → the share sheet; the facade downloads ── */
@@ -75,13 +86,13 @@ try {
   assert.equal((await mark('fh-save', `() => __H.button('SAVE ')`)).ok, 1, 'no SAVE row after the render');
   const n0 = await ev(`return { films: await __H.films() };`);
   assert.equal((await g.tap('#fh-save')).ok, 1, 'the SAVE tap did not land');
-  const t1 = await ev(`await new Promise((r) => setTimeout(r, 400)); const st = __LW.render.view.state();
+  const t1 = await ev(`await __until(__H.saved); const st = __LW.render.view.state();
     return { done: st.done, shares: __H.shares.slice(), downloads: __H.downloads.length, click: __H.clicks.filter((c) => c.trusted).pop(), errs: __e.slice() };`);
   assert.ok(t1.click && t1.click.live, 'the SAVE press carried no activation: ' + JSON.stringify(t1.click));
   assert.equal(t1.shares.length, 1, 'a card SAVE inside a live tap did not share: ' + JSON.stringify(t1));
   assert.ok(t1.shares[0].live && /^lambdawaves-.*\.mp4$/.test(t1.shares[0].names[0]) && !/render\.mp4$/.test(t1.shares[0].names[0]), 'the shared film is not under λWAVES\' name (R10): ' + JSON.stringify(t1));
   assert.equal(t1.downloads, 0, 'a card SAVE inside a live tap also downloaded: ' + JSON.stringify(t1));
-  const f1 = await ev(`__H.reset(); const r = await __LW.captureUI.record(); await new Promise((q) => setTimeout(q, 300)); const s = __H.saves.find((x) => x.who === 'film');
+  const f1 = await ev(`__H.reset(); const r = await __LW.captureUI.record(); await __until(() => __H.saves.some((x) => x.who === 'film') && __H.saved()); const s = __H.saves.find((x) => x.who === 'film');
     return { ok: r && r.ok, save: s && { live: s.live, name: s.name, timers: s.timers.map((t) => t.ms) }, shares: __H.shares.length, downloads: __H.downloads.map((d) => ({ name: d.name, blob: d.href.startsWith('blob:') })), errs: __e.slice() };`);
   assert.equal(f1.ok, true, 'the facade record() did not finish: ' + JSON.stringify(f1));
   assert.equal(f1.save.live, false); assert.equal(f1.shares, 0, 'a scripted film took the share road: ' + JSON.stringify(f1));
@@ -91,23 +102,25 @@ try {
 
   /* ── 2 · no discard timer: the facade film has its bytes and its store copy stays until DISCARD STORED RENDER; DISCARD RENDER removes the card's ──
      (038: the page cannot fetch(blob:) under the live CSP's connect-src 'self', here as on the site — the bytes are the save's own files') */
-  const t2a = await ev(`const s = __H.saves.find((x) => x.who === 'film'); await __LW.render.view.paint(); await new Promise((r) => setTimeout(r, 600));
+  const t2a = await ev(`const s = __H.saves.find((x) => x.who === 'film'); await __LW.render.view.paint();
+    await __until(() => { const t = [...document.querySelectorAll('.dev[data-id="render"] button')].map((b) => b.textContent.trim()); return t.includes('DISCARD RENDER') && t.includes('DISCARD STORED RENDER'); });
     return { at: s.bytes, films: await __H.films(), timers: s.timers.map((t) => t.ms), rows: [...document.querySelectorAll('.dev[data-id="render"] button')].map((b) => b.textContent.trim()).filter((x) => /STORED|DISCARD/.test(x)) };`);
   assert.ok(t2a.at > 0, 'the facade film has no bytes: ' + JSON.stringify(t2a));
   assert.ok(t2a.timers.every((ms) => ms === 600000), 'a save set a timer other than the hand-over URL\'s own revoke: ' + JSON.stringify(t2a));
   assert.ok(t2a.films >= 2 && t2a.rows.includes('DISCARD RENDER') && t2a.rows.some((x) => x === 'DISCARD STORED RENDER'), 'the store does not hold both films with their discard rows: ' + JSON.stringify(t2a));
   assert.equal((await mark('fh-discard', `() => __H.button('DISCARD RENDER')`)).ok, 1);
   assert.equal((await g.tap('#fh-discard')).ok, 1, 'the DISCARD RENDER tap did not land');
-  const t2b = await ev(`await new Promise((r) => setTimeout(r, 800)); return { films: await __H.films(), done: __LW.render.view.state().done };`);
+  const t2b = await ev(`await __H.filmsTo(${t2a.films - 1}); await __until(() => !__LW.render.view.state().done); return { films: await __H.films(), done: __LW.render.view.state().done };`);
   assert.ok(t2b.films === t2a.films - 1 && !t2b.done, 'DISCARD RENDER did not remove the card film from the store: ' + JSON.stringify(t2b));
   assert.equal((await mark('fh-stored', `() => __H.button('DISCARD STORED RENDER')`)).ok, 1);
   assert.equal((await g.tap('#fh-stored')).ok, 1, 'the DISCARD STORED RENDER tap did not land');
-  const t2c = await ev(`await new Promise((r) => setTimeout(r, 800)); return { films: await __H.films() };`);
+  const t2c = await ev(`await __H.filmsTo(${t2b.films - 1}); return { films: await __H.films() };`);
   assert.equal(t2c.films, t2b.films - 1, 'DISCARD STORED RENDER did not remove the facade film: ' + JSON.stringify(t2c));
   pass(`no discard timer (the save's only timer is the hand-over URL's ${t2a.timers.join(', ')} ms); the film is ${t2a.at} B with the copy kept; DISCARD RENDER ${t2a.films} → ${t2b.films}, DISCARD STORED RENDER → ${t2c.films}`);
 
   /* ── 3 · TAKE A PICTURE from a script: no activation → a download ── */
-  const t3 = await ev(`await new Promise((r) => setTimeout(r, 6000)); __H.reset(); await __LW.captureUI.picture();   /* past the last tap's transient activation (5 s) */ await new Promise((r) => setTimeout(r, 400));
+  const t3 = await ev(`const gone = await __until(() => !navigator.userActivation.isActive, 20000); __H.reset(); await __LW.captureUI.picture();   /* past the last tap's transient activation (its own state, not a 6-s sleep) */
+    await __until(() => __H.saves.some((x) => x.who === 'picture') && __H.saved());
     const s = __H.saves.find((x) => x.who === 'picture');
     return { live: s && s.live, name: s && s.name, shares: __H.shares.length, downloads: __H.downloads.map((d) => d.name), errs: __e.slice() };`);
   assert.equal(t3.live, false);
@@ -122,7 +135,7 @@ try {
   await until(`__LW.render.view.state().held`, 30000);
   assert.equal((await mark('fh-dl', `() => __H.button('DOWNLOAD IMAGE')`)).ok, 1);
   assert.equal((await g.tap('#fh-dl')).ok, 1, 'the DOWNLOAD IMAGE tap did not land');
-  const t4 = await ev(`await new Promise((r) => setTimeout(r, 400)); return { held: __LW.render.view.state().held, shares: __H.shares.map((x) => ({ names: x.names, live: x.live })), downloads: __H.downloads.length, errs: __e.slice() };`);
+  const t4 = await ev(`await __until(__H.saved); return { held: __LW.render.view.state().held, shares: __H.shares.map((x) => ({ names: x.names, live: x.live })), downloads: __H.downloads.length, errs: __e.slice() };`);
   assert.equal(t4.shares.length, 1, 'DOWNLOAD IMAGE inside a live tap did not share: ' + JSON.stringify(t4));
   assert.ok(t4.shares[0].live && /\.png$/.test(t4.shares[0].names[0]), 'the shared picture: ' + JSON.stringify(t4));
   assert.equal(t4.downloads, 0, 'DOWNLOAD IMAGE inside a live tap also downloaded: ' + JSON.stringify(t4));
@@ -133,7 +146,7 @@ try {
          back — 0 uncapturederror over the presents after a 1-s clip and after a picture (the old road: ~2 per present, a black stage, on
          Chromium; this Firefox does not validate a surface copy, so the context's own usage is read too: COPY_SRC while the tap reads) ── */
   const t5 = await ev(`const L = __LW, gpu = []; L.field.device.addEventListener('uncapturederror', (e) => gpu.push(String(e.error && e.error.message).slice(0, 120)));
-    L.nodes.setOff(false); L.nodes.add('feedback'); await new Promise((r) => setTimeout(r, 400)); await L.settle();
+    L.nodes.setOff(false); L.nodes.add('feedback'); await __until(() => L.nodes.nodes().some((n) => n.type === 'feedback')); await L.settle();
     const shows = async () => { const p = L.field.stats.presents; for (let i = 0; i < 8; i++) { L.schedule(L.TIER.PRESENT); await L.settle(); } return L.field.stats.presents - p; };
     const copy = () => !!(L.field.canvas.getContext('webgpu').getConfiguration().usage & GPUTextureUsage.COPY_SRC);
     const before = await shows(), e0 = gpu.length, u0 = copy();

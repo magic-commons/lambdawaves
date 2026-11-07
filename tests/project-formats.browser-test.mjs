@@ -115,30 +115,41 @@ try {
   /* ── 5 · FOLDERS IS PAINTED GLASS ── */
   /* 038 Z1: every wait is on a STATE (a refresh counted, the entrance's animations finished, the block holding the landed rect), never a timer —
      a loaded headless Firefox can hold its refresh driver (rAF, the WAAPI entrance, the paused mask's frame) for seconds after a reload, and the
-     old 600/1200 ms waits read the block before its first refresh (before 0, open 0) */
+     old 600/1200 ms waits read the block before its first refresh (before 0, open 0).
+     039 S4 · THE EVENT, NOT "EVENTUALLY" (Z-REVIEW #7): "landed" is the mask's FIRST refresh after FOLDERS' entrance ends (ink.js landing()
+     re-dirties it then; a paused lab draws nothing else) — the hook keeps the first write made while the open pane stands still (judged in
+     the hook, so no frame ordering can hide it), and it must hold the pane where it stands.  Any later block that happens to match no longer
+     passes; the 20 s is a ceiling for the wait only, and the times are printed, never judged. */
   const occ = await g.ev(`const w = (n) => new Promise((r) => setTimeout(r, n)), f = __LW.field, o = f.setOcclusion.bind(f);
     const until = async (ok, ms = 20000) => { for (const t0 = performance.now(); performance.now() - t0 < ms; await w(50)) if (ok()) return true; return !!ok(); };
     const block = () => window.__occ || [];
-    window.__calls = 0; f.setOcclusion = (rects) => { window.__calls++; window.__occ = rects.map((x) => x.map(Math.round)); return o(rects); };
+    window.__calls = 0; window.__after = null; window.__still = null;
+    f.setOcclusion = (rects) => { window.__calls++; window.__occ = rects.map((x) => x.map(Math.round));
+      if (window.__still && !window.__after && window.__still()) window.__after = { occ: window.__occ, want: window.__want(), at: performance.now() };   /* the first write after the entrance */
+      return o(rects); };
     __LW.pause(); await until(() => !__LW.clock.playing);
     const c0 = window.__calls; document.body.classList.add('pf-probe'); await w(50); document.body.classList.remove('pf-probe');   /* a body class dirties the block: read it once */
     const read = await until(() => window.__calls > c0);
     const before = block().length;
-    const F = __LW.projects.folders, R = F.win.root; F.open();
+    const F = __LW.projects.folders, R = F.win.root;
     const moving = () => R.getAnimations({ subtree: true }).some((a) => a.playState === 'running' && a.effect && a.effect.getTiming().iterations !== Infinity);
-    const want = () => { const cb = document.getElementById('field').getBoundingClientRect(), rr = R.getBoundingClientRect(); return [rr.left - cb.left, rr.top - cb.top, rr.right - cb.left, rr.bottom - cb.top].map(Math.round); };
+    const want = window.__want = () => { const cb = document.getElementById('field').getBoundingClientRect(), rr = R.getBoundingClientRect(); return [rr.left - cb.left, rr.top - cb.top, rr.right - cb.left, rr.bottom - cb.top].map(Math.round); };
     const chipsNow = () => [...F.win.rail.el.querySelectorAll('.mir-chip')].filter((c) => c.getBoundingClientRect().width > 2).length;
-    const landed = await until(() => F.isOpen() && !moving() && block().some((x) => x.every((v, i) => Math.abs(v - want()[i]) <= 1)));
+    const t0 = performance.now(); F.open(); const movingAtOpen = moving(); window.__still = () => F.isOpen() && !moving();
+    await until(() => window.__after);
+    const A = window.__after, landed = !!A && A.occ.some((x) => x.every((v, i) => Math.abs(v - A.want[i]) <= 1));
+    const timing = { movingAtOpen, refresh: A ? Math.round(A.at - t0) : -1 };
     await until(() => block().length === before + 1 + chipsNow(), 5000);   /* the rail's chips land a beat after the pane */
     const chips = chipsNow(), open = block().length;
     F.close(); await until(() => !F.isOpen() && block().length === before);
-    return { read, before, open, chips, landed, after: block().length, errs: __e.slice() };`);
+    window.__still = null;
+    return { read, before, open, chips, landed, timing, first: A && { occ: A.occ, want: A.want }, after: block().length, errs: __e.slice() };`);
   assert.equal(occ.read, true, 'the paused mask was never refreshed after a body class dirtied it: ' + JSON.stringify(occ));
-  assert.equal(occ.landed, true, 'paused, the mask kept FOLDERS mid-entrance: ' + JSON.stringify(occ));
+  assert.equal(occ.landed, true, 'paused, the mask\'s first refresh after the entrance did not hold FOLDERS where it landed: ' + JSON.stringify(occ));
   assert.equal(occ.open, occ.before + 1 + occ.chips, 'the pane and its ' + occ.chips + ' chips did not join the block: ' + JSON.stringify(occ));
   assert.equal(occ.after, occ.before, 'FOLDERS stayed in the block after it closed');
   assert.deepEqual(occ.errs, []);
-  pass('FOLDERS is painted glass: paused, its pane (where the entrance lands, not mid-motion) and its ' + occ.chips + ' rail chips join the occlusion block (' + occ.before + ' → ' + occ.open + ' rects) and leave it when it closes');
+  pass('FOLDERS is painted glass: paused, the mask\'s first refresh after the entrance holds its pane where it landed (' + occ.timing.refresh + ' ms after the open, the entrance ' + (occ.timing.movingAtOpen ? 'running from the press' : 'not yet started at the press') + ' — printed, not judged) and its ' + occ.chips + ' rail chips join the occlusion block (' + occ.before + ' → ' + occ.open + ' rects) and leave it when it closes');
 } catch (e) {
   failed = true; console.error(e);
 } finally {
