@@ -29,7 +29,7 @@
  *   port { host, part, snapshot(), rollback(S) → bool, busy(±1), opened(label), notice() → D9's line, thumbnail(), confirm(text),
  *          rack, onMoved(rect), titleAfterSave(name) → bool, cover() → the front page { shown, close } | null, saved(name),
  *          inspect(entry | null, how), shown() (039 W4: FOLDERS came on screen — its Escape layer) } */
-import { createFolders, toThumb } from './mir/folders/folders.js'; import { glyphEl } from './mir/glyph.js';
+import { createFolders, toThumb } from './mir/folders/folders.js'; import { glyphEl } from './mir/glyph.js'; import { hint } from './mir/kit.js';
 import { createFiles } from './mir/folders/files.js';
 import { registerProjectPart, restoreProject, projectSignature } from './mir/core/project.js';
 import { saveBlob } from './mir/folders/save-blob.js';
@@ -153,7 +153,11 @@ export function createProjects(port) {
     actions: ['save', 'project', 'duplicate', 'fresh'], folderGlyph: 'folder', glyph: (name, cls, size) => glyphEl(name === 'save' ? 'saveInto' : name, cls, size),   // 021 V2: PROJECT wears λWAVES' saveInto (012 M1), not the floppy rack: port.rack, onMoved: port.onMoved,
     factory: () => api.restoreDemos(),
     captions: true,   // 039 K7 (MIR 1.5.7-alpha.22 THE CARD SAYS HOW IT OPENS; WALK-A #9, WALK-B #2): every card wears its name beneath its picture at rest
-    galleryCopy: { factory: 'RESTORE THE DEMOS', factoryNote: 'puts back the demos λWAVES ships with — adds only what is missing, and never touches anything you saved',
+    /* 039 X9 · SAVE AND SAVE NEW (WALK-A #9, WALK-B #16: two floppies, one meaning unclear): SAVE writes over the open project; PROJECT reads SAVE NEW
+       (its id `project` kept) and wears its own drawing (fieldIcons, below) — the words say the difference */
+    copy: { save: ['SAVE', 'this project', 'Save over the open project (a new one if none is open)'] },
+    galleryCopy: { project: ['SAVE NEW', 'a new project', 'Save what is on screen as a new project, here'],
+      factory: 'RESTORE THE DEMOS', factoryNote: 'puts back the demos λWAVES ships with — adds only what is missing, and never touches anything you saved',
       /* 036 K5 (Josh: not 'DEMOS' and 'DEMOS' — greyed 'Name File' and 'Folder Name'; inside a folder of your own, SAVE TO names it): MIR 1.5.7-alpha.5 */
       namePlaceholder: 'NAME FILE', saveToPlaceholder: 'FOLDER NAME', proposeName: false },
     /* ⓘ (and a selection) names the project RENDER's SUBJECT describes; THIS VIEW when none */
@@ -196,7 +200,10 @@ export function createProjects(port) {
     },
   });
   /* 021 V2 · NAME and SAVE TO wear the table's fileName / folderName at their left (012 M1's glyphs, SVG now; the kit's gallery has no seat for them) */
-  const fieldIcons = () => { for (const f of folders.win.root.querySelectorAll('.sv-field')) if (!f.querySelector('.sv-field-ico')) f.prepend(glyphEl(f.querySelector('.sv-to-input') ? 'folderName' : 'fileName', 'sv-field-ico', 15)); };
+  const fieldIcons = () => { for (const f of folders.win.root.querySelectorAll('.sv-field')) if (!f.querySelector('.sv-field-ico')) f.prepend(glyphEl(f.querySelector('.sv-to-input') ? 'folderName' : 'fileName', 'sv-field-ico', 15));
+    /* 039 X9: SAVE NEW wears a page with a +, never SAVE's drawing; SAVE TO says where a save lands */
+    const l = folders.win.root.querySelector('.sv-project .trig-l'); if (l && !l.querySelector('.gly-saveNew')) { const g = glyphEl('saveNew', 'gly gly-saveNew', 20); if (g) l.replaceChildren(g); }
+    const to = folders.win.root.querySelector('.sv-to-input'); if (to && !to.dataset.tTitle) hint(to, 'Where it is saved · left empty, at ROOT'); };
   fieldIcons();
   /* THE DOORS a λWAVES file comes in by (the kit's intake takes only its own envelopes): a drop on the window, OPEN FILE, IMPORT.
      8 MiB a project file on every one of them (R10 b; a picture is capped by the project it carries, at the store); a .mir or a

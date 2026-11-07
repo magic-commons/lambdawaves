@@ -24,9 +24,9 @@ export function createRegister(host, api) {
   /** the one state: MOLECULES ON, VIEW REGISTRY, and this pane shown */
   const drawn = () => { const c = C(); return !!(c && c.on && c.view === 'registry'); };
   const want = (m) => drawn() && mode === m;
-  const modeSeg = seg({ aria: 'Register pane', value: mode, cls: 'reg-mode', options: [{ id: 'orbital', label: 'ORBITAL' }, { id: 'states', label: 'STATES' }],
+  const modeSeg = seg({ aria: 'Register pane', value: mode, cls: 'reg-mode', options: [{ id: 'orbital', label: 'ORBITALS' }, { id: 'states', label: 'STATES' }],   // 039 X2: ORBITALS, so VIEW's ORBITAL is the one ORBITAL (ids kept)
     onChange: (v) => setMode(v, true) });
-  modeSeg.root.title = 'ORBITAL: one electron · STATES: the molecule';
+  modeSeg.root.title = 'The ladder below: its orbitals or the molecule’s states';
   (api.bar || host).appendChild(modeSeg.root);
   const paneO = el('div', 'reg-pane', host), paneS = el('div', 'reg-pane', host); paneS.hidden = true;
 

@@ -52,7 +52,7 @@ export function createOrbitals(host, api) {
 
   /* ── the ladder ───────────────────────────────────────────────────────────────────────────────── */
   const cv = el('canvas', 'mol-c', host), cfoot = footLine(cv), views = new Set();   // 016 R1: the law line, shown on a hover
-  watchStroke((m) => { cv.title = m === 'paint' ? 'MO ladder ε_k (Eh): drag adds, right-drag removes' : 'MO ladder ε_k (Eh): a click toggles a level'; });   // 036 P1
+  watchStroke((m) => { cv.title = m === 'paint' ? 'MO ladder ε_k (Eh): drag adds, right-drag removes' : 'MO ladder (Eh): a click toggles a level; ORBITAL shows it'; });   // 036 P1
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
   const head = el('div', 'row tight sp-head', host);
@@ -539,7 +539,7 @@ export function createOrbitals(host, api) {
         hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: cur || lit ? 2 : 1, colour: ink(1),
           info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
             + (sol.names ? '  ·  ' + about(lv.k) : '')
-            + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : dim ? '  ·  not carried by this record' : '  ·  click to add')
+            + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : dim ? '  ·  not carried by this record' : lead ? '  ·  click to show it' : '  ·  click to add')   // 039 X2: under VIEW ORBITAL a click names it
             + (lv.k === kc ? '  ·  the ORBITAL dial’s orbital' + (lead ? ' — VIEW ORBITAL draws it' : ' — turn the dial for VIEW ORBITAL')
               : i === curRow ? `  ·  degenerate with the ORBITAL dial’s ${label(kc)}, so lit with it` + (lead ? ' — VIEW ORBITAL draws that one' : '') : '') });
       }
@@ -596,6 +596,9 @@ export function createOrbitals(host, api) {
     at: (p) => { const h = nearestHit(p, 8); return h ? [h.core ? 'core' : h.k] : []; }, across: crossed,
     apply: (ks, add) => {                                                   // a TAP on the folded core opens it; a stroke paints past it
       if (ks.includes('core')) { if (!stroke.painting) setCoreOpen(true); ks = ks.filter((k) => k !== 'core'); }
+      /* 039 X2 (WALK-A #7): a TAP on one level while VIEW is ORBITAL names that orbital — the dial's hand road — and the VIEW stays ORBITAL;
+         a stroke still paints the register (MIX), and PAINT's right tap still takes a level out */
+      const c = C(); if (!stroke.painting && ks.length === 1 && c && c.view === 'orbital' && c.handOrbital && (add || strokeMode() === 'buttons')) { c.handOrbital(ks[0] + 1); return 0; }
       return ks.length ? paintLevels(ks, add) : 0;
     },
     /* iteration 008 U · THE STROKE'S END (still inside its pointerup, so the same undo row): the sum of |c|^2 goes to 1, and a hand that

@@ -12,8 +12,8 @@
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
-import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, chip } from './mir/kit.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton } from './paint-stroke.js';
+import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, chip, hint } from './mir/kit.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js';
 import { PRESET_BY_ID } from './state.js';
 import { createUserPresets } from './user-presets.js';
 
@@ -94,6 +94,7 @@ export function createSpectrum(host, api) {
   const head = el('div', 'row tight sp-head', host);
   const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
   const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
+  hint(addBtn, 'Show or hide the 140 states to add');
   /* iteration 008 S · EMPTY ↔ FILL ALL (paint-stroke.js fillButton; the register's glyph since iteration 009 F2): a register with anything in it shows EMPTY (c ↦ 0, SPECTRUM's
      old CLEAR), an empty one FILL ALL (all 140 labels, equal and in phase, normalised); one undo row each.  NORM went: a HAND stroke on the grid
      normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
@@ -141,7 +142,7 @@ export function createSpectrum(host, api) {
     nl.addEventListener('pointerdown', (e) => e.stopPropagation());   // the handle is no paint stroke (paint-stroke.js would swallow its click)
     nl.addEventListener('click', () => { setShellFold(n, !cs.hidden); });
     for (const s of BASIS) if (s.n === n) {
-      const b = el('button', 'pk-c', cs, s.label); b.type = 'button'; b.title = `${s.id}  E = ${s.E.toFixed(5)}`;
+      const b = el('button', 'pk-c', cs, s.label); b.type = 'button';
       b.dataset.a = String(s.index);
       b.addEventListener('click', () => { api.toggleMode(s.index); if (api.settle) api.settle(); });       // the keyboard's road (a hand: normalised); a pointer is answered by the paint stroke below
       chips.set(s.index, b);
@@ -161,6 +162,12 @@ export function createSpectrum(host, api) {
     }
   }
   for (let n = 1; n <= NMAX; n++) setShellFold(n, FOLD_DEFAULT.includes(n));
+  /* 039 X1 · THE CHIPS SAY ADD (WALK-A #6): a chip ADDS its state to the picture and a second press takes it out; its hint says which,
+     by the stroke mode in force and whether the state is on (rewritten only when either changes) */
+  const CHIP_HINT = { buttons: ['Add {s} to the picture · press again to remove', 'Take {s} out of the picture'],
+    paint: ['Add {s} · drag adds more, right-click removes', 'Right-click takes {s} out of the picture'] };
+  const chipHint = (a, b) => hint(b, CHIP_HINT[strokeMode()][b.classList.contains('on') ? 1 : 0], { s: BASIS[a].label });
+  watchStroke(() => { for (const [a, b] of chips) chipHint(a, b); });
   /* 2026-10 (Josh) · PAINT THE GRID (lab/paint-stroke.js): LEFT adds a state, RIGHT removes it; a drag takes every chip it
      crosses.  The chips are DOM, so the stroke is sampled every 6 px and asked of elementFromPoint.  036 P1: under BUTTONS a click toggles one. */
   const chipAt = (p) => { const c = document.elementFromPoint(p.x, p.y), b = c && c.closest ? c.closest('.pk-c') : null; return b && picker.contains(b) ? [+b.dataset.a] : []; };
@@ -301,7 +308,7 @@ export function createSpectrum(host, api) {
     anySolo = want.some((a) => reg.solo[a]);
     rateOff = !!reg.P || !!(api.rateDisabled && api.rateDisabled());   // any propagator (STURMIAN, 0.8.0 INTER-SHELL STARK)
     for (const [a, L] of lanes) refresh(L, a);
-    for (const [a, b] of chips) b.classList.toggle('on', keep.has(a));
+    for (const [a, b] of chips) if (b.classList.contains('on') !== keep.has(a)) { b.classList.toggle('on', keep.has(a)); chipHint(a, b); }
     paintCounts();
     const rs = reg.renderSet();
     const levels = Object.keys(groupByN(want)).length;

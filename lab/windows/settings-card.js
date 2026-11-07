@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, trig, readout, group, label } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { summon } from '../summon.js';import { askUrlOf, ASK_ENABLED } from '../ask.js';
+import { el, knob, sw, seg, trig, readout, group, label, hint } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb, srgbToLinear } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { summon } from '../summon.js';import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, perf, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
@@ -55,6 +55,9 @@ export function createSettingsCard(app) {
       app.state.stageMix = Math.max(0, Math.min(1, Number.isFinite(+v) ? +v : 0));
       const a = themeGround(), b = mat.stageCustom;
       mat.bg = app.state.stageFollow ? a.slice() : [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * app.state.stageMix);
+      /* 039 X4 · THE STAGE WORDS WEAR THE STAGE'S INK (WALK-A #11): the words on the stage (the caption, INFORMATIONAL's, WIDGETS, the ESP key) read
+         against this ground, not the theme's — dark ink over a ground whose relative luminance passes 0.2 (where the two inks' contrasts cross), else light (lab.css) */
+      const L = 0.2126 * srgbToLinear(mat.bg[0]) + 0.7152 * srgbToLinear(mat.bg[1]) + 0.0722 * srgbToLinear(mat.bg[2]); document.body.dataset.stageInk = L > 0.195 ? 'dark' : 'light';
       look.paintInk(); schedule(TIER.PRESENT);
     }
     app.hooks.restage = () => setStageMix(app.state.stageMix);
@@ -65,12 +68,13 @@ export function createSettingsCard(app) {
     }
     function setStageFollow(on) {
       app.state.stageFollow = !!on;
-      if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', app.state.stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(app.state.stageFollow)); }
+      if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', app.state.stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(app.state.stageFollow));
+        hint(ui.stageFollow, app.state.stageFollow ? 'On: the stage is the theme’s ground · press: your colour' : 'Off: the stage wears your colour · press: the theme’s'); }   // 039 X4: it said "Ignore the chosen stage colour", backwards
       setStageMix(app.state.stageMix);
     }
     app.hooks.setStageColour = setStageColour;
     app.hooks.setStageFollow = setStageFollow;
-    ui.stageK = knob({ label: 'STAGE', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
+    ui.stageK = knob({ label: 'STAGE', title: 'How much of your colour the stage wears; 0 % is the theme', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
     app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); if (x === app.state.stageMix) return x; ui.stageK.set(x); setStageMix(x); return x; };   // 029 M1: the value in force writes nothing
     { const seat = el('div', 'stage-seat'); ui.stageSeat = { root: seat };   // 037 T1: the seat, STAGE and GAMMA are seated in STAGE (lab/stage-window.js)
       ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
@@ -78,10 +82,12 @@ export function createSettingsCard(app) {
          STAGE knob sits at its near-theme rest (≤ 5 %, the first run's 4 %), takes it to 100 %, so the colour chosen IS the ground; a knob the hand set
          higher keeps its blend */
       ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); if (app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });
-      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.title = 'Ignore the chosen stage colour';
-      ui.stageFollow.addEventListener('click', () => setStageFollow(!app.state.stageFollow));
+      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button';
+      /* 039 X4 (WALK-A #10: FOLLOW THEME off showed nothing until the STAGE knob was raised): a HAND turning it off lifts a resting knob (≤ 5 %) to 100 %,
+         P7's road, so the colour chosen shows at once; a knob the hand set higher keeps its blend */
+      ui.stageFollow.addEventListener('click', () => { const on = !app.state.stageFollow; setStageFollow(on); if (!on && app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });
       setStageColour(mat.stageCustom); setStageFollow(true); }
-    ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } });
+    ui.gammaK = knob({ label: 'GAMMA', title: 'The picture’s gamma: above 1 brightens the mid-tones', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } });
     /* 037 T1 · THE STAGE WINDOW: the rows above leave DISPLAY for `stage` (the controls move, the roads do not); DISPLAY keeps EDIT STAGE (native-ui.js seats it) */
     createStageWindow(app);
     ui.editStage = trig({ label: 'EDIT STAGE', glyph: 'stage', title: 'Open STAGE below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'stage') });   // 037 T2 · THE SUMMONS (lab/summon.js)
@@ -126,7 +132,7 @@ export function createSettingsCard(app) {
     const swS = (o) => ({ ...sw(o), spec: o });   // 035 G3: a switch that keeps its options, as seg and knob do (the sheet's second face is made from them)
     const gq = group(ui.set.body, 'FIELD QUALITY');
     const r5 = el('div', 'row', gq);
-    ui.gridSeg = seg({ label: '', aria: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³' }, { id: '96', label: '96³' }, { id: '128', label: '128³' }],
+    ui.gridSeg = seg({ label: '', aria: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³', title: 'Coarse grid: the fastest, softest picture' }, { id: '96', label: '96³', title: 'Middle grid: the usual balance' }, { id: '128', label: '128³', title: 'Fine grid: the sharpest, and the heaviest' }],
       onChange: (v) => { quality.res = +v; quality.steps = { 64: 110, 96: 160, 128: 240 }[+v]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[+v]; schedule(TIER.REBUILD); } });
     r5.appendChild(ui.gridSeg.root);   // iteration 013 S1 (Josh: "Remove text that says 'grid' in quality"): no word over 64³ · 96³ · 128³; the radiogroup is still named GRID
     const capSeg = seg({ label: 'FIELD CLOCK cap', value: '0', options: [{ id: '0', label: 'MAX' }, { id: '33', label: '30 Hz' }, { id: '66', label: '15 Hz' }, { id: '200', label: '5 Hz' }],
@@ -146,10 +152,10 @@ export function createSettingsCard(app) {
        also caps the canvas at half while playing (rack.js loop).  ui.setTier is the one road (applySettings too) */
     ui.setTier = (t) => { perf.tier = t === 'quality' ? 'full' : ['full', 'balanced', 'light'].includes(t) ? t : 'smooth'; look.hold(perf.tier === 'balanced' || perf.tier === 'light'); ui.tierSeg.set(perf.tier); schedule(TIER.PRESENT); };
     ui.tierSeg = seg({ label: 'PERFORMANCE', value: 'smooth', options: [
-      { id: 'full', label: 'FULL', title: 'Everything as the look says, always' },
-      { id: 'smooth', label: 'SMOOTH', title: 'Live glass; canvas at 85 % while playing' },
-      { id: 'balanced', label: 'BALANCED', title: 'Hold the frost while the picture moves' },
-      { id: 'light', label: 'LIGHT', title: 'Hold the frost; half-size canvas while playing' }],
+      { id: 'full', label: 'FULL', title: 'The sharpest picture and the windows’ blur, always' },   // 039 X16 (WALK-D #7): the reader's words, not the builders'
+      { id: 'smooth', label: 'SMOOTH', title: 'Blur stays on; a slightly softer picture while playing' },
+      { id: 'balanced', label: 'BALANCED', title: 'The windows’ blur rests while the picture moves' },
+      { id: 'light', label: 'LEAN', title: 'Lightest: blur rests, a half-sharp picture while playing' }],   // 039 X16: LEAN (THEME's LIGHT keeps the word; FOR-JOSH), the id `light` kept
       onChange: (v) => { ui.setTier(v); saveSettings(); } });
     r5b.appendChild(ui.tierSeg.root);
     /* iteration 016 W4 (Josh, call 7: "60 | 120 HZ probably moves into SETTINGS"): the modulation's update rate, beside the GOVERNOR — off the modulation
@@ -188,24 +194,23 @@ export function createSettingsCard(app) {
     const r5c = el('div', 'row tight fit lw-dither', gq);   // 022 F2: A ROW FITS
     const setDither = (v) => { mat.dither = v; ui.ditherK.setDisabled(!v); schedule(TIER.PRESENT); saveSettings(); };
     ui.ditherSeg = seg({ label: 'DITHER', value: 'off', options: [
-      { id: 'off', label: 'OFF', title: 'the colour goes to the 8-bit swapchain as it is' },
-      { id: 'ordered', label: 'ORDERED 8×8', title: 'Apply ordered dithering to reduce 8-bit colour bands' }],
+      { id: 'off', label: 'OFF', title: 'No dithering: smooth gradients may show bands' },
+      { id: 'ordered', label: 'ORDERED 8×8', title: 'A fine pattern that hides bands in smooth gradients' }],
       onChange: (v) => setDither(v === 'off' ? 0 : ui.ditherK.get()) });
     r5c.appendChild(ui.ditherSeg.root);
-    ui.ditherK = knob({ label: 'STRENGTH', min: 0.25, max: 2, value: 1, fmt: (v) => '±' + (v / 2).toFixed(2) + ' LSB', onInput: (v) => { if (ui.ditherSeg.get() !== 'off') setDither(v); } });
-    ui.ditherK.root.title = 'Dither strength in 8-bit output levels; 1 is ±½ level';
+    ui.ditherK = knob({ label: 'STRENGTH', title: 'How strong the pattern is: ±0.50 is half a colour step', min: 0.25, max: 2, value: 1, fmt: (v) => '±' + (v / 2).toFixed(2) + ' step', onInput: (v) => { if (ui.ditherSeg.get() !== 'off') setDither(v); } });   // 039 X16: the hint in the spec, so the sheet's face wears it; a colour step, not an LSB
     ui.ditherK.setDisabled(true);
     r5c.appendChild(ui.ditherK.root);
     ui.showDither = (k) => { ui.ditherSeg.set(k ? 'ordered' : 'off'); ui.ditherK.setDisabled(!k); if (k) ui.ditherK.set(Math.max(0.25, Math.min(2, k))); };   // the controls repainted from mat.dither (the settings, a lift, LW)
     const r6 = el('div', 'row fit lw-domain', gq);
-    ui.domainAuto = swS({ label: 'DOMAIN AUTO', value: true, onChange: (v) => { domain.auto = v; ui.domainKnob.setDisabled(v); schedule(TIER.REBUILD); } });
+    ui.domainAuto = swS({ label: 'DOMAIN AUTO', value: true, title: 'Fit the wave’s box to the state; off, WIDTH sets it', onChange: (v) => { domain.auto = v; ui.domainKnob.setDisabled(v); schedule(TIER.REBUILD); } });
     r6.appendChild(ui.domainAuto.root);
     ui.domainKnob = knob({ label: 'WIDTH', title: 'The domain’s half-width, ± a₀', min: 3, max: 140, value: 7, log: true, fmt: (v) => '±' + v.toFixed(0) + ' a₀', onChange: (v) => { domain.half = v; schedule(TIER.REBUILD); } });
     ui.domainKnob.setDisabled(true);
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
     ui.keepSw = swS({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>Performance.</b> FIELD CLOCK cap limits how often ψ is reconstructed from the register; the picture still presents every frame, so it saves CPU time, not GPU time. AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE: FULL keeps everything as the look says; SMOOTH, the default, keeps the live glass and every motion and draws the canvas at 85 % while playing (full size at rest, in films and in pictures); BALANCED holds the frost while the picture moves (the look returns at rest); LIGHT also draws the canvas at half size while playing (films and pictures keep their own size). READERS 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH 1 is ±½ output level. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    el('div', 'note', gq).innerHTML = '<b>Performance.</b> FIELD CLOCK cap limits how often ψ is reconstructed from the register; the picture still presents every frame, so it saves CPU time, not GPU time. AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE: FULL keeps everything as the look says; SMOOTH, the default, keeps the live glass and every motion and draws the canvas at 85 % while playing (full size at rest, in films and in pictures); BALANCED holds the frost while the picture moves (the look returns at rest); LEAN also draws the canvas at half size while playing (films and pictures keep their own size). READERS 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH ±0.50 is half a colour step. KEEP FRAMES updates the playhead every frame and may cost performance.';
     el('div', 'note', gq).innerHTML = '<b>Playback.</b> WALL follows the wall clock. LOCKED steps time by exactly one CADENCE step per frame and holds the render scale, so a recording never sees a skipped or doubled step; a slow frame slows time instead. LATENCY is the time from a knob to the picture.';
   }
   /* 035 G3 · THE MENU SHEET's rows (Josh 11-03: "a little slide-over which is a minimalist-CSS version of Settings rack window > Quality, among
@@ -238,7 +243,7 @@ export function createSettingsCard(app) {
        cap and READERS stay in the rack's SETTINGS › QUALITY.  `more` takes a row as any group does (a later door's knob joins it there). */
     const gm = group('');
     row(gm, face(ui.tierSeg));
-    row(gm, lookSeg('motion', 'MOTION', [['auto', 'AUTO', 'Follow the system'], ['full', 'FULL'], ['reduced', 'REDUCED', 'Fades only: nothing travels'], ['off', 'OFF', 'Nothing animates']]));
+    row(gm, lookSeg('motion', 'MOTION', [['auto', 'AUTO', 'Follow the system'], ['full', 'FULL', 'Every motion plays'], ['reduced', 'REDUCED', 'Fades only: nothing travels'], ['off', 'OFF', 'Nothing animates']]));
     /* 037 M1 · THE COLLAGE SWITCH (Josh: "an option in the main menu settings to enable or disable collage animation … a video icon and the
        switches to the icon with a line crossing it out"): the word, and the film camera or the camera struck through (both glyphs in the
        switch, the CSS shows the state's); the value is the main menu's own PREFERENCE (app.state.picker — this module never imports it) */
@@ -249,10 +254,10 @@ export function createSettingsCard(app) {
     row(gm, lookSeg('frost', 'FROST', [['off', 'OFF', 'No backdrop blur'], ['still', 'STILL', 'Blur while the picture is still'], ['always', 'ALWAYS', 'Blur always: it can cost frames']]));
     { const on = () => !!document.fullscreenElement, f = sw({ label: 'FULLSCREEN', value: on(), title: 'Fill the screen (F)', onChange: () => { app.sh.ACTIONS.run('fullscreen'); setTimeout(paint, 400); } });
       paints.push(() => f.set(on())); document.addEventListener('fullscreenchange', () => f.set(on())); row(gm, f); }   // the `fullscreen` action's road; the switch mirrors the document
-    row(gm, lookSeg('theme', 'THEME', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM', 'Follow the system']], (v) => app.hooks.setTheme(v)));
+    row(gm, lookSeg('theme', 'THEME', [['light', 'LIGHT', 'Light windows and stage'], ['dark', 'DARK', 'Dark windows and stage'], ['system', 'SYSTEM', 'Follow the system']], (v) => app.hooks.setTheme(v)));
     { const h = sw({ label: 'HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
     const moreRow = el('div', 'mm-sh-more', host), more = group('');
-    { const f = fold(moreRow, more, { what: 'more settings', key: 'menuMore' }); f.button.prepend(el('span', 'mm-sh-morew', null, 'MORE')); }
+    { const f = fold(moreRow, more, { what: 'more settings', key: 'menuMore' }); f.button.prepend(el('span', 'mm-sh-morew', null, 'MORE')); hint(f.button, 'More: the grid, the clock and the fine-tuning'); }
     /* 036 G5b (chain K's FOR-SOS): STROKE — the kit's look key `stroke` (0–1 by .05; MIR OPTIONS › CONTROLS' 0–100 % knob; λWAVES' home 0), a
        second face of the look store as the rows above; shown only where the kit carries the key (MIR 1.5.7-alpha's door) */
     if (look.get('stroke') !== undefined) {

@@ -102,7 +102,7 @@ export function createBake(app) {
     const bar = document.querySelector('.lw-espbar:not([hidden])');
     if (bar) {
       const ramp = bar.querySelector('.lw-espbar-ramp'), r = ramp.getBoundingClientRect(), side = bar.dataset.side, horiz = side === 'top' || side === 'bottom';
-      const stops = [...(ramp.style.background || '').matchAll(/(#[0-9a-f]{6}|rgb\([^)]*\))\s+([\d.]+)%/gi)];
+      const stops = [...(ramp.style.background || '').matchAll(/(#[0-9a-f]{6}(?:[0-9a-f]{2})?|rgba?\([^)]*\))\s+([\d.]+)%/gi)];   // 039 X3: VIEW ESP's clear middle (rgba)
       const x0 = X(r.left), y0 = Y(r.top), x1 = x0 + r.width * k, y1 = y0 + r.height * k;
       const grad = horiz ? g.createLinearGradient(x0, 0, x1, 0) : g.createLinearGradient(0, y1, 0, y0);
       for (const m of stops) grad.addColorStop(Math.min(1, +m[2] / 100), m[1]);

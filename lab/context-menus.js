@@ -43,7 +43,7 @@ export function createContextMenus(app) {
   const control = (el) => [row('control.reset', 'RESET', { off: !el.closest('[data-param]') }), row('control.learn', 'LEARN…', { off: !el.closest('[data-key-action]') }),
     ...events(el), ...favRows(el), row('knob.copyId', 'COPY ID', { off: !el.closest('[data-param], [data-key-action], [data-fav], [data-event]') })];
   const bar = () => [row('dock', 'DOCK'), row('csb.expand', 'EXPAND'), sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get())),
-    row('folds', A.get('folds') && A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'MINIMIZE ALL', { on: () => undefined }), row('modArm', 'MOD'), row('gui', 'MIR OPTIONS'), null, row('hide', 'HIDE THE INTERFACE')];
+    row('folds', A.get('folds') && A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'FOLD ALL', { on: () => undefined }), row('modArm', 'MOD'), row('gui', 'MIR OPTIONS'), null, row('hide', 'HIDE THE INTERFACE')];
   const tile = (el) => [row('picker.open', 'OPEN'), row('picker.isomers', 'ISOMERS', { off: !el.querySelector('.mm-iso') }), row('picker.keep', 'KEEP ON THIS DEVICE', { off: !el.querySelector('img[data-vol]') }), null,
     row('copy.name', 'COPY NAME'), row('copy.formula', 'COPY FORMULA')];
   const looks = () => [...document.querySelectorAll('#lwMenu .mm-lk')].map((b) => [b.dataset.look, (b.getAttribute('aria-label') || b.title || b.dataset.look).split(' · ')[0]]);

@@ -63,7 +63,11 @@ THE STAGE WINDOW (037 T1, Josh: "New MIR rack window called 'Stage' where the st
 (`lab/stage-window.js`, glyph `stage`, KIND core, CLOSED on a first run, in the FINDER, `window.stage.*` generated) holding FRAME, then AXES ·
 AXIS COLOUR, then the stage colour · FOLLOW THEME, then STAGE · GAMMA, then PULSE. A LABEL MOVES, A KEY STAYS: those rows left SETTINGS › DISPLAY
 as the same controls (settings-card.js still makes them), so FIELD_CHROME, `presentation.ui.stage`, `presentation.mat.gamma`, `material.stage`
-and `material.gamma` are untouched; DISPLAY keeps one row, EDIT STAGE. The body is short and never scrolls.
+and `material.gamma` are untouched; DISPLAY keeps one row, EDIT STAGE. The body is short and never scrolls. FOLLOW THEME SAYS WHAT IT DOES (039 X4, WALK-A #10):
+its hint follows its state (On: the theme's ground · Off: your colour), and a HAND turning it off lifts a resting STAGE knob (≤ 5 %) to 100 % by P7's road, so the
+chosen colour shows at once; STAGE and GAMMA carry hints. THE STAGE WORDS WEAR THE STAGE'S INK (039 X4, WALK-A #11): `body[data-stage-ink]` follows the
+stage ground's relative luminance (dark ink past 0.195, settings-card.js setStageMix) and the stage's words — the caption, INFORMATIONAL's, WIDGETS, the ESP
+key — wear it (lab.css); the rack's words stay the theme's.
 
 THE SUMMONS (037 T2): `summon(rk, fromId, id)` (`lab/summon.js`) opens `id` DIRECTLY BELOW `fromId` in fromId's rack (the kit's
 `open(id, { side, index })`; open already, it is docked or moved there and unfolded, nothing raised) and plays THE MITOSIS once — a copy of

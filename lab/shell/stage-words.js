@@ -44,7 +44,7 @@ export const INFO_ROWS = Object.freeze([
   { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'seat', label: 'PAD', fmt: pct, hint: 'Formula margin' },
   /* iteration 018 B7 (Josh: "Include ESP's bar with a padding setting and a toggle that just cycles between right (where it is now), left, top, and bottom.
      Stage text and formula is on top of the bar … Stage text takes priority"): the bar is painted by WAVE (material.js) and seated by these three */
-  { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'ESP colour bar: φ, five values in a.u.' },
+  { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'ESP key: + and − colours (WAVE’s ESP: values in a.u.)' },
   { key: 'espBarSide', type: 'enum', values: ['right', 'left', 'top', 'bottom'], default: 'right', group: 'bar', label: 'SIDE', options: [{ id: 'right', label: 'RIGHT' }, { id: 'left', label: 'LEFT' }, { id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'ESP bar side: RIGHT → LEFT → TOP → BOTTOM' },
   { key: 'espBarPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'bar', label: 'PAD', fmt: pct, hint: 'ESP bar margin' },
   ...KINDS.filter((k) => k.hint).map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),

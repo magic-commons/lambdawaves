@@ -18,7 +18,7 @@ import { Register, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { VIEW, VIEW_NAMES, STYLE, quatFromYawPitch, waveView, KNEE_DEFAULT } from './field.js';
-import { el, device as kitDevice } from './mir/kit.js';
+import { el, hint, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createGas } from './windows/gas.js'; import { createEqualizerCard } from './windows/equalizer.js';   // 021 G2 (THE HINGE): the BOX rows and the EQUALIZER window, out of spectrum.js
 import { createFolders } from './windows/folders.js';   // 021 G3: the FOLDERS card, out of boot()
@@ -54,7 +54,7 @@ export { TIER };
 
 export async function boot(dom) {
   registerIcons();
-  const DEVICES = new Map(), device = (o) => { const d = kitDevice(o); DEVICES.set(o.id, d); return d; };   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked
+  const DEVICES = new Map(), device = (o) => { const d = kitDevice(o); DEVICES.set(o.id, d); if (d.foldBtn) hint(d.foldBtn, 'Fold or unfold this window'); return d; };   // 039 X8 · FOLDING'S ONE WORD (the kit's hint says "Collapse or expand": FOR-KIT)   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked
   const reg = new Register();
   /* UNDO / REDO: the ring (`app.state.history`) is built at the foot of boot(), once every path it writes through exists; hNote() is
      the "an edit may have happened" ping for the few register-side setters that do not bump reg.version */

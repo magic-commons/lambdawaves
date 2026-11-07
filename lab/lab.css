@@ -227,6 +227,11 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 .mb-sub-list.mb-accordion { position: static; flex: 0 0 auto; min-width: 0; max-height: none; overflow: visible; margin: 0 0 4px 12px; box-shadow: none; }
 .mb-item.mb-check, .mb-item.mb-radio { position: relative; padding-inline-start: 26px; }
 .mb-item:has(> .mb-icon) { align-items: center; }
+/* 039 X8 · ONE COLUMN OF WORDS (WALK-A #15, WALK-C #18): in a list where any row wears an icon, a row without one starts its word in the icons'
+   word column (10 + 16 − 8 + 18 = 36 px); a check or radio row WITH an icon keeps the icons' padding and wears its ✓ or • at the row's end */
+.mb-list:has(> .mb-item > .mb-icon) > .mb-item:not(:has(> .mb-icon)) { padding-inline-start: 36px; }
+.mb-item:is(.mb-check, .mb-radio):has(> .mb-icon) { padding-inline-start: 10px; }
+.mb-item:is(.mb-check, .mb-radio):has(> .mb-icon) > .mb-mark { position: static; flex: 0 0 auto; }
 
 
 .mb-item > .mb-num { margin-left: auto; flex: 0 0 auto; display: inline-flex; align-items: center;
@@ -758,6 +763,15 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    in the words' ink; a widget is a box in stage fractions with no background, border or shadow, never a pointer target outside EDIT; H takes them out */
 #widgets { position: absolute; inset: 0; z-index: 19; pointer-events: none; user-select: none; -webkit-user-select: none; color: hsl(40 33% 96%); }
 [data-theme="light"] #widgets { color: hsl(232 22% 10%); }
+/* 039 X4 · THE STAGE WORDS WEAR THE STAGE'S INK (WALK-A #11): the caption, INFORMATIONAL's words, WIDGETS and the ESP key read against the stage's
+   own ground — body[data-stage-ink], from mat.bg's luminance (settings-card.js setStageMix); at the theme's own ground it is the theme's ink, as before */
+body[data-stage-ink="light"] .mir-info { --info-ink: hsl(40 33% 96%); --info-paper: hsl(228 40% 4% / .27); --info-paper-soft: hsl(228 40% 4% / .14); }
+body[data-stage-ink="dark"] .mir-info { --info-ink: hsl(232 22% 10%); --info-paper: hsl(42 45% 97% / .38); --info-paper-soft: hsl(42 45% 97% / .2); }
+body[data-stage-ink="light"] #widgets { color: hsl(40 33% 96%); } body[data-stage-ink="dark"] #widgets { color: hsl(232 22% 10%); }
+body[data-stage-ink="light"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(0 0 0 / .5); } body[data-stage-ink="dark"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(255 255 255 / .75); }
+body[data-stage-ink="light"] .lw-espbar { color: hsl(40 33% 96%); text-shadow: 0 0 6px rgb(0 0 0 / .75); } body[data-stage-ink="dark"] .lw-espbar { color: hsl(232 22% 10%); text-shadow: 0 0 6px rgb(255 255 255 / .8); }
+html body[data-stage-ink="light"] #title .word { color: #fff; } html body[data-stage-ink="dark"] #title .word { color: #000; }   /* the wordmark and the menu's words stand on the stage too */
+html body[data-stage-ink="light"] #menubar .mb-btn:not(:hover):not([aria-expanded="true"]) { color: hsl(40 33% 96% / .86); } html body[data-stage-ink="dark"] #menubar .mb-btn:not(:hover):not([aria-expanded="true"]) { color: hsl(232 22% 10% / .8); }
 #widgets .lw-widget { position: absolute; box-sizing: border-box; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; outline: 0; }
 #widgets .lw-widget-body { position: absolute; inset: 0; container-type: size; overflow: hidden; }
 #widgets .lw-widget-bar, #widgets .lw-widget-x, #widgets .lw-widget-grip { display: none; }
@@ -778,6 +792,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 #widgets .lw-w-text { font-family: var(--font-info-body, "Spectral", Georgia, serif); line-height: 1.3; overflow-wrap: anywhere; text-shadow: 0 0 .35em rgb(0 0 0 / .5); }
 [data-theme="light"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(255 255 255 / .75); }
 #widgets .lw-w-text :is(h1, h2) { font-family: 'LW Title', var(--font-ui); font-weight: 400; letter-spacing: .04em; }
+#widgets .lw-w-text :is(h1, h2).lw-uiface { font-family: var(--font-ui); letter-spacing: 0; }   /* 039 X12 · A HEADING WEARS ONE FACE: a ψ, λ or É sets the whole heading in the UI face */
 #widgets .lw-w-text > :first-child { margin-top: 0; }
 #widgets .lw-w-text :is(h1, h2, h3, h4, p, ul, ol, blockquote) { margin: 0 0 .35em; }
 #widgets .lw-w-text h1 { font-size: 1.5em; } #widgets .lw-w-text h2 { font-size: 1.25em; } #widgets .lw-w-text :is(h3, h4) { font-size: 1.1em; }
@@ -906,6 +921,13 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) { width: min(46vw, 320px); height: 30px; }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-ramp { bottom: auto; width: auto; right: 0; height: 12px; }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-n { top: 20px; transform: translateX(-50%); }
+/* 039 X3 · THE KEY'S WORDS beyond the ramp's ends: + over the top (a lying bar: right of its + end), − under the foot (left of its − end) */
+.lw-espbar .lw-espbar-w { left: 0; transform: none; font-size: 10px; letter-spacing: .06em; }
+.lw-espbar .lw-espbar-w[data-end="pos"] { top: auto; bottom: calc(100% + 6px); }
+.lw-espbar .lw-espbar-w[data-end="neg"] { top: calc(100% + 6px); }
+.lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-w { top: -2px; bottom: auto; transform: none; }
+.lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-w[data-end="pos"] { left: calc(100% + 8px); }
+.lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-w[data-end="neg"] { left: auto; right: calc(100% + 8px); }
 /* iteration 016 W8 · THE ACCENT B DOT (Josh's call 14): a rack window whose controls carry a modulation route (mod-port.js `routeDots`, `.lw-routed`)
    wears a 6 px ACCENT B dot; a greyed routed knob (016 V1) is thus still told of.  Since 017 R1 it sits INSIDE the title bar at the eyebrow's end
    (016 seated it just past the card's edge, where the scroll pill now floats — "strange diamonds under the pills"): the eyebrow's own padding
