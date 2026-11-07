@@ -618,9 +618,10 @@ img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no
 #lwMenu .mm-table[hidden] { display: none; }
 /* iteration 016 L3 · THE 140 ON ONE PAGE: fourteen columns of the periodic cell (the same --t while the screen is wide; on a narrow one the
    fourteen take the width), ten rows, the state's name centred at the tile's foot */
-#lwMenu .mm-htable { --t: min(calc((100vw - 48px) / 14.3), calc((100dvh - 300px) / 10.25)); grid-template-columns: repeat(14, var(--t)); grid-template-rows: none; grid-auto-rows: var(--t); }
-@media (min-width: 900px) { #lwMenu .mm-htable { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 300px) / 10.25)); } }   /* ten full rows where the table's 9.35 stood: a cell's size while the height allows */
+#lwMenu .mm-htable { --t: min(calc((100vw - 48px) / 14.3), calc((100dvh - 300px) / 10.25), var(--fit, 100vh)); grid-template-columns: repeat(14, var(--t)); grid-template-rows: none; grid-auto-rows: var(--t); }
+@media (min-width: 900px) { #lwMenu .mm-htable { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 300px) / 10.25), var(--fit, 100vh)); } }   /* ten full rows where the table's 9.35 stood: a cell's size while the height allows */
 #lwMenu .mm-htable .mm-orb { border-radius: 6px; }
+#lwMenu .mm-htable.mm-hscroll { overflow-y: auto; scrollbar-width: thin; }   /* 039 W9 (D #5): a page too short for ten 24-px rows scrolls the grid, then the page */
 #lwMenu .mm-htable .mm-hl { left: 50%; bottom: 3%; translate: -50% 0; font-size: clamp(11px, calc(var(--t) * .2), 24px); white-space: nowrap; }
 /* iteration 015 M3 · THE 140 (HYDROGEN on the ATOMIC deck): the state's name in STIX, its m the subscript; under SHOW LABELS as the symbols are */
 #lwMenu .mm-hl { position: absolute; left: 7%; bottom: 5%; pointer-events: none; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(14px, calc(var(--t) * .17), 30px); line-height: 1;

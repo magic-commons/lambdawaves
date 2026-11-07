@@ -13,6 +13,8 @@ import { widgetsOfProject, loadWidgets } from '../widgets.js';   // 037 W1: the 
 import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS, N6, narrow, widen } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 import { LIGHT_KEYS } from '../light-window.js';   // 037 L3: THE LIGHT's targets, seated in presentation.mat.light
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
+/** 039 W6: is there a quick save to LOAD (FILE › QUICK › LOAD is dim without one) */
+export const quickSaved = () => { try { return localStorage.getItem(LS_EXP) != null; } catch (_) { return false; } };
 /** 028 R-04 · A FILE'S NUMBER IS TAKEN ONLY WHEN IT IS ONE: `v` (a file's obs, mat, quality or domain) with every number `cur` holds
  *  that `v` carries non-finite (null, NaN, 'boom') kept at `cur`'s, one nested object deep and element-wise in a number array; the
  *  rest of `v`, its keys and their order, as it came.  A `domain.half: null` froze the stage and the session kept it. */
@@ -163,7 +165,7 @@ export function createPersist(app) {
     schedule(TIER.PRESENT);
     return ok;
   }
-  function save() { try { const s = serialize(); localStorage.setItem(LS_EXP, JSON.stringify(s.experiment)); localStorage.setItem(LS_PRES, JSON.stringify(s.presentation)); wState.setStatus('saved', 'live'); } catch (e) { wState.setStatus('save failed', 'warn'); } }
+  function save() { try { const s = serialize(); localStorage.setItem(LS_EXP, JSON.stringify(s.experiment)); localStorage.setItem(LS_PRES, JSON.stringify(s.presentation)); wState.setStatus('saved', 'live'); return true; } catch (e) { wState.setStatus('save failed', 'warn'); return false; } }
   /** the whole session as JSON on the clipboard — STATE's COPY JSON and the FILE menu's row are this one road (N1) */
   async function copyJSON() { try { await navigator.clipboard.writeText(JSON.stringify(serialize(), null, 1)); } catch (_) {} }
   /** opt.history (UNDO / REDO, S3): an edit-scope record; the transport stays where it is (the anchor c(0) travels, so the picture

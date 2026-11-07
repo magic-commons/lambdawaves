@@ -3,15 +3,16 @@
  * field and control laws, recording and saving the difference.  What stays λWAVES' is here:
  *   · the rows are rack.js ACTIONS (A9): `ctrl: true` → Mod, `ctrl: 'Ctrl'` → Ctrl (⌘⇧Q never runs the dolly zoom); a row with no
  *     `shift` answers its chord AND Shift+chord, and every run reads Shift as the fine step (0.25), but the pan, Alt(+Shift)+Drag (stage-gestures.js, not a row), is 1:1, no fine step (0.5.3 R8); held keys repeat; a `stage`
- *     row runs only while the stage has the focus (THE TAB RULE); every row is `overControls`, so a focused control keeps a key only
- *     by acting on it (it prevents the default: a knob's arrows, a seg's arrows) and a control that will not act yields it (wave
- *     68), and Space is the transport's over any control and a focused <select> (wave 88);
+ *     row runs only while the stage has the focus (THE TAB RULE); 039 W1 THE KEY PRESSES THE FOCUSED CONTROL: a control the KEYBOARD
+ *     brought the focus to keeps the keys it operates by (the kit's ownsKey: a button its Enter and Space, a slider its arrows) and
+ *     acts; one the POINTER focused (a click leaves the focus on its button) hands them to the rows, so Space still plays after a
+ *     click and over a focused <select> (wave 88), and a control that will not act yields its key (wave 68);
  *   · THE BINDING LAW (CLAUDE.md): an overlap is refused unless the steal is explicit, a saved chord another row holds by
  *     default is dropped on read, Tab (any chord on it) / Escape / a modifier alone are refused, and a stage row binds on Tab alone;
  *   · the save, `lambdawaves.q0.keys` (PREFERENCE): a 0.4.0 record { id: { key, ctrl, alt, shift } }, or one saved under an old
  *     id (`was`), is read into the kit's { id: [chords] }; what is written is the kit's difference, and nothing when there is none;
  *   · the rows' key / ctrl / alt / shift follow the table, so the menus, the history's names and the tests read the live chord. */
-import { createKeys, parseChord, normalize, chordFromEvent, RESERVED_BY_BROWSER } from './mir/shell/keys.js';
+import { createKeys, parseChord, normalize, chordFromEvent, RESERVED_BY_BROWSER, isField, ownsKey } from './mir/shell/keys.js';
 import { jsonStore } from './mir/core/prefs.js';
 
 /** the keyboard window's groups, in λWAVES' order (021 I1: CONTROL SURFACE was missing — indexOf −1 sorted csb.search first — and the registry's groups follow) */
@@ -49,12 +50,30 @@ export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus =
   const group = (a) => a.group || ORDER[3];
   const table = createKeys({ platform, target, reserved, storage:   /* 021 I2: the browser's own chords refused by the binder (kit 1.5.6-alpha.2) */ { get: () => liftSaved(storage.get(), rows), set: (o) => storage.set(carry(o)) },
     actions: [...rows].sort((x, y) => ORDER.indexOf(group(x)) - ORDER.indexOf(group(y))).map((a) => ({ id: a.id, label: a.label, group: group(a), short: a.short,
-      keys: keysOf(a), inFields: !!a.inFields, repeat: true, overControls: true, when: a.when || (a.stage ? stageHasFocus : undefined),
+      keys: keysOf(a), inFields: !!a.inFields, repeat: true, when: a.when || (a.stage ? stageHasFocus : undefined),
       run: (e) => edit(a, () => a.run(e && e.shiftKey ? 0.25 : 1)), up: a.up && (() => a.up()) })) });   // `up`: a HELD row (the kit's: its release, or leaving the page, runs it)
   const P = table.platform, row = (id) => table.list().find((x) => x.id === id);
   const view = target || (typeof window !== 'undefined' ? window : null);   // wave 88: a focused <select> yields Space (the kit counts it a field)
   if (view) view.addEventListener('keydown', (e) => { const t = e.target; if (e.code !== 'Space' || e.defaultPrevented || !t || t.tagName !== 'SELECT') return;
     const id = table.holders(chordFromEvent(e, P))[0]; if (id) { e.preventDefault(); table.run(id, e); } });
+  /* 039 W1 · the pointer's focus hands the keys back: a control focused by a press (not by Tab, an arrow or a key's act) keeps no key from a
+     row — the row runs, its keyup is swallowed (a button clicks on Space's release) — and nor does an element the browser never presses (the
+     logo, a role=button div); after a key moved the focus there, the kit's table has already let the control have it */
+  if (view) {
+    let byKey = false, keyFocus = null; const taken = new Set();
+    /* a tapped knob takes the focus (the kit's dial prevents the press's default, so it never did): its arrows turn it, never the camera */
+    view.addEventListener('pointerdown', (e) => { byKey = false; keyFocus = null; const d = e.target.closest && e.target.closest('.k-dial'), k = d && d.closest('.k');
+      if (k && k.tabIndex >= 0 && k !== document.activeElement) k.focus({ preventScroll: true }); }, true);
+    view.addEventListener('keydown', () => { byKey = true; }, true);
+    view.addEventListener('focusin', (e) => { keyFocus = byKey ? e.target : null; }, true);
+    const pressable = (n) => /^(BUTTON|SUMMARY|INPUT)$/.test(n.tagName) || (n.tagName === 'A' && n.hasAttribute('href'));
+    view.addEventListener('keydown', (e) => { if (e.defaultPrevented || e.isComposing || table.recording()) return;
+      const t = e.target, c = chordFromEvent(e, P); if (!c || !t || isField(t) || !ownsKey(t, c)) return;
+      if (t === keyFocus && (pressable(t) || !/^(Space|Enter)$/.test(c))) return;   // the control acts
+      const id = table.holders(c).find((x) => { const a = table.get(x); try { return !!a && (!a.when || !!a.when()); } catch (_) { return false; } });
+      if (id) { e.preventDefault(); taken.add(e.code); table.run(id, e); } });
+    view.addEventListener('keyup', (e) => { if (taken.delete(e.code)) e.preventDefault(); }, true);
+  }
   /* THE FOCUS LAW (0.5.0 C7b): a row with a `when` of its own (the TIMELINE's: its surface has the focus; 021 I1: NODES' ground) wins its chord
      over λWAVES' other rows while that holds; table order alone handed Home, E, C, P, Y and the Shift-arrows to the stage */
   if (view) view.addEventListener('keydown', (e) => { if (e.defaultPrevented || e.isComposing || table.recording()) return;

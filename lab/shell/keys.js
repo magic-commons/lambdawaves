@@ -25,7 +25,7 @@ export function createKeys(app) {
   const kt = createKeyTable({ rows: A.list().filter((r) => r.bind !== false).map(feed), stageHasFocus, keep: ASK_ENABLED ? [] : ['ask'] });   // 0.5.0 C3: the one listener, the save, the binding law
   A.setEdit(keyEdit);
   A.onAdd((rows) => kt.table.add(rows.filter((r) => r.bind !== false).map((r) => { const x = feed(r); return { id: x.id, label: x.label, group: x.group, short: x.short, keys: keysOf(x),
-    repeat: true, overControls: true, when: x.when, run: (e) => x.run(e && e.shiftKey ? 0.25 : 1), up: x.up }; })));   // a row the registry learns later (a window registered after boot)
+    repeat: true, when: x.when, run: (e) => x.run(e && e.shiftKey ? 0.25 : 1), up: x.up }; })));   // a row the registry learns later (a window registered after boot)
   /* ── 0.5.0 C3 · THE KEYBOARD WINDOW is the kit's createKeyboardWindow (keymap.js left): the drawn board, the platform switch, RECORD /
      RESET, the search and the list, the steal on a second press, Escape's three steps, the drag — on the float layer (UI space for the
      scene guard), its move telling the occlusion (CLAUDE.md).  Its paint is λWAVES' charcoal-blue skin (lab.css §KEYBOARD, R5-S3).  Its
@@ -130,9 +130,13 @@ export function createKeys(app) {
       if (!app.state.modHost.model.routesOfTarget(k.dataset.param).some((r) => !r.dormant)) return; const id = k.dataset.param; k.removeAttribute('data-param');
       document.addEventListener(type, () => { k.dataset.param = id; }, { capture: true, once: true }); }, true);
   }
+  let uiEsc = null;
   function toggleUI() {
     const on = document.body.classList.toggle('ui-hidden');
     app.state.uiHidden = on;
+    /* 039 W4: under H nothing is left to press, so Escape brings the interface back (a layer of THE ESCAPE STACK while it is hidden; H stays H) */
+    if (uiEsc) { uiEsc(); uiEsc = null; }
+    if (on) uiEsc = A.escape.push(() => { uiEsc = null; if (document.body.classList.contains('ui-hidden')) toggleUI(); }, { alive: () => document.body.classList.contains('ui-hidden') });
     /* 037 (Josh 11-06: "when the UI is hidden I see the MIR diamond in the top right. It should be absolutely clear. It's supposed to be only
        for hide and reveal"): under H the title goes with everything else — the kit's `body.ui-hidden #title { display: none !important }`
        stands (034 M4 kept the flag in paint here by an inline style; that is B's alone now: THE FLAG ALONE lives under body.rack-hidden) */

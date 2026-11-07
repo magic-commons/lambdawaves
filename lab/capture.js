@@ -115,7 +115,7 @@
 
 import { densityPeriod } from './period.js';
 import { crc32 } from './mir/core/png.js';
-import { saveBlob } from './mir/folders/save-blob.js';
+import { saveBlob } from './mir/folders/save-blob.js'; import { notice } from './mir/shell/notice.js'; import { t } from './mir/core/i18n.js';
 
 export const AU_FS = 0.02418884326;                 // 1 a.u. of time, in femtoseconds (period.js' constant)
 export const ENDPOINT = 'exclusive';                // [t0, t0+T): the endpoint frame is DROPPED.  See endpointProof.
@@ -651,13 +651,17 @@ export async function readback(f, canvas, w, h, draw, wit = null, opaque = true)
  *  `<a download>` λWAVES used before C7, its URL kept as the kit keeps one (a video ten minutes, anything else one).  A
  *  browser without navigator.userActivation counts as spent.  tests/film-handover.browser-test.mjs is its guard. */
 export function handOver(blob, name) {
-  if (typeof navigator !== 'undefined' && navigator.userActivation && navigator.userActivation.isActive) return saveBlob(blob, name);
+  if (typeof navigator !== 'undefined' && navigator.userActivation && navigator.userActivation.isActive) return landed(saveBlob(blob, name), name);
   const url = URL.createObjectURL(blob), a = document.createElement('a'), video = (blob.type || '').startsWith('video/') || /\.mp4$/i.test(name);
   a.href = url; a.download = name; a.rel = 'noopener';
   document.body.appendChild(a); a.click();
   setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) { /* gone */ } a.remove(); }, video ? 10 * 60 * 1000 : 60000);
-  return 'download';
+  return landed('download', name);
 }
+/* 039 W6 EVERY ROW ANSWERS: a download says the file's own name and where it went (the share sheet speaks for itself) — the picture, a shape,
+   a grid and the film's SAVE, every road through the hand-over; the toast follows the hand-over (a microtask), so the save itself sets no
+   timer but its URL's revoke (tests/film-handover) */
+const landed = (how, name) => { if (how === 'download') queueMicrotask(() => notice(t('Saved {name} to your downloads', { name }), { kind: 'ok', ms: 5000 })); return how; };
 
 /**
  * createCapture(LW, { canvas, caption, energies }) — the camera over a booted lab.

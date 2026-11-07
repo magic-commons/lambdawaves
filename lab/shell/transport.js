@@ -3,7 +3,7 @@
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
 import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp, label } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
-import { cssZoom } from '../mir/core/zoom.js'; import { adopt } from '../widgets.js'; import { STYLES as MOL_STYLES, STYLE_GLYPH } from '../widget-mol.js';
+import { cssZoom } from '../mir/core/zoom.js'; import { notice } from '../mir/shell/notice.js'; import { adopt } from '../widgets.js'; import { STYLES as MOL_STYLES, STYLE_GLYPH } from '../widget-mol.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
@@ -85,6 +85,14 @@ export function createTransport(app) {
       places: ['rack', 'stage'],
       onDock: (v) => { const rk = app.sh.rk; if (!rk) return; if (v && rk.isOpen('transport')) transportDock(rk).open(rk.window('transport'));   // 038 S6: the open card read from the rack (app.sh carries no wTr: this road never ran, and a press on an open, empty card did nothing)
         else if (v) rk.open('transport', { index: app.sh.layout.dockIndex }); else rk.close('transport'); } });
+    /* 039 W3 · THE BAR IS IN THE TAB ORDER as the kit made it: one Tab stop (Play), and ← → Home End walk every control.  Two lacks stopped
+       the kit's walk (FOR-KIT): the BPM pill keeps ← → for the tempo (here it keeps ↑ ↓, PageUp/PageDown and Shift+← →), and its list holds
+       the controls a mode hides by visibility (HYDROGEN's molecule chooser), which take no focus.  The app walks the shown ones */
+    const walkable = (n) => !n.hidden && !n.disabled && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden' && !n.closest('.native-tempo, [inert]') && !n.classList.contains('tr-back');
+    T.addEventListener('keydown', (e) => { const k = e.code; if (!/^(ArrowLeft|ArrowRight|Home|End)$/.test(k) || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.target.tagName === 'INPUT') return;
+      const list = [...T.querySelectorAll('button, input')].filter(walkable), i = list.indexOf(e.target); if (i < 0) return;
+      const to = k === 'Home' ? 0 : k === 'End' ? list.length - 1 : (i + (k === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
+      e.preventDefault(); e.stopPropagation(); list[to].focus({ preventScroll: true }); }, true);
     /* the rack's ☆ list opens beside its button, wherever the bar sits (it is the stage's, never the bar's: the bar clips) */
     for (const [b, l] of [['rackFav', 'rackFavList']]) { const btnEl = byId(b), list = byId(l); if (!btnEl || !list) continue;
       btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const z = cssZoom(list), r = btnEl.getBoundingClientRect(), h = list.offsetHeight * z, w = list.offsetWidth * z, up = r.top - h - 8 >= 8;   // 036 K2: seen, written ÷ UI SCALE
@@ -320,22 +328,33 @@ export function createTransport(app) {
    *  new control, because the modulation window is a ported artifact and its timing bar is not ours
    *  to grow; the sentence lives on the MOD button and in the keyboard editor.  It never guesses: no exact
    *  period, no lock, and the refusal says which. */
+  /* 039 W7 BAR LOCK RESTORES THE TEMPO: the lock remembers the tempo it replaced, and a second press while the fitted tempo still stands
+     puts that one back (a tempo moved by hand since is the user's: the next press locks again from it).  Each press says what it did */
+  let held = null;
+  const bpmNow = () => app.state.modHost.model.transport.bpm, tell = (line, warn) => { if (app.state.modView) app.state.modView.say(line, warn ? 'warn' : undefined); notice(line, { kind: warn ? 'warn' : 'ok', ms: warn ? 5000 : 3200 }); };
+  barLock.on = () => !!(held && app.state.modHost && bpmNow() === held.to);
   function barLock() {
     if (!app.state.modHost) return { ok: false, reason: 'no modulation rack' };
+    if (barLock.on()) { const from = held.from; held = null; app.state.modHost.clock.setBpm(from); if (app.state.modView) app.state.modView.sync();
+      tell('BAR LOCK off — the tempo back to ' + bpmNow().toFixed(1) + ' BPM'); saveSettings(); return { ok: true, released: true, bpm: bpmNow() }; }
+    held = null;
     const P = app.hooks.period ? app.hooks.period() : null;
     if (!P || !P.exact || !(P.T > 0)) {
       const why = !P ? 'no recurrence scan' : P.stark ? 'no exact period under a static field'
         : P.mix ? 'the A ↔ B mix has its own clock' : P.stationary ? 'one energy: the density never changes'
         : 'no exact period — the energies are incommensurate';
-      if (app.state.modView) app.state.modView.say('the loop clock cannot be locked to this state: ' + why, 'warn');
+      tell('the loop clock cannot be locked to this state: ' + why, true);
       return { ok: false, reason: why };
     }
     const r = barTempo({ T: P.T, rate: clock.rate });
     if (!r.ok) return { ok: false, reason: r.reason };
+    const from = bpmNow();
     app.state.modHost.clock.setBpm(r.clamped ? r.bpmThatFits : r.bpm);
-    if (app.state.modView) { app.state.modView.sync(); app.state.modView.say(r.clamped
-      ? 'one bar = ' + r.lapsThatFit + ' laps of the recurrence at ' + app.state.modHost.model.transport.bpm.toFixed(1) + ' BPM (one lap would be ' + r.wanted.toFixed(1) + ', past the tempo range)'
-      : 'one bar = one recurrence of the density, at ' + app.state.modHost.model.transport.bpm.toFixed(1) + ' BPM'); }
+    held = { from, to: bpmNow() };
+    if (app.state.modView) app.state.modView.sync();
+    tell(r.clamped
+      ? 'one bar = ' + r.lapsThatFit + ' laps of the recurrence at ' + bpmNow().toFixed(1) + ' BPM (one lap would be ' + r.wanted.toFixed(1) + ', past the tempo range)'
+      : 'one bar = one recurrence of the density, at ' + bpmNow().toFixed(1) + ' BPM — BAR LOCK again puts ' + from.toFixed(1) + ' back');
     saveSettings();
     return { ok: true, bpm: app.state.modHost.model.transport.bpm, wanted: r.wanted, clamped: r.clamped,
              laps: r.clamped ? r.lapsThatFit : 1, T: P.T, seconds: r.seconds, fits: r.fitsAtLaps };

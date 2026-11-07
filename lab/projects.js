@@ -28,7 +28,7 @@
  *   · entryOf(path) · inspected (the RENDER card's gallery: the project ⓘ pointed at) · restoreDemos()
  *   port { host, part, snapshot(), rollback(S) → bool, busy(±1), opened(label), notice() → D9's line, thumbnail(), confirm(text),
  *          rack, onMoved(rect), titleAfterSave(name) → bool, cover() → the front page { shown, close } | null, saved(name),
- *          inspect(entry | null, how) } */
+ *          inspect(entry | null, how), shown() (039 W4: FOLDERS came on screen — its Escape layer) } */
 import { createFolders, toThumb } from './mir/folders/folders.js'; import { glyphEl } from './mir/glyph.js';
 import { createFiles } from './mir/folders/files.js';
 import { registerProjectPart, restoreProject, projectSignature } from './mir/core/project.js';
@@ -180,7 +180,7 @@ export function createProjects(port) {
     },
     /* FOLDERS' entrance is a motion (core/motion.js presence): the mask is taken again where it lands, paused or not (CLAUDE.md's
        mask law).  And opened over the current project, clean and still without a picture, it takes one then */
-    onOpen: () => { fieldIcons(); cover(); demosFirst(folders.gallery); const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
+    onOpen: () => { fieldIcons(); cover(); demosFirst(folders.gallery); if (port.shown) port.shown(); const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
       const e = currentId && files.entry(currentId); if (e && !e.thumb && !dirty()) Promise.resolve(port.thumbnail()).then(toThumb)
       .then((thumb) => { if (thumb) files.overwrite(e.id, { payload: e.payload, thumb, facts: e.facts, at: e.at }); }).catch(() => {}); },
     /* iteration 012 M1 (O1's finding; Josh 10-20 "make sure the Window, UI, saving system works"): an OPEN from FOLDERS lands on the stage, so the

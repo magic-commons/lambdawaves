@@ -164,30 +164,32 @@ judge('A6 index.html carries the two skip links, both racks as tabindex="-1" fra
    (lab/mir/shell/keys.js: ownsKey, pickAction, the one listener, bindError, read by its exact path) through λWAVES' rows (lab/key-table.js).
    The laws are the same; where each one lives now:
      · ROLES, not tags: the kit's ownsKey reads `role` (a slider its arrows, a radio its arrows, a button / link its Space and Enter);
-     · A HANDLED EVENT IS HANDLED and A CONTROL THAT WILL NOT ACT DOES NOT OWN THE KEYS (wave 68): every λWAVES row is `overControls`, so a
-       control keeps a key only by acting on it — the kit's knob, seg and fader prevent the default on what they turn — and the one listener
-       returns on e.defaultPrevented; a disabled one acts on nothing and the app has the key;
-     · SPACE IS THE TRANSPORT'S (wave 88, Josh): over any control (overControls), its release taken so a button never clicks (the kit's
-       `taken`), and over a focused <select> too (key-table's own listener: the kit counts a select a field);
+     · A HANDLED EVENT IS HANDLED and A CONTROL THAT WILL NOT ACT DOES NOT OWN THE KEYS (wave 68): the kit's knob, seg and fader prevent
+       the default on what they turn, the one listener returns on e.defaultPrevented, and a disabled control acts on nothing: the app has the key;
+     · 039 W1 THE KEY PRESSES THE FOCUSED CONTROL: a control the KEYBOARD brought the focus to keeps the keys it owns (a button its Space and
+       Enter: no row is `overControls`); SPACE IS THE TRANSPORT'S (wave 88, Josh) wherever the POINTER left the focus — after a click, on a
+       role=button that is not a button, and over a focused <select> (key-table's own listeners: the row runs, its release is taken so the
+       button never clicks);
      · THE TAB RULE: the stage rows run only while the stage has the focus (`when`, which the kit's pickAction skips past — a `continue`), and
        the binding law refuses Tab on any chord to every other row (key-table's check over the kit's bindError). */
 const kitKeys = (() => { try { return fs.readFileSync(path.join(LAB, 'mir/shell/keys.js'), 'utf8'); } catch (_) { return ''; } })();
 const kt = TEXT.get('lab/key-table.js') || '';
 const owned = /export function ownsKey\(n, chord\)/.test(kitKeys) && /n\.getAttribute && n\.getAttribute\('role'\)/.test(kitKeys);
 const sliderOwnsNoSpace = /role === 'slider'[^\n]*return ARROWS\.has\(chord\) \|\| chord === 'PageUp' \|\| chord === 'PageDown';/.test(kitKeys);
-const buttonOwnsEnterOnly = /overControls: true,/.test(kt);                 // a button's Space is the transport's; Enter stays the activator (no row holds it)
-const noRoleOwnsSpace = buttonOwnsEnterOnly && /if \(owned && !a\.overControls\) continue;/.test(kitKeys);
+const buttonPresses = !/overControls: true/.test(kt) && /if \(owned && !a\.overControls\) continue;/.test(kitKeys)   // 039 W1: a keyed focus keeps its keys
+  && /keyFocus = byKey \? e\.target : null/.test(kt) && /if \(t === keyFocus && \(pressable\(t\) \|\| !\/\^\(Space\|Enter\)\$\/\.test\(c\)\)\) return;/.test(kt);
+const pointerSpacePlays = buttonPresses && /taken\.add\(e\.code\); table\.run\(id, e\);/.test(kt) && /if \(taken\.delete\(e\.code\)\) e\.preventDefault\(\);/.test(kt);
 const spaceCancelled = /if \(owned\) taken\.add\(e\.code\);/.test(kitKeys) && /if \(taken\.delete\(e\.code\)\) e\.preventDefault\(\);/.test(kitKeys);
 const selectYieldsSpace = /e\.code !== 'Space' \|\| e\.defaultPrevented \|\| !t \|\| t\.tagName !== 'SELECT'/.test(kt);
 const stageContinue = /when: a\.when \|\| \(a\.stage \? stageHasFocus : undefined\)/.test(kt) && /if \(ok\) return a;/.test(kitKeys);
 const roleAware = owned && /\^\(radio\|tab\|option\|menuitem/.test(kitKeys);
-const notDead = buttonOwnsEnterOnly && /if \(rec \|\| e\.defaultPrevented/.test(kitKeys);
+const notDead = buttonPresses && /if \(rec \|\| e\.defaultPrevented/.test(kitKeys);
 const handled = /if \(rec \|\| e\.defaultPrevented \|\| e\.isComposing/.test(kitKeys);
 const tabLaw = /when: a\.when \|\| \(a\.stage \? stageHasFocus : undefined\)/.test(kt) && /p\.code === 'Tab' && \(p\.mods\.length === 0/.test(kitKeys);
 const tabRefused = /\/\(\^\|\\\+\)Tab\$\/\.test\(c \|\| ''\) \? 'Tab is reserved for focus navigation\.'/.test(kt);
-judge('A7 the single-key law is a property of THE KEY AND THE ROLE — a slider owns the arrows, a button owns ENTER, and the arrows still step time from a focused switch — with ONE key carved out of it entirely: SPACE IS THE TRANSPORT\'S (wave 88, Josh). No role keeps it from the transport, its native activation is cancelled, and a focused <select> yields it too; Enter is the activator everywhere. And the stage guard skips one action (a `continue`), never the table (0.5.0 C3: MIR\'s ONE KEY TABLE through lab/key-table.js)',
-  owned && sliderOwnsNoSpace && buttonOwnsEnterOnly && noRoleOwnsSpace && spaceCancelled && selectYieldsSpace && stageContinue,
-  { owned, sliderOwnsNoSpace, buttonOwnsEnterOnly, noRoleOwnsSpace, spaceCancelled, selectYieldsSpace, stageContinue });
+judge('A7 the single-key law is a property of THE KEY AND THE ROLE — a slider owns the arrows, a button owns SPACE and ENTER, and the arrows still step time from a focused switch — and 039 W1: THE KEY PRESSES THE FOCUSED CONTROL the keyboard reached, while SPACE IS THE TRANSPORT\'S (wave 88, Josh) on a control the pointer focused: its native activation is cancelled, and a focused <select> yields it too. And the stage guard skips one action (a `continue`), never the table (0.5.0 C3: MIR\'s ONE KEY TABLE through lab/key-table.js)',
+  owned && sliderOwnsNoSpace && buttonPresses && pointerSpacePlays && spaceCancelled && selectYieldsSpace && stageContinue,
+  { owned, sliderOwnsNoSpace, buttonPresses, pointerSpacePlays, spaceCancelled, selectYieldsSpace, stageContinue });
 judge('A11 the guard knows ROLES and not tags, refuses to swallow for a control that will not act, the one listener honours e.defaultPrevented, and TAB off the stage is the browser\'s whatever the binding table says — the stage rows run on the stage alone and the binding law (lab/key-table.js over the kit\'s bindError) refuses Tab to every other row, so the trap wave 57 removed cannot be rebuilt by rebinding',
   roleAware && notDead && handled && tabLaw && tabRefused, { roleAware, notDead, handled, tabLaw, tabRefused });
 

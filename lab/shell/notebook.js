@@ -1,7 +1,7 @@
 /* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el } from '../mir/kit.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
+import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, hint } from '../mir/kit.js'; import { hoverable } from '../mir/core/kbm.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle, quatFromYawPitch } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
@@ -75,7 +75,7 @@ export function createNotebook(app) {
       const A = app.sh.ACTIONS, keyFor = (id) => app.sh.kt.keyText(id);
       /** item(id, text, opts) — a row for an action: its key after the TAB, a toggle checked from get(), `args` run with arguments */
       const item = (id, text, o = {}) => { const a = A.get(id); if (!a) return null; const m = !o.args && app.sh.kt.table.menuItem(id, text), k = o.args ? '' : keyFor(id), on = o.on !== undefined ? o.on() : a.kind === 'toggle' && a.get ? !!a.get() : undefined;
-        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), m ? m[1] : () => A.run(id, o.args), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon || (a.icon && !o.radio) ? { icon: o.icon || (typeof a.icon === 'function' ? a.icon() : a.icon) } : {}) }]; };   // 022 E2: a row wears its action's glyph (the registry's `icon`)
+        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), m ? m[1] : () => A.run(id, o.args), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { id, ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon || (a.icon && !o.radio) ? { icon: o.icon || (typeof a.icon === 'function' ? a.icon() : a.icon) } : {}) }]; };   // 022 E2: a row wears its action's glyph (the registry's `icon`)
       const sub = (text, entries, icon) => [text, entries, null, '', { sub: true, ...(icon ? { icon } : {}) }];
       const radio = (id, group, choices, cur) => choices.map(([v, w]) => item(id, w, { args: { id: v }, radio: group, on: () => cur() === v }));
       const reveal = A.reveal, H = () => app.sh.historyApi, wins = () => [...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')];
@@ -110,7 +110,7 @@ export function createNotebook(app) {
           sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get()), 'moon'),
           item('fullscreen', 'FULL SCREEN', { icon: 'expand' })],
         PLAY: () => [item('transport.play', 'PLAY / PAUSE', { icon: 'play' }), item('home', 't → 0', { icon: 'rewind' }), item('stepBack', 'STEP ◂'), item('stepFwd', 'STEP ▸'), null,
-          item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK'), item('settings.playLock', 'PLAYBACK LOCK'), null,
+          item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK', { on: A.get('modBar').get }), item('settings.playLock', 'PLAYBACK LOCK'), null,
           sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
         WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'search' }), item('gui', 'MIR OPTIONS…'), null,   // 038 M3 (Josh 11-06): the kit's OPTIONS window, a WINDOW row
           sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'MINIMIZE ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
@@ -132,6 +132,34 @@ export function createNotebook(app) {
       const mb = createMenubar({ opener: title, host: document.getElementById('lab'), phone: isPhone,
         menus: Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => wrap(rows())])) });
       layout.menu = { open: mb.open, close: mb.close, get isOpen() { return mb.isOpen; }, scale: 1.04, get enlarged() { return title.classList.contains('menu-open'); } };
+      /* 039 W5 · THE TITLE'S FIRST CLICK: a cursor reaching the logo shows the bar on its hover, so the kit's click toggle hid it again under the
+         same hand (A #4: five first clicks of five did nothing) — a cursor's click keeps the bar its hover showed, as the kit's groups keep their
+         lists (FOR-KIT); a finger's tap still toggles.  W9 · D #3: its hint names the menus and the MAIN MENU's key */
+      document.addEventListener('click', (e) => { if (title.contains(e.target) && mb.isOpen && e.detail > 0 && hoverable(e)) e.stopPropagation(); }, true);
+      hint(title, 'the menus — L opens the MAIN MENU: tutorial · library');
+      /* 039 W2 · THE MENUS BY KEYBOARD (the kit's bar walks a list's rows ↑ ↓ and opens a submenu on →, but a group takes no arrow and a key's
+         open leaves the focus on the group — FOR-KIT): on a group Enter or ↓ opens it at its first row (↑ its last), ← → Home End walk the
+         groups (an open list follows the focus); in a list ← → step to the next group's list where no submenu takes the key; Escape closes
+         the list back to its group, then the bar (the kit's: the focus back on the logo) */
+      { const groups = () => [...mb.bar.querySelectorAll('.mb-btn')], isOpen = (b) => b.getAttribute('aria-expanded') === 'true';
+        const openAt = (b, last) => { if (!isOpen(b)) mb.openGroup(b.dataset.menu); const rows = [...b.nextElementSibling.querySelectorAll(':scope > .mb-item:not(:disabled)')];
+          (rows[last ? rows.length - 1 : 0] || b).focus({ preventScroll: true }); };
+        mb.bar.addEventListener('keydown', (e) => { if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+          const k = e.code, g = groups(), btn = e.target.closest('.mb-btn'), item = e.target.closest('.mb-item');
+          const step = (b, d) => g[(g.indexOf(b) + d + g.length) % g.length];
+          if (btn) {
+            if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === 'NumpadEnter') { e.preventDefault(); openAt(btn, k === 'ArrowUp'); }
+            else if (k === 'ArrowRight' || k === 'ArrowLeft') { e.preventDefault(); const to = step(btn, k === 'ArrowRight' ? 1 : -1); if (isOpen(btn)) openAt(to); else to.focus({ preventScroll: true }); }
+            else if (k === 'Home' || k === 'End') { e.preventDefault(); g[k === 'Home' ? 0 : g.length - 1].focus({ preventScroll: true }); }
+            else if (k === 'Escape' && isOpen(btn)) { e.preventDefault(); btn.click(); }
+            return;
+          }
+          if (!item) return;
+          let list = item.parentElement; while (list && list.mbParent) list = list.mbParent;   // a submenu's row belongs to its root list's group
+          const grp = list && list.previousElementSibling; if (!grp || !grp.classList.contains('mb-btn')) return;
+          if (k === 'ArrowLeft' || (k === 'ArrowRight' && !item.mbEntries)) { e.preventDefault(); openAt(step(grp, k === 'ArrowRight' ? 1 : -1)); }
+          else if (k === 'Escape' && item.parentElement === list) { e.preventDefault(); grp.click(); grp.focus({ preventScroll: true }); }
+        }); }
       /* iteration 014 A7 · 018 E5 · THE FINDER (the kit's createWindowPicker; WINDOW's first row, the CSB's window-plus and the key row `windowPicker`):
          every window by name with its one glyph (021 V2: its register's, lab/icons.js WINDOW_GLYPH), a window the mode hides greyed with the mode that shows it;
          a pick of an open window scrolls the rack to it (kit rk.reveal: no reorder), a closed one opens at the top and the rack scrolls up */
@@ -166,6 +194,8 @@ export function createNotebook(app) {
       const nbPaint = coalesce(paint => paint());
       /* the title, subtitle and text are the part's: each input tells the session (projects.changed, the part's subscribe) */
       const nbStore = () => { if (layout.projects) layout.projects.changed(); };
+      /* the text keeps its keys from the app's rows; Ctrl+S and Ctrl+, travel on, and Escape (039 W4: the notebook's layer of THE ESCAPE STACK) */
+      const travels = (e) => e.code === 'Escape' || ((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'));
       titleIn.addEventListener('input', nbStore);
       titleIn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -174,7 +204,7 @@ export function createNotebook(app) {
           else titleIn.blur();
         }
         if (e.key === 'ArrowDown' && subIn && !subIn.hidden) { e.preventDefault(); subIn.focus(); }
-        if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
+        if (!travels(e)) e.stopPropagation();
       });
       if (subIn) {
         subIn.addEventListener('input', nbStore);
@@ -182,7 +212,7 @@ export function createNotebook(app) {
           if (e.key === 'Enter') { e.preventDefault(); subIn.blur(); }
           else if (e.key === 'Backspace' && !subIn.value) { e.preventDefault(); subIn.hidden = true; nbStore(); titleIn.focus(); }
           else if (e.key === 'ArrowUp') { e.preventDefault(); titleIn.focus(); }
-          if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
+          if (!travels(e)) e.stopPropagation();
         });
       }
       const renderMarkdown = renderNotebook;
@@ -194,7 +224,7 @@ export function createNotebook(app) {
       nb.dataset.mode = 'edit';
       nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
-        if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
+        if (!travels(e)) e.stopPropagation(); });
       /* 0.5.1 D8 · `lw:` LINKS in the VIEW (R6-K): `[water](lw:molecule=h2o)` runs a WHITELIST of hand verbs — preset (STATE's), molecule
          (the MOLECULE dropdown's pick, MOLECULES on), view (the V key's), orbital (the ORBITAL dial by name or number, VIEW orbital), volume
          (iteration 004 V2: `volume=vol-1&id=aspirin[&basis=6-31g]`, a volume's molecule on its record — chemview openVolume) — one
@@ -298,7 +328,9 @@ export function createNotebook(app) {
       }
       /* RENDER's SUBJECT says THIS VIEW's system: an open card is painted again when a project lands or ⓘ points (iteration 004) */
       const renderPaint = () => { const fc = app.state.filmCard; if (fc && !fc.card.root.classList.contains('closed')) fc.view.paint(); };
+      let fdDrop = null;   // 039 W4: FOLDERS is a layer of THE ESCAPE STACK while it is up (from its NAME field too)
       const projects = createProjects({ host: floats || document.body, part,
+        shown: () => { if (fdDrop) fdDrop(); fdDrop = app.sh.ACTIONS.escape.push(() => projects.folders.close(), { fields: true, alive: () => projects.folders.isOpen() }); },
         snapshot: () => JSON.parse(JSON.stringify(app.sh.serialize())), rollback: (S) => app.sh.restore(S) === true,   // M5b: the instrument as it stood, through the same road
         busy: (d) => { busy.n = Math.max(0, busy.n + d); busySync(); },   // wave 48: a project load rebuilds the register, the operator and the field — BUSY work
         notice: () => app.state.restoreNotice, thumbnail: () => app.sh.LW.thumbnail(), confirm: (text) => window.confirm(text), onMoved: () => occlusion.dirty(),
@@ -319,6 +351,8 @@ export function createNotebook(app) {
            text: no flag.  S3: the ring's bottom row is named for the file. */
         opened(label) { if (label === 'new project') freshWindows(); count(); if (app.state.history) app.state.history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); renderPaint(); },
         titleAfterSave(name) { if (titleIn.value !== 'NOTEBOOK') return false; titleIn.value = name; return true; } });
+      /* 039 W4: the kit's NAME and SAVE TO fields stop every key's travel, so the Escape that closes FOLDERS is taken before them (FOR-KIT) */
+      addEventListener('keydown', (e) => { if (e.code === 'Escape' && !e.isComposing && e.target.closest && e.target.closest('.sv-fields') && projects.folders.isOpen() && projects.folders.win.root.contains(e.target)) { e.preventDefault(); projects.folders.close(); } }, true);
       addEventListener('beforeunload', (e) => {
         if (!projects.dirty) return;
         /* 034 F8 (Josh: "'Repair - Installed - Reloading' seems to be stuck … the firefox warning"): REPAIR asked already (its own dialog,
@@ -411,7 +445,12 @@ export function createNotebook(app) {
         if (abFace === 'mir' && was && mirFace.offsetWidth === was[0] && p.offsetHeight !== was[1]) requestAnimationFrame(abFit); }) : null;
       abI.addEventListener('click', () => { abShow(abFace === 'lw' ? 'mir' : 'lw'); abFit(); });
       occlusion.register('about', () => (abWin.isOpen() ? [paintedRect(abWin.root)] : [])); occlusion.watch(abWin.root, { attributes: true, attributeFilter: ['hidden'] });
-      layout.about = { open(f = 'lw') { abShow(f); abWin.open(); abWin.raise(); abFit(); return true; }, close() { abWin.close(); }, toggle(f) { if (abWin.isOpen() && (!f || f === abFace)) abWin.close(); else layout.about.open(f || abFace); },
+      /* 039 W4 · ESCAPE STEPS BACK EVERYWHERE: ABOUT, FOLDERS and the notebook are layers of THE ESCAPE STACK (lab/actions.js) while they are up —
+         ABOUT closes wherever the focus is; the notebook's text gives the keyboard back first, then the notebook closes */
+      const escLayer = (close, alive, fields) => { let drop = null; return () => { if (drop) drop(); drop = app.sh.ACTIONS.escape.push(close, { alive, fields }); }; };
+      const abEsc = escLayer(() => abWin.close(), () => abWin.isOpen());
+      const nbEsc = escLayer(() => { const f = document.activeElement; if (nb.contains(f) && f.matches('textarea, input')) { f.blur(); nbEsc(); } else nb.hidden = true; }, () => !nb.hidden, true);
+      layout.about = { open(f = 'lw') { abShow(f); abWin.open(); abWin.raise(); abFit(); abEsc(); return true; }, close() { abWin.close(); }, toggle(f) { if (abWin.isOpen() && (!f || f === abFace)) abWin.close(); else layout.about.open(f || abFace); },
         get isOpen() { return abWin.isOpen(); }, get face() { return abFace; }, win: abWin };
       const show = (face) => {
         if (face === 'projects') { projects.show(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS' (iteration 004: the front page put away first)
@@ -425,7 +464,7 @@ export function createNotebook(app) {
           nb.style.left = 'calc(50% - ' + Math.round(w / 2) + 'px)';
           nb.style.top = '12%';
         }
-        ta.focus();
+        ta.focus(); nbEsc();
       };
       nb.querySelector('.nb-close').addEventListener('click', () => { nb.hidden = true; });
       nb.querySelector('.nb-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ta.value); } catch (e) {} });
