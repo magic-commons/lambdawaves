@@ -63,8 +63,8 @@ export function createMaterial(app) {
     const auN = (v) => { const a = Math.abs(v); return a.toFixed(a >= 10 ? 1 : a >= 1 ? 2 : 3); }, pctF = (v) => Math.round(v * 100) + '%', au = (v) => '±' + auN(v);
     /* 032 O1 · THE ATOMS ARE KNOBS: SIZE > 0 draws the atoms and RADIUS > 0 the bonds under any style (field.js atomsOver; ESP keeps its sticks only),
        both 0 by default so no picture moved; an older BALLS / STICKS opens as SHELL with its knob raised (field.js liftAtomStyle) */
-    ui.atomSizeK = knob({ label: 'SIZE', min: 0, max: 1.5, value: 0, fmt: pctF, title: 'SIZE > 0 draws the atoms (× van der Waals)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
-    ui.stickK = knob({ label: 'RADIUS', min: 0, max: 1.2, value: 0, fmt: (v) => v.toFixed(2), title: 'RADIUS > 0 draws the bonds (bohr)', onInput: (v) => { mat.stickR = v; schedule(TIER.PRESENT); } });
+    ui.atomSizeK = knob({ label: 'SIZE', min: 0, max: 1.5, value: 0, fmt: pctF, title: 'SIZE > 0 draws the atoms (× van der Waals)', onInput: (v) => { mat.atomSize = v; ui.sliceCut?.sync(); schedule(TIER.PRESENT); } });
+    ui.stickK = knob({ label: 'RADIUS', min: 0, max: 1.2, value: 0, fmt: (v) => v.toFixed(2), title: 'RADIUS > 0 draws the bonds (bohr)', onInput: (v) => { mat.stickR = v; ui.sliceCut?.sync(); schedule(TIER.PRESENT); } });
     ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'Probe radius in bohr (2.65 = water)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
     ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 50, value: ESP_RANGE, log: true, fmt: au, title: 'ESP colour span ±RANGE Eh/e', onInput: (v) => { mat.espRange = v; styleSync(); schedule(TIER.PRESENT); } });
     ui.espSurfSeg = seg({ aria: 'potential surface', value: 'iso', options: [
@@ -74,7 +74,7 @@ export function createMaterial(app) {
       onChange: (v) => { mat.espSurf = v; styleSync(); schedule(TIER.PRESENT); } });
     /* iteration 016 S2 · MAP ONLY (Josh: "a toggle beside RADIUS hides the sticks under ESP so the map stands alone, and nothing is drawn underneath as its
        opacity falls"): `mat.espBare`, written only by a hand (absent = off, so an older file and the edit bytes are unchanged; an older build ignores it) */
-    ui.espBareSw = sw({ label: 'MAP ONLY', value: false, title: 'ESP map alone, no sticks inside', onChange: (on) => { mat.espBare = on; schedule(TIER.PRESENT); } });
+    ui.espBareSw = sw({ label: 'MAP ONLY', value: false, title: 'ESP map alone, no sticks inside', onChange: (on) => { mat.espBare = on; ui.sliceCut?.sync(); schedule(TIER.PRESENT); } });
     ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: re-solve live (≤ 1/s)', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
     { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.espBareSw, ui.espSurfSeg]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.probeK, ui.espRangeK, ui.espLiveSw]) r2.appendChild(k.root); }   // 018 B2 (native-ui.js seats the same two)
     /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers — the signed log's inverse at s = ±1, ±½, 0
@@ -158,7 +158,7 @@ export function createMaterial(app) {
       const styleName = (ui.styleSeg.button(drawStyle(st)) || {}).textContent || 'this STYLE';
       for (const [k, on] of Object.entries(STYLE_READS)) { const styleOff = !on.includes(st);
         mute(ui[k], styleOff || (esp && ((k === 'probeK' && surf === 'iso') || ((k === 'isoK' || k === 'softK') && surf !== 'iso'))), styleOff ? 'off in ' + styleName : 'off with ' + surf.toUpperCase()); }
-      modeSync();
+      modeSync(); ui.sliceCut?.sync();   // 038 F7: CLIP's CUT switches follow the drawn kinds
       bar.hidden = !esp || !IP.get('espBar');
       if (!bar.hidden) {
         const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20; paintBar();
@@ -221,13 +221,17 @@ export function createMaterial(app) {
     ui.sliceMini = mini;
     /* 038 F3 · THE CLIP'S TOGGLE (Josh: "include a toggle to include or not include the balls and/or sticks so that it only cuts the waves"): CUT BALLS ·
        CUT STICKS under the plane, lit = cut (as always); off writes `mat.slice.balls` / `mat.slice.sticks` = false, a hand's only, so NEW, a link and every
-       older file open cut.  The row is MOLECULES' (hidden under hydrogen, as WAVE's SIZE · RADIUS: modeSync); a restore sets it (persist.js) */
+       older file open cut.  The row is MOLECULES' (hidden under hydrogen, as WAVE's SIZE · RADIUS: modeSync); a restore sets it (persist.js).  038 F7: a
+       kind the look does not draw (SIZE or RADIUS at 0, ESP's map alone; ESP draws no balls) greys its switch in the kit's muted look, the reason first */
     const cutRow = el('div', 'row tight fit clip-cut', gs);
     const cutSw = (k, o) => sw({ ...o, value: true, onChange: (on) => { if (on) delete mat.slice[k]; else mat.slice[k] = false; schedule(TIER.PRESENT); } });
-    ui.sliceCut = { row: cutRow, balls: cutSw('balls', { label: 'CUT BALLS', title: 'Cut the balls too; off, the plane cuts only the wave' }),
-      sticks: cutSw('sticks', { label: 'CUT STICKS', title: 'Cut the sticks too; off, the plane cuts only the wave' }),
-      sync() { ui.sliceCut.balls.set(mat.slice.balls !== false); ui.sliceCut.sticks.set(mat.slice.sticks !== false); } };
-    cutRow.append(ui.sliceCut.balls.root, ui.sliceCut.sticks.root); cutRow.hidden = availability('wave.esp', app).hide;
+    ui.sliceCut = { row: cutRow, balls: cutSw('balls', { label: 'CUT BALLS', title: 'Cut the balls too; off, the balls stand whole' }),
+      sticks: cutSw('sticks', { label: 'CUT STICKS', title: 'Cut the sticks too; off, the sticks stand whole' }),
+      sync() { const C = ui.sliceCut, esp = (mat.style | 0) === STYLE.esp, bare = esp && !!mat.espBare;
+        C.balls.set(mat.slice.balls !== false); C.sticks.set(mat.slice.sticks !== false);
+        mute(C.balls, esp || !(atomSizeOf(mat) > 0), esp ? 'ESP draws no balls' : 'SIZE is 0: no balls drawn');
+        mute(C.sticks, bare || !(stickROf(mat) > 0), bare ? 'MAP ONLY: no sticks drawn' : 'RADIUS is 0: no sticks drawn'); } };
+    cutRow.append(ui.sliceCut.balls.root, ui.sliceCut.sticks.root); cutRow.hidden = availability('wave.esp', app).hide; ui.sliceCut.sync();
     ui.sliceAxisSeg.root.hidden = true;
     /* WAVE 106 · THESE TWO KEEP THEIR HANDLES NOW, and that is what makes them modulatable.  Both
        were built inline — `knob({...}).root` appended straight into the row — so the objects went

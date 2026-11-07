@@ -847,8 +847,10 @@ fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -
 }
 /* 038 F3 · THE CLIP'S TOGGLE: is this kind (1 the balls, 2 the sticks) one the plane does NOT cut (p11.z's bits; 0 = both cut, every file before 038) */
 fn uncut(bit: u32) -> bool { return (u32(V.p11.z) & bit) != 0u; }
-/* 038 F5 · THE OBJECT MASK (p11.z bit 4, field.setObjectMask): the pixel's alpha — 1 (code 255) where the skeleton is on the ray, 254/255 on the rest
-   of the stage, the colour premultiplied by it (the canvas is premultiplied while the mask lives); off, 1 everywhere as before */
+/* 038 F5 · THE OBJECT MASK (p11.z bit 4, field.setObjectMask): the pixel's alpha — 1 (code 255) where the skeleton is what the eye sees, 254/255 on the
+   rest of the stage, the colour premultiplied by it (the canvas is premultiplied while the mask lives); off, 1 everywhere as before.  038 F7 · THE BURIED
+   ATOM: an atom on the ray counts only while it carries at least half of the pixel — the ray's transmittance to it (the march's bgBlend, DUST's 1 − a,
+   the ESP map's 1 − its opacity) ≥ ½; an atom under the wave reads STAGE */
 fn objA(hit: bool) -> f32 { if ((u32(V.p11.z) & 4u) == 0u) { return 1.0; } return select(254.0 / 255.0, 1.0, hit); }
 /* 032 O1 · THE ATOMS OVER ANY STYLE: SIZE > 0 the balls, RADIUS > 0 the sticks — the nearer of the two on the ray (t = 1e30: none); 038 F3: a kind the
    plane does not cut is met on the box's own interval [b0, bf], a cut one on the plane's [t0, tf] */
@@ -897,7 +899,7 @@ fn espColour(phi: f32) -> vec3<f32> {
    and stays full inside, so a grazing ray (the silhouette) gathers only part of it and the edge fades, while the interior still hides the far side; every
    sample that adds colour paints φ there, lit by the density's gradient as the hard surface is.  e = 0 never reaches this function: the hard path
    below is the SOFT-at-its-hard-end picture, text unchanged.  The march stops at the sticks (tEnd), the way the hard surface yields to them. */
-fn espSoft(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, tEnd: f32, half: f32, back: vec3<f32>, jit: f32) -> vec3<f32> {
+fn espSoft(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, tEnd: f32, half: f32, back: vec3<f32>, jit: f32) -> vec4<f32> {   // rgb, w the ground's share (038 F7)
   let rs = V.p9.w; let e = V.p11.x; let lo = -2.0 * e; let hi = e;
   let steps = max(V.fwd.w, 8.0); let ds = (tf - t0) / steps; let K = 14.0 - 8.0 * e; // K: the band's opacity per bohr once inside it (a softer edge also gathers slower)
   var T = 1.0; var col = vec3<f32>(0.0); var t = t0 + ds * jit;
@@ -925,13 +927,14 @@ fn espSoft(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, tEnd: f32, half: f32,
     t += ds;
   }
   let am = clamp(0.8 * V.p0.y, 0.05, 1.0);                                            // EXPOSURE's translucency, as the hard surface's
-  return back * (1.0 - (1.0 - T) * am) + col * am;
+  let share = 1.0 - (1.0 - T) * am;
+  return vec4<f32>(back * share + col * am, share);
 }
 fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, half: f32, bg: vec3<f32>, jit: f32) -> vec4<f32> {   // rgb, w 1 where the inner sticks are on the ray (038 F5)
   var inner = vec4<f32>(0.0, 0.0, 0.0, 1e30);
   if (V.p11.y < 0.5) { let u = uncut(2u); inner = ballsOrSticks(ro, rd, select(t0, b0, u), select(tf, bf, u), true); }   // iteration 016 S2 · MAP ONLY: no sticks inside, the stage alone beneath the map; 038 F3: uncut, the box's interval
   let surf = u32(V.p8.x); let hit = select(0.0, 1.0, inner.w < 1e30);
-  if (surf == 0u && V.p11.x > 0.0) { return vec4<f32>(espSoft(ro, rd, t0, tf, min(tf, inner.w), half, select(bg, inner.rgb, inner.w < 1e30), jit), hit); }
+  if (surf == 0u && V.p11.x > 0.0) { let es = espSoft(ro, rd, t0, tf, min(tf, inner.w), half, select(bg, inner.rgb, inner.w < 1e30), jit); return vec4<f32>(es.rgb, hit * es.w); }
   var th = 1e30; var n = vec3<f32>(0.0);
   if (surf == 0u) {                                                  // the density's ISO surface: march, then bisect
     let rs = V.p9.w; let steps = max(V.fwd.w, 8.0); let ds = (tf - t0) / steps; var ta = t0;
@@ -968,7 +971,8 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, ha
   if (V.p9.z > 0.5) { c = espColour(phiAt(ro + rd * th)); }
   if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
   if (V.p6.w < 1.5) { c = atomLit(c, n, rd, ro + rd * th); }        // MATTE: the map's colour unlit
-  return vec4<f32>(mix(back, c, clamp(0.8 * V.p0.y, 0.05, 1.0)), hit);
+  let am = clamp(0.8 * V.p0.y, 0.05, 1.0);
+  return vec4<f32>(mix(back, c, am), hit * (1.0 - am));                // 038 F7: the sticks' share under the map
 }
 /* 037 T4 · PULSE (lab/stage-window.js), the first STAGE FX: a radial wash of the stage — × 2.2 + 0.035 on a dark stage, × 0.7 on a light one (by
    the stage colour's own luminance) — weighted from the centre outward (CENTRE, p17.x 0) or from the edge inward (EDGE, 1); r is 0 at the centre and 1
@@ -1041,13 +1045,13 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
     let d = dustPixel(ro, rd, t0, min(tEnd, tf), half, mode, soft, rhoMax, ampMax, refMax, pxA);
     var od = pow(max(d.rgb + back * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     od = select(od, bgOut, od != od);
-    let ad = objA(onObj); return vec4<f32>((od + bayer8(in.pos.xy) * (V.p2.w / 255.0)) * ad, ad);
+    let ad = objA(onObj && d.a <= 0.5); return vec4<f32>((od + bayer8(in.pos.xy) * (V.p2.w / 255.0)) * ad, ad);   // 038 F7: the atom carries ≥ ½
   }
   if (style == 11u && V.p7.x > 0.5) {                               // iteration 014 B: ESP draws the map over its sticks (none set: the march below, as CLOUD); 032 O1: BALLS · STICKS are the composite above
     let oc = espPixel(ro, rd, t0, tf, b0, bf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
     var om = pow(max(oc.rgb, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     om = select(om, bgOut, om != om);
-    let ae = objA(oc.w > 0.5); return vec4<f32>((om + bayer8(in.pos.xy) * (V.p2.w / 255.0)) * ae, ae);
+    let ae = objA(oc.w >= 0.5); return vec4<f32>((om + bayer8(in.pos.xy) * (V.p2.w / 255.0)) * ae, ae);
   }
   let kq = V.p3.w;                                                // THE KNEE's q (0 at the shipped 0.6: the old compositing, untouched)
   var tau = 0.0;
@@ -1195,7 +1199,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
      default and it never touches the physics — the readback path renders through the same shader, so a gate
      that compares pixels compares the same numbers as long as the strength is zero. */
   o = o + bayer8(in.pos.xy) * (V.p2.w / 255.0);
-  let ao = objA(onObj); return vec4<f32>(o * ao, ao);                // 038 F5: THE OBJECT MASK (off: × 1, the old bits)
+  let ao = objA(onObj && bgBlend >= 0.5); return vec4<f32>(o * ao, ao);   // 038 F5: THE OBJECT MASK (off: × 1, the old bits); F7: a buried atom reads STAGE
 }`;
 
 /* ── THE SPECIALISED PRESENT (optimization 2026-09-24, K2 · AUDIT-A FA3, REFUTE-E/F, PLAN §0) ─────────────────────────
@@ -2202,7 +2206,8 @@ export async function createField(canvas, opts = {}) {
     if (!f && tapTex) { tapTex.destroy(); tapTex = null; }
   }
   /* 038 F5 · THE OBJECT MASK (the field's side of A NODE HAS A TARGET): `setObjectMask(on)` → the state in force.  On, the canvas is `premultiplied`
-     and every pixel's alpha says where the skeleton is — code 255 on a ball or stick on the ray (ESP's inner sticks too), 254 on the rest, the colour
+     and every pixel's alpha says where the skeleton is seen — code 255 where a ball or stick carries ≥ ½ of the pixel (ESP's inner sticks too; 038 F7:
+     one under the wave is STAGE), 254 on the rest, the colour
      premultiplied by it (the page behind the canvas is the stage colour: nothing shows); the line pass keeps the destination's alpha.  The tap
      copies it (a SHADER node reads `.a`), an SVG node thresholds SourceAlpha.  Off (the boot, THE LOCK) the canvas is `opaque` and alpha is 1 */
   function setObjectMask(on) { const m = !!on; if (m !== objMask) { objMask = m; reconfigure(); } return objMask; }
