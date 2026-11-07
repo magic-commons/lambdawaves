@@ -113,6 +113,7 @@ body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-
 .dev[data-id="transport"].floating .dev-util > .dev-rail { display: none; }
 .dev[data-id="transport"].floating .dev-util > .dev-pop { display: inline-flex; border: 0; background: transparent; color: var(--dim); }
 .dev[data-id="transport"].floating .dev-util > .dev-pop:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
+#floats > .dev[data-id="transport"] #transport .dock-btn { display: none; }   /* S6: the bar's own ↗ stands down while its card floats — the corner chip is the one road to the stage, in the same glyph */
 /* the FREE window (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack */
 html body #transport[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
 html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }
