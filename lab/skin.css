@@ -558,7 +558,9 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-fgal { width: min(1500px, 100%); container-type: inline-size; }
 @media (min-width: 1100px) { #lwMenu .mm-fgal { width: min(1500px, 100%, calc(100vw - 2 * (var(--rack-w, 300px) + 20px))); } }   /* off the racks, as the decks keep */
 #lwMenu[data-sec="folders"] .mm-opts { visibility: hidden; }
-#lwMenu .mm-folders .sv-paged .sv-project-grid { grid-template-columns: repeat(var(--fcols, 4), minmax(0, 1fr)); }
+/* 039 K7: the page reserves ITS rows of --fcols (the kit's reserve is four rows of a two-column card, so the pager sat ~1000 px below the fold) and each card's name row under its 16 : 10 picture (K9, alpha.24) */
+#lwMenu .mm-folders .sv-paged .sv-project-grid { grid-template-columns: repeat(var(--fcols, 4), minmax(0, 1fr)); grid-template-rows: repeat(var(--frows, 2), auto);
+  min-height: calc(var(--frows, 2) * ((100cqw - 24px - (var(--fcols, 4) - 1) * var(--folders-gap)) / var(--fcols, 4) * var(--sv-shot-k, .75) + 2px + var(--sv-cap-h, 0px)) + (var(--frows, 2) - 1) * var(--folders-gap)); }
 #lwMenu[data-sec="folders"] .mm-navb[data-nav="folders"] { opacity: 1; color: var(--acc); }
 #lwMenu .mm-top { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px 4px; }
 #lwMenu .mm-logo { height: 56px; color: var(--fg); } #lwMenu .mm-logo svg { height: 100%; width: auto; display: block; }

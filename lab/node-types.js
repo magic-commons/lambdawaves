@@ -11,7 +11,7 @@
  *   (controls/factory.js — the kind of value chooses it), a number knob stamped `data-param` with its stable modulation target id
  *   `nodes.<node>.<knob>` (idOf), so it is a drop target like any rack dial; the hand's write goes to `hand`. */
 import { control } from './mir/controls/factory.js';
-import { hint } from './mir/kit.js';
+import { row } from './mir/kit.js';
 import { colourMatrix } from './mir/panels/picture-filter.js';
 import { IDENTITY, LUMA } from './nodes-compile.js';
 
@@ -153,14 +153,13 @@ export function nodeBody(parent, node, T, { idOf, hand }) {
   const ctls = {}, at = {};
   /* 038 P2 · A FULL NODE'S FACE: `face` lays the knobs out one fit row per line (a knob it does not name joins the last); `bare` hides the labels,
      and the readout (its name in `fmt`) shows only while a knob is edited (nodes.css) */
-  if (T.face) for (const keys of T.face) { const r = document.createElement('div'); r.className = 'nodes-face row fit'; parent.appendChild(r); for (const k of keys) at[k] = r; at[''] = r; }
+  if (T.face) for (const keys of T.face) { const r = row(parent, { fit: true, seg: 1, cls: 'nodes-face' }); for (const k of keys) at[k] = r; at[''] = r; }
   if (T.bare) parent.classList.add('nodes-bare');
   const order = T.face ? [...T.face.flat(), ...T.knobs.map((K) => K.k)].filter((k, i, a) => a.indexOf(k) === i) : T.knobs.map((K) => K.k);
   for (const K of order.map((k) => T.knobs.find((J) => J.k === k))) {
     const tip = K.hint || (T.knobs.length === 1 ? T.hint : undefined);   // 038 P9: a one-knob node's knob takes the node's hint (the knob is the node)
     const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: tip, min: K.min, max: K.max, step: K.step, log: K.log, home: K.home, unit: K.unit,
       fmt: K.fmt, colour: K.colour, options: K.options, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, v, false), onChange: (v) => hand(K.k, v, true) });
-    if (tip && !c.targets[0]) hint(c.root, tip);                          // a seg or a stepper: the kit hints its options, not the control
     (at[K.k] || at[''] || parent).appendChild(c.root);
     if (c.targets[0]) c.targets[0].root.dataset.param = idOf(K.k);
   }

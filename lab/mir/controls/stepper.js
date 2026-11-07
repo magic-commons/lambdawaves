@@ -7,7 +7,8 @@
  * opens the list: one law for ↑ ↓ on a closed list, wave 19).  A TAP ON THE NAME OPENS THE FULL LIST in the kit's menu pane
  * (controls/select.js `listPane`), so a long ordered list (twelve blend modes) is one tap from any entry, not eleven.  By the rules of
  * docs/INTENT.md: no relief at rest, hover a lighter face, press a sink and a small scale, focus an accent ring outside.
- *   stepper({ label, aria, items, value, onChange, wrap, list, pager, count, compact, cls })
+ *   stepper({ label, aria, title, items, value, onChange, wrap, list, pager, count, compact, cls })
+ *     title   the control's hint, on its root (THE ROOT WEARS THE HINT, 1.5.7-alpha.18), as every other kit control's
  *     items   [{ id, label, vars?, coming? }]
  *     onChange(id, dir)   dir is −1 / +1 for an arrow, 0 for a pick from the list
  *     wrap    false stops at the ends (default true)
@@ -17,7 +18,7 @@
  *     compact true: no arrows in the DOM (a strip a finger wide): the name opens the list, ← → still step it from the keys
  *   → { root, prev, next, name, get, set(id), setItems(items, id), step(d), open(), close(), destroy() }
  * Styled by controls.css; the buttons are `.mir-step-b[data-step="-1|1"]`, the name `.mir-step-name`. */
-import { el, label, ariaLabel, mathPlain } from '../kit.js';
+import { el, label, ariaLabel, hint, mathPlain } from '../kit.js';
 import { t as tx, onLanguage } from '../core/i18n.js';
 import { listPane, liveItems } from './select.js';
 import { glyphEl } from '../glyph.js';
@@ -38,6 +39,7 @@ export function stepTo(items, id, d, wrap = true) {
 export function stepper(o = {}) {
   const pager = !!o.pager, canList = o.list !== false && !pager;
   const root = el('div', 'mir-step' + (pager ? ' mir-step-pager' : '') + (o.cls ? ' ' + o.cls : ''));
+  if (o.title) hint(root, o.title);
   if (o.label) label(el('div', 'k-lbl', root), o.label);
   const row = el('div', 'mir-step-row', root);
   const compact = !!o.compact;                       // the arrows are made (the API keeps them) but never seated

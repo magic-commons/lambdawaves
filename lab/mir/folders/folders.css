@@ -172,6 +172,15 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 .mir-folders .sv-acts { position: absolute; bottom: 0; left: 0; right: 0; display: none; gap: 2px; padding: var(--sp-5) var(--sp-1) var(--sp-1);
   background: linear-gradient(transparent, var(--folders-over-scrim)); pointer-events: none; }
 .mir-folders :is(.sv-card.selected, .sv-card:focus-within) :is(.sv-meta, .sv-acts) { display: flex; }
+/* 1.5.7-alpha.22 · THE CARD SAYS HOW IT OPENS (`captions`, λWAVES 039 K7): the name in the card's own row beneath its picture, at rest —
+   one line, cut with …, the chosen card's in accent A; the verbs ride the picture's foot above it */
+.mir-folders .sv-captions { --sv-cap-h: 24px; --sv-shot-k: .625; }
+/* 1.5.7-alpha.24 · THE NAMED CARD KEEPS ITS HEIGHT: with its name row the picture is 16 : 10, so a named card stands about as tall as a 4 : 3
+   card without one (at the gallery's ~190-px cards) and a window that fitted its cards still fits them */
+.mir-folders .sv-captions .sv-shot { aspect-ratio: 1 / var(--sv-shot-k); }
+.mir-folders .sv-meta.sv-cap { position: static; display: flex; justify-content: center; height: var(--sv-cap-h); box-sizing: border-box; padding: 0 var(--sp-3); background: none; }
+.mir-folders .sv-cap .sv-name { font-size: var(--fs-small); line-height: var(--sv-cap-h); color: var(--fg-soft); }
+.mir-folders .sv-card:has(> .sv-cap) > .sv-acts { bottom: var(--sv-cap-h); }
 .mir-folders .sv-acts button { flex: 1 1 0; min-width: 0; min-height: 36px; padding: 0; border: 0; border-radius: var(--r-sm);
   background: var(--folders-over-scrim-soft); color: var(--folders-over-ink); pointer-events: auto;
   display: inline-flex; align-items: center; justify-content: center; font: var(--w-semi) var(--fs-lead)/1 var(--font-ui); cursor: pointer; }
@@ -213,9 +222,10 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 
 /* a docked or paged gallery (an app's rack card): two columns, four rows a page */
 /* … and, as BASINS', a page RESERVES its four rows (the last page too), so the page buttons do not move; container
-   units follow the rack's width with no measuring (BASINS save.css) */
+   units follow the rack's width with no measuring (BASINS save.css); with `captions` a row reserves its name's row too (1.5.7-alpha.22) and
+   its 16 : 10 picture (alpha.24) */
 .mir-folders .sv-paged .sv-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(var(--sv-page-rows, 4), auto); align-content: start;
-  min-height: calc(var(--sv-page-rows, 4) * ((100cqw - 24px) * .375 + 2px) + (var(--sv-page-rows, 4) - 1) * var(--folders-gap)); }
+  min-height: calc(var(--sv-page-rows, 4) * ((100cqw - 24px) / 2 * var(--sv-shot-k, .75) + 2px + var(--sv-cap-h, 0px)) + (var(--sv-page-rows, 4) - 1) * var(--folders-gap)); }
 .mir-folders .sv-paged .sv-card { align-self: start; }
 .mir-folders .sv-pages { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: var(--folders-gap); margin-top: 8px; }
 .mir-folders .sv-pages button { width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--glass-hairline); border-radius: 50%; background: var(--glass-well);

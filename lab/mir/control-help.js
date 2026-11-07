@@ -50,6 +50,21 @@ export function infoPanel(content, label = 'Information') {
 /* One quiet tooltip surface for short control hints. Window explanations use the
    adjacent info button below, so every kind of help has one predictable home. */
 
+/** hintSpot(r, w, h, vw, vh, head?) → { left, top } — where a hint of w × h goes for a control at rect r in a vw × vh viewport (seen px,
+ *  pure).  Below the control, else above it.  THE HINT CLEARS THE ROW (1.5.7-alpha.21, λWAVES 039 K6): a control in a window's head
+ *  (`head`, the bar's rect) is hinted ABOVE the bar, else BESIDE the bar in its own band (its right, else its left: off the window, so
+ *  neither the first row nor the bar's other controls are covered), else below as before. */
+export function hintSpot(r, w, h, vw, vh, head = null) {
+  const x = Math.max(8, Math.min(vw - w - 8, r.left + r.width / 2 - w / 2));
+  if (head) {
+    if (head.top - h - 7 >= 8) return { left: x, top: head.top - h - 7 };
+    const top = Math.max(8, Math.min(vh - h - 8, head.top + head.height / 2 - h / 2));
+    if (head.right + 7 + w <= vw - 8) return { left: head.right + 7, top };
+    if (head.left - w - 7 >= 8) return { left: head.left - w - 7, top };
+  }
+  return { left: x, top: r.bottom + h + 8 <= vh ? r.bottom + 7 : Math.max(8, r.top - h - 7) };
+}
+
 export function installControlHelp(root = document) {
   if (document.getElementById('controlHelp')) return;
   const tip = el('div', 'control-help', document.body); tip.id = 'controlHelp'; tip.hidden = true;
@@ -81,8 +96,9 @@ export function installControlHelp(root = document) {
     const copy = node?.dataset?.help; if (!copy || document.body.classList.contains(hintsOffClass)) return;
     close(); owner = node; tip.textContent = node.dataset.keyHint ? copy + '  ' + node.dataset.keyHint : copy; tip.hidden = false; raise(true); node.setAttribute('aria-describedby', tip.id);   // a key cap (data-key-hint, keys.hints) is never translated
     const z = cssZoom(tip), r = node.getBoundingClientRect(), w = tip.offsetWidth * z, h = tip.offsetHeight * z;   // seen; written ÷ UI SCALE
-    tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) / z + 'px';
-    tip.style.top = (r.bottom + h + 8 <= innerHeight ? r.bottom + 7 : Math.max(8, r.top - h - 7)) / z + 'px';
+    const bar = node.closest('.dev-head, .mir-win-head'), at = hintSpot(r, w, h, innerWidth, innerHeight, bar ? bar.getBoundingClientRect() : null);
+    tip.style.left = at.left / z + 'px';
+    tip.style.top = at.top / z + 'px';
   };
   adopt(root.documentElement || root);
   new MutationObserver((records) => { for (const r of records) { if (r.type === 'attributes') adopt(r.target); else for (const n of r.addedNodes) adopt(n); } })

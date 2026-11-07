@@ -12,8 +12,8 @@ running and the readout cycles 1.1 … 1.4. At each wrap a synced LFO whose peri
 words; alpha.8 claimed every synced LFO kept its phase). A playing tick already at or past the loop's end (a seek there, the clips cut away under
 the head) lands on its start — a ruler range or ACTIVE too: a play started past its end begins at its start (FL's way; Ableton plays through);
 CREATE CLIP and → TL place at the playhead's bar start, so the first clip starts at 1.1. A seek, a scrub, a
-paused clock and a film still never loop. Under PLAYBACK LOCK the clock is stepped (`host.clock.step`, rack.js), which never loops: the arrangement
-runs free there, empty or not (a FOR-YAN line of 038 T, not this law).
+paused clock and a film still never loop. Under PLAYBACK LOCK the clock is stepped (`host.clock.step(1/hz, { loop: true })`, rack.js) and loops
+by the same rule (THE STEPPED CLOCK LOOPS, 039 K1, kit 1.5.7-alpha.17); the film's step passes nothing and never loops.
 
 A CLIP LOOPS A WHOLE MEASURE AT LEAST (038 T4, alpha.10; Josh: "if a modulation rate is set to 1/16, then when placing it onto the timeline, it
 should loop for a whole measure"): → TL sends an LFO faster than a bar as n = ⌈bar / period⌉ whole cycles (a 1/16 LFO: 16 cycles over 4 beats); a

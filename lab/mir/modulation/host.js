@@ -227,10 +227,20 @@ export function createModClock(opts) {
      only.  A tick whose beat crosses `end` (from before it) lands at start + the overshoot, before anything is applied, so
      no frame is drawn at `end`; a playing tick already at or past `end` lands on `start` (1.5.7-alpha.8, λWAVES 038 T1: a
      play past the end comes home, never a free run); a seek, a paused move and the recorder's deterministic step never
-     loop (a film is exact). */
+     loop (a film is exact).  THE STEPPED CLOCK LOOPS (1.5.7-alpha.17, λWAVES 039 K1): an app that steps the clock on its
+     own frame (λWAVES' PLAYBACK LOCK) asks `step(dt, { loop: true })` and the step wraps by the same rule; the recorder
+     passes nothing and keeps the unlooped step. */
   let loopProvider = null;
   const readLoop = () => { let r = null; try { r = loopProvider(); } catch (_) { return null; }
     return r && Number.isFinite(r.start) && Number.isFinite(r.end) && r.start >= 0 && r.end > r.start ? r : null; };
+  /* the wrap, one rule for both roads: the model's own road, as the resume moves the beat (setTransport, re-anchor, a dt-0
+     edit); a beat already past the end (a play or a seek there, clips cut away under it) comes home to the start → looped */
+  const wrapLoop = (from, w) => {
+    const L = loopProvider && readLoop(), b = M.transport.beats;
+    if (!L || b < L.end) return false;
+    M.setTransport({ beats: from < L.end ? L.start + ((b - L.end) % (L.end - L.start)) : L.start }); M.reanchorTransport(w); M.advance(0, w); stats.loops++;
+    return true;
+  };
   let modulationEnabled = true;    /* deterministic clients may drive automation without macro routes */
   let exactResume = !!o.exactResume; /* arrangements can own an exact play cursor; legacy ships */
   let automationHold = !!o.automationHold; /* paused arrangement baseline is independent of LFO BASE/HOLD */
@@ -470,11 +480,7 @@ export function createModClock(opts) {
       stats.seconds += dt;
       const from = M.transport.beats;
       M.advance(dt, w);
-      const L = loopProvider && readLoop(), b = M.transport.beats, looped = !!L && b >= L.end;
-      if (looped) {                  /* THE LOOP: the model's own road, as the resume moves the beat (setTransport, re-anchor, a dt-0 edit);
-                                        a beat already past the end (a play or a seek there, clips cut away under it) comes home to the start */
-        M.setTransport({ beats: from < L.end ? L.start + ((b - L.end) % (L.end - L.start)) : L.start }); M.reanchorTransport(w); M.advance(0, w); stats.loops++;
-      }
+      const looped = wrapLoop(from, w);  /* THE LOOP */
       if (applyAll(false)) requestPresentation('modulation-output');
       if (advanceWatchers.size) { if (looped) advanced('seek'); advanced('tick'); }
       return dt;
@@ -484,8 +490,9 @@ export function createModClock(opts) {
     /** Advance by EXACTLY dt with a synthesised wall stamp.  No realtime anywhere:
      *  the same sequence of step() calls from the same rack gives bit-identical
      *  results, which is what an export and a proof both need.  It applies as though
-     *  running, exactly as the source's video clock does. */
-    step(dt) {
+     *  running, exactly as the source's video clock does.  `{ loop: true }` (1.5.7-alpha.17) wraps at the loop's end
+     *  as the realtime pump does (heard as 'seek' then 'step'); without it — the recorder's road — a step never loops. */
+    step(dt, o) {
       const d = Number.isFinite(dt) && dt > 0 ? dt : 0;
       stepping++; exactStep++;
       try {
@@ -494,12 +501,14 @@ export function createModClock(opts) {
         prevWall = wall;
         stats.steps++;
         stats.seconds += d;
+        const from = M.transport.beats;
         M.advance(d, wall);
+        const looped = !!(o && o.loop) && wrapLoop(from, wall);
         applyAll(false);
         requestPresentation(running ? 'modulation-output' : 'manual-step');
         /* the notice is heard INSIDE the deterministic door, so what a client applies (the pattern's velocity) is applied
            as though running even while the page is hidden — a recording in a hidden tab plays exactly as a visible one */
-        if (advanceWatchers.size) advanced('step');
+        if (advanceWatchers.size) { if (looped) advanced('seek'); advanced('step'); }
       } finally { stepping--; exactStep--; }
       return d;
     },

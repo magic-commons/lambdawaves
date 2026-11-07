@@ -75,6 +75,8 @@ export const DEFAULT_ACTIONS = Object.freeze(['project', 'capture', 'download', 
  *   onInspect(entry|null, how)  ·  onOpened(entry)  ·  onSaved(entry)  ·  onFresh()
  *   persist(prefs) / prefs   { sort, parts }
  *   dropLayer         where the drop guides are drawn (default document.body)
+ *   captions          true: every card wears its name beneath its picture at rest (THE CARD SAYS HOW IT OPENS, 1.5.7-alpha.22; the
+ *                     name row is the card's own, renamed in place there); default the name on the picture, shown when chosen
  */
 export function buildGallery(panel, opts) {
   const o = opts || {};
@@ -105,7 +107,7 @@ export function buildGallery(panel, opts) {
   const persist = () => { if (typeof o.persist === 'function') { try { o.persist({ sort: S.sort, parts: { ...S.parts } }); } catch (_) {} } };
 
   const pageSize = Number.isInteger(o.pageSize) && o.pageSize > 0 ? o.pageSize : 0;
-  const wrap = mk('div', 'sv-wrap' + (pageSize ? ' sv-paged' : ''), panel);
+  const wrap = mk('div', 'sv-wrap' + (pageSize ? ' sv-paged' : '') + (o.captions ? ' sv-captions' : ''), panel);
 
   /* The projects are the main surface. Keep the verbs in one fixed-height row. */
   const verbs = mk('div', 'sv-toolbar', wrap);
@@ -603,7 +605,8 @@ export function buildGallery(panel, opts) {
       card.classList.toggle('selected', active);
       const shot = card.querySelector('.sv-shot');
       shot.setAttribute('aria-pressed', String(active));
-      shot.setAttribute('aria-label', t(active ? 'Open {name} — tap again' : 'Select {name}', { name: card.dataset.name }));
+      const said = t(active ? 'Open {name} — tap again' : 'Select {name} — tap again to open', { name: card.dataset.name });
+      shot.setAttribute('aria-label', said); shot.title = said;   // 1.5.7-alpha.22: the hint follows the choice too (it kept the word it was built with)
       if (!active) {
         const del = card.querySelector('.sv-del.armed');
         if (del) { del.classList.remove('armed'); del.textContent = ''; ink(del, 'close', 14); }
@@ -672,7 +675,7 @@ export function buildGallery(panel, opts) {
       card.dataset.entry = e.id;
       card.dataset.name = e.name;
       if (o.current && o.current() === e.id) card.dataset.current = 'true';
-      const shot = btn('sv-shot', card, null, t(S.selected === e.id ? 'Open {name} — tap again' : 'Select {name}', { name: e.name }));
+      const shot = btn('sv-shot', card, null, t(S.selected === e.id ? 'Open {name} — tap again' : 'Select {name} — tap again to open', { name: e.name }));
       shot.setAttribute('aria-pressed', String(S.selected === e.id));
       if (e.thumb) shot.style.setProperty('--sv-thumb', 'url(' + JSON.stringify(e.thumb) + ')');
       tileLife.push(pointerField(shot, { touch: true }));            // BASINS' parallax follows a finger too
@@ -688,7 +691,7 @@ export function buildGallery(panel, opts) {
         if (S.selected === e.id) openEntry(e.id); else selectCard(e.id);
       });
       wireLongPress(shot, () => itemMenu(e));
-      const meta = mk('div', 'sv-meta', card);
+      const meta = mk('div', 'sv-meta' + (o.captions ? ' sv-cap' : ''), card);   // 1.5.7-alpha.22: `captions` — the name beneath the picture at rest
       const name = mk('div', 'sv-name', meta, e.name);
       name.title = e.name + ' · ' + fmtBytes(e.bytes);
       const renameIt = () => { if (ro(e)) { say(t('{name} came with the app and cannot be renamed — {:DUPLICATE} makes your own copy', { name: e.name }), true); return; } renameInline(name, e.name, (v) => files.rename(e.id, v)); };

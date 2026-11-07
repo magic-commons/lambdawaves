@@ -61,6 +61,27 @@ const ACCEPTED = {
   /* 038 N8 · MIR 1.5.7-alpha.16 THE MENU PANE KEEPS ITS FLOOR (kit-038 @ eddd2b6, on chain P's alpha.15 d37162a — this adoption carries THE ARC WEARS A
      GRADIENT's kit files too; P's own alpha.15 row and app side merge beside it): the menu floor and the bar's list floor outweigh FROST's dark veil */
   '1.5.7-alpha.16': '084779bf81107c9968080e760926c30db62d29c0041a30c74d92c094ef1278d9',
+  /* 039 K1 · MIR 1.5.7-alpha.17 THE STEPPED CLOCK LOOPS (kit-039 @ b415b77, from kit-038's eddd2b6): clock.step(dt, { loop: true }) wraps as the
+     realtime pump does; the recorder keeps the unlooped step */
+  '1.5.7-alpha.17': '8ff1ef8c8dcfa662d11b0a3281f7ac108afe7898a32e229974b22a2001682e6c',
+  /* 039 K2 · MIR 1.5.7-alpha.18 THE ROOT WEARS THE HINT (kit-039 @ d8e5701): seg({ title }) and stepper({ title }) hint their root */
+  '1.5.7-alpha.18': '094a93a051a31ea903d6fea7b13c8b049b19b359a7f51e9c03f85650a241eb0c',
+  /* 039 K3 · MIR 1.5.7-alpha.19 THE FIT ROW KEEPS ITS CELLS (kit-039 @ b1942e8): row({ fit: true, seg: 1 }) — a seg takes one cell in that row */
+  '1.5.7-alpha.19': '9da2d21097bac38a0ab50dda78801780077587ec82737c02a6700acf97ed7290',
+  /* 039 K4 · MIR 1.5.7-alpha.20 THE POWER WORD PASSES THROUGH (kit-039 @ 8a4c2d5): installTimeline({ transport: { powerWord } }) → the work bar's power seat */
+  '1.5.7-alpha.20': '32eb37eae01196c6bfd2c03531570fa1770159de66c696296429675842dce31c',
+  /* 039 K6 · MIR 1.5.7-alpha.21 THE HINT CLEARS THE ROW (kit-039 @ 0104a0b): a window head's hint goes above the bar, else beside the bar (control-help.js
+     hintSpot); the number planned for A TARGET HAS ONE AUTOMATION, which waits on a ruling (docs/FOR-MIR.md § 039) */
+  '1.5.7-alpha.21': 'e7b50ad0353d4d000caf9f151fbd04373a9c0fe84adb6b12c9ef3c55a8387649',
+  /* 039 K7 · MIR 1.5.7-alpha.22 THE CARD SAYS HOW IT OPENS (kit-039 @ 42e8d20): a card's hint says a second tap opens it; createFolders({ captions })
+     names every card beneath its picture (λWAVES: lab/projects.js) */
+  '1.5.7-alpha.22': 'eb64ebbc0393a86f33bed9e2daa63edad29fd6a67d37cea976228115cdb758f4',
+  /* 039 K8 · MIR 1.5.7-alpha.23 THE EMPTY LANE SAYS HOW (kit-039 @ 247d5ec): an empty timeline's one line on how a clip arrives, an empty lane's
+     hint says it (timeline/view.js); nothing app-side */
+  '1.5.7-alpha.23': '95d138a95e3063d70266b73466f56ca6ce33c2abcf756610b79963c89595d500',
+  /* 039 K9 · MIR 1.5.7-alpha.24 THE NAMED CARD KEEPS ITS HEIGHT (kit-039 @ e061205): with captions the card's picture is 16 : 10, so FOLDERS at
+     1000 × 700 no longer scrolls; λWAVES: the MAIN MENU page's reserve reads --sv-shot-k (skin.css, picker.js) */
+  '1.5.7-alpha.24': '0a2bbd180ecd8ca79e0c3ca952026d932f29133c432ad5d8e674c0523b877cdd',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

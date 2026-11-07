@@ -58,7 +58,6 @@
    only while the knob is edited — a drag, its 700-ms tail, the keys (Josh: "no numbers or texts, only during knob edit do they show"); LEVELS' strip
    is its curve over Photoshop's three marks, 24 px, no frame */
 .nodes-knobs > .nodes-face { grid-column: 1 / -1; }
-.nodes-face > :is(.seg, .segw) { grid-column: auto; min-width: 0; }   /* the kit spans a seg over two cells; in a face row segs share it (FILM GRAIN's KIND · BLEND) */
 .nodes-face > .segw > .seg { width: 100%; }
 .nodes-face > .segw > .seg > button { flex: 1 1 0; min-width: 0; padding-inline: 4px; }
 .nodes-knobs.nodes-bare { row-gap: 2px; }
