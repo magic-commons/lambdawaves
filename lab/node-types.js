@@ -73,6 +73,13 @@ export const TABLE_TYPES = {
       { k: 'highlights', label: 'HIGHLIGHTS', min: -100, max: 100, home: 0, stops: ['#949494', '#fff'], hint: 'HIGHLIGHTS — the light tones raised or dimmed', fmt: signed }],
     fn: (v) => { const m = Math.pow(2, v.stops), S = v.shadows / 100, H = v.highlights / 100;
       return (y) => { y = clamp01(y * m); return y + 0.945 * (S * y * (1 - y) * (1 - y) + H * y * y * (1 - y)); }; } },
+  /* 038 P6 · BRIGHTNESS & CONTRAST, the classic two (Josh: "Contrast needs to be the classic, 2-param 'Brightness & Contrast'"): y = (y − ½)·c + ½ + b,
+     one table — BRIGHTNESS ±100 (b = B/200, half the range at an end), CONTRAST ±100 (c = 1 + C/100 below home, flat grey at −100; 1 + C/50 above,
+     the one-knob's 3 at +100) */
+  bc: { cls: 'table', group: 'tone', label: 'BRIGHTNESS & CONTRAST', hint: 'the classic two: brightness and contrast',
+    knobs: [{ k: 'brightness', label: 'BRIGHTNESS', min: -100, max: 100, home: 0, stops: BW, hint: 'BRIGHTNESS — every tone lifted or lowered', fmt: signed },
+      { k: 'contrast', label: 'CONTRAST', min: -100, max: 100, home: 0, stops: ['hsl(0 0% 50%)', 'var(--fg)'], hint: 'CONTRAST — the tones pushed from mid-grey, or pulled in', fmt: signed }],
+    fn: (v) => { const b = v.brightness / 200, c = v.contrast >= 0 ? 1 + v.contrast / 50 : 1 + v.contrast / 100; return (y) => (y - 0.5) * c + 0.5 + b; } },
 };
 export const MATRIX_TYPES = {
   hue: { cls: 'matrix', label: 'HUE', hint: 'turn every colour round the wheel', knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, unit: '°' }],
