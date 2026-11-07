@@ -61,7 +61,10 @@ export function createView(parent, kind, M) {
   const ground = el('div', 'nodes-ground', parent), plane = el('div', 'nodes-plane', ground);
   const svg = plane.appendChild(document.createElementNS(NS, 'svg')); svg.setAttribute('class', 'nodes-wires');
   const empty = el('div', 'nodes-empty', plane); label(empty, 'Hit + to add a node');
-  const cards = {}, ro = new ResizeObserver(() => wires()), sel = new Set();
+  /* 038 N8 · A CARD THAT GROWS PUSHES THE CARDS BELOW (the window: its cards are placed, not flowed): a card that grows — its FADE · MASK · TARGET fold,
+     its body unfolded — moves the cards under it (overlapping its width) down until the gap is GAP again, kept as a nudge; no card is covered */
+  const ro = new ResizeObserver((es) => { if (W) { let pushed = false; for (const e of es) { const c = e.target; if (c === ground) continue; const h = c.offsetHeight; if (c.h0 !== undefined && h > c.h0 && clear(c)) pushed = true; c.h0 = h; } if (pushed) moved(true); } wires(); });
+  const cards = {}, sel = new Set();
   const hands = el('div', 'nodes-hands', plane), H = new Map(), P = new Map();   // 038 N4: the wires' handles and paths, by their downstream node
   let wsel = null;                                                   // the selected wire: its downstream node's id
   let map = null, held = false;                                      // 038 N5: the minimap (the window's), and a hand on it (its frame held)
@@ -85,6 +88,9 @@ export function createView(parent, kind, M) {
   const pick = (ids, add) => { if (!add) sel.clear(); for (const id of ids) sel.add(id); wsel = null; paintSel(); };
   const pickWire = (id) => { sel.clear(); wsel = id; paintSel(); };
   const xy = (c) => [parseFloat(c.style.left) || 0, parseFloat(c.style.top) || 0];
+  const clear = (c) => { const [l, t] = xy(c), r = l + c.offsetWidth, below = Object.values(cards).map((n) => n.c).filter((o) => o !== c && xy(o)[1] > t && xy(o)[0] < r && xy(o)[0] + o.offsetWidth > l);
+    if (!below.length) return false; const push = t + c.offsetHeight + GAP - Math.min(...below.map((o) => xy(o)[1])); if (push <= 0) return false;
+    for (const o of below) o.style.top = xy(o)[1] + push + 'px'; return true; };
   const at = () => Object.fromEntries(M.list().filter((q) => cards[q.id]).map((q) => [q.id, xy(cards[q.id].c)]));
   /** a card moved: every node takes the place it shows (the model re-sorts the list by top → bottom) */
   const moved = (nudge, plug) => M.moved(at(), { in: xy(cards.in.c), out: xy(cards.out.c) }, nudge, plug);   // plug: a node plugged in by the move (038 N4)
@@ -177,13 +183,13 @@ export function createView(parent, kind, M) {
   const SV = (tag, a, parent) => { const e = document.createElementNS(NS, tag); for (const n in a) e.setAttribute(n, a[n]); parent.appendChild(e); return e; };
   const paintHand = (q, v) => { const h = H.get(q.id); if (!h) return; const k = mixOf(T[q.type]), x = k ? clamp01(+(v === undefined ? q.values[k] : v)) : 0, arc = h.querySelector('.v');
     h.classList.toggle('nomix', !k); arc.setAttribute('stroke-dasharray', (x * 300).toFixed(1) + ' 360'); arc.style.visibility = x > 0.004 ? '' : 'hidden';
-    if (k) h.dataset.val = (k === 'amount' ? 'AMOUNT ' : 'MIX ') + Math.round(x * 100) + ' %'; };
+    if (k) label(h.querySelector('.nodes-hand-val'), k === 'amount' ? 'AMOUNT {v} %' : 'MIX {v} %', { v: Math.round(x * 100) }); };   // 038 N8: the readout's words through label()
   function handOf(q) {
     const id = q.id; let h = H.get(id); if (h) return h;
     h = el('div', 'nodes-hand'); h.dataset.wire = id; h.title = 'the wire\'s MIX: drag or wheel · Delete unplugs';
     const s = SV('svg', { viewBox: '0 0 20 20', 'aria-hidden': 'true' }, h);
     SV('circle', { class: 't', cx: 10, cy: 10, r: 7, pathLength: 360, 'stroke-dasharray': '300 360', transform: 'rotate(120 10 10)' }, s);
-    SV('circle', { class: 'v', cx: 10, cy: 10, r: 7, pathLength: 360, transform: 'rotate(120 10 10)' }, s); SV('circle', { class: 'c', cx: 10, cy: 10, r: 2.4 }, s);
+    SV('circle', { class: 'v', cx: 10, cy: 10, r: 7, pathLength: 360, transform: 'rotate(120 10 10)' }, s); SV('circle', { class: 'c', cx: 10, cy: 10, r: 2.4 }, s); el('span', 'nodes-hand-val', h);
     h.addEventListener('pointerdown', (e) => {
       if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); ground.focus({ preventScroll: true }); pickWire(id);
       const q0 = M.byId(id), k = q0 && mixOf(T[q0.type]); if (!k) return;

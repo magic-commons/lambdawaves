@@ -77,7 +77,8 @@
 .nodes-hand.nomix { cursor: pointer; }
 .nodes-hand.cut { opacity: .6; }
 .nodes-hand.cut .c { fill: none; stroke: currentColor; stroke-width: 1.2; }
-.nodes-hand.turn::after { content: attr(data-val); position: absolute; left: 50%; bottom: calc(100% + 4px); translate: -50% 0; padding: 2px 6px; border-radius: var(--r-sm); white-space: nowrap; pointer-events: none;
+.nodes-hand-val { display: none; }
+.nodes-hand.turn > .nodes-hand-val { display: block; position: absolute; left: 50%; bottom: calc(100% + 4px); translate: -50% 0; padding: 2px 6px; border-radius: var(--r-sm); white-space: nowrap; pointer-events: none;
   background: var(--glass-well); color: var(--fg); font: var(--w-bold) var(--fs-micro) / 1.2 var(--font-ui); letter-spacing: var(--tr-wide); }
 .nodes-wires path.cut { stroke-dasharray: 4 4; opacity: .55; }
 .nodes-wires path:is(.sel, .hot) { stroke-width: 3; opacity: 1; }
