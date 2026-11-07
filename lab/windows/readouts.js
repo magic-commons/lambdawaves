@@ -1,7 +1,7 @@
 /* lab/windows/readouts.js — the readout cards (0.5.2 R2b; moved verbatim out of lab/rack.js boot()) at THREE seats, so the rack keeps its order: createReadouts(app)
  * builds SHADOW · ORBIT · VORTEX · PLANE and returns the CALCULUS and ATOMS seats, which boot() calls where they stood (READERS, track, hydroReader stay there). */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
+import { el, knob, sw, seg, trig, readout, group, label } from '../mir/kit.js'; import { fold } from '../fold.js';
 import { toLUT } from '../mir/palette.js';
 import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS, orbitalFromTable } from '../hydrogen.js'; import { gammaAbs2 } from '../equalizer.js'; import { RENDER_CAP } from '../state.js'; import { waitForPaint } from '../frame-settle.js';
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
@@ -142,6 +142,12 @@ export function createReadouts(app) {
        Ctrl+drag bow, SQUEEZE-IN; written by static-field.js and kepler.js through `ui.kickRo`) */
     ui.kickRo = readout({ label: 'IMPULSE  escaped · Δp', value: '—', cls: 'wide', sub: 'no impulse yet · Ctrl + drag on the stage, or K' }); wMet.row('tight').appendChild(ui.kickRo.root);
   el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. READERS (SETTINGS › FIELD QUALITY) at 120 Hz updates visible CPU readers every fourth frame while the field continues to present each frame.';
+    /* 039 V9 · METERS SHOWS ITS READINGS, AND IS NEVER TALL (C #21: LEAN hid every readout and left an empty strip; shown whole the card is 888 px in a
+       626-px page): the state's five (NORM · ⟨E⟩ · t · AUTOCORR · MODES) and the last IMPULSE stand open; the engine's — FIELD CACHE · CLOCKS · LAST
+       TIER · FLOOR · STATUS · FRAME PROFILE · COHERENCE and the GOVERNOR — are one fold row, ENGINE (lab/fold.js: closed on a first run, kept by data-fold) */
+    const grid = wMet.body.querySelector(':scope > .meters'), kick = ui.kickRo.root.parentElement, eng = el('div', 'meters met-engine'), head = el('div', 'row tight lw-field-head met-head');
+    eng.append(...[...grid.children].slice(5)); grid.after(kick, head, eng, rp); label(el('div', 'grp-lbl', head), 'ENGINE');
+    fold(head, [eng, rp], { what: 'the engine’s readings', key: 'meters-engine' });
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
