@@ -76,7 +76,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
 
   /* THE LIST: the record's nodes as saved (at most one CURVES); else 018's one-node graph, or a reader who graded before NODES kept a
      record; else THE DEFAULT GRAPH, which is EMPTY */
-  const fresh = (id, type, o = {}) => ({ id, type, bypass: !!o.bypass, at: Array.isArray(o.at) ? o.at : null, name: typeof o.name === 'string' && o.name ? o.name : null, fold: !!o.fold,
+  const fresh = (id, type, o = {}) => ({ id, type, bypass: !!o.bypass, plug: o.plug !== false, at: Array.isArray(o.at) ? o.at : null, name: typeof o.name === 'string' && o.name ? o.name : null, fold: !!o.fold,
     values: { ...homeOf(TYPES[type]), ...(o.values || {}) }, v: 0 });
   const listOf = (list) => { let one = false;
     return list.filter((q) => q && /^[a-z][a-z0-9]*$/.test(q.id) && TYPES[q.type] && (q.type !== 'curves' || (!one && (one = true)))).map((q) => fresh(q.type === 'curves' ? 'curves' : q.id, q.type, q)); };
@@ -96,7 +96,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const curvesNode = () => nodes.find((q) => q.type === 'curves');
   const has = () => { const c = curvesNode(); return !!c && !c.bypass; };
   let saving = 0, savingList = 0;
-  const rows = () => nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold }));
+  const rows = () => nodes.map(({ id, type, values, bypass, plug, at, name, fold }) => ({ id, type, values, bypass, ...(plug === false && { plug }), at, name, fold }));   // 038 N4: `plug` only when false
   const saveList = (now) => { clearTimeout(savingList); const w = () => put({ seq, list: rows() }); if (now) w(); else savingList = setTimeout(w, 250); };
   onForget(() => { clearTimeout(saving); clearTimeout(savingList); saving = savingList = 0; });
   const FLAT = { v: 1, amount: 1, curves: {} };   // 036 S1: the grade a project without one opens on (the kit's restore(null) changes nothing)
@@ -131,7 +131,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const hand = (q, k, v) => { undo.touch(); if (routed(ID(q, k))) mod.registry.write(ID(q, k), v); else setValue(q, k, v, 'hand'); };
 
   /* 020 X1 · NODES' OWN UNDO (lab/nodes-undo.js): a snapshot of the list and the graph's places; every verb marks the state before it */
-  const snap = () => JSON.stringify({ list: nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold })), at: rec().at || null });
+  const snap = () => JSON.stringify({ list: rows(), at: rec().at || null });
   const undo = createUndo(snap, (s) => { const o = JSON.parse(s); batch(() => { for (const q of nodes) unenroll(q); nodes = o.list.map((q) => fresh(q.id, q.type, q)); for (const q of nodes) enroll(q); });
     put({ at: o.at }); changed(true); });
   const many = (x) => (Array.isArray(x) ? x : [x]);
@@ -180,11 +180,16 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const flag = (f, id) => { flags[f] = id && flags[f] !== id && byId(id) ? id : null; changed(); };
   function setOff(on) { if (!!rec().off === !!on) return; undo.mark(); put({ off: !!on }); changed(); }
   function tidy() { undo.mark(); for (const q of nodes) q.at = null; put({ at: {} }); changed(); }
-  const graphOf = () => nodes.filter((q) => q.type !== 'curves').map(({ type, values, bypass }) => ({ type, values: { ...values }, bypass }));
-  /** the cards moved (the window's ground): each node takes the place it shows, the list follows the graph's top → bottom (THE COLUMN IS THE CHAIN) */
-  function moved(at, io, nudge) {
+  const graphOf = () => nodes.filter((q) => q.type !== 'curves').map(({ type, values, bypass, plug }) => ({ type, values: { ...values }, bypass, ...(plug === false && { plug }) }));
+  /** 038 N4 · setPlug(id, on): a wire unplugged (its node out of the chain, its place and values kept — absent = plugged, so every saved graph reads
+   *  as it was) or plugged back; one step of NODES' ring */
+  function setPlug(id, on) { const q = byId(id); if (!q || q.plug === !!on) return; undo.mark(); q.plug = !!on; changed(); }
+  /** the cards moved (the window's ground): each node takes the place it shows, the list follows the graph's top → bottom (THE COLUMN IS THE CHAIN);
+   *  038 N4: `plug` names a node the move plugs in (a port carried onto a wire), in the same step */
+  function moved(at, io, nudge, plug) {
     if (nudge) undo.touch(); else undo.mark();
     for (const q of nodes) if (at[q.id]) q.at = at[q.id];
+    if (plug && byId(plug)) byId(plug).plug = true;
     put({ at: { ...(rec().at || {}), ...io } });
     nodes.sort((a, b) => (a.at ? a.at[1] : 0) - (b.at ? b.at[1] : 0)); changed();
   }
@@ -238,7 +243,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
 
   /* the views' one door to the model */
   let win = null;
-  const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, duplicate, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
+  const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, setPlug, duplicate, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
     setFold, rename, reset, move, tidy, flags, setView: (id) => flag('view', id), setSolo: (id) => flag('solo', id), setOff, off: () => !!rec().off,
     undo: () => undo.undo(), redo: () => undo.redo(),
     door: (kind) => { if (kind === 'win') { win.close(); raise('nodes'); } else { rk.close('nodes'); win.open(); } } };

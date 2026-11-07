@@ -63,6 +63,29 @@
 .nodes-card.past { opacity: .4; }
 .nodes-passes > span + span::before { content: ' · '; }
 .nodes-off .nodes-wires { opacity: .3; }
+/* 038 N4 · THE WIRE HAS A KNOB: the handles over the cards (a round puck, the track and the value arc in the accent, a dot at the hub), the selected
+   wire lit, the value only while it turns; an unplugged wire dashed to its hollow handle and its node dimmed; a live port a drag target */
+.nodes-hands { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; }
+.nodes-hand { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; color: var(--acc); cursor: ns-resize; touch-action: none;
+  background: var(--glass-raise, var(--glass-tint)); box-shadow: 0 0 0 1.5px var(--glass-well), var(--relief-raise, var(--neu-raise)); }
+.nodes-hand > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.nodes-hand circle { fill: none; stroke-width: 2.4; stroke-linecap: round; }
+.nodes-hand .t { stroke: color-mix(in srgb, var(--ink-faint) 40%, transparent); }
+.nodes-hand .v { stroke: currentColor; }
+.nodes-hand .c { fill: currentColor; stroke: none; }
+.nodes-hand.sel { box-shadow: 0 0 0 2px var(--acc), var(--relief-raise, var(--neu-raise)); }
+.nodes-hand.nomix { cursor: pointer; }
+.nodes-hand.cut { opacity: .6; }
+.nodes-hand.cut .c { fill: none; stroke: currentColor; stroke-width: 1.2; }
+.nodes-hand.turn::after { content: attr(data-val); position: absolute; left: 50%; bottom: calc(100% + 4px); translate: -50% 0; padding: 2px 6px; border-radius: var(--r-sm); white-space: nowrap; pointer-events: none;
+  background: var(--glass-well); color: var(--fg); font: var(--w-bold) var(--fs-micro) / 1.2 var(--font-ui); letter-spacing: var(--tr-wide); }
+.nodes-wires path.cut { stroke-dasharray: 4 4; opacity: .55; }
+.nodes-wires path:is(.sel, .hot) { stroke-width: 3; opacity: 1; }
+.nodes-wires path.ghost { stroke-dasharray: 3 3; opacity: .9; }
+.nodes-port.live { cursor: crosshair; }
+.nodes-port.live::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; }
+.nodes-card.unplug { opacity: .5; }
+.nodes-column .nodes-card.unplug::before { border-left-style: dashed; }
 /* 020 X4 · the foot fold: FADE · MASK · SOFT under the knobs; lit while either is off home */
 .nodes-foot { margin-top: 6px; border-top: 1px solid var(--glass-hairline); }
 .nodes-foot-t { display: block; width: 100%; padding: 5px 0 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }

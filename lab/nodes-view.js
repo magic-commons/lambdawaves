@@ -16,6 +16,9 @@
  * right-click menus (a card's, the ground's) and TIDY (the cards back in one column, in list order).
  * 020 X3 THE FLAGS: an eye on every bar (VIEW HERE: the stage shows the chain up to it, the foot says "viewing 3 of 6"; the lit eye again =
  * STAGE OUT), SOLO (S, a second lit mark: this node alone), BYPASS ALL (the head's power, key \: the foot says "graph off").
+ * 038 N4 THE WIRE HAS A KNOB (FL Studio's Patcher): on each wire into a node a round HANDLE at its middle — the node's MIX (its FADE; a LAYER's or a
+ * SHADER's own 0–1 MIX or AMOUNT), turned by a vertical drag or the wheel, its arc the value; a press selects the wire (Delete unplugs it, the arrows
+ * turn it); a card's PORT carried onto a wire moves its node into that wire (and plugs it in), an in-port let go on the empty ground unplugs it.
  * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
  * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
@@ -57,6 +60,8 @@ export function createView(parent, kind, M) {
   const svg = plane.appendChild(document.createElementNS(NS, 'svg')); svg.setAttribute('class', 'nodes-wires');
   const empty = el('div', 'nodes-empty', plane); label(empty, 'Hit + to add a node');
   const cards = {}, ro = new ResizeObserver(() => wires()), sel = new Set();
+  const hands = el('div', 'nodes-hands', plane), H = new Map(), P = new Map();   // 038 N4: the wires' handles and paths, by their downstream node
+  let wsel = null;                                                   // the selected wire: its downstream node's id
   let pan = [0, 0], z = 1;
   /** the view: the pan (px) and the zoom; the dot grid follows both */
   const setPan = (p, zz = z) => { pan = p; z = zz; plane.style.translate = p[0] + 'px ' + p[1] + 'px'; plane.style.scale = z;
@@ -72,16 +77,20 @@ export function createView(parent, kind, M) {
     const gw = ground.clientWidth, gh = ground.clientHeight, zz = clampZ(Math.min((gw - 48) / (x1 - x0), (gh - 48) / (y1 - y0)));
     setPan([(gw - (x1 - x0) * zz) / 2 - x0 * zz, (gh - (y1 - y0) * zz) / 2 - y0 * zz], zz); keep();
   }
-  const paintSel = () => { for (const [id, n] of Object.entries(cards)) n.c.classList.toggle('sel', sel.has(id)); };
-  const pick = (ids, add) => { if (!add) sel.clear(); for (const id of ids) sel.add(id); paintSel(); };
+  const paintSel = () => { for (const [id, n] of Object.entries(cards)) n.c.classList.toggle('sel', sel.has(id));
+    for (const [id, h] of H) h.classList.toggle('sel', id === wsel); for (const [id, p] of P) p.classList.toggle('sel', id === wsel); };
+  const pick = (ids, add) => { if (!add) sel.clear(); for (const id of ids) sel.add(id); wsel = null; paintSel(); };
+  const pickWire = (id) => { sel.clear(); wsel = id; paintSel(); };
   const xy = (c) => [parseFloat(c.style.left) || 0, parseFloat(c.style.top) || 0];
   const at = () => Object.fromEntries(M.list().filter((q) => cards[q.id]).map((q) => [q.id, xy(cards[q.id].c)]));
   /** a card moved: every node takes the place it shows (the model re-sorts the list by top → bottom) */
-  const moved = (nudge) => M.moved(at(), { in: xy(cards.in.c), out: xy(cards.out.c) }, nudge);
+  const moved = (nudge, plug) => M.moved(at(), { in: xy(cards.in.c), out: xy(cards.out.c) }, nudge, plug);   // plug: a node plugged in by the move (038 N4)
   const node = (id, title, ins, outs, glyph, mark) => {
     const c = el('div', 'nodes-card', plane); c.dataset.node = id;
     const bar = el('div', 'nodes-title', c); icon(bar, glyph); const name = label(el('span', 'nodes-name', bar), title); if (mark) el('i', 'nodes-mark', bar, mark);
-    if (ins) el('i', 'nodes-port in', c); if (outs) el('i', 'nodes-port out', c);
+    for (const [has, side] of [[ins, 'in'], [outs, 'out']]) if (has) { const pt = el('i', 'nodes-port ' + side, c);
+      if (W && id !== 'in' && id !== 'out') { pt.classList.add('live'); pt.title = side === 'in' ? 'drag onto a wire: the node goes there · off: unplugs' : 'drag onto a wire: the node goes there';
+        pt.addEventListener('pointerdown', (e) => portDrag(e, id, side)); } }
     /* a press on a title selects it (shift adds or takes it out) and drags the selection with it; STAGE IN / OUT drag alone */
     let t0 = -1e9;                                                  // a second press within 350 ms is a double-click: RENAME
     if (W) grab(bar, (e) => !e.target.closest('button, input'), (e) => {
@@ -119,13 +128,88 @@ export function createView(parent, kind, M) {
     }
     plane.insertBefore(n.c, cards.out.c);
   }
-  /** the wires: each node's out port (the bottom's middle) to the next one's in port (the top's middle), a cubic as a network draws it */
+  /** the wires: each node's out port (the bottom's middle) to the next one's in port (the top's middle), a cubic as a network draws it; 038 N4: on
+      each wire into a node its HANDLE at the curve's middle (t = ½ is the mean of the ends), and an unplugged node's wire drawn only from above to
+      its handle (the cubic's first half), dashed */
   function wires() {
     if (!W) return;                                                 // the rack card is a column: its ports meet, no wire to draw
     const mid = (id, end) => { const c = cards[id].c; return [c.offsetLeft + c.offsetWidth / 2, c.offsetTop + (end ? c.offsetHeight : 0)]; };
-    const ids = ['in', ...M.list().map((q) => q.id), 'out'];
+    const ids = ['in', ...M.list().map((q) => q.id), 'out'], hs = new Set(); P.clear();
     svg.replaceChildren(...ids.slice(1).map((b, i) => { const [x1, y1] = mid(ids[i], true), [x2, y2] = mid(b, false), d = Math.max(30, Math.abs(y2 - y1) / 2);
-      const p = document.createElementNS(NS, 'path'); p.setAttribute('d', `M${x1} ${y1} C${x1} ${y1 + d} ${x2} ${y2 - d} ${x2} ${y2}`); return p; }));
+      const q = M.byId(b), cut = !!q && q.plug === false, mx = (x1 + x2) / 2, my = (y1 + y2) / 2, p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', cut ? `M${x1} ${y1} C${x1} ${y1 + d / 2} ${(3 * x1 + x2) / 4} ${(3 * y1 + y2 + d) / 4} ${mx} ${my}` : `M${x1} ${y1} C${x1} ${y1 + d} ${x2} ${y2 - d} ${x2} ${y2}`);
+      p.wire = [x1, y1, x2, y2, d]; p.classList.toggle('cut', cut); P.set(b, p);
+      if (q) { const h = handOf(q); h.style.left = mx + 'px'; h.style.top = my + 'px'; h.classList.toggle('cut', cut); hs.add(h); if (h.parentNode !== hands) hands.appendChild(h); }
+      return p; }));
+    for (const [id, h] of H) if (!hs.has(h)) { h.remove(); H.delete(id); }
+    paintSel();
+  }
+  /* 038 N4 · THE WIRE HAS A KNOB (Josh: "The connector wires also need a way to connect and disconnect. Check out FL Studio's 'Patcher' … how they
+     design the 'knob' on the wires"): each wire is its downstream node's input, so its knob is that node's MIX — FADE (already folded, already a
+     target), or a LAYER's / SHADER's own 0–1 MIX or AMOUNT (none: no arc).  The kit's hand: 220 px of rise is the whole range, Shift the fine gear
+     (1/8), two presses come home; the wheel turns it here, where nothing scrolls */
+  const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+  const mixOf = (t) => (!over(t) ? 'fade' : ['mix', 'amount'].find((k) => t.knobs.some((K) => K.k === k && K.min === 0 && K.max === 1)) || null);
+  const homeOf = (t, k) => [...t.knobs, ...FOOT].find((K) => K.k === k).home;
+  const SV = (tag, a, parent) => { const e = document.createElementNS(NS, tag); for (const n in a) e.setAttribute(n, a[n]); parent.appendChild(e); return e; };
+  const paintHand = (q, v) => { const h = H.get(q.id); if (!h) return; const k = mixOf(T[q.type]), x = k ? clamp01(+(v === undefined ? q.values[k] : v)) : 0, arc = h.querySelector('.v');
+    h.classList.toggle('nomix', !k); arc.setAttribute('stroke-dasharray', (x * 300).toFixed(1) + ' 360'); arc.style.visibility = x > 0.004 ? '' : 'hidden';
+    if (k) h.dataset.val = (k === 'amount' ? 'AMOUNT ' : 'MIX ') + Math.round(x * 100) + ' %'; };
+  function handOf(q) {
+    const id = q.id; let h = H.get(id); if (h) return h;
+    h = el('div', 'nodes-hand'); h.dataset.wire = id; h.title = 'the wire\'s MIX: drag or wheel · Delete unplugs';
+    const s = SV('svg', { viewBox: '0 0 20 20', 'aria-hidden': 'true' }, h);
+    SV('circle', { class: 't', cx: 10, cy: 10, r: 7, pathLength: 360, 'stroke-dasharray': '300 360', transform: 'rotate(120 10 10)' }, s);
+    SV('circle', { class: 'v', cx: 10, cy: 10, r: 7, pathLength: 360, transform: 'rotate(120 10 10)' }, s); SV('circle', { class: 'c', cx: 10, cy: 10, r: 2.4 }, s);
+    h.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); ground.focus({ preventScroll: true }); pickWire(id);
+      const q0 = M.byId(id), k = q0 && mixOf(T[q0.type]); if (!k) return;
+      if (e.timeStamp - (h.t0 || -1e9) < 300) { h.t0 = -1e9; M.hand(q0, k, homeOf(T[q0.type], k)); return; } h.t0 = e.timeStamp;
+      h.setPointerCapture(e.pointerId); const u = cssZoom(ground); let v0 = clamp01(+q0.values[k]), y0 = e.clientY, fine = e.shiftKey;
+      const mv = (ev) => { const q = M.byId(id); if (!q) return; if (ev.shiftKey !== fine) { fine = ev.shiftKey; v0 = clamp01(+q.values[k]); y0 = ev.clientY; }
+        h.classList.add('turn'); M.hand(q, k, clamp01(v0 - (ev.clientY - y0) / u / (fine ? 1760 : 220))); };
+      const end = () => { for (const [t, f] of on) h.removeEventListener(t, f); h.classList.remove('turn'); };
+      const on = [['pointermove', mv], ['pointerup', end], ['pointercancel', end]]; for (const [t, f] of on) h.addEventListener(t, f);
+    });
+    h.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) return; const q = M.byId(id), k = q && mixOf(T[q.type]); if (!k) return; e.preventDefault(); e.stopPropagation();
+      M.hand(q, k, clamp01(+q.values[k] - Math.sign(e.deltaY) * (e.shiftKey ? 0.01 : 0.05))); h.classList.add('turn'); clearTimeout(h.tw); h.tw = setTimeout(() => h.classList.remove('turn'), 700); }, { passive: false });
+    H.set(id, h); paintHand(q); return h;
+  }
+  /** a card's port carried onto a wire (or onto a port: the wire it ends) puts its node INTO that wire and plugs it in — THE COLUMN IS THE CHAIN,
+      so "into" is a place: under the wire's upstream card, every card from its downstream one on shifted down to make room (the order kept, no
+      card covered); an in-port let go on the empty ground (24 px off) unplugs its node.  Its own wires are no target, but an unplugged node's own
+      input wire plugs it back where it stands */
+  const toPlane = (e) => { const p = local(e); return [(p[0] - pan[0]) / z, (p[1] - pan[1]) / z]; };
+  function wireAt(p, id) {
+    const q = M.byId(id), ids = ['in', ...M.list().map((n) => n.id), 'out']; let best = null, bd = 18 / z;
+    for (let i = 1; i < ids.length; i++) {
+      if (ids[i - 1] === id || (ids[i] === id && q.plug !== false)) continue;
+      const w = P.get(ids[i]); if (!w || !w.wire) continue; const [x1, y1, x2, y2, d] = w.wire;
+      for (let s = 0; s <= 16; s++) { const t = s / 16, a = (1 - t) ** 3, b = 3 * (1 - t) ** 2 * t, c = 3 * (1 - t) * t * t, f = t ** 3;
+        const dd = Math.hypot((a + b) * x1 + (c + f) * x2 - p[0], a * y1 + b * (y1 + d) + c * (y2 - d) + f * y2 - p[1]); if (dd < bd) { bd = dd; best = ids[i]; } }
+    }
+    return best;
+  }
+  function portDrag(e, id, side) {
+    if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); ground.focus({ preventScroll: true });
+    const pt = e.currentTarget, c = cards[id].c, from = [c.offsetLeft + c.offsetWidth / 2, c.offsetTop + (side === 'out' ? c.offsetHeight : 0)], p0 = toPlane(e);
+    pt.setPointerCapture(e.pointerId);
+    const ghost = svg.appendChild(document.createElementNS(NS, 'path')); ghost.setAttribute('class', 'ghost'); let hot = null, far = false;
+    const mv = (ev) => { const p = toPlane(ev); far = far || Math.hypot(p[0] - p0[0], p[1] - p0[1]) > 24 / z; hot = wireAt(p, id);
+      ghost.setAttribute('d', `M${from[0]} ${from[1]} L${p[0]} ${p[1]}`); for (const [b, w] of P) w.classList.toggle('hot', b === hot); };
+    const end = (ev) => { for (const [t, f] of on) pt.removeEventListener(t, f); ghost.remove(); for (const w of P.values()) w.classList.remove('hot');
+      if (ev.type === 'pointercancel') return; const q = M.byId(id); if (!q) return;
+      if (hot) into(id, hot); else if (far && side === 'in' && q.plug !== false) M.setPlug(id, false); };
+    const on = [['pointermove', mv], ['pointerup', end], ['pointercancel', end]]; for (const [t, f] of on) pt.addEventListener(t, f);
+  }
+  function into(id, D) {
+    const L = ['in', ...M.list().map((q) => q.id), 'out'], U = L[L.indexOf(D) - 1];
+    if (U === id || D === id) { moved(false, id); return; }
+    const x = cards[id].c, u = cards[U].c, dn = cards[D].c, [ul, ut] = xy(u), [dl, d0] = xy(dn), top = ut + u.offsetHeight + GAP;
+    x.style.left = Math.round((ul + u.offsetWidth / 2 + dl + dn.offsetWidth / 2) / 2 - x.offsetWidth / 2) + 'px'; x.style.top = Math.round(top) + 'px';
+    const shift = top + x.offsetHeight + GAP - d0;
+    if (shift > 0) for (const [k, n] of Object.entries(cards)) if (k !== id && k !== 'in' && xy(n.c)[1] >= d0) n.c.style.top = xy(n.c)[1] + shift + 'px';
+    moved(false, id);
   }
   /** RENAME: the title becomes a line; Enter keeps it, Escape (or leaving it) does not; empty = the type's name */
   function renameAt(id) {
@@ -145,8 +229,11 @@ export function createView(parent, kind, M) {
   const cardRows = (q) => [['VIEW HERE', () => M.setView(q.id), M.flags.view === q.id], ['SOLO', () => M.setSolo(q.id), M.flags.solo === q.id], ['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'EXPAND' : 'COLLAPSE', () => M.setFold(q.id, !q.fold)],
     ['DUPLICATE', () => pick(M.duplicate(q.id, at()))], ['RENAME', () => renameAt(q.id)], ['RESET', () => M.reset(q.id)], null,
     ['MOVE UP', () => M.move(q.id, -1)], ['MOVE DOWN', () => M.move(q.id, 1)], null, ['REMOVE', () => M.remove(q.id)]];
-  const groundRows = () => [['ADD…', () => openMenu()], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()]].filter((r) => r !== false);
+  const wireRows = (q) => { const k = mixOf(T[q.type]); return [[q.plug === false ? 'PLUG IN' : 'UNPLUG', () => M.setPlug(q.id, q.plug === false)], k && ['RESET MIX', () => M.hand(q, k, homeOf(T[q.type], k))]].filter(Boolean); };
+  const groundRows = () => [['ADD…', () => openMenu()], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()],
+    ...(wsel && M.byId(wsel) ? [null, wireRows(M.byId(wsel))[0]] : [])].filter((r) => r !== false);
   onContext(ground, ({ x, y, target }) => { if (target.closest('input') || (drag && drag.zoom)) return;   // a Mac's ctrl + press is a zoom here, not a menu
+    const hd = target.closest('.nodes-hand'), hq = hd && M.byId(hd.dataset.wire); if (hq) { pickWire(hq.id); popup(x, y, wireRows(hq)); return; }
     const c = target.closest('.nodes-card[data-node]'), q = c && M.byId(c.dataset.node); popup(x, y, q ? cardRows(q) : groundRows()); });
   if (!W) ground.classList.add('nodes-column');
   else {
@@ -194,9 +281,10 @@ export function createView(parent, kind, M) {
     /* THE KEYS ARE THE GROUND'S — 021 I1: rows of THE ACTION REGISTRY (`nodes.*`, lab/actions.js), live while this ground has the focus (THE FOCUS
        LAW): chords by place (AZERTY, Dvorak), rebindable, on the board; Tab is the kit's again, the add menu is Shift+A.  These are their acts. */
     GROUNDS.set(ground, {
-      nudge(dx, dy, a) { const ids = [...sel]; if (!ids.length) return; const s = a && a.shift ? 10 : 1;
+      nudge(dx, dy, a) { if (wsel) { const q = M.byId(wsel), k = q && mixOf(T[q.type]); if (k) M.hand(q, k, clamp01(+q.values[k] + (dx - dy) * (a && a.shift ? 0.1 : 0.01))); return; }
+        const ids = [...sel]; if (!ids.length) return; const s = a && a.shift ? 10 : 1;
         for (const id of ids) { const n = cards[id].c, p = xy(n); n.style.left = p[0] + dx * s + 'px'; n.style.top = p[1] + dy * s + 'px'; } moved(true); },
-      remove() { M.remove([...sel]); sel.clear(); }, duplicate() { pick(M.duplicate([...sel], at())); }, all() { pick(M.list().map((q) => q.id)); },
+      remove() { if (wsel) { M.setPlug(wsel, false); return; } M.remove([...sel]); sel.clear(); }, duplicate() { pick(M.duplicate([...sel], at())); }, all() { pick(M.list().map((q) => q.id)); },
       undo: () => M.undo(), redo: () => M.redo(), off: () => M.setOff(!M.off()), add: () => openMenu(), fit: () => fit(),
       bypass() { const ids = [...sel]; if (ids.length) M.setBypass(ids, ids.some((id) => !M.byId(id).bypass)); }, solo() { const ids = [...sel]; if (ids.length) M.setSolo(ids[0]); },
       fold() { const ids = [...sel]; if (ids.length) M.setFold(ids, ids.some((id) => !M.byId(id).fold)); },
@@ -254,7 +342,7 @@ export function createView(parent, kind, M) {
   const api = {
     get view() { return cards.curves && cards.curves.view; },
     widget: (id, k) => { const n = cards[id], c = n && ((n.ctl && n.ctl.ctls[k]) || (n.fctl && n.fctl.ctls[k])); return c ? c.targets[0] || null : null; },
-    paint(q, k, v, shown) { const n = cards[q.id]; if (!n) return; for (const c of [n.ctl, n.fctl]) if (c) c.paint(k, v, shown); api.mark(q); },
+    paint(q, k, v, shown) { const n = cards[q.id]; if (!n) return; for (const c of [n.ctl, n.fctl]) if (c) c.paint(k, v, shown); if (k === mixOf(T[q.type])) paintHand(q, v); api.mark(q); },
     /** the cost mark (a masked node is a pass) and the foot fold's light (FADE or MASK off home) */
     mark(q) { const n = cards[q.id]; if (!n) return; n.bar.querySelector('.nodes-mark').textContent = markOf(q, T[q.type]);
       if (n.foot) n.foot.classList.toggle('on', q.values.fade < 1 || (q.values.mask || 'none') !== 'none'); },
@@ -274,7 +362,7 @@ export function createView(parent, kind, M) {
     sync(rebuild) {
       const L = M.list();
       for (const id of Object.keys(cards)) if (id !== 'in' && id !== 'out' && (rebuild || !M.byId(id))) { sel.delete(id); ro.unobserve(cards[id].c); if (cards[id].view) cards[id].view.destroy(); cards[id].c.remove(); delete cards[id]; }
-      for (const q of L) { if (!cards[q.id]) make(q); const n = cards[q.id]; n.c.classList.toggle('off', q.bypass); n.bar.querySelector('.nodes-x').setAttribute('aria-pressed', String(q.bypass));
+      for (const q of L) { if (!cards[q.id]) make(q); const n = cards[q.id]; n.c.classList.toggle('off', q.bypass); n.c.classList.toggle('unplug', q.plug === false); paintHand(q); n.bar.querySelector('.nodes-x').setAttribute('aria-pressed', String(q.bypass));
         api.mark(q); n.c.classList.toggle('fold', q.fold); n.bar.querySelector('.nodes-eye').setAttribute('aria-pressed', String(M.flags.view === q.id));
         n.bar.querySelector('.nodes-solo').setAttribute('aria-pressed', String(M.flags.solo === q.id));
         n.c.classList.toggle('past', !!(M.flags.solo ? M.flags.solo !== q.id : M.flags.view && L.findIndex((p) => p.id === M.flags.view) < L.indexOf(q))); n.bar.querySelector('.nodes-chev').setAttribute('aria-expanded', String(!q.fold));

@@ -14,7 +14,7 @@
  * tables are handed back BY IDENTITY otherwise, and the kit does not rewrite them).
  *   compile(list, TYPES, cache, { upTo, solo, off }) → { runs, layers, passes }
  *     upTo    VIEW HERE (020 X3): the chain up to and including this node id · solo  this node alone · off  BYPASS ALL: nothing
- *     list    [{ id, type, values, bypass, v }] in graph order (v: a version the owner bumps on every change of the node)
+ *     list    [{ id, type, values, bypass, plug?, v }] in graph order (v: a version the owner bumps on every change of the node; plug false: unplugged)
  *     TYPES   { type: { cls: 'table' | 'matrix' | 'prim' | 'layer', neutral?(values, node), fn?(values, node) → (y, ch) → y,
  *               luma?, matrix?(values) → 20 numbers, prim?(values, id) → [[tag, attrs, children?], …] } }
  *     cache   a Map the caller keeps between compiles (the TABLE runs by key)
@@ -107,7 +107,7 @@ export function compile(list, TYPES, cache = new Map(), o = {}) {
   const matrix = (m) => { close(); const last = runs[runs.length - 1]; if (last && last.matrix) last.matrix = mul(m, last.matrix); else runs.push({ matrix: m }); };
   for (const q of list) {
     const T = TYPES[q.type];
-    if (!T || q.bypass || (T.neutral && T.neutral(q.values, q)) || fadeOf(q, T) === 0) continue;
+    if (!T || q.bypass || q.plug === false || (T.neutral && T.neutral(q.values, q)) || fadeOf(q, T) === 0) continue;   // 038 N4: an unplugged node emits nothing
     const a = fadeOf(q, T);
     if (!over(T) && ownRun(q, T)) { close(); const k = 'o' + q.id + ':' + q.v; keep.set(k, cache.get(k) || { prim: own(q, T) }); runs.push(keep.get(k)); }
     else if (T.cls === 'table') { if (T.luma) matrix(LUMA); (tab || (tab = [])).push(q); }
