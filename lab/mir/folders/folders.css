@@ -227,6 +227,7 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 .mir-folders .sv-paged .sv-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(var(--sv-page-rows, 4), auto); align-content: start;
   min-height: calc(var(--sv-page-rows, 4) * ((100cqw - 24px) / 2 * var(--sv-shot-k, .75) + 2px + var(--sv-cap-h, 0px)) + (var(--sv-page-rows, 4) - 1) * var(--folders-gap)); }
 .mir-folders .sv-paged .sv-card { align-self: start; }
+.mir-folders .sv-folder-seat { visibility: hidden; }   /* THE FOLDER ROW KEEPS ITS SEAT (1.5.7-alpha.26): a later page's hidden seat, a folder's own height */
 .mir-folders .sv-pages { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: var(--folders-gap); margin-top: 8px; }
 .mir-folders .sv-pages button { width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--glass-hairline); border-radius: 50%; background: var(--glass-well);
   color: var(--acc); font: var(--folders-page-glyph)/1 var(--font-ui); cursor: pointer; }   /* BASINS' page buttons: round wells */

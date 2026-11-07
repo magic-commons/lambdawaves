@@ -358,13 +358,28 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function showFolders() {
     const P = app.sh.layout && app.sh.layout.projects; if (!P) return;
     showView('folders');
-    if (!foldersView) {   // sized to the page once, at its first showing: the columns as the decks', the rows from the height
+    if (!foldersView) {   // sized to the page once, at its first showing: the columns as the decks', the rows from what the page's chrome leaves
       const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
-      const W = Math.min(1500, foldersEl.clientWidth - 48, innerWidth >= 1100 ? innerWidth - 2 * (rackW + 20) : Infinity), H = foldersEl.clientHeight - 150, cols = Math.max(2, Math.min(8, Math.floor(W / 210))), rows = Math.max(1, Math.min(4, Math.floor(H / ((W / cols) * 0.625 + 80))));   // 039 K7 / K9: a 16 : 10 picture and the card's name row
-      foldersEl.style.setProperty('--fcols', String(cols)); foldersEl.style.setProperty('--frows', String(rows));   // skin.css reserves the page's rows
-      foldersView = P.folders.mountGallery(el('div', 'mm-fgal', foldersEl), { pageSize: cols * rows, prefsKey: 'pickerGallery', factory: () => P.restoreDemos() });
-    }
-    P.demosFirst(foldersView); foldersView.paint(); animate(foldersEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
+      const W = Math.min(1500, foldersEl.clientWidth - 48, innerWidth >= 1100 ? innerWidth - 2 * (rackW + 20) : Infinity), cols = Math.max(2, Math.min(8, Math.floor(W / 210)));
+      let host = null;
+      const mount = ([c, r]) => { foldersEl.style.setProperty('--fcols', String(c)); foldersEl.style.setProperty('--frows', String(r));   // skin.css reserves the page's rows
+        host = el('div', 'mm-fgal', foldersEl); foldersView = P.folders.mountGallery(host, { pageSize: c * r, prefsKey: 'pickerGallery', factory: () => P.restoreDemos() }); P.demosFirst(foldersView); foldersView.paint(); };
+      /* 039 F1 (K-REVIEW #2): the rows come from the chrome that is there, measured on a first page of one row — the toolbar, the fields, the
+         crumbs, the DEMOS folder row (on every page, alpha.26), the heading, RESTORE THE DEMOS, the pager and the count — never a guessed 150 px
+         (at 1000 × 700 it is 364 px, and the pager sat under the fold).  Columns narrow until a row fits; where none fits beside the foot, the
+         foot rides under the row (skin.css: the explorer is the one scroller, so the pager and the count stay on the page) */
+      mount([cols, 1]);
+      const g = foldersEl.querySelector('.sv-project-grid'), sc = foldersEl.querySelector('.sv-explorer-scroll'), foot = foldersEl.querySelector('.sv-foot');
+      if (g && sc) {
+        const cs = getComputedStyle(g), gap = parseFloat(cs.rowGap) || 6, k = parseFloat(cs.getPropertyValue('--sv-shot-k')) || 0.75, cap = parseFloat(cs.getPropertyValue('--sv-cap-h')) || 0;
+        const used = sc.lastElementChild.getBoundingClientRect().bottom - sc.firstElementChild.getBoundingClientRect().top;   // its content's own height (scrollHeight is never under the box)
+        const room = sc.clientHeight - (used - g.offsetHeight), row = (c) => (g.clientWidth - (c - 1) * gap) / c * k + 2 + cap;
+        const fit = (spare) => { for (let c = cols; c <= 8; c++) { const r = Math.floor((spare + gap) / (row(c) + gap)); if (r >= 1) return [c, Math.min(4, r)]; } return null; };
+        const best = fit(room) || fit(room + (foot && !foot.hidden ? foot.offsetHeight : 0)) || [8, 1];
+        if (best[0] !== cols || best[1] !== 1) { foldersView.destroy(); host.remove(); mount(best); }
+      }
+    } else { P.demosFirst(foldersView); foldersView.paint(); }
+    animate(foldersEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
   }
   caption.setAttribute('aria-live', 'polite');
   /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
