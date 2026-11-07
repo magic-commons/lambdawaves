@@ -21,7 +21,7 @@ function face(host) {
       if (k === 'w' || k === 's') { r.node.textContent = s; r.s = s; return; }
       const grow = !r.cells || r.cells.length !== s.length;
       if (grow) { r.node.textContent = ''; r.cells = [...s].map(() => el('span', 'lw-w-c', r.node)); }
-      [...s].forEach((ch, j) => { if (!grow && r.s[j] === ch) return; const c = r.cells[j]; c.textContent = ch; c.classList.toggle('p', !/\d/.test(ch)); if (live && !grow) c.animate(ROLL, ROLL_T); });
+      [...s].forEach((ch, j) => { if (!grow && r.s[j] === ch) return; const c = r.cells[j]; c.textContent = ch; c.classList.toggle('p', /[.\-]/.test(ch)); if (live && !grow) c.animate(ROLL, ROLL_T); });
       if (live && glow === i && r.s !== null) r.node.animate([{ textShadow: '0 0 .45em currentColor' }, { textShadow: '0 0 0 transparent' }], { duration: 700, easing: 'ease-out' });
       r.s = s; });
   } };
