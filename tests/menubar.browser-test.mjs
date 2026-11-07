@@ -122,7 +122,7 @@ try {
     const before = snapLS();
     const rs = await __row('FILE', 'QUICK › SAVE the experiment');
     const after = snapLS();
-    const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((k) => before[k] !== after[k]).sort();
+    const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((k) => before[k] !== after[k] && k !== 'lambdawaves.q0.session').sort();   /* the session's own 300-ms autosave may land under load; it is not the quick save's */
     const S = __LW.serialize();
     const expSame = JSON.stringify(JSON.parse(after[LS_EXP])) === JSON.stringify(S.experiment);
     const presSame = JSON.stringify(mask(JSON.parse(after[LS_PRES]))) === JSON.stringify(mask(S.presentation));

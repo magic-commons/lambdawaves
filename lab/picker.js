@@ -388,7 +388,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      light and dark dependant"): the seventh tile keeps its saved id `labels`; its glyph is a wedge and its picture the chemist's perspective
      diagram (tools/diagrams, RDKit), one SVG drawn in the tile's own ink (picker-fx.js setPic), so it follows the theme */
   const LOOKS = [['density', 'ρ', 'Density · ρ = |ψ|²'], ['phase', 'arg ψ', 'Phase · arg ψ on the colour wheel'], ['im', 'Im ψ', 'Imaginary part · Im ψ, signed'],
-    ['balls', '●', 'Balls · space-filling CPK spheres'], ['sticks', '⊸', 'Sticks · the bonds'], ['esp', 'φ', 'Electrostatic potential · φ on the surface'], ['labels', '◣', 'Diagram · a wedge comes toward you, a hash goes away']];
+    ['balls', '●', 'Balls · space-filling CPK spheres'], ['sticks', '⊸', 'Sticks · the bonds'], ['esp', 'φ', 'Electrostatic potential · φ on the surface'], ['labels', '◣', 'Diagram · wedge-and-dash: a wedge comes toward you, a dash goes away']];
   const ATOM_LOOKS = new Set(['density', 'phase', 'im']);
   /* 037 D6: while a volume is open THE LOOK button's hint says which looks its pages carry (volumes.js looks); the rest draw its plain picture */
   const LOOK_WORD = { density: 'ρ', phase: 'arg ψ', im: 'Im ψ', balls: 'balls', sticks: 'sticks', esp: 'φ', labels: 'diagram' };
