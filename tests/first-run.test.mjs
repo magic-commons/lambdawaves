@@ -6,7 +6,10 @@
  * when this browser SAID it (cardSet, wave 51), a legacy frost `true` is ALWAYS (wave 67), anything unreadable is the
  * default.  0.5.0 C2: those laws are the look lift's (lab/look.js liftLook: an older blob into the kit's `mir.gui`, once), and
  * the device's material is the look store's defaults.  And the wiring: rack.js asks with its own crossings and feeds these
- * into the look store (a source read, because rack.js needs a DOM). */
+ * into the look store (a source read, because rack.js needs a DOM).
+ * 039 S3 · THE FIRST RUN IS PROVEN BY PRESSING: SIMPLE · ADVANCED on a fresh profile, every window folded, the answer saved, CONTINUE on the second
+ * visit and ADVANCED → NEW → still ADVANCED are tests/start.browser-test.mjs scenes 4–5 (the DOM); the source-string judges of that wiring, the
+ * folds' count (FOLD_ALL is ADVANCED's lists: one fact asserted twice) and THE CHOICE KEEPS' source lines went.  The lists themselves stay here. */
 import { readFileSync, readdirSync } from 'node:fs';
 import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING, FIRST_RUN_RACKS, firstRunRacks } from '../lab/first-run.js';
 import { liftLook, LOOK_ROWS, BLOB_LOOK, LOOK_VERSION, frostText } from '../lab/look.js';
@@ -85,21 +88,14 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
     phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
     foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
-    /* 018 C4 (Josh): the right rack is the basic look controls; the docked transport always seats at the left rack's top.  038 M1 · M5 · M6:
-       the arrangement this browser chose is open, laid in ADVANCED's order (rack.js), and a fresh install's face is handed the choice */
-    racks: src.includes("const racks = firstRunRacks(readSettings().nativeLayout), open = [...racks.left, ...racks.right], { advanced } = FIRST_RUN_RACKS;") && src.includes("for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])"),
-    /* 038 M6: NODES' dock lands in its seat (under INFORMATIONAL), shown — never the kit's raise to the rack's top, above the docked CSB */
+    /* 038 M6: NODES' dock lands in its seat (under INFORMATIONAL), shown — never the kit's raise to the rack's top, above the docked CSB.
+       018 C4 (Josh): the docked transport always seats at the left rack's top.  (039 S3: the racks a press lays and the fresh face's doors are
+       pressed in tests/start.browser-test.mjs, not read here.) */
     nodesDock: src.includes('raise: (id) => { seat(id); rk.reveal(id); saveSettings(); }') && !src.includes('raise: (id) => layout.raise(id)'),
-    chooses: src.includes('const freshInstall = !Array.isArray(readSettings().closed);') && src.includes('...(freshInstall ? { choose } : {})'),
     transportTop: src.includes('if (layout.docked) layout.seatTransport();') && !src.includes('layout.dockIndex = '),
   };
   judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds the look store\'s card and frost defaults (0.5.0 C2: LOOK_DEFAULTS → createLook, mir.gui) and the furniture\'s folds from the answer, an unnamed card is the device\'s, and the phone crossing\'s FROST OFF override is kept',
     Object.values(wires).every(Boolean), wires);
-}
-{
-  const rows = { desktop: firstRunMaterial(false).folded, mobile: firstRunMaterial(true).folded };
-  judge('THE FIRST-RUN FOLDS (2026-10-16, iteration 001): every first-visit window arrives folded on every device, INFORMATIONAL in SHADOW\'s seat, MO-REGISTRY inside MOLECULES (iteration 008 U), no STATE (018 C1: retired into SPECTRUM), and 038 M1 ADVANCED\'s three; frozen',
-    eq(rows.desktop, rows.mobile) && rows.desktop.length === 11 && ['nodes', 'light', 'stage'].every((id) => rows.desktop.includes(id)) && !rows.desktop.includes('state') && rows.desktop.includes('informational') && !rows.desktop.includes('orbitals') && !rows.desktop.includes('shadow') && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
 }
 {
   const { simple, advanced } = FIRST_RUN_RACKS, rows = { simple, advanced };
@@ -109,18 +105,10 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     && [FIRST_RUN_RACKS, simple, advanced, simple.left, advanced.right].every(Object.isFrozen), rows);
 }
 {
-  /* 038 M5 · THE CHOICE KEEPS (Yan 11-06: "NEW must keep an ADVANCED reader's rack"): the door writes `nativeLayout` 2 and takes NEW's DEFAULT again
-     with the three laid; saveSettings keeps the 2; every compact boot lays firstRunRacks(nativeLayout) and captures DEFAULT right after it — so
-     ADVANCED → NEW → still ADVANCED, on that visit and every later one, and SIMPLE stays SIMPLE */
-  const src = appSource(), block = src.indexOf('const racks = firstRunRacks(readSettings().nativeLayout)'), capture = src.indexOf('layout.DEFAULT = layout.captureLayout();   // 036 S3');
-  const rows = { two: firstRunRacks(2) === FIRST_RUN_RACKS.advanced, one: firstRunRacks(1) === FIRST_RUN_RACKS.simple, none: firstRunRacks(undefined) === FIRST_RUN_RACKS.simple,
-    compactTwo: src.includes('const useCompactDefaults = [1, 2].includes(readSettings().nativeLayout) || freshInstall;'),
-    defaultAfterBlock: block > 0 && capture > block && !src.slice(block, capture).includes('applySettings('),
-    doorWrites: src.includes('settingsStore.write({ ...readSettings(), nativeLayout: 2 });'),
-    doorRecaptures: /\{ seat\(id\); rk\.fold\(id, true\); \}\s*layout\.DEFAULT = layout\.captureLayout\(\);/.test(src),
-    savedKept: src.includes('nativeLayout: useCompactDefaults ? (S0.nativeLayout === 2 ? 2 : 1) : S0.nativeLayout'),
-    newRestoresDefault: src.includes('if (layout.DEFAULT) layout.applyLayout(layout.DEFAULT);') };
-  judge('THE CHOICE KEEPS (038 M5): ADVANCED → NEW → still ADVANCED — the door writes nativeLayout 2 and retakes NEW\'s DEFAULT, saveSettings keeps the 2, a compact boot lays firstRunRacks(nativeLayout) and captures DEFAULT from it before the settings apply; SIMPLE stays SIMPLE',
+  /* 038 M5 · THE CHOICE KEEPS (Yan 11-06: "NEW must keep an ADVANCED reader's rack"): `nativeLayout` 2 names ADVANCED, anything else SIMPLE.
+     039 S3: ADVANCED → NEW → still ADVANCED, and both answers on the second visit, are pressed in tests/start.browser-test.mjs scenes 4–5 */
+  const rows = { two: firstRunRacks(2) === FIRST_RUN_RACKS.advanced, one: firstRunRacks(1) === FIRST_RUN_RACKS.simple, none: firstRunRacks(undefined) === FIRST_RUN_RACKS.simple };
+  judge('THE CHOICE KEEPS (038 M5): firstRunRacks names ADVANCED for nativeLayout 2 and SIMPLE for 1 or none (the presses: start.browser-test scenes 4–5)',
     Object.values(rows).every(Boolean), rows);
 }
 {
