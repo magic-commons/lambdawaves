@@ -783,6 +783,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 #widgets .lw-w-text { font-family: var(--font-info-body, "Spectral", Georgia, serif); line-height: 1.3; overflow-wrap: anywhere; text-shadow: 0 0 .35em rgb(0 0 0 / .5); }
 [data-theme="light"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(255 255 255 / .75); }
 #widgets .lw-w-text :is(h1, h2) { font-family: 'LW Title', var(--font-ui); font-weight: 400; letter-spacing: .04em; }
+#widgets .lw-w-text :is(h1, h2).lw-uiface { font-family: var(--font-ui); letter-spacing: 0; }   /* 039 X12 · A HEADING WEARS ONE FACE: a ψ, λ or É sets the whole heading in the UI face */
 #widgets .lw-w-text > :first-child { margin-top: 0; }
 #widgets .lw-w-text :is(h1, h2, h3, h4, p, ul, ol, blockquote) { margin: 0 0 .35em; }
 #widgets .lw-w-text h1 { font-size: 1.5em; } #widgets .lw-w-text h2 { font-size: 1.25em; } #widgets .lw-w-text :is(h3, h4) { font-size: 1.1em; }

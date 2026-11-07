@@ -14,6 +14,7 @@ registerKind({ kind: 'text', label: 'TEXT', glyph: 'words', hint: 'Words on the 
        box's font size alone), so a forced tick never rebuilds a block mid-fade */
     const paint = (arrive) => { view.style.fontSize = (PX[api.opts().size] || PX.m) + 'px'; const md = words(); if (md === shown) return;
       const was = shown === null ? null : [...view.children].map((n) => n.outerHTML); shown = md; view.innerHTML = md.trim() ? renderNotebook(md) : '';
+      for (const h of view.querySelectorAll('h1, h2')) h.classList.toggle('lw-uiface', /[^\x20-\x7E]/.test(h.textContent));   // 039 X12 · A HEADING WEARS ONE FACE: LW Title is ASCII alone
       if (was && motionPolicy() === 'full') [...view.children].forEach((n, i) => { if ((arrive || i >= was.length) && !was.includes(n.outerHTML)) n.animate([{ opacity: 0, filter: 'blur(3px)' }, { opacity: 1, filter: 'none' }], { duration: 220, easing: 'ease-out' }); }); };
     const heard = () => paint(false);   // the notebook's typing draws no frame of the rack's: the widget hears it (capture: a scripted input does not bubble)
     if (nbEl) nbEl.addEventListener('input', heard, true);
