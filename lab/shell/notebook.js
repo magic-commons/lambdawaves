@@ -1,7 +1,7 @@
 /* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el } from '../mir/kit.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
+import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, hint } from '../mir/kit.js'; import { hoverable } from '../mir/core/kbm.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
@@ -132,6 +132,11 @@ export function createNotebook(app) {
       const mb = createMenubar({ opener: title, host: document.getElementById('lab'), phone: isPhone,
         menus: Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => wrap(rows())])) });
       layout.menu = { open: mb.open, close: mb.close, get isOpen() { return mb.isOpen; }, scale: 1.04, get enlarged() { return title.classList.contains('menu-open'); } };
+      /* 039 W5 · THE TITLE'S FIRST CLICK: a cursor reaching the logo shows the bar on its hover, so the kit's click toggle hid it again under the
+         same hand (A #4: five first clicks of five did nothing) — a cursor's click keeps the bar its hover showed, as the kit's groups keep their
+         lists (FOR-KIT); a finger's tap still toggles.  W9 · D #3: its hint names the menus and the MAIN MENU's key */
+      document.addEventListener('click', (e) => { if (title.contains(e.target) && mb.isOpen && e.detail > 0 && hoverable(e)) e.stopPropagation(); }, true);
+      hint(title, 'the menus — L opens the MAIN MENU: tutorial · library');
       /* 039 W2 · THE MENUS BY KEYBOARD (the kit's bar walks a list's rows ↑ ↓ and opens a submenu on →, but a group takes no arrow and a key's
          open leaves the focus on the group — FOR-KIT): on a group Enter or ↓ opens it at its first row (↑ its last), ← → Home End walk the
          groups (an open list follows the focus); in a list ← → step to the next group's list where no submenu takes the key; Escape closes
