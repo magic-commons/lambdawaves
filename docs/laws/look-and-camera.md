@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 039
+
+THE SUMMONS CLEARS THE DOORS (039 V2, the walks: NODES over the λWAVES logo and 14–17 bar buttons, FOLDERS over CAMERA and the timeline's chips, KEYS over the bar's top row): a window that OPENS — a kit window a menu, a key, a bar button or a restore shows, a card floated off its rack by anything but a hand's drag (a pressed pointer marks the hand's detach), the notebook — moves once, in the float layer's observer microtask, to the seat nearest its own (`lab/summon.js` `clearSeat`, pure) that covers neither the bar (its PLAY and mini-viewer), nor the logo and the menu row's 52-px band, nor an open TIMELINE or MODULATION and their rails, nor a rack column. The order (`shell/modulation.js` `seatOpen`): the full size, then narrower (4 % a step, three at most, ≥ 300 px) and shorter (6 % a step, ≥ 280 px) for a kit window or the notebook, clear of everything; then of all but the racks; then — a stage too small for a work bar and a window beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without. The kit's own floor (`min`, FOLDERS' 360 px) can be above ours: placed taller than asked, the window is seated once more from there. With no seat at all it stays where it opened and, if it meets the bar, carries `data-seat="over"` (the bar goes under it, 021 V3). The work bars and PATTERN keep their own seats (the magnet, the dock, the dodge, the anchor); MODULATION has no host `place()` (its floating rail on a rack column is a FOR-KIT line); a hand's later drag is never undone while the window stays open; measured by layout (`offset*`, never the entrance's scale). Probe `tools/v039-shots.mjs summons` (1600 × 900, 1000 × 700, each with and without the TIMELINE).
+
 ## The laws of 038
 
 THE CLIP'S TOGGLE (038 F3, Josh: "In clip, include a toggle to include or not include the balls and/or sticks so that it only cuts the waves"): under

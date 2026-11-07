@@ -2,7 +2,7 @@
  * (021 G2, THE HINGE: moved verbatim out of lab/windows/spectrum.js, created right after SPECTRUM, so its device and its rack place are where they were).
  * It returns syncEq for the loop; app.state.eq / app.state.chord / app.state.eqNoNodes are its own. */
 import { TIER } from '../tier.js';
-import { el, sw, seg, readout, group, fader, stepper } from '../mir/kit.js';
+import { el, sw, seg, readout, group, fader, stepper, hint } from '../mir/kit.js';
 import { createEqualizer, EQ_PRESETS, EQ_SHELLS } from '../equalizer.js'; import { createEqAudio } from '../eq-audio.js'; import { createChord } from '../chord-audio.js';
 import { VIEW } from '../field.js';
 import { BASIS } from '../hydrogen.js';
@@ -25,7 +25,7 @@ export function createEqualizerCard(app) {
   ui.eqPick = (id) => { eqStep.set(id); eq.setPreset(id); syncEq(true); hNote(); };   // 0.6.6 G1: the stepper's road for THE VERB TABLE's switch
   const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'eq-faders', mix);
   const eqFd = Array.from({ length: EQ_SHELLS }, (_, i) => i).map((i) => fader({ label: 'n ' + (i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
-  eqHead.append(eqStep.root, eqRo.root); for (const f of eqFd) rFd.appendChild(f.root);
+  eqHead.append(eqStep.root, eqRo.root); eqFd.forEach((f, i) => { hint(f.root, 'Shell n = {n} · lower it to fade its beats', { n: i + 1 }); rFd.appendChild(f.root); });   // 039 V7: the label is hidden (skin.css), the hint says n
   /* 017 X1 · AN EFFECT SHOWS ITS WINDOW: × or POWER OFF stands the table down (syncEq's `why`); a reopen re-arms it from the knobs */
   for (const t of ['devclose', 'devopen']) wEq.root.addEventListener(t, () => syncEq(false)); wEq.root.querySelector('.dev-power').addEventListener('click', () => syncEq(false));
   const aud = createEqAudio(app, { eq, host: gEq, sync: () => { eqKey = ''; syncEq(false); } });   // iteration 002: AUDIO IN (lab/eq-audio.js)

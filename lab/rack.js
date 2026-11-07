@@ -705,8 +705,13 @@ export async function boot(dom) {
     if (on) {
       filmBefore = { state: reg.serialize(clock.t), version: reg.version, mat: structuredClone(mat), obs: { ...obs }, rot: { ...rotRate } };
       app.state.exportLocked = true; if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;
+      /* 039 V3 · A FILM HAS NO WINDOWS: the line pass skips the windows' rects on the screen (INK UNDER GLASS), and a film took them along — its frame
+         and axes holed where a card stood, the same take different with SETTINGS unfolded (.tmp probe: 30 of 30 digests moved).  The block is empty for
+         the film; the first frame after it asks the windows again */
+      if (field.setOcclusion) field.setOcclusion([]);
       return;
     }
+    app.state.occludeDirty = true;
     const b = filmBefore; filmBefore = null;
     if (b) { if (reg.version !== b.version) reg.restore(b.state); Object.assign(mat, b.mat); Object.assign(obs, b.obs); Object.assign(rotRate, b.rot); }   // a film that moved no coefficient leaves the register (and the loop plan made on it) as it was
     app.state.exportLocked = false; app.state.modWall = 0; lastWall = performance.now() / 1000;

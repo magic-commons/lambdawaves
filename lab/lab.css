@@ -29,9 +29,10 @@ body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-head { -webkit-backdr
 #field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 #field.khover { cursor: pointer; } #field.kdrag { cursor: grabbing; }
 #field.drag { cursor: grabbing; }
-#rack, #rackL { position: absolute; top: 0; right: 0; bottom: auto; max-height: 100%; width: var(--rack-w); z-index: var(--z-chrome); min-height: 0; overflow: hidden auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+#rack, #rackL { position: absolute; top: 0; right: 0; bottom: auto; max-height: min(100%, var(--rack-stop, 100%)); width: var(--rack-w); z-index: var(--z-chrome); min-height: 0; overflow: hidden auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   padding: var(--sp-2); display: flex; flex-direction: column; gap: var(--sp-2); background: transparent; border: 0; scrollbar-width: thin; pointer-events: auto; touch-action: pan-y;
   transition: transform .28s ease, opacity .28s ease; }
+/* 039 V1 · THE RACKS STOP ABOVE THE BAR: --rack-stop (shell/modulation.js clearRack) is the room above the bar's top on a rack whose columns it shares */
 /* iteration 006 R: a column whose laid-out content fits has no bar to show, so the rack motion's FLIP transforms must not raise one
    (the bar's 6 px re-sized every card inside a ResizeObserver delivery: "undelivered notifications").  rack-wiring.js sets it. */
 #rack.rack-fits, #rackL.rack-fits { overflow-y: hidden; }
@@ -253,8 +254,9 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 @media (max-width: 860px) {
   #rack { top: auto; bottom: 0; left: 0; right: 0; width: auto; height: 46vh; }
 }
-#title { position: absolute; left: calc(var(--rack-w) + 14px); top: 6px; z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-3);
+#title { position: absolute; left: calc(var(--rack-w) + 14px); top: 6px; z-index: calc(var(--z-chrome) + 2); display: flex; align-items: center; gap: var(--sp-3);
   padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); pointer-events: none; }
+/* 039 V7: the logo (the menus' door) over the scroll pills (chrome + 1, C #22: at 150 % CAMERA's pill lay on it), under #floats (the same z, later in the page) and the bar */
 #title .lam { color: var(--acc); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); }
 #title .word { color: var(--fg); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: .14em; }
 #title .mark { height: 1.05em; width: 1.05em; display: inline-block; vertical-align: -0.12em; }
@@ -418,6 +420,11 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .calc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .dev.floating .calc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .dev.lean .dev-body .calc-grid > .ro, .dev.lean .dev-body .ro.calc-ray { display: flex; }
+/* 039 V9 · METERS SHOWS ITS READINGS (C #21: WINDOW › INFO › METERS opened a 280 × 62 empty strip — LEAN, on by a first run, hid every readout and
+   METERS is nothing else; with HELP off its Aa is not shown): the meters are the window, not its commentary, as CALCULUS' tiles — its note still goes */
+.dev.lean[data-id="meters"] .dev-body .ro, .dev.lean[data-id="meters"] .dev-body .row:has(> .ro) { display: flex; }
+.dev[data-id="meters"] .met-head { align-items: center; margin: 2px 0; }
+.dev[data-id="meters"] .met-head > .lw-fold { min-height: 30px; height: 30px; }
 .calc-ray { margin-top: 6px; } .calc-ray canvas { display: block; width: 100%; height: 56px; margin-top: 4px; }   /* 0.8.2 P3: ψ ALONG A RAY */
 /* MO-REGISTRY (registerview.js + statesview.js): keep the stable reg-* hooks used by both modes. */
 .reg-pane[hidden] { display: none; }
@@ -951,10 +958,23 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .dev[data-id="emission"] .em-table th { color: var(--dim); font-weight: 500; }
 .dev[data-id="emission"] .em-table td:last-child, .dev[data-id="emission"] .em-table th:last-child { text-align: left; }
 .dev[data-id="emission"] .em-none { color: var(--dim); font-size: var(--fs-micro); margin: 4px 0; }
+/* 039 V7 · THE TOAST CLEARS THE BAR: the kit's toast stands where clearRack (shell/modulation.js) seats it — 8 px over the bar when the bar holds its band */
+.mir-toast { --toast-bottom: var(--lw-toast-bottom, 84px); }
 /* 017 R4 (call 14) · RENDER's self-test printout: no scroller in a rack window — the last six lines, the earlier ones behind a fold (film-card.js) */
 .dev[data-id="render"] .sr-lines { max-height: none; overflow: visible; }
 .dev[data-id="render"] .sr-fold { justify-content: flex-end; margin: 4px 0 0; }
 .dev[data-id="render"] .sr-fold[hidden], .dev[data-id="render"] .sr-early[hidden] { display: none; }
+/* 039 V3 · RENDER FOLDS (film-card.js): a section's head row — its title and the fold's chevron at the end; its parts in one box that lays out as they did */
+.dev[data-id="render"] .sr-fold-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 0; min-height: 30px; }
+.dev[data-id="render"] .sr-fold-head > .sr-title { margin: 0; }
+.dev[data-id="render"] .sr-fold-head > .lw-fold { min-height: 30px; height: 30px; }
+.dev[data-id="render"] .sr-section:has(> .lw-fold-body[hidden]) { padding-block: 2px; }   /* a folded section is its head row alone */
+.dev[data-id="render"] .sr-fold-head[hidden] { display: none; }
+.dev[data-id="render"] .sr-fold-box { display: contents; }
+.dev[data-id="render"] .sr-view > .sr-subject { padding: 0; margin: 0; background: none; border: 0; box-shadow: none; }
+/* 039 V8 · THE DOCK BUTTON HAS AREA (C #13: on a floating window "dock this window back into the rack" had zero area — the kit's skin hides the pop
+   chip): a floating card shows it, in the kit's `dock` face, its press the kit's (the rack's toggleFloat); the CONTROL SURFACE's card keeps csb.css' */
+body:not(.phone) .dev.floating > .dev-head > .dev-util > .dev-pop { display: inline-flex; }
 /* 017 R4 (call 14) · a WIDE readout in a rack window is CLAMPED to its two lines (modhost.css gives it `overflow: auto`, a tiny scroller) */
 [data-mir-rack] > .dev .ro.wide .ro-val { overflow: hidden; }
 /* 037 H4 · CLIP's frame (CAMERA | OBJECT, material.js sliceFrameSeg) beside the plane's picture, its two cells stacked */

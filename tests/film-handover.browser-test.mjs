@@ -33,7 +33,10 @@ const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefin
 const until = async (expr, ms) => { const t0 = Date.now(); for (;;) { if (await g.ev(`try { return !!(${expr}); } catch (_) { return false; }`)) return Date.now() - t0;
   assert.ok(Date.now() - t0 < ms, 'timed out waiting for ' + expr); await new Promise((r) => setTimeout(r, 500)); } };
 const mark = (id, find) => ev(`const frame = () => new Promise((r) => requestAnimationFrame(r)), still = async () => { await frame(); await frame(); return __until(__rest); };
-  const before = await still(); const n = (${find})(); if (!n) return { none: true }; n.id = ${JSON.stringify(id)};
+  const n = (${find})(); if (!n) return { none: true };
+  /* 039 V3: RENDER's IMAGE, STORED RENDER, SELF-TEST and PERIOD are fold rows (film-card.js), closed until a hand opens them: a part behind one opens it first, and the rack settles (039 S6) */
+  const f = n.closest('.lw-fold-body[hidden]'), t = f && document.querySelector('[aria-controls~="' + f.id + '"]'); if (t) { t.click(); await still(); }
+  const before = await still(); n.id = ${JSON.stringify(id)};
   n.scrollIntoView({ block: 'center', behavior: 'instant' }); const after = await still(); return { ok: before >= 0 && after >= 0 ? 1 : 0, before, after };`);
 /* a real tap that did not land says gatekit's why (no such element · zero area · covered by …) */
 const tapOn = async (sel, what) => { const r = await g.tap(sel); assert.equal(r.ok, 1, 'the ' + what + ' tap did not land: ' + JSON.stringify(r)); return r; };

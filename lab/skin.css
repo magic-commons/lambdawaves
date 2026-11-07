@@ -399,6 +399,9 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
    collage or its decks (their geometry is picker.js'; 036 K FOR-SOS).  A root inside another root takes zoom 1 (zoom compounds). */
 :where(#title, #badges, #sheet, .csb-pill, .csb-suggest, #lwMenu > .mm-top, #lwMenu > .mm-face, #lwMenu > .mm-caption) { zoom: var(--ui-zoom); --in-zoom: var(--ui-zoom); }
 :where(#rack, #rackL, #floats, #transport, #notebook) :where(#title, #badges, #sheet, .csb-pill, .csb-suggest) { zoom: 1; }
+/* 039 V4 · THE SCALE FITS THE PAGE: the bar on the stage, the logo and the menu row are UI SCALE × their fit (shell/modulation.js fitHead, clearRack),
+   the largest ≤ 1 that keeps each on the page; a fit is written only below 1 */
+#stage > #transport, #title, #menubar { zoom: calc(var(--ui-zoom, 1) * var(--lw-fit, 1)); --in-zoom: calc(var(--ui-zoom, 1) * var(--lw-fit, 1)); }
 /* 036 K3 · THE TEMPO EDITOR (MIR 1.5.7-alpha.3): the CSB's editor types at its pill's 12 px (csb.css .csb-tempo .tempo-number), in the pill's box */
 #transport[data-layout="csb"] .csb-tempo { --xport-edit-size: 12px; }
 /* Window contents expand naturally. The rack/page handles navigation; History alone keeps its list scroll. */
@@ -522,6 +525,8 @@ body[data-theme="dark"] .eq-grid { --eq-near: hsl(291 85% 68%); --eq-mid: hsl(33
 .eq-mix { display: grid; grid-template-columns: var(--eq-size) minmax(0, 1fr); gap: 10px; align-items: start; }
 .eq-faders { display: grid; grid-auto-rows: minmax(0, 1fr); gap: 2px; height: var(--eq-size); padding-top: 14px; box-sizing: border-box; }
 .eq-faders > .fd { min-height: 0; height: auto; }
+/* 039 V7 (C #22: n 1…n 7 sat on their 18-px faders): the grid's own row numbers name the shells, so the fader keeps its value alone (its hint and its aria name say n) */
+.eq-faders > .fd > .fd-lbl { display: none; }
 .eq-head { flex-wrap: nowrap; align-items: center; }
 .eq-head > .mol-step { flex: 1 1 auto; min-width: 0; }
 .eq-audio { flex-wrap: nowrap; align-items: center; }

@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 039
+
+THE LAYERS LIE UNDER THE WINDOWS (039 V5, B #6: a VIGNETTE greyed the SPECTRUM header and grain lay over every window). Measured first: the layers were already under every window (a layer's z 8 against the racks' 30, #floats' 32, the bar's 33; the SPECTRUM card is what a press at its header meets) — a window's glass is translucent, and it showed the vignetted stage beneath it (the header's mean 250.2 → 206.5 with a VIGNETTE; 250.2 again with the layer cut under the rack). So the picture's layers are INK UNDER GLASS like the frame's lines: `lab/shell/ink.js` `glassCut` writes the line pass's own window rects as `--lw-glass-cut` on `#nodeLayers` — `path(evenodd, …)`, the stage less each window, written only when it changes, asked again when the host is built — and every `.node-layer` wears `clip-path: var(--lw-glass-cut, none)` (nodes.css). FILM GRAIN's tile and its jumps are a child `i` (`node-layers.js`, PAINT.grain), so the layer itself stays still and its cut stays where the windows are; its blend and AMOUNT stay on the layer (038 P8's blend group kept). A film paints its layers itself (`paintLayer`), whole; THE LOCK holds no DOM layer. Probe (`.tmp/v5-probe.mjs`, 1600 × 900, SPECTRUM unfolded): VIGNETTE — header 250.2 → 250.2, the free stage's edge 209.1 → 189.2, the centre 208.6 → 208.6; + FILM GRAIN — header 250.2, stddev unchanged, the edge's stddev 11.8.
+
 ## The laws of 038
 
 THE + MENU IS THE KIT'S (038 N1, Josh: "Nodes dropdown seems to be missing it's background"). The + menu is the kit's `contextMenu` anchored under the +, on the page as every kit menu is. Inside the window or the rack card the old pane blurred only the card's own glass (a nested backdrop root), and the short card clipped it to a scroller.

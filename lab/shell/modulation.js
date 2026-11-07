@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { cssZoom } from '../mir/core/zoom.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js'; import { lightDefs } from '../light-window.js';   // 037 L3: THE LIGHT's targets
+import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { cssZoom } from '../mir/core/zoom.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow, windowOf } from '../mir/window/window.js'; import { clearSeat } from '../summon.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js'; import { lightDefs } from '../light-window.js';   // 037 L3: THE LIGHT's targets
 /** 032 W3 · AN OLDER CURVE ON A BANDED TARGET (the project open road, shell/persist.js): a curve drawn before its target had `options` carries no
  *  `steps` and meant the old integer line — k at k / (max − min) — so each point is read back as that integer (an older GRAIN as DUST, BALLS or
  *  STICKS as SHELL), seated at the centre of its option's band, and the curve remembers the count (WATER ESP's, STAR LOOP's and BENZENE π's STYLE
@@ -291,7 +291,7 @@ export function createModSeam(app) {
        always, a wide one's `.at-top` — sits under the last card of every rack hanging from the stage's top whose columns the bar, its PLAY or its
        mini-viewer shares: `--csb-clear` on the bar (the greater rack's end + 10 px), read as max(the seat, the clear) by lab.css and csb.css and by
        `seatRect`, absent when nothing is in the way, and never lower than the room above the foot (a narrow stage's bottom rack) leaves.  Where no
-       seat clears a rack's cards (the foot's room is short of them), the bar goes UNDER the racks as it does under a float (`rackOver` in `under`).
+       seat clears a rack's cards (the foot's room is short of them), the racks stop above the bar (039 V1, below).
        A rack's box is its cards' (lab.css: top 0, bottom auto), so their ResizeObserver, the bar's own box and class, the body's class (B, H) and a
        resize ask again, once a frame */
     const racksEl = ['rackL', 'rack'].map((id) => document.getElementById(id)).filter(Boolean); let clearPx = 0, clearBooked = 0;
@@ -303,18 +303,66 @@ export function createModSeam(app) {
       const rs = [t, t.querySelector(':scope > .csb-play'), t.querySelector(':scope > .csb-mini')].filter((e) => e && e.offsetWidth).map((e) => e.getBoundingClientRect());
       return { left: Math.min(...rs.map((r) => r.left)), right: Math.max(...rs.map((r) => r.right)), top: Math.min(...rs.map((r) => r.top)), bottom: Math.max(...rs.map((r) => r.bottom)) };
     };
-    const rackOver = () => { const s = barSpan(); return !!s && racksEl.some((rk) => [...rk.children].some((d) => shownCard(d) && hits(d.getBoundingClientRect(), s))); };
+    /* 039 V1 · THE BAR IS ON TOP AND THE RACKS STOP ABOVE IT (the walks: the Play disc's click landed on MOLECULES' chevron; one unfolded rack window
+       covered six bar buttons at 1000 × 700, EXPAND ALL ten): the bar never goes under a rack (038 M7's `rackOver` is gone); instead every rack whose
+       columns the bar, its PLAY or its mini-viewer share stops 10 px above the bar's top — `--rack-stop` on the rack, its max-height (lab.css), in the
+       rack's own px — so a tall column scrolls above the bar instead of running under it.  The top seat's clear reads the racks' CONTENT bottoms (the
+       cards as laid out, never the stopped box: the stop follows the bar, the bar's clear follows the cards), so the two never chase each other */
+    const contentBottom = (rk) => { let b = 0; for (const c of rk.children) if (c.offsetParent === rk) b = Math.max(b, c.offsetTop + c.offsetHeight); return b + (parseFloat(getComputedStyle(rk).paddingBottom) || 0); };
+    const stops = new Map(); let toastPx = 0;
+    /* 039 V4 · THE SCALE FITS THE PAGE (C #6: at UI SCALE 150 % on a 1000-px page PLAY sat at x −112, the bar ran −5…1005, HELP was a 27-px sliver
+       of the menu row and the logo lay 49 px under the right rack's SETTINGS head): the bar on the stage (with its PLAY and mini-viewer), the logo and
+       the menu row each take `--lw-fit` — skin.css: their zoom is UI SCALE × the fit — the largest ≤ 1 that keeps them on the page: the bar 8 px
+       inside both edges about its centre, the logo 8 px left of the right rack's cards, the menu row 8 px inside the right edge (its left, the
+       kit's, re-written for the new zoom).  A phone's own layout is left alone; at 100 % on a desktop page wider than the bar every fit is 1 */
+    const fitOf = (e) => parseFloat(e.style.getPropertyValue('--lw-fit')) || 1;
+    const setFit = (e, f) => { f = Math.max(0.5, Math.min(1, Math.floor(f * 100) / 100)); if (Math.abs(f - fitOf(e)) < 0.01) return false;
+      if (f >= 1) e.style.removeProperty('--lw-fit'); else e.style.setProperty('--lw-fit', String(f)); return true; };
+    const menuRow = document.getElementById('menubar'), logoEl = document.getElementById('title');
+    function fitHead() {
+      const phone = document.body.classList.contains('phone');
+      if (logoEl && logoEl.offsetWidth) { const r = logoEl.getBoundingClientRect(), rk = document.getElementById('rack'), rr = !phone && rk && !document.body.classList.contains('rack-hidden') && [...rk.children].some(shownCard) ? rk.getBoundingClientRect() : null;
+        setFit(logoEl, phone ? 1 : fitOf(logoEl) * ((rr && rr.top < r.bottom && rr.left > r.left ? rr.left : innerWidth) - 8) / r.right); }   // its left and its width both scale with its zoom
+      if (!menuRow || menuRow.hidden || !menuRow.offsetWidth) return;
+      let rtl = false; try { rtl = menuRow.matches(':dir(rtl)'); } catch (_) {}
+      const r = menuRow.getBoundingClientRect();
+      if (setFit(menuRow, phone || rtl ? 1 : fitOf(menuRow) * (innerWidth - 8 - r.left) / (r.right - r.left)) && !phone && !rtl) {
+        const z = cssZoom(menuRow) || 1, l = logoEl ? logoEl.getBoundingClientRect() : r;   // the kit's place() in the new zoom: beside the logo, level with it
+        menuRow.style.left = (l.right + 8) / z + 'px'; menuRow.style.top = Math.max(0, l.top + l.height / 2 - menuRow.offsetHeight * z / 2) / z + 'px';
+      }
+    }
+    if (menuRow) new MutationObserver(fitHead).observe(menuRow, { attributes: true, attributeFilter: ['hidden'] });
     function clearRack() {
       clearBooked = 0;
-      const t = document.getElementById('transport'), s = barSpan(); if (!t) return;
+      const t = document.getElementById('transport'); if (!t) return;
+      fitHead();
+      if (t.parentElement && t.parentElement.id === 'stage' && t.offsetWidth && !document.body.classList.contains('phone')) {   // V4: the bar's fit, about its centre
+        const sp = barSpan(), b = t.getBoundingClientRect(), c = (b.left + b.right) / 2;
+        if (sp) setFit(t, fitOf(t) * Math.min((c - 8) / Math.max(1, c - sp.left), (innerWidth - 8 - c) / Math.max(1, sp.right - c)));
+      } else setFit(t, 1);
+      const s = barSpan();
+      /* 039 V7 · THE TOAST CLEARS THE BAR (C #22: "Saved — …" and "New — the empty project" sat on LIBRARY…FOLDERS): where the bar on the stage reaches
+         the kit toast's band (84 px over the foot), the toast stands 8 px above the bar's top — `--lw-toast-bottom` on <body>, lab.css' .mir-toast */
+      const tb = s && s.top < innerHeight - 84 && s.bottom > innerHeight - 84 - 44 ? Math.round(innerHeight - s.top + 8) : 0;
+      if (tb !== toastPx) { toastPx = tb; if (tb) document.body.style.setProperty('--lw-toast-bottom', tb + 'px'); else document.body.style.removeProperty('--lw-toast-bottom'); }
       let v = 0;
-      const hang = s ? racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => rk.getBoundingClientRect()).filter((r) => r.width && r.top < 52 && r.right > s.left && r.left < s.right) : [];
+      const meet = s ? racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => ({ rk, r: rk.getBoundingClientRect() })).filter(({ r }) => r.width && r.right > s.left && r.left < s.right) : [];
+      const hang = meet.filter(({ r }) => r.top < 52);
       if (hang.length) {   // a narrow stage's right rack lies along the foot (its top is not the stage's): never one to clear by going lower
-        const b = t.getBoundingClientRect(), foot = narrowNow() ? (document.getElementById('rack') || t).getBoundingClientRect().top : innerHeight - 60;
-        v = Math.max(0, Math.round((Math.min(Math.max(...hang.map((r) => r.bottom)) + 10, foot - b.height - 10) - (t.offsetParent || document.body).getBoundingClientRect().top) / (cssZoom(t) || 1)));
+        /* 039 V2: …nor lower than an open work bar's top (the TIMELINE or MODULATION docked below holds the foot): the bar stays above it and the
+           rack stops above the bar (V1), never the bar across the timeline's lanes */
+        const b = t.getBoundingClientRect(), work = Object.values(dodging).filter((r) => r && r.top > 52 * (cssZoom(t) || 1) + b.height).map((r) => r.top);
+        const foot = Math.min(narrowNow() ? (document.getElementById('rack') || t).getBoundingClientRect().top : innerHeight - 60, ...work);
+        const cards = Math.max(...hang.map(({ rk, r }) => r.top + contentBottom(rk) * (cssZoom(rk) || 1)));
+        v = Math.max(0, Math.round((Math.min(cards + 10, foot - b.height - 10) - (t.offsetParent || document.body).getBoundingClientRect().top) / (cssZoom(t) || 1)));
       }
       if (v !== clearPx) { clearPx = v; if (v) t.style.setProperty('--csb-clear', v + 'px'); else t.style.removeProperty('--csb-clear'); occlusion.dirty(); }   // the line masks follow the bar, paused or not
-      if (!trMoving) under(blocked);   // a seat that still meets a rack's cards: the bar under them
+      if (trMoving) return;   // the stop is measured on the bar where it landed (the settle asks again)
+      for (const rk of racksEl) {
+        const m = meet.find((x) => x.rk === rk), stop = m && m.r.top < s.top ? Math.max(0, Math.floor((s.top - 10 - m.r.top) / (cssZoom(rk) || 1))) : 0;
+        if (stops.get(rk) !== stop) { stops.set(rk, stop); if (stop) rk.style.setProperty('--rack-stop', stop + 'px'); else rk.style.removeProperty('--rack-stop'); }
+      }
+      under(blocked);
     }
     /* no ResizeObserver on the racks (M7: a card another observer resized inside the racks left theirs undelivered — the browser's "loop" error):
        a card opened, closed or folded (its class, in either rack), the bar's class, the body's class and a resize ask once a frame, and once more when
@@ -323,14 +371,15 @@ export function createModSeam(app) {
       const mo = new MutationObserver(book), t = document.getElementById('transport');
       for (const rk of racksEl) mo.observe(rk, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden'] });
       if (t) mo.observe(t, { attributes: true, attributeFilter: ['class', 'data-place'] });
+      if (t) new ResizeObserver(book).observe(t);   // 039 V1: the expander opening or closing moves the bar's top, and the racks' stop with it (the callback only books a frame)
       mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
       addEventListener('resize', book); }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
     /* 020 T3 · THE BAR IS ON TOP of every window (lab.css, chrome + 3) but these two: when no seat clears them it goes UNDER them for that time.
-       021 V3 · …AND UNDER EVERY OTHER OPEN FLOAT IT MEETS (a short screen: MIR OPTIONS, KEYBOARD, NODES, a floated card): the seat is chosen
-       against TIMELINE and MODULATION as before; then any open window in #floats over the bar's box puts the bar under it (`blocked`: no seat
-       cleared those two).  A window off the bar leaves it on top, so on a tall screen nothing changes until a window is dragged over it */
+       021 V3 · …AND UNDER AN OPEN FLOAT IT MEETS — since 039 V1 only one TALLER THAN THE ROOM above the bar (MIR OPTIONS on a short screen: no seat
+       could clear it, and its foot would lie under the bar); any other window that meets the bar (a hand's drag) goes under the bar, which stays
+       pressable.  The seat is chosen against TIMELINE and MODULATION as before (`blocked`: no seat cleared those two) */
     const floatsEl = document.getElementById('floats');
     let blocked = false;
     const floatOver = () => {
@@ -339,12 +388,65 @@ export function createModSeam(app) {
       if (!open.length) return false;
       const t = document.getElementById('transport'); if (!t || !t.classList.contains('mini') || t.dataset.place === 'free') return false;
       const b = t.getBoundingClientRect(); if (!b.width) return false;
-      return open.some((n) => { const r = n.getBoundingClientRect(); return r.width > 0 && hits(r, b); });
+      const room = Math.max(b.top - 52 * (cssZoom(t) || 1), innerHeight - b.bottom);   // 039 V1: the taller of the two bands beside the bar's seat
+      return open.some((n) => { const r = n.getBoundingClientRect(); return r.width > 0 && (r.height > room || n.dataset.seat === 'over') && hits(r, b); });
     };
-    const under = (on) => document.body.classList.toggle('transport-under', !!on || floatOver() || rackOver());   // 038 M7: and under a rack's cards no seat cleared
+    const under = (on) => document.body.classList.toggle('transport-under', !!on || floatOver());
+    /* 039 V2 · A SUMMONED WINDOW CLEARS THE BAR, THE LOGO AND THE OPEN WORK BAR (the walks: NODES over the logo and 17 bar buttons, RENDER over the
+       bar's right half, FOLDERS over CAMERA and the timeline's chips): a window that opens — a kit window a menu, a key, a bar button or a restore
+       shows, a card floated off its rack by anything but a hand's drag (FILE › RENDER…), the notebook — moves once to the seat nearest its own that
+       covers neither the bar (its PLAY and mini-viewer), nor the λWAVES logo and the menu row's band, nor an open TIMELINE or MODULATION and their
+       rails, nor a rack column where the stage has the room (summon.js clearSeat; the order under `fit`).  A window with no seat at all keeps the one
+       it opened in and lies over the bar as V1 lets a tall one (`data-seat="over"`).  The work bars and PATTERN keep their own seats (the
+       magnet, the dock, the dodge, the anchor); a hand's later drag is never undone while the window stays open.  Measured by layout (offset*,
+       never the entrance's scale), in the observer's microtask, before the window is painted where it opened */
+    const laid = (e) => { const p = e.offsetParent, o = p ? p.getBoundingClientRect() : { left: 0, top: 0 }, z = cssZoom(e) || 1, l = o.left + e.offsetLeft * z, tp = o.top + e.offsetTop * z;
+      return { left: l, top: tp, right: l + e.offsetWidth * z, bottom: tp + e.offsetHeight * z }; };
+    const spanOf = (rs) => (rs.length ? { left: Math.min(...rs.map((r) => r.left)), top: Math.min(...rs.map((r) => r.top)), right: Math.max(...rs.map((r) => r.right)), bottom: Math.max(...rs.map((r) => r.bottom)) } : null);
+    const railOf = (n) => { const w = windowOf(n), r = w && w.pair && w.pair.rail; return r && !r.hidden && r.offsetWidth ? r : null; };
+    const workRoots = () => [document.querySelector('[data-mir-window="timeline"]'), app.state.modView && app.state.modView.root].filter(Boolean);
+    const nbEl = document.getElementById('notebook'), seated = new WeakSet();
+    let pressed = false;   // a card added to the float layer under a pressed pointer is a hand's detach: never moved
+    addEventListener('pointerdown', () => { pressed = true; }, true);
+    for (const k of ['pointerup', 'pointercancel']) addEventListener(k, () => { pressed = false; }, true);
+    const summoned = (n) => !!n && !n.hidden && n.offsetWidth > 0 && (n === nbEl || (n.classList.contains('mir-win') && !n.classList.contains('mir-transport-free'))
+      || (n.classList.contains('dev') && n.classList.contains('floating') && !n.classList.contains('closed') && n.dataset.id !== 'transport')) && !workRoots().includes(n) && n.dataset.mirWindow !== 'pattern';
+    function seatOpen(n, floor = { h: 280, w: 300 }) {
+      const kit = n.classList.contains('mir-win') ? windowOf(n) : null; if (kit && typeof kit.place !== 'function') return;
+      const pane = laid(n), rail = kit ? railOf(n) : null, box = spanOf([pane, ...(rail ? [laid(rail)] : [])]), s = barSpan(), title = document.getElementById('title');
+      const door = [s, title && title.offsetWidth ? title.getBoundingClientRect() : null].filter(Boolean), work = workRoots().filter((r) => !r.hidden && r.offsetWidth).flatMap((r) => [laid(r), ...(railOf(r) ? [laid(railOf(r))] : [])]), hard = [...door, ...work];
+      const soft = document.body.classList.contains('rack-hidden') ? [] : racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => rk.getBoundingClientRect()).filter((r) => r.width);
+      const view = { width: innerWidth, height: innerHeight }, top = 52 * (cssZoom(title) || 1), ph = pane.bottom - pane.top, pw = pane.right - pane.left, rim = box.bottom - box.top - ph, wim = box.right - box.left - pw;
+      /* the full size first, then shorter (6 % a step, never below 280 px, the tallest minimum of the windows that come here) and narrower (4 % a step,
+         three at most, never below 300 px): clear of everything; then of all but the rack columns; then — a stage too small for a work bar and a window
+         beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without.  A floated card keeps its size (V3 folds RENDER) */
+      const sizes = (kit || n === nbEl) ? 12 * 4 : 1;
+      const fit = (avoid) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = Math.floor(pw * (1 - j * 0.04)); if (i && (hh < floor.h || ww < floor.w)) continue;
+        const at = clearSeat({ ...box, right: box.left + wim + ww, bottom: box.top + rim + hh }, { avoid, view, top }); if (at) return { at, h: k ? hh : 0, w: j ? ww : 0 }; } return null; };
+      const got = fit([...hard, ...soft]) || fit(hard) || fit([...door, ...soft]) || fit(door);
+      if (n.dataset.seat === 'over') delete n.dataset.seat;
+      if (!got) { if (s && hits(box, s)) n.dataset.seat = 'over'; return; }   // no room on this stage: it stays where it opened, over the bar (021 V3)
+      const { at, h, w } = got; if (at.left === Math.round(box.left) && at.top === Math.round(box.top) && !h && !w) return;
+      const z = cssZoom(n) || 1, x = pane.left + at.left - box.left, y = pane.top + at.top - box.top;
+      if (kit) { kit.place({ left: x / z, top: y / z, ...(h ? { height: h / z } : {}), ...(w ? { width: w / z } : {}) });
+        const was = laid(n), wh = was.bottom - was.top, wd = was.right - was.left;   // the kit's floor (min) can be above ours: once more from there, never shorter than it
+        if (floor.h === 280 && ((h && wh > h + 2) || (w && wd > w + 2))) seatOpen(n, { h: Math.ceil(wh), w: Math.ceil(wd) }); }
+      else if (n === nbEl) { const o = n.offsetParent ? n.offsetParent.getBoundingClientRect() : { left: 0, top: 0 }; n.style.left = (x - o.left) / z + 'px'; n.style.top = (y - o.top) / z + 'px'; if (h) n.style.height = h / z + 'px'; if (w) n.style.width = w / z + 'px'; }
+      else app.sh.layout.moveFloat(n.dataset.id, x, y);
+    }
+    const seatNew = (gone = []) => {
+      for (const n of gone) if (n.nodeType === 1 && n.parentElement !== floatsEl) { seated.delete(n); if (n.dataset && n.dataset.seat === 'over') delete n.dataset.seat; }   // docked: no float's mark
+      for (const n of [...(floatsEl ? floatsEl.children : []), nbEl]) {
+        if (!summoned(n)) { if (n) seated.delete(n); continue; }
+        if (seated.has(n)) continue; seated.add(n);
+        if (n.classList.contains('dev') && pressed) continue;
+        try { seatOpen(n); } catch (_) {}   // a seat is a courtesy: never a thrown open
+      }
+    };
+    if (nbEl) new MutationObserver(() => seatNew()).observe(nbEl, { attributes: true, attributeFilter: ['hidden'] });
     if (floatsEl) {   // a float opened, closed, moved or resized: ask again, once a frame
       let booked = 0; const book = () => { if (!booked) booked = requestAnimationFrame(() => { booked = 0; if (!trMoving) under(blocked); }); };
-      const mo = new MutationObserver((list) => { for (const m of list) for (const n of m.addedNodes || []) if (n.nodeType === 1) watch(n); book(); });
+      const mo = new MutationObserver((list) => { const gone = []; for (const m of list) { for (const n of m.addedNodes || []) if (n.nodeType === 1) watch(n); gone.push(...(m.removedNodes || [])); } seatNew(gone); book(); });
       const watch = (n) => mo.observe(n, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
       mo.observe(floatsEl, { childList: true }); for (const n of floatsEl.children) watch(n);
       addEventListener('resize', book);
@@ -354,6 +456,7 @@ export function createModSeam(app) {
          zero rect): a window that is not open has nothing to dodge */
       const was = dodging[who];
       dodging[who] = rect && (who === 'mod' ? app.state.modView && app.state.modView.isOpen : app.state.tl && app.state.tl.isOpen()) ? rect : null;
+      if (!clearBooked) clearBooked = requestAnimationFrame(clearRack);   // 039 V2: the top seat's clear stops above an open work bar
       if (who === 'tl' && !was && dodging.tl && cycle('tl')) return;   // 016 W5: the timeline opened where the two cannot stack — the window gave way
       if (who === 'tl') magnetSeat();   // 015 T5: the modulation window follows the timeline it sits on
       const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));

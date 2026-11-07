@@ -8,7 +8,9 @@
  *   SCANLINES   a repeating gradient, multiplied: PITCH (px) · AMOUNT
  * THE HOST (`#nodeLayers`, built on the first layer) sits in #stage over the stage canvases and under the stage text, the atom labels and the
  * racks, pointer-events none, never in the occlusion mask (it registers nothing with lab/occlusion.js): it is part of the picture, not
- * a window.  038 P8 THE LAYERS BLEND WITH THE STAGE: the host is no stacking context (z-index auto) and each layer sits at z 8 (nodes.css) — at
+ * a window.  039 V5 THE LAYERS LIE UNDER THE WINDOWS: the picture's layers are INK UNDER GLASS too — every layer is cut where a window stands
+ * (`--lw-glass-cut` on the host, shell/ink.js: the line pass's own rects), so a window's glass shows the field, not a vignette or grain over it;
+ * FILM GRAIN's tile and its jumps are a child `i`, so the layer itself stays still and its cut stays where the windows are.  038 P8 THE LAYERS BLEND WITH THE STAGE: the host is no stacking context (z-index auto) and each layer sits at z 8 (nodes.css) — at
  * z 8 the host was an isolated blend group, so every layer's blend met nothing (grain at AMOUNT 1 painted flat grey, a vignette a white centre).  Layers are composited over the whole stage in graph order, after the filter: a layer between two filter nodes still sits on top.
  *   createLayerHost(stage) → { set(layers) }   layers: compile()'s [{ id, type, values }] — a div per node, kept while the node lives
  * 025 B1 · RENDER BAKES THE GRAPH: `paintLayer(g, l, w, h, k, i)` paints the same layer onto a film frame's 2-D canvas at the film's scale k (film px per
@@ -58,8 +60,8 @@ function tonedTile(kind, t) {
   if (toned.size > 8) toned.clear(); toned.set(key, d); return d;
 }
 const PAINT = {
-  grain: (s, v) => { const px = Math.round(256 * v.size), w = veil(v.tone), V = w ? `linear-gradient(rgba(${w}), rgba(${w})), ` : '';
-    s.backgroundImage = V + tile(v.kind === 'colour' ? 'colour' : 'mono'); s.backgroundSize = (V ? 'auto, ' : '') + px + 'px ' + px + 'px'; s.mixBlendMode = v.blend === 'overlay' ? 'overlay' : 'soft-light'; },
+  grain: (s, v, d) => { const px = Math.round(256 * v.size), w = veil(v.tone), V = w ? `linear-gradient(rgba(${w}), rgba(${w})), ` : '', t = d.firstElementChild.style;   // 039 V5: the tile and its jumps are the child's
+    t.backgroundImage = V + tile(v.kind === 'colour' ? 'colour' : 'mono'); t.backgroundSize = (V ? 'auto, ' : '') + px + 'px ' + px + 'px'; s.mixBlendMode = v.blend === 'overlay' ? 'overlay' : 'soft-light'; },
   vignette: (s, v) => { const r = v.round, a = (71 * (1 - r)).toFixed(1) + '% + ' + (60 * r).toFixed(1) + 'vmax', in0 = Math.round((1 - v.feather) * 100);
     s.backgroundImage = `radial-gradient(ellipse calc(${a}) calc(${a}) at 50% 50%, #fff ${Math.min(in0, 99)}%, #000 100%)`; s.mixBlendMode = 'multiply'; },
   scanlines: (s, v) => { const p = Math.max(2, Math.round(v.pitch)); s.backgroundImage = `repeating-linear-gradient(to bottom, #000 0 ${p / 2}px, #fff ${p / 2}px ${p}px)`; s.mixBlendMode = 'multiply'; },
@@ -95,12 +97,12 @@ export function createLayerHost(stage, gpu = null) {   // 024 S2: a `gpu` layer 
       for (const [id, d] of divs) if (!live.has(id)) { d.remove(); if (gpu) gpu.drop(d); divs.delete(id); }
       layers.forEach((l, i) => {
         let d = divs.get(l.id);
-        if (!d || d.dataset.type !== l.type) { if (d) { d.remove(); if (gpu) gpu.drop(d); } d = l.gpu && gpu ? gpu.make(l) : document.createElement('div'); d.className = 'node-layer'; d.dataset.type = l.type; divs.set(l.id, d); }
+        if (!d || d.dataset.type !== l.type) { if (d) { d.remove(); if (gpu) gpu.drop(d); } d = l.gpu && gpu ? gpu.make(l) : document.createElement('div'); d.className = 'node-layer'; d.dataset.type = l.type; if (l.type === 'grain') d.append(document.createElement('i')); divs.set(l.id, d); }
         if (host.children[i] !== d) host.insertBefore(d, host.children[i] || null);   // graph order: a later layer over an earlier one (moved only when it is not there)
         if (l.gpu) { if (gpu) gpu.paint(d, l); return; }
         const s = d.style, { amount, ...look } = l.values, key = JSON.stringify(look);
         if (s.opacity !== String(amount)) s.opacity = String(amount);    // a modulated AMOUNT writes one number
-        if (d.dataset.key !== key) { d.dataset.key = key; PAINT[l.type](s, l.values); }
+        if (d.dataset.key !== key) { d.dataset.key = key; PAINT[l.type](s, l.values, d); }
       });
     },
   };
