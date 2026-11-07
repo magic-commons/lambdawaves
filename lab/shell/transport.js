@@ -125,7 +125,7 @@ export function createTransport(app) {
     const miniEl = el('div', 'csb-mini', T), miniView = adopt('mol', miniEl, { app, opts: () => favs.mini() }), miniB = btn('csb-mini-b', '', '', 'mini-viewer style');
     label(el('span', 'ro-lbl', miniB), 'MINI-VIEWER'); const miniV = el('span', 'ro-val', miniB), miniG = el('i', 'csb-mini-g', miniV), miniW = el('span', '', miniV);
     const paintMini = () => { const m = favs.mini(), i = Math.max(0, MOL_STYLES.findIndex((s) => s.id === m.style)), s = MOL_STYLES[i], n = MOL_STYLES[(i + 1) % MOL_STYLES.length];
-      miniEl.hidden = miniB.hidden = !m.on; setGlyph(miniG, STYLE_GLYPH[s.id]); label(miniW, s.label); ariaLabel(miniB, 'mini-viewer: ' + s.label); hint(miniB, ['The mini-viewer by the bar · press for {b}', { b: n.label }]); if (miniView) miniView.set(m); };
+      miniEl.hidden = miniB.hidden = !m.on; setGlyph(miniG, STYLE_GLYPH[s.id]); label(miniW, s.label); ariaLabel(miniB, 'mini-viewer: {s}', { s: { t: s.label } }); hint(miniB, ['The mini-viewer by the bar · press for {b}', { b: { t: n.label } }]); if (miniView) miniView.set(m); };
     miniB.addEventListener('click', () => { const i = MOL_STYLES.findIndex((s) => s.id === favs.mini().style); favs.setMini({ style: MOL_STYLES[(i + 1) % MOL_STYLES.length].id }); });
     favs.onMini(paintMini); paintMini(); if (sec.tr) sec.tr.body.insertBefore(miniB, mt.bpm.root);
     for (const [id, c] of [['spectrum.scale', ui.scaleSeg], ['wave.space', ui.spaceSeg], ['wave.view', ui.viewSeg]]) favs.offer(id, c, { width: 150 });
