@@ -2,7 +2,7 @@
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
 import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el } from '../mir/kit.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
-import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle } from '../field.js'; import { getZ } from '../hamiltonian.js';
+import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle, quatFromYawPitch } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
@@ -238,8 +238,12 @@ export function createNotebook(app) {
         if (!bases) return data;
         pr.modulationBases = bases;
         for (const [id, seat] of Object.entries(app.sh.modSeats(data))) if (seat[0] && !seat[2] && Number.isFinite(bases[id])) seat[0][seat[1]] = bases[id];   // S3: the history's table
+        /* 039 R4 · A DEMO PLAYS CLEAN: a lane or a route on the camera's angles seats their BASES above, so the pose's quaternion is the bases' too —
+           recorded off the playing frame it read as an edit within 0.5 s of PLAY (STAR LOOP), and a save carried a pose the open re-derived */
+        if (pr.obs && (played('observer.yaw') || played('observer.pitch'))) pr.obs.quat = quatFromYawPitch(pr.obs.yaw, pr.obs.pitch);
         return data;
       }
+      const played = (id) => { const R = app.state.modHost && app.state.modHost.registry; return !!(R && R.has(id) && R.isModulated(id)); };
       function projectKey() {
         const data = projectSnapshot(), pr = data.presentation;
         /* THE KEYS THAT DO NOT DIRTY A PROJECT (docs/STATE-SCOPES.md): the WORKSPACE — moving a window, the modulation window's
@@ -251,6 +255,16 @@ export function createNotebook(app) {
         delete pr.layout; delete pr.modwin; delete pr.camera; delete pr.notebook;
         if (pr.domain.auto) delete pr.domain.half; // computed during rebuild, not a project edit
         for (const m of (pr.modulation && pr.modulation.macros) || []) if (m.sourceId) delete m.value;   // S2: a bound macro reads its source (deserialize overwrites the value) — NEW's LFO playing is not an edit
+        /* 039 R4 · A DEMO PLAYS CLEAN: what a playing lane or route moves is derived, never the reader's edit (a hand's base, in modulationBases,
+           still counts) — an EVENT target's live choice (modSeats seats the dials alone: WATER ESP's STYLE clip read as an edit at its first
+           switch), while a camera angle plays the rest of the pose (a FREE camera's yaw is an orbit about the view, so the unplayed angle
+           and its base move with it: BENZENE π, WATER ESP), and while a lane drives the register (ROTATE z, STARK, DEFECT, a shell's RATE
+           re-anchor its coefficients on every tick — STAR LOOP's n = 5 RATE under its A/B transition read as an edit seven seconds in) the
+           coefficients themselves */
+        if (['state.rot.z', 'state.stark.kz', 'state.defect.l2', ...[1, 2, 3, 4, 5, 6, 7].map((n) => 'shell.rate.n' + n)].some(played)) delete data.experiment.modes;
+        for (const [id, o, k] of [['material.style', pr.mat, 'style'], ['material.view', pr.mat, 'view'], ['material.slice.mode', pr.mat.slice, 'mode'], ['material.space', pr, 'space'],
+          ['palette.index', pr, 'palette'], ['palette.index', pr, 'paletteId'], ['state.scale', pr.sturmian, 'on']]) if (o && played(id)) delete o[k];
+        if (pr.obs && (played('observer.yaw') || played('observer.pitch'))) { delete pr.obs.quat; for (const a of ['yaw', 'pitch']) if (!played('observer.' + a)) { delete pr.obs[a]; if (pr.modulationBases) delete pr.modulationBases['observer.' + a]; } }
         return JSON.stringify([data, titleIn.value, subIn ? subIn.value : '', ta.value]);
       }
       /* 0.5.0 C6 · THE ONE PROJECT PART (R5-A3): λWAVES' project is serialize()/restore() — projectSnapshot() above — with the
