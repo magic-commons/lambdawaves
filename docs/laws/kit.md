@@ -2,6 +2,12 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 039
+
+THE DOORS OF 039 · CHAIN K (THE KIT RETURN, Opus 5.5; the clone road on kit branch `kit-039` from kit-038's eddd2b6, adopted one by one):
+- alpha.17 THE STEPPED CLOCK LOOPS (`modulation/host.js` `clock.step(dt, { loop: true })`, one wrap `wrapLoop` for both roads): an app's own frame wraps by the realtime rule, heard as 'seek' then 'step'; the recorder passes nothing and never loops. λWAVES: PLAYBACK LOCK's step (rack.js).
+Each door has its BUILT line in docs/FOR-MIR.md § 039.
+
 ## The laws of 038
 
 THE DOORS OF 038 · CHAIN T (THE TIMELINE, Opus 5.5; the clone road on kit branch `kit-038` from kit-037's e377982, adopted one by one as `1.5.7-alpha.8` … `alpha.12`): alpha.8 THE EMPTY TIMELINE RESTS (`timeline/window.js` the loop's extent reader answers bar 1 with no clip playing, `timeline/model.js` `meter()`; `modulation/host.js` a playing tick at or past the loop's end lands on its start — the alpha.25 "a play past the end runs free" reversed; → TL at the playhead's bar start) · alpha.9 THE TIMELINE SCROLLS UNDER THE POINTER (`timeline/editor.js`: the plain wheel scrolls time while the lanes fit, Shift + wheel always, Ctrl + wheel zooms; THE EDGE PUMP for a scrub, range, move, trim or stretch held at the viewport's edge) · alpha.10 THE MEASURE IS THE LEAST LOOP (`modulation/window.js` `lfoCycles`: → TL sends ⌈bar / period⌉ whole cycles inside the 256-point source cap) · alpha.11 THE SELECTION RESIZES TOGETHER (`timeline/editor.js` `edgeFrom`, `timeline/geometry.js` `glueTimelineClips`: a group trim, a glued group stretch, one undo row) · alpha.12 THE RING FOLLOWS THE DIAL (`kit.js` knob's `k-rev`, `modulation/window.js` `paintRing` and the ring's depth drag mirror on a reversed dial). Three of them change a kit-wide law a sibling will feel on re-adoption (an empty timeline loops bar 1 and a play past the end comes home; a plain wheel over the timeline scrolls time; an edge press keeps a selection of several); the others are additive. The next door is 1.5.7-alpha.13 (chain K, then P, build on chain T's kit tip). Each door has its BUILT line in docs/FOR-MIR.md § 038.

@@ -381,8 +381,9 @@ export async function boot(dom) {
     }
     /* 021 R3 · ONE TIME: under PLAYBACK LOCK, while ψ plays, the modulation clock and the rotation drive step EXACTLY 1/hz on the tick ψ steps
        (the film's way, render-exact.js: the kit's deterministic `step`), so a late frame slows the LFOs, the TIMELINE clips and ROTATE z with
-       ψ and the three never part.  The release re-anchors the modulation's wall stamp (the kit's realtime door, no play edge) so WALL resumes
-       without a jump.  WALL (no lock) is the road below, byte for byte. */
+       ψ and the three never part.  The step asks `{ loop: true }` (039 K1, kit 1.5.7-alpha.17), so the arrangement loops as on the realtime road;
+       the film's own step passes nothing and never loops.  The release re-anchors the modulation's wall stamp (the kit's realtime door, no play
+       edge) so WALL resumes without a jump.  WALL (no lock) is the road below, byte for byte. */
     const modLock = !!(app.state.modHost && lockHz && clock.playing);
     if (app.state.modHost && modLocked && !modLock) { const rel = app.state.modHost.clock.suspendRealtime(now); if (rel) rel(now); }
     modLocked = modLock;
@@ -391,7 +392,7 @@ export async function boot(dom) {
         const H = app.state.modHost, run = H.clock.isRunning();
         if (run) modSyncBases();
         if (run || (app.state.audioCap && app.state.audioCap.live) || rotDriving()) {
-          feedAudio(lockHz); if (run) H.clock.step(1 / lockHz);
+          feedAudio(lockHz); if (run) H.clock.step(1 / lockHz, { loop: true });
           if (app.state.eq && app.state.eq.audioTick) app.state.eq.audioTick();
         }
         rotStep(1 / lockHz);
