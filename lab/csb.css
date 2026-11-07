@@ -218,9 +218,10 @@ body[data-theme="light"] .csb-float :is(.k-lbl, .k-val) { text-shadow: 0 1px 3px
 #transport.docked .tempo-expand { width:100%;background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise,var(--neu-raise)); }
 /* 021 V3 · THE NARROW STAGE (≤ 860 px: the racks stack, the right one at the foot): the old seat (left rack-w + 10, width auto) lost to the csb rules'
    weight, so the bar kept its 674 px, stretched from 112 px to 60 px above the foot over the rack and left PLAY off the edge.  Now: under the top
-   rack's cards, centred with PLAY (the pair 674 + 78 px; 39 px is half PLAY's seat), its own height */
+   rack's cards, centred with PLAY (the pair 674 + 78 px; 39 px is half PLAY's seat), its own height.  038 M6: "under the top rack's cards" is measured —
+   112 px is two folded cards' seat, and a third (ADVANCED's NODES) or an unfolded one pushes it down (--csb-clear, shell/modulation.js clearRack) */
 @media (max-width:860px) {
-  #transport.mini[data-layout="csb"],#transport.mini[data-layout="csb"].tempo-open { left:calc(50% + 39px);right:auto;top:calc(env(safe-area-inset-top) + 112px);bottom:auto;transform:translateX(-50%);max-width:calc(100vw - 102px); }
+  #transport.mini[data-layout="csb"],#transport.mini[data-layout="csb"].tempo-open { left:calc(50% + 39px);right:auto;top:calc(env(safe-area-inset-top) + max(112px, var(--csb-clear, 0px)));bottom:auto;transform:translateX(-50%);max-width:calc(100vw - 102px); }
 }
 /* 022 E3 · BELOW 790 px ON A DESKTOP (a phone has its own layout) the stage bar and its PLAY are scaled about the bar's centre, so the pair stays on the
    screen down to ≈ 620 px (021 V3: PLAY clipped under 776); a transform, so the hit road, the mask and the resting box read the drawn rect */

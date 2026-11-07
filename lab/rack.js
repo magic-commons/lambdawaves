@@ -909,7 +909,16 @@ export async function boot(dom) {
      and the rack card `nodes`, seated where CURVES was (after RENDER, closed; a saved layout's `curves` seat opens `nodes`: settings.js RETIRED_WINDOWS).
      The grade is still the kit's curves panel over the stage canvas, its record `lambdawaves.q0.curves`; `__LW.curves` is its model, `__LW.nodes` the
      graph.  036 S1: the graph and the grade are the PROJECT's (presentation.nodes) — an edit books the session's save (onEdit) */
-  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod, field, mat, present: () => schedule(TIER.PRESENT), onWin: () => app.sh.ACTIONS.notify('nodes'),
+  /* 038 M1 · M6 · THE SEATS: STAGE, LIGHTING and NODES open directly below the window before them in FIRST_RUN_RACKS.advanced (SETTINGS, CAMERA,
+     INFORMATIONAL — THE SUMMONS' seats and NODES', Josh's) through the kit's open(id, { side, index }); an anchor not on a rack: that side's foot */
+  const seat = (id) => {
+    const side = FIRST_RUN_RACKS.advanced.left.includes(id) ? 'left' : 'right', ids = FIRST_RUN_RACKS.advanced[side];
+    const seen = (d) => d.classList.contains('dev') && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating');
+    const a = document.querySelector('.dev[data-id="' + ids[ids.indexOf(id) - 1] + '"]'), host = a && seen(a) && /^rackL?$/.test(a.parentElement.id) ? a.parentElement : null;
+    return rk.open(id, host ? { side: host === rackL ? 'left' : 'right', index: [...host.children].filter((c) => seen(c) && c.dataset.id !== id).indexOf(a) + 1 } : { side, index: Infinity });
+  };
+  /* 038 M6 (the fresh eyes: the kit's raise put the card above SPECTRUM and the docked CSB): NODES' dock lands in its seat under INFORMATIONAL, unfolded and shown */
+  { const N = createNodes({ device, rk, raise: (id) => { seat(id); rk.reveal(id); saveSettings(); }, host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod, field, mat, present: () => schedule(TIER.PRESENT), onWin: () => app.sh.ACTIONS.notify('nodes'),
       onEdit: () => layout.projects && layout.projects.changed() });   // 024 S2: field · mat · present for a SHADER node
     LW.curves = N.model; LW.nodes = N; LW.skeletonArgs = skeletonArgs; }
   // FOLDERS — the FOLDERS card (`projects`), the kit's mountGallery (021 G3: lab/windows/folders.js)
@@ -936,12 +945,13 @@ export async function boot(dom) {
   // First-visit furniture. Existing saved visibility and layouts are restored below.
   // 2026-10 (Josh): MOLECULES (with its register since iteration 008 U) opens on the LEFT rack under SPECTRUM.  No `devopen` fires here, so neither
   // solves at boot — MOLECULES pays its solve when it is switched on or a molecule is picked.
-  /* 038 M1 · M5 · THE FIRST RUN CHOOSES, THE CHOICE KEEPS: the arrangement this browser chose (`nativeLayout` 2 = ADVANCED, the face's door; else
-     SIMPLE, whose other windows stay where they were built), and NEW's DEFAULT below is captured from it */
+  /* 038 M1 · M5 · M6 · THE FIRST RUN CHOOSES, THE CHOICE KEEPS: the arrangement this browser chose open (`nativeLayout` 2 = ADVANCED, the face's door;
+     else SIMPLE), laid in ADVANCED's order — a window SIMPLE closes waits in its seat, so one its opener seated (THE SUMMONS, NODES' dock) comes back
+     there; NEW's DEFAULT below is captured from it */
   if(useCompactDefaults) {
-    const racks = firstRunRacks(readSettings().nativeLayout), open = [...racks.left, ...racks.right];
+    const racks = firstRunRacks(readSettings().nativeLayout), open = [...racks.left, ...racks.right], { advanced } = FIRST_RUN_RACKS;
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',!open.includes(d.dataset.id));
-    for(const [host,ids] of [[rackL,racks.left],[rack,racks.right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
+    for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
     /* iteration 011 Q2 (Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside every window closed (first-run.js `inner`); a record that loads after (rack-wiring.js `folds`) wins */
     if(FIRST_RUN.inner===false)for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]'))b.click();
   }
@@ -972,15 +982,9 @@ export async function boot(dom) {
      window before it in its list (a seat that is not on a rack: that rack's foot); either answer is saved at once, so the next visit says CONTINUE.
      M5 · THE CHOICE KEEPS: ADVANCED is `nativeLayout` 2 (saveSettings keeps it), and NEW's DEFAULT is taken again with the three in it */
   const choose = (kind) => {
-    const seen = (d) => d.classList.contains('dev') && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating');
     if (kind === 'advanced') {
       settingsStore.write({ ...readSettings(), nativeLayout: 2 });
-      for (const side of ['left', 'right']) FIRST_RUN_RACKS.advanced[side].forEach((id, i, ids) => {
-        if (FIRST_RUN_RACKS.simple[side].includes(id)) return;
-        const a = document.querySelector('.dev[data-id="' + ids[i - 1] + '"]'), host = a && seen(a) && /^rackL?$/.test(a.parentElement.id) ? a.parentElement : null;
-        rk.open(id, host ? { side: host === rackL ? 'left' : 'right', index: [...host.children].filter((c) => seen(c) && c.dataset.id !== id).indexOf(a) + 1 } : { side, index: Infinity });
-        rk.fold(id, true);
-      });
+      for (const side of ['left', 'right']) for (const id of FIRST_RUN_RACKS.advanced[side]) if (!FIRST_RUN_RACKS.simple[side].includes(id)) { seat(id); rk.fold(id, true); }
       layout.DEFAULT = layout.captureLayout();
     }
     saveSettings();

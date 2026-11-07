@@ -85,9 +85,11 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
     phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
     foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
-    /* 018 C4 (Josh): the right rack is the basic look controls; the docked transport always seats at the left rack's top.  038 M1 · M5: the
-       arrangement this browser chose is laid (rack.js), and a fresh install's face is handed the choice */
-    racks: src.includes("const racks = firstRunRacks(readSettings().nativeLayout), open = [...racks.left, ...racks.right];") && src.includes("for(const [host,ids] of [[rackL,racks.left],[rack,racks.right]])"),
+    /* 018 C4 (Josh): the right rack is the basic look controls; the docked transport always seats at the left rack's top.  038 M1 · M5 · M6:
+       the arrangement this browser chose is open, laid in ADVANCED's order (rack.js), and a fresh install's face is handed the choice */
+    racks: src.includes("const racks = firstRunRacks(readSettings().nativeLayout), open = [...racks.left, ...racks.right], { advanced } = FIRST_RUN_RACKS;") && src.includes("for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])"),
+    /* 038 M6: NODES' dock lands in its seat (under INFORMATIONAL), shown — never the kit's raise to the rack's top, above the docked CSB */
+    nodesDock: src.includes('raise: (id) => { seat(id); rk.reveal(id); saveSettings(); }') && !src.includes('raise: (id) => layout.raise(id)'),
     chooses: src.includes('const freshInstall = !Array.isArray(readSettings().closed);') && src.includes('...(freshInstall ? { choose } : {})'),
     transportTop: src.includes('if (layout.docked) layout.seatTransport();') && !src.includes('layout.dockIndex = '),
   };
@@ -115,7 +117,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     compactTwo: src.includes('const useCompactDefaults = [1, 2].includes(readSettings().nativeLayout) || freshInstall;'),
     defaultAfterBlock: block > 0 && capture > block && !src.slice(block, capture).includes('applySettings('),
     doorWrites: src.includes('settingsStore.write({ ...readSettings(), nativeLayout: 2 });'),
-    doorRecaptures: /rk\.fold\(id, true\);\s*\}\);\s*layout\.DEFAULT = layout\.captureLayout\(\);/.test(src),
+    doorRecaptures: /\{ seat\(id\); rk\.fold\(id, true\); \}\s*layout\.DEFAULT = layout\.captureLayout\(\);/.test(src),
     savedKept: src.includes('nativeLayout: useCompactDefaults ? (S0.nativeLayout === 2 ? 2 : 1) : S0.nativeLayout'),
     newRestoresDefault: src.includes('if (layout.DEFAULT) layout.applyLayout(layout.DEFAULT);') };
   judge('THE CHOICE KEEPS (038 M5): ADVANCED → NEW → still ADVANCED — the door writes nativeLayout 2 and retakes NEW\'s DEFAULT, saveSettings keeps the 2, a compact boot lays firstRunRacks(nativeLayout) and captures DEFAULT from it before the settings apply; SIMPLE stays SIMPLE',
