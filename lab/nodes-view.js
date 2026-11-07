@@ -37,8 +37,11 @@ const SPAN = 250;                                                    // the colu
 const GAP = 36;
 const NOTE = 'Grades the screen only — pictures and films are untouched.';
 const MARK = { table: '·', matrix: '·', prim: '···', layer: '··', shader: '····' };   // THE COST IS ON THE CARD: · folds for free, ·· a layer, ··· a pass, ···· a GPU pass (024 S)
-/** 038 N1 · the + menu's groups, in order: [id, its word] — a kind is in `T.group` (else its class); a group with no kind is not shown */
-const GROUPS = [['table', 'TONE'], ['matrix', 'COLOUR'], ['prim', 'PASSES'], ['layer', 'LAYERS'], ['shader', 'SHADERS']];
+/** 038 N1 · the + menu's groups, in order: [id, its word, its glyph, the classes it takes (else [id])] — a kind is in `T.group` (else its class);
+ *  a group with no kind is not shown.  038 P9 THE FULL NODE AND THE ONE-KNOB NODE: the full nodes (COLOUR, TONE) first, then every one-knob TABLE and
+ *  MATRIX kind in one group, as Josh put it ("the full node vs the simple 1-knob nodes"); a kind with `menu: false` (the old LEVELS) opens, never offered */
+const GROUPS = [['colour', 'COLOUR', 'nodeColor'], ['tone', 'TONE', 'nodeTable'], ['one', 'ONE-KNOB', 'nodeKnob', ['table', 'matrix']], ['prim', 'PASSES', 'nodePrim'],
+  ['layer', 'LAYERS', 'nodeLayer'], ['shader', 'SHADERS', 'nodeShader']];
 const markOf = (q, T) => MARK[!over(T) && ownRun(q, T) ? 'prim' : T.cls];
 const NS = 'http://www.w3.org/2000/svg';
 const hueAt = (h) => [Math.abs(h * 6 - 3) - 1, 2 - Math.abs(h * 6 - 2), 2 - Math.abs(h * 6 - 4)].map((x) => Math.min(1, Math.max(0, x)));
@@ -123,7 +126,7 @@ export function createView(parent, kind, M) {
     n.c.dataset.type = q.type; n.c.title = t.hint || '';
     const v = el('button', 'nodes-chev', null); v.type = 'button'; chip(v, 'chevronDown', 'COLLAPSE'); n.bar.prepend(v); v.addEventListener('click', () => M.setFold(q.id, !q.fold));
     if (!W) n.name.addEventListener('dblclick', () => renameAt(q.id));
-    if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip'); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
+    if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip' + (t.draw ? ' nodes-drawn' : '')); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
     const eye = el('button', 'nodes-eye', n.bar); eye.type = 'button'; chip(eye, 'eye', 'VIEW HERE'); eye.addEventListener('click', () => M.setView(q.id));
     const so = el('button', 'nodes-solo', n.bar); so.type = 'button'; chip(so, 'solo', 'SOLO'); so.addEventListener('click', () => M.setSolo(q.id));
     const x = el('button', 'nodes-x', n.bar); x.type = 'button'; chip(x, 'power', 'MUTE NODE'); x.addEventListener('click', () => M.setBypass(q.id, !q.bypass));
@@ -340,7 +343,7 @@ export function createView(parent, kind, M) {
   const offB = tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
   const back = () => { if (W) ground.focus({ preventScroll: true }); };   // a pick or an Escape gives the ground its keys back
   const kindRow = (type, t) => [t.label + '\t' + MARK[t.cls] + (t.heavy ? ' HEAVY' : ''), () => { M.add(type); back(); }, type === 'curves' && M.has(), t.hint, { icon: nodeGlyph(type), id: type }];
-  const kinds = (g) => Object.entries(T).filter(([, t]) => (t.group || t.cls) === g).map(([type, t]) => kindRow(type, t));
+  const kinds = ([g, , , cls = [g]]) => Object.entries(T).filter(([, t]) => t.menu !== false && cls.includes(t.group || t.cls)).map(([type, t]) => kindRow(type, t));
   const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list); back(); }, false, hint, { id: 'graph:' + name, raw }];
   const graphRows = () => { const U = M.graphs.list();
     return [...Object.entries(M.SHIPPED).map(([name, list]) => graph(name, list, 'a shipped graph: every node but CURVES replaced')),
@@ -348,7 +351,7 @@ export function createView(parent, kind, M) {
       null, ['SAVE THIS GRAPH', saveGraph, false, 'the nodes as your own graph (kept on this device)', { icon: 'saveInto', id: 'save' }],
       ...(U.length ? [['REMOVE', () => U.map((u) => [u.name, () => M.graphs.remove(u.name), false, 'remove this graph', { raw: true, id: 'remove:' + u.name }]), null, '', { sub: true, icon: 'trash', id: 'remove' }]] : [])]; };
   const found = (s) => { const S = s.toUpperCase();
-    return [...Object.entries(T).filter(([, t]) => t.label.includes(S)).map(([type, t]) => kindRow(type, t)),
+    return [...Object.entries(T).filter(([, t]) => t.menu !== false && t.label.includes(S)).map(([type, t]) => kindRow(type, t)),
       ...Object.entries(M.SHIPPED).filter(([n]) => n.includes(S)).map(([n, list]) => graph(n, list, 'a shipped graph')),
       ...M.graphs.list().filter((u) => u.name.toUpperCase().includes(S)).map((u) => graph(u.name, u.data && u.data.nodes, 'your graph', true))].slice(0, 10); };
   let find = null;
@@ -359,7 +362,7 @@ export function createView(parent, kind, M) {
       find.addEventListener('keydown', (e) => { e.stopPropagation(); const r = pop && pop.pane.querySelector('.mb-item:not(:disabled)');
         if (r && (e.key === 'Enter' || e.key === 'ArrowDown')) { e.preventDefault(); if (e.key === 'Enter') r.click(); else r.focus(); } }); }
     if (!s) find.value = '';
-    const at = [find.selectionStart, find.selectionEnd], rows = s ? found(s) : [...GROUPS.filter(([g]) => kinds(g).length).map(([g, word]) => [word, () => kinds(g), null, '', { sub: true, icon: nodeGlyph(g), id: 'group:' + g }]),
+    const at = [find.selectionStart, find.selectionEnd], rows = s ? found(s) : [...GROUPS.filter((G) => kinds(G).length).map((G) => [G[1], () => kinds(G), null, '', { sub: true, icon: G[2], id: 'group:' + G[0] }]),
       null, ['GRAPHS', graphRows, null, '', { sub: true, icon: 'nodes', id: 'graphs' }]];
     const m = pop = contextMenu({ anchor: addB, label: 'Add a node', entries: rows.length ? rows : [['NO MATCH', null, true]], onClose: () => { if (pop === m) pop = null; } });
     if (!m) return;
@@ -385,7 +388,9 @@ export function createView(parent, kind, M) {
       if (n.foot) n.foot.classList.toggle('on', q.values.fade < 1 || (q.values.mask || 'none') !== 'none' || (q.values.target || 'both') !== 'both'); },
     /** the PREVIEW strip: a grey ramp over a hue ramp, each of the 128 columns through the node's own transfer (coalesced on the frame) */
     strip(q) { const n = cards[q.id]; if (!n || !n.strip) return; frame.coalesce('nodes.strip.' + kind + '.' + q.id, () => {
-      const f = transfer(q, T[q.type]), g = n.strip.getContext('2d'), im = g.createImageData(128, 10);
+      const f = transfer(q, T[q.type]), g = n.strip.getContext('2d');
+      if (T[q.type].draw) { T[q.type].draw(g, q.values, f); return; }   // 038 P2: a kind that draws its own strip (LEVELS' curve and marks)
+      const im = g.createImageData(128, 10);
       for (let i = 0; i < 128; i++) { const s = i / 127, rows = [f([s, s, s]), f(hueAt(i / 128))];
         for (let y = 0; y < 10; y++) { const c = rows[y < 5 ? 0 : 1], o = (y * 128 + i) * 4; im.data[o] = c[0] * 255; im.data[o + 1] = c[1] * 255; im.data[o + 2] = c[2] * 255; im.data[o + 3] = 255; } }
       g.putImageData(im, 0, 0); }); },

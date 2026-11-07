@@ -6,7 +6,7 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 THE + MENU IS THE KIT'S (038 N1, Josh: "Nodes dropdown seems to be missing it's background"). The + menu is the kit's `contextMenu` anchored under the +, on the page as every kit menu is. Inside the window or the rack card the old pane blurred only the card's own glass (a nested backdrop root), and the short card clipped it to a scroller.
 - **It holds:** a search line (typed, the pane reopens with up to ten matches; Enter adds the first), then GROUPS, then GRAPHS ›.
-- **GROUPS:** TONE · COLOUR · PASSES · LAYERS · SHADERS, each a submenu. A kind joins one by `group`, else by its class; a new group is a row of `GROUPS` in `lab/nodes-view.js`; a group with no kind is hidden.
+- **GROUPS:** COLOUR · TONE · ONE-KNOB · PASSES · LAYERS · SHADERS since 038 P9 (THE FULL NODE AND THE ONE-KNOB NODE, below), each a submenu. A kind joins one by `group`, else by its class; a new group is a row of `GROUPS` in `lab/nodes-view.js` (its id, its word, its glyph, the classes it takes); a group with no kind is hidden.
 - **GRAPHS ›:** the shipped graphs, the reader's, SAVE THIS GRAPH (the `saveInto` glyph, its name asked in the kit's dialog) and REMOVE ›.
 - **The keys:** the kit's ↑ ↓ → ← and Enter. Escape closes it and gives the ground its keys back.
 - No scroller. The REFRACTIVE · DARK · FROST tie of the menu floor is the kit's (FOR-MIR).
@@ -43,6 +43,35 @@ A NODE HAS A TARGET (038 N6, CALLS 4: one picture, a mask, a TARGET seg). Every 
 - **The field** writes its codes only while a compiled run reads them (`compile().mask`), so an untargeted graph and THE LOCK see the opaque canvas. A closing run sets the alpha back to 1. The field's premultiplied returns clamp their colour to 1 first (an overbright 255 over 254 unpremultiplies past 255).
 - **A film reads the codes:** the readback keeps the alpha for the bake's filter while the mask lives. A still keeps 255 (≤ 1 level darker on the stage while a target lives).
 - LAYERs and SHADERs carry no TARGET.
+
+THE FULL NODE AND THE ONE-KNOB NODE (038 P, Josh: "We should also try to combine some of the nodes while leaving out the simple 'one-knobber' nodes … it gives users the options to use the full node vs the simple 1-knob nodes").
+- **Appended, never renumbered.** A full node is a new id beside the kept one-knobbers, so an old graph opens as it was. The old LEVELS (`levels`) still opens but is never offered (`menu: false`); the + menu's LEVELS is `levels2`.
+- **The + menu's groups:** COLOUR (the full colour nodes) · TONE (the full tone nodes, CURVES among them) · ONE-KNOB (every one-knob TABLE and MATRIX kind) · PASSES · LAYERS · SHADERS. A `GROUPS` row names the classes it takes.
+- **A full node's face is data** (`lab/node-types.js`):
+  - `face` lays its knobs out one fit row per line, in the face's order;
+  - `bare` hides their labels, and the readout (its name in `fmt`) shows only while a knob is edited (a drag, its tail, the keys);
+  - `stops` give a knob Photoshop's track on the kit's arc (THE ARC WEARS A GRADIENT, kit.md);
+  - `draw` paints the card's strip.
+- **The foot is the house's.** Every full TABLE, MATRIX or PRIM node keeps the foot fold, TARGET included. A LAYER never has it.
+- **Every control is hinted** (038 P9).
+  - A knob carries its own `hint`; a one-knob node's knob takes the node's hint, because the knob is the node.
+  - A seg's or a stepper's hint is set on its root by `nodeBody`, since the kit hints only a seg's options (FOR-MIR).
+  - FOOT's MASK has its hint.
+- **A MATRIX kind may add a run** (`run(values, id, src)`, nodes-compile.js): primitives after its matrix. While it answers, the node is its own run (cost ···); otherwise the matrix folds for free.
+
+| kind (id) · group | knobs (home) | what it computes |
+|---|---|---|
+| LEVELS (`levels2`) · TONE | IN BLACK 0 · GAMMA 1 (0.1–10, log) · IN WHITE 1 / OUT BLACK 0 · OUT WHITE 1, bare, read 0–255 | `levels`' table, byte-identical; the strip is the curve as a silhouette over Photoshop's three marks (no tap) |
+| EXPOSURE (`exposure2`) · TONE | EXPOSURE 0 (±4 EV) · SHADOWS 0 · HIGHLIGHTS 0 (±100) | y₁ = clamp(y·2^EV); y₂ = y₁ + .945·[S·y₁(1−y₁)² + H·y₁²(1−y₁)]: ±.14 at ⅓ and ⅔, the ends fixed, monotone (least slope .055) |
+| BRIGHTNESS & CONTRAST (`bc`) · TONE | BRIGHTNESS 0 · CONTRAST 0 (±100) | y = (y−½)·c + ½ + b, with b = B/200 and c = 1 + C/50 above home, 1 + C/100 below (0 flat, 3 at +100) |
+| HUE/SATURATION (`color`) · COLOUR | HUE 0 (±180°, the track what red becomes) · SATURATION 0 · LIGHTNESS 0 (±100) | one matrix: Photoshop's lightness ∘ saturate(1 + S/100) ∘ hue-rotate(H) |
+| BALANCE (`balance`) · COLOUR | TEMPERATURE 0 · TINT 0 / VIBRANCE 0 · SATURATION 0 (±100) | one matrix, diag(warm · tint) ∘ saturate. VIBRANCE ≠ 0 adds a 5-primitive run: D = c − luma; c + V·D(1−|D|), split into positive and negative parts so alpha stays 1 |
+| CHROMATIC ABERRATION (`aberration`) · PASSES | MODE SHIFT · PERSPECTIVE (appended, home SHIFT); AMOUNT (the `shift` key, px) · ANGLE | PERSPECTIVE: an feImage ramp and two feDisplacementMaps, red out and blue in from the centre (Procreate's) |
+| FILM GRAIN (`grain`) · LAYERS | AMOUNT · SIZE · TONE (appended, −1…1, home 0) / KIND · BLEND | TONE veils the tile with white or black (alpha \|tone\|) before its blend, so SOFT LIGHT and OVERLAY read it |
+
+THE LAYERS BLEND WITH THE STAGE (038 P8). `#nodeLayers` sits at `z-index: auto` and each `.node-layer` at 8 (above `#skeleton` 7, below the atom labels 9).
+- **Why:** at z 8 the host was a stacking context, which is an isolated blend group. Every LAYER's `mix-blend-mode` then blended with nothing: grain at AMOUNT 1 turned the stage flat grey, and a vignette painted the centre white.
+- **The film** always blended right (`paintLayer`), so the stage and the film now agree.
 
 ## The law of 036
 

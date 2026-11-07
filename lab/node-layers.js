@@ -7,8 +7,9 @@
  *   VIGNETTE    a radial gradient, multiplied: AMOUNT · FEATHER (where the dark starts) · ROUNDNESS (the frame's ellipse → a circle)
  *   SCANLINES   a repeating gradient, multiplied: PITCH (px) · AMOUNT
  * THE HOST (`#nodeLayers`, built on the first layer) sits in #stage over the stage canvases and under the stage text, the atom labels and the
- * racks (z 8), pointer-events none, never in the occlusion mask (it registers nothing with lab/occlusion.js): it is part of the picture, not
- * a window.  Layers are composited over the whole stage in graph order, after the filter: a layer between two filter nodes still sits on top.
+ * racks, pointer-events none, never in the occlusion mask (it registers nothing with lab/occlusion.js): it is part of the picture, not
+ * a window.  038 P8 THE LAYERS BLEND WITH THE STAGE: the host is no stacking context (z-index auto) and each layer sits at z 8 (nodes.css) — at
+ * z 8 the host was an isolated blend group, so every layer's blend met nothing (grain at AMOUNT 1 painted flat grey, a vignette a white centre).  Layers are composited over the whole stage in graph order, after the filter: a layer between two filter nodes still sits on top.
  *   createLayerHost(stage) → { set(layers) }   layers: compile()'s [{ id, type, values }] — a div per node, kept while the node lives
  * 025 B1 · RENDER BAKES THE GRAPH: `paintLayer(g, l, w, h, k, i)` paints the same layer onto a film frame's 2-D canvas at the film's scale k (film px per
  * stage CSS px) — the tile is SEEDED (one tile per kind, the same on the stage and in every film), FILM GRAIN's offset hashed from the frame index i (the
@@ -16,14 +17,19 @@
 const AMOUNT = (home) => ({ k: 'amount', label: 'AMOUNT', min: 0, max: 1, home });
 const off = (v) => v.amount === 0;
 export const LAYER_TYPES = {
-  grain: { cls: 'layer', label: 'FILM GRAIN', hint: 'grain over the picture, fresh every frame', neutral: off,
-    knobs: [AMOUNT(0.35), { k: 'size', label: 'SIZE', min: 0.5, max: 4, home: 1, log: true },
-      { k: 'kind', label: 'KIND', home: 'mono', options: [{ id: 'mono', label: 'MONO' }, { id: 'colour', label: 'COLOUR' }] },
-      { k: 'blend', label: 'BLEND', home: 'soft-light', options: [{ id: 'soft-light', label: 'SOFT' }, { id: 'overlay', label: 'OVERLAY' }] }] },
+  /* 038 P8 (Josh: "Film Grain's Kind and Blend switches could be on the same row in the layout. Add a third knob that controls lightness and darkness and
+     also affected by the blend mode"): AMOUNT · SIZE · TONE over KIND · BLEND; TONE (appended, −1 … 1, home 0) veils the tile with white or black at
+     alpha |tone| before its blend, so SOFT and OVERLAY read it — the stage's PAINT and the film's paintLayer alike */
+  grain: { cls: 'layer', label: 'FILM GRAIN', hint: 'grain over the picture, fresh every frame', neutral: off, face: [['amount', 'size', 'tone'], ['kind', 'blend']],
+    knobs: [{ ...AMOUNT(0.35), hint: 'AMOUNT — how much grain' }, { k: 'size', label: 'SIZE', min: 0.5, max: 4, home: 1, log: true, hint: 'SIZE — the grain\'s scale' },
+      { k: 'kind', label: 'KIND', home: 'mono', hint: 'MONO grey grain · COLOUR grain', options: [{ id: 'mono', label: 'MONO' }, { id: 'colour', label: 'COLOUR' }] },
+      { k: 'blend', label: 'BLEND', home: 'soft-light', hint: 'how the grain meets the picture', options: [{ id: 'soft-light', label: 'SOFT' }, { id: 'overlay', label: 'OVERLAY' }] },
+      { k: 'tone', label: 'TONE', min: -1, max: 1, home: 0, hint: 'TONE — the grain darker or lighter, through its blend', fmt: (x) => (x >= 0.005 ? '+' : x <= -0.005 ? '−' : '') + Math.round(Math.abs(x) * 100) }] },
   vignette: { cls: 'layer', label: 'VIGNETTE', hint: 'the edges darkened, as a lens does', neutral: off,
-    knobs: [AMOUNT(0.6), { k: 'feather', label: 'FEATHER', min: 0, max: 1, home: 0.5 }, { k: 'round', label: 'ROUNDNESS', min: 0, max: 1, home: 0.5 }] },
+    knobs: [{ ...AMOUNT(0.6), hint: 'AMOUNT — how dark the edges' }, { k: 'feather', label: 'FEATHER', min: 0, max: 1, home: 0.5, hint: 'FEATHER — where the dark begins' },
+      { k: 'round', label: 'ROUNDNESS', min: 0, max: 1, home: 0.5, hint: 'ROUNDNESS — the frame\'s ellipse to a circle' }] },
   scanlines: { cls: 'layer', label: 'SCANLINES', hint: 'a CRT\'s lines', neutral: off,
-    knobs: [{ k: 'pitch', label: 'PITCH', min: 2, max: 12, step: 1, home: 3, unit: ' px' }, AMOUNT(0.3)] },
+    knobs: [{ k: 'pitch', label: 'PITCH', min: 2, max: 12, step: 1, home: 3, unit: ' px', hint: 'PITCH — the lines\' spacing, in px' }, { ...AMOUNT(0.3), hint: 'AMOUNT — how dark the lines' }] },
 };
 
 const tiles = {}, canvases = {};
@@ -40,8 +46,19 @@ function tileCanvas(kind) {
   return (canvases[kind] = c);
 }
 const tile = (kind) => tiles[kind] || (tiles[kind] = 'url(' + tileCanvas(kind).toDataURL() + ')');
+/** 038 P8 · TONE: −1 … 1 → [r, g, b, a] of the veil over the tile (white above 0, black below), or null at 0 */
+const veil = (t) => { t = Math.max(-1, Math.min(1, +t || 0)); return t ? [t > 0 ? 255 : 0, t > 0 ? 255 : 0, t > 0 ? 255 : 0, +Math.abs(t).toFixed(3)] : null; };
+const toned = new Map();
+/** the film's tile under its TONE's veil (paintLayer), one canvas per kind and tone */
+function tonedTile(kind, t) {
+  const c = tileCanvas(kind), w = veil(t); if (!w) return c;
+  const key = kind + w.join(); if (toned.has(key)) return toned.get(key);
+  const d = document.createElement('canvas'); d.width = d.height = 256; const g = d.getContext('2d'); g.drawImage(c, 0, 0); g.fillStyle = `rgba(${w})`; g.fillRect(0, 0, 256, 256);
+  if (toned.size > 8) toned.clear(); toned.set(key, d); return d;
+}
 const PAINT = {
-  grain: (s, v) => { const px = Math.round(256 * v.size); s.backgroundImage = tile(v.kind === 'colour' ? 'colour' : 'mono'); s.backgroundSize = px + 'px ' + px + 'px'; s.mixBlendMode = v.blend === 'overlay' ? 'overlay' : 'soft-light'; },
+  grain: (s, v) => { const px = Math.round(256 * v.size), w = veil(v.tone), V = w ? `linear-gradient(rgba(${w}), rgba(${w})), ` : '';
+    s.backgroundImage = V + tile(v.kind === 'colour' ? 'colour' : 'mono'); s.backgroundSize = (V ? 'auto, ' : '') + px + 'px ' + px + 'px'; s.mixBlendMode = v.blend === 'overlay' ? 'overlay' : 'soft-light'; },
   vignette: (s, v) => { const r = v.round, a = (71 * (1 - r)).toFixed(1) + '% + ' + (60 * r).toFixed(1) + 'vmax', in0 = Math.round((1 - v.feather) * 100);
     s.backgroundImage = `radial-gradient(ellipse calc(${a}) calc(${a}) at 50% 50%, #fff ${Math.min(in0, 99)}%, #000 100%)`; s.mixBlendMode = 'multiply'; },
   scanlines: (s, v) => { const p = Math.max(2, Math.round(v.pitch)); s.backgroundImage = `repeating-linear-gradient(to bottom, #000 0 ${p / 2}px, #fff ${p / 2}px ${p}px)`; s.mixBlendMode = 'multiply'; },
@@ -51,7 +68,7 @@ const PAINT = {
 export function paintLayer(g, l, w, h, k, i) {
   const v = l.values; g.save(); g.globalAlpha = Math.max(0, Math.min(1, +v.amount || 0));
   if (l.type === 'grain') {
-    const px = Math.max(1, 256 * v.size * k), pat = g.createPattern(tileCanvas(v.kind === 'colour' ? 'colour' : 'mono'), 'repeat'), a = hash32(i * 2 + 1), b = hash32(a ^ 0x9e3779b9);
+    const px = Math.max(1, 256 * v.size * k), pat = g.createPattern(tonedTile(v.kind === 'colour' ? 'colour' : 'mono', v.tone), 'repeat'), a = hash32(i * 2 + 1), b = hash32(a ^ 0x9e3779b9);
     pat.setTransform(new DOMMatrix([px / 256, 0, 0, px / 256, (a / 4294967296) * px, (b / 4294967296) * px]));
     g.globalCompositeOperation = v.blend === 'overlay' ? 'overlay' : 'soft-light'; g.fillStyle = pat; g.fillRect(0, 0, w, h);
   } else if (l.type === 'vignette') {

@@ -15,6 +15,13 @@ Its BUILT line is in docs/FOR-MIR.md § 038.
 
 THE FIX OF 038 · T8 (from the fresh-eyes review of chain T; on chain K's alpha.13 25e0836, so P's door is alpha.15): alpha.14 THE PUMP WAITS FOR A DRAG (`timeline/editor.js`: the edge pump starts only after the 6-px slop; a scrub's head stays inside the lanes on view; a scrub released past the loop's end while playing brings the view home; `modulation/window.js` → TL's hint says the LFO's whole cycles; `timeline/window.js` the empty loop's words say which synced LFOs stay continuous).
 
+THE ARC WEARS A GRADIENT (038 P1, chain P, Opus 5.5; the clone road on kit branch `kit-038`, alpha.15 @ d37162a on T8's alpha.14 eeb8f7c, adopted as `1.5.7-alpha.15`).
+- **The kit:** `arcRing({ stops })` draws the track as 16–48 butt-joined vector segments, each in the oklab mix of two or more evenly spaced CSS colours, round at the two ends. Each leans `--arc-grad-weight` (18 %) toward `--arc-grad-ink` (the theme's `--fg`), so the track reads on both themes.
+- **The value** is a thumb riding the track: a disc in the colour beneath it, `--arc-thumb-ring`, `--arc-thumb-halo`. There is no value ring.
+- **The factory:** `control({ stops })` on a finite range is that arc, and a log range keeps its map. The drag law, the keys, home, the readout and the modulation contract are the arc's.
+- **λWAVES' side:** `nodeBody` passes a knob's `stops` (node-types.js), so a node kind wears Photoshop's tracks by data alone (the full nodes, nodes.md).
+- Its BUILT line is in docs/FOR-MIR.md § 038. N8 took 1.5.7-alpha.16; the next door is 1.5.7-alpha.17.
+
 THE FIX OF 038 · N8 (from the fresh-eyes review of chain N; on chain P's alpha.15 d37162a): alpha.16 THE MENU PANE KEEPS ITS FLOOR (kit `eddd2b6`; `css/skin.css` `body[data-card][data-card] .glass[data-mir-surface="menu"]:not([hidden])` (0,5,1), `shell/shell.css` `body[data-card][data-card] #menubar .mb-list:not([hidden])` (1,4,1)): the menu floors outweigh FROST's dark veil and STILL's fill, so a menu pane never reads below its floor in any material (dark REFRACTIVE FROST .72, not .10). The next door is 1.5.7-alpha.17.
 
 ## The laws of 037

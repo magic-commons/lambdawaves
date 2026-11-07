@@ -154,6 +154,14 @@ const ICONS = {
     '<circle cx="6" cy="8" r="1"/><circle cx="11" cy="10.5" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="8" cy="13.5" r="1"/><circle cx="13.5" cy="13.5" r="1"/></g>',
   nodeVignette: n16('<rect x="1.5" y="3" width="13" height="10" rx="1"/><ellipse cx="8" cy="8" rx="4" ry="2.8"/>'),
   nodeScanlines: n16('<path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/>'),
+  /* 038 P · THE FULL NODES: LEVELS (Photoshop's: the histogram and its marks) · EXPOSURE with SHADOWS and HIGHLIGHTS (the sun, its core split) · COLOR
+     (a wheel with three sliders: H · S · L) · BALANCE (a beam) · BRIGHTNESS & CONTRAST (the half-filled disc in rays); the + menu's ONE-KNOB group (a knob) */
+  nodeLevels2: n16('<path d="M2 10L5 5L8 8L11 3L14 10Z"/><path d="M2 12.5h12M3 15l1-2 1 2M7 15l1-2 1 2M11 15l1-2 1 2"/>'),
+  nodeExposure2: n16('<circle cx="8" cy="8" r="3"/><path d="M8 5a3 3 0 0 1 0 6Z" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3"/>'),
+  nodeColor: n16('<circle cx="8" cy="8" r="6.5"/><path d="M4.5 5.5h7M4.5 8h7M4.5 10.5h7"/><circle cx="6" cy="5.5" r="1" fill="currentColor"/><circle cx="10" cy="8" r="1" fill="currentColor"/><circle cx="7.5" cy="10.5" r="1" fill="currentColor"/>'),
+  nodeBalance: n16('<path d="M8 2.5v11M4.5 14h7M2 5h12"/><path d="M2 5L.8 9h2.4ZM14 5l-1.2 4h2.4Z"/>'),
+  nodeBc: n16('<circle cx="8" cy="8" r="4"/><path d="M8 4a4 4 0 0 1 0 8Z" fill="currentColor"/><path d="M8 .8v1.8M8 13.4v1.8M.8 8h1.8M13.4 8h1.8"/>'),
+  nodeKnob: n16('<circle cx="8" cy="8" r="5.5"/><path d="M8 8V3.8M3.2 13.6l-.9.9M12.8 13.6l.9.9"/>'),
   /* 024 S: the SHADER class (a scatter of dots piling into a fold) and DECOHERE (a line, decohering into the scatter) */
   nodeShader: '<g transform="scale(1.5)" fill="currentColor"><circle cx="2" cy="13.5" r=".8"/><circle cx="4.5" cy="11.2" r=".8"/><circle cx="6.6" cy="9.4" r=".8"/>' +
     '<circle cx="8.4" cy="8" r=".8"/><circle cx="10" cy="7" r=".8"/><circle cx="11.4" cy="6.3" r=".8"/><circle cx="12.7" cy="5.8" r=".8"/><circle cx="14" cy="5.5" r=".8"/>' +

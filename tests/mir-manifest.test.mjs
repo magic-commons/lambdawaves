@@ -55,6 +55,9 @@ const ACCEPTED = {
   /* 038 T8 · MIR 1.5.7-alpha.14 THE PUMP WAITS FOR A DRAG (kit-038 @ eeb8f7c, on chain K's alpha.13 25e0836 — this adoption carries THE PAD WRAPS' kit
      files too; K's own alpha.13 row and app side merge beside it): the edge pump waits for a real drag, a scrub's head stays in the lanes, → TL's hint, the loop's words */
   '1.5.7-alpha.14': '3e9e0561e665d8ff69be238223adc873467265499664ed409a60f25a0b512872',
+  /* 038 P1 · MIR 1.5.7-alpha.15 THE ARC WEARS A GRADIENT (kit-038 @ d37162a, on T8's alpha.14 eeb8f7c): arcRing({ stops }) — a gradient track and a thumb;
+     control({ stops }) on a finite range is an arc */
+  '1.5.7-alpha.15': 'd6478e9112b46698c0eed1a244f346a376822cdd5ee9e7b7079d7259a9a4b8bf',
   /* 038 N8 · MIR 1.5.7-alpha.16 THE MENU PANE KEEPS ITS FLOOR (kit-038 @ eddd2b6, on chain P's alpha.15 d37162a — this adoption carries THE ARC WEARS A
      GRADIENT's kit files too; P's own alpha.15 row and app side merge beside it): the menu floor and the bar's list floor outweigh FROST's dark veil */
   '1.5.7-alpha.16': '084779bf81107c9968080e760926c30db62d29c0041a30c74d92c094ef1278d9',

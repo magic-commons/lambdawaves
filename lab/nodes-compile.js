@@ -31,6 +31,8 @@
  * alpha code (lab/field.js setObjectMask, chain F: 255 on the orbital and the molecule, 254 the background — which pixel is which is F's rule): a targeted
  * node is its own run whose mask is SourceAlpha through feFuncA (OBJECT 255·A − 254, STAGE 255 − 255·A, × the FADE; times the MASK when one is
  * set), softened 1.2 px, so out = mix(in, fx, mask) on the `in` / `over` road; `mask: true` asks the field for its codes, and a closing run puts A back to 1.
+ * 038 P5 A MATRIX KIND MAY ADD A RUN: `run(values, id, src)` → primitives after its matrix (reading `src`, the matrix's result), or null.  While it
+ * answers the node is its own run (cost ···) — BALANCE's VIBRANCE, which is not linear; otherwise the matrix folds for free.
  *   Pure helpers: IDENTITY · LUMA · mul(B, A) · isIdentity(m) · tableOf(fns, n) · fadeOf(q, T) · ownRun(q, T) · weight(kind, x, soft) */
 import { TABLE_N } from './mir/panels/picture-filter.js';
 
@@ -70,7 +72,7 @@ const fadeOf = (q, T) => (over(T) || !Number.isFinite(+q.values.fade) ? 1 : clam
 const maskOf = (q, T) => (over(T) ? 'none' : q.values.mask || 'none');
 const targetOf = (q, T) => (!over(T) && (q.values.target === 'stage' || q.values.target === 'object') ? q.values.target : 'both');
 /** ownRun(q, T): the node is a run of its own — masked, targeted, or a faded PRIMITIVE or luma TABLE (whose fade is a composite, not a fold) */
-export const ownRun = (q, T) => maskOf(q, T) !== 'none' || targetOf(q, T) !== 'both' || (fadeOf(q, T) < 1 && (T.cls === 'prim' || !!T.luma));
+export const ownRun = (q, T) => maskOf(q, T) !== 'none' || targetOf(q, T) !== 'both' || (fadeOf(q, T) < 1 && (T.cls === 'prim' || !!T.luma)) || !!(T.run && T.run(q.values, q.id, ''));
 /** the closing run while a target lives: alpha back to 1 (the field's codes never reach the page) — one identity, so never rewritten */
 const OPAQUE = Object.freeze({ prim: [['feComponentTransfer', {}, [['feFuncA', { type: 'linear', slope: 0, intercept: 1 }]]]] });
 /** weight(kind, x, soft) → 0..1: where a mask lets the node through — x the luma (lights · darks · mids) or the distance from the centre */
@@ -95,7 +97,8 @@ function own(q, T) {
     ['feGaussianBlur', { stdDeviation: 1.2, result }]];
   if (T.cls === 'table') { if (T.luma) out.push(['feColorMatrix', { in: '$IN', type: 'matrix', values: S(LUMA) }]);
     const t = tableOf([T.fn(q.values, q)]); out.push(['feComponentTransfer', T.luma ? {} : { in: '$IN' }, [['feFuncR', { type: 'table', tableValues: S(t.r) }], ['feFuncG', { type: 'table', tableValues: S(t.g) }], ['feFuncB', { type: 'table', tableValues: S(t.b) }]]]); }
-  else if (T.cls === 'matrix') out.push(['feColorMatrix', { in: '$IN', type: 'matrix', values: S(T.matrix(q.values)) }]);
+  else if (T.cls === 'matrix') { out.push(['feColorMatrix', { in: '$IN', type: 'matrix', values: S(T.matrix(q.values)) }]);
+    const r = T.run && T.run(q.values, id, id + 'k'); if (r) { out[0][1].result = id + 'k'; out.push(...r); } }   // 038 P5: the kind's own primitives after its matrix
   else out.push(...T.prim(q.values, id));
   out[out.length - 1][1].result = X;
   if (kind === 'none' && tgt === 'both') return [...out, ['feComposite', { in: X, in2: '$IN', operator: 'arithmetic', k1: 0, k2: a, k3: 1 - a, k4: 0 }]];

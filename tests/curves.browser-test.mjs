@@ -35,10 +35,10 @@ try {
     const win = [...document.querySelectorAll('#menubar .mb-lbl, .mb-list .mb-lbl, [role="menu"] .mb-lbl')].map((l) => l.textContent.trim()); b.click();
     return { made: !!d, closed: d.classList.contains('closed'), side: d.parentElement.id, plus: plus.includes('nodes'), win: win.some((t) => /NODES$/.test(t)),
       note: d.querySelector('.note').textContent, errs: __e.slice() };`);
-  assert.equal(first.made, true); assert.equal(first.closed, true); assert.equal(first.side, 'rack');
+  assert.equal(first.made, true); assert.equal(first.closed, true); assert.equal(first.side, 'rackL');   // 038 M: NODES' card seats on the left rack (THE FIRST RUN CHOOSES)
   assert.equal(first.plus, true); assert.equal(first.win, true);
   assert.equal(first.note, 'Grades the screen only — pictures and films are untouched.'); assert.deepEqual(first.errs, []);
-  console.log('PASS NODES (CURVES\' heir) ships closed on the right rack, in the FINDER and WINDOW, and says in one line that it grades the screen only');
+  console.log('PASS NODES (CURVES\' heir) ships closed on the left rack, in the FINDER and WINDOW, and says in one line that it grades the screen only');
 
   /* 2 · neutral costs nothing */
   assert.equal(await g.ev('return __filter();'), 'none');
