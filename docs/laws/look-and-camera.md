@@ -18,8 +18,8 @@ and entering one puts its remembered values back (a style never visited inherits
 modulation window's route list) or a timeline clip holds (a clip's curve `targetId`) is skipped both ways — the route owns it — and its last
 hand-set number is kept for when it is let go (`isModulated` is true only while a modulator writes, so the routes and the clips are read).
 `ui.styleRecall(from, to)` (lab/windows/material.js) runs from the STYLE seg's hand, the `style` action (C, the stage's STYLE ›) and the
-`material.style` target's set (an EVENT lane — which refreshes a style the hand remembered and never starts a memory, so a demo whose lane
-plays stays clean), NEVER from a restore (a project, an undo, a link, a demo) nor `LW.setStyle` (the tools' looks);
+`material.style` target's set (an EVENT lane — which refreshes a style the hand remembered and starts no memory: a demo whose lane plays
+gains no `styleMem`), NEVER from a restore (a project, an undo, a link, a demo) nor `LW.setStyle` (the tools' looks);
 a switch is one history row with the knobs it moved. PROJECT inside `presentation.mat`, absent = nothing remembered, never in NEW, a link
 does not carry it; it is replaced, never mutated (a restore hands it the history's own record).
 
