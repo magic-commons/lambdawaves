@@ -218,7 +218,7 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     ranges: Object.freeze({ zoom: R(...CAM.DIST, H.dist, { log: true, fmt: 'zoom', reverse: true }), fov: R(...CAM.FOV, H.fov), yaw: R(0, 2 * Math.PI, H.yaw),
       pitch: R(-CAM.PITCH, CAM.PITCH, H.pitch), panX: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }), panY: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }),
       drag: R(...CAM.GAIN, CAM.GAIN_DEF, { step: CAM.GAIN_STEP, log: false }), friction: R(0, CAM.MU_MAX, CAM.MU_DEF, { step: CAM.MU_STEP }),
-      fling: R(...CAM.FLING, CAM.FLING_DEF, { step: CAM.FLING_STEP }) }) };
+      fling: R(...CAM.FLING, CAM.FLING_DEF, { step: CAM.FLING_STEP }), autoRotate: { hint: 'AUTO-ROTATE — a fling never stops (no friction)' } }) };   // 038 K4: the kit's word ("turn the view on its own") is not this law's
   return { camera, camTravel, camLevel, syncFreeAngles, orbitBy: told(orbitBy), keyOrbitMoving, queueKeyOrbit, stepKeyOrbit: told(stepKeyOrbit), setCamMode,
     camLevelStep: told(camLevelStep), cameraStep: told(cameraStep), setDist, setFov, syncCamUI: tell, resetView, zoomAt, setShift, panBy, port };
 }

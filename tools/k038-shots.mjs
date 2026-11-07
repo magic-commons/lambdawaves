@@ -13,7 +13,7 @@ const scene = process.argv[2] || 'k1', DIR = process.argv[3] || '.tmp/K-shots';
 mkdirSync('.tmp', { recursive: true }); mkdirSync(DIR, { recursive: true });
 const W = 1500, H = 950;
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 9703}/lab/?starter=home&warn=0&sw=0`, { width: W, height: H,
-  prefs: { 'ui.primaryPointerCapabilities': 6, 'ui.allPointerCapabilities': 6 } });
+  prefs: scene === 'k4' ? {} : { 'ui.primaryPointerCapabilities': 6, 'ui.allPointerCapabilities': 6 } });   // k4: headless Firefox under the pointer prefs hit-tests <html> over the stage, so its right-click finds no stage
 let pid = 0;
 const drag = (pts, ms = 40) => drv.actions(g.s, [{ type: 'pointer', id: 'd' + (++pid), parameters: { pointerType: 'mouse' }, actions: [
   { type: 'pointerMove', duration: 0, origin: 'viewport', x: Math.round(pts[0][0]), y: Math.round(pts[0][1]) }, { type: 'pointerDown', button: 0 },
@@ -141,9 +141,10 @@ try {
         box: [R.left, R.top, R.right, R.bottom].map(Math.round), vw: innerWidth, vh: innerHeight };`);
     const free = (fx, fy) => g.ev(`const S = document.querySelector('#stage').getBoundingClientRect();
       for (let k = 0; k < 60; k++) { const x = S.left + S.width * (${fx} + (0.5 - ${fx}) * k / 60), y = S.top + S.height * (${fy} + (0.5 - ${fy}) * k / 60), h = document.elementFromPoint(x, y);
-        if (h && h.tagName === 'CANVAS' && h.closest('#stage')) return [Math.round(x), Math.round(y)]; } return null;`);
-    const right = async (p) => { await drv.actions(g.s, [{ type: 'pointer', id: 'r' + (++pid), parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: p[0], y: p[1] },
-      { type: 'pointerDown', button: 2 }, { type: 'pointerUp', button: 2 }] }]); await nap(400); return menu(); };
+        if (h && h.matches('#stage, #stage > canvas')) return [Math.round(x), Math.round(y)]; } return [Math.round(S.left + S.width / 2), Math.round(S.top + S.height / 2)];`);   // headless Firefox under the pointer prefs answers elementFromPoint with <html> over the stage: the centre then
+    /* headless Firefox delivers a driver's button-2 press as a contextmenu on <html> (the base's too), so the press is the canvas's own contextmenu event */
+    const right = async (p) => { if (!Array.isArray(p)) throw new Error('no stage point: ' + JSON.stringify(p));
+      await g.ev(`document.querySelector('#field').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: ${p[0]}, clientY: ${p[1]} })); return 1;`); await nap(400); return menu(); };
     const auto = () => g.ev(`return __LW.actions.get('camera.autoRotate').get();`);
     const c = await free(0.5, 0.5); out.centre = await right(c);
     const L = out.centre.rows.map((r) => r.lbl), iLock = L.findIndex((l) => l.startsWith('LOCK')), iAuto = L.findIndex((l) => l.startsWith('AUTO-ROTATE'));

@@ -4,7 +4,8 @@
  * A surface with its own door keeps it — a registered knob (the kit's knob menu: the timeline's CLIP › and the modulation window's ROUTES ›;
  * λWAVES adds its rows here, as the part 'app'), FOLDERS (the kit's rows), NODES, the favourites strip — and a surface whose right button is a
  * law keeps that (SPECTRUM's grid: right = REMOVE, paint-stroke.js), its menu on the keys and the hold.  A text field keeps the browser's menu.
- * The stage never shows the browser's menu.  Each menu is ≤ 8 rows.  createContextMenus(app) is seated by rack.js after FOLDERS. */
+ * The stage never shows the browser's menu.  Each menu is ≤ 8 rows but the stage's, ≤ 9 since 038 K4 (Josh's AUTO-ROTATE under LOCK; FLIP kept, no
+ * submenu).  createContextMenus(app) is seated by rack.js after FOLDERS. */
 import { contextMenu, knobMenu, knobMenuPart, setMenuEscape } from './mir/shell/menubar.js';
 import { holdTap } from './mir/kit.js';
 import { VIEW_NAMES, drawStyle } from './field.js';
@@ -31,7 +32,7 @@ export function createContextMenus(app) {
   const VIEWS = [['density', 'ρ  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']];
   const stage = () => [sub('VIEW', () => radio('view', 'view', VIEWS, () => VIEW_NAMES[mat.view])),
     sub('STYLE', () => radio('style', 'style', ui.styleList(), () => drawStyle(mat.style))),   // 032 O1: the seg's own visible set (it listed five)
-    row('palette', 'PALETTE'), row('camReset', 'CAMERA HOME'), row('camera.flip', 'FLIP'), row('camera.lock', 'LOCK'), null, row('copy.picture', 'COPY PICTURE'), row('hide', 'HIDE THE INTERFACE')];
+    row('palette', 'PALETTE'), row('camReset', 'CAMERA HOME'), row('camera.flip', 'FLIP'), row('camera.lock', 'LOCK'), row('camera.autoRotate', 'AUTO-ROTATE'), null, row('copy.picture', 'COPY PICTURE'), row('hide', 'HIDE THE INTERFACE')];   // 038 K4 (Josh: "add 'Auto-rotate' … perhaps under 'lock'"): the ninth row
   const title = (id) => [row(`window.${id}.fold`, 'FOLD'), row(`window.${id}.float`, 'FLOAT'), row(`window.${id}.side`, win(id).side === 'right' ? 'TO THE LEFT RACK' : 'TO THE RIGHT RACK'),
     row(`window.${id}.reset`, 'RESET PLACE'), row(`window.${id}.solo`, 'SOLO'), row('notes', 'WINDOW HELP'), null, row(`window.${id}.close`, 'CLOSE')];
   const favRows = (el) => { const f = el.closest('[data-fav]'), F = app.sh.csb; return f && F ? F.rowsFor(f.dataset.fav).map((r) => [r.label, r.run]) : []; };   // ADD TO / REMOVE FROM the CONTROL SURFACE
