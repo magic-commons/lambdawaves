@@ -133,8 +133,8 @@ export function createMaterial(app) {
     const tethered = () => { const h = mod.host, ed = app.state.tl && app.state.tl.editor, T = new Set(h ? h.model.routeList().map((r) => r.targetId) : []);
       if (ed && ed.model) { const doc = ed.model.state(), on = new Set(doc.clips.map((c) => c.curveId)); for (const c of doc.curves) if (on.has(c.id)) T.add(c.targetId); }
       return T; };
-    /* `lane` (the STYLE target's road): a lane only refreshes a style the hand already remembered — it never starts a memory, so a demo or a file
-       whose STYLE lane plays keeps no record it did not have (A DEMO OPENS CLEAN stays clean while it plays) */
+    /* `lane` (the STYLE target's road): a lane only refreshes a style the hand already remembered — it starts no memory, so a demo or a file
+       whose STYLE lane plays gains no `styleMem` it did not have */
     ui.styleRecall = (from, to, lane = false) => {
       if (from === to) return;
       const T = tethered(), M = { ...mat.styleMem }, keep = {}, back = M[drawStyle(to)] || {};

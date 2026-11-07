@@ -37,7 +37,7 @@ const theme = (t) => g.ev(`__LW.look.set({ theme: ${JSON.stringify(t)} }); await
 const out = {};
 try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify((await g.errors()).errs));
-  await g.ev(`__LW.loadPreset('1s+2pz'); __LW.pause(); await __LW.settle(); return 1;`);
+  if (scene !== 'k6s') await g.ev(`__LW.loadPreset('1s+2pz'); __LW.pause(); await __LW.settle(); return 1;`);   // k6s opens a demo from a clean start (a touched session asks first)
   if (scene === 'k1') {
     /* the check: a real press on SHELL ±, two real drags (EXPOSURE down, KNEE up), SIGNED (no memory: the knobs stay), EXPOSURE up there, then back:
        SHELL ± wears its own numbers again and SIGNED its own; a macro on EXPOSURE and a timeline clip on KNEE stand still through a switch while ISO is
@@ -222,6 +222,33 @@ try {
     out.size = await g.ev(`return { size: __LW.mat.atomSize, mem: JSON.parse(JSON.stringify(__LW.mat.styleMem || {})) };`);
     for (const t of ['light', 'dark']) { await theme(t); await shot(`038-K5-wave-benzene-${t}`, await rectOf('.dev[data-id="observer"]')); }
     out.ok = out.mol.ok && !out.rows.scrolls && out.rows.esp && out.size.size === 0.35 && !Object.values(out.size.mem).some((m) => 'atomSize' in m);
+  }
+  if (scene === 'k6') {
+    /* K6 · THE REVIEW'S STEPS (a dial after an undo must not rewrite a history row): KEY dragged up (≈ 1.3), RESET by Enter, UNDO (KEY back), KEY dragged
+       further (≈ 1.45), UNDO, UNDO, REDO → the REDO lands on the first KEY, never the second; then the same with KEY dragged DOWN through its home */
+    await float('light', 40, 40, 300);
+    const KEY = '.dev[data-id="light"] [data-param="light.key"]', key = () => g.ev(`return __LW.mat.light ? (__LW.mat.light.key ?? null) : 'absent';`);
+    const turn = async (dy) => { const c = mid(await rectOf(KEY)); await drag([c, [c[0], c[1] - dy / 2], [c[0], c[1] - dy]]); await nap(700); };
+    const enterReset = async () => { await g.ev(`document.querySelector('.dev[data-id="light"] .lw-light-reset').focus(); return 1;`); await g.press(''); await nap(700); };
+    const H = (verb) => g.ev(`__LW.history.${verb}(); await new Promise((r) => setTimeout(r, 400)); return __LW.mat.light ? (__LW.mat.light.key ?? null) : 'absent';`);
+    const run = async (d1, d2) => { const o = {}; await turn(d1); o.k1 = await key(); await enterReset(); o.reset = await key(); o.undo1 = await H('undo');
+      await turn(d2); o.k2 = await key(); o.undoA = await H('undo'); o.undoB = await H('undo'); o.redo = await H('redo'); o.ok = o.redo === o.k1 && o.undo1 === o.k1; return o; };
+    out.up = await run(22, 10);
+    await g.ev(`__LW.history.clear(); document.querySelector('.dev[data-id="light"] .lw-light-reset').click(); await new Promise((r) => setTimeout(r, 400)); __LW.history.clear(); return 1;`);
+    out.through = await run(22, -40);   // the second drag takes KEY down through its home (1.0)
+    out.ok = out.up.ok && out.through.ok;
+  }
+  if (scene === 'k6s') {
+    /* K6 · DOES STAR LOOP GO DIRTY WHILE IT PLAYS? the DEMOS press, then play 15 s reading `projects.dirty` every 500 ms; what moved in the edit record */
+    await g.ev(`__LW.projects.demo('star-loop'); for (let i = 0; i < 100 && !/opened demo/.test(__LW.projects.status); i++) await new Promise((r) => setTimeout(r, 100)); await __LW.settle(); return 1;`);
+    out.opened = await g.ev(`return { status: __LW.projects.status, dirty: __LW.projects.dirty, mem: __LW.mat.styleMem || null };`);
+    const before = await g.ev(`return __LW.serialize ? JSON.stringify(__LW.serialize({ scope: 'edit' })) : null;`).catch(() => null);
+    await g.ev(`__LW.run('transport.play'); return 1;`);
+    const t = []; for (let i = 0; i < 30; i++) { await nap(500); t.push(await g.ev(`return __LW.projects.dirty;`)); }
+    await g.ev(`__LW.run('transport.play'); return 1;`);
+    out.dirtySeries = t.map((d) => (d ? 1 : 0)).join(''); out.dirtyEver = t.some(Boolean);
+    out.after = await g.ev(`return { mem: __LW.mat.styleMem || null, style: __LW.mat.style, light: __LW.mat.light || null };`);
+    out.ok = !out.dirtyEver;
   }
 } catch (e) { out.error = String(e && e.stack || e); }
 finally { out.errors = (await g.errors()).errs; await g.close(); }

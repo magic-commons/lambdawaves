@@ -50,11 +50,12 @@ export function createLight(app) {
   const w = device({ id: 'light', eyebrow: 'LIGHTING', title: 'the key, the fill, the rim', status: '' });
   w.root.classList.add('native-clean', 'closed', 'lw-light'); app.host.rack.appendChild(w.root);
   const knobs = {}, cur = (k) => valOf(mat.light, k);
-  /** the one write: the record keeps only what is off its home, and goes when nothing is */
+  /** the one write: the record keeps only what is off its home, and goes when nothing is.  038 K6: a FRESH record every write, never an edit in place —
+   *  the record may be an object a history row also holds, and a dial moved after an undo must not rewrite that row */
   function write(k, v) {
-    const L = mat.light || (mat.light = {});
+    const L = { ...mat.light };
     if (v === HOME[k]) delete L[k]; else L[k] = v;
-    if (!Object.keys(L).length) delete mat.light;
+    if (Object.keys(L).length) mat.light = L; else delete mat.light;
     if (k === 'az' || k === 'el' || k === 'hue' || k === 'tint') paintSun();
     schedule(TIER.PRESENT);
   }
