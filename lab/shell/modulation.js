@@ -412,26 +412,32 @@ export function createModSeam(app) {
     for (const k of ['pointerup', 'pointercancel']) addEventListener(k, () => { pressed = false; }, true);
     const summoned = (n) => !!n && !n.hidden && n.offsetWidth > 0 && (n === nbEl || (n.classList.contains('mir-win') && !n.classList.contains('mir-transport-free'))
       || (n.classList.contains('dev') && n.classList.contains('floating') && !n.classList.contains('closed') && n.dataset.id !== 'transport')) && !workRoots().includes(n) && n.dataset.mirWindow !== 'pattern';
-    function seatOpen(n, floor = { h: 280, w: 300 }) {
+    function seatOpen(n, floor = { h: 280, w: 280 }, again = false) {
       const kit = n.classList.contains('mir-win') ? windowOf(n) : null; if (kit && typeof kit.place !== 'function') return;
       const pane = laid(n), rail = kit ? railOf(n) : null, box = spanOf([pane, ...(rail ? [laid(rail)] : [])]), s = barSpan(), title = document.getElementById('title');
-      const door = [s, title && title.offsetWidth ? title.getBoundingClientRect() : null].filter(Boolean), work = workRoots().filter((r) => !r.hidden && r.offsetWidth).flatMap((r) => [laid(r), ...(railOf(r) ? [laid(railOf(r))] : [])]), hard = [...door, ...work];
+      const open = workRoots().filter((r) => !r.hidden && r.offsetWidth), rails = open.map(railOf).filter(Boolean).map(laid);
+      const door = [s, title && title.offsetWidth ? title.getBoundingClientRect() : null].filter(Boolean), work = [...open.map(laid), ...rails], hard = [...door, ...work];
+      const ctl = [...open.map((r) => spanOf([...r.querySelectorAll('button, .tl-clip')].filter((b) => b.offsetWidth).map((b) => b.getBoundingClientRect()))).filter(Boolean), ...rails];   // a work bar's controls and clips, and its rail
       const soft = document.body.classList.contains('rack-hidden') ? [] : racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => rk.getBoundingClientRect()).filter((r) => r.width);
       const view = { width: innerWidth, height: innerHeight }, top = 52 * (cssZoom(title) || 1), ph = pane.bottom - pane.top, pw = pane.right - pane.left, rim = box.bottom - box.top - ph, wim = box.right - box.left - pw;
       /* the full size first, then shorter (6 % a step, never below 280 px, the tallest minimum of the windows that come here) and narrower (4 % a step,
-         three at most, never below 300 px): clear of everything; then of all but the rack columns; then — a stage too small for a work bar and a window
-         beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without.  A floated card keeps its size (V3 folds RENDER) */
+         three at most): clear of everything; then of all but the rack columns; then (039 F3, V-REVIEW 3: at 1300 × 850 the columns beside a docked
+         TIMELINE are 284–286 px and NODES, FOLDERS and the notebook lay on its controls) at the floor's width, 280 px, clear of everything and of all but
+         the racks; then over the work bar's empty lanes, clear of its controls, its clips and its rail (full, then the floor's width); then — a stage too small for a work bar and a
+         window beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without.  A floated card keeps its size */
       const sizes = (kit || n === nbEl) ? 12 * 4 : 1;
-      const fit = (avoid) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = Math.floor(pw * (1 - j * 0.04)); if (i && (hh < floor.h || ww < floor.w)) continue;
-        const at = clearSeat({ ...box, right: box.left + wim + ww, bottom: box.top + rim + hh }, { avoid, view, top }); if (at) return { at, h: k ? hh : 0, w: j ? ww : 0 }; } return null; };
-      const got = fit([...hard, ...soft]) || fit(hard) || fit([...door, ...soft]) || fit(door);
+      const fit = (avoid, narrow = false) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = narrow ? floor.w : Math.floor(pw * (1 - j * 0.04));
+        if (narrow ? j || ww >= pw * 0.88 || hh < floor.h : i && (hh < floor.h || ww < floor.w)) continue;
+        const at = clearSeat({ ...box, right: box.left + wim + ww, bottom: box.top + rim + hh }, { avoid, view, top }); if (at) return { at, h: k ? hh : 0, w: narrow || j ? ww : 0 }; } return null; };
+      const thin = (avoid) => sizes > 1 && fit(avoid, true), lanes = [...door, ...ctl];
+      const got = fit([...hard, ...soft]) || fit(hard) || thin([...hard, ...soft]) || thin(hard) || fit([...lanes, ...soft]) || fit(lanes) || thin([...lanes, ...soft]) || thin(lanes) || fit([...door, ...soft]) || fit(door);
       if (n.dataset.seat === 'over') delete n.dataset.seat;
       if (!got) { if (s && hits(box, s)) n.dataset.seat = 'over'; return; }   // no room on this stage: it stays where it opened, over the bar (021 V3)
       const { at, h, w } = got; if (at.left === Math.round(box.left) && at.top === Math.round(box.top) && !h && !w) return;
       const z = cssZoom(n) || 1, x = pane.left + at.left - box.left, y = pane.top + at.top - box.top;
       if (kit) { kit.place({ left: x / z, top: y / z, ...(h ? { height: h / z } : {}), ...(w ? { width: w / z } : {}) });
         const was = laid(n), wh = was.bottom - was.top, wd = was.right - was.left;   // the kit's floor (min) can be above ours: once more from there, never shorter than it
-        if (floor.h === 280 && ((h && wh > h + 2) || (w && wd > w + 2))) seatOpen(n, { h: Math.ceil(wh), w: Math.ceil(wd) }); }
+        if (!again && ((h && wh > h + 2) || (w && wd > w + 2))) seatOpen(n, { h: h && wh > h + 2 ? Math.ceil(wh) : floor.h, w: w && wd > w + 2 ? Math.ceil(wd) : floor.w }, true); }
       else if (n === nbEl) { const o = n.offsetParent ? n.offsetParent.getBoundingClientRect() : { left: 0, top: 0 }; n.style.left = (x - o.left) / z + 'px'; n.style.top = (y - o.top) / z + 'px'; if (h) n.style.height = h / z + 'px'; if (w) n.style.width = w / z + 'px'; }
       else app.sh.layout.moveFloat(n.dataset.id, x, y);
     }
