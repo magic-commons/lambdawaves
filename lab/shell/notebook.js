@@ -132,6 +132,29 @@ export function createNotebook(app) {
       const mb = createMenubar({ opener: title, host: document.getElementById('lab'), phone: isPhone,
         menus: Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => wrap(rows())])) });
       layout.menu = { open: mb.open, close: mb.close, get isOpen() { return mb.isOpen; }, scale: 1.04, get enlarged() { return title.classList.contains('menu-open'); } };
+      /* 039 W2 · THE MENUS BY KEYBOARD (the kit's bar walks a list's rows ↑ ↓ and opens a submenu on →, but a group takes no arrow and a key's
+         open leaves the focus on the group — FOR-KIT): on a group Enter or ↓ opens it at its first row (↑ its last), ← → Home End walk the
+         groups (an open list follows the focus); in a list ← → step to the next group's list where no submenu takes the key; Escape closes
+         the list back to its group, then the bar (the kit's: the focus back on the logo) */
+      { const groups = () => [...mb.bar.querySelectorAll('.mb-btn')], isOpen = (b) => b.getAttribute('aria-expanded') === 'true';
+        const openAt = (b, last) => { if (!isOpen(b)) mb.openGroup(b.dataset.menu); const rows = [...b.nextElementSibling.querySelectorAll(':scope > .mb-item:not(:disabled)')];
+          (rows[last ? rows.length - 1 : 0] || b).focus({ preventScroll: true }); };
+        mb.bar.addEventListener('keydown', (e) => { if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+          const k = e.code, g = groups(), btn = e.target.closest('.mb-btn'), item = e.target.closest('.mb-item');
+          const step = (b, d) => g[(g.indexOf(b) + d + g.length) % g.length];
+          if (btn) {
+            if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === 'NumpadEnter') { e.preventDefault(); openAt(btn, k === 'ArrowUp'); }
+            else if (k === 'ArrowRight' || k === 'ArrowLeft') { e.preventDefault(); const to = step(btn, k === 'ArrowRight' ? 1 : -1); if (isOpen(btn)) openAt(to); else to.focus({ preventScroll: true }); }
+            else if (k === 'Home' || k === 'End') { e.preventDefault(); g[k === 'Home' ? 0 : g.length - 1].focus({ preventScroll: true }); }
+            else if (k === 'Escape' && isOpen(btn)) { e.preventDefault(); btn.click(); }
+            return;
+          }
+          if (!item) return;
+          let list = item.parentElement; while (list && list.mbParent) list = list.mbParent;   // a submenu's row belongs to its root list's group
+          const grp = list && list.previousElementSibling; if (!grp || !grp.classList.contains('mb-btn')) return;
+          if (k === 'ArrowLeft' || (k === 'ArrowRight' && !item.mbEntries)) { e.preventDefault(); openAt(step(grp, k === 'ArrowRight' ? 1 : -1)); }
+          else if (k === 'Escape' && item.parentElement === list) { e.preventDefault(); grp.click(); grp.focus({ preventScroll: true }); }
+        }); }
       /* iteration 014 A7 · 018 E5 · THE FINDER (the kit's createWindowPicker; WINDOW's first row, the CSB's window-plus and the key row `windowPicker`):
          every window by name with its one glyph (021 V2: its register's, lab/icons.js WINDOW_GLYPH), a window the mode hides greyed with the mode that shows it;
          a pick of an open window scrolls the rack to it (kit rk.reveal: no reorder), a closed one opens at the top and the rack scrolls up */
