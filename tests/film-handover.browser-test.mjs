@@ -14,6 +14,10 @@
 // 039 S4 · A RED MEANS A BUG: a wait before a read is on the state it means (__until in the page, 25 ms apart with a ceiling): a card open and
 // at rest, a save's share or download, the store's count, the last tap's activation expired, a node added; a screenshot is taken when two in
 // a row agree (the stage at rest), never after a fixed sleep.
+// 039 S6 · the stored renders' rows are the store's: the kit repaints them (panel.js paintRecoveries) only after its own await on the
+// recorder's recoveries(), so a paint and DISCARD RENDER both leave the old rows up for a while — step 2 waits until the rows read the
+// recorder's own list (date and frames, newest first), before the discard and after it, never on the store's count alone (S6 pass 1:
+// the id was set on a row the repaint then took off the page — 'the DISCARD STORED RENDER tap did not land' — the suite's red).
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
 
@@ -102,21 +106,31 @@ try {
 
   /* ── 2 · no discard timer: the facade film has its bytes and its store copy stays until DISCARD STORED RENDER; DISCARD RENDER removes the card's ──
      (038: the page cannot fetch(blob:) under the live CSP's connect-src 'self', here as on the site — the bytes are the save's own files') */
-  const t2a = await ev(`const s = __H.saves.find((x) => x.who === 'film'); await __LW.render.view.paint();
+  const t2a = await ev(`const s = __H.saves.find((x) => x.who === 'film');
+    /* the rows the card shows vs the recorder's own list: [frames, date] each, newest first */
+    __H.rowsNow = () => [...__LW.render.view.controls.recoveryRow.querySelectorAll('.sv-note')].map((n) => { const p = n.textContent.split(' · '); return parseInt(p[1], 10) + ' · ' + p[p.length - 1]; });
+    __H.jobsNow = async () => (await __LW.render.recorder.recoveries()).map((j) => j.frames + ' · ' + new Date(j.store.manifest.at).toLocaleString());
+    __H.rowsTrue = async (ms = 15000) => { const t0 = performance.now(); for (;;) { if (JSON.stringify(__H.rowsNow()) === JSON.stringify(await __H.jobsNow())) return Math.round(performance.now() - t0);
+      if (performance.now() - t0 > ms) return -1; await new Promise((r) => setTimeout(r, 25)); } };
+    await __LW.render.view.paint();
     await __until(() => { const t = [...document.querySelectorAll('.dev[data-id="render"] button')].map((b) => b.textContent.trim()); return t.includes('DISCARD RENDER') && t.includes('DISCARD STORED RENDER'); });
-    return { at: s.bytes, films: await __H.films(), timers: s.timers.map((t) => t.ms), rows: [...document.querySelectorAll('.dev[data-id="render"] button')].map((b) => b.textContent.trim()).filter((x) => /STORED|DISCARD/.test(x)) };`);
+    const paintMs = await __H.rowsTrue();
+    return { paintMs, list: __H.rowsNow(), jobs: await __H.jobsNow(), at: s.bytes, films: await __H.films(), timers: s.timers.map((t) => t.ms), rows: [...document.querySelectorAll('.dev[data-id="render"] button')].map((b) => b.textContent.trim()).filter((x) => /STORED|DISCARD/.test(x)) };`);
   assert.ok(t2a.at > 0, 'the facade film has no bytes: ' + JSON.stringify(t2a));
   assert.ok(t2a.timers.every((ms) => ms === 600000), 'a save set a timer other than the hand-over URL\'s own revoke: ' + JSON.stringify(t2a));
+  assert.ok(t2a.paintMs >= 0, 'the stored renders\' rows never read the recorder\'s list: ' + JSON.stringify(t2a));
   assert.ok(t2a.films >= 2 && t2a.rows.includes('DISCARD RENDER') && t2a.rows.some((x) => x === 'DISCARD STORED RENDER'), 'the store does not hold both films with their discard rows: ' + JSON.stringify(t2a));
   assert.equal((await mark('fh-discard', `() => __H.button('DISCARD RENDER')`)).ok, 1);
-  assert.equal((await g.tap('#fh-discard')).ok, 1, 'the DISCARD RENDER tap did not land');
-  const t2b = await ev(`await __H.filmsTo(${t2a.films - 1}); await __until(() => !__LW.render.view.state().done); return { films: await __H.films(), done: __LW.render.view.state().done };`);
+  const tapD = await g.tap('#fh-discard'); assert.equal(tapD.ok, 1, 'the DISCARD RENDER tap did not land: ' + JSON.stringify(tapD));
+  const t2b = await ev(`await __H.filmsTo(${t2a.films - 1}); await __until(() => !__LW.render.view.state().done); const repaint = await __H.rowsTrue();
+    return { films: await __H.films(), done: __LW.render.view.state().done, repaint, list: __H.rowsNow(), jobs: await __H.jobsNow() };`);
   assert.ok(t2b.films === t2a.films - 1 && !t2b.done, 'DISCARD RENDER did not remove the card film from the store: ' + JSON.stringify(t2b));
+  assert.ok(t2b.repaint >= 0 && t2b.list.length === t2a.list.length - 1, 'the stored renders\' rows are not the store\'s after DISCARD RENDER: ' + JSON.stringify({ before: t2a.list, now: t2b }));
   assert.equal((await mark('fh-stored', `() => __H.button('DISCARD STORED RENDER')`)).ok, 1);
-  assert.equal((await g.tap('#fh-stored')).ok, 1, 'the DISCARD STORED RENDER tap did not land');
+  const tapS = await g.tap('#fh-stored'); assert.equal(tapS.ok, 1, 'the DISCARD STORED RENDER tap did not land: ' + JSON.stringify(tapS));
   const t2c = await ev(`await __H.filmsTo(${t2b.films - 1}); return { films: await __H.films() };`);
   assert.equal(t2c.films, t2b.films - 1, 'DISCARD STORED RENDER did not remove the facade film: ' + JSON.stringify(t2c));
-  pass(`no discard timer (the save's only timer is the hand-over URL's ${t2a.timers.join(', ')} ms); the film is ${t2a.at} B with the copy kept; DISCARD RENDER ${t2a.films} → ${t2b.films}, DISCARD STORED RENDER → ${t2c.films}`);
+  pass(`no discard timer (the save's only timer is the hand-over URL's ${t2a.timers.join(', ')} ms); the film is ${t2a.at} B with the copy kept; DISCARD RENDER ${t2a.films} → ${t2b.films} (the stored rows ${t2a.list.length} → ${t2b.list.length}, the store's own list, read ${t2a.paintMs} and ${t2b.repaint} ms after the paint and the drop — printed, not judged), DISCARD STORED RENDER → ${t2c.films}`);
 
   /* ── 3 · TAKE A PICTURE from a script: no activation → a download ── */
   const t3 = await ev(`const gone = await __until(() => !navigator.userActivation.isActive, 20000); __H.reset(); await __LW.captureUI.picture();   /* past the last tap's transient activation (its own state, not a 6-s sleep) */
