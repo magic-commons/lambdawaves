@@ -763,6 +763,15 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    in the words' ink; a widget is a box in stage fractions with no background, border or shadow, never a pointer target outside EDIT; H takes them out */
 #widgets { position: absolute; inset: 0; z-index: 19; pointer-events: none; user-select: none; -webkit-user-select: none; color: hsl(40 33% 96%); }
 [data-theme="light"] #widgets { color: hsl(232 22% 10%); }
+/* 039 X4 · THE STAGE WORDS WEAR THE STAGE'S INK (WALK-A #11): the caption, INFORMATIONAL's words, WIDGETS and the ESP key read against the stage's
+   own ground — body[data-stage-ink], from mat.bg's luminance (settings-card.js setStageMix); at the theme's own ground it is the theme's ink, as before */
+body[data-stage-ink="light"] .mir-info { --info-ink: hsl(40 33% 96%); --info-paper: hsl(228 40% 4% / .27); --info-paper-soft: hsl(228 40% 4% / .14); }
+body[data-stage-ink="dark"] .mir-info { --info-ink: hsl(232 22% 10%); --info-paper: hsl(42 45% 97% / .38); --info-paper-soft: hsl(42 45% 97% / .2); }
+body[data-stage-ink="light"] #widgets { color: hsl(40 33% 96%); } body[data-stage-ink="dark"] #widgets { color: hsl(232 22% 10%); }
+body[data-stage-ink="light"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(0 0 0 / .5); } body[data-stage-ink="dark"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(255 255 255 / .75); }
+body[data-stage-ink="light"] .lw-espbar { color: hsl(40 33% 96%); text-shadow: 0 0 6px rgb(0 0 0 / .75); } body[data-stage-ink="dark"] .lw-espbar { color: hsl(232 22% 10%); text-shadow: 0 0 6px rgb(255 255 255 / .8); }
+html body[data-stage-ink="light"] #title .word { color: #fff; } html body[data-stage-ink="dark"] #title .word { color: #000; }   /* the wordmark and the menu's words stand on the stage too */
+html body[data-stage-ink="light"] #menubar .mb-btn:not(:hover):not([aria-expanded="true"]) { color: hsl(40 33% 96% / .86); } html body[data-stage-ink="dark"] #menubar .mb-btn:not(:hover):not([aria-expanded="true"]) { color: hsl(232 22% 10% / .8); }
 #widgets .lw-widget { position: absolute; box-sizing: border-box; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; outline: 0; }
 #widgets .lw-widget-body { position: absolute; inset: 0; container-type: size; overflow: hidden; }
 #widgets .lw-widget-bar, #widgets .lw-widget-x, #widgets .lw-widget-grip { display: none; }

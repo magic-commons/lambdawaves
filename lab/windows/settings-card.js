@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, trig, readout, group, label } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { summon } from '../summon.js';import { askUrlOf, ASK_ENABLED } from '../ask.js';
+import { el, knob, sw, seg, trig, readout, group, label, hint } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb, srgbToLinear } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { summon } from '../summon.js';import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, perf, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
@@ -55,6 +55,9 @@ export function createSettingsCard(app) {
       app.state.stageMix = Math.max(0, Math.min(1, Number.isFinite(+v) ? +v : 0));
       const a = themeGround(), b = mat.stageCustom;
       mat.bg = app.state.stageFollow ? a.slice() : [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * app.state.stageMix);
+      /* 039 X4 · THE STAGE WORDS WEAR THE STAGE'S INK (WALK-A #11): the words on the stage (the caption, INFORMATIONAL's, WIDGETS, the ESP key) read
+         against this ground, not the theme's — dark ink over a ground whose relative luminance passes 0.2 (where the two inks' contrasts cross), else light (lab.css) */
+      const L = 0.2126 * srgbToLinear(mat.bg[0]) + 0.7152 * srgbToLinear(mat.bg[1]) + 0.0722 * srgbToLinear(mat.bg[2]); document.body.dataset.stageInk = L > 0.195 ? 'dark' : 'light';
       look.paintInk(); schedule(TIER.PRESENT);
     }
     app.hooks.restage = () => setStageMix(app.state.stageMix);
@@ -65,12 +68,13 @@ export function createSettingsCard(app) {
     }
     function setStageFollow(on) {
       app.state.stageFollow = !!on;
-      if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', app.state.stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(app.state.stageFollow)); }
+      if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', app.state.stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(app.state.stageFollow));
+        hint(ui.stageFollow, app.state.stageFollow ? 'On: the stage is the theme’s ground · press: your colour' : 'Off: the stage wears your colour · press: the theme’s'); }   // 039 X4: it said "Ignore the chosen stage colour", backwards
       setStageMix(app.state.stageMix);
     }
     app.hooks.setStageColour = setStageColour;
     app.hooks.setStageFollow = setStageFollow;
-    ui.stageK = knob({ label: 'STAGE', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
+    ui.stageK = knob({ label: 'STAGE', title: 'How much of your colour the stage wears; 0 % is the theme', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
     app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); if (x === app.state.stageMix) return x; ui.stageK.set(x); setStageMix(x); return x; };   // 029 M1: the value in force writes nothing
     { const seat = el('div', 'stage-seat'); ui.stageSeat = { root: seat };   // 037 T1: the seat, STAGE and GAMMA are seated in STAGE (lab/stage-window.js)
       ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
@@ -78,10 +82,12 @@ export function createSettingsCard(app) {
          STAGE knob sits at its near-theme rest (≤ 5 %, the first run's 4 %), takes it to 100 %, so the colour chosen IS the ground; a knob the hand set
          higher keeps its blend */
       ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); if (app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });
-      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.title = 'Ignore the chosen stage colour';
-      ui.stageFollow.addEventListener('click', () => setStageFollow(!app.state.stageFollow));
+      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button';
+      /* 039 X4 (WALK-A #10: FOLLOW THEME off showed nothing until the STAGE knob was raised): a HAND turning it off lifts a resting knob (≤ 5 %) to 100 %,
+         P7's road, so the colour chosen shows at once; a knob the hand set higher keeps its blend */
+      ui.stageFollow.addEventListener('click', () => { const on = !app.state.stageFollow; setStageFollow(on); if (!on && app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });
       setStageColour(mat.stageCustom); setStageFollow(true); }
-    ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } });
+    ui.gammaK = knob({ label: 'GAMMA', title: 'The picture’s gamma: above 1 brightens the mid-tones', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } });
     /* 037 T1 · THE STAGE WINDOW: the rows above leave DISPLAY for `stage` (the controls move, the roads do not); DISPLAY keeps EDIT STAGE (native-ui.js seats it) */
     createStageWindow(app);
     ui.editStage = trig({ label: 'EDIT STAGE', glyph: 'stage', title: 'Open STAGE below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'stage') });   // 037 T2 · THE SUMMONS (lab/summon.js)
