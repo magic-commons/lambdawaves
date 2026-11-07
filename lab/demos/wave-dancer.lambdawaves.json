@@ -996,14 +996,6 @@
       "float": null
      },
      {
-      "id": "informational",
-      "side": "L",
-      "folded": true,
-      "closed": false,
-      "off": false,
-      "float": null
-     },
-     {
       "id": "chem",
       "side": "L",
       "folded": true,
@@ -1033,6 +1025,14 @@
       "id": "spectrum",
       "side": "L",
       "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "informational",
+      "side": "L",
+      "folded": true,
       "closed": false,
       "off": false,
       "float": null
