@@ -28,7 +28,7 @@
  * picture) times the FADE, then the node's output `in` the mask, `over` the input.  The cost mark follows (ownRun → ···).
  * 038 N6 A NODE HAS A TARGET (Josh: "an option so that it can only affect either the 'stage', 'object', or 'both'"; CALLS 4: one picture, a mask,
  * a TARGET seg): every node but a LAYER or a SHADER carries TARGET (both · stage · object; absent = both, today's bytes).  The mask is the field's
- * alpha code (lab/field.js setObjectMask, chain F: 255 where an atom carries the pixel, 254 the stage — which pixel is which is F's rule): a targeted
+ * alpha code (lab/field.js setObjectMask, chain F: 255 on the orbital and the molecule, 254 the background — which pixel is which is F's rule): a targeted
  * node is its own run whose mask is SourceAlpha through feFuncA (OBJECT 255·A − 254, STAGE 255 − 255·A, × the FADE; times the MASK when one is
  * set), softened 1.2 px, so out = mix(in, fx, mask) on the `in` / `over` road; `mask: true` asks the field for its codes, and a closing run puts A back to 1.
  *   Pure helpers: IDENTITY · LUMA · mul(B, A) · isIdentity(m) · tableOf(fns, n) · fadeOf(q, T) · ownRun(q, T) · weight(kind, x, soft) */
@@ -89,7 +89,7 @@ function shape(kind, soft) {
 /** a node as its own run: its output named `<id>x`, then the fade (arithmetic) or the mask (`<id>m`, alpha) — in, over its input */
 function own(q, T) {
   const id = q.id, X = id + 'x', a = fadeOf(q, T), kind = maskOf(q, T), soft = clamp01(+q.values.soft || 0), out = [], tgt = targetOf(q, T), M = id + 'm';
-  /* 038 N6: the target's alpha from the field's code in SourceAlpha (OBJECT 255·A − 254: 1 on a ball or stick, 0 on the stage; STAGE the other), × s,
+  /* 038 N6: the target's alpha from the field's code in SourceAlpha (OBJECT 255·A − 254: 1 on the orbital and the molecule, 0 on the background; STAGE the other), × s,
      softened 1.2 px (the code's edge is the march's stipple, F7: it moves with the jitter unless PLAYBACK LOCK pins it) */
   const tA = (s, result) => [['feComponentTransfer', { in: 'SourceAlpha' }, [['feFuncA', { type: 'linear', slope: (tgt === 'object' ? 255 : -255) * s, intercept: (tgt === 'object' ? -254 : 255) * s }]]],
     ['feGaussianBlur', { stdDeviation: 1.2, result }]];
