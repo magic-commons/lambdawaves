@@ -218,10 +218,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const labB = el('button', 'mm-face-lab', way, 'CONTINUE'); labB.type = 'button'; labB.title = 'Continue to the lab'; labB.addEventListener('click', () => close());   // 035 G1: was ENTER THE LAB
   /* 038 M1 · THE FIRST RUN CHOOSES (Josh 11-06: "if the cache is cleared/brand new … instead of 'continue' show an option to go for an 'advanced'
      layout, or a 'simple' layout"): a fresh install's open (rack.js hands `choose`) puts SIMPLE · ADVANCED in CONTINUE's seat, CONTINUE's ink and
-     shadow; a press lays the rack and enters the lab as CONTINUE does.  Any way out of that open is the answer (SIMPLE when no door said) */
+     shadow; a press lays the rack and enters the lab as CONTINUE does.  039 W9 (WALK-D #2): only a press answers — Escape, ⌂ or a pick leave
+     the lab in SIMPLE's rack as it stands and the question open, so the face offers the two doors again at its next open of this visit */
   let choose = null;
   const answer = (kind) => { const c = choose; choose = null; if (c) c(kind); };
-  const firstBs = [['simple', 'SIMPLE', 'The basics — SPECTRUM, PALETTE, WAVE, CAMERA, CLIP'], ['advanced', 'ADVANCED', 'The basics, plus NODES, LIGHTING and STAGE']].map(([kind, word, hint]) => {   // 038 M6: what each lays out, to a reader who has never seen the rack
+  const firstBs = [['simple', 'SIMPLE', 'The basics; more windows later from WINDOW'], ['advanced', 'ADVANCED', 'The basics plus NODES, LIGHTING, STAGE; more from WINDOW']].map(([kind, word, hint]) => {   // 038 M6: what each lays out, to a reader who has never seen the rack
     const b = el('button', 'mm-face-lab', way, word); b.type = 'button'; b.dataset.layout = kind; b.title = hint; b.hidden = true;
     b.addEventListener('click', () => { answer(kind); close(); }); return b; });
   /* 035 G2 · THE CORNERS (Josh 11-03: "a Light/Dark Toggle and a settings … reveal", "the MIR logo … Kinda small in the bottom right", "3 Icon
@@ -320,11 +321,17 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   for (const sc of [scroller, tutEl]) sc.addEventListener('scroll', edging, { passive: true });
   /* 034 M1 · THE VIEWS: the face (over the decks, which stay laid out under it), the decks, FOLDERS' gallery and the tutorial (each in the
      decks' seat); one at a time, one hero playing at most, and leaving a view puts its hero to rest */
+  /* 039 W9 (WALK-D #11): a view that changes under a still pointer wakes no hint — a control that arrived under it is hovered once the pointer
+     moves (the kit's hint answers any pointerover; FOR-KIT) */
+  let unmoved = false;
+  root.addEventListener('pointerover', (e) => { if (unmoved) e.stopPropagation(); }, true);
+  root.addEventListener('pointermove', (e) => { if (e.movementX || e.movementY) unmoved = false; }, true);
   let at = 'decks', firstDeal = false;   // firstDeal: a first run's LIBRARY deals MOLECULAR's first page in THE ENTRANCE (iteration 012 L3)
   function showView(name) {
     collage[name === 'face' ? 'show' : 'hide']();   // 035: the collage under the face alone; the decks, folders and tutorial keep the plain ground
     if (name === at) return false;
     const was = at; at = name; closeDrop(); closeSheet(); restHero();
+    unmoved = true; document.dispatchEvent(new Event('controlhintschange'));   // 039 W9 (WALK-D #11): the standing hint goes with the view (the kit's close)
     face.hidden = name !== 'face'; root.classList.toggle('at-face', name === 'face');
     for (const e of [top, scroller, caption, backB]) e.inert = name === 'face';
     const away = name === 'folders' || name === 'tutorial';
@@ -611,7 +618,18 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const h = prefs.atomic === 'hydrogen'; table.hidden = h; hTable.hidden = !h;
     for (const b of amodeBtns) { const on = b.dataset.amode === prefs.atomic; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
     if (h && !hSet) { hSet = true; for (const b of BASIS) hTile(b, hTable); }
+    if (h) fitH();
     if (keep && !root.hidden) enterTiles(h ? [...hTable.children] : [...table.children], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i % 14 + Math.floor(i / 14)));
+  }
+  /* 039 W9 (WALK-D #5): THE 140 FIT THEIR PAGE — the cell is also bounded by the room ATOMIC's page leaves under its row of words (`--fit`),
+     so the tenth row clears the caption; below a 24-px cell the grid keeps 24 and scrolls in itself, before the wheel turns the page */
+  function fitH() {
+    if (root.hidden || hTable.hidden || !hTable.getClientRects().length) return;
+    const sec = sections[0].sec, cs = getComputedStyle(sec), gap = parseFloat(cs.rowGap) || 0;
+    let room = scroller.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0) - 4;
+    for (const c of sec.children) if (c !== hTable && c.getClientRects().length) room -= c.offsetHeight + gap;
+    const rows = Math.ceil(BASIS.length / 14), t = Math.floor((room - (rows - 1) * 2) / rows);
+    hTable.style.setProperty('--fit', Math.max(24, t) + 'px'); hTable.classList.toggle('mm-hscroll', t < 24); hTable.style.maxHeight = t < 24 ? Math.floor(room) + 'px' : '';
   }
   setAtomic(prefs.atomic, false);
   /* ── MOLECULAR: MOLECULES ONLY (iteration 011 Q4, Josh: "remove those 'lattice' and 'heavy' and other downloadable stuff from the molecular
@@ -985,7 +1003,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   let current = sections[0]; paintLooks();
   const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = amode.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
-  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); movePill(current.b); } }); });   // observed only while the Picker is open
+  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); fitH(); movePill(current.b); } }); });   // observed only while the Picker is open
 
   /* ── going there ── */
   function goMolecule(id) { close(); const C = app.state.chem; if (!C) return; if (!C.on) C.setOn(true); C.pick(id); }
@@ -1034,7 +1052,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function open(o) {
     if (!root.hidden) return;
     const first = !!(o && o.first), toDecks = !!(o && o.decks);
-    choose = (o && o.choose) || null; labB.hidden = !!choose; for (const b of firstBs) b.hidden = !choose;
+    choose = (o && o.choose) || choose; labB.hidden = !!choose; for (const b of firstBs) b.hidden = !choose;
     const r = home.getBoundingClientRect();
     root.style.setProperty('--ox', r.width ? r.left + r.width / 2 + 'px' : '50%'); root.style.setProperty('--oy', r.width ? r.top + r.height / 2 + 'px' : '50%');
     root.classList.toggle('first', first); if (first) firstDeal = true;
@@ -1042,12 +1060,12 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     root.hidden = false; document.body.classList.add('menu-open'); said = null; say(null); ro.observe(scroller); layer();
     if (!seated) { seated = true; sections[1].sec.scrollIntoView({ block: 'start' }); }
     if (toDecks) showView('decks'); else showFace();
-    for (const d of decks) d.lay();
+    for (const d of decks) d.lay(); fitH();
     if (current.id !== 'atomic') readStore();
     if (first) { setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700); setTimeout(() => { root.classList.remove('first'); }, 2600); }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); if (at === 'decks') enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; answer('simple'); dropAbout(); closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; dropAbout(); closeDrop(); closeSheet(); restHero(); collage.hide(); library.rest(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = (o) => (root.hidden ? open(o) : close());
   /* M1: Escape puts THE LOOK DROP away first; 035 G3: then THE SHEET; 036 G3 (Josh, FOR JOSH 035 answer 5): then it STEPS BACK — off the face
      to the face, on the face out to the lab (the inner Escapes — the look drop's, the isomer deck's, the tip sheet's — still stop first) */
