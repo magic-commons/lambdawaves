@@ -11,7 +11,6 @@
  *   (controls/factory.js — the kind of value chooses it), a number knob stamped `data-param` with its stable modulation target id
  *   `nodes.<node>.<knob>` (idOf), so it is a drop target like any rack dial; the hand's write goes to `hand`. */
 import { control } from './mir/controls/factory.js';
-import { hint } from './mir/kit.js';
 import { colourMatrix } from './mir/panels/picture-filter.js';
 import { IDENTITY, LUMA } from './nodes-compile.js';
 
@@ -160,7 +159,6 @@ export function nodeBody(parent, node, T, { idOf, hand }) {
     const tip = K.hint || (T.knobs.length === 1 ? T.hint : undefined);   // 038 P9: a one-knob node's knob takes the node's hint (the knob is the node)
     const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: tip, min: K.min, max: K.max, step: K.step, log: K.log, home: K.home, unit: K.unit,
       fmt: K.fmt, colour: K.colour, options: K.options, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, v, false), onChange: (v) => hand(K.k, v, true) });
-    if (tip && !c.targets[0]) hint(c.root, tip);                          // a seg or a stepper: the kit hints its options, not the control
     (at[K.k] || at[''] || parent).appendChild(c.root);
     if (c.targets[0]) c.targets[0].root.dataset.param = idOf(K.k);
   }

@@ -6,6 +6,7 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 THE DOORS OF 039 · CHAIN K (THE KIT RETURN, Opus 5.5; the clone road on kit branch `kit-039` from kit-038's eddd2b6, adopted one by one):
 - alpha.17 THE STEPPED CLOCK LOOPS (`modulation/host.js` `clock.step(dt, { loop: true })`, one wrap `wrapLoop` for both roads): an app's own frame wraps by the realtime rule, heard as 'seek' then 'step'; the recorder passes nothing and never loops. λWAVES: PLAYBACK LOCK's step (rack.js).
+- alpha.18 THE ROOT WEARS THE HINT (`kit.js` `seg({ title })`, `controls/stepper.js` `stepper({ title })`): the control's hint on its root, as every kit control; an option keeps its own. λWAVES: `nodeBody` no longer hints a seg's root itself (node-types.js).
 Each door has its BUILT line in docs/FOR-MIR.md § 039.
 
 ## The laws of 038

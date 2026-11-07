@@ -473,9 +473,11 @@ export function sw(o) {
   return { root: b, get: () => v, set(x) { v = !!x; paint(); } };
 }
 
-/** seg({ label, aria, options: [{id, label, title}], value, onChange }) — an enumeration */
+/** seg({ label, aria, title, options: [{id, label, title}], value, onChange }) — an enumeration.  `title` hints the control on its root
+ *  (THE ROOT WEARS THE HINT, 1.5.7-alpha.18), as every other kit control does; an option's own `title` hints that option. */
 export function seg(o) {
   const root = el('div', 'segw' + (o.cls ? ' ' + o.cls : ''));
+  if (o.title) hint(root, o.title);
   if (o.label) label(el('div', 'k-lbl', root), o.label);
   const row = el('div', 'seg', root);
   /* WAVE 62 · THIS IS THE ONE PLACE THE INTERFACE PRESENTED STATE IT DID NOT EXPOSE: the selection

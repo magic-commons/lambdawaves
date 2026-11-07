@@ -44,6 +44,41 @@ try {
       return { ok: r && r.ok, frames: r && r.frames, error: r && r.error, first: beats[0], last: beats.at(-1), mono, n: beats.length };`);
     out.verdict = { headWraps: out.play.max < 8 && out.play.wraps >= 2 && out.play.loops > out.setup.loops0, filmThreeBars: !!out.film.ok && out.film.mono && out.film.first < 0.1 && out.film.last > 11.8 };
   }
+  if (scene === 'k2') {
+    /* the count: every seg and stepper root in the page (hydrogen, then a molecule), and how many wear a hint on the root itself */
+    const count = () => g.ev(`await __LW.settle(); const R = [...document.querySelectorAll('.segw, .mir-step')], tip = (r) => r.dataset.helpEn || r.title || '', hinted = R.filter(tip);
+      const where = (r) => (r.closest('.dev') && r.closest('.dev').dataset.id) || (r.closest('[data-mir-window]') && r.closest('[data-mir-window]').dataset.mirWindow) || r.parentElement.className.split(' ')[0];
+      return { roots: R.length, hinted: hinted.length, long: hinted.filter((r) => tip(r).length > 60).map(tip), list: hinted.map((r) => where(r) + ': ' + tip(r)) };`);
+    out.hydrogen = await count();
+    await g.ev(`__LW.run('mode', { id: 'molecules' }); await new Promise((r) => setTimeout(r, 2500)); return 1;`);
+    out.molecules = await count();
+    /* the node faces: LEVELS and ABERRATION with their feet open (MASK, TARGET and ABERRATION's mode are segs) — the root hint is the kit's now */
+    await g.ev(`const N = __LW.nodes; N.open(); await new Promise((r) => setTimeout(r, 600)); N.win.place({ x: 600, y: 40, w: 520, h: 760 }); N.add('levels'); N.add('aberration');
+      await new Promise((r) => setTimeout(r, 600)); for (const f of document.querySelectorAll('[data-mir-window="nodes"] .nodes-foot-fold, [data-mir-window="nodes"] [data-fold]')) f.click(); await new Promise((r) => setTimeout(r, 400)); return 1;`);
+    out.nodes = await count();
+  }
+  if (scene === 'k3m' || scene === 'k3') {
+    /* every seg in a fit row (hydrogen, a molecule, three nodes with their feet open): its cells now, the room it needs, one cell's width — so the
+       one-cell default can be judged row by row; k3 also takes the nodes' full cards (FILM GRAIN's KIND · BLEND, ABERRATION's MODE, the feet) */
+    const measure = () => g.ev(`await __LW.settle(); const rows = [...document.querySelectorAll('.row.fit')], out = [];
+      for (const r of rows) { if (!r.offsetParent) continue; const cols = getComputedStyle(r).gridTemplateColumns.split(' ').filter((x) => /px$/.test(x)).map(parseFloat);
+        for (const s of r.querySelectorAll(':scope > .segw, :scope > .seg')) { const bs = [...s.querySelectorAll('.seg-b')], need = bs.reduce((n, b) => n + b.scrollWidth, 0);
+          const where = (s.closest('.dev') && s.closest('.dev').dataset.id) || (s.closest('[data-mir-window]') && s.closest('[data-mir-window]').dataset.mirWindow) || '?';
+          out.push({ where, opts: bs.map((b) => b.textContent.trim()).join('|'), span: getComputedStyle(s).gridColumnStart + '/' + getComputedStyle(s).gridColumnEnd, w: Math.round(s.getBoundingClientRect().width), need: Math.round(need), cell: Math.round(cols[0] || 0), cols: cols.length, cls: s.className }); } }
+      return out;`);
+    out.hydrogen = await measure();
+    await g.ev(`__LW.run('mode', { id: 'molecules' }); await new Promise((r) => setTimeout(r, 2500)); return 1;`);
+    out.molecules = await measure();
+    await g.ev(`const N = __LW.nodes; N.open(); await new Promise((r) => setTimeout(r, 600)); N.win.place({ x: 560, y: 30, w: 560, h: 880 }); N.add('grain'); N.add('aberration'); N.add('levels');
+      await new Promise((r) => setTimeout(r, 800)); for (const f of document.querySelectorAll('[data-mir-window="nodes"] .nodes-foot-fold, [data-mir-window="nodes"] [data-fold]')) f.click(); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+    out.nodes = (await measure()).filter((x) => x.where === 'nodes');
+    if (scene === 'k3') {
+      const tag = process.argv[4] || 'after';
+      for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+        const box = await g.ev(`const w = document.querySelector('[data-mir-window="nodes"]'); const r = w.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`);
+        out['shot-' + t] = await shot(`039-K3-nodes-${tag}-${t}`, box); }
+    }
+  }
   out.errs = (await g.errors()).errs;
 } catch (e) { out.E = String(e && e.stack || e); }
 finally { await g.close(); }
