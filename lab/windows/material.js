@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, group, readout, chip, hint, trig } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
+import { el, knob, sw, seg, group, readout, chip, hint, trig, label } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
 import { createLight, summonLight } from '../light-window.js';   // 037 L1: THE LIGHTING WINDOW, CAMERA's sibling (lab/, not windows/); L4 its summons
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel, directionSphere } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
@@ -84,6 +84,7 @@ export function createMaterial(app) {
        CSS filter.  ROTATE follows because it rotates the stops the LUT is made of */
     const bar = el('div', 'lw-espbar', app.dom.stage); bar.hidden = true; bar.setAttribute('aria-hidden', 'true');
     const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map(() => el('span', 'lw-espbar-n', bar));
+    for (const [end, w] of [['pos', '+ POSITIVE'], ['neg', '− NEGATIVE']]) label(el('span', 'lw-espbar-n lw-espbar-w', bar), w).dataset.end = end;   // 039 X3: the key's words beyond its ends (film-bake draws every .lw-espbar-n)
     let barTimer = 0, barKey = '', palLut = null, lutN = 0;
     const RAMP = ESP_RAMP.map(hexToRgb), K3 = 1 / Math.sqrt(3);
     const hueRot = (c, h) => { if (!h) return c; const a = h * 2 * Math.PI, ca = Math.cos(a), sa = Math.sin(a), d = (c[0] + c[1] + c[2]) / 3 * (1 - ca);
@@ -95,9 +96,15 @@ export function createMaterial(app) {
         c = [0, 1, 2].map((q) => palLut[i * 4 + q] + (palLut[j * 4 + q] - palLut[i * 4 + q]) * f); }
       else { const s = u * 4, k = Math.min(3, Math.floor(s)), f = s - k; c = hueRot(RAMP[k].map((v, q) => v + (RAMP[k + 1][q] - v) * f), h); }
       return mat.invert ? c.map((v) => 1 - v) : c; };
-    paintBar = () => { if (bar.hidden) return; const key = [mat.paletteOn, mat.hueShift, mat.invert, lutN, bar.dataset.side].join();
-      if (key === barKey) return; barKey = key;
-      barRamp.style.background = 'linear-gradient(to ' + (/^(top|bottom)$/.test(bar.dataset.side) ? 'right' : 'top') + ', ' + Array.from({ length: 25 }, (_, i) => rgbToHex(espAt(i / 24)) + ' ' + (i / 24 * 100).toFixed(1) + '%').join(', ') + ')'; };
+    /* 039 X3 · THE KEY UNDER MOLECULES' VIEW ESP (WALK-A #8: the walker pressed VIEW ESP, and the bar was STYLE ESP's alone): VIEW ESP draws Φ
+       signed, READ as 'real' (field.js mode 2: + at the palette's 0.5 + HUE, − at its HUE; PALETTE OFF (1, .58, .16) and (.22, .5, 1); INVERT
+       last), so the bar shows there too (`data-kind` view): the − colour, clear at 0, the + colour; its numbers blank but 0 */
+    const molEsp = () => !!(app.state.chem && app.state.chem.on && app.state.chem.view === 'esp');
+    const signedAt = (pos) => { let c; if (mat.paletteOn && palLut) { const x = (pos ? 0.5 : 0) + (mat.hueShift || 0), i = Math.floor((x - Math.floor(x)) * 256) % 256; c = [0, 1, 2].map((q) => palLut[i * 4 + q]); }
+      else c = pos ? [1, 0.58, 0.16] : [0.22, 0.5, 1]; return mat.invert ? c.map((v) => 1 - v) : c; };
+    paintBar = () => { if (bar.hidden) return; const sig = bar.dataset.kind === 'view', key = [sig, mat.paletteOn, mat.hueShift, mat.invert, lutN, bar.dataset.side].join();
+      if (key === barKey) return; barKey = key; const to = 'linear-gradient(to ' + (/^(top|bottom)$/.test(bar.dataset.side) ? 'right' : 'top') + ', ', neg = rgbToHex(signedAt(false)), pos = rgbToHex(signedAt(true));
+      barRamp.style.background = sig ? to + neg + ' 0%, ' + neg + '00 50%, ' + pos + '00 50%, ' + pos + ' 100%)' : to + Array.from({ length: 25 }, (_, i) => rgbToHex(espAt(i / 24)) + ' ' + (i / 24 * 100).toFixed(1) + '%').join(', ') + ')'; };
     /* iteration 018 B7 · THE BAR'S SEAT is INFORMATIONAL's (ESP BAR · SIDE · PAD in `lambdawaves.q0.info`): the free stage the formula's block reads (racks
        and a floating transport out), PAD a share of it from the SIDE's edge, centred along it; TOP and BOTTOM lie the bar down (data-side, lab.css).
        THE STAGE TEXT WINS: a bar that would cross the formula block steps clear of it, vertically — a TOP bar under it, a BOTTOM bar over it, a side
@@ -179,10 +186,10 @@ export function createMaterial(app) {
       for (const [k, on] of Object.entries(STYLE_READS)) { const styleOff = !on.includes(st);
         mute(ui[k], styleOff || (esp && ((k === 'probeK' && surf === 'iso') || ((k === 'isoK' || k === 'softK') && surf !== 'iso'))), styleOff ? 'off in ' + styleName : 'off with ' + surf.toUpperCase()); }
       modeSync(); ui.sliceCut?.sync();   // 038 F7: CLIP's CUT switches follow the drawn kinds
-      bar.hidden = !esp || !IP.get('espBar');
+      const sig = !esp && molEsp(); bar.hidden = !(esp || sig) || !IP.get('espBar'); bar.dataset.kind = sig ? 'view' : 'style';   // 039 X3: STYLE ESP's values, or VIEW ESP's two colours
       if (!bar.hidden) {
         const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20; paintBar();
-        [R, h, 0, -h, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + auN(v); });
+        [R, h, 0, -h, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : sig ? '' : (v > 0 ? '+' : '−') + auN(v); });
         barSeat(); if (!barTimer) barTimer = setInterval(() => { if (bar.hidden) { clearInterval(barTimer); barTimer = 0; } else { barSeat(); paintBar(); } }, 500);   // the poll also catches a routed HUE and LW.setInvert
       }
     }

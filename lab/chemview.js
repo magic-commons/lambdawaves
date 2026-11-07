@@ -424,7 +424,7 @@ export function createChem(host, api) {
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'One molecular orbital, the ORBITAL dial’s' },
     { id: 'registry', label: 'MIX', title: 'MIX: the lit lines in phase' },
-    { id: 'esp', label: 'ESP', title: 'Φ(r) = Σ Z_A/|r−R_A| − ∫ρ/|r−r′| on a 64³ grid' },
+    { id: 'esp', label: 'ESP', title: 'Electrostatic potential: + electron-poor · − electron-rich' },   // 039 X3: the formula is the ⓘ's (below)
     { id: 'spin', label: 'SPIN', title: 'Spin density ρα − ρβ (UHF open shell)' },
     { id: 'dlda', label: 'Δ LDA−RHF', title: 'ρ_LDA − ρ_RHF: where LDA puts more' }],
     onChange: (v) => { view = v; seats(); pushMatrix(); refresh(); tell(); if (api.say) api.say('view', 'VIEW · ' + vSeg.button(v).textContent); if (api.viewed) api.viewed(true); } });
@@ -515,7 +515,8 @@ export function createChem(host, api) {
   const roXc = readout({ label: '<m>E_xc · ∫ρ</m>', cls: 'wide', value: '—', sub: '' }); roXc.root.hidden = true;   // 0.7.3 K2: RKS LDA's own numbers, the reply's
   for (const r of [roE, roEps, roTr, roIdem, roT, roXc, roSym, roPick]) rr.appendChild(r.root);
   el('div', 'note', host).innerHTML = '<b>Model.</b> Hartree–Fock (RHF; UHF for an open shell) or, by METHOD, Kohn–Sham LDA, in a vendored Cartesian basis at a fixed geometry this window never optimises: measured for a molecule solved live (AlH₃’s is the RHF/STO-3G minimum: no gas-phase structure has been determined), computed for most library records (the head says which). Sticks are singlet RPA (or TDA) roots with height proportional to oscillator strength; the curve is Im α(ω) from the real-time δ-kick trace. Peaks are fitted poles with a 4ε/σ certificate: an uncertified reading is labelled as the raw maximum. The electron count is Tr(DS), never a voxel sum.';
-  { const capNote = el('div', 'note', host); el('b', null, capNote, 'The cap. '); capNote.append(CAP_RULE); }   // 022 H1: the chooser's old hint, kept in the ⓘ
+  { const capNote = el('div', 'note', host); el('b', null, capNote, 'The cap. '); capNote.append(CAP_RULE); }
+  { const espNote = el('div', 'note', host); el('b', null, espNote, 'ESP. '); espNote.append('Φ(r) = Σ Z_A/|r−R_A| − ∫ρ/|r−r′| on a 64³ grid; + where the nuclei win, − where the electrons do; the bar on the stage keys the two colours.'); }   // 039 X3   // 022 H1: the chooser's old hint, kept in the ⓘ
   /* 2026-10 (Josh) · EVERYTHING BELOW VIEW + ORBITAL sits in `.mol-more`: TDA / CORE, the kick and run controls, the
      spectrum, the readouts and the note — every control keeps its state, save/load and API (__LW.chem.kick(), run, setTda …),
      and `shown()` makes a folded canvas's paint a no-op.
