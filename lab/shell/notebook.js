@@ -145,7 +145,7 @@ export function createNotebook(app) {
         light: 'lighting sun shadow lamp', stage: 'background colour color gamma axes frame', palette: 'colours colors gradient hue', observer: 'style look cloud',
         camera: 'view zoom rotate orbit fov', clip: 'cut plane slice section', chem: 'molecule chemistry benzene water orbitals', spectrum: 'states hydrogen orbitals levels',
         projects: 'save open files projects', history: 'undo redo', widgets: 'clock text', equalizer: 'audio sound music', informational: 'labels words captions text',
-        settings: 'quality performance theme', transport: 'play tempo bpm bar' };
+        settings: 'quality performance theme' };   // the FINDER lists rack windows alone: TIMELINE, MODULATION and the CONTROL SURFACE open from the bar
       { const F = layout.finder, q = F.root.querySelector('.wp-search');
         if (q) q.addEventListener('input', () => { const s = q.value.trim().toLowerCase(); if (!s) return; let first = null;
           for (const b of F.root.querySelectorAll('.wp-list [data-win]')) { if (b.hidden && (FIND_WORDS[b.dataset.win] || '').split(' ').some((w) => w.startsWith(s))) b.hidden = false;
