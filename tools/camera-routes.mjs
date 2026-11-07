@@ -8,6 +8,8 @@
  *   4 · each target has a dial on the glass ([data-param]), and on a ROUTED one a key on that dial moves the BASE (the hand's law),
  *       the route stays, and the base is put back.  (Before C1 YAW and PITCH had no dial — the camera was dragged, not dialled —
  *       so a pre-C1 tree reds on those two dials and on nothing else: 2026-10-08, `3a60679` vs C1, routes/bases/law SAME on all 5.)
+ *       039 S5: on one an arrangement's CLIP drives (no route — STAR LOOP's yaw/pitch/dist/fov, BENZENE π's and WATER ESP's yaw) the same key
+ *       moves the base, the clip still drives it, and the base is put back (the value under a clip is the clip's: no landing is judged).
  * --out keeps the fingerprint (routes, bases, the law, the dials) so a tree served from `git archive` can be compared with this one;
  * --against FILE compares this run's routes, bases and law with that file's and reds on any difference (the dials are reported).
  *   python3 tools/gate/server.py <root> <LW_PORT>   (stop it by pid)
@@ -72,9 +74,17 @@ try {
         k.focus(); k.dispatchEvent(new KeyboardEvent('keydown', { key, code: key, bubbles: true, cancelable: true })); await __w(80);
         const b1 = R.baseOf(id), still = M.routeList().some((rt) => rt.targetId === id), mod = !!R.isModulated(id); R.write(id, b0); await __w(50);
         hands[id] = { dial: true, moved: b1 !== b0, b0, b1, routeKept: still, stillModulated: mod, putBack: R.baseOf(id) === b0 }; k.blur(); }
+      /* 039 S5 · THE HAND UNDER A CLIP (Z-REVIEW #5): the parts that hold where a clip drives the target — a key on its dial moves the BASE, the
+         target is still modulated (the clip still plays it), and the base is put back; no route to keep, and the value is the clip's */
+      const clipHands = {};
+      for (const id of clipped) { const k = document.querySelector('[data-param="' + id + '"]'); if (!k) { clipHands[id] = { dial: false }; continue; }
+        const b0 = R.baseOf(id), key = R.toNorm(id, b0) > 0.5 ? 'ArrowLeft' : 'ArrowRight';
+        k.focus(); k.dispatchEvent(new KeyboardEvent('keydown', { key, code: key, bubbles: true, cancelable: true })); await __w(80);
+        const b1 = R.baseOf(id), mod = !!R.isModulated(id); R.write(id, b0); await __w(50);
+        clipHands[id] = { dial: true, moved: b1 !== b0, b0, b1, stillModulated: mod, putBack: R.baseOf(id) === b0 }; k.blur(); }
       if (started) __LW.mod.stop();
       for (const id of routedIds) if (!hands[id]) hands[id] = { dial: !!document.querySelector('[data-param="' + id + '"]'), moved: false, why: 'never modulated, even playing' };
-      return { status: __LW.projects.status, saved, live, hands, clipped, errs: __e.slice() };`);
+      return { status: __LW.projects.status, saved, live, hands, clipped, clipHands, errs: __e.slice() };`);
     if (!r || r.E) throw new Error(name + ': the open threw in the page — ' + (r && r.E));
     const s = { name, ...r }; run.scenes.push(s);
     const why = [];
@@ -94,12 +104,13 @@ try {
       if (!r.live.dials[id]) why.push(id + ' has no dial on the glass');
     }
     for (const [id, h] of Object.entries(r.hands)) if (!h.dial || !h.moved || !h.routeKept || !h.putBack) why.push(id + ' (routed): the hand on its dial ' + JSON.stringify(h));
+    for (const [id, h] of Object.entries(r.clipHands)) if (!h.dial || !h.moved || !h.stillModulated || !h.putBack) why.push(id + ' (under a clip): the hand on its dial ' + JSON.stringify(h));
     if (r.errs.length) why.push('page errors ' + JSON.stringify(r.errs));
     const routed = r.saved.routes.map((x) => x.id + '→' + x.target).join(', ') || 'none';
     if (why.length) fail(name, why.join('; '));
     else console.log(`GREEN ${name.padEnd(11)} routes on observer.*: ${routed}; 6 targets, bases = the file's, law kept; dials ${JSON.stringify(Object.values(r.live.dials))}` +
       (Object.keys(r.hands).length ? `; the hand on ${Object.keys(r.hands).join(', ')} moved the base and kept the route` : '') +
-      (r.clipped.length ? `; driven by the arrangement's clips: ${r.clipped.join(', ')}` : ''));
+      (r.clipped.length ? `; driven by the arrangement's clips: ${r.clipped.join(', ')} — the hand on each moved its base (${Object.entries(r.clipHands).map(([id, h]) => id.slice(9) + ' ' + (+h.b0).toFixed(2) + '→' + (+h.b1).toFixed(2)).join(', ')}), the clip still drives it, the base put back` : ''));
   }
 } finally { await g.close(); }
 const print = (sc) => ({ name: sc.name, routes: sc.live.routes, bases: sc.live.bases, law: sc.live.law });
