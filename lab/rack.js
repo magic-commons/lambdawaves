@@ -961,6 +961,10 @@ export async function boot(dom) {
   applySettings();
   rk.start();                         // 0.5.0 C3: the kit's rack takes the furniture as it stands, and its crossing runs before λWAVES' half
   syncPhone();                        // wave 51: the breakpoint is read once the browser's settings are in, so the phone's DEFAULTS never overwrite them
+  /* 039 R2 · R7 · THE RACK COMES BACK AS IT WAS LEFT: FOLD_ALL is the first run's.  Any later boot lays the arrangement the session last kept — its
+     WORKSPACE layout (every card's fold, seat and float, the bar's dock), written whenever the rack moved (main.js) — so a boot that resumes nothing
+     (a link, a ?preset=, a driver) keeps the reader's rack, the bar where it was left; a RESUME lays the same record again with its work */
+  { const L = !freshInstall && dom.start && dom.start.session ? dom.start.session.read()?.parts?.lambdawaves?.data?.presentation?.layout : null; if (L) layout.applyLayout(L); }
 
   /* ── WAVE 56 · A LINK OPENS HERE ──────────────────────────────────────────────────────────────────
    * `?preset=` is read forty lines up, and this is the same kind of thing said in the fragment — but it

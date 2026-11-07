@@ -19,6 +19,7 @@
 import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
 import { el, chip, mathPlain, stepper, seg } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
+import { chordFromEvent } from './mir/shell/keys.js';   // 039 R5: the menu's own chord passes to the key table while the menu holds the keys
 import { CHEM_PRESETS } from './chemview.js';
 import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
 import { ATOMS } from './atoms.js';
@@ -1053,6 +1054,24 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      to the face, on the face out to the lab (the inner Escapes — the look drop's, the isomer deck's, the tip sheet's — still stop first) */
   const escape = () => (aboutOver() ? closeAbout() : !drop.hidden ? closeDrop(true) : sheetUp() ? closeSheet(true) : at !== 'face' ? showFace() : close());   // 036 G4: ABOUT over the menu first
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
+  /* 039 R5 · THE FACE KEEPS THE FOCUS (M-REVIEW #7, WALK-D #10): while the menu is up it is the page's one keyboard.  Tab and Shift+Tab cycle its
+     own controls — on the face the logo (ABOUT) through the credits and round; ABOUT's window while it stands over the menu — never the lab
+     behind; and no other key reaches the lab (the window's key table) but the menu's own chord (L) and Escape, which steps back.  A kit dialog
+     over the menu keeps its own trap */
+  const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  const keyScope = () => { const A = aboutOver() && aboutOf(), w = A && A.win && A.win.root; return w && !w.hidden ? w : root; };
+  document.addEventListener('keydown', (e) => {
+    if (root.hidden || e.defaultPrevented || e.key !== 'Tab' || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.mir-dialog')) return;
+    const f = [...keyScope().querySelectorAll(FOCUSABLE)].filter((n) => !n.disabled && !n.closest('[inert], [hidden]') && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden');
+    if (!f.length) return;
+    e.preventDefault(); const i = f.indexOf(document.activeElement);
+    f[i < 0 ? (e.shiftKey ? f.length - 1 : 0) : (i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus({ preventScroll: true });
+  }, true);
+  document.addEventListener('keydown', (e) => {
+    if (root.hidden || e.key === 'Escape' || e.key === 'Tab' || document.querySelector('.mir-dialog')) return;
+    const T = app.sh.kt && app.sh.kt.table; if (T && T.holders(chordFromEvent(e, T.platform)).includes('menu')) return;
+    e.stopPropagation();
+  });
   /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
   let escDrop = null; const layer = () => { if (escDrop) escDrop(); escDrop = app.sh.ACTIONS.escape.push(() => { escDrop = null; escape(); if (!root.hidden) layer(); }, { alive: () => !root.hidden }); };
   /* the home button by the title: the kit's grid glyph */
