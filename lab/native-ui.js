@@ -42,9 +42,9 @@ export function reworkNative({ ui, mat, repaint }) {
   const rows=[...settings.querySelectorAll(':scope > .grp')];
   for(const g of rows){g.classList.add('settings-section');}
   // Honest enum controls replace switches that secretly cycle through three/four modes.
-  function enumControl(old,label,options,get,set){const control=seg({label,value:get(),options:options.map(id=>({id,label:id.toUpperCase()})),onChange:set});old.root.replaceWith(control.root);const write=old.set;old.set=v=>{write(v);control.set(get());};return control;}
-  ui.frameModeSeg=enumControl(ui.frameSw,'FRAME',['box','lattice','dots','off'],()=>mat.frame===false?'off':mat.frameMode||'box',v=>{mat.frame=v!=='off';if(v!=='off')mat.frameMode=v;ui.frameSw.set(mat.frame);repaint();ui.saveNative();});
-  ui.axisModeSeg=enumControl(ui.axisSw,'AXES',['box','corner','off'],()=>mat.axis===false?'off':mat.axisMode||'box',v=>{mat.axis=v!=='off';if(v!=='off')mat.axisMode=v;ui.axisSw.set(mat.axis);repaint();ui.saveNative();});
+  function enumControl(old,label,options,get,set){const control=seg({label,value:get(),options:options.map(([id,title])=>({id,label:id.toUpperCase(),title})),onChange:set});old.root.replaceWith(control.root);const write=old.set;old.set=v=>{write(v);control.set(get());};return control;}
+  ui.frameModeSeg=enumControl(ui.frameSw,'FRAME',[['box','An outline round the field’s box'],['lattice','The box as a grid of lines'],['dots','The box as a grid of dots'],['off','No frame round the field']],()=>mat.frame===false?'off':mat.frameMode||'box',v=>{mat.frame=v!=='off';if(v!=='off')mat.frameMode=v;ui.frameSw.set(mat.frame);repaint();ui.saveNative();});
+  ui.axisModeSeg=enumControl(ui.axisSw,'AXES',[['box','The x, y and z axes through the field’s box'],['corner','A small x, y, z compass in the stage’s corner'],['off','No axes']],()=>mat.axis===false?'off':mat.axisMode||'box',v=>{mat.axis=v!=='off';if(v!=='off')mat.axisMode=v;ui.axisSw.set(mat.axis);repaint();ui.saveNative();});
   // A binary, deliberately stubborn switch: an unsupported canvas cannot claim P3.
   const gamut=ui.gamutSeg;
   const p3=sw({label:'P3',value:gamut.get()==='p3',title:gamut.button('p3').title,

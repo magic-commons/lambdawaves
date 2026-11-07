@@ -13,7 +13,7 @@ import { createRenderCard } from './mir/render/panel.js';
 import { fmtBytes } from './mir/render/plan.js';
 import { VIEW_NAMES } from './field.js';
 import { registerClipKind } from './mir/timeline/kinds.js';
-import { el, label, trig, svgNode, sw } from './mir/kit.js';
+import { el, label, trig, svgNode, sw, hint } from './mir/kit.js';
 import { handOver } from './capture.js';
 import { notice } from './mir/shell/notice.js';
 import { fold } from './fold.js';
@@ -92,6 +92,7 @@ export function createFilmCard(o) {
       s.append(trig({ label: 'PLAN', cls: 'sv-act sv-wide', onFire: () => plan() }).root, trig({ label: 'PLACE ONE PERIOD', cls: 'sv-act sv-wide', onFire: () => place() }).root);
     } });
   const { card, view } = made, C = view.controls, set = (f, v) => { f.value = v; f.dispatchEvent(new Event('change')); };
+  if (card.foldBtn) hint(card.foldBtn, 'Fold or unfold this window');   // 039 X15: the kit's device here is the kit's own, so rack.js's wrapper never re-hinted it (FOR-KIT: the word)
   /* NODES and CHROME: λWAVES' switches in the kit's switch seat, beside MODULATION · TIMELINE (stored as before: on|off, labels|off) */
   const lwSw = (key, text, tip, on, [yes, no]) => { const s = sw({ label: text, title: tip, lamp: false, value: on, onChange: (v) => ls.set(key, v ? yes : no) }); s.root.dataset.field = key; C.switches.appendChild(s.root); return s; };
   C.nodesSw = lwSw('nodes', 'NODES', 'ON · the screen’s NODES graph baked into each frame · OFF · the field alone', nodesOn(), ['on', 'off']);
