@@ -659,8 +659,9 @@ export function handOver(blob, name) {
   return landed('download', name);
 }
 /* 039 W6 EVERY ROW ANSWERS: a download says the file's own name and where it went (the share sheet speaks for itself) — the picture, a shape,
-   a grid and the film's SAVE, every road through the hand-over */
-const landed = (how, name) => { if (how === 'download') notice(t('Saved {name} to your downloads', { name }), { kind: 'ok', ms: 5000 }); return how; };
+   a grid and the film's SAVE, every road through the hand-over; the toast follows the hand-over (a microtask), so the save itself sets no
+   timer but its URL's revoke (tests/film-handover) */
+const landed = (how, name) => { if (how === 'download') queueMicrotask(() => notice(t('Saved {name} to your downloads', { name }), { kind: 'ok', ms: 5000 })); return how; };
 
 /**
  * createCapture(LW, { canvas, caption, energies }) — the camera over a booted lab.
