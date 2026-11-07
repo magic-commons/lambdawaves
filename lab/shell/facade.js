@@ -274,7 +274,7 @@ export function createFacade(app) {
     version: 'QWAVE-0.1 hydrogen shadow lab · FRONTIER · 2026-09-03',
     /** 0.5.0 C9 · R14 · FOLDERS' thumbnail() for C6's project adapter, whose toThumb() drawImage()s what it gets (a WebGPU canvas can
      *  answer that BLANK): the GPU readback's PNG, always (C7 took capture's readability probe away; C7b drops its dead branch). */
-    async thumbnail() { const r = await app.state.capApi.capture.picture({ width: 320 }); return r.ok ? r.blob : null; },
+    async thumbnail() { const r = await app.state.capApi.capture.picture({ width: 320, caption: false }); return r.ok ? r.blob : null; },   // 039 X5 (WALK-A #17): a card's picture carries no caption (it was cut to "XACT")
     look: look.prefs,   // 0.5.0 C2: the look store (`mir.gui`), for probes (`__LW.look.get('theme')`)
     session: dom.start ? dom.start.session : null,   // 0.5.0 C6b: THE SESSION (main.js createSession over the one part): read(), armed(), flush()
     get timeline() { return app.state.tl; },   // 0.5.0 C7b: the kit's TIMELINE (installTimeline's result: model, editor, controller, open/close), for the timeline suite

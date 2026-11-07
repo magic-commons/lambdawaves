@@ -232,6 +232,8 @@ export function createChem(host, api) {
     dlBusy = true; dlB.disabled = true; ringTo(0); Promise.resolve(handPick(id)).then(() => lamps()).finally(() => { dlBusy = false; dlB.disabled = false; ringTo(null); rowPic(); }); });
   function rowPic() {
     const id = mSel.value, k = vKey(id), P = !k && id ? PRESET_BY_ID.get(id) : null;
+    if (P && !P.recordOnly && Number.isFinite(P.predictedMs)) hint(mList.button, '{name} · solves in ~{t} · the cap is benzene', { name: capName(P.name), t: showMs(P.predictedMs) });   // 039 X5: the time the chip's face left
+    else hint(mList.button, 'The cap is benzene: a slower entry is disabled');
     let glyph = false, src = null;
     if (k) {
       const v = vShelf.get(k.volume), kept = vKept.get(k.volume);
@@ -266,7 +268,7 @@ export function createChem(host, api) {
       if (!list.length) continue;
       head(g.label);
       for (const p of list) rows.push({ id: p.id, label: optionLabel(p, !p.recordOnly || !!have.get(p.records['sto-3g'].hash)), coming: !!p.disabled,
-        title: p.name + (p.disabled ? ' — ' + p.reason : '') + ' · ' + p.source, pic: './img/menu/' + p.id + '.webp' });
+        title: p.name + (p.disabled ? ' — ' + p.reason : '') + (p.recordOnly ? '' : ' · solves in ~' + showMs(p.predictedMs)) + ' · ' + p.source, pic: './img/menu/' + p.id + '.webp' });
     }
     if (volRef && !(VP && vMolPage.get(volRef.key) === page)) { head('VOL. ' + volRef.numeral); rows.push({ id: volRef.key, label: volName(volRef), title: volRef.name + ' · ' + volRef.geometry }); }   // V2: the volume molecule on screen, until a catalogue pick
     mRows = rows; mList.setItems(rows); mSel.value = preset;   // turned away from the molecule on screen: nothing chosen here yet

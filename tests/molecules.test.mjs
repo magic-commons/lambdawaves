@@ -176,9 +176,9 @@ const MOLECULES = ALL.filter((m) => m.multiplicity === 1);
     const t = optionLabel(m);
     assert.ok(!/<m>|<\/m>/.test(t), `${m.id}: the option text is plain, not markup`);
     assert.ok(t.includes(`${m.nAO} AO`), `${m.id}: the option text carries the AO count`);
-    assert.ok(/~(\d+ ms|\d+\.\d s)( · .+)?$/.test(t), `${m.id}: the option text carries the predicted time, got "${t}"`);
+    assert.ok(!/~\d/.test(t), `${m.id}: the option text leaves the predicted time to its hint (039 X5: the bar's chip is never cut), got "${t}"`);
     if (m.disabled) assert.ok(t.endsWith(' · ' + m.shortReason), `${m.id}: a disabled option says why in its own row, got "${t}"`);
-    else assert.ok(/~(\d+ ms|\d+\.\d s)$/.test(t), `${m.id}: an enabled option ends at the predicted time, got "${t}"`);
+    else assert.ok(t.endsWith(`${m.nAO} AO`), `${m.id}: an enabled option ends at its AO count, got "${t}"`);
   }
   console.log(`PASS the dropdown's contract: ${GROUPS.length} optgroups covering ${MOLECULES.length} options, e.g. "${optionLabel(MOLECULE_BY_ID.get('H2O'))}" · "${optionLabel(MOLECULE_BY_ID.get('C6H6'))}" · "${optionLabel(MOLECULE_BY_ID.get('Br2'))}".`);
 }
