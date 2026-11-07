@@ -19,6 +19,8 @@ const mix = (A, B, t) => A.map((a, i) => a + (B[i] - a) * t);
 const W = [0.2126, 0.7152, 0.0722];
 const AMOUNT = (home = 1) => ({ k: 'amount', label: 'AMOUNT', min: 0, max: 1, home });
 const BW = ['#000', '#fff'];
+/** a ±100 readout as Photoshop writes it: +12, 0, −40 */
+const signed = (x) => { const r = Math.round(x); return (r > 0 ? '+' : r < 0 ? '−' : '') + Math.abs(r); };
 /** a LEVELS value (0–1, read 0–255 as Photoshop does) on a black → white track, its name in the readout (the face is bare) */
 const lv = (k, label, home, what) => ({ k, label, min: 0, max: 1, home, stops: BW, hint: label + ' — ' + what, fmt: (x) => label + ' ' + Math.round(x * 255) });
 /** LEVELS' strip (038 P2): the input histogram's place, with no tap of the stage — the node's own curve (f, its transfer) as a silhouette, and
@@ -62,6 +64,15 @@ export const TABLE_TYPES = {
         fmt: (x) => 'GAMMA ' + x.toFixed(2) },
       lv('outblack', 'OUT BLACK', 0, 'what black becomes'), lv('outwhite', 'OUT WHITE', 1, 'what white becomes')],
     fn: (v) => TABLE_TYPES.levels.fn(v), draw: levelsStrip },
+  /* 038 P3 · EXPOSURE with SHADOWS and HIGHLIGHTS (Josh: "Photoshop uses 'Shadows' and 'Highlights', perhaps we can add these two knobs independent of the
+     main exposure knob?"): the one-knob's y·2^stops, clamped, then two bumps — S·y(1−y)² peaks at ⅓, H·y²(1−y) at ⅔ — scaled .945, so at ±100 each moves
+     its tone by ±.14 while black and white stay put and the curve stays monotone (its least slope .055); the tracks sit where they act */
+  exposure2: { cls: 'table', group: 'tone', label: 'EXPOSURE', hint: 'exposure, then the shadows and the highlights apart',
+    knobs: [{ k: 'stops', label: 'EXPOSURE', min: -4, max: 4, home: 0, stops: BW, hint: 'EXPOSURE — stops of light: each one doubles it', fmt: (x) => (x >= 0.005 ? '+' : x <= -0.005 ? '−' : '') + Math.abs(x).toFixed(2) + ' EV' },
+      { k: 'shadows', label: 'SHADOWS', min: -100, max: 100, home: 0, stops: ['#000', '#6b6b6b'], hint: 'SHADOWS — the dark tones lifted or deepened', fmt: signed },
+      { k: 'highlights', label: 'HIGHLIGHTS', min: -100, max: 100, home: 0, stops: ['#949494', '#fff'], hint: 'HIGHLIGHTS — the light tones raised or dimmed', fmt: signed }],
+    fn: (v) => { const m = Math.pow(2, v.stops), S = v.shadows / 100, H = v.highlights / 100;
+      return (y) => { y = clamp01(y * m); return y + 0.945 * (S * y * (1 - y) * (1 - y) + H * y * y * (1 - y)); }; } },
 };
 export const MATRIX_TYPES = {
   hue: { cls: 'matrix', label: 'HUE', hint: 'turn every colour round the wheel', knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, unit: '°' }],

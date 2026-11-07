@@ -84,6 +84,27 @@ try {
       const f = $('.mir-ctx .nodes-find'); f.value = 'lev'; f.dispatchEvent(new Event('input')); await w(250); o.find = rows($('.mir-ctx .nodes-add-menu')).filter(Boolean);
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); $('.mir-ctx .nodes-find') && $('.mir-ctx .nodes-find').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return o;`);
   }
+  if (scene === 'p3' || scene === 'p6') {
+    /* a full TONE table: its card (dark, light), its table read back from the compile — against the one-knob it grows from, and its shape */
+    const P3 = scene === 'p3', type = P3 ? 'exposure2' : 'bc';
+    out.table = await ev(`N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 520 }); await w(300);
+      const tab = () => Array.from(N.compile().runs[0].tables.r), at = (t, y) => t[Math.round(y * 255)];
+      const one = N.add('${P3 ? 'exposure' : 'contrast'}'); N.set(one, '${P3 ? 'stops' : 'contrast'}', ${P3 ? 0.7 : 1.8}); await w(100); const t1 = tab(); N.remove(one);
+      const id = N.add('${type}'); await w(100); const o = { home: N.compile().runs.length };
+      N.set(id, '${P3 ? 'stops' : 'contrast'}', ${P3 ? 0.7 : 40}); await w(100); const t2 = tab(); o.sameAsOneKnob = t1.every((x, i) => Math.abs(x - t2[i]) < 1e-6);
+      ${P3 ? `N.set(id, 'stops', 0); N.set(id, 'shadows', 100); await w(100); const s = tab(); N.set(id, 'shadows', 0); N.set(id, 'highlights', -100); await w(100); const h = tab();
+      N.set(id, 'shadows', -100); N.set(id, 'highlights', 100); await w(100); const x = tab(); const mono = (t) => t.every((y, i) => !i || y >= t[i - 1] - 1e-6);
+      Object.assign(o, { shadowsAtThird: +(at(s, 1 / 3) - 1 / 3).toFixed(4), highlightsAtTwoThirds: +(at(h, 2 / 3) - 2 / 3).toFixed(4), ends: [s[0], s[255], h[0], h[255], x[0], x[255]],
+        monotone: [mono(s), mono(h), mono(x)], leastSlope: +Math.min(...x.slice(1).map((y, i) => (y - x[i]) * 255)).toFixed(3) });
+      N.set(id, 'shadows', 30); N.set(id, 'highlights', -20); N.set(id, 'stops', 0.5);`
+      : `N.set(id, 'contrast', 0); N.set(id, 'brightness', 50); await w(100); const b = tab(); N.set(id, 'brightness', 0); N.set(id, 'contrast', -100); await w(100); const f = tab();
+      N.set(id, 'contrast', 100); await w(100); const c = tab();
+      Object.assign(o, { brightness50: [at(b, 0), at(b, 0.5)], flatAtMinus100: [at(f, 0), at(f, 1)], slopeAt100: +((at(c, 0.55) - at(c, 0.45)) / 0.1).toFixed(2) });
+      N.set(id, 'brightness', 12); N.set(id, 'contrast', 25);`}
+      await w(400); o.box = rect(card('${type}')); o.h = card('${type}').offsetHeight; o.labels = [...card('${type}').querySelectorAll('.nodes-body .k-lbl')].map((l) => l.textContent); o.mark = card('${type}').querySelector('.nodes-mark').textContent; return o;`);
+    const b = out.table.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
+    for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot(`038-${scene.toUpperCase()}-${type}-${t}`, crop, 2); }
+  }
   out.errors = (await g.errors()).errs;
   console.log(JSON.stringify(out, null, 1));
 } finally { await g.close(); }
