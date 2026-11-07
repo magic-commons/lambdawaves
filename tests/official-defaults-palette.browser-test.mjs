@@ -21,7 +21,7 @@ try {
       theme:__LW.themeChoice,card:__LW.cardStyle,frost:__LW.frost,
       blur:getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim(),
       vivid:+vivid,
-      // 029 M10: PERFORMANCE · FULL | SMOOTH | BALANCED | LEAN (039 X16: LIGHT's word; the id `light` kept), and a first run takes SMOOTH (the look above untouched)
+      // 029 M10: PERFORMANCE · FULL | SMOOTH | BALANCED | LEAN (039 X16: LIGHT's word; the id 'light' kept), and a first run takes SMOOTH (the look above untouched)
       tier:(()=>{const r=[...document.querySelectorAll('[role=radiogroup]')].find(x=>x.getAttribute('aria-label')==='PERFORMANCE'),bs=r?[...r.querySelectorAll('.seg-b')]:[];
         return bs.map(x=>x.textContent+(x.getAttribute('aria-checked')==='true'?'*':'')).join('|');})(),errors:__e.slice()};`);
   assert.deepEqual(fresh, { tags:true,captions:true,hints:true,helpOff:true,lean:true,aaHidden:true,chemAaShown:true,
