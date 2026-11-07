@@ -32,14 +32,18 @@ molecules' `<id>.im.webp` (`molLook('im')`, WAVE's RE), the 140 `orb-<nl>_<m>.we
 and a volume's `t/<id>.im.webp`.
 
 THE OBJECT MASK (038 F5, the field's side of A NODE HAS A TARGET): `field.setObjectMask(on)` → the state in force, `field.objectMask` the live
-reading. On, the canvas is configured `premultiplied` and the fragment writes alpha 255 on a skeleton pixel (a ball or stick on the ray — over any
-style, ESP's inner sticks, a kind the CLIP does not cut) and 254 on every other pixel, the colour premultiplied by it (the page behind the canvas is
-the stage colour, so nothing shows: the composited page moves ≤ 3 levels); the line pass keeps the destination's alpha. Off — the boot, NEW, THE
-LOCK, every frame without a scoped node — the canvas is `opaque` and alpha is 1 as before. A SHADER node reads the code in the tap's `.a`; an SVG
-node thresholds SourceAlpha (OBJECT: slope 255, intercept −254; STAGE: −255, 255) and its chain ends by forcing A = 1. p11.z bit 4. THE BURIED
-ATOM (038 F7): a skeleton pixel is one the atom carries — the ray's transmittance to the hit (the march's `bgBlend`, DUST's 1 − a, the ESP map's
-1 − its opacity) is at least ½; an atom under a SOLID or SHELL surface or a dense cloud reads STAGE, so a STAGE node recolours the wave over it and an
-OBJECT node never draws a hard silhouette through the wave.
+reading. On, the canvas is configured `premultiplied` and the fragment writes alpha 255 on an OBJECT pixel and 254 on a STAGE pixel, the colour
+premultiplied by it (the page behind the canvas is the stage colour, so nothing shows: the composited page moves ≤ 3 levels); the line pass keeps the
+destination's alpha. Off — the boot, NEW, THE LOCK, every frame without a scoped node — the canvas is `opaque` and alpha is 1 as before. A SHADER node
+reads the code in the tap's `.a`; an SVG node thresholds SourceAlpha (OBJECT: slope 255, intercept −254; STAGE: −255, 255) and its chain ends by
+forcing A = 1. p11.z bit 4. OBJECT IS WHAT THE FIELD DRAWS (038 F8, Josh 11-07: "objects just means anything on the stage that isn't the background.
+Like the molecule or the orbitals"): a pixel is OBJECT where the background carries less than half of it — the ray's transmittance to the stage (the
+march's `bgBlend`; ADD's 1 − max(col); DUST's 1 − a; under ESP the map's 1 − its opacity, soft or hard) is below ½ — and wherever a ball or stick
+stands on the ray (it hides the stage; ESP's inner sticks, a kind the CLIP does not cut). So the orbital cloud, SOLID's and SHELL's surfaces, the dust
+and ESP's map are OBJECT where they are dense, and STAGE is the background alone: the stage colour and the empty picture, a cloud's faint tail
+included. THE BURIED ATOM (038 F7) is now a special case: an atom under a dense cloud is OBJECT because the cloud is. The furniture (the AXES, the
+FRAME, the slice outline) is STAGE furniture, but it is drawn over the field and keeps the code beneath it: an axis line over the cloud reads OBJECT.
+That is accepted, not re-engineered.
 
 ## The laws of 037
 

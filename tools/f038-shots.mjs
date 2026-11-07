@@ -209,6 +209,55 @@ h = d.convert('L').histogram(); print(max(i for i, n in enumerate(h) if n), sum(
     out.ok = out.tile.match && M.footprint > 0 && M.solid254 > 0 && M.solid255 > 0 && M.solid255 < M.footprint && out.cut0.balls[0] && out.cut0.sticks[0] && !out.cutSize.balls[0] && !out.cutSize.sticks[0]
       && out.cutEsp.balls[0] && !out.cutEsp.sticks[0] && out.cutBare.sticks[0];
   }
+  if (scene === 'f8') {
+    /* F8 · OBJECT IS WHAT THE FIELD DRAWS (Josh 11-07): an INVERT node aimed at OBJECT inverts the cloud and the atoms and not the background; aimed at
+       STAGE, the background alone; a hydrogen state aimed at OBJECT inverts the orbital.  Each: the field's codes (readPixels while the run lives: 255
+       OBJECT · 254 STAGE) and, on the driver's picture of the page, the share of each class's uncovered canvas pixels that changed (> 24 levels) */
+    const P = `const w = (n) => new Promise((r) => setTimeout(r, n)), N = __LW.nodes; `;
+    const canvasBox = () => g.ev(`const r = document.getElementById('field').getBoundingClientRect(), c = document.getElementById('field'); return { box: [r.left, r.top, r.right, r.bottom].map(Math.round), w: c.width, h: c.height };`);
+    const snapPng = async (name) => { const f = `.tmp/f8-${name}.png`; writeFileSync(f, Buffer.from(await g.snap(), 'base64')); return f; };
+    /* the codes at half the canvas's own grid, written raw for the measure below */
+    const codes = async (name, cb) => { const r = await g.ev(`const L = __LW, F = L.field, k = 2; F.stats.presents = 13; const r = await F.readPixels(L.obs, L.mat, Math.round(${cb.w} / k), Math.round(${cb.h} / k), true);
+        const n = { 255: 0, 254: 0 }; const a = new Uint8Array(r.w * r.h * 4); for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) { const i = y * r.bpr + x * 4, o = (y * r.w + x) * 4; a[o] = r.px[i]; a[o + 1] = r.px[i + 1]; a[o + 2] = r.px[i + 2]; a[o + 3] = r.px[i + 3]; if (n[r.px[i + 3]] !== undefined) n[r.px[i + 3]]++; }
+        let s = ''; for (let i = 0; i < a.length; i += 0x8000) s += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000)); return { w: r.w, h: r.h, n, b64: btoa(s), mask: F.objectMask };`);
+      writeFileSync(`.tmp/f8-${name}.rgba`, Buffer.from(r.b64, 'base64')); return { w: r.w, h: r.h, n: r.n, mask: r.mask, file: `.tmp/f8-${name}.rgba` }; };
+    const measure = (base, after, c, cb) => JSON.parse(execFileSync('python3', ['-I', '-c', `import sys, json
+from PIL import Image
+base, after, raw, w, h = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]); x0, y0, x1, y1 = map(int, sys.argv[6:10])
+B = Image.open(base).convert('RGB').crop((x0, y0, x1, y1)).resize((w, h), Image.NEAREST); A = Image.open(after).convert('RGB').crop((x0, y0, x1, y1)).resize((w, h), Image.NEAREST)
+R = Image.frombytes('RGBA', (w, h), open(raw, 'rb').read())
+cnt = { 'object': [0, 0], 'stage': [0, 0] }
+for b, a, r in zip(B.getdata(), A.getdata(), R.getdata()):
+  if max(abs(b[i] - r[i]) for i in range(3)) > 12: continue          # covered by a window, or the live frame's jitter: not counted
+  k = 'object' if r[3] == 255 else 'stage'; cnt[k][1] += 1
+  if max(abs(a[i] - b[i]) for i in range(3)) > 24: cnt[k][0] += 1
+print(json.dumps({ k: { 'changed': v[0], 'of': v[1], 'share': round(v[0] / max(1, v[1]), 3) } for k, v in cnt.items() }))`, base, after, c.file, String(c.w), String(c.h), ...cb.box.map(String)]).toString());
+    const crop = (png, name, cb) => execFileSync('python3', ['-I', '-c', `import sys
+from PIL import Image
+im = Image.open(sys.argv[1]).convert('RGB').crop(tuple(map(int, sys.argv[3:7])))
+if im.width > 1100: im = im.resize((1100, round(im.height * 1100 / im.width)))
+im.save(sys.argv[2], quality=82)`, png, `${DIR}/${name}.jpg`, ...cb.box.map(String)]);
+    const settleAll = (ms = 500) => g.ev(P + `__LW.schedule(4); await __LW.settle(); await w(${ms}); return 1;`);
+    /* benzene, CLOUD at the default EXPOSURE, the atoms on */
+    await molecule('C6H6');
+    await g.ev(`__LW.setStyle('cloud'); __LW.mat.exposure = 1; __LW.mat.atomSize = 0.35; __LW.mat.stickR = 0.3; return 1;`); await settleAll(800);
+    const cb = await canvasBox();
+    const base = await snapPng('mol-base');
+    out.molObject = {}; out.molStage = {};
+    await g.ev(P + `window.__id = N.add('invert'); N.set(__id, 'target', 'object'); await w(400); return 1;`); await settleAll(600);
+    { const c = await codes('mol-object', cb), p = await snapPng('mol-object'); out.molObject = { codes: c.n, mask: c.mask, page: measure(base, p, c, cb) }; crop(p, '038-F8-benzene-invert-object', cb); }
+    await g.ev(P + `N.set(__id, 'target', 'stage'); await w(400); return 1;`); await settleAll(600);
+    { const c = await codes('mol-stage', cb), p = await snapPng('mol-stage'); out.molStage = { codes: c.n, mask: c.mask, page: measure(base, p, c, cb) }; crop(p, '038-F8-benzene-invert-stage', cb); }
+    await g.ev(P + `N.remove(__id); await w(300); return 1;`);
+    /* hydrogen: MOLECULES off, the boot's 1s+2pz, the atoms gone */
+    await g.ev(`delete __LW.mat.atomSize; delete __LW.mat.stickR; __LW.chem.setOn(false); __LW.loadPreset('1s+2pz'); __LW.pause(); return 1;`); await settleAll(900);
+    const cbH = await canvasBox(), baseH = await snapPng('h-base');
+    await g.ev(P + `window.__id = N.add('invert'); N.set(__id, 'target', 'object'); await w(400); return 1;`); await settleAll(600);
+    { const c = await codes('h-object', cbH), p = await snapPng('h-object'); out.hObject = { codes: c.n, mask: c.mask, page: measure(baseH, p, c, cbH) }; crop(p, '038-F8-hydrogen-invert-object', cbH); }
+    await g.ev(P + `N.remove(__id); await w(300); return 1;`);
+    const O = out.molObject.page, S = out.molStage.page, H = out.hObject.page;
+    out.ok = O.object.share > 0.9 && O.stage.share < 0.05 && S.stage.share > 0.9 && S.object.share < 0.05 && H.object.share > 0.9 && H.stage.share < 0.05 && out.hObject.codes['255'] > 0;
+  }
   if (scene === 'f3') {
     /* the check: benzene's balls and sticks at EXPOSURE 0 (the picture is the atoms alone) — the CLIP on cuts them as before; CUT BALLS and CUT STICKS off
        draw them exactly as the CLIP off does (CLIP and SLAB); one kind off leaves the other cut.  The switches: hidden under hydrogen, shown under

@@ -847,10 +847,11 @@ fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -
 }
 /* 038 F3 · THE CLIP'S TOGGLE: is this kind (1 the balls, 2 the sticks) one the plane does NOT cut (p11.z's bits; 0 = both cut, every file before 038) */
 fn uncut(bit: u32) -> bool { return (u32(V.p11.z) & bit) != 0u; }
-/* 038 F5 · THE OBJECT MASK (p11.z bit 4, field.setObjectMask): the pixel's alpha — 1 (code 255) where the skeleton is what the eye sees, 254/255 on the
-   rest of the stage, the colour premultiplied by it (the canvas is premultiplied while the mask lives); off, 1 everywhere as before.  038 F7 · THE BURIED
-   ATOM: an atom on the ray counts only while it carries at least half of the pixel — the ray's transmittance to it (the march's bgBlend, DUST's 1 − a,
-   the ESP map's 1 − its opacity) ≥ ½; an atom under the wave reads STAGE */
+/* 038 F5 · THE OBJECT MASK (p11.z bit 4, field.setObjectMask): the pixel's alpha — 1 (code 255) on the OBJECT, 254/255 on the STAGE, the colour
+   premultiplied by it (the canvas is premultiplied while the mask lives); off, 1 everywhere as before.  038 F8 (Josh 11-07: "objects just means anything
+   on the stage that isn't the background. Like the molecule or the orbitals"): a pixel is OBJECT where the background carries LESS than half of it — the
+   ray's transmittance to the stage (the march's bgBlend, DUST's 1 − a, the ESP map's 1 − its opacity) < ½ — and wherever an atom stands on the ray (it
+   hides the stage); the orbital, SOLID's surface, the dust and ESP's map are OBJECT where they are dense, the empty picture STAGE */
 fn objA(hit: bool) -> f32 { if ((u32(V.p11.z) & 4u) == 0u) { return 1.0; } return select(254.0 / 255.0, 1.0, hit); }
 /* 032 O1 · THE ATOMS OVER ANY STYLE: SIZE > 0 the balls, RADIUS > 0 the sticks — the nearer of the two on the ray (t = 1e30: none); 038 F3: a kind the
    plane does not cut is met on the box's own interval [b0, bf], a cut one on the plane's [t0, tf] */
@@ -930,11 +931,11 @@ fn espSoft(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, tEnd: f32, half: f32,
   let share = 1.0 - (1.0 - T) * am;
   return vec4<f32>(back * share + col * am, share);
 }
-fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, half: f32, bg: vec3<f32>, jit: f32) -> vec4<f32> {   // rgb, w 1 where the inner sticks are on the ray (038 F5)
+fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, half: f32, bg: vec3<f32>, jit: f32) -> vec4<f32> {   // rgb, w the stage's share of the pixel (038 F8)
   var inner = vec4<f32>(0.0, 0.0, 0.0, 1e30);
   if (V.p11.y < 0.5) { let u = uncut(2u); inner = ballsOrSticks(ro, rd, select(t0, b0, u), select(tf, bf, u), true); }   // iteration 016 S2 · MAP ONLY: no sticks inside, the stage alone beneath the map; 038 F3: uncut, the box's interval
-  let surf = u32(V.p8.x); let hit = select(0.0, 1.0, inner.w < 1e30);
-  if (surf == 0u && V.p11.x > 0.0) { let es = espSoft(ro, rd, t0, tf, min(tf, inner.w), half, select(bg, inner.rgb, inner.w < 1e30), jit); return vec4<f32>(es.rgb, hit * es.w); }
+  let surf = u32(V.p8.x); let open = select(1.0, 0.0, inner.w < 1e30);   // 038 F8: the stage's share before the map (the inner sticks hide it)
+  if (surf == 0u && V.p11.x > 0.0) { let es = espSoft(ro, rd, t0, tf, min(tf, inner.w), half, select(bg, inner.rgb, inner.w < 1e30), jit); return vec4<f32>(es.rgb, open * es.w); }
   var th = 1e30; var n = vec3<f32>(0.0);
   if (surf == 0u) {                                                  // the density's ISO surface: march, then bisect
     let rs = V.p9.w; let steps = max(V.fwd.w, 8.0); let ds = (tf - t0) / steps; var ta = t0;
@@ -966,13 +967,13 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, ha
                                                                                    surfDist(p + vec3<f32>(0.0, 0.0, e), ses) - surfDist(p - vec3<f32>(0.0, 0.0, e), ses)) + vec3<f32>(1e-12)); }
   }
   let back = select(bg, inner.rgb, inner.w < 1e30);
-  if (th >= 1e30 || inner.w < th) { return vec4<f32>(back, hit); }
+  if (th >= 1e30 || inner.w < th) { return vec4<f32>(back, open); }
   var c = vec3<f32>(0.62);                                           // φ not ready: a grey surface
   if (V.p9.z > 0.5) { c = espColour(phiAt(ro + rd * th)); }
   if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
   if (V.p6.w < 1.5) { c = atomLit(c, n, rd, ro + rd * th); }        // MATTE: the map's colour unlit
   let am = clamp(0.8 * V.p0.y, 0.05, 1.0);
-  return vec4<f32>(mix(back, c, am), hit * (1.0 - am));                // 038 F7: the sticks' share under the map
+  return vec4<f32>(mix(back, c, am), open * (1.0 - am));               // 038 F8: the stage's share under the map
 }
 /* 037 T4 · PULSE (lab/stage-window.js), the first STAGE FX: a radial wash of the stage — × 2.2 + 0.035 on a dark stage, × 0.7 on a light one (by
    the stage colour's own luminance) — weighted from the centre outward (CENTRE, p17.x 0) or from the edge inward (EDGE, 1); r is 0 at the centre and 1
@@ -1039,19 +1040,19 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
   let refMax = max(bitcast<f32>(stats[1]), 1e-30);
   /* 032 O1 · THE ATOMS COMPOSITE: with MOLECULES' atoms set, SIZE > 0 (balls) or RADIUS > 0 (sticks) draws them under every style but ESP (its own
      sticks): the march stops at the nearest hit, which is its ground.  None set (hydrogen, THE LOCK) or both 0: back = bg, tEnd = tf — the old picture */
-  var back = bg; var tEnd = tf; var onObj = false;                 // 038 F5: onObj, the skeleton is on this ray (THE OBJECT MASK's alpha)
+  var back = bg; var tEnd = tf; var onObj = false;                 // 038 F5: onObj, an atom is on this ray (it hides the stage: OBJECT, 038 F8)
   if (style != 11u && V.p7.x > 0.5 && (V.p7.z > 0.0 || V.p7.w > 0.0)) { let m = atomsOver(ro, rd, t0, tf, b0, bf); if (m.w < 1e30) { back = m.rgb; tEnd = m.w; onObj = true; } }   // 038 F3: an uncut kind's t may lie past tf (the march still ends at steps)
   if (style == 2u || style == 5u) {                               // DUST (a retired GRAIN, 2, draws as DUST)
     let d = dustPixel(ro, rd, t0, min(tEnd, tf), half, mode, soft, rhoMax, ampMax, refMax, pxA);
     var od = pow(max(d.rgb + back * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     od = select(od, bgOut, od != od);
-    let ad = objA(onObj && d.a <= 0.5); return vec4<f32>(min(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), vec3<f32>(1.0)) * ad, ad);   // 038 F7: the atom carries ≥ ½; N6: the colour clamped before the × a
+    let ad = objA(onObj || d.a > 0.5); return vec4<f32>(min(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), vec3<f32>(1.0)) * ad, ad);   // 038 F8: the stage carries < ½ (an atom hides it); N6: the colour clamped before the × a
   }
   if (style == 11u && V.p7.x > 0.5) {                               // iteration 014 B: ESP draws the map over its sticks (none set: the march below, as CLOUD); 032 O1: BALLS · STICKS are the composite above
     let oc = espPixel(ro, rd, t0, tf, b0, bf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w)));
     var om = pow(max(oc.rgb, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     om = select(om, bgOut, om != om);
-    let ae = objA(oc.w >= 0.5); return vec4<f32>(min(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), vec3<f32>(1.0)) * ae, ae);   // F7's ≥ ½; N6's clamp
+    let ae = objA(oc.w < 0.5); return vec4<f32>(min(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), vec3<f32>(1.0)) * ae, ae);   // 038 F8: the stage's share < ½; N6's clamp
   }
   let kq = V.p3.w;                                                // THE KNEE's q (0 at the shipped 0.6: the old compositing, untouched)
   var tau = 0.0;
@@ -1199,7 +1200,7 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
      default and it never touches the physics — the readback path renders through the same shader, so a gate
      that compares pixels compares the same numbers as long as the strength is zero. */
   o = o + bayer8(in.pos.xy) * (V.p2.w / 255.0);
-  let ao = objA(onObj && bgBlend >= 0.5); return vec4<f32>(min(o, vec3<f32>(1.0)) * ao, ao);   // 038 F5: THE OBJECT MASK (off: × 1, the old bits); F7: a buried atom reads STAGE; N6: the colour clamped before the × a (an overbright 255 over a = 254 is no premultiplied pixel)
+  let ao = objA(onObj || bgBlend < 0.5); return vec4<f32>(min(o, vec3<f32>(1.0)) * ao, ao);   // 038 F5: THE OBJECT MASK (off: × 1, the old bits); F8: OBJECT where the stage carries < ½ (the wave, an atom); N6: the colour clamped before the × a (an overbright 255 over a = 254 is no premultiplied pixel)
 }`;
 
 /* ── THE SPECIALISED PRESENT (optimization 2026-09-24, K2 · AUDIT-A FA3, REFUTE-E/F, PLAN §0) ─────────────────────────
@@ -2206,8 +2207,8 @@ export async function createField(canvas, opts = {}) {
     if (!f && tapTex) { tapTex.destroy(); tapTex = null; }
   }
   /* 038 F5 · THE OBJECT MASK (the field's side of A NODE HAS A TARGET): `setObjectMask(on)` → the state in force.  On, the canvas is `premultiplied`
-     and every pixel's alpha says where the skeleton is seen — code 255 where a ball or stick carries ≥ ½ of the pixel (ESP's inner sticks too; 038 F7:
-     one under the wave is STAGE), 254 on the rest, the colour
+     and every pixel's alpha says OBJECT or STAGE — code 255 where the stage carries less than half of the pixel (038 F8: the orbital, SOLID's surface,
+     the dust, ESP's map, an atom), 254 on the background, the colour
      premultiplied by it (the page behind the canvas is the stage colour: nothing shows); the line pass keeps the destination's alpha.  The tap
      copies it (a SHADER node reads `.a`), an SVG node thresholds SourceAlpha.  Off (the boot, THE LOCK) the canvas is `opaque` and alpha is 1 */
   function setObjectMask(on) { const m = !!on; if (m !== objMask) { objMask = m; reconfigure(); } return objMask; }
