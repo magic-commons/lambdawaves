@@ -161,5 +161,37 @@ try {
     for (const th of ['light', 'dark']) { await g.ev(`__LW.look.set({ theme: '${th}' }); return 1;`); await wait(700); await shot(`038-S5-faces-sml-${th}`, R); }
     out.log.push({ errors: (await g.errors()).errs });
   }
+  if (scene === 's6') {   /* S6 (S-REVIEW #2, #3, #4): one chip on the detached card; the manager's row keeps EDIT · SNAP · CLEAR whole; the bar's mini-viewer drawn at the size seen under UI SCALE */
+    await g.ev(`__LW.look.set({ theme: 'dark' }); __LW.chem.setOn(true); await __LW.settle(); await __LW.chem.pick('cubane'); await __LW.settle(); return 1;`); await wait(1200);
+    out.log.push({ dock: await g.tap('#transport .dock-btn') }); await wait(900);
+    const h = await g.ev(`const r = document.querySelector('.dev[data-id="transport"] .dev-head').getBoundingClientRect(); return [Math.round(r.left + 110), Math.round(r.top + r.height / 2)];`); await drag(h[0], h[1], 700, 520); await wait(1000);
+    out.log.push(await state('detached')); out.log.push({ stageChips: await g.ev(`return [...document.querySelectorAll('.dev[data-id="transport"] button')].filter((b) => b.getBoundingClientRect().width > 0 && /stage/i.test(b.dataset.helpEn || b.title || '')).map((b) => b.className.split(' ')[0] + ':' + b.dataset.gly);`) });
+    const C = await g.ev(`const r = document.querySelector('.dev[data-id="transport"]').getBoundingClientRect(); return [r.left - 16, r.top - 16, r.right + 16, r.bottom + 16];`);
+    await shot('038-S6-detached-one-chip-dark', C);
+    await g.ev(`__LW.look.set({ theme: 'light' }); return 1;`); await wait(600); await shot('038-S6-detached-one-chip-light', C);
+    await g.tap('.dev[data-id="transport"] .dev-pop'); await wait(900); out.log.push(await state('the corner chip'));
+    out.log.push({ acts: await g.ev(`__LW.layout.reopen('widgets', 'R'); await new Promise((r) => setTimeout(r, 700)); return [...document.querySelectorAll('.dev[data-id="widgets"] .wg-acts > *')].map((x) => { const r = x.getBoundingClientRect(), led = x.querySelector('.sw-led'); return x.textContent.trim() + ' ' + [r.left, r.top, r.width].map(Math.round).join('/') + (led ? ' led ' + Math.round(led.getBoundingClientRect().width) : '') + (x.scrollWidth > x.clientWidth + 1 ? ' OVERFLOW' : ''); });`) });
+    const M = await g.ev(`const r = document.querySelector('.dev[data-id="widgets"]').getBoundingClientRect(); return [r.left - 10, r.top - 10, r.right + 10, r.bottom + 10];`);
+    await shot('038-S6-manager-light', M); await g.ev(`__LW.look.set({ theme: 'dark' }); return 1;`); await wait(600); await shot('038-S6-manager-dark', M);
+    for (const sc of [1, 1.5]) {
+      await g.ev(`__LW.look.set({ scale: ${sc} }); return 1;`); await wait(1200);
+      out.log.push({ scale: sc, mini: await g.ev(`const m = document.querySelector('#transport > .csb-mini'), c = m.querySelector('canvas'), r = m.getBoundingClientRect(); return { seen: [Math.round(r.width), Math.round(r.height)], canvas: [c.width, c.height], dpr: devicePixelRatio };`) });
+      await shot('038-S6-mini-scale-' + sc, await g.ev(`const r = document.querySelector('#transport > .csb-mini').getBoundingClientRect(); return [r.left - 8, r.top - 8, r.right + 8, r.bottom + 8];`));
+    }
+    await g.ev(`__LW.look.set({ scale: 1 }); return 1;`);
+    out.log.push({ errors: (await g.errors()).errs });
+  }
+  if (scene === 's6r') {   /* S6 (S-REVIEW #1, #8): the bar's card through a reload — detached then ?starter=resume; docked then a driven boot (?preset) and a plain one */
+    const base = `https://127.0.0.1:${process.env.LW_PORT || 9699}/lab/?`, again = async (q, tag) => { await g.nav(base + q, { wait: false }); await boot(); out.log.push(await state(tag)); };
+    const detach = async () => { const h = await g.ev(`const r = document.querySelector('.dev[data-id="transport"] .dev-head').getBoundingClientRect(); return [Math.round(r.left + 110), Math.round(r.top + r.height / 2)];`); await drag(h[0], h[1], 700, 560); await wait(1500); };
+    out.log.push({ dock: await g.tap('#transport .dock-btn') }); await wait(900); await detach(); out.log.push(await state('detached'));
+    await again('starter=resume&warn=0', 'detached → resume'); await shot('038-S6-resume-after-detach', null);
+    out.log.push({ dock: await g.tap('#transport .dock-btn') }); await wait(1200); out.log.push(await state('dock chip after the resume'));
+    await shot('038-S6-dock-after-resume', [0, 0, 320, 420]);
+    await again('preset=1s%2B2pz&menu=0&warn=0', 'docked → a driven boot (?preset)'); await shot('038-S6-preset-after-dock', [0, 0, 320, 420]);
+    out.log.push({ dock: await g.tap('#transport .dock-btn') }); await wait(1200); out.log.push(await state('dock chip after the driven boot'));
+    await again('warn=0&menu=0', 'docked → a plain boot');
+    out.log.push({ errors: (await g.errors()).errs });
+  }
 } catch (e) { out.error = String(e && e.stack || e); }
 finally { console.log(JSON.stringify(out, null, 1)); await g.close(); }

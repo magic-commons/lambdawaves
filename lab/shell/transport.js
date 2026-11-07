@@ -83,7 +83,7 @@ export function createTransport(app) {
          FREE left the cycle — the card popped out of the rack is the one-card look (csb.css, the kit's `bare` pop).  The rack seat is λWAVES' TRANSPORT
          card at its remembered slot (rack-wiring.js), so the kit docks through it; a card already open (an open slot with no bar) takes the bar at once */
       places: ['rack', 'stage'],
-      onDock: (v) => { const rk = app.sh.rk, w = app.sh.wTr; if (!rk) return; if (v && w && !w.root.classList.contains('closed')) transportDock(rk).open({ body: w.body });
+      onDock: (v) => { const rk = app.sh.rk; if (!rk) return; if (v && rk.isOpen('transport')) transportDock(rk).open(rk.window('transport'));   // 038 S6: the open card read from the rack (app.sh carries no wTr: this road never ran, and a press on an open, empty card did nothing)
         else if (v) rk.open('transport', { index: app.sh.layout.dockIndex }); else rk.close('transport'); } });
     /* the rack's ☆ list opens beside its button, wherever the bar sits (it is the stage's, never the bar's: the bar clips) */
     for (const [b, l] of [['rackFav', 'rackFavList']]) { const btnEl = byId(b), list = byId(l); if (!btnEl || !list) continue;

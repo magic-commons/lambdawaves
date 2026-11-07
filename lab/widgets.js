@@ -10,7 +10,7 @@
  *   registerKind({ kind, label, glyph, hint, size: { w, h }, opts, mount(el, api) → { tick(now, force, ctx), set(opts), destroy() }, controls(bar, api) })
  *   api = { app, id, kind, el, opts(), set(patch, name), theme(), ink(), editing(), size() }
  *   createWidgets(app) → { root, add(kind, opts), remove(id), clear(), list(), edit(on), snap(on), tick(now, ctx), restore(rec), serialize(), subscribe(fn) } */
-import { el, hint, onThemeChange } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js';
+import { el, hint, onThemeChange } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js'; import { cssZoom } from './mir/core/zoom.js';
 const KEY = 'lambdawaves.q0.widgets', MIN = 0.06;
 const KINDS = new Map(), heard = new Set();
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v)), r4 = (v) => Math.round(v * 1e4) / 1e4;
@@ -41,7 +41,7 @@ export function adopt(kind, host, { app, opts }) {
   const K = KINDS.get(kind); if (!K) return null;
   const P = { host, force: false, inst: {} };
   P.inst = K.mount(host, { app, id: kind, kind, el: host, opts, theme, ink: () => getComputedStyle(host).color, editing: () => false,
-    size: () => ({ w: host.clientWidth, h: host.clientHeight }), set: () => {} }) || {};
+    size: () => { const z = cssZoom(host); return { w: host.clientWidth * z, h: host.clientHeight * z }; }, set: () => {} }) || {};   // S6: the size SEEN — the bar is a zoomed root (UI SCALE), so its canvas is drawn at the pixels it covers
   PINNED.add(P); onThemeChange(() => pinKick(P));
   if (typeof ResizeObserver === 'function') new ResizeObserver(() => pinKick(P)).observe(host);
   return { set: (o) => { if (P.inst.set) P.inst.set(o); pinKick(P); } };

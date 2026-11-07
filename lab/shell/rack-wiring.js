@@ -13,10 +13,11 @@ export function createRackWiring(app) {
   /** a rack card's width, from the RACK's own content box — the scrollbar is already out of clientWidth */
   const rackCardWidth = () => { const cs = getComputedStyle(rack); return Math.max(180, Math.round(rack.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0))); };
   /** the TRANSPORT's pop chip wears the act its next press performs; every other card's is the kit's.  038 S1 BACK TO THE STAGE: popped off the rack
-   *  its corner shows it (csb.css) and it puts the bar on the stage — repainted after the kit's own face on every persisted change (onChange) */
+   *  its corner shows it (csb.css) and it puts the bar on the stage, in the bar's own glyph for that act (S6: the kit's `popOut`, the dock chip's ↗, which
+   *  stands down in the card while it floats — one chip, one glyph) — repainted after the kit's own face on every persisted change (onChange) */
   function popFace(d) {
     const b = d && d.querySelector('.dev-pop'); if (!b) return;
-    const out = d.classList.contains('floating'), g = out ? 'toStage' : layout.docked ? 'north' : 'reopen'; if (b.dataset.gly === g) return;
+    const out = d.classList.contains('floating'), g = out ? 'popOut' : layout.docked ? 'north' : 'reopen'; if (b.dataset.gly === g) return;
     chip(b, g, out ? 'put the bar on the stage' : layout.docked ? 'undock the control surface' : 'dock the control surface');
     b.title = out ? 'Put the bar on the stage' : 'Dock or undock the control surface';
   }
@@ -97,6 +98,7 @@ export function createRackWiring(app) {
     for (const c of L.cards) {
       const d = devById(c.id); if (!d) continue;
       if (d === wTr.root) {
+        if (rk.floatOf('transport')) rk.dock('transport');           // 038 S6: a restore never floats the bar's card — the kit's apply floats it from a record's `float` (a session, a ☆ slot saved while it was detached), the road onClose's dock (S2) never sees
         if (layout.docked) layout.seatTransport();                    // 018 C4: a record's seat is not read — the docked transport is the LEFT rack's top
         d.classList.toggle('closed', !layout.docked);                // iteration 014 A0: the card is open exactly while the kit's bar is docked in it
         if (d.classList.contains('folded') !== !!c.folded) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
