@@ -141,8 +141,9 @@ try {
   }
   if (scene === 'n5') {
     /* the minimap: hidden at FIT; zoomed in, shown — a rect a card and the view's; a drag centres the view on the map's point; the wheel zooms about the view's centre */
-    out.fit = await ev(`N.open(); await w(600); N.win.place({ x: 600, y: 60, w: 520, h: 640 }); await w(300); for (const t of ['levels', 'hue', 'blur', 'grain', 'vignette', 'posterize']) N.add(t); await w(500);
-      $(WIN + '.nodes-ground').focus(); key($(WIN + '.nodes-ground'), 'Home', { code: 'Home' }); await w(300); const m = $(WIN + '.nodes-map'); return { hidden: m.hidden, z: $(WIN + '.nodes-plane').style.scale };`);
+    out.fit = await ev(`N.open(); await w(600); N.win.place({ x: 600, y: 60, w: 520, h: 640 }); await w(300); for (const t of ['levels', 'hue']) N.add(t); await w(500);
+      $(WIN + '.nodes-ground').focus(); key($(WIN + '.nodes-ground'), 'Home', { code: 'Home' }); await w(300); const m = $(WIN + '.nodes-map'), o = { hidden: m.hidden, z: $(WIN + '.nodes-plane').style.scale };
+      for (const t of ['blur', 'grain', 'vignette', 'posterize']) N.add(t); await w(500); return o;`);
     out.zoom = await ev(`const G = $(WIN + '.nodes-ground'), r = G.getBoundingClientRect(); G.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -400, clientX: r.left + 150, clientY: r.top + 120 })); await w(300);
       const m = $(WIN + '.nodes-map'), s = m.firstChild, R = [...s.children]; return { hidden: m.hidden, rects: R.length, cards: $$(WIN + '.nodes-card').length, view: R[R.length - 1].getAttribute('class'), box: rect(m), title: m.title, vb: s.getAttribute('viewBox') };`);
     await shot('038-N5-minimap', [600, 60, 1120, 700]);

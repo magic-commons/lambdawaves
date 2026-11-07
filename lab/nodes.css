@@ -85,6 +85,14 @@
 .nodes-port.live { cursor: crosshair; }
 .nodes-port.live::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; }
 .nodes-card.unplug { opacity: .5; }
+/* 038 N5 · THE MINIMAP: a well at the ground's bottom-right; the cards faint ink (STAGE IN / OUT the accent), the view an accent frame */
+.nodes-map { position: absolute; right: 8px; bottom: 8px; z-index: 1; width: 120px; height: 80px; box-sizing: border-box; overflow: hidden; cursor: crosshair; touch-action: none;
+  border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+.nodes-map > svg { display: block; width: 100%; height: 100%; }
+.nodes-map .c { fill: color-mix(in srgb, var(--ink-faint) 60%, transparent); }
+.nodes-map .c.io { fill: color-mix(in srgb, var(--acc) 55%, transparent); }
+.nodes-map .c.dim { opacity: .4; }
+.nodes-map .v { fill: color-mix(in srgb, var(--acc) 10%, transparent); stroke: var(--acc); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .nodes-column .nodes-card.unplug::before { border-left-style: dashed; }
 /* 020 X4 · the foot fold: FADE · MASK · SOFT under the knobs; lit while either is off home */
 .nodes-foot { margin-top: 6px; border-top: 1px solid var(--glass-hairline); }

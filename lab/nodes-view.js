@@ -19,6 +19,8 @@
  * 038 N4 THE WIRE HAS A KNOB (FL Studio's Patcher): on each wire into a node a round HANDLE at its middle — the node's MIX (its FADE; a LAYER's or a
  * SHADER's own 0–1 MIX or AMOUNT), turned by a vertical drag or the wheel, its arc the value; a press selects the wire (Delete unplugs it, the arrows
  * turn it); a card's PORT carried onto a wire moves its node into that wire (and plugs it in), an in-port let go on the empty ground unplugs it.
+ * 038 N5 THE MINIMAP (the window): the graph in small at the ground's bottom-right — the cards, the view as an accent rect; a drag looks round, the
+ * wheel zooms about the view's centre; hidden while every card is in view.
  * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
  * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
@@ -62,10 +64,11 @@ export function createView(parent, kind, M) {
   const cards = {}, ro = new ResizeObserver(() => wires()), sel = new Set();
   const hands = el('div', 'nodes-hands', plane), H = new Map(), P = new Map();   // 038 N4: the wires' handles and paths, by their downstream node
   let wsel = null;                                                   // the selected wire: its downstream node's id
+  let map = null, held = false;                                      // 038 N5: the minimap (the window's), and a hand on it (its frame held)
   let pan = [0, 0], z = 1;
   /** the view: the pan (px) and the zoom; the dot grid follows both */
   const setPan = (p, zz = z) => { pan = p; z = zz; plane.style.translate = p[0] + 'px ' + p[1] + 'px'; plane.style.scale = z;
-    ground.style.backgroundPosition = p[0] + 'px ' + p[1] + 'px'; ground.style.backgroundSize = 22 * z + 'px ' + 22 * z + 'px'; };
+    ground.style.backgroundPosition = p[0] + 'px ' + p[1] + 'px'; ground.style.backgroundSize = 22 * z + 'px ' + 22 * z + 'px'; drawMap(); };
   const keep = () => M.put({ pan: { ...(M.rec().pan || {}), [kind]: pan }, ...(W ? { zoom: z } : {}) });
   /** zoom to zz about the ground point p (px): the plane point under it stays */
   const zoomAt = (zz, p, base = pan, z0 = z) => { zz = clampZ(zz); setPan([p[0] - ((p[0] - base[0]) * zz) / z0, p[1] - ((p[1] - base[1]) * zz) / z0], zz); };
@@ -142,7 +145,27 @@ export function createView(parent, kind, M) {
       if (q) { const h = handOf(q); h.style.left = mx + 'px'; h.style.top = my + 'px'; h.classList.toggle('cut', cut); hs.add(h); if (h.parentNode !== hands) hands.appendChild(h); }
       return p; }));
     for (const [id, h] of H) if (!hs.has(h)) { h.remove(); H.delete(id); }
-    paintSel();
+    paintSel(); drawMap();
+  }
+  /* 038 N5 · THE MINIMAP (Josh: "Patcher also has a cool minimap view finder … Perhaps scrolling on the viewfinder will allow you to zoom in and out
+     as well to adjust the view finder width"): an SVG over the cards' union and the view [−pan/z, (ground − pan)/z] — each card a rect (STAGE IN /
+     OUT in the accent, a muted or unplugged node faint), the view an accent rect — redrawn once a frame when the view or a card moves; a drag centres
+     the view where it points (the map's frame held while the hand is on it), the wheel zooms about the view's centre; hidden while all is in view */
+  function drawMap() {
+    if (!map) return;
+    frame.coalesce('nodes.map.' + kind, () => {
+      const B = Object.entries(cards).map(([id, n]) => { const [l, t] = xy(n.c); return [l, t, n.c.offsetWidth, n.c.offsetHeight, id, n.c]; }), gw = ground.clientWidth, gh = ground.clientHeight;
+      const v = [-pan[0] / z, -pan[1] / z, gw / z, gh / z], x0 = Math.min(...B.map((b) => b[0])), y0 = Math.min(...B.map((b) => b[1])), x1 = Math.max(...B.map((b) => b[0] + b[2])), y1 = Math.max(...B.map((b) => b[1] + b[3]));
+      map.hidden = !held && x0 >= v[0] - 1 && y0 >= v[1] - 1 && x1 <= v[0] + v[2] + 1 && y1 <= v[1] + v[3] + 1; if (map.hidden) return;
+      const s = map.firstChild;
+      if (!held) { const X0 = Math.min(x0, v[0]), Y0 = Math.min(y0, v[1]), w = Math.max(x1, v[0] + v[2]) - X0, h = Math.max(y1, v[1] + v[3]) - Y0, m = 0.05 * Math.max(w, h);
+        s.setAttribute('viewBox', [X0 - m, Y0 - m, w + 2 * m, h + 2 * m].map((x) => x.toFixed(1)).join(' ')); }
+      while (s.childElementCount < B.length + 1) s.insertBefore(document.createElementNS(NS, 'rect'), s.firstChild);
+      while (s.childElementCount > B.length + 1) s.firstChild.remove();
+      const R = [...s.children], put = (r, x, y, w, h) => { r.setAttribute('x', x.toFixed(1)); r.setAttribute('y', y.toFixed(1)); r.setAttribute('width', w.toFixed(1)); r.setAttribute('height', h.toFixed(1)); };
+      B.forEach(([l, t, w, h, id, c], i) => { put(R[i], l, t, w, h); R[i].setAttribute('rx', 10); R[i].setAttribute('class', 'c' + (id === 'in' || id === 'out' ? ' io' : '') + (c.matches('.off, .unplug') ? ' dim' : '')); });
+      put(R[B.length], ...v); R[B.length].setAttribute('class', 'v');
+    });
   }
   /* 038 N4 · THE WIRE HAS A KNOB (Josh: "The connector wires also need a way to connect and disconnect. Check out FL Studio's 'Patcher' … how they
      design the 'knob' on the wires"): each wire is its downstream node's input, so its knob is that node's MIX — FADE (already folded, already a
@@ -278,6 +301,14 @@ export function createView(parent, kind, M) {
     ground.addEventListener('pointerleave', () => ground.classList.remove('nodes-zkey'));
     ground.addEventListener('wheel', (e) => { if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault();
       zoomAt(z * Math.exp(-e.deltaY * (e.deltaMode ? 16 : 1) * 0.002), local(e)); keep(); }, { passive: false });
+    map = el('div', 'nodes-map', ground); map.hidden = true; map.title = 'MAP — drag to look round · the wheel zooms'; map.appendChild(document.createElementNS(NS, 'svg'));
+    const look = (e) => { const s = map.firstChild, m = s.getScreenCTM(); if (!m) return; const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+      setPan([ground.clientWidth / 2 - q.x * z, ground.clientHeight / 2 - q.y * z]); };
+    map.addEventListener('pointerdown', (e) => { if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); held = true; map.setPointerCapture(e.pointerId); look(e);
+      const mv = (ev) => look(ev), end = () => { map.removeEventListener('pointermove', mv); map.removeEventListener('pointerup', end); map.removeEventListener('pointercancel', end); held = false; keep(); drawMap(); };
+      map.addEventListener('pointermove', mv); map.addEventListener('pointerup', end); map.addEventListener('pointercancel', end); });
+    map.addEventListener('wheel', (e) => { e.preventDefault(); e.stopPropagation(); zoomAt(z * Math.exp(-e.deltaY * (e.deltaMode ? 16 : 1) * 0.002), [ground.clientWidth / 2, ground.clientHeight / 2]); keep(); }, { passive: false });
+    ro.observe(ground);
     /* THE KEYS ARE THE GROUND'S — 021 I1: rows of THE ACTION REGISTRY (`nodes.*`, lab/actions.js), live while this ground has the focus (THE FOCUS
        LAW): chords by place (AZERTY, Dvorak), rebindable, on the board; Tab is the kit's again, the add menu is Shift+A.  These are their acts. */
     GROUNDS.set(ground, {
