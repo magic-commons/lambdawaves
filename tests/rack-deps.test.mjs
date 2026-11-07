@@ -11,11 +11,13 @@
  * §5 (0.5.2 R1) a module that has left rack.js is measured from its file (lab/shell/, lab/windows/) as a piece of its planned module:
  *    a fixture boot + controller file (handed names by key, app chains, the file's seats at its call, a module's fill of its own name
  *    not a crossing, a null slot destructured is a stray, an unplanned file refused), then the real tree keeps its 27 rows (23 until iteration 008 S added FIELD; 021 G2 GAS and EQUALIZER, G3 FOLDERS).
+ * §6 (039 S2, THE CYCLE COUNT IS RACK-DEPS') `--cycles`: the static imports by the lexer on a fixture (a ring of three app modules through
+ *    `import` / `export … from`, a kit-only pair, a dynamic import, specifiers in a comment and a string), then lab/** itself: 0 app-side cycles.
  *
  * Run:  node tests/rack-deps.test.mjs
  */
 import { readFileSync } from 'node:fs';
-import { lex, analyze, classes, PLANNED, HINGE } from '../tools/rack-deps.mjs';
+import { lex, analyze, classes, PLANNED, HINGE, staticImports, cyclesOf, labSources } from '../tools/rack-deps.mjs';
 import { appFiles, appSource, APP_FOLDERS } from './helpers/app-source.mjs';
 
 let red = 0;
@@ -256,6 +258,20 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   try { R = classes(src); } catch (e) { err = e.message; }
   check(!!R && R.modules.length === Object.keys(PLANNED).length && R.modules.length === 27 && R.files.every((F) => R.modules.find((m) => m.id === F.module).files.some((x) => x.rel === F.rel)),
     `the real tree: ${R ? R.files.length : '?'} module file(s) measured as their planned modules (${R ? R.files.map((F) => F.rel + ' → ' + F.module).join(', ') || 'none yet' : err}); the table keeps its 27 rows (iteration 008 S: FIELD; 021 G2: GAS, EQUALIZER; G3: FOLDERS)`, err);
+}
+
+/* ── §6 THE CYCLES (039 S2) ── */
+{
+  const fx = { 'a.js': "import b, { c as d } from './b.js';\n// import './e.js'\nconst s = \"import './e.js'\";",
+    'b.js': "export { x } from './sub/c.js';\nexport const y = 1;", 'sub/c.js': "import * as A from '../a.js';\nconst later = () => import('../d.js');",
+    'd.js': "import './a.js?v=1';", 'e.js': 'export default 1;', 'mir/k1.js': "import './k2.js';", 'mir/k2.js': "export * from './k1.js';" };
+  check(same(staticImports(fx['a.js']), ['./b.js']) && same(staticImports(fx['sub/c.js']), ['../a.js']), 'cycles: the static imports by the lexer — a comment, a string and import() are not edges', JSON.stringify([staticImports(fx['a.js']), staticImports(fx['sub/c.js'])]));
+  const C = cyclesOf(fx);
+  check(same(C.app.map((c) => c.files), [['a.js', 'b.js', 'sub/c.js']]) && same(C.mir.map((c) => c.files), [['mir/k1.js', 'mir/k2.js']]) && C.edges === 6,
+    'cycles: a ring through import and export … from is one app-side component (d.js imports a.js but is reached only by c.js\' dynamic import, so it stays out); a ring wholly in mir/ is the kit\'s', JSON.stringify(C));
+  const L = cyclesOf(labSources());
+  check(L.app.length === 0 && L.unresolved.length === 0 && L.modules > 300,
+    `cycles: lab/** — ${L.modules} modules, ${L.edges} static edges, 0 app-side cycles (the kit's own: ${L.mir.map((c) => c.files.length + ' modules').join(', ') || 'none'})`, JSON.stringify(L.app));
 }
 
 if (red) { console.log(`RED ${red} rack-deps check(s)`); process.exit(1); }

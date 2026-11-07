@@ -109,8 +109,14 @@ and the code disagree, the code is right; please say so in an issue.
 - The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 843 values, and 987 with the s4a fixture since iteration 008 W — both runs with `--query gastab=0`; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
   `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (843) and the same with
   `--fixture tests/fixtures/digest-lock-s4a.json` (987), against a tree served by `tools/gate/server.py`. Since 038 Z4 `gastab=0` is the
-  tool's default (a run without it read `gas` red at 64/96/128 — 12 readbacks · 3 pack bytes — the old "s4a 12 · 3").
+  tool's default (a run without it read `gas` red at 64/96/128 — 12 readbacks · 3 pack bytes — the old "s4a 12 · 3"). Since 039 S1 a
+  state@grid whose two in-run digests disagree is digested a third time and the majority is the leaf (`RETRIED <state>@<grid>: 1 of 3
+  digests differed (…)`, and `retried …` on the last line); a leaf that still differs from the fixture is RED. The fixtures are never re-baked.
   Source: `tools/perf/digest-lock.mjs` (header).
+- The app's import graph has no cycle: `node tools/rack-deps.mjs --cycles` (039 S2) walks every `lab/**` module's static imports by the
+  tool's own lexer (no npm), prints the circular components and exits 1 on an app-side one; the kit's own (one component, 13 modules,
+  37 edges, inside `lab/mir/**`) is printed apart and never fails. `tests/rack-deps.test.mjs` §6 holds the same in `test.sh node`.
+  Source: `tools/rack-deps.mjs` §5d.
 - A change to CSS or to what the page builds at boot is checked with MIR's `tools/stylehash.mjs` (computed
   styles and pixels, theme × card × frost, before and after). Source: `research/optimization-2026-09-24/BUILD-BRIEF.md`.
 - `node tools/changelog.mjs --check` fails when CHANGELOG.md is out of date with the tags. Source: that file.
