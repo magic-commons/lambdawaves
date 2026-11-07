@@ -176,8 +176,7 @@ const kitKeys = (() => { try { return fs.readFileSync(path.join(LAB, 'mir/shell/
 const kt = TEXT.get('lab/key-table.js') || '';
 const owned = /export function ownsKey\(n, chord\)/.test(kitKeys) && /n\.getAttribute && n\.getAttribute\('role'\)/.test(kitKeys);
 const sliderOwnsNoSpace = /role === 'slider'[^\n]*return ARROWS\.has\(chord\) \|\| chord === 'PageUp' \|\| chord === 'PageDown';/.test(kitKeys);
-const buttonPresses = !/overControls: true/.test(kt) && /if \(owned && !a\.overControls\) continue;/.test(kitKeys)   // 039 W1: a keyed focus keeps its keys
-  && /keyFocus = byKey \? e\.target : null/.test(kt) && /if \(t === keyFocus && \(pressable\(t\) \|\| !\/\^\(Space\|Enter\)\$\/\.test\(c\)\)\) return;/.test(kt);
+const buttonPresses = !/overControls: true/.test(kt) && /if \(owned && !a\.overControls\) continue;/.test(kitKeys);   // 039 W1: a keyed focus keeps its keys — proven by pressing (W-REVIEW W1), not by key-table's text (039 F1 dropped that judge)
 const pointerSpacePlays = buttonPresses && /taken\.add\(e\.code\); table\.run\(id, e\);/.test(kt) && /if \(taken\.delete\(e\.code\)\) e\.preventDefault\(\);/.test(kt);
 const spaceCancelled = /if \(owned\) taken\.add\(e\.code\);/.test(kitKeys) && /if \(taken\.delete\(e\.code\)\) e\.preventDefault\(\);/.test(kitKeys);
 const selectYieldsSpace = /e\.code !== 'Space' \|\| e\.defaultPrevented \|\| !t \|\| t\.tagName !== 'SELECT'/.test(kt);

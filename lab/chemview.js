@@ -478,7 +478,7 @@ export function createChem(host, api) {
   const kapKnob = knob({ label: '<m>κ</m>', min: 1e-4, max: 1e-2, value: 1e-3, log: true, title: 'δ-kick strength κ: smaller is more linear',
     fmt: (v) => v.toExponential(1), onInput: (v) => { if (api.wake) api.wake(); if (api.modHand && api.modHand('chem.kick', v)) return; kappa = v; } });   // iteration 007 (MIR check B2): routed, the hand moves the base; 038 C4: a favourite's turn wakes the card
   r2.appendChild(kapKnob.root);
-  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂), then field-free propagation', onFire: () => { kick(); if (api.strike) api.strike(Math.sqrt(kappa / 1e-3)); } }); r2.appendChild(kickT.root); kickT.root.dataset.keyAction = 'chem.kick';   // 021 I1: the action presses it; 034 I: a hand's KICK strikes the register too
+  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂), then field-free propagation', onFire: () => { if (api.wake) api.wake(); kick(); if (api.strike) api.strike(Math.sqrt(kappa / 1e-3)); } }); r2.appendChild(kickT.root); kickT.root.dataset.keyAction = 'chem.kick';   // 021 I1: the action presses it; 034 I: a hand's KICK; 039 F1: it, VIBRATE and BREATHE (the api below, their rows' road) wake a quiet card, as its dials do strikes the register too
   /* iteration 008 U · Δρ, the VIEW that left the seg: the induced density against the reference stored at the kick, over whatever VIEW the card draws */
   const deltaSw = sw({ label: 'Δρ', value: false, title: 'ΔD since the kick, signed', onChange: (v) => { setDelta(v); } });
   r2.appendChild(deltaSw.root);
@@ -1483,7 +1483,7 @@ export function createChem(host, api) {
     /** 0.7.0 · the nuclei and the dipole AS DRAWN this frame (bohr, a.u.): the preset's atoms and the solve's dipole until VIBRATE poses them (V1); the skeleton and the atom labels read these, never moleculeAtoms */
     atomsNow: () => (vibFr && vibAt) || chemAtoms(preset), /** iteration 014 D6: the open rung's Mulliken charges and a record's bonds, or null */ /** iteration 014 B3: a volume rung's φ grid, or null (field.js's Poisson pass) */ espGrid: () => (sol && sol.espGrid) || null, chargesNow: () => (sol && sol.mulliken) || null, bondsNow: () => (sol && sol.bonds) || null, dipoleNow: () => (vibFr && vibJ >= 0 ? Array.from(vibFr.dipole.subarray(3 * vibJ, 3 * vibJ + 3)) : (sol && sol.dipole) || null),
     /** 0.7.0 V1 · VIBRATE from outside (the verb, __LW.chem): the row's own controls; `breathe` presses BREATHE; → the line while it plays, or null */
-    async vibrate({ on: v = true, mode, amp, breathe: b } = {}) { if (Number.isFinite(amp)) ampKnob.set(Math.min(4, Math.max(0, amp))); await (b ? breathe() : setVib(v, Number.isFinite(mode) ? mode : vibK, Number.isFinite(amp) ? amp : vibAmp)); return vibLine(); },
+    async vibrate({ on: v = true, mode, amp, breathe: b } = {}) { if (api.wake) api.wake(); if (Number.isFinite(amp)) ampKnob.set(Math.min(4, Math.max(0, amp))); await (b ? breathe() : setVib(v, Number.isFinite(mode) ? mode : vibK, Number.isFinite(amp) ? amp : vibAmp)); return vibLine(); },
     vibLine,
     /* THE LIBRARY (0.4.0 S4a): every record row with its installed lamp, and the INSTALL / REMOVE a section header (S4b) presses */
     async records() { await lamps(); return CHEM_PRESETS.flatMap((p) => Object.values(p.records || {}).map((r) => ({ id: p.id, basis: r.basis, hash: r.hash, bytes: r.bytes,

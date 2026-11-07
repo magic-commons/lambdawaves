@@ -32,7 +32,7 @@
 import { createFolders, toThumb } from './mir/folders/folders.js'; import { glyphEl } from './mir/glyph.js'; import { hint } from './mir/kit.js';
 import { createFiles } from './mir/folders/files.js';
 import { registerProjectPart, restoreProject, projectSignature } from './mir/core/project.js';
-import { saveBlob } from './mir/folders/save-blob.js';
+import { handOver } from './capture.js';   // 039 F1 (W-REVIEW row 1): a project's file leaves by the one hand-over, which says "Saved <name> to your downloads"
 import { notice } from './mir/shell/notice.js';
 import { coalesce } from './frame-coalescer.js';   // 0.5.0 C6b: the part's subscribe, once a frame
 import { keepData } from './library.js';   // iteration 005 A: the demo covers are DATA
@@ -152,6 +152,7 @@ export function createProjects(port) {
        OPEN FILE and EXPORT left the toolbar for FILE › IMPORT and FILE › EXPORT (.json · .mir · picture); a drop still opens a file */
     actions: ['save', 'project', 'duplicate', 'fresh'], folderGlyph: 'folder', glyph: (name, cls, size) => glyphEl(name === 'save' ? 'saveInto' : name, cls, size),   // 021 V2: PROJECT wears λWAVES' saveInto (012 M1), not the floppy rack: port.rack, onMoved: port.onMoved,
     factory: () => api.restoreDemos(),
+    download: handOver,   // 039 F1: the .mir and the picture through W6's one road (its toast follows the kit's line and replaces it)
     captions: true,   // 039 K7 (MIR 1.5.7-alpha.22 THE CARD SAYS HOW IT OPENS; WALK-A #9, WALK-B #2): every card wears its name beneath its picture at rest
     /* 039 X9 · SAVE AND SAVE NEW (WALK-A #9, WALK-B #16: two floppies, one meaning unclear): SAVE writes over the open project; PROJECT reads SAVE NEW
        (its id `project` kept) and wears its own drawing (fieldIcons, below) — the words say the difference */
@@ -352,7 +353,7 @@ export function createProjects(port) {
       return ok;
     },
     /** download() — EXPORT: the open project as its `.lambdawaves.json` */
-    download() { const t = api.exportText(); if (!t) { pjStatus('nothing to export — save first', true); return false; } saveBlob(new Blob([t], { type: 'application/json' }), (api.current || 'project').replace(/\//g, '__') + '.lambdawaves.json'); return true; },
+    download() { const t = api.exportText(); if (!t) { pjStatus('nothing to export — save first', true); return false; } handOver(new Blob([t], { type: 'application/json' }), (api.current || 'project').replace(/\//g, '__') + '.lambdawaves.json'); return true; },
     /** pick() — IMPORT: a file picker over the same door as a drop */
     pick() { const input = document.createElement('input'); input.type = 'file'; input.accept = 'application/json,.json,.mir,.png,image/png';
       input.addEventListener('change', () => { for (const f of input.files || []) take(f, 'picker'); }, { once: true }); input.click(); },

@@ -271,6 +271,19 @@ export function createNotebook(app) {
         /* 036 S1: NODES' knobs (`nodes.*`) are the project's graph's, their bases with every other (020 X4 left them out while the graph was PREFERENCE) */
         return Object.fromEntries(app.state.modHost.registry.list().map((id) => [id, app.state.modHost.registry.baseOf(id)]));
       }
+      /* 039 F1 · A HAND'S EDIT DIRTIES, ALWAYS (R-REVIEW row 1): R4 left a played target out of the key whenever a lane HELD it, and `isModulated`
+         stays true at rest once a lane has written, so a paused hand's MUTE, REMOVE, STYLE or drag left the project CLEAN.  A lane's write is told
+         from a hand's at its source instead: the register keeps the hand's modes at a drive's edge (Register.drive), and an EVENT target or the
+         pose leaves the key only while the instrument still shows what the lane LEFT there (the registry's 'modulated' write, read back after its
+         set; the pose whole, as a FREE yaw moves the pitch) — a value a hand moved since stays in.  A project's open seats what it left. */
+      const LANDS = ['material.style', 'material.view', 'material.slice.mode', 'material.space', 'palette.index', 'state.scale', 'observer.yaw', 'observer.pitch'];
+      const slot = (id) => (id.startsWith('observer.') ? 'pose' : id), left = new Map();
+      const shown = (id) => { if (slot(id) === 'pose') return obs.yaw + ' ' + obs.pitch; const g = app.ctl.modGets[id]; return g ? String(g()) : ''; };
+      const seatLeft = () => { for (const id of LANDS) left.set(slot(id), shown(id)); };
+      if (app.state.modHost) app.state.modHost.registry.subscribe('*', (e) => { if (e.reason === 'modulated' && LANDS.includes(e.id)) left.set(slot(e.id), shown(e.id)); });
+      seatLeft();
+      const laneLeft = (id) => played(id) && left.get(slot(id)) === shown(id);
+      const poseLeft = () => (played('observer.yaw') || played('observer.pitch')) && laneLeft(played('observer.yaw') ? 'observer.yaw' : 'observer.pitch');
       /* A project stores the HAND values behind every routed control. The live Card values may be
          anywhere in an LFO cycle when Save is pressed; those animated values are presentation for
          this frame, not the parameter settings the artist made. Keep both the generic base table and
@@ -283,8 +296,9 @@ export function createNotebook(app) {
         pr.modulationBases = bases;
         for (const [id, seat] of Object.entries(app.sh.modSeats(data))) if (seat[0] && !seat[2] && Number.isFinite(bases[id])) seat[0][seat[1]] = bases[id];   // S3: the history's table
         /* 039 R4 · A DEMO PLAYS CLEAN: a lane or a route on the camera's angles seats their BASES above, so the pose's quaternion is the bases' too —
-           recorded off the playing frame it read as an edit within 0.5 s of PLAY (STAR LOOP), and a save carried a pose the open re-derived */
-        if (pr.obs && (played('observer.yaw') || played('observer.pitch'))) pr.obs.quat = quatFromYawPitch(pr.obs.yaw, pr.obs.pitch);
+           recorded off the playing frame it read as an edit within 0.5 s of PLAY (STAR LOOP), and a save carried a pose the open re-derived.
+           039 F1: only while the pose is still the one the lane LEFT (laneLeft): a hand's drag since is the pose the save keeps */
+        if (pr.obs && poseLeft()) pr.obs.quat = quatFromYawPitch(pr.obs.yaw, pr.obs.pitch);
         return data;
       }
       const played = (id) => { const R = app.state.modHost && app.state.modHost.registry; return !!(R && R.has(id) && R.isModulated(id)); };
@@ -304,11 +318,12 @@ export function createNotebook(app) {
            switch), while a camera angle plays the rest of the pose (a FREE camera's yaw is an orbit about the view, so the unplayed angle
            and its base move with it: BENZENE π, WATER ESP), and while a lane drives the register (ROTATE z, STARK, DEFECT, a shell's RATE
            re-anchor its coefficients on every tick — STAR LOOP's n = 5 RATE under its A/B transition read as an edit seven seconds in) the
-           coefficients themselves */
-        if (['state.rot.z', 'state.stark.kz', 'state.defect.l2', ...[1, 2, 3, 4, 5, 6, 7].map((n) => 'shell.rate.n' + n)].some(played)) delete data.experiment.modes;
+           coefficients themselves.  039 F1: never by leaving a key out while a lane merely HOLDS it — the register's modes are the hand's as a drive
+           found them (Register.drive), and a choice or the pose leaves only while it is still what the lane left (laneLeft); PALETTE's ON is the hand's */
+        { const hm = reg.handModes(); if (hm) data.experiment.modes = hm; }
         for (const [id, o, k] of [['material.style', pr.mat, 'style'], ['material.view', pr.mat, 'view'], ['material.slice.mode', pr.mat.slice, 'mode'], ['material.space', pr, 'space'],
-          ['palette.index', pr, 'palette'], ['palette.index', pr, 'paletteId'], ['state.scale', pr.sturmian, 'on']]) if (o && played(id)) delete o[k];
-        if (pr.obs && (played('observer.yaw') || played('observer.pitch'))) { delete pr.obs.quat; for (const a of ['yaw', 'pitch']) if (!played('observer.' + a)) { delete pr.obs[a]; if (pr.modulationBases) delete pr.modulationBases['observer.' + a]; } }
+          ['palette.index', pr.palette, 'stops'], ['palette.index', pr.palette, 'selected'], ['palette.index', pr, 'paletteId'], ['state.scale', pr.sturmian, 'on']]) if (o && laneLeft(id)) delete o[k];
+        if (pr.obs && poseLeft()) { delete pr.obs.quat; if (pr.obs.mode === 'free') for (const a of ['yaw', 'pitch']) if (!played('observer.' + a)) { delete pr.obs[a]; if (pr.modulationBases) delete pr.modulationBases['observer.' + a]; } }
         return JSON.stringify([data, titleIn.value, subIn ? subIn.value : '', ta.value]);
       }
       /* 0.5.0 C6 · THE ONE PROJECT PART (R5-A3): λWAVES' project is serialize()/restore() — projectSnapshot() above — with the
@@ -323,6 +338,7 @@ export function createNotebook(app) {
           const n = v.notebook && typeof v.notebook === 'object' ? v.notebook : {};
           ta.value = n.text || ''; titleIn.value = n.title || (ctx && ctx.name) || 'NOTEBOOK'; curPath = null;
           if (subIn) { subIn.value = n.subtitle || ''; subIn.hidden = !subIn.value; }
+          seatLeft();   // 039 F1: what the open put on an EVENT target or the pose is the file's (or its lanes'), never a hand's
           return true;
         },
         signature: () => projectKey(),

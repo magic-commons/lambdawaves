@@ -182,9 +182,11 @@ export async function createController(app) {
     const az = rotRate.z * dt, ak = reg.P ? 0 : rotRate.kz * dt, ad = reg.P ? 0 : rotRate.def * dt;
     if (az === 0 && ak === 0 && ad === 0) return false;
     const d0 = reg.digest(); app.state.rotTicking = true;
-    if (az !== 0) reg.rotateZ(az);
-    if (ak !== 0) reg.rotateK(ak);                    // ≤ 35 blocks of ≤ 6×6 symEig, unpopulated ones skipped
-    if (ad !== 0) reg.defectWait(ad);
+    reg.drive(() => {                                 // 039 F1: a turn is a DRIVE's, never the project's edit (Register.drive)
+      if (az !== 0) reg.rotateZ(az);
+      if (ak !== 0) reg.rotateK(ak);                  // ≤ 35 blocks of ≤ 6×6 symEig, unpopulated ones skipped
+      if (ad !== 0) reg.defectWait(ad);
+    });
     app.state.rotTicking = false; app.state.rotMoved = reg.digest() !== d0;
     touchState();                                     // ONE schedule for all three, not three
     return true;

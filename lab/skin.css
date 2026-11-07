@@ -558,9 +558,11 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *)), #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *))::before, #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *))::after { outline: none; border: 0; box-shadow: none; }
 #lwMenu button:where(:not(.mm-folders *, .mm-sheet-body *)) { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }   /* iteration 015 M4: the kit's gallery keeps its own look */
 /* iteration 015 M4 · THE THIRD VIEW: the gallery in the decks' seat, as wide as a deck, its paged grid --fcols across (picker.js sizes it) */
-#lwMenu .mm-folders { grid-row: 2; grid-column: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; justify-content: center; padding: 8px 24px 20px; box-sizing: border-box; }
+#lwMenu .mm-folders { grid-row: 2; grid-column: 1; min-height: 0; overflow: hidden; display: flex; justify-content: center; padding: 8px 24px; box-sizing: border-box; }
 #lwMenu .mm-folders[hidden], #lwMenu .mm-scroll[hidden], #lwMenu .mm-caption[hidden] { display: none; }
-#lwMenu .mm-fgal { width: min(1500px, 100%); container-type: inline-size; }
+#lwMenu .mm-fgal { width: min(1500px, 100%); container-type: inline-size; display: flex; flex-direction: column; }
+/* 039 F1 (K-REVIEW #2): the page buttons and the count never leave the page — the gallery fills the view (.mm-folders no longer scrolls) as a column
+   whose explorer is the one scroller; picker.js fits the rows to the chrome that is there, so only where no row fits beside RESTORE THE DEMOS does that foot ride under the row */
 @media (min-width: 1100px) { #lwMenu .mm-fgal { width: min(1500px, 100%, calc(100vw - 2 * (var(--rack-w, 300px) + 20px))); } }   /* off the racks, as the decks keep */
 #lwMenu[data-sec="folders"] .mm-opts { visibility: hidden; }
 /* 039 K7: the page reserves ITS rows of --fcols (the kit's reserve is four rows of a two-column card, so the pager sat ~1000 px below the fold) and each card's name row under its 16 : 10 picture (K9, alpha.24) */

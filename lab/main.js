@@ -18,9 +18,9 @@ const $ = (id) => document.getElementById(id);
    039 R2 · THE RACK COMES BACK AS IT WAS LEFT: the session's signature is the project's AND the arrangement's (captureLayout without its stamp).
    projectKey() leaves the WORKSPACE out (a window moved is not unsaved work), so a session last written at an edit kept that moment's rack, and a
    fold, an open or a move made after it came back undone at the next RESUME.  FOLDERS' unsaved mark keeps projectKey alone. */
-const arrangement = () => { const L = window.__LW && window.__LW.layout; return L && L.captureLayout ? JSON.stringify({ ...L.captureLayout(), at: 0 }) : ''; };
+const start = { arrangement: () => '' };   // 039 F1 (R-REVIEW NOTE): the boot seats the app's own reader here (rack.js), so the diagnostics facade carries no load
 const session = createSession({ key: 'lambdawaves.q0.session',
-  parts: { capture: captureProject, restore: restoreProject, subscribe: subscribeProject, signature: () => String(projectSignature()) + arrangement() } });
+  parts: { capture: captureProject, restore: restoreProject, subscribe: subscribeProject, signature: () => String(projectSignature()) + start.arrangement() } });
 /* THE PHOTOSENSITIVITY LAW (waves 57/59) IS λWAVES', NOT THE KIT'S: a human visitor reads the notice once per browser before anything
    animates, and NO query string silences it for a human (the kit's ?warn=0 is not honoured here); only a test driver skips it — ?warn=1
    forces it there, ?opener=1 makes a driven start a human one.  The notice is the kit's photosensitivityNotice; its seen-flag is the
@@ -62,7 +62,7 @@ let pick; const choice = new Promise((r) => { pick = r; });
    canvas until the first picture is presented (8 s at most); neither is a window, so neither is in the stage's mask */
 const banner = installBanner({ errors: false });
 bootVeil({ ready: () => !!(window.__LW && __LW.stats.presents) });
-boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), flow: $('flow'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner, start: { session, warning, choice } })
+boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), flow: $('flow'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner, start: Object.assign(start, { session, warning, choice }) })
   .then((LW) => { try { installLayer(LW); } catch (e) { if (LW && LW.sw) { LW.sw.mode = 'failed'; LW.sw.error = String(e && e.message || e); } } })
   .catch((e) => { __e.push('BOOT ' + (e && e.stack || e)); banner.fail('boot failed', String(e && e.message || e)); });
 /* the boot has run to its first await, so the look is on: the notice wears this browser's glass.  While it is up no key reaches the

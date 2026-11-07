@@ -640,7 +640,11 @@ export function buildGallery(panel, opts) {
     S.page = Math.max(0, Math.min(S.page, pages - 1));
     const a = pageSize ? S.page * pageSize : 0, b = pageSize ? a + pageSize : Infinity;
     const kidsShown = kids.slice(a, Math.min(b, kids.length)), shown = direct.slice(Math.max(0, a - kids.length), Math.max(0, b - kids.length));
-    const folderRow = kidsShown.length ? mk('section', 'sv-folder-row', grid) : null;
+    /* THE FOLDER ROW KEEPS ITS SEAT (1.5.7-alpha.26, λWAVES 039 F1): a paged gallery draws, on every page, the folder row its first page
+       draws — this page's folders, then hidden seats up to the first page's count — so the projects and the page buttons below stand where
+       they stood on page 1 (the hand law: positions never move; a page without its folders lifted the buttons by one row) */
+    const seats = pageSize ? Math.min(kids.length, pageSize) : kidsShown.length;
+    const folderRow = seats ? mk('section', 'sv-folder-row', grid) : null;
     if (folderRow) folderRow.setAttribute('aria-label', t('Folders'));
     for (const path of kidsShown) {
       const card = mk('div', 'sv-folder', folderRow);
@@ -657,6 +661,7 @@ export function buildGallery(panel, opts) {
       shot.addEventListener('click', () => go(path));
       wireLongPress(shot, () => folderMenu(path));
     }
+    for (let i = kidsShown.length; i < seats; i++) { const seat = mk('div', 'sv-folder sv-folder-seat', folderRow); seat.setAttribute('aria-hidden', 'true'); ink(mk('span', 'sv-folder-glyph', mk('span', 'sv-folder-shot', seat)), 'saveFolder', 20); }
 
     const projectSection = mk('section', 'sv-projects', grid);
     projectSection.setAttribute('aria-label', t('Projects'));
