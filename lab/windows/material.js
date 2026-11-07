@@ -48,7 +48,7 @@ export function createMaterial(app) {
       { id:'additive',label:'ADD',title:'Additive emission through the field' },
       { id: 'bands', label: 'BANDS', title: 'One level surface per octave of the density, anchored at ISO' },
       { id: 'esp', label: 'ESP', title: 'ESP map on the surface (red −, blue +)' }],   // B3 (STYLE 11); 032 O1: BALLS (9) and STICKS (10) are SIZE and RADIUS > 0 now (the ids reserved)
-      onChange: (v) => { mat.style = STYLE[drawStyle(v)]; styleSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
+      onChange: (v) => { const from = mat.style | 0; mat.style = STYLE[drawStyle(v)]; ui.styleRecall(from, mat.style); styleSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE · 038 K1: the hand's switch recalls
     rd.appendChild(ui.styleSeg.root).dataset.keyAction = 'style';
     /** 032 O1: the styles the seg offers now, in its order, with their words — the STYLE menus (the stage's, VIEW's) and the STYLE target's bands */
     ui.styleList = () => ui.styleSeg.spec.options.filter((o) => o.id !== 'esp' || !availability('wave.style.esp', app).hide).map((o) => [o.id, ui.styleSeg.button(o.id).textContent]);   // the law, not the DOM: a restore asks before the seg repaints
@@ -122,6 +122,26 @@ export function createMaterial(app) {
     const S_ = STYLE, VOL = [S_.cloud, S_.solid, S_.signed, S_.bands, S_.dust, S_.glass, S_.glassSigned];
     const STYLE_READS = { isoK: [S_.solid, S_.signed, S_.bands, S_.glass, S_.glassSigned, S_.esp], kneeK: VOL, softK: [S_.cloud, S_.bands, S_.dust, S_.additive, S_.esp], grainK: [S_.dust],
       atomSizeK: [...VOL, S_.additive], stickK: [...VOL, S_.additive, S_.esp], espBareSw: [S_.esp], probeK: [S_.esp], espRangeK: [S_.esp], espSurfSeg: [S_.esp], espLiveSw: [S_.esp] };   // 032 O1: SIZE in every style but ESP (its sticks alone), RADIUS in every one
+    /* 038 K1 · A STYLE REMEMBERS ITS KNOBS (Josh: "Each style mode … if not tethered to a macro/timeline clip should retain their information"): leaving a
+       style keeps the knobs it reads (EXPOSURE and HUE always, SOFT · ISO · GRAIN · KNEE as STYLE_READS has them) in `mat.styleMem[<style>]`, and entering
+       one puts its remembered values back.  A knob a route (the modulation window's list) or a timeline clip holds is TETHERED, skipped both ways: the route
+       owns it (`isModulated` is true only while a modulator writes, so the routes and the clips are read).  A hand's switch (the seg, C, the stage's STYLE ›)
+       and the STYLE target's set only; a restore, an undo, a demo and LW.setStyle keep the file's own values.  `styleMem` rides presentation.mat (absent:
+       nothing remembered; never in NEW; a link does not carry it); it is replaced, never mutated, because a restore hands it the history's own record */
+    const MEM = [['expK', 'exposure', 'material.exposure'], ['hueK', 'hueShift', 'material.hue'], ['softK', 'softness', 'material.softness'],
+      ['isoK', 'iso', 'material.iso'], ['grainK', 'grain', 'material.grain'], ['kneeK', 'knee', 'material.knee']];
+    const tethered = () => { const h = mod.host, ed = app.state.tl && app.state.tl.editor, T = new Set(h ? h.model.routeList().map((r) => r.targetId) : []);
+      if (ed && ed.model) { const doc = ed.model.state(), on = new Set(doc.clips.map((c) => c.curveId)); for (const c of doc.curves) if (on.has(c.id)) T.add(c.targetId); }
+      return T; };
+    /* `lane` (the STYLE target's road): a lane only refreshes a style the hand already remembered — it never starts a memory, so a demo or a file
+       whose STYLE lane plays keeps no record it did not have (A DEMO OPENS CLEAN stays clean while it plays) */
+    ui.styleRecall = (from, to, lane = false) => {
+      if (from === to) return;
+      const T = tethered(), M = { ...mat.styleMem }, keep = {}, back = M[drawStyle(to)] || {};
+      for (const [k, key, id] of MEM) if ((k === 'expK' || k === 'hueK' || STYLE_READS[k].includes(from)) && !T.has(id) && Number.isFinite(mat[key])) keep[key] = mat[key];
+      if (Object.keys(keep).length && (!lane || M[drawStyle(from)])) { M[drawStyle(from)] = { ...M[drawStyle(from)], ...keep }; mat.styleMem = M; }   // a tethered knob keeps its last hand-set number for when it is let go
+      for (const [k, key, id] of MEM) if (Number.isFinite(back[key]) && !T.has(id) && back[key] !== mat[key]) { mat[key] = back[key]; ui[k].set(back[key]); if (k === 'hueK') { applyAccent(); paintBar(); } }
+    };
     /* the kit's muted look on the three shapes: a knob's own setDisabled, a switch's button, a seg's buttons */
     const mute = (c, off, why) => { if (c.setDisabled) c.setDisabled(off); else { c.root.classList.toggle('disabled', off); c.root.setAttribute('aria-disabled', String(off));
       for (const b of c.root.matches('button') ? [c.root] : c.root.querySelectorAll('button')) b.disabled = off; }
@@ -290,7 +310,7 @@ export function createMaterial(app) {
        the 'reload' and 'Reverse' to the top … and vice versa"; "Make 'Add' a plus sign icon"): the top row is PALETTE · RELOAD (the kit's RESET,
        "reload the chosen preset") · REVERSE; the bottom row was ADD (the plus icon) · INVERT · the selected stop's swatch and × · ROTATE, and is ADD · ROTATE · … · INVERT since 016 P1 */
     const resetEl = rv.root.querySelector('.mir-ramp-reset'), [addEl, revEl] = verbs.querySelectorAll(':scope > .trig'), rotEl = verbs.querySelector(':scope > .k');
-    chip(resetEl, 'undo', 'RELOAD'); rowOn.append(resetEl, revEl);
+    chip(resetEl, 'reload', 'RELOAD'); rowOn.append(resetEl, revEl);   // 038 K2 (Josh: "reset (can be a reload icon; palette needs to update this as well)"): ↺, as LIGHTING's RESET
     revEl.classList.add('pal-rev'); chip(revEl, 'reverse'); revEl.setAttribute('aria-label', 'REVERSE'); revEl.title = 'REVERSE · run the ramp backwards';   // iteration 015 P2: the word is the hint
     rotEl.appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; paintBar(); saveSettings(); schedule(TIER.PRESENT); } });
@@ -344,7 +364,7 @@ export function createMaterial(app) {
        target — the saved observer.* routes stay the defs' below, whose knob accessors are these dials (camKnobs) — and a hand on a
        routed dial writes its base (modHand), as everywhere. */
     const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['friction', 'drag', 'fling']); let feelSave = 0;
-    const camPanel = createCameraPanel({ mode: '3d', modPrefix: 'observer', project: false, mod,
+    const camPanel = createCameraPanel({ mode: '3d', modPrefix: 'observer', project: false, mod, panWrap: 'plane',   // 038 K3 (Josh: "allow the XY thing to do the pacman tunnel effect"): MIR 1.5.7-alpha.13 — the pivot leaves one edge of the frame and comes in at the other
       port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } },
         turn(dy, dp) { cameraPort.turn(dy, dp); const s = camView.sphere; s.yaw.set(cameraPort.get('yaw')); s.pitch.set(cameraPort.get('pitch')); } } });   // 0.5.3 M5: the kit's port.turn road never sets the sphere's arcs and its sync skips a sphere mid-drag, so the rings' arrow froze until a later notice (and each step turned from the stale arrow): it follows the hand here, per move (MIR-BRIEF-sphere.md)
     camPanel.spec.build(gc, null);

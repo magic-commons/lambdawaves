@@ -50,6 +50,8 @@ const ACCEPTED = {
   '1.5.7-alpha.11': '2bc556b4f46bf9bdac9c16bb022c6f137282f14468b76effebbb01c338642f4c',
   /* 038 T6 · MIR 1.5.7-alpha.12 THE RING FOLLOWS THE DIAL (kit-038 @ 8836838): a reversed knob wears k-rev and the route ring mirrors with its needle */
   '1.5.7-alpha.12': '360fb20beff92804d633d28927d9c858a77e431fc34805208c29690f3b404f06',
+  /* 038 K3 · MIR 1.5.7-alpha.13 THE PAD WRAPS (kit-038 @ 25e0836, on chain T's alpha.8–12): xyPad({ wrap: 'plane' | 'sphere' }), createCameraView({ panWrap }) */
+  '1.5.7-alpha.13': 'cf06ef67fd087b44be639585f6cab73f779e05717388625b64e0f8ac6c725333',
   /* 038 T8 · MIR 1.5.7-alpha.14 THE PUMP WAITS FOR A DRAG (kit-038 @ eeb8f7c, on chain K's alpha.13 25e0836 — this adoption carries THE PAD WRAPS' kit
      files too; K's own alpha.13 row and app side merge beside it): the edge pump waits for a real drag, a scrub's head stays in the lanes, → TL's hint, the loop's words */
   '1.5.7-alpha.14': '3e9e0561e665d8ff69be238223adc873467265499664ed409a60f25a0b512872',

@@ -12,6 +12,32 @@ bools). The row is MOLECULES': it is hidden under hydrogen and an ATOM, as WAVE'
 sets it. A kind the look does not draw greys its switch, the reason first in its hint (038 F7): CUT BALLS while SIZE is 0 or under ESP (ESP draws no
 balls), CUT STICKS while RADIUS is 0 or under ESP's MAP ONLY. The hints say what off does: "off, the balls stand whole" / "off, the sticks stand whole".
 
+A STYLE REMEMBERS ITS KNOBS (038 K1, Josh: "Each style mode … if not tethered to a macro/timeline clip should retain their information"): leaving a
+WAVE style keeps the knobs it reads — EXPOSURE and HUE always, SOFT · ISO · GRAIN · KNEE as STYLE_READS has them — in `mat.styleMem[<style id>]`,
+and entering one puts its remembered values back (a style never visited inherits what stands). THE TETHER RULE: a knob a route holds (the
+modulation window's route list) or a timeline clip holds (a clip's curve `targetId`) is skipped both ways — the route owns it — and its last
+hand-set number is kept for when it is let go (`isModulated` is true only while a modulator writes, so the routes and the clips are read).
+`ui.styleRecall(from, to)` (lab/windows/material.js) runs from the STYLE seg's hand, the `style` action (C, the stage's STYLE ›) and the
+`material.style` target's set (an EVENT lane — which refreshes a style the hand remembered and never starts a memory, so a demo whose lane
+plays stays clean), NEVER from a restore (a project, an undo, a link, a demo) nor `LW.setStyle` (the tools' looks);
+a switch is one history row with the knobs it moved. PROJECT inside `presentation.mat`, absent = nothing remembered, never in NEW, a link
+does not carry it; it is replaced, never mutated (a restore hands it the history's own record).
+
+LIGHTING'S ONE ROW (038 K2, Josh: "Camera and Global, reset (can be a reload icon; palette needs to update this as well) and the 'expand' arrow
+to be on one row"): FRAME (CAMERA · WORLD, two columns that never wrap) · RESET · MORE's chevron stand on one row down to the rack's narrow
+262 px; RESET is the reload glyph ↺ (`reload`), as PALETTE's RELOAD (it wore the kit's undo arrow), both 18 px, named and hinted.
+
+THE PAD WRAPS (038 K3, MIR 1.5.7-alpha.13, Josh: "if my cursor keeps going up and the XY thing hits the top edge, it will teleport to the bottom
+and keep going … in the stage, it just looks like the lighting is going round and round"): THE SUN PAD wraps as a sphere — past the rim (the
+point straight behind) at θ it comes back in at θ + π, so a drag or an arrow that keeps going walks the light over the back and round to the
+front again; the disc clips the lattice, never the sun. CAMERA's PAN pad wraps as a plane (a torus): its ±1 is the frame's edge, so the
+pivot leaves one side of the frame and comes in at the other; under the LOCK the pad still rests. The ranges stay the app's (the record, the
+targets and a route are unchanged).
+
+AUTO-ROTATE IN THE STAGE'S MENU (038 K4, Josh: "For rightclick stage, add 'Auto-rotate' to the list of camera controls; perhaps under 'lock'"):
+the stage's right-click menu carries AUTO-ROTATE (the `camera.autoRotate` action, a check row) directly after LOCK — nine rows, the one menu over
+eight (context-menus.js says so); FLIP stays. Its meaning is 037's: FRICTION read as 0, a fling never stops, no ambient spin.
+
 ## The laws of 037
 
 THE RANGES OF 037 (037 H1–H3, Josh 11-05): FOV spans 5°–90° (`CAM.FOV`, radians; the readout prints degrees) and ZOOM spans [1, 12] (`CAM.DIST`,

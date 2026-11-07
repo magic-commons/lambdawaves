@@ -929,6 +929,13 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
    two hidden knobs the disc's x · y), the horizon dashed at half the radius, the sun its point (the key's colour when tinted, faint behind) — beside
    KEY · RADIUS / HUE · TINT; then AMBIENT · SPECULAR · SHINE · RIM.  The visible body stays near 300 px; FILL and SPOT fold away */
 .lw-light .lw-light-verbs .lw-light-frame { flex: 1 1 auto; }
+/* 038 K2 · ONE ROW at the rack's narrow 262 px (Josh: "Camera and Global, reset … and the 'expand' arrow to be on one row"): CAMERA · WORLD two equal
+   columns that never wrap, RESET the reload glyph in PALETTE's glyph seat (the two resets read alike) */
+.lw-light .lw-light-verbs { flex-wrap: nowrap; }
+.lw-light .lw-light-frame .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; box-sizing: border-box; }
+.lw-light .lw-light-frame .seg-b { min-width: 0; padding: 0 6px; white-space: nowrap; }
+.lw-light .lw-light-reset { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
+.lw-light .lw-light-reset > svg, .native-clean[data-id="palette"] .mir-ramp-reset > svg { width: 18px; height: 18px; }
 .lw-light .lw-light-key { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 10px; align-items: center; margin: 6px 0; }
 .lw-light .lw-sun { width: 128px; }
 .lw-light .lw-sun .mir-xy-body { display: block; }
@@ -937,6 +944,9 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .lw-light .lw-sun .xy-pad .xy-dot, .lw-light .lw-sun .xy-pad:is(.drag, :focus-visible, .mod) .xy-dot { display: grid; place-items: center; background: hsl(var(--glass-tint) / .92);
   box-shadow: 0 0 0 1px var(--glass-hairline); color: var(--lw-sun, var(--acc)); }
 .lw-light .lw-sun .xy-pad.behind .xy-dot { opacity: .45; }
+/* 038 K3 · THE PAD WRAPS: the sun crosses the rim (straight behind) and comes in on the far side, so the disc clips its lattice, never the sun */
+.lw-light .lw-sun .xy-pad { overflow: visible; }
+.lw-light .lw-sun .xy-lattice { border-radius: 50%; }
 .lw-light .lw-sun-rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; fill: none; stroke: var(--glass-hairline); stroke-width: .8; }
 .lw-light .lw-sun-rings .lw-sun-horizon { stroke: var(--fg-soft); stroke-dasharray: 2 2.4; opacity: .55; }
 .lw-light .lw-light-side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 4px; justify-items: center; }
