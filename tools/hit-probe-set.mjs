@@ -29,8 +29,10 @@ const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8823}/lab/?sw=0&warn=0&
 const POSE = 'JSON.stringify([__LW.obs.yaw, __LW.obs.pitch, __LW.obs.dist, __LW.obs.shift])';
 const MOD = `__LW.layout.modulation.expand(); for (let i = 0; i < 3; i++) __LW.mod.addSource('lfo');`;
 const SHUT = '__LW.layout.modulation.collapse(); __LW.sw.closeOffer(); __LW.widgets.clear();';   // 032: the update popup is put away too; 038: a widget scene's CLOCK too (the record is the profile's)   // the first-run modulation window is open over the middle of the stage: every other scene shuts it
-const FLOAT = SHUT + ` __LW.layout.reopen('shadow'); __LW.layout.popOut('shadow', { x: 640, y: 180, w: 300 });`;   // SHADOW ships closed: open it, then float it
-const NODES = SHUT + ` __LW.layout.reopen('nodes'); __LW.layout.popOut('nodes', { x: 640, y: 120, w: 300 });`;   // the CURVES card's seat since 020 X: NODES' card, the chain as a column
+/* 038 Z6: a card M1's first run (or a saved layout) folded is a head alone — no body, no head-body gap, nothing to press: every floated card is unfolded */
+const UNFOLD = (id) => ` if (__LW.actions.get('window.${id}.fold').get()) __LW.run('window.${id}.fold');`;
+const FLOAT = SHUT + ` __LW.layout.reopen('shadow'); __LW.layout.popOut('shadow', { x: 640, y: 180, w: 300 });` + UNFOLD('shadow');   // SHADOW ships closed: open it, then float it
+const NODES = SHUT + ` __LW.layout.reopen('nodes'); __LW.layout.popOut('nodes', { x: 640, y: 120, w: 300 });` + UNFOLD('nodes');   // the CURVES card's seat since 020 X: NODES' card, the chain as a column
 const WIDGET = SHUT + ` __LW.widgets.add('clock');`;   // 037 W: one CLOCK at the stage's centre
 /* [name, selector, the scene's setup through __LW, THROUGH?] — the C9 row's list: the modulation window open, a floated card, the chip rail,
    the keyboard window, the notebook, the sheet, the offer, FOLDERS; 037 W's widgets layer; NODES (the CURVES card's successor) */
@@ -79,6 +81,7 @@ try {
     const box = await b.eval(`(() => { const n = ${FIND(selector)}; if (!n) return null; const r = n.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height }; })()`);
     const row = { name, selector, through, field, found: !!box, box: box && [box.left, box.top, box.width, box.height].map(Math.round), grid: { n: GRID, inside: 0, stage: 0, other: {} }, raster: null, pressed: 0, reached: 0, presses: [] };
     if (!box) { ok = false; out.scenes.push(row); console.log(`FAIL  ${name}: no visible ${selector}`); continue; }
+    if (/^#floats/.test(selector) && box.height < 80) { ok = false; out.scenes.push(row); console.log(`FAIL  ${name}: the card arrived folded (${row.box.join(',')}) — no body, no gap to press`); continue; }
     const control = through, grid = gridPoints(box, GRID), hits = await b.eval(classify(selector, grid));
     for (const h of hits) if (h === 'inside') row.grid.inside++; else if (h === 'stage') row.grid.stage++; else row.grid.other[h] = (row.grid.other[h] || 0) + 1;
     let gaps = grid.filter((p, i) => hits[i] === 'stage');

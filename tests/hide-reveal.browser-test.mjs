@@ -165,7 +165,11 @@ try {
       const r = v.getBoundingClientRect(); if (!r.width || !r.height || !v.getClientRects().length) continue;
       for (let a = v.parentElement; a && a !== document.body; a = a.parentElement) {
         const cs = getComputedStyle(a); if (!/paint|strict|content/.test(cs.contain) && cs.overflow === 'visible' && cs.overflowX === 'visible' && cs.overflowY === 'visible') continue;
-        const b = a.getBoundingClientRect(), out1 = (q) => q.left < b.left - 0.5 || q.right > b.right + 0.5 || q.top < b.top - 0.5 || q.bottom > b.bottom + 0.5;
+        /* 038 Z6: a SCROLLER clips only past its scroll extent — a bubble under the rack's visible edge is scrolled-away content, not cropped (M1's
+           ADVANCED seat put LIGHTING's HUE/TINT row exactly on the rack's bottom edge, dial 1280–1314 of a 1314-px rack, its bubble at 1316: one scroll shows it) */
+        const b = a.getBoundingClientRect(), sy = /auto|scroll/.test(cs.overflowY), sx = /auto|scroll/.test(cs.overflowX);
+        const e = { l: sx ? b.left - a.scrollLeft : b.left, r: sx ? b.left - a.scrollLeft + a.scrollWidth : b.right, t: sy ? b.top - a.scrollTop : b.top, b: sy ? b.top - a.scrollTop + a.scrollHeight : b.bottom };
+        const out1 = (q) => q.left < e.l - 0.5 || q.right > e.r + 0.5 || q.top < e.t - 0.5 || q.bottom > e.b + 0.5;
         const dial = (v.closest('.k, .fd') || v.parentElement).querySelector('.k-dial, .fd-track') || v.parentElement;   // a knob scrolled out of its rack is not a cropped bubble: only one whose control is in the box
         if (out1(r) && !out1(dial.getBoundingClientRect())) out.push((v.closest('[data-param]')?.dataset.param || v.closest('.dev, #transport').dataset.id || 'transport') + ' in ' + (a.id || a.className.toString().slice(0, 24)));
         break;

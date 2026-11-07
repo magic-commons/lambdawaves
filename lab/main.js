@@ -118,12 +118,9 @@ function installLayer(LW) {
     sw.registration = reg; sw.mode = 'registered';
     if (sw.repairBoot) sw.repairBoot(reg);                                   // 033 REPAIR: the second reload of the repair road, and its verdict
     /* 038 Z3 · THE PARSERS ARE DATA (sw.js §1b): marked, KaTeX and its sheet are never precached; what index.html loaded is kept here, so
-       this install sets maths offline from its next open.  Every activate sweeps them (a new build's bytes may differ), a first install's
-       too: so on a first install they are kept once that worker is ACTIVATED, else at once (a controlled open keeps the new build's) */
-    const keepParsers = () => { if (window.marked && window.katex) for (const f of ['marked.min.js', 'katex/katex.min.js', 'katex/katex.min.css']) keepData('./mir/shell/vendor/' + f); };
-    const first = !reg.active && (reg.installing || reg.waiting);
-    if (!first) keepParsers();
-    else first.addEventListener('statechange', function on() { if (first.state === 'activated') { first.removeEventListener('statechange', on); keepParsers(); } });
+       this install sets maths offline from its next open.  038 Z6: an activate deletes a kept parser only when its bytes are not that
+       build's (sw.js KEPT), so a keep survives an update and the first install's own activate; one a kit change swept is kept again here */
+    if (window.marked && window.katex) for (const f of ['marked.min.js', 'katex/katex.min.js', 'katex/katex.min.css']) keepData('./mir/shell/vendor/' + f);
 
     /** OFFER a waiting worker to the interface.  Nothing here takes it; accept() does — on a press, or quietly
         (`alone`) for an untouched session.  ONCE PER WORKER (wave 133): `reg.waiting`, the install's statechange and §3's

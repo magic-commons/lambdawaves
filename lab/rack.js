@@ -232,7 +232,8 @@ export async function boot(dom) {
   document.addEventListener('resume', () => setPageHidden(false, 'resume'));
   window.addEventListener('pagehide', () => setPageHidden(true, 'pagehide'));
   /* A pagehide that is NOT going into the back-forward cache is a real unload: release the GPU in order
-     (textures, buffers, context, device) before the navigation tears the page down under the driver. */
+     (textures, buffers, context) before the navigation tears the page down under the driver; the device is left to the
+     browser (038 Z1: destroying it with frames in flight froze the next page in Firefox — field.js dispose()). */
   window.addEventListener('pagehide', (e) => { if (!e.persisted && field && field.dispose) field.dispose(); });
   window.addEventListener('pageshow', () => setPageHidden(document.visibilityState === 'hidden', 'pageshow'));
 

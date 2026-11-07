@@ -3,9 +3,9 @@
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --write    record the lock on THIS tree
  *   LW_PORT=8722 GD_PORT=5241 node tools/perf/digest-lock.mjs --check    re-run and compare, exit 1 on any difference
  *   options:  --fixture <path>   (default tests/fixtures/digest-lock-base.json)
- *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=0'   (appended to the lab URL; THE DEFAULT since 038 Z4,
- *             `--query ''` for none; W125: the gas table is the default, so the pre-W125 base fixture is checked with `--query 'gastab=0'`, and
- *             digest-lock-base-w125.json is the base with it on)
+ *             --only states,styles,lines     --grids 64,96,128     --query 'gastab=0'   (appended to the lab URL; THE DEFAULT since 038 Z4 for
+ *             --check AND --write — a fresh capture records `gastab=0` in its url unless `--query ''`; W125 made the gas table the app's
+ *             default, and both shipped fixtures (base, s4a) predate it)
  *             --nowarm   (K2) do not warm the specialised present pipelines: every readPixels draws with the generic one
  *             --states a,b,c   only these states (0.4.0 S4a: `--states` with the thirteen pre-S4a names checks the old fixture
  *                        on a tree that has the new ones; tests/fixtures/digest-lock-s4a.json is the lock
