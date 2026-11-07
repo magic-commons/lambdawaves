@@ -18,6 +18,10 @@
 // recorder's recoveries(), so a paint and DISCARD RENDER both leave the old rows up for a while — step 2 waits until the rows read the
 // recorder's own list (date and frames, newest first), before the discard and after it, never on the store's count alone (S6 pass 1:
 // the id was set on a row the repaint then took off the page — 'the DISCARD STORED RENDER tap did not land' — the suite's red).
+// 039 S6 · a mark finds, scrolls and marks its button only once the rack is at rest, two frames after the last change: the kit's rack
+// motion FLIPs a raised card from a MutationObserver, i.e. AFTER the script that raised it returns (0 animations at the raise, 2 a
+// microtask later), so a scroll taken then is wrong by the flight still to go (probe: RENDER's centre at y 220, not 407) and on one
+// run in four the button landed off the page ('the RENDER tap did not land', covered by nothing: off-screen) — the suite's red too.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
 
@@ -28,7 +32,11 @@ const pass = (m) => console.log('PASS ' + m);
 const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefined && r !== null && !r.E, 'page threw: ' + JSON.stringify(r)); return r; };
 const until = async (expr, ms) => { const t0 = Date.now(); for (;;) { if (await g.ev(`try { return !!(${expr}); } catch (_) { return false; }`)) return Date.now() - t0;
   assert.ok(Date.now() - t0 < ms, 'timed out waiting for ' + expr); await new Promise((r) => setTimeout(r, 500)); } };
-const mark = (id, find) => ev(`const n = (${find})(); if (!n) return { none: true }; n.id = ${JSON.stringify(id)}; n.scrollIntoView({ block: 'center', behavior: 'instant' }); await new Promise((r) => requestAnimationFrame(r)); await __until(__rest); return { ok: 1 };`);
+const mark = (id, find) => ev(`const frame = () => new Promise((r) => requestAnimationFrame(r)), still = async () => { await frame(); await frame(); return __until(__rest); };
+  const before = await still(); const n = (${find})(); if (!n) return { none: true }; n.id = ${JSON.stringify(id)};
+  n.scrollIntoView({ block: 'center', behavior: 'instant' }); const after = await still(); return { ok: before >= 0 && after >= 0 ? 1 : 0, before, after };`);
+/* a real tap that did not land says gatekit's why (no such element · zero area · covered by …) */
+const tapOn = async (sel, what) => { const r = await g.tap(sel); assert.equal(r.ok, 1, 'the ' + what + ' tap did not land: ' + JSON.stringify(r)); return r; };
 /* the stage at rest by the driver's own screenshot: two in a row agree */
 const stillHash = async () => { let a = await g.snapHash(); for (let k = 0; k < 20; k++) { const b = await g.snapHash(); if (b === a) return a; a = b; } return a; };
 try {
@@ -85,11 +93,11 @@ try {
 
   /* ── 1 · a real RENDER tap, then a real SAVE tap: the card's save is inside the second tap → the share sheet; the facade downloads ── */
   assert.equal((await mark('fh-render', `() => __LW.render.view.controls.renderBtn`)).ok, 1);
-  assert.equal((await g.tap('#fh-render')).ok, 1, 'the RENDER tap did not land');
+  await tapOn('#fh-render', 'RENDER');
   await until(`__LW.render.view.state().done && !__LW.render.view.state().running`, 240000);
   assert.equal((await mark('fh-save', `() => __H.button('SAVE ')`)).ok, 1, 'no SAVE row after the render');
   const n0 = await ev(`return { films: await __H.films() };`);
-  assert.equal((await g.tap('#fh-save')).ok, 1, 'the SAVE tap did not land');
+  await tapOn('#fh-save', 'SAVE');
   const t1 = await ev(`await __until(__H.saved); const st = __LW.render.view.state();
     return { done: st.done, shares: __H.shares.slice(), downloads: __H.downloads.length, click: __H.clicks.filter((c) => c.trusted).pop(), errs: __e.slice() };`);
   assert.ok(t1.click && t1.click.live, 'the SAVE press carried no activation: ' + JSON.stringify(t1.click));
@@ -121,13 +129,13 @@ try {
   assert.ok(t2a.paintMs >= 0, 'the stored renders\' rows never read the recorder\'s list: ' + JSON.stringify(t2a));
   assert.ok(t2a.films >= 2 && t2a.rows.includes('DISCARD RENDER') && t2a.rows.some((x) => x === 'DISCARD STORED RENDER'), 'the store does not hold both films with their discard rows: ' + JSON.stringify(t2a));
   assert.equal((await mark('fh-discard', `() => __H.button('DISCARD RENDER')`)).ok, 1);
-  const tapD = await g.tap('#fh-discard'); assert.equal(tapD.ok, 1, 'the DISCARD RENDER tap did not land: ' + JSON.stringify(tapD));
+  await tapOn('#fh-discard', 'DISCARD RENDER');
   const t2b = await ev(`await __H.filmsTo(${t2a.films - 1}); await __until(() => !__LW.render.view.state().done); const repaint = await __H.rowsTrue();
     return { films: await __H.films(), done: __LW.render.view.state().done, repaint, list: __H.rowsNow(), jobs: await __H.jobsNow() };`);
   assert.ok(t2b.films === t2a.films - 1 && !t2b.done, 'DISCARD RENDER did not remove the card film from the store: ' + JSON.stringify(t2b));
   assert.ok(t2b.repaint >= 0 && t2b.list.length === t2a.list.length - 1, 'the stored renders\' rows are not the store\'s after DISCARD RENDER: ' + JSON.stringify({ before: t2a.list, now: t2b }));
   assert.equal((await mark('fh-stored', `() => __H.button('DISCARD STORED RENDER')`)).ok, 1);
-  const tapS = await g.tap('#fh-stored'); assert.equal(tapS.ok, 1, 'the DISCARD STORED RENDER tap did not land: ' + JSON.stringify(tapS));
+  await tapOn('#fh-stored', 'DISCARD STORED RENDER');
   const t2c = await ev(`await __H.filmsTo(${t2b.films - 1}); return { films: await __H.films() };`);
   assert.equal(t2c.films, t2b.films - 1, 'DISCARD STORED RENDER did not remove the facade film: ' + JSON.stringify(t2c));
   pass(`no discard timer (the save's only timer is the hand-over URL's ${t2a.timers.join(', ')} ms); the film is ${t2a.at} B with the copy kept; DISCARD RENDER ${t2a.films} → ${t2b.films} (the stored rows ${t2a.list.length} → ${t2b.list.length}, the store's own list, read ${t2a.paintMs} and ${t2b.repaint} ms after the paint and the drop — printed, not judged), DISCARD STORED RENDER → ${t2c.films}`);
@@ -145,10 +153,10 @@ try {
   /* ── 4 · CAPTURE IMAGE then DOWNLOAD IMAGE, both real taps: the save runs inside the second → the share sheet ── */
   await ev(`__H.reset(); return 1;`);
   assert.equal((await mark('fh-cap', `() => __H.button('CAPTURE IMAGE')`)).ok, 1);
-  assert.equal((await g.tap('#fh-cap')).ok, 1, 'the CAPTURE IMAGE tap did not land');
+  await tapOn('#fh-cap', 'CAPTURE IMAGE');
   await until(`__LW.render.view.state().held`, 30000);
   assert.equal((await mark('fh-dl', `() => __H.button('DOWNLOAD IMAGE')`)).ok, 1);
-  assert.equal((await g.tap('#fh-dl')).ok, 1, 'the DOWNLOAD IMAGE tap did not land');
+  await tapOn('#fh-dl', 'DOWNLOAD IMAGE');
   const t4 = await ev(`await __until(__H.saved); return { held: __LW.render.view.state().held, shares: __H.shares.map((x) => ({ names: x.names, live: x.live })), downloads: __H.downloads.length, errs: __e.slice() };`);
   assert.equal(t4.shares.length, 1, 'DOWNLOAD IMAGE inside a live tap did not share: ' + JSON.stringify(t4));
   assert.ok(t4.shares[0].live && /\.png$/.test(t4.shares[0].names[0]), 'the shared picture: ' + JSON.stringify(t4));
