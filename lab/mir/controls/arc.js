@@ -5,8 +5,9 @@
  * own ink.  Josh: "Color knobs needs to be rounded and less pixelated" · "Arcs that show color can primarily be used
  * for color and knobs are for all parameters".  An ordinary parameter stays the kit's solid `knob()`.
  *
- *   arcRing(parent, { from, span })   the ring alone: { svg, set(turn) } — what the GUI's accent dials, the transport and
- *                                     the modulation window draw their arcs with (one build, three used to exist)
+ *   arcRing(parent, { from, span, stops })   the ring alone: { svg, set(turn) } — what the GUI's accent dials, the transport and
+ *                                     the modulation window draw their arcs with (one build, three used to exist); `stops`
+ *                                     (1.5.7-alpha.15) a gradient track with a thumb for the value
  *   arcKnob(o)                        the kit's knob() with the ring: every knob() option, and the same widget contract
  *                                     (root / get / set / show / shown / setBase / paint / setDisabled), so it is a
  *                                     modulation target exactly as a knob is (`params: [{ widget }]`)
@@ -44,19 +45,22 @@ export const ARC = Object.freeze({
   NEAR: 34, FLOOR: 0.15,       // gain = dist > NEAR ? max(FLOOR, NEAR / dist) : 1, at the press (the flagship's KNOB_FINE)
 });
 
-/** arcRing(parent, { from, span }) → { svg, set(turn) }: a track `span` degrees long starting `from` degrees clockwise
- *  from the top, and a value ring `turn` degrees of it (0 hides it: a zero-length round cap would draw a dot) */
-export function arcRing(parent, { from = 0, span = 360 } = {}) {
+/** arcRing(parent, { from, span, stops }) → { svg, set(turn) }: a track `span` degrees long starting `from` degrees clockwise
+ *  from the top, and a value ring `turn` degrees of it (0 hides it: a zero-length round cap would draw a dot).
+ *  1.5.7-alpha.15 THE ARC WEARS A GRADIENT (λWAVES 038 P1, Josh: "show the arcs as knob wrapped versions of the photoshop sliders"):
+ *  `stops`, two or more CSS colours evenly spaced along the track, draws the TRACK as vector segments coloured along them
+ *  (butt-joined, a round cap at each end; each pulled toward the theme's ink by --arc-grad-weight, so a yellow end reads on a pale
+ *  card and a blue one on a dark card) and the value as a THUMB riding the track — a disc in the colour under it, a ring, a halo —
+ *  in place of the value ring: Photoshop's slider track, wrapped round the knob.  Still no masked conic */
+export function arcRing(parent, { from = 0, span = 360, stops = null } = {}) {
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('class', 'k-arc'); svg.setAttribute('viewBox', '0 0 40 40');
   svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
   svg.style.setProperty('--arc-from', from + 'deg');
   svg.style.setProperty('--arc-span', String(span));
-  const circle = (cls) => {
-    const node = document.createElementNS(NS, 'circle');
-    for (const [k, v] of Object.entries({ class: cls, cx: 20, cy: 20, r: 17, pathLength: 360 })) node.setAttribute(k, v);
-    svg.appendChild(node); return node;
-  };
+  const node = (tag, attrs, into = svg) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); into.appendChild(n); return n; };
+  const circle = (cls) => node('circle', { class: cls, cx: 20, cy: 20, r: 17, pathLength: 360 });
+  if (Array.isArray(stops) && stops.length >= 2) return gradRing(parent, svg, node, circle, span, stops);
   circle('k-arc-track');
   const value = circle('k-arc-value');
   parent.appendChild(svg);
@@ -67,10 +71,37 @@ export function arcRing(parent, { from = 0, span = 360 } = {}) {
   } };
 }
 
+/** the gradient ring (arcRing's `stops`): segments of span / n degrees, n = 8 per gap between stops (16 … 48); each a dash of its own
+ *  length + ½ (no hairline seam between butt ends) in the stops' colour at its middle (`--arc-seg`, an oklab mix of the two stops
+ *  either side); the two end segments drawn FIRST with round caps, so the inner segments cover the caps' inner halves.  A full ring
+ *  (span 360) has no ends.  set(turn) moves the thumb to `turn` degrees along the track and gives it the colour beneath */
+function gradRing(parent, svg, node, circle, span, stops) {
+  svg.classList.add('k-arc-grad');
+  const n = Math.max(16, Math.min(48, 8 * (stops.length - 1))), len = span / n, ends = span < 360, m = stops.length - 1;
+  const at = (t) => { const x = t * m, i = Math.min(m - 1, Math.floor(x)), f = x - i;
+    return f < 0.005 ? stops[i] : f > 0.995 ? stops[i + 1] : `color-mix(in oklab, ${stops[i]} ${(100 - 100 * f).toFixed(1)}%, ${stops[i + 1]})`; };
+  const ink = [], order = ends ? [0, n - 1, ...Array.from({ length: n - 2 }, (_, i) => i + 1)] : Array.from({ length: n }, (_, i) => i);
+  for (const i of order) {
+    const s = circle('k-arc-seg' + (ends && (i === 0 || i === n - 1) ? ' k-arc-end' : ''));
+    s.setAttribute('stroke-dasharray', (len + (ends && i === n - 1 ? 0 : 0.5)).toFixed(3) + ' 360');
+    s.setAttribute('stroke-dashoffset', (-i * len).toFixed(3));
+    s.style.setProperty('--arc-seg', ink[i] = at((i + 0.5) / n));
+  }
+  const thumb = node('g', { class: 'k-arc-thumb' });
+  node('circle', { class: 'k-arc-halo', r: 5.2 }, thumb); node('circle', { class: 'k-arc-disc', r: 3.6 }, thumb);
+  parent.appendChild(svg);
+  return { svg, set(turn) {
+    const a = Math.max(0, Math.min(span, turn)), r = (a * Math.PI) / 180;   // the svg turns by --arc-from − 90°: its 3 o'clock is the track's start
+    setAttr(thumb, 'transform', `translate(${(20 + 17 * Math.cos(r)).toFixed(2)} ${(20 + 17 * Math.sin(r)).toFixed(2)})`);
+    setVar(thumb, '--arc-seg', ink[Math.min(n - 1, Math.floor(a / len))]);
+  } };
+}
+
 /**
  * arcKnob({ law: 'vertical' | 'angular', home, value, ink, onPress, live, size, …every kit knob() option })
  *   home     the engine's own value: where a double-tap, a double-click and Delete go
  *   ink      a CSS colour or (base) → colour, written to --lane-ink on the root (else the lane's, else the accent)
+ *   stops    (1.5.7-alpha.15) two or more CSS colours: the track wears them as a gradient and a thumb marks the value (arcRing)
  *   size     'sm' = the lane's 22 px dial with no label (the title and the value chip name it); default the kit's 34 px
  *   onPress  (event) → a hook the host runs on every press the law takes, after the press is forwarded
  *   live     () → the modulated value now, or null: read when the hand lets go, so a routed dial shows its live value
@@ -103,7 +134,7 @@ export function arcKnob(o) {
   const root = k.root, dial = root.querySelector('.k-dial');
   root.classList.add('k-arcknob', wrap ? 'k-free' : 'k-bounded');
   if (o.size === 'sm') root.classList.add('k-arc-sm');
-  const ring = arcRing(dial, { from: FROM, span: SPAN });
+  const ring = arcRing(dial, { from: FROM, span: SPAN, stops: o.stops });   // 1.5.7-alpha.15: a gradient track and its thumb
   const liveDot = el('i', 'k-live', dial); liveDot.setAttribute('aria-hidden', 'true');
 
   paintArc = () => {

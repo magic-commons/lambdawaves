@@ -33,6 +33,10 @@ THE MINIMAP (038 N5): the window's viewfinder at the ground's bottom-right.
 - **The hand:** a drag centres the view on its point; the wheel zooms about the view's centre.
 - It is hidden while every card is in view. The rack card has none.
 
+A CARD THAT GROWS PUSHES THE CARDS BELOW (038 N8, the fresh eyes: an opened FADE · MASK · TARGET fold covered the next card, so TARGET could not be pressed). In the window, a card that grows — its foot fold, or its body unfolded — moves the cards under it (overlapping its width) down until the gap is GAP again. The move is kept as a nudge, so no card is covered. A card that shrinks leaves its gap. The rack card's column flows as before.
+
+THE KIT'S MENU FLOOR (038 N8, MIR 1.5.7-alpha.16 THE MENU PANE KEEPS ITS FLOOR). Every menu pane holds its floor in every material: the + menu, its submenus, the kit's right-click and the bar's lists. Dark REFRACTIVE FROST ALWAYS reads .72, not .10. The handle's readout ("MIX 50 %") is written through `label()`.
+
 A NODE HAS A TARGET (038 N6, CALLS 4: one picture, a mask, a TARGET seg). Every TABLE, MATRIX and PRIM node carries TARGET: BOTH · STAGE · OBJECT. It is the foot fold's last row (FADE · MASK · TARGET); absent means BOTH, today's bytes.
 - **The mask** is the field's alpha code (`field.setObjectMask`, chain F; which pixel is OBJECT is F's rule — the atom carries at least half of it).
 - **The run:** a targeted node is its own run (cost ···) whose mask is SourceAlpha through feFuncA (OBJECT 255·A − 254, STAGE 255 − 255·A), × its FADE, × its MASK when set. It is softened 1.2 px, because the code's edge follows the march's stipple. Then out = mix(in, fx, mask) on the `in` / `over` road.

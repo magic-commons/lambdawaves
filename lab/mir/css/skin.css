@@ -489,8 +489,10 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
 :where([data-mir-surface="menu"]) { box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); }
 /* 1.5.6-alpha.4 · THE MENU FLOOR: a menu pane (`.glass[data-mir-surface="menu"]`) keeps its skin's material and never thins below
    --surface-menu-floor — the one token for the .92 / .94 / .97 an app hard-coded so the stage could not read through.  Heavy enough to beat
-   every card style's pane rule, FROST's and STILL's included; it paints the colour only, so a sheen and the blur stay. */
-body[data-card] .glass[data-mir-surface="menu"]:not([hidden]) { background-color: hsl(var(--surface-menu-tint) / var(--surface-menu-floor)); border-color: var(--surface-menu-edge); }
+   every card style's pane rule, FROST's and STILL's included; it paints the colour only, so a sheen and the blur stay.  1.5.7-alpha.16 · THE MENU
+   PANE KEEPS ITS FLOOR (λWAVES 038 N8): it tied at (0,4,1) with FROST · ALWAYS's dark veil and FROST · STILL's fill below, which came later and won —
+   under dark REFRACTIVE FROST every menu pane read .10 — so it weighs one attribute more ([data-card] twice): (0,5,1), the floor in every material. */
+body[data-card][data-card] .glass[data-mir-surface="menu"]:not([hidden]) { background-color: hsl(var(--surface-menu-tint) / var(--surface-menu-floor)); border-color: var(--surface-menu-edge); }
 :where([data-mir-surface="island"]) { border: var(--surface-edge-width, var(--glass-border)) solid transparent; }   /* joined: paintless, the same box it has as an island */   /* the pane is CARD STYLE's, §14c */
 /* 1.5.6-alpha.7 · two INNER surfaces (λWAVES 022 C1): `well` (a recess in a pane: the skin's well and its relief) and `section` (a hairline
    frame on a well, kit.js section()); neither is a pane, so no card style, frost or pane shadow reaches them, and a SKIN change re-skins both */

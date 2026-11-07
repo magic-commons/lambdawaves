@@ -110,7 +110,7 @@ try {
       return { hs, mid, at: ${ctr(H('n2'))}, lv: ${ctr(H('n1'))}, kids: document.getElementById(N.filter.id).children.length };`);
     let [hx, hy] = out.start.at;
     await drag([[hx, hy], [hx, hy + 40], [hx, hy + 80], [hx, hy + 110]]);
-    out.turn = await ev(`const q = () => N.nodes().find((n) => n.id === 'n2'); return { fade: +q().values.fade.toFixed(3), val: ${H('n2')}.dataset.val, sel: ${H('n2')}.classList.contains('sel'), focus: document.activeElement.className, arc: ${H('n2')}.querySelector('.v').getAttribute('stroke-dasharray') };`);
+    out.turn = await ev(`const q = () => N.nodes().find((n) => n.id === 'n2'); return { fade: +q().values.fade.toFixed(3), val: ${H('n2')}.querySelector('.nodes-hand-val').textContent, sel: ${H('n2')}.classList.contains('sel'), focus: document.activeElement.className, arc: ${H('n2')}.querySelector('.v').getAttribute('stroke-dasharray') };`);
     out.wheel = await ev(`const h = ${H('n1')}; h.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 100 })); await w(100); const a = N.nodes()[0].values.fade;
       h.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 100, ctrlKey: true })); await w(100); return { fade: a, after: N.nodes()[0].values.fade, z: $(WIN + '.nodes-plane').style.scale };`);
     [hx, hy] = await ev(`return ${ctr(H('n2'))};`);   // the ctrl + wheel above zoomed the view
@@ -218,6 +218,53 @@ Image.open(sys.argv[1]).convert('RGB').crop(tuple(map(int, sys.argv[3:7]))).save
     await drv.actions(g.s, [{ type: 'pointer', id: 'nr' + ++nA, parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', x: at[0], y: at[1], origin: 'viewport' }, { type: 'pointerDown', button: 2 }, { type: 'pointerUp', button: 2 }] }]); await drv.relActions(g.s);
     out.ctx = await ev(`await w(400); const p = $('.mir-ctx .mir-ctx-pane'); return p ? { bg: getComputedStyle(p).backgroundColor, cls: p.className } : null;`);
     await shot('038-N7-kit-ctx-dark-frost-headed', [630, 30, 1130, 690]);
+  }
+  if (scene === 'n8') {
+    /* the fold pushes: three cards at FIT, the first's FADE · MASK · TARGET opened — every TARGET word hit-tests to its own seg, the cards below moved
+       down to a GAP; the handle's readout through label(); the rack card's fold opened (the page errors it logs) */
+    out.fold = await ev(`N.open(); await w(600); N.win.place({ x: 640, y: 40, w: 480, h: 760 }); await w(300); for (const t of ['levels', 'hue', 'blur']) N.add(t); await w(500); N.views[1].place(); await w(300);
+      $(WIN + '.nodes-ground').focus(); key($(WIN + '.nodes-ground'), 'Home', { code: 'Home' }); await w(300);
+      const card = (id) => $(WIN + '.nodes-card[data-node="' + id + '"]'), tops0 = ['n1', 'n2', 'n3'].map((id) => parseFloat(card(id).style.top));
+      card('n1').querySelector('.nodes-foot-t').click(); await w(500);
+      const segs = [...card('n1').querySelectorAll('.nodes-foot .seg-b')], hits = segs.map((b) => { const r = b.getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return b.textContent + ':' + (b.contains(e) ? 'own' : (e.closest('.nodes-card') || {}).dataset?.node || e.className); });
+      const c1 = card('n1'), gap = parseFloat(card('n2').style.top) - (parseFloat(c1.style.top) + c1.offsetHeight);
+      return { tops0, tops1: ['n1', 'n2', 'n3'].map((id) => parseFloat(card(id).style.top)), hits, gap, rec: JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')).list.map((q) => q.at && Math.round(q.at[1])), box: rect(c1) };`);
+    await shot('038-N8-fold-pushes', [630, 30, 1130, 810]);
+    const at = await ev(`const r = $(WIN + '.nodes-hand[data-wire="n2"]').getBoundingClientRect(); return [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2)];`);
+    await drv.actions(g.s, [{ type: 'pointer', id: 'n8' + ++nA, parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', x: at[0], y: at[1], origin: 'viewport' }, { type: 'pointerDown', button: 0 }, { type: 'pointerMove', x: at[0], y: at[1] + 55, origin: 'viewport', duration: 60 }] }]);
+    out.readout = await ev(`const v = $(WIN + '.nodes-hand[data-wire="n2"] .nodes-hand-val'); return { text: v.textContent, shown: getComputedStyle(v).display, t: v.getAttribute('data-t') };`);
+    await drv.actions(g.s, [{ type: 'pointer', id: 'n8' + nA, parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerUp', button: 0 }] }]); await drv.relActions(g.s);
+    const e0 = (await g.errors()).errs.length;
+    out.card = await ev(`N.win.close(); __LW.layout.reopen('nodes'); __LW.layout.raise('nodes'); await w(900); const d = $('.dev[data-id="nodes"]'); d.scrollIntoView(); await w(300);
+      d.querySelector('.nodes-card[data-node="n1"] .nodes-foot-t').click(); await w(600); return 1;`);
+    const errs = (await g.errors()).errs; out.cardErrors = errs.slice(e0);
+  }
+  if (scene === 'n8c') {
+    /* the rack card's fold, a short card (one node): the page errors each open logs */
+    out.c = await ev(`N.add('levels'); __LW.layout.reopen('nodes'); __LW.layout.raise('nodes'); await w(1200); if (${process.env.N8_SIDE ? 1 : 0}) { __LW.run('window.nodes.side'); await w(800); } const d = $('.dev[data-id="nodes"]'); d.scrollIntoView(); await w(300); if (${process.env.N8_FOLDALL ? 1 : 0}) { for (const x of __LW.layout.rk ? [] : []) x; for (const id of ['spectrum', 'molecules', 'informational', 'info']) { try { if (__LW.actions.get('window.' + id + '.fold') && !__LW.actions.get('window.' + id + '.fold').get()) __LW.run('window.' + id + '.fold'); } catch (_) {} } await w(800); }
+      const scr = () => { const r = d.parentElement; return r.scrollHeight > r.clientHeight; }, s0 = scr(); const t = d.querySelector('.nodes-foot-t'), o = []; if (${process.env.N8_NOSEG ? 1 : 0}) { const st = document.createElement('style'); st.textContent = '.nodes-foot .nodes-knobs > :is(.seg, .segw) { display: none !important; }'; document.head.appendChild(st); }
+      if (${process.env.N8_NOCLEAR ? 1 : 0}) { const st = document.createElement('style'); st.textContent = '#transport { --csb-clear: 0px !important; }'; document.head.appendChild(st); }
+      for (let i = 0; i < 4; i++) { const e0 = (window.__e || []).length; t.click(); await w(700); o.push({ open: t.getAttribute('aria-expanded'), scroll: scr(), errs: (window.__e || []).slice(e0).length }); }
+      const other = []; for (const id of ['nodes', 'informational']) { const dv = $('.dev[data-id="' + id + '"]'); if (!dv) continue; for (let i = 0; i < 2; i++) { const e0 = (window.__e || []).length; dv.querySelector('.dev-fold').click(); await w(800); other.push(id + ':' + (window.__e || []).slice(e0).length); } }
+      const knob = []; { const e0 = (window.__e || []).length; const lv = N.nodes()[0]; N.set(lv.id, 'gamma', 2); await w(500); knob.push((window.__e || []).slice(e0).length); }
+      return { s0, o, other, knob, h: d.offsetHeight, rack: d.parentElement.id };`);
+  }
+  if (scene === 'n8m') {
+    /* THE MENU PANE KEEPS ITS FLOOR (kit 1.5.7-alpha.16): the computed fill of the + pane, its submenu, the kit's right-click pane and the bar's list,
+       in every material — dark REFRACTIVE FROST ALWAYS first (the desktop first run in the dark theme) */
+    const looks = [['dark', 'refractive', 'always'], ['dark', 'refractive', 'still'], ['light', 'refractive', 'always'], ['dark', 'refractive', 'off'], ['dark', 'tinted', 'always'], ['light', 'solid', 'off']];
+    await ev(`N.open(); await w(600); N.win.place({ x: 640, y: 40, w: 480, h: 640 }); N.add('levels'); await w(400); return 1;`);
+    out.panes = {};
+    for (const [theme, card, frost] of looks) {
+      out.panes[theme + ' ' + card + ' ' + frost] = await ev(`__LW.look.set({ theme: '${theme}' }); __LW.setCardStyle('${card}'); __LW.setFrost('${frost}'); await w(400);
+        const bg = (e) => e ? getComputedStyle(e).backgroundColor : null, o = { body: document.body.className.match(/frost[\w-]*/g) };
+        $(WIN + '.nodes-add').click(); await w(250); const p = $('.mir-ctx .nodes-add-menu'); p.querySelector('[data-id="group:table"]').click(); await w(250);
+        o.plus = bg(p); o.sub = bg($('.mir-ctx .mb-sub-list')); key(document.activeElement, 'Escape', { code: 'Escape' }); key(document.activeElement, 'Escape', { code: 'Escape' }); await w(150);
+        const c = $(WIN + '.nodes-card[data-node="n1"] .nodes-title'), r = c.getBoundingClientRect(); c.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, button: 2, clientX: r.left + 40, clientY: r.top + 8 })); await w(250);
+        o.ctx = bg($('.mir-ctx .mir-ctx-pane:not(.nodes-add-menu)')); document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); await w(150);
+        __LW.layout.menu.open(); const b = [...document.getElementById('menubar').querySelectorAll('.mb-btn')].find((x) => x.dataset.menu === 'WINDOW'); b.click(); await w(250);
+        o.bar = bg([...document.querySelectorAll('#menubar .mb-list')].find((l) => !l.hidden && l.offsetParent)); b.click(); await w(150); return o;`);
+    }
   }
   if (scene === 'n6b') {
     /* the experiment: an arithmetic copy of the source first (does it clamp the colour to the alpha?) */

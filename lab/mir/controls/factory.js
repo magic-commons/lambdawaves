@@ -12,14 +12,16 @@
  *   options, 5 or more, in order ............................................... stepper   (the page turner's form)
  *   options, a long list of data (list: true, ordered: false, or over 16) ....... select
  *   a finite range, cyclic (wrap, cyclic, hue or angle) ......................... arc knob  (a hue or an angle: INTENT rule 2)
+ *   a finite range with a gradient track (stops: [css, …], 1.5.7-alpha.15) ...... arc knob  (its track the colours, a thumb the value)
  *   a finite range, the thing's one principal amount (principal: true) .......... lane slider
  *   a finite range ............................................................ knob
  *   otherwise ................................................................. number field
  *
  * descriptor: { id, label, hint, value, get?, set?, type?, options?: [{ id, label, coming?/disabled? }], min, max, step, log, wrap, hue, angle,
- *   cyclic, principal, list, ordered, colour, pair, ink, unit, digits, fmt, orient, lamp, reverse, onInput?, onChange? }.  `reverse` (1.5.7-alpha.6): the
+ *   cyclic, principal, list, ordered, colour, pair, ink, stops, unit, digits, fmt, orient, lamp, reverse, onInput?, onChange? }.  `reverse` (1.5.7-alpha.6): the
  *   knob turns the other way (kit.js knob's own law; the value, the range and a modulation map unchanged).  `wrap` on a `pair` (1.5.7-alpha.13 THE PAD
- *   WRAPS) is the pad's: 'plane' or 'sphere' (xy.js padWrap); each axis keeps its own map.  `get` and `set` are the app's
+ *   WRAPS) is the pad's: 'plane' or 'sphere' (xy.js padWrap); each axis keeps its own map.  `stops` (1.5.7-alpha.15 THE ARC WEARS A GRADIENT): two or
+ *   more CSS colours, evenly spaced — the knob becomes an arc whose track wears them and whose thumb marks the value (arc.js arcRing).  `get` and `set` are the app's
  *   own road to the value (the registry's adapters): the control reads its first value from `get()`, and every hand writes `set(v)`.
  *   → { kind, root, widget, targets, get(), set(v), desc, params() }
  *     kind     one of KINDS
@@ -55,7 +57,7 @@ export function controlKind(d) {
     return 'stepper';
   }
   if (finiteRange(d)) {
-    if (d.wrap || d.cyclic || d.hue || d.angle) return 'arc';
+    if (d.wrap || d.cyclic || d.hue || d.angle || (Array.isArray(d.stops) && d.stops.length >= 2)) return 'arc';   // 1.5.7-alpha.15: a gradient track is an arc
     if (d.principal) return 'lane';
     return 'knob';
   }
@@ -82,7 +84,7 @@ export function control(d, hooks = {}) {
     case 'segment': widget = seg({ ...common, options: d.options.map((o) => ({ id: o.id, label: o.label, title: o.hint })), value: String(read()), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
     case 'stepper': widget = stepper({ ...common, items: itemsOf(d), value: read(), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
     case 'select': widget = select({ ...common, items: itemsOf(d), value: read(), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
-    case 'arc': widget = arcKnob({ ...knobOpts(), ink: d.ink, home: d.home }); targets = [widget]; getter = () => widget.get(); setter = (v) => widget.set(v); break;
+    case 'arc': widget = arcKnob({ ...knobOpts(), ink: d.ink, home: d.home, stops: d.stops }); targets = [widget]; getter = () => widget.get(); setter = (v) => widget.set(v); break;
     case 'lane': widget = laneSlider({ ...common, min: d.min, max: d.max, value: read(), log: d.log, fmt: d.fmt, ink: d.ink, orient: d.orient, home: d.home, onInput: input, onChange: change }); targets = [widget]; getter = () => widget.get(); setter = (v) => widget.set(v); break;
     case 'knob': widget = knob(knobOpts()); if (Number.isFinite(d.home)) widget.setDefault(d.home); targets = [widget]; getter = () => widget.get(); setter = (v) => widget.set(v); break;   // a double-tap goes HOME
     case 'xy': {
