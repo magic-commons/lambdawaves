@@ -563,10 +563,11 @@ export const moleculeAtoms = (id, R = null) => {
 };
 /** the entry's charge, which chem.solve needs beside the atoms */
 export const moleculeCharge = (id) => (MOLECULE_BY_ID.get(id) || MOLECULES[0]).charge;
-/** one line for the dropdown: "H₂O · 7 AO", "C₆H₆ · 36 AO", "C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD"; the predicted time (showMs: milliseconds below a second, since
-    half this library solves in under 50 ms and rounding all of it to "~0.0 s" would tell nobody anything) is the row's and the chip's hint (039 X5) */
+/** one line for the dropdown: "H₂O", "C₆H₆", "C₆H₁₄N₂O₂ · record · DOWNLOAD"; the predicted time (showMs: milliseconds below a second, since
+    half this library solves in under 50 ms and rounding all of it to "~0.0 s" would tell nobody anything) is the row's and the chip's hint (039 X5),
+    and the AO count the row's ("36 atomic orbitals", 039 F2: WALK-A §3 read "36 AO" as nothing) */
 export const showMs = (ms) => (ms < 950 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
-export const optionLabel = (m, installed = true) => `${m.formula.replace(/<\/?m>/g, '')} · ${m.nAO} AO`   // 039 X5 (WALK-A #18): the time left the face (its hint says it), so the bar's chip is never cut
+export const optionLabel = (m, installed = true) => m.formula.replace(/<\/?m>/g, '')   // 039 X5 (WALK-A #18): the time left the face (its hint says it), so the bar's chip is never cut
   + (m.recordOnly ? ' · record' + (installed ? '' : ' · DOWNLOAD') : m.shortReason ? ` · ${m.shortReason}` : '');
 /** the ring builders' closure residuals in ångström — a parameter set that does not close is a broken geometry */
 export const RING_RESIDUALS = { C4H4O: FURAN.residual, C5H5N: PYRIDINE.residual };

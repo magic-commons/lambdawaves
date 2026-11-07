@@ -169,7 +169,8 @@ export function createNotebook(app) {
       /* 039 X7 · THE FINDER'S KEYWORDS (WALK-B #3: "grain", "film", "effects", "vignette" found nothing): until the kit's picker takes `keywords`
          (FOR-KIT), a word a newcomer types also shows the window it names — the kit filters by title, then a row whose words begin with the typed
          word comes back, and the first openable row is marked (the kit's own pointer road), so Enter opens it */
-      const FIND_WORDS = { nodes: 'effects fx grain film vignette curves colour color look blur glow bloom', render: 'film video movie mp4 export record',
+      const FIND_WORDS = { nodes: 'effects fx grain film vignette curves look blur glow bloom',   // 039 F2 (X-REVIEW #8): "colour" marks PALETTE first
+        render: 'film video movie mp4 export record',
         light: 'lighting sun shadow lamp', stage: 'background colour color gamma axes frame', palette: 'colours colors gradient hue', observer: 'style look cloud',
         camera: 'view zoom rotate orbit fov', clip: 'cut plane slice section', chem: 'molecule chemistry benzene water orbitals', spectrum: 'states hydrogen orbitals levels',
         projects: 'save open files projects', history: 'undo redo', widgets: 'clock text', equalizer: 'audio sound music', informational: 'labels words captions text',

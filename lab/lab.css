@@ -539,7 +539,7 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 
 /* ── shadow view ────────────────────────────────────────────────────────── */
 .shadow-c { width: 100%; height: 236px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); touch-action: none; }
-.mol-c { width: 100%; height: 150px; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); }
+.mol-c { width: 100%; height: 150px; display: block; border-radius: var(--r-md); border: 0; background: var(--glass-well); }   /* 039 F2 (X-REVIEW #5): no border (the skin's was transparent), so the kit's hover (border box) and a tap (content box) read one band */
 .mol-c.mol-core { height: 84px; }                       /* CHEMISTRY's core inset: less screen than the inspector (answer 11) */
 .mol-c[hidden] { display: none; }                      /* `display: block` above outranks the UA's [hidden] rule, so say it here */
 .mol-c.mol-curve { height: 110px; margin-top: 6px; }           /* 0.7.1 U2: THE H₂ CURVE under the H₂ note (chemview.js h2Box) */

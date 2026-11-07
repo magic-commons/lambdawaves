@@ -14,7 +14,7 @@ import { BUILD_ID } from './build-id.js';   // 033 THE UPDATER: the page's own b
  *   A FAILURE SAYS WHY — LW_SW_INSTALL_FAILED carries the entry and the reason the install was refused; the badge, SETTINGS' status and
  *     the diagnostics say the sentence (for a day of 032 UPDATE FAILED said nothing while Cloudflare 307ed one precached file).
  *   REPAIR TOUCHES THE BUILD, NEVER THE DATA — refresh() ends in a verified state: the registration and the lw-lab-* caches go, the page
- *     reloads (sessionStorage lw.repair = 1), waits for the fresh install to activate, reloads once more (= 2) and says REPAIRED;
+ *     reloads (sessionStorage lw.repair = 1), waits for the fresh install to activate, reloads once more (= 2) and says UPDATED (039 F2; REPAIRED before);
  *     lw-data-v1, lw-vol-*, localStorage and the session are never touched.
  *   THE STATE CAN BE SEEN — diagnostics(): one text of the builds, the controller, every cache, every record, the volumes, the app's
  *     own lines (`extra`), the last errors; COPY DIAGNOSTICS puts it on the clipboard and shows it. */
@@ -134,7 +134,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
     },
     /** the visible offer: the badge, SETTINGS' status line, and the popup — the popup at most once per waiting build */
     offer() {
-      if (swClient.repairWaits) swClient.say('REPAIR · WAITING FOR THE OTHER WINDOW', 'repair: the build installed and waits for the other λWAVES window — reload all, or close it');   // 034 F8
+      if (swClient.repairWaits) swClient.say('UPDATE · WAITING FOR THE OTHER WINDOW', 'update: the build installed and waits for the other λWAVES window — reload all, or close it');   // 034 F8
       else swClient.say('A NEW BUILD IS READY · UPDATE', 'a new build is ready');
       const build = (swClient.pending && swClient.pending.build) || '';
       if (swClient.offered === build) return false;
@@ -223,7 +223,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
         if (discardApproved) projects.markClean();
         swClient.asked = true;
         try { sessionStorage.setItem('lw.repair', '1'); } catch (_) {}   // 033: the repair road continues after the reload (repairBoot)
-        swClient.say('REPAIR · CACHE CLEARED · RELOADING…', 'repair: the build cache cleared; reloading (your volumes, projects and settings are untouched)');
+        swClient.say('UPDATE · CACHE CLEARED · RELOADING…', 'update: the build cache cleared; reloading (your volumes, projects and settings are untouched)');
         swClient.reload();
         return true;
       } catch (e) {
@@ -233,18 +233,19 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       }
     },
     /** 033 REPAIR, after the reload (main.js, once the registration exists): lw.repair = 1 → wait for the fresh install to activate, then
-     *  reload once more as 2 → say REPAIRED (the page is controlled by a verified build) or why not. */
+     *  reload once more as 2 → say UPDATED (the page is controlled by a verified build) or why not.  039 F2 (X-REVIEW #3): the road's words
+     *  say UPDATE, as HELP › UPDATE APP and its question do; the road's names and the `lw.repair` key are unchanged */
     repairBoot(reg) {
       let flag = null; try { flag = sessionStorage.getItem('lw.repair'); } catch (_) {}
       if (!flag) return 'none';
       const done = () => { try { sessionStorage.removeItem('lw.repair'); } catch (_) {} };
       if (flag === '2') {
         done();
-        if (navigator.serviceWorker.controller) swClient.say('REPAIRED · THIS BUILD IS INSTALLED', 'repaired: the build is installed and serves this page');
-        else swClient.say('REPAIR DID NOT TAKE · TRY AGAIN', 'repair: the page is still uncontrolled after the reinstall');
+        if (navigator.serviceWorker.controller) swClient.say('UPDATED · THIS BUILD IS INSTALLED', 'updated: the build is installed and serves this page');
+        else swClient.say('UPDATE DID NOT TAKE · TRY AGAIN', 'update: the page is still uncontrolled after the reinstall');
         return flag;
       }
-      const again = () => { try { sessionStorage.setItem('lw.repair', '2'); } catch (_) {} swClient.asked = true; swClient.say('REPAIR · INSTALLED · RELOADING…', 'repair: the build installed; reloading once more'); swClient.reload(); };
+      const again = () => { try { sessionStorage.setItem('lw.repair', '2'); } catch (_) {} swClient.asked = true; swClient.say('UPDATE · INSTALLED · RELOADING…', 'update: the build installed; reloading once more'); swClient.reload(); };
       const w = reg.installing || reg.waiting;
       if (!w && reg.active && reg.active.state === 'activated') { again(); return flag; }
       /* 034 F8 · a fresh build installed while another λWAVES window still holds the old one WAITS (the one law: no skipWaiting) — it gets
@@ -255,10 +256,10 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       };
       if (w) { w.addEventListener('statechange', () => {
         if (w.state === 'activated') again();
-        else if (w.state === 'redundant') { done(); swClient.say('REPAIR FAILED · ' + brief(swClient.failure || 'the install was refused') + ' · TRY AGAIN', 'repair failed: ' + (swClient.failure || 'the install was refused')); }
+        else if (w.state === 'redundant') { done(); swClient.say('UPDATE FAILED · ' + brief(swClient.failure || 'the install was refused') + ' · TRY AGAIN', 'update failed: ' + (swClient.failure || 'the install was refused')); }
         else waits();
       }); waits(); }
-      else { done(); swClient.say('REPAIR DID NOT START · TRY AGAIN', 'repair: no worker is installing'); }
+      else { done(); swClient.say('UPDATE DID NOT START · TRY AGAIN', 'update: no worker is installing'); }
       return flag;
     },
     /** 033 · THE STATE CAN BE SEEN: one text — the builds, the controller, the registration, storage, every cache, every record, the

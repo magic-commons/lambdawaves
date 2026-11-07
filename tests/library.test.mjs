@@ -124,7 +124,7 @@ const lys = MOLECULE_BY_ID.get('lysine');
 assert.deepEqual(RECORD_ONLY.map((x) => x.id), CAT.rows.filter((r) => r.molecule).map((r) => r.id), 'the record-only rows are the catalogue\'s own molecules');
 assert.ok(RECORD_ONLY.includes(lys) && RECORD_ONLY.some((x) => x.id === 'C60'), 'lysine and C60 (S4c\'s frontier record) are record-only rows');
 assert.ok(!MOLECULES.includes(lys) && lys.over && lys.recordOnly && !lys.disabled && lys.reason === null, 'lysine: past the cap, DOWNLOAD, never DISABLED');
-assert.equal(optionLabel(lys, false), 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(optionLabel(lys, true), 'C₆H₁₄N₂O₂ · 64 AO · record');
+assert.equal(optionLabel(lys, false), 'C₆H₁₄N₂O₂ · record · DOWNLOAD'); assert.equal(optionLabel(lys, true), 'C₆H₁₄N₂O₂ · record');
 assert.ok(!MOLECULE_BY_ID.get('C6H6').recordOnly && MOLECULE_BY_ID.get('C6H6').records['sto-3g'].hash === row('C6H6').hash, 'benzene: under the cap, with its record');
 assert.ok(CAP_MS > 1000 && CAP_MS < 2500, 'the refit cap is benzene at ~1.7 s, not 9.6 s: ' + CAP_MS);
 assert.equal(L.caps.tdhf, false); assert.equal(rec.caps.tdhf, true);
