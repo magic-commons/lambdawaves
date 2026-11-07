@@ -46,7 +46,8 @@ A NODE HAS A TARGET (038 N6, CALLS 4: one picture, a mask, a TARGET seg). Every 
 
 THE FULL NODE AND THE ONE-KNOB NODE (038 P, Josh: "We should also try to combine some of the nodes while leaving out the simple 'one-knobber' nodes … it gives users the options to use the full node vs the simple 1-knob nodes").
 - **Appended, never renumbered.** A full node is a new id beside the kept one-knobbers, so an old graph opens as it was. The old LEVELS (`levels`) still opens but is never offered (`menu: false`); the + menu's LEVELS is `levels2`.
-- **The + menu's groups:** COLOUR (the full colour nodes) · TONE (the full tone nodes, CURVES among them) · ONE-KNOB (every one-knob TABLE and MATRIX kind) · PASSES · LAYERS · SHADERS. A `GROUPS` row names the classes it takes.
+- **The + menu's groups:** COLOUR (the full colour nodes, then TINT, whose colour and amount are two controls — 038 P11) · TONE (the full tone nodes, CURVES among them) · ONE-KNOB (every one-knob TABLE and MATRIX kind) · PASSES · LAYERS · SHADERS. A `GROUPS` row names the classes it takes.
+- **A knob may say when it does nothing** (`off(values)`, 038 P11): it greys, keeping its place and its hint. ANGLE does this under PERSPECTIVE.
 - **A full node's face is data** (`lab/node-types.js`):
   - `face` lays its knobs out one fit row per line, in the face's order;
   - `bare` hides their labels, and the readout (its name in `fmt`) shows only while a knob is edited (a drag, its tail, the keys);
@@ -61,13 +62,13 @@ THE FULL NODE AND THE ONE-KNOB NODE (038 P, Josh: "We should also try to combine
 
 | kind (id) · group | knobs (home) | what it computes |
 |---|---|---|
-| LEVELS (`levels2`) · TONE | IN BLACK 0 · GAMMA 1 (0.1–10, log) · IN WHITE 1 / OUT BLACK 0 · OUT WHITE 1, bare, read 0–255 | `levels`' table, byte-identical; the strip is the curve as a silhouette over Photoshop's three marks (no tap) |
+| LEVELS (`levels2`) · TONE | IN BLACK 0 · GAMMA 1 (0.1–10, log) · IN WHITE 1 / OUT BLACK 0 · OUT WHITE 1, bare, read 0–255 (a key steps 1/255) | `levels`' table, byte-identical; the strip is the curve as a silhouette over Photoshop's three marks (no tap) |
 | EXPOSURE (`exposure2`) · TONE | EXPOSURE 0 (±4 EV) · SHADOWS 0 · HIGHLIGHTS 0 (±100) | y₁ = clamp(y·2^EV); y₂ = y₁ + .945·[S·y₁(1−y₁)² + H·y₁²(1−y₁)]: ±.14 at ⅓ and ⅔, the ends fixed, monotone (least slope .055) |
 | BRIGHTNESS & CONTRAST (`bc`) · TONE | BRIGHTNESS 0 · CONTRAST 0 (±100) | y = (y−½)·c + ½ + b, with b = B/200 and c = 1 + C/50 above home, 1 + C/100 below (0 flat, 3 at +100) |
 | HUE/SATURATION (`color`) · COLOUR | HUE 0 (±180°, the track what red becomes) · SATURATION 0 · LIGHTNESS 0 (±100) | one matrix: Photoshop's lightness ∘ saturate(1 + S/100) ∘ hue-rotate(H) |
-| BALANCE (`balance`) · COLOUR | TEMPERATURE 0 · TINT 0 / VIBRANCE 0 · SATURATION 0 (±100) | one matrix, diag(warm · tint) ∘ saturate. VIBRANCE ≠ 0 adds a 5-primitive run: D = c − luma; c + V·D(1−|D|), split into positive and negative parts so alpha stays 1 |
-| CHROMATIC ABERRATION (`aberration`) · PASSES | MODE SHIFT · PERSPECTIVE (appended, home SHIFT); AMOUNT (the `shift` key, px) · ANGLE | PERSPECTIVE: an feImage ramp and two feDisplacementMaps, red out and blue in from the centre (Procreate's) |
-| FILM GRAIN (`grain`) · LAYERS | AMOUNT · SIZE · TONE (appended, −1…1, home 0) / KIND · BLEND | TONE veils the tile with white or black (alpha \|tone\|) before its blend, so SOFT LIGHT and OVERLAY read it |
+| BALANCE (`balance`) · COLOUR | TEMPERATURE 0 · TINT 0 / VIBRANCE 0 · SATURATION 0 (±100) | one matrix, diag(warm · tint) ∘ saturate. VIBRANCE ≠ 0 adds a 7-primitive run: D = c − luma; c + V·D(1−\|D\|), split into positive and negative parts. The result goes over an opaque black flood, so alpha is exactly 1 on the film's 2-D road too: Firefox's software composite rounds 1 − V + V to 254, and a channel at 255 then wrapped to black (038 P11) |
+| CHROMATIC ABERRATION (`aberration`) · PASSES | MODE SHIFT · PERSPECTIVE (appended, home SHIFT); AMOUNT (the `shift` key, px) · ANGLE (greyed under PERSPECTIVE) | PERSPECTIVE: an feImage ramp and two feDisplacementMaps, red out and blue in from the centre (Procreate's) |
+| FILM GRAIN (`grain`) · LAYERS | AMOUNT · SIZE · TONE (appended, −1…1, home 0) / KIND · BLEND | TONE veils the tile with white or black (alpha .85·\|tone\|, so the grain survives at the ends) before its blend, so SOFT LIGHT and OVERLAY read it |
 
 THE LAYERS BLEND WITH THE STAGE (038 P8). `#nodeLayers` sits at `z-index: auto` and each `.node-layer` at 8 (above `#skeleton` 7, below the atom labels 9).
 - **Why:** at z 8 the host was a stacking context, which is an isolated blend group. Every LAYER's `mix-blend-mode` then blended with nothing: grain at AMOUNT 1 turned the stage flat grey, and a vignette painted the centre white.

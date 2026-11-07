@@ -19,7 +19,7 @@ const off = (v) => v.amount === 0;
 export const LAYER_TYPES = {
   /* 038 P8 (Josh: "Film Grain's Kind and Blend switches could be on the same row in the layout. Add a third knob that controls lightness and darkness and
      also affected by the blend mode"): AMOUNT · SIZE · TONE over KIND · BLEND; TONE (appended, −1 … 1, home 0) veils the tile with white or black at
-     alpha |tone| before its blend, so SOFT and OVERLAY read it — the stage's PAINT and the film's paintLayer alike */
+     alpha .85·|tone| before its blend, so SOFT and OVERLAY read it and the grain survives at the ends — the stage's PAINT and the film's paintLayer alike */
   grain: { cls: 'layer', label: 'FILM GRAIN', hint: 'grain over the picture, fresh every frame', neutral: off, face: [['amount', 'size', 'tone'], ['kind', 'blend']],
     knobs: [{ ...AMOUNT(0.35), hint: 'AMOUNT — how much grain' }, { k: 'size', label: 'SIZE', min: 0.5, max: 4, home: 1, log: true, hint: 'SIZE — the grain\'s scale' },
       { k: 'kind', label: 'KIND', home: 'mono', hint: 'MONO grey grain · COLOUR grain', options: [{ id: 'mono', label: 'MONO' }, { id: 'colour', label: 'COLOUR' }] },
@@ -46,8 +46,9 @@ function tileCanvas(kind) {
   return (canvases[kind] = c);
 }
 const tile = (kind) => tiles[kind] || (tiles[kind] = 'url(' + tileCanvas(kind).toDataURL() + ')');
-/** 038 P8 · TONE: −1 … 1 → [r, g, b, a] of the veil over the tile (white above 0, black below), or null at 0 */
-const veil = (t) => { t = Math.max(-1, Math.min(1, +t || 0)); return t ? [t > 0 ? 255 : 0, t > 0 ? 255 : 0, t > 0 ? 255 : 0, +Math.abs(t).toFixed(3)] : null; };
+/** 038 P8 · TONE: −1 … 1 → [r, g, b, a] of the veil over the tile (white above 0, black below), or null at 0; 038 P11 its alpha is .85·|tone|, so at the
+ *  ends 15 % of the tile still shows and the grain survives (at 1 the veil hid it: a flat darken or lighten) */
+const veil = (t) => { t = Math.max(-1, Math.min(1, +t || 0)); return t ? [t > 0 ? 255 : 0, t > 0 ? 255 : 0, t > 0 ? 255 : 0, +(0.85 * Math.abs(t)).toFixed(3)] : null; };
 const toned = new Map();
 /** the film's tile under its TONE's veil (paintLayer), one canvas per kind and tone */
 function tonedTile(kind, t) {

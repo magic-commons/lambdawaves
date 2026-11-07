@@ -207,6 +207,64 @@ print(json.dumps({ 'mean': round(s.mean[0], 1), 'sd': round(s.stddev[0], 1), 'ce
         if (miss.length) o[t] = miss; }
       return { unhinted: o, n: kinds.length };`);
   }
+  if (scene === 'p11') {
+    /* the review's fixes. (1) + › GRAPHS › FILM adds its five nodes, and the stage's middle (layers hidden) equals 037's FILM (levels in place of
+       levels2) built by hand. (2) BALANCE's VIBRANCE at ±25 · ±60 · ±100 on the film's road (a 2-D canvas through ctx.filter = url(#…), film-bake.js)
+       and the stage's (an element's CSS filter, the driver's picture): alpha 255 everywhere, red stays red, white stays white, the two within 3 levels */
+    const mid = async (tag) => { const png = `.tmp/p-p11-${tag}.png`; writeFileSync(png, Buffer.from(await g.snap(), 'base64'));
+      return JSON.parse(execFileSync('python3', ['-I', '-c', `import sys, json
+from PIL import Image, ImageStat
+im = Image.open(sys.argv[1]).convert('L'); W, H = im.size; print(json.dumps(round(ImageStat.Stat(im.crop((W // 2 - 100, H // 2 - 60, W // 2 + 100, H // 2 + 60))).mean[0], 1)))`, png]).toString()); };
+    out.film = await ev(`N.open(); await w(600); N.win.place({ x: 980, y: 60, w: 420, h: 400 }); await w(300); $(WIN + '.nodes-add').click(); await w(300);
+      $('.mir-ctx .nodes-add-menu [data-id="graphs"]').click(); await w(250); [...document.querySelectorAll('.mir-ctx .mb-sub-list .mb-item')].find((b) => b.querySelector('.mb-lbl').textContent === 'FILM').click(); await w(500);
+      N.win.close(); await w(300); document.getElementById('nodeLayers').style.visibility = 'hidden'; await w(300); return N.nodes().map((q) => q.type);`);
+    out.filmMid = await mid('film');
+    await ev(`for (const q of N.nodes()) N.remove(q.id); const S = (t, v) => { const id = N.add(t); for (const k in v) N.set(id, k, v[k]); };
+      S('levels', { outblack: 0.05, outwhite: 0.95, gamma: 1.08 }); S('temperature', { warmth: 0.3 }); S('saturation', { saturation: 0.82 }); S('grain', { amount: 0.32, size: 1.2 }); S('vignette', { amount: 0.45, feather: 0.6, round: 0.35 });
+      await w(600); return 1;`);
+    out.film037Mid = await mid('film037');
+    await ev(`for (const q of N.nodes()) N.remove(q.id); document.getElementById('nodeLayers').style.visibility = ''; await w(300); return 1;`);
+    const P = [[255, 0, 0], [230, 40, 40], [0, 0, 255], [255, 255, 255], [128, 128, 128], [153, 128, 115]];
+    await ev(`const c = document.createElement('canvas'); c.id = 'p11s'; c.width = 360; c.height = 60; Object.assign(c.style, { position: 'fixed', left: '20px', top: '600px', width: '360px', height: '60px', zIndex: 99999 });
+      document.body.appendChild(c); const g2 = c.getContext('2d'); ${JSON.stringify(P)}.forEach((p, i) => { g2.fillStyle = 'rgb(' + p + ')'; g2.fillRect(i * 60, 0, 60, 60); });
+      const { pictureFilter } = await import('./mir/panels/picture-filter.js'); window.__sf = pictureFilter(c); window.__ff = pictureFilter(document.createElement('div')); window.__src = c; return 1;`);
+    out.vib = {};
+    for (const V of [25, -25, 60, -60, 100, -100]) {
+      const film = await ev(`for (const q of N.nodes()) N.remove(q.id); const id = N.add('balance'); N.set(id, 'vibrance', ${V}); await w(150); const runs = N.compile().runs;
+        __ff.setChain(runs).flush(); __sf.setChain(runs).flush(); const o = document.createElement('canvas'); o.width = 360; o.height = 60; const g2 = o.getContext('2d', { willReadFrequently: true });
+        g2.filter = 'url(#' + __ff.id + ')'; g2.drawImage(__src, 0, 0); g2.filter = 'none'; const d = g2.getImageData(0, 0, 360, 60).data; let amin = 255; for (let i = 3; i < d.length; i += 4) amin = Math.min(amin, d[i]);
+        await w(400); return { prims: runs[0].prim ? runs[0].prim.length : 0, alphaMin: amin, px: [0, 1, 2, 3, 4, 5].map((i) => { const j = (30 * 360 + i * 60 + 30) * 4; return [d[j], d[j + 1], d[j + 2]]; }) };`);
+      const png = `.tmp/p-p11-v${V}.png`; writeFileSync(png, Buffer.from(await g.snap(), 'base64'));
+      const stage = JSON.parse(execFileSync('python3', ['-I', '-c', `import sys, json
+from PIL import Image
+im = Image.open(sys.argv[1]).convert('RGB'); print(json.dumps([list(im.getpixel((50 + 60 * i, 630))) for i in range(6)]))`, png]).toString());
+      out.vib[V] = { prims: film.prims, alphaMin: film.alphaMin, film: film.px, stage, maxDiff: Math.max(...film.px.flatMap((p, i) => p.map((x, c) => Math.abs(x - stage[i][c])))) };
+    }
+    await ev(`__sf.setChain([]).flush(); document.getElementById('p11s').remove(); return 1;`);
+  }
+  if (scene === 'p11b') {
+    /* the review's cheap notes: (5) ANGLE greyed under PERSPECTIVE, live under SHIFT; (7) LEVELS' keys step the 0–255 readout by one; (8) TINT offered in
+       COLOUR, not ONE-KNOB; (6) TONE ±1 keeps grain (the spread of the stage's middle at AMOUNT 1, the veil's alpha) */
+    out.angle = await ev(`N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 520 }); await w(300); const id = N.add('aberration'); await w(300);
+      const a = () => card('aberration').querySelector('[data-param$=".angle"]').classList.contains('disabled'); const o = { shift: a() };
+      N.set(id, 'mode', 'perspective'); await w(200); o.perspective = a(); N.set(id, 'mode', 'shift'); await w(200); o.back = a(); N.set(id, 'mode', 'perspective'); await w(300); o.box = rect(card('aberration')); return o;`);
+    const b = out.angle.box; await shot('038-P11-angle-perspective', [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10], 2);
+    out.levels = await ev(`for (const q of N.nodes()) N.remove(q.id); N.add('levels2'); await w(300); const k = card('levels2').querySelector('[data-param$=".inblack"]'); k.focus(); return 1;`);
+    const reads = [];
+    for (let i = 0; i < 3; i++) { await g.press(''); reads.push(await ev(`await w(80); return document.activeElement.querySelector('.k-val').textContent;`)); }
+    out.levels = reads;
+    out.menu = await ev(`$(WIN + '.nodes-add').click(); await w(300); const p = $('.mir-ctx .nodes-add-menu'), rows = (q) => [...q.querySelectorAll(':scope > .mb-item')].map((x) => x.querySelector('.mb-lbl').textContent), o = {};
+      for (const g of ['colour', 'one']) { p.querySelector('[data-id="group:' + g + '"]').click(); await w(250); o[g] = rows([...document.querySelectorAll('.mir-ctx .mb-sub-list')].pop()); }
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return o;`);
+    await g.press('');
+    const sd = async (tag) => { const png = `.tmp/p-p11b-${tag}.png`; writeFileSync(png, Buffer.from(await g.snap(), 'base64'));
+      return JSON.parse(execFileSync('python3', ['-I', '-c', `import sys, json
+from PIL import Image, ImageStat
+im = Image.open(sys.argv[1]).convert('L'); W, H = im.size; s = ImageStat.Stat(im.crop((W // 2 - 100, H // 2 - 60, W // 2 + 100, H // 2 + 60))); print(json.dumps([round(s.mean[0], 1), round(s.stddev[0], 1)]))`, png]).toString()); };
+    await ev(`N.win.close(); for (const q of N.nodes()) N.remove(q.id); await w(300); return 1;`); out.none = await sd('none');
+    for (const t of [0, -1, 1]) { await ev(`if (!N.nodes().length) N.set(N.add('grain'), 'amount', 1); N.set(N.nodes()[0].id, 'tone', ${t}); await w(400); return 1;`); out['tone' + t] = await sd('tone' + t); }
+    out.veil = await ev(`return getComputedStyle(document.querySelector('.node-layer[data-type="grain"]')).backgroundImage.slice(0, 50);`);
+  }
   if (scene === 'p10') {
     /* THE FINISH: every new face in the window (all seven at once, the empty state first) and in the rack card, each kind's TARGET (on TABLE · MATRIX ·
        PRIM, never a LAYER), every control hinted and every word upper-case, nothing scrolling, the knobs at home and at their ends, the keys on a knob */

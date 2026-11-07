@@ -35,7 +35,7 @@ export const PRIM_TYPES = {
     prim: (v) => { const a = -v.amount; return [['feConvolveMatrix', { order: 3, kernelMatrix: `0 ${a} 0 ${a} ${1 + 4 * v.amount} ${a} 0 ${a} 0`, preserveAlpha: 'true', edgeMode: 'duplicate' }]]; } },
   aberration: { cls: 'prim', label: 'CHROMATIC ABERRATION', hint: 'red and blue pulled apart, as a cheap lens does', face: [['mode'], ['shift', 'angle']],
     knobs: [{ k: 'shift', label: 'AMOUNT', min: 0, max: 16, home: 2, unit: ' px', hint: 'AMOUNT — how far red and blue part, in px' },
-      { k: 'angle', label: 'ANGLE', min: 0, max: 360, home: 0, unit: '°', hint: 'ANGLE — which way they part (SHIFT only)' },
+      { k: 'angle', label: 'ANGLE', min: 0, max: 360, home: 0, unit: '°', hint: 'ANGLE — which way they part (SHIFT only)', off: (v) => v.mode === 'perspective' },
       { k: 'mode', label: 'MODE', home: 'shift', hint: 'SHIFT one way · PERSPECTIVE out from the centre', options: [{ id: 'shift', label: 'SHIFT' }, { id: 'perspective', label: 'PERSPECTIVE' }] }],
     neutral: (v) => v.shift === 0,
     prim: (v, id) => { if (v.mode === 'perspective') return perspective(v.shift, id);
