@@ -318,20 +318,33 @@ export function createModSeam(app) {
     const fitOf = (e) => parseFloat(e.style.getPropertyValue('--lw-fit')) || 1;
     const setFit = (e, f) => { f = Math.max(0.5, Math.min(1, Math.floor(f * 100) / 100)); if (Math.abs(f - fitOf(e)) < 0.01) return false;
       if (f >= 1) e.style.removeProperty('--lw-fit'); else e.style.setProperty('--lw-fit', String(f)); return true; };
-    const menuRow = document.getElementById('menubar'), logoEl = document.getElementById('title');
+    const logoEl = document.getElementById('title'); let menuRow = null;   // 039 F3: the kit's menubar is built after this seam (notebook.js), so V4's menu-row fit never ran — found, and watched, at the first fitHead
+    /* 039 F3 · THE MENUS STAND ABOVE THE RACKS (V-REVIEW 6: at UI SCALE 150 % on a 1000-px page the menu row lay across SETTINGS' head, WINDOW and HELP
+       over its power button and ×, and no room beside the logo holds the row): while the row shows, a rack whose cards it meets starts below it —
+       `--rack-top` on the rack, lab.css' top, in the rack's own px — and clearRack (the row's show asks it at once) takes the stop from there; the
+       row hidden, the rack is back; the logo's fit reads the rack where it rests */
+    const rackTop = new Map(), restTop = (rk, r) => r.top - (rackTop.get(rk) || 0) * (cssZoom(rk) || 1);
     function fitHead() {
+      if (!menuRow && (menuRow = document.getElementById('menubar'))) new MutationObserver(() => clearRack()).observe(menuRow, { attributes: true, attributeFilter: ['hidden'] });
       const phone = document.body.classList.contains('phone');
       if (logoEl && logoEl.offsetWidth) { const r = logoEl.getBoundingClientRect(), rk = document.getElementById('rack'), rr = !phone && rk && !document.body.classList.contains('rack-hidden') && [...rk.children].some(shownCard) ? rk.getBoundingClientRect() : null;
-        setFit(logoEl, phone ? 1 : fitOf(logoEl) * ((rr && rr.top < r.bottom && rr.left > r.left ? rr.left : innerWidth) - 8) / r.right); }   // its left and its width both scale with its zoom
-      if (!menuRow || menuRow.hidden || !menuRow.offsetWidth) return;
-      let rtl = false; try { rtl = menuRow.matches(':dir(rtl)'); } catch (_) {}
-      const r = menuRow.getBoundingClientRect();
-      if (setFit(menuRow, phone || rtl ? 1 : fitOf(menuRow) * (innerWidth - 8 - r.left) / (r.right - r.left)) && !phone && !rtl) {
-        const z = cssZoom(menuRow) || 1, l = logoEl ? logoEl.getBoundingClientRect() : r;   // the kit's place() in the new zoom: beside the logo, level with it
-        menuRow.style.left = (l.right + 8) / z + 'px'; menuRow.style.top = Math.max(0, l.top + l.height / 2 - menuRow.offsetHeight * z / 2) / z + 'px';
+        setFit(logoEl, phone ? 1 : fitOf(logoEl) * ((rr && restTop(rk, rr) < r.bottom && rr.left > r.left ? rr.left : innerWidth) - 8) / r.right); }   // its left and its width both scale with its zoom
+      const shown = !!menuRow && !menuRow.hidden && menuRow.offsetWidth > 0;
+      if (shown) {
+        let rtl = false; try { rtl = menuRow.matches(':dir(rtl)'); } catch (_) {}
+        const r = menuRow.getBoundingClientRect();
+        if (setFit(menuRow, phone || rtl ? 1 : fitOf(menuRow) * (innerWidth - 8 - r.left) / (r.right - r.left)) && !phone && !rtl) {
+          const z = cssZoom(menuRow) || 1, l = logoEl ? logoEl.getBoundingClientRect() : r;   // the kit's place() in the new zoom: beside the logo, level with it
+          menuRow.style.left = (l.right + 8) / z + 'px'; menuRow.style.top = Math.max(0, l.top + l.height / 2 - menuRow.offsetHeight * z / 2) / z + 'px';
+        }
+      }
+      const mr = shown && !phone && !document.body.classList.contains('rack-hidden') ? menuRow.getBoundingClientRect() : null;
+      for (const rk of racksEl) {
+        const cs = mr ? [...rk.children].filter(shownCard).map((c) => c.getBoundingClientRect()) : [], z = cssZoom(rk) || 1, top0 = cs.length ? restTop(rk, rk.getBoundingClientRect()) : 0;
+        const px = cs.length && Math.min(...cs.map((c) => c.left)) < mr.right && Math.max(...cs.map((c) => c.right)) > mr.left && top0 < mr.bottom ? Math.ceil((mr.bottom - top0) / z) : 0;
+        if (px !== (rackTop.get(rk) || 0)) { rackTop.set(rk, px); if (px) rk.style.setProperty('--rack-top', px + 'px'); else rk.style.removeProperty('--rack-top'); }
       }
     }
-    if (menuRow) new MutationObserver(fitHead).observe(menuRow, { attributes: true, attributeFilter: ['hidden'] });
     function clearRack() {
       clearBooked = 0;
       const t = document.getElementById('transport'); if (!t) return;
