@@ -149,8 +149,8 @@ try {
       const ask = [...document.querySelectorAll('.mir-dialog, [role="alertdialog"], [role="dialog"]')].find((d) => /WITHOUT SAVING/i.test(d.textContent)); if (ask) { const y = [...ask.querySelectorAll('button')].find((x) => /UPDATE|YES|REPAIR/i.test(x.textContent)); if (y) y.click(); }
       const r = await Promise.race([p, new Promise((q) => setTimeout(() => q('reloading'), 8000))]); return { started: r, state: __LW.sw.state }; })()`).catch((e) => ({ E: String(e && e.message || e).slice(0, 160) }));
   console.log('      (C2 REPAIR pressed: ' + J(rep) + ')');
-  s = await waitState(g, (x) => x.ready && x.controller && (x.page && x.page !== oldPage) && x.sw && x.sw.cache && /REPAIRED/.test(x.badge || ''), 240, 500);
-  check(s && s.controller && /REPAIRED/.test(s.badge || ''), 'C2 REPAIR ends controlled by a verified build and says REPAIRED', s && { badge: s.badge, cache: s.sw && s.sw.cache, caches: s.caches, reg: s.reg });
+  s = await waitState(g, (x) => x.ready && x.controller && (x.page && x.page !== oldPage) && x.sw && x.sw.cache && /UPDATED|REPAIRED/.test(x.badge || ''), 240, 500);   // 039 F2: the road says UPDATED (REPAIRED on a build before it)
+  check(s && s.controller && /UPDATED|REPAIRED/.test(s.badge || ''), 'C2 REPAIR ends controlled by a verified build and says UPDATED', s && { badge: s.badge, cache: s.sw && s.sw.cache, caches: s.caches, reg: s.reg });
   const labs2 = (s && s.caches || []).filter((n) => n.startsWith('lw-lab-'));
   check(labs2.length === 1 && (s && s.caches || []).includes('lw-vol-' + VOL), 'C3 after REPAIR: one build cache, the volume untouched', { caches: s && s.caches });
   await snap(g, 'C-repaired');
