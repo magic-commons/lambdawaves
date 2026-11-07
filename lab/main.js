@@ -1,6 +1,7 @@
 /* main.js — decide the start (the notice, then the session or the boot), boot the lab behind it, then arm the install layer. */
 import { boot } from './rack.js';
 import { createSession } from './mir/core/session.js';   // 0.5.0 C6b: THE SESSION, the live project kept over the one part
+import { captureProject, restoreProject, projectSignature, subscribeProject } from './mir/core/project.js';   // 039 R2: the session's parts are the kit's defaults, its signature with the arrangement
 import { photosensitivityNotice } from './mir/shell/flash-guard.js';   // 0.5.0 C6b: the kit's notice, under λWAVES' law
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 C6b: the notice's seen-flag is the blob's `warned`
 import { STARTERS } from './project-store.js';   // the demos' ids are `?starter=`'s (iteration 009: one, wave-dancer) (their covers are FOLDERS' DEMOS pictures, iteration 004)
@@ -13,8 +14,13 @@ addEventListener('unhandledrejection', (e) => __e.push('REJ ' + String(e.reason 
 const $ = (id) => document.getElementById(id);
 /* 0.5.0 C6b · THE SESSION (MIR core/session.js): the one part's capture in `lambdawaves.q0.session` (PROJECT), written once the part
    says it changed (the kit's quiet 300 ms) and at once on pagehide; never a ring row, never an edit; nothing is written until armed.
-   036 S1: the part is the project whole — NODES' graph inside it — so the session is the kit's default over the shared registry */
-const session = createSession({ key: 'lambdawaves.q0.session' });
+   036 S1: the part is the project whole — NODES' graph inside it — so the session is the kit's default over the shared registry.
+   039 R2 · THE RACK COMES BACK AS IT WAS LEFT: the session's signature is the project's AND the arrangement's (captureLayout without its stamp).
+   projectKey() leaves the WORKSPACE out (a window moved is not unsaved work), so a session last written at an edit kept that moment's rack, and a
+   fold, an open or a move made after it came back undone at the next RESUME.  FOLDERS' unsaved mark keeps projectKey alone. */
+const arrangement = () => { const L = window.__LW && window.__LW.layout; return L && L.captureLayout ? JSON.stringify({ ...L.captureLayout(), at: 0 }) : ''; };
+const session = createSession({ key: 'lambdawaves.q0.session',
+  parts: { capture: captureProject, restore: restoreProject, subscribe: subscribeProject, signature: () => String(projectSignature()) + arrangement() } });
 /* THE PHOTOSENSITIVITY LAW (waves 57/59) IS λWAVES', NOT THE KIT'S: a human visitor reads the notice once per browser before anything
    animates, and NO query string silences it for a human (the kit's ?warn=0 is not honoured here); only a test driver skips it — ?warn=1
    forces it there, ?opener=1 makes a driven start a human one.  The notice is the kit's photosensitivityNotice; its seen-flag is the
