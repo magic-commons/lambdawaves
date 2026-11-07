@@ -3,7 +3,7 @@
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../tier.js'; import { setGlyph } from '../mir/glyph.js';
 import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js'; import { timelineRows } from '../timeline-follow.js';
-import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout, el, hint, label } from '../mir/kit.js'; import { formatSeconds } from '../mir/timeline/time-format.js';
+import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout, el, hint } from '../mir/kit.js'; import { formatSeconds } from '../mir/timeline/time-format.js';
 export function createKeys(app) {
   const { dom, ui, clock, appPlay, mat, settingsStore } = app, { schedule } = app.loop, { floats, rack, rackL } = app.host;
   const { devById, layout, readSettings, rk, setModArm } = app.sh, { wState } = app.w, { occlusion } = app.ctl;
@@ -87,6 +87,7 @@ export function createKeys(app) {
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, audio: false,
       transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:clock', 'rewind', 'app:render'] }, 'door'], nodes: { clock: tlSec.root, render: tlRender }, seats: 'thin',
         door: 'none',   // 021 V2: dressed below with the table's `modulation` (an SVG, no mask)
+        powerWord: 'MOD',   // 032 T8 · MOD ON THE TIMELINE'S POWER (Josh: "MOD word on the timeline's toggle; the power icon stays on the modulation window"); the kit builds it since 1.5.7-alpha.20 (039 K4)
         onSwitch: () => { app.state.tl.close(); layout.modulation.expand(); } },   // 015 T5: the timeline's door SWAPS to the modulation window, as that window's switch swaps back   // A9: the modulation window's own icon, no MIR logo (Josh 10-22)
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
       busy: () => app.state.capApi.busy, moved: (r) => app.state.dodge(r, 'tl'), onWindow: () => occlusion.dirty(),
@@ -95,9 +96,6 @@ export function createKeys(app) {
       scrubLevel: () => { const g = mirGui(); return g ? g.sampling().scrub : 'live'; } });
     tlRows.bind(app.state.tl);
     { const d = app.state.tl.root.querySelector('.tl-transport .mod-exp'); if (d) setGlyph(d, 'modulation'); }   // 021 V2: the work bar's door wears the modulation window's own icon (A9)
-    /* 032 T8 · MOD ON THE TIMELINE'S POWER (Josh: "MOD word on the timeline's toggle; the power icon stays on the modulation window"): the work bar's
-       power seat wears the kit's word face — modPower({ word }), as the CSB's — dressed here as the door is (the timeline's transport takes no powerWord) */
-    { const p = app.state.tl.root.querySelector('.tl-transport .mir-mod-power'); if (p) { p.dataset.face = 'word'; label(p, 'MOD'); } }
     /* 032 T24 · A HEAVY SWITCH HOLDS THE PLAY (Josh: "heavy switches pause real-time playback"): while the timeline plays and the busy count is up (a
        solve, a basis — busyWrap brackets every worker call), the realtime pump is held through the scrub's own door (host.clock.suspendRealtime), so the
        arrangement waits for the picture instead of running ahead of it; released on the count's zero.  A film steps frame-exact and already owns the

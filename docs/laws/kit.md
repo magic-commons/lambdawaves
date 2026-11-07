@@ -8,6 +8,7 @@ THE DOORS OF 039 · CHAIN K (THE KIT RETURN, Opus 5.5; the clone road on kit bra
 - alpha.17 THE STEPPED CLOCK LOOPS (`modulation/host.js` `clock.step(dt, { loop: true })`, one wrap `wrapLoop` for both roads): an app's own frame wraps by the realtime rule, heard as 'seek' then 'step'; the recorder passes nothing and never loops. λWAVES: PLAYBACK LOCK's step (rack.js).
 - alpha.18 THE ROOT WEARS THE HINT (`kit.js` `seg({ title })`, `controls/stepper.js` `stepper({ title })`): the control's hint on its root, as every kit control; an option keeps its own. λWAVES: `nodeBody` no longer hints a seg's root itself (node-types.js).
 - alpha.19 THE FIT ROW KEEPS ITS CELLS (`kit.js` `row(parent, { fit: true, seg: 1 })` → `data-seg="1"`, `css/base.css`): in that row a seg takes one cell; `.wide` / `.full` still span; a plain fit row keeps the two-cell seg. λWAVES: the node faces' rows (node-types.js), nodes.css's override gone.
+- alpha.20 THE POWER WORD PASSES THROUGH (`timeline/window.js`): `installTimeline({ transport: { powerWord } })` builds the work bar's power seat with the word face. λWAVES: `powerWord: 'MOD'` (shell/keys.js), no relabel after install.
 Each door has its BUILT line in docs/FOR-MIR.md § 039.
 
 ## The laws of 038

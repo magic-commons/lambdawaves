@@ -6,6 +6,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { open } from './gate/gatekit.mjs';
+import * as drv from './gate/drv.mjs';
 
 const scene = process.argv[2] || 'k1', DIR = process.argv[3] || '.tmp/K-shots';
 mkdirSync('.tmp', { recursive: true }); mkdirSync(DIR, { recursive: true });
@@ -77,6 +78,40 @@ try {
       for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
         const box = await g.ev(`const w = document.querySelector('[data-mir-window="nodes"]'); const r = w.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`);
         out['shot-' + t] = await shot(`039-K3-nodes-${tag}-${t}`, box); }
+    }
+  }
+  if (scene === 'k4') {
+    /* the timeline's work-bar power seat is built with the word face: MOD, the kit's own label (data-t), with no relabel in the app; a press arms / disarms */
+    await g.ev(`__LW.timeline.open(); await new Promise((r) => setTimeout(r, 1200)); return 1;`);
+    const seat = () => g.ev(`const p = __LW.timeline.root.querySelector('.tl-transport .mir-mod-power'); return p && { face: p.dataset.face, text: p.textContent.trim(), key: p.dataset.t || null, on: p.classList.contains('on'), svg: !!p.querySelector('svg'), armed: __LW.mod.armed };`);
+    out.seat = await seat();
+    await g.tap('.tl-transport .mir-mod-power'); await nap(300); out.pressed = await seat();
+    await g.tap('.tl-transport .mir-mod-power'); await nap(300); out.back = await seat();
+    for (const t of ['dark', 'light']) { await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+      const box = await g.ev(`const r = __LW.timeline.root.querySelector('.tl-transport').getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round);`);
+      out['shot-' + t] = await shot(`039-K4-work-bar-${t}`, box, 12); }
+  }
+  if (scene === 'k6') {
+    /* a real hover on MOLECULES' fold button (unfolded, at the left rack's top) and on SPECTRUM's: the hint's rect against the card's head and its
+       first row below the head — the hint must not cover the first row; pictures dark and light (argv[4] tags them before / after) */
+    const tag = process.argv[4] || 'after';
+    await g.ev(`__LW.run('mode', { id: 'molecules' }); await new Promise((r) => setTimeout(r, 2500)); for (const id of ['chem', 'spectrum']) { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (d && d.classList.contains('folded')) d.querySelector('.dev-fold').click(); } await new Promise((r) => setTimeout(r, 800)); return 1;`);
+    const hover = async (id) => {
+      const c = await g.ev(`__LW.layout.raise('${id}'); await new Promise((r) => setTimeout(r, 600)); const rk = document.querySelector('.dev[data-id="${id}"]').closest('#rackL, #rackR, .rack'); if (rk) rk.scrollTop = 0; await new Promise((r) => setTimeout(r, 300)); const b = document.querySelector('.dev[data-id="${id}"] .dev-head .dev-fold'); if (!b) return null; const r = b.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2].map(Math.round);`);
+      if (!c) return { missing: id };
+      await drv.actions(g.s, [{ type: 'pointer', id: 'h' + id, parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: 5, y: 600 }, { type: 'pointerMove', duration: 120, origin: 'viewport', x: c[0], y: c[1] }] }]);
+      await nap(1100);
+      return g.ev(`const d = document.querySelector('.dev[data-id="${id}"]'), head = d.querySelector('.dev-head').getBoundingClientRect(), tip = document.getElementById('controlHelp');
+        const kids = [...d.children].filter((k) => k !== d.querySelector('.dev-head') && k.getBoundingClientRect().height > 0), first = kids.length ? kids[0].getBoundingClientRect() : null, t = tip.getBoundingClientRect();
+        const R = (q) => q && [q.left, q.top, q.right, q.bottom].map(Math.round);
+        return { shown: !tip.hidden, text: tip.textContent, tip: R(t), head: R(head), first: R(first), overFirst: !!first && !tip.hidden && t.bottom > first.top + 1 && t.top < first.bottom && t.right > first.left && t.left < first.right, card: R(d.getBoundingClientRect()) };`);
+    };
+    for (const t of ['dark', 'light']) {
+      await g.ev(`__LW.look.set({ theme: '${t}' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+      for (const id of ['chem', 'spectrum']) {
+        const o = out[id + '-' + t] = await hover(id);
+        if (o && o.card) { const b = [Math.min(o.card[0], o.tip[0]), Math.min(o.head[1], o.tip[1]) - 4, Math.max(o.card[2], o.tip[2]), Math.max(o.head[3] + 90, o.tip[3])]; o.shot = await shot(`039-K6-${id}-fold-hint-${tag}-${t}`, b, 10); }
+      }
     }
   }
   out.errs = (await g.errors()).errs;
