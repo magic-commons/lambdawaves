@@ -138,6 +138,7 @@ export function createView(parent, kind, M) {
   }
   /* THE RIGHT-CLICK MENUS (022 P2: the kit's contextMenu — a right-click, the ContextMenu key or a still hold, onContext; ✓ where a row is a state) */
   let pop = null;                                                    // the kit menu open from this view (a right-click's, or the + menu)
+  let drag = null;                                                   // the ground's press: a pan, a box (shift) or a zoom (ctrl / ⌘)
   const popup = (x, y, rows) => { const m = pop = contextMenu({ x, y, entries: rows.map((r) => (r ? [r[0], r[1], false, '', r.length > 2 ? { checked: !!r[2] } : {}] : null)), onClose: () => { if (pop === m) pop = null; } }); };
   const folded = () => M.list().length > 0 && M.list().every((q) => q.fold);
   const foldAll = () => M.setFold(M.list().map((q) => q.id), !folded());
@@ -145,13 +146,16 @@ export function createView(parent, kind, M) {
     ['DUPLICATE', () => pick(M.duplicate(q.id, at()))], ['RENAME', () => renameAt(q.id)], ['RESET', () => M.reset(q.id)], null,
     ['MOVE UP', () => M.move(q.id, -1)], ['MOVE DOWN', () => M.move(q.id, 1)], null, ['REMOVE', () => M.remove(q.id)]];
   const groundRows = () => [['ADD…', () => openMenu()], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()]].filter((r) => r !== false);
-  onContext(ground, ({ x, y, target }) => { if (target.closest('input')) return; const c = target.closest('.nodes-card[data-node]'), q = c && M.byId(c.dataset.node); popup(x, y, q ? cardRows(q) : groundRows()); });
+  onContext(ground, ({ x, y, target }) => { if (target.closest('input') || (drag && drag.zoom)) return;   // a Mac's ctrl + press is a zoom here, not a menu
+    const c = target.closest('.nodes-card[data-node]'), q = c && M.byId(c.dataset.node); popup(x, y, q ? cardRows(q) : groundRows()); });
   if (!W) ground.classList.add('nodes-column');
   else {
-    /* THE GROUND'S HAND: a drag pans, shift + drag draws a box, two fingers pinch; ctrl/⌘ + wheel zooms about the pointer */
+    /* THE GROUND'S HAND: a drag pans, shift + drag draws a box, two fingers pinch; ctrl/⌘ + wheel zooms about the pointer, and 038 N2 (Josh: "Ctrl+drag
+       on background will resize/scale the entire nodes like a zoom-in/out feature") ctrl/⌘ + drag zooms about the press — up is in, 0.5–2× —
+       the kit's modifier table ("Ctrl shapes — zoom"); the cursor says so while the key is held over the ground */
     ground.tabIndex = 0;
     const box = el('div', 'nodes-box', ground), pts = new Map();
-    let drag = null, pinch = null;
+    let pinch = null;
     const span = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
     ground.addEventListener('pointerdown', (e) => {
       if (!(e.target === ground || e.target === plane || e.target === svg)) return;
@@ -159,13 +163,15 @@ export function createView(parent, kind, M) {
       if (pts.size === 2) { const [a, b] = pts.values(); pinch = { d: span(a, b), m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], pan, z }; drag = null; return; }
       if (e.button !== 0) return;
       e.preventDefault(); try { ground.setPointerCapture(e.pointerId); } catch (_) { /* a pointer already gone */ }
-      drag = { p: local(e), pan, box: e.shiftKey };
+      const zk = e.ctrlKey || e.metaKey; drag = { p: local(e), pan, box: e.shiftKey && !zk, zoom: zk && z }; ground.classList.toggle('nodes-zooming', zk);
     });
     ground.addEventListener('pointermove', (e) => {
+      ground.classList.toggle('nodes-zkey', e.ctrlKey || e.metaKey);
       if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, local(e));
       if (pinch && pts.size === 2) { const [a, b] = pts.values(); zoomAt(pinch.z * (span(a, b) / pinch.d), pinch.m, pinch.pan, pinch.z); return; }
       if (!drag) return;
       const p = local(e), d = [p[0] - drag.p[0], p[1] - drag.p[1]];
+      if (drag.zoom) { zoomAt(drag.zoom * Math.exp(-d[1] * 0.006), drag.p, drag.pan, drag.zoom); return; }
       if (!drag.box) { setPan([drag.pan[0] + d[0], drag.pan[1] + d[1]]); return; }
       drag.r = [Math.min(p[0], drag.p[0]), Math.min(p[1], drag.p[1]), Math.abs(d[0]), Math.abs(d[1])];
       Object.assign(box.style, { display: 'block', left: drag.r[0] + 'px', top: drag.r[1] + 'px', width: drag.r[2] + 'px', height: drag.r[3] + 'px' });
@@ -178,9 +184,11 @@ export function createView(parent, kind, M) {
         const [l, t, w, h] = drag.r.map((v, i) => (i < 2 ? (v - pan[i]) / z : v / z));
         pick(M.list().map((q) => q.id).filter((id) => { const c = cards[id].c; return c.offsetLeft < l + w && c.offsetLeft + c.offsetWidth > l && c.offsetTop < t + h && c.offsetTop + c.offsetHeight > t; }), true);
       } else if (!drag.box) { if (drag.pan === pan) pick([]); else keep(); }   // a click on the empty ground lets the selection go
-      box.style.display = 'none'; drag = null;
+      box.style.display = 'none'; drag = null; ground.classList.remove('nodes-zooming');
     };
     ground.addEventListener('pointerup', up); ground.addEventListener('pointercancel', up);
+    for (const t of ['keydown', 'keyup']) ground.addEventListener(t, (e) => { if (e.key === 'Control' || e.key === 'Meta') ground.classList.toggle('nodes-zkey', t === 'keydown'); });
+    ground.addEventListener('pointerleave', () => ground.classList.remove('nodes-zkey'));
     ground.addEventListener('wheel', (e) => { if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault();
       zoomAt(z * Math.exp(-e.deltaY * (e.deltaMode ? 16 : 1) * 0.002), local(e)); keep(); }, { passive: false });
     /* THE KEYS ARE THE GROUND'S — 021 I1: rows of THE ACTION REGISTRY (`nodes.*`, lab/actions.js), live while this ground has the focus (THE FOCUS

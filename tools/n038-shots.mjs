@@ -71,6 +71,36 @@ try {
       return { pane: !!p, inCard: !!(p && p.closest('.dev')), under: p && [rect(add), rect(p)], card: rect(d), rows: p && rows(p), scroll: p && p.scrollHeight > p.clientHeight };`);
     const r = out.card.under; if (r) await shot('038-N1-card-menu', [r[1][0] - 300, r[0][1] - 60, r[1][2] + 40, r[1][3] + 40]);
   }
+  if (scene === 'n2') {
+    /* ctrl + drag on the empty ground: up 60 px zooms in ×e^0.36 about the press (the plane point under it stays), down zooms out, the clamp, the record */
+    const at = await ev(`N.open(); await w(600); N.win.place({ x: 600, y: 60, w: 520, h: 640 }); await w(300); N.add('levels'); N.add('blur'); await w(400);
+      const G = $(WIN + '.nodes-ground'), r = G.getBoundingClientRect(); let p = null;
+      for (let y = r.top + r.height * 0.4; y < r.bottom - 60 && !p; y += 20) for (let x = r.left + 20; x < r.right - 20; x += 20) { const e = document.elementFromPoint(x, y); if (e === G || e.matches('.nodes-plane, .nodes-wires')) { p = [x, y]; break; } }
+      window.__z = () => +($(WIN + '.nodes-plane').style.scale || 1); window.__pan = () => $(WIN + '.nodes-plane').style.translate;
+      window.__plane = (x, y) => { const pl = $(WIN + '.nodes-plane'), [tx, ty = 0] = pl.style.translate.split(' ').map(parseFloat), z = __z(), u = G.getBoundingClientRect(); return [(x - u.left - tx) / z, (y - u.top - ty) / z].map((v) => +v.toFixed(2)); };
+      return { p, z0: __z(), plane0: __plane(...p) };`);
+    out.start = at;
+    const [x, y] = at.p;
+    await drag([[x, y], [x, y - 20], [x, y - 40], [x, y - 60]], ['']);
+    out.up = await ev(`return { z: +__z().toFixed(3), want: +(${at.z0} * Math.exp(0.36)).toFixed(3), plane: __plane(${x}, ${y}), menu: !!$('.mir-ctx'), rec: JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')).zoom };`);
+    await drag([[x, y], [x, y + 200], [x, y + 400]], ['']);
+    out.down = await ev(`return { z: __z(), menu: !!$('.mir-ctx') };`);
+    await drag([[x, y], [x + 40, y + 30]]);
+    out.pan = await ev(`return { z: __z(), pan: __pan() };`);
+    out.cursor = await ev(`const G = $(WIN + '.nodes-ground'); G.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, ctrlKey: true, clientX: ${x}, clientY: ${y} })); const a = getComputedStyle(G).cursor;
+      G.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: ${x}, clientY: ${y} })); return [a, getComputedStyle(G).cursor];`);
+  }
+  if (scene === 'n3') {
+    /* the doors in the bars: the window's dock beside × (a .mir-win-btn, its glyph 16 px), the card's pop-out before × (× 's look), none in the ground */
+    const size = (sel) => `(() => { const e = $(${JSON.stringify(sel)}); if (!e) return null; const s = e.querySelector('svg'), b = e.getBoundingClientRect(), v = s.getBoundingClientRect(); return { w: Math.round(b.width), svg: Math.round(v.width), next: e.nextElementSibling && e.nextElementSibling.className, hint: e.getAttribute('aria-label'), ink: getComputedStyle(e).color }; })()`;
+    out.win = await ev(`N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 520 }); await w(300); N.add('levels'); await w(300);
+      return { door: ${size(WIN + '.mir-win-tools .nodes-door')}, x: ${size(WIN + '.mir-win-x')}, glyph: Math.round($(WIN + '.mir-win-glyph').getBoundingClientRect().width), inGround: !!$(WIN + '.nodes-ground .nodes-door'), head: rect($(WIN + '.mir-win-head')) };`);
+    if (out.win.head) await shot('038-N3-win-bar', [out.win.head[0] - 6, out.win.head[1] - 6, out.win.head[2] + 6, out.win.head[3] + 70]);
+    out.dock = await ev(`$(WIN + '.mir-win-tools .nodes-door').click(); await w(900); const d = $('.dev[data-id="nodes"]');
+      return { win: N.win.isOpen(), card: !d.classList.contains('closed'), door: ${size('.dev[data-id="nodes"] .dev-util .nodes-door')}, x: ${size('.dev[data-id="nodes"] .dev-close')}, inGround: !!$('.dev[data-id="nodes"] .nodes-ground .nodes-door'), head: rect(d.querySelector('.dev-head')) };`);
+    if (out.dock.head) await shot('038-N3-card-bar', [out.dock.head[0] - 6, out.dock.head[1] - 6, out.dock.head[2] + 6, out.dock.head[3] + 60]);
+    out.pop = await ev(`$('.dev[data-id="nodes"] .dev-util .nodes-door').click(); await w(900); return { win: N.win.isOpen(), card: !$('.dev[data-id="nodes"]').classList.contains('closed') };`);
+  }
   out.errors = (await g.errors()).errs;
   console.log(JSON.stringify(out, null, 1));
 } finally { await g.close(); }

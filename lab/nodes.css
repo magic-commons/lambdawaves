@@ -6,6 +6,7 @@
 .nodes-host > .nodes-ground { flex: 1 1 auto; min-height: 0; }
 .dev .nodes-ground { height: min(70vh, 680px); }
 .nodes-ground:active { cursor: grabbing; }
+.nodes-ground:is(.nodes-zkey, .nodes-zooming) { cursor: zoom-in; }   /* 038 N2: ctrl / ⌘ held over the ground, or a ctrl-drag under way: the drag zooms */
 .nodes-plane { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
 .nodes-wires { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
 .nodes-wires path { fill: none; stroke: var(--acc); stroke-width: 2; opacity: .75; }
