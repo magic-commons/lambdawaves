@@ -110,16 +110,21 @@ export function createMaterial(app) {
        THE STAGE TEXT WINS: a bar that would cross the formula block steps clear of it, vertically — a TOP bar under it, a BOTTOM bar over it, a side
        bar away from it.  023 R6 (Josh: "If the ESP strip is either left or right, it shouldn't readjust whenever CSB … is open"): a LEFT or RIGHT bar is
        seated from the stage's edges and the racks only (`free(false)`), so the CSB opening, expanding, docking or folding moves it by 0 px; its unit
-       (φ · a.u.) is ESP BAR's hint, not a caption on the strip */
+       (φ · a.u.) is ESP BAR's hint, not a caption on the strip.  039 F2 · THE WHOLE KEY IS SEATED (X-REVIEW #1: at 1000 × 700 "− NEGATIVE", 6 px past
+       the ramp's foot, lay under the bar): the ramp, its numbers and its words are one box (`k`, bar px), and since THE BAR IS ON TOP that box steps clear
+       of the bar's resting box where it would lie under it — the only time the bar moves a side strip */
     const IP = infoPrefs();
     const barSeat = () => {
       const st = app.state.stageText, sb = app.dom.stage.getBoundingClientRect(), side = IP.get('espBarSide'), pad = IP.get('espBarPad'), horiz = side === 'top' || side === 'bottom';
       if (bar.dataset.side !== side) { bar.dataset.side = side; barNums.forEach((n, i) => { n.style.top = horiz ? '' : i * 25 + '%'; n.style.left = horiz ? 100 - i * 25 + '%' : ''; }); paintBar(); }
-      const F = st ? st.free(horiz) : { L: 16, R: sb.width - 16, T: 16, B: sb.height - 16 }, w = bar.offsetWidth, h = bar.offsetHeight, b = st && st.blockRect(), G = 12;
-      const x = horiz ? (F.L + F.R - w) / 2 : side === 'left' ? F.L + pad * (F.R - F.L) : F.R - pad * (F.R - F.L) - w;
+      const F = st ? st.free(horiz) : { L: 16, R: sb.width - 16, T: 16, B: sb.height - 16 }, b = st && st.blockRect(), T = F.barBox, G = 12;
+      const o = bar.getBoundingClientRect(), k = { x0: 0, y0: 0, x1: bar.offsetWidth, y1: bar.offsetHeight };
+      for (const n of bar.children) { const r = n.getBoundingClientRect(); if (r.width) { k.x0 = Math.min(k.x0, r.left - o.left); k.y0 = Math.min(k.y0, r.top - o.top); k.x1 = Math.max(k.x1, r.right - o.left); k.y1 = Math.max(k.y1, r.bottom - o.top); } }
+      const w = k.x1 - k.x0, h = k.y1 - k.y0, x = horiz ? (F.L + F.R - w) / 2 : side === 'left' ? F.L + pad * (F.R - F.L) : F.R - pad * (F.R - F.L) - w;
       let y = horiz ? (side === 'top' ? F.T + pad * (F.B - F.T) : F.B - pad * (F.B - F.T) - h) : (F.T + F.B - h) / 2;
       if (b && x < b.right + G && x + w > b.left - G && y < b.bottom + G && y + h > b.top - G) y = side === 'top' || (side !== 'bottom' && b.top + b.bottom < 2 * y + h) ? b.bottom + G : b.top - G - h;
-      bar.style.left = Math.round(x) + 'px'; bar.style.top = Math.round(y) + 'px'; };
+      if (T && x < T.right && x + w > T.left && y < T.bottom + G && y + h > T.top - G) y = T.top + T.bottom < 2 * y + h ? T.bottom + G : T.top - G - h;
+      bar.style.left = Math.round(x - k.x0) + 'px'; bar.style.top = Math.round(y - k.y0) + 'px'; };
     IP.subscribe((_, changed) => { if (changed.some((k) => /^(espBar|infoP)/.test(k))) styleSync(); });
     /* iteration 015 W1 · THE KNOBS FOLLOW THE STYLE (Josh: "Allow the knobs to be dynamically shown"): the table is RENDER_WGSL's own reads (SOFT is the
        power w = ρ^SOFT, which SOLID · SIGNED · SHELL · SHELL ± overwrite, and ESP's soft edge under its ISO surface since 016 S1; KNEE is the transmittance

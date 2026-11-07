@@ -339,9 +339,11 @@ export function createStageWords(app) {
       /** the pop-ups' SIZE (× 15 px), apart from the formula's since iteration 007 */
       setPopScale(s) { pop.style.setProperty('--lw-pop-size', String(s)); },
       /** the free stage (stage px { L, R, T, B, m }) and the formula block's rect in stage px or null: where the ESP bar may sit and what it yields to (018 B7);
-       *  free(false) leaves the bar out — the racks and the stage's edges only (023 R6: a LEFT or RIGHT strip never moves with the CSB) */
+       *  free(false) leaves the bar out — the racks and the stage's edges only (023 R6: a LEFT or RIGHT strip never moves with the CSB); `barBox` is the
+       *  bar's resting box on the stage (null when docked), which the strip steps clear of only where it would lie under it (039 F2: THE BAR IS ON TOP) */
       free: (bar = true) => { const k = rest(), sb = k.sb, F = freeOf(bar ? k.rs : k.racks, sb), now = dom.stage.getBoundingClientRect(), dx = sb.left - now.left, dy = sb.top - now.top;   // in today's stage px
-        return { ...F, L: F.L + dx, R: F.R + dx, T: F.T + dy, B: F.B + dy }; },
+        const t = k.rs.length > k.racks.length ? k.rs[k.rs.length - 1] : null;   // rest() puts the bar's box last
+        return { ...F, L: F.L + dx, R: F.R + dx, T: F.T + dy, B: F.B + dy, barBox: t && { left: t.left - now.left, right: t.right - now.left, top: t.top - now.top, bottom: t.bottom - now.top } }; },
       blockRect() { if (!on || !block) return null; const r = block.el.getBoundingClientRect(), sb = dom.stage.getBoundingClientRect();
         return r.width ? { left: r.left - sb.left, right: r.right - sb.left, top: r.top - sb.top, bottom: r.bottom - sb.top } : null; },
       get on() { return on; }, get labelsOn() { return labelsOn; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
