@@ -8,10 +8,18 @@
 //   2 an edit, a reload: no notice, no title screen — the session is put back (ring [resume], unsaved) and a waiting build is offered
 //   3 the law: a reset notice comes back once; a given start (`&starter=home`) is ready while it is still up and `?play=1` waits for it;
 //     dismiss() (the facade over the kit's notice) puts it down and the play starts
+//   039 S3 · THE FIRST RUN IS PROVEN BY PRESSING (each in a FRESH profile — no `lambdawaves.q0.settings` at all — on `?menu=1&warn=0`, the face's
+//   query for a driver: the plain URL sends a driver straight into the lab, rack.js `pickerAtBoot`):
+//   4 the face offers SIMPLE and ADVANCED and no CONTINUE; a pointer on SIMPLE lays SIMPLE's racks (lab/first-run.js FIRST_RUN_RACKS, read
+//     from the DOM: each rack's open windows in order, the mode showing one of SPECTRUM · MOLECULES), every one folded, the answer saved
+//     (`closed[]`, `nativeLayout` 1); the second visit shows CONTINUE and no doors, the racks still SIMPLE's
+//   5 a pointer on ADVANCED lays ADVANCED's (NODES under INFORMATIONAL, STAGE under SETTINGS, LIGHTING under CAMERA), folded, `nativeLayout` 2;
+//     NEW keeps them (THE CHOICE KEEPS); the second visit shows CONTINUE, no doors, ADVANCED's racks
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
 import { go } from '../tools/gate/drv.mjs';
+import { FIRST_RUN_RACKS } from '../lab/first-run.js';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
 const URL_ = LAB + '?opener=1';
@@ -27,9 +35,20 @@ const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n));
     sw.buildReady((o) => { took = o || {}; }); const r = { taken: !!took, quiet: !!(took && took.alone), pane: !!__LW.sw.offering };
     sw.state = 'idle'; sw.pending = null; sw.offered = null; sw.closeOffer(); return r; };
   return 1;`;
+/* 039 S3: the face and the racks as the DOM has them (never a source string) */
+const FACE = `window.__still = () => !document.getAnimations().some((a) => a.playState === 'running' && a.effect && a.effect.getTiming().iterations !== Infinity);
+  window.__face = () => { const m = document.getElementById('lwMenu'), f = document.querySelector('.mm-face'), S = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || 'null');
+    const way = [...document.querySelectorAll('.mm-face-way .mm-face-lab')], shown = (b) => !b.hidden && b.offsetWidth > 0;
+    return { face: !!(m && !m.hidden && f && f.offsetWidth), doors: way.filter((b) => b.dataset.layout && shown(b)).map((b) => b.dataset.layout), cont: way.some((b) => !b.dataset.layout && shown(b)),
+      fresh: !(S && Array.isArray(S.closed)), nativeLayout: S ? S.nativeLayout : null }; };
+  window.__racks = () => { const open = (id) => [...document.getElementById(id).children].filter((e) => e.classList.contains('dev') && !e.classList.contains('closed'));
+    const all = [...open('rackL'), ...open('rack')];
+    return { left: open('rackL').map((e) => e.dataset.id), right: open('rack').map((e) => e.dataset.id), unfolded: all.filter((e) => !e.classList.contains('folded')).map((e) => e.dataset.id),
+      modeShows: ['spectrum', 'chem'].filter((id) => { const e = document.querySelector('.dev[data-id="' + id + '"]'); return e && !e.hidden && !e.classList.contains('closed'); }) }; };
+  return 1;`;
 let n = 0;
 const pass = (m) => console.log('PASS ' + ++n + ' ' + m);
-const g = await open(URL_, { width: 1300, height: 900, script: 120000 });
+let g = await open(URL_, { width: 1300, height: 900, script: 120000 });
 let failed = false;
 /* 0.5.0: the navigation hops through about:blank after a pause and checks that the new page PAINTS — this headless Firefox leaves the next page's
    requestAnimationFrame dead after a real pointer press or a navigation within a moment of the last frame (v0.4.0-alpha too; the legacy/boot re-aim's
@@ -85,10 +104,38 @@ try {
     return { d, open, ...__screen(), playing: __LW.clock.playing, autoplay: __LW.motion.autoplay };`);
   assert.deepEqual([s7d.d, s7d.open, s7d.notice, s7d.warned, s7d.playing], [true, false, false, true, true], JSON.stringify(s7d));
   pass(`the law: a reset notice comes back; a given start is ready under it (\`?play=1\` ${JSON.stringify(s7.autoplay)}); ?warn=0 does not silence a human; dismiss() put it down, wrote \`warned\` and the play started (${JSON.stringify(s7d.autoplay)})`);
+
+  /* ── 4 · 5 · THE FIRST RUN CHOOSES, BY PRESSING (039 S3): a fresh profile each; a door is a real pointer on what elementFromPoint says is on top ── */
+  const FACE_URL = LAB + '?menu=1&warn=0';
+  const lay = (kind) => ({ left: [...FIRST_RUN_RACKS[kind].left], right: [...FIRST_RUN_RACKS[kind].right] });
+  for (const kind of ['simple', 'advanced']) {
+    await g.close(); g = await open(FACE_URL, { width: 1300, height: 900, script: 120000 }); await g.ev(HELP); await g.ev(FACE);
+    assert.equal((await g.waitFor('window.__LW && __LW.ready && __face().face && __still()', 300, 100)).ok, 1, 'a fresh profile on ' + FACE_URL + ' never showed the face at rest');
+    const f0 = await g.ev('return __face();');
+    assert.deepEqual(f0, { face: true, doors: ['simple', 'advanced'], cont: false, fresh: true, nativeLayout: null }, 'a fresh face offers SIMPLE · ADVANCED and no CONTINUE: ' + JSON.stringify(f0));
+    const t0 = Date.now();
+    assert.equal((await g.tap(`.mm-face-way .mm-face-lab[data-layout="${kind}"]`)).ok, 1, kind.toUpperCase() + ' was not pressable');
+    assert.equal((await g.waitFor('!__face().face && !__face().fresh', 200, 50)).ok, 1, kind.toUpperCase() + ' never entered the lab with its answer saved');
+    const ms = Date.now() - t0;
+    const r1 = await g.ev('await __LW.settle(); return { ...__racks(), ...__face(), errors: __e.slice() };');
+    assert.deepEqual({ left: r1.left, right: r1.right }, lay(kind), kind.toUpperCase() + ' laid other racks: ' + JSON.stringify(r1));
+    assert.deepEqual([r1.unfolded, r1.modeShows.length, r1.nativeLayout, r1.errors], [[], 1, kind === 'advanced' ? 2 : 1, []], kind.toUpperCase() + ': every window folded, the mode showing one, the answer saved: ' + JSON.stringify(r1));
+    let kept = '';
+    if (kind === 'advanced') {   /* THE CHOICE KEEPS (038 M5): NEW is the project's, the layout the workspace's */
+      const r2 = await g.ev('window.confirm = () => true; const ok = await __LW.layout.projects.requestFresh(); await __LW.settle(); return { ok, ...__racks() };');
+      assert.deepEqual([r2.ok, { left: r2.left, right: r2.right }], [true, lay(kind)], 'NEW did not keep ADVANCED\'s racks: ' + JSON.stringify(r2));
+      kept = '; NEW kept them';
+    }
+    await nav(FACE_URL); await g.ev(FACE);
+    assert.equal((await g.waitFor('window.__LW && __LW.ready && __face().face', 300, 100)).ok, 1, 'the second visit never showed the face');
+    const r3 = await g.ev('await __LW.settle(); return { ...__face(), ...__racks() };');
+    assert.deepEqual([r3.doors, r3.cont, r3.fresh, { left: r3.left, right: r3.right }], [[], true, false, lay(kind)], 'the second visit: CONTINUE, no doors, the same racks: ' + JSON.stringify(r3));
+    pass(`a fresh profile's face offers SIMPLE · ADVANCED and no CONTINUE; a pointer on ${kind.toUpperCase()} entered the lab in ${ms} ms (printed, not judged) with left ${r1.left.join(' › ')} · right ${r1.right.join(' › ')}, every window folded, nativeLayout ${r1.nativeLayout} saved${kept}; the second visit says CONTINUE, no doors, the same racks`);
+  }
 } catch (error) { failed = true; console.error(error); }
 finally {
   try { await Promise.race([g.close(), new Promise((_, reject) => setTimeout(() => reject(new Error('driver cleanup timed out')), 10000))]); }
   catch (error) { failed = true; console.error('INFRASTRUCTURE:', error.message); }
-  console.log((failed ? 'RED' : 'GREEN') + ' start.browser-test — ' + n + ' of 3 scenes');
+  console.log((failed ? 'RED' : 'GREEN') + ' start.browser-test — ' + n + ' of 5 scenes');
   process.exit(failed ? 1 : 0);
 }

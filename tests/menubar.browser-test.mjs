@@ -118,11 +118,15 @@ try {
     const snapLS = () => Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)]));
     const mask = (o) => { if (o && o.layout) o.layout.at = 0; if (o && o.quality) o.quality.autoScale = 1; return o; };
     __LW.loadPreset('1s+2pz'); __LW.pause(); await __LW.settle();
+    /* 039 S4: the preset is an edit, and the session (the kit's createSession) writes it 300 ms after the last edit — under load that write landed
+       inside the quick save's window, so 038 filtered the session key out.  It is flushed here instead, before the snapshot: the window is then
+       the quick save's alone, and every key it changes is judged — the session's too */
+    __LW.session.flush();
     localStorage.removeItem(LS_EXP); localStorage.removeItem(LS_PRES);
     const before = snapLS();
     const rs = await __row('FILE', 'QUICK › SAVE the experiment');
     const after = snapLS();
-    const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((k) => before[k] !== after[k] && k !== 'lambdawaves.q0.session').sort();   /* the session's own 300-ms autosave may land under load; it is not the quick save's */
+    const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((k) => before[k] !== after[k]).sort();
     const S = __LW.serialize();
     const expSame = JSON.stringify(JSON.parse(after[LS_EXP])) === JSON.stringify(S.experiment);
     const presSame = JSON.stringify(mask(JSON.parse(after[LS_PRES]))) === JSON.stringify(mask(S.presentation));

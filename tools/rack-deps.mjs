@@ -14,6 +14,8 @@
  *   node tools/rack-deps.mjs --classes        0.5.2 G-G: the classes table for the plan's cut (§5b); --verbose names, --strict exits 1 on a red hinge;
  *                                             a module that has left rack.js is measured from its file (lab/shell/, lab/windows/: R1)
  *   node tools/rack-deps.mjs --rename x=app.state.x [--rename …|map.json] [--dry-run]   a resolver-driven rename at token positions (§5c)
+ *   node tools/rack-deps.mjs --cycles         039 S2: lab/**'s static import graph by §1's lexer; prints its circular components and exits 1 on
+ *                                             an APP-side one (a cycle wholly inside lab/mir/** is printed apart: the kit is adopt's) (§5d)
  *
  * No dependencies (the repo has no node_modules, so no acorn).  §1 is a lexer: comments, strings, templates with ${…}
  * nesting, regex literals (a `/` after an operator, an opener, a `,` `;` `:` or a keyword such as `return` / `typeof`
@@ -791,21 +793,7 @@ export function analyze(src, opts = {}) {
   const edge = (a, b) => reads[a][b] + writes[a][b] > 0;   // b uses a's names
 
   /* ── cycles: Tarjan over "b depends on a" ── */
-  const sccs = [];
-  {
-    let index = 0;
-    const idx = new Array(n).fill(-1), low = new Array(n).fill(0), on = new Array(n).fill(false), st = [];
-    const strong = (v) => {
-      idx[v] = low[v] = index++; st.push(v); on[v] = true;
-      for (let a = 0; a < n; a++) {
-        if (a === v || !edge(a, v)) continue;
-        if (idx[a] < 0) { strong(a); low[v] = Math.min(low[v], low[a]); } else if (on[a]) low[v] = Math.min(low[v], idx[a]);
-      }
-      if (low[v] === idx[v]) { const c = []; let w; do { w = st.pop(); on[w] = false; c.push(w); } while (w !== v); if (c.length > 1) sccs.push(c.sort((p, q) => p - q)); }
-    };
-    for (let v = 0; v < n; v++) if (idx[v] < 0) strong(v);
-    sccs.sort((p, q) => q.length - p.length || p[0] - q[0]);
-  }
+  const sccs = strongComponents(n, (v) => { const out = []; for (let a = 0; a < n; a++) if (a !== v && edge(a, v)) out.push(a); return out; });
   const mutual = [];
   for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) if (edge(a, b) && edge(b, a)) mutual.push({ a, b, aUsesB: reads[b][a] + writes[b][a], bUsesA: reads[a][b] + writes[a][b] });
 
@@ -1347,6 +1335,88 @@ export function renamePlan(src, map) {
   return { src: out, edits: regions, problems, placeholders, counts };
 }
 
+/* ══ 5d.  --cycles: THE MODULE GRAPH OF lab/** (039 S2, THE CYCLE COUNT IS RACK-DEPS') ═════════════════════════════════
+ * Every `lab/**` module's STATIC imports (`import … from '…'`, `import '…'`, `export … from '…'`; relative specifiers — the app has no
+ * other), read by §1's lexer so a specifier in a comment, a string or a template is never an edge and `import('…')` (dynamic) and
+ * `import.meta` are not static.  The file graph's strongly connected components (Tarjan, the one this file's sections use) are the
+ * cycles: one with any app file is APP-SIDE and fails; one wholly inside `lab/mir/**` is the kit's (adopt's) and is printed apart. */
+/** Tarjan's strongly connected components of n nodes; next(v) lists v's successors.  Components of two or more, each sorted, largest first. */
+export function strongComponents(n, next) {
+  const sccs = [], idx = new Array(n).fill(-1), low = new Array(n).fill(0), on = new Array(n).fill(false), st = [];
+  let index = 0;
+  const strong = (v) => {
+    idx[v] = low[v] = index++; st.push(v); on[v] = true;
+    for (const a of next(v)) {
+      if (idx[a] < 0) { strong(a); low[v] = Math.min(low[v], low[a]); } else if (on[a]) low[v] = Math.min(low[v], idx[a]);
+    }
+    if (low[v] === idx[v]) { const c = []; let w; do { w = st.pop(); on[w] = false; c.push(w); } while (w !== v); if (c.length > 1) sccs.push(c.sort((p, q) => p - q)); }
+  };
+  for (let v = 0; v < n; v++) if (idx[v] < 0) strong(v);
+  return sccs.sort((p, q) => q.length - p.length || p[0] - q[0]);
+}
+/** a module's static import specifiers, in source order */
+export function staticImports(src) {
+  const { toks } = lex(src), M = pairBrackets(toks), out = [];
+  const P = (k, v) => toks[k] && toks[k].t === 'punct' && toks[k].v === v, N = (k, v) => toks[k] && toks[k].t === 'name' && (v === undefined || toks[k].v === v);
+  const from = (j) => (N(j, 'from') && toks[j + 1] && toks[j + 1].t === 'str' && !toks[j + 1].tpl ? toks[j + 1].v.slice(1, -1) : null);
+  for (let k = 0; k < toks.length; k++) {
+    if (!N(k, 'import') && !N(k, 'export')) continue;
+    if (P(k - 1, '.') || P(k - 1, '?.')) continue;                                         // a property named import / export
+    let j = k + 1;
+    if (toks[k].v === 'import') {
+      if (P(j, '(') || P(j, '.')) continue;                                                // import('…') and import.meta
+      if (toks[j] && toks[j].t === 'str') { out.push(toks[j].v.slice(1, -1)); continue; } // import '…'
+      if (N(j) && !N(j, 'from')) j++;                                                      // the default binding
+      if (P(j, ',')) j++;
+      if (P(j, '*') && N(j + 1, 'as') && N(j + 2)) j += 3;
+      else if (P(j, '{')) j = M[j] + 1;
+    } else {
+      if (P(j, '*')) { j++; if (N(j, 'as') && N(j + 1)) j += 2; }                          // export * [as ns] from '…'
+      else if (P(j, '{')) j = M[j] + 1;                                                    // export { … } from '…'
+      else continue;                                                                       // export const / function / default …
+    }
+    const spec = from(j);
+    if (spec !== null) out.push(spec);
+  }
+  return out;
+}
+/** the module graph of a { 'path/relative/to/lab.js': source } map, and its cycles */
+export function cyclesOf(sources) {
+  const files = Object.keys(sources).sort(byName), at = new Map(files.map((f, i) => [f, i]));
+  const next = files.map(() => new Set()), unresolved = [], bare = [];
+  let edges = 0;
+  files.forEach((f, i) => {
+    for (const spec of staticImports(sources[f])) {
+      if (!spec.startsWith('./') && !spec.startsWith('../')) { bare.push(f + ' → ' + spec); continue; }
+      const to = path.posix.normalize(path.posix.join(path.posix.dirname(f), spec.replace(/[?#].*$/, '')));
+      if (!at.has(to)) { unresolved.push(f + ' → ' + spec); continue; }
+      if (!next[i].has(at.get(to))) { next[i].add(at.get(to)); edges++; }
+    }
+  });
+  const loops = files.filter((f, i) => next[i].has(i)).map((f) => [f]);                    // a module that imports itself
+  const comps = [...strongComponents(files.length, (v) => next[v]).map((c) => c.map((i) => files[i])), ...loops];
+  const kit = (c) => c.every((f) => f.startsWith('mir/'));
+  const inside = (c) => { const S = new Set(c.map((f) => at.get(f))); let k = 0; for (const i of S) for (const j of next[i]) if (S.has(j)) k++; return k; };
+  const app = comps.filter((c) => !kit(c)).map((c) => ({ files: c, edges: inside(c) }));
+  const mir = comps.filter(kit).map((c) => ({ files: c, edges: inside(c) }));
+  return { modules: files.length, edges, unresolved, bare, app, mir };
+}
+/** every lab/**\/*.js file, keyed by its path under lab/ */
+export function labSources(lab = path.join(ROOT, 'lab')) {
+  return Object.fromEntries(readdirSync(lab, { recursive: true }).map(String).map((f) => f.split('\\').join('/')).filter((f) => f.endsWith('.js'))
+    .sort(byName).map((f) => [f, readFileSync(path.join(lab, f), 'utf8')]));
+}
+function cyclesText(C) {
+  const o = [], sum = (xs) => xs.reduce((k, c) => k + c.edges, 0), s = (k) => (k === 1 ? '' : 's');
+  o.push(`THE CYCLES (039 S2): lab/**/*.js — ${C.modules} modules · ${C.edges} static relative import edges · unresolved ${C.unresolved.length}${C.unresolved.length ? ' (' + C.unresolved.join(', ') + ')' : ''} · not relative ${C.bare.length}${C.bare.length ? ' (' + C.bare.join(', ') + ')' : ''}`);
+  o.push(`  app-side: ${C.app.length} circular component${s(C.app.length)} · ${sum(C.app)} circular edge${s(sum(C.app))}`);
+  for (const c of C.app) o.push(`    · ${c.files.length} modules, ${c.edges} edges: ${c.files.join(' · ')}`);
+  o.push(`  kit-only (lab/mir/**, adopt's — printed, never a failure): ${C.mir.length} circular component${s(C.mir.length)} · ${sum(C.mir)} circular edge${s(sum(C.mir))}`);
+  for (const c of C.mir) o.push(`    · ${c.files.length} modules, ${c.edges} edges: ${c.files.join(' · ')}`);
+  o.push(C.app.length ? `→ RED: ${C.app.length} app-side cycle${s(C.app.length)}` : '→ HOLDS: 0 app-side cycles');
+  return o.join('\n');
+}
+
 /* ══ 6.  THE REPORTS ═════════════════════════════════════════════════════════════════════════════════════════════ */
 const sid = (k) => '§' + k;
 const list = (xs, empty = '—') => (xs && xs.length ? xs.join(', ') : empty);
@@ -1601,6 +1671,7 @@ export function jsonText(R) {
 
 /* ══ 7.  THE COMMAND ═════════════════════════════════════════════════════════════════════════════════════════════ */
 function main(argv) {
+  if (argv.includes('--cycles')) { const C = cyclesOf(labSources()); console.log(cyclesText(C)); if (C.app.length) process.exit(1); return; }
   const arg = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
   const rel = arg('--file') || 'lab/rack.js';
   const text = readFileSync(path.resolve(ROOT, rel), 'utf8');

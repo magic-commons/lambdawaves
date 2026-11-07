@@ -1,11 +1,17 @@
 // Focused acceptance for the current native app, independent of historical layouts.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
+// 039 S4 · A RED MEANS A BUG: a wait before a read of a state is on that state (__until, 25 ms apart, an 8 s ceiling under the 20 s script):
+// the card built, the transition done, the route numbered, the restore landed, the clock moved, the drag's base moved, the demo opened. The one
+// quiet window kept is the click's (a click must move nothing: a window before a "nothing changed" read).
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`, { width:1500,height:1100,script:20000 });
 let failed = false;
 try {
  assert.equal((await g.waitFor('window.__LW&&__LW.ready',150,100)).ok,1);
+ await g.ev(`window.__until=async(ok,ms=8000)=>{const t0=performance.now();for(;;){let v=false;try{v=!!ok();}catch(_){}if(v)return Math.round(performance.now()-t0);if(performance.now()-t0>ms)return -1;await new Promise(r=>setTimeout(r,25));}};
+  window.__rest=()=>!document.getAnimations().some(a=>a.playState==='running'&&a.effect&&a.effect.getTiming().iterations!==Infinity);
+  window.__shown=q=>{const e=document.querySelector(q);return !!e&&e.getClientRects().length>0;};return 1;`);
  const boot = await g.ev(`const workers=__LW.maths.started,period=__LW.period;return {errors:__e,dirty:__LW.layout.projects.dirty,gpu:__LW.field.error||null,workers,period,workersAfterPeriod:__LW.maths.started,
   ladderComputed:__LW.ladder.computed}`);
  assert.deepEqual(boot.errors,[]); assert.equal(boot.dirty,false);
@@ -77,7 +83,7 @@ try {
  assert.deepEqual(notebook,{unsafe:0,title:'$x$',disabled:true,inline:2,display:1,text:true,
   attribute:'$x$',attributeElements:0,injectedHandlers:0,fallbackImages:0,missingText:'<script>bad()</script>'});
  console.log('PASS notebook renderer: sanitized markup, inline/display math, literal attributes and safe parser fallback');
- await g.ev(`__LW.layout.modulation.expand();await new Promise(r=>setTimeout(r,150));document.querySelector('.m2numseat').focus();return true`);
+ await g.ev(`__LW.layout.modulation.expand();await __until(()=>__shown('.m2numseat')&&__rest());document.querySelector('.m2numseat').focus();return true`);
  await g.press('\uE012');
  const depth=await g.ev(`return document.querySelector('.m2numseat').getAttribute('aria-valuenow')`);
  assert.equal(Number(depth),99);
@@ -88,7 +94,7 @@ try {
  // value survives a collapse/expand. The macro VALUE is the rail's own control, not this seat's.
  assert.equal(Number(macro.value),100); assert.equal(macro.reopened,macro.value);assert.deepEqual(macro.errors,[]);
  console.log('PASS macro keyboard: the seat edits depth folded or not, and close/reopen keeps it; no page errors');
- const audioFace=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.mod.addSource('audio');await w(250);const audio=M.sourceList().find(s=>s.kind==='audio');
+ const audioFace=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.mod.addSource('audio');await __until(()=>__shown('.m2dev.audio .aud-range-row')&&__rest());const audio=M.sourceList().find(s=>s.kind==='audio');
   const card=document.querySelector('.m2dev.audio'),rows=[...card.querySelectorAll('.aud-range-row')];
   const rowBoxes=rows.map(e=>e.getBoundingClientRect()),trackBoxes=rows.map(e=>e.querySelector('.aud-range-track').getBoundingClientRect()),mixBoxes=rows.map(e=>e.querySelector('.aud-level-mix').getBoundingClientRect()),ringBoxes=rows.map(e=>e.querySelector('.m2depthring').getBoundingClientRect());
   const level=card.querySelector('[data-band="level"]'),track=level.querySelector('.aud-range-track'),lower=level.querySelector('.aud-range-handle.lower'),upper=level.querySelector('.aud-range-handle.upper');
@@ -114,13 +120,13 @@ try {
     routeNamesNeutral:Object.values(routeEls).every(e=>getComputedStyle(e.querySelector('.m2audname')).color!==accB),audioTitleAccent:getComputedStyle(card.querySelector('.m2kind')).color===accA,
     noHeadStatus:getComputedStyle(card.querySelector('.m2audioheadstate')).display==='none',
     oneGrip:getComputedStyle(card.querySelector('.m2head'),'::before').content==='none'&&Math.round(card.querySelector('.m2grab i').getBoundingClientRect().width)===13};
-  card.style.setProperty('--acc','#0b528f');card.style.setProperty('--acc2','#8f520b');await w(250);const paletteLive=getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor;ott.followsPalette=paletteLive!==ott.live&&getComputedStyle(upper).color===paletteLive&&getComputedStyle(card.querySelector('.m2audsrc')).color!==paletteLive&&getComputedStyle(level.querySelector('.aud-range-zone')).backgroundColor!==ott.rangeColor;card.style.removeProperty('--acc');card.style.removeProperty('--acc2');
-  lower.focus();await w(250);ott.valuesReveal=getComputedStyle(level.querySelector('.aud-range-value')).opacity==='1';lower.blur();
+  card.style.setProperty('--acc','#0b528f');card.style.setProperty('--acc2','#8f520b');await __until(__rest);const paletteLive=getComputedStyle(level.querySelector('.aud-range-output')).backgroundColor;ott.followsPalette=paletteLive!==ott.live&&getComputedStyle(upper).color===paletteLive&&getComputedStyle(card.querySelector('.m2audsrc')).color!==paletteLive&&getComputedStyle(level.querySelector('.aud-range-zone')).backgroundColor!==ott.rangeColor;card.style.removeProperty('--acc');card.style.removeProperty('--acc2');
+  lower.focus();await __until(()=>getComputedStyle(level.querySelector('.aud-range-value')).opacity==='1'&&__rest());ott.valuesReveal=getComputedStyle(level.querySelector('.aud-range-value')).opacity==='1';lower.blur();
   const lowMix=card.querySelector('[data-band="low"] .aud-level-mix-dial');lowMix.focus();lowMix.dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true}));
   ott.lowMixHome=M.audioReadout(audio.id).levelMix.low===0;lowMix.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true}));
-  document.querySelector('.m2dev.audio .m2audout[data-out="low"] .m2audmac').click();await w(80);const assignedRoute=document.querySelector('.m2dev.audio .m2audout[data-out="low"]');ott.assignedNumber=assignedRoute.querySelector('.m2audslot').textContent!=='--'&&getComputedStyle(assignedRoute.querySelector('.m2audslot')).color===accB;
-  __LW.mod.addSource('lfo');__LW.mod.addSource('env');await w(120);
-  const compact=document.querySelector('[data-mir-rail="modulation"] [data-rail="compact"]');compact.click();await w(180);
+  document.querySelector('.m2dev.audio .m2audout[data-out="low"] .m2audmac').click();await __until(()=>document.querySelector('.m2dev.audio .m2audout[data-out="low"] .m2audslot').textContent!=='--');const assignedRoute=document.querySelector('.m2dev.audio .m2audout[data-out="low"]');ott.assignedNumber=assignedRoute.querySelector('.m2audslot').textContent!=='--'&&getComputedStyle(assignedRoute.querySelector('.m2audslot')).color===accB;
+  __LW.mod.addSource('lfo');__LW.mod.addSource('env');await __until(()=>__shown('.m2dev.lfo')&&__shown('.m2dev.env')&&__rest());
+  const compact=document.querySelector('[data-mir-rail="modulation"] [data-rail="compact"]');compact.click();await __until(()=>document.querySelectorAll('.m2dev.audio .m2knobs .m2k').length>0&&__rest());
   const card2=document.querySelector('.m2dev.audio'),knobBoxes=[...card2.querySelectorAll('.m2knobs .m2k')].map(e=>e.getBoundingClientRect()),dialBoxes=[...card2.querySelectorAll('.m2knobs .m2kd')].map(e=>e.getBoundingClientRect()),referenceDialRows=['lfo','env'].map(k=>[...document.querySelectorAll('.m2dev.'+k+' .m2knobs .m2kd')].map(e=>e.getBoundingClientRect().top)),compactRows=[...card2.querySelectorAll('.aud-range-row')],compactTracks=compactRows.map(e=>e.querySelector('.aud-range-track').getBoundingClientRect()),compactRings=compactRows.map(e=>e.querySelector('.m2depthring').getBoundingClientRect()),compactNames=compactRows.map(e=>e.querySelector('.aud-range-name').getBoundingClientRect()),bodyBox=card2.querySelector('.m2body').getBoundingClientRect(),editBox=card2.querySelector('.m2edit').getBoundingClientRect(),sourceBox=card2.querySelector('.m2col').getBoundingClientRect(),routeBox=card2.querySelector('.m2rt').getBoundingClientRect(),compactRoutes=[...card2.querySelectorAll('.m2audout')],sourceButtons=[...card2.querySelectorAll('.m2audsrc')].map(e=>e.getBoundingClientRect());
   const result={allBands:compactRows.every(e=>getComputedStyle(e).display!=='none'),twoByTwo:new Set(knobBoxes.map(b=>Math.round(b.top))).size===2&&new Set(knobBoxes.map(b=>Math.round(b.left))).size===2,
     sideLayout:Math.max(...knobBoxes.map(b=>b.right))<Math.min(...compactTracks.map(b=>b.left))&&sourceBox.right<editBox.left&&routeBox.right<editBox.left&&editBox.height>bodyBox.height-10,
@@ -131,8 +137,8 @@ try {
     compactRouteGeometry:(()=>{const q=Object.fromEntries(compactRoutes.map(e=>[e.dataset.out,e.getBoundingClientRect()]));return Math.abs(routeBox.width-164)<.1&&Math.abs(routeBox.height-88)<.1&&Math.abs(q.level.width-82)<.1&&Math.abs(q.hit.width-82)<.1&&Math.abs(q.low.width-164/3)<.1&&Math.abs(q.level.left-routeBox.left)<.1&&Math.abs(q.low.left-routeBox.left)<.1&&Math.abs(q.hit.right-routeBox.right)<.1&&Math.abs(q.high.right-routeBox.right)<.1})(),
     sourcePair:sourceButtons.length===2&&Math.abs(sourceButtons[0].width-sourceButtons[1].width)<.1&&sourceButtons[0].x<sourceButtons[1].x,setVisible:[...card2.querySelectorAll('.m2audsrc')].some(e=>e.textContent.trim()==='SET'&&getComputedStyle(e).display!=='none'),latencyGone:!card2.querySelector('.aud-latency'),
     ott,errors:__e.slice()};
-  card2.querySelector('.m2fold').click();await w(100);const mini=document.querySelector('.m2dev.audio .m2audminleds'),visible=()=>[...mini.querySelectorAll('i')].filter(e=>getComputedStyle(e).display!=='none').map(e=>e.dataset.out),bands=[...visible()],bandWidths=[...mini.querySelectorAll('i')].filter(e=>getComputedStyle(e).display!=='none').map(e=>e.getBoundingClientRect().width),bandInk=getComputedStyle(mini.querySelector('[data-out="low"]'),'::after').backgroundColor;
-  mini.click();await w(50);const all=[...visible()],allWidth=mini.querySelector('[data-out="level"]').getBoundingClientRect().width,allInk=getComputedStyle(mini.querySelector('[data-out="level"]'),'::after').backgroundColor;__LW.mod.addSource('lfo');await w(100);const rebuilt=document.querySelector('.m2dev.audio .m2audminleds');
+  card2.querySelector('.m2fold').click();await __until(()=>__shown('.m2dev.audio .m2audminleds')&&__rest());const mini=document.querySelector('.m2dev.audio .m2audminleds'),visible=()=>[...mini.querySelectorAll('i')].filter(e=>getComputedStyle(e).display!=='none').map(e=>e.dataset.out),bands=[...visible()],bandWidths=[...mini.querySelectorAll('i')].filter(e=>getComputedStyle(e).display!=='none').map(e=>e.getBoundingClientRect().width),bandInk=getComputedStyle(mini.querySelector('[data-out="low"]'),'::after').backgroundColor;
+  mini.click();await __until(()=>mini.classList.contains('is-all'));const all=[...visible()],allWidth=mini.querySelector('[data-out="level"]').getBoundingClientRect().width,allInk=getComputedStyle(mini.querySelector('[data-out="level"]'),'::after').backgroundColor;{const n0=document.querySelectorAll('.m2dev.lfo').length;__LW.mod.addSource('lfo');await __until(()=>document.querySelectorAll('.m2dev.lfo').length>n0&&__shown('.m2dev.audio .m2audminleds')&&__rest());}const rebuilt=document.querySelector('.m2dev.audio .m2audminleds');
   result.mini={bands,bandWidths,bandInk,all,allWidth,allInk,pressed:rebuilt.getAttribute('aria-pressed'),survivesRebuild:rebuilt.classList.contains('is-all'),noCurve:!document.querySelector('.m2dev.audio .m2mintrace'),accent:accA};M.deserialize(null);return result;`);
  assert.equal(audioFace.allBands,true);assert.equal(audioFace.twoByTwo,true);assert.equal(audioFace.sideLayout,true);assert.equal(audioFace.controlsAboveKnobs,true);assert.equal(audioFace.verticalMeters,true);assert.equal(audioFace.compactAligned,true);assert.equal(audioFace.labelsBottom,true);assert.equal(audioFace.shortLabels,true);assert.equal(audioFace.verticalHandles,true);assert.equal(audioFace.allRoutes,true);assert.equal(audioFace.compactRouting,true);assert.equal(audioFace.compactRouteContentsAligned,true);assert.equal(audioFace.compactKnobRhythm,true);assert.equal(audioFace.compactRouteGeometry,true);assert.equal(audioFace.sourcePair,true);assert.equal(audioFace.setVisible,true);assert.equal(audioFace.latencyGone,true);assert.deepEqual(audioFace.errors,[]);
  for(const key of ['macroArc','openArc','equalRows','stacked','aligned','labelsAfter','shortLabels','longMeters','sourceNarrow','clearTrack','noPeakDots','palette','routingFour','routingBand','routingSpacing','routingPlain','routingContentsAligned','routeNamesNeutral','audioTitleAccent','assignedNumber','noHeadStatus','valuesHidden','valuesReveal','lowMixHome','followsPalette','oneGrip'])assert.equal(audioFace.ott[key],true,key);
@@ -144,17 +150,17 @@ try {
     the routes with their ranges — and comes back from it.  0.3.1 · S1 THE SCOPE LAW: the theme and the camera's feel
     are PREFERENCE, so a file that still carries them (an older save) leaves both exactly as they were. */
  const daw=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));const theme0=document.body.dataset.theme,fric0=__LW.camera.friction;
-  __LW.loadPreset('1s+2pz');M.addSource('lfo');__LW.layout.modulation.expand();await w(400);M.addRoute(M.macroList()[0].id,'material.exposure',0.5,4);
-  __LW.layout.reopen('settings','R');__LW.layout.reopen('spectrum','R');await w(200);
+  __LW.loadPreset('1s+2pz');M.addSource('lfo');__LW.layout.modulation.expand();await __until(()=>__shown('.m2dev.lfo')&&__rest());M.addRoute(M.macroList()[0].id,'material.exposure',0.5,4);
+  __LW.layout.reopen('settings','R');__LW.layout.reopen('spectrum','R');await __until(()=>__shown('.dev[data-id=spectrum] .sp-ab .trig')&&__shown('.stage-colour')&&__rest());
   __LW.camera.setAutoRotate(true);__LW.kepler.setOn(true);__LW.vortex.setOn(true);__LW.spectrum.setDials(true);__LW.layout.notebookResize(520,380);
-  const tr=[...document.querySelectorAll('.dev[data-id=spectrum] .sp-ab .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('STORE A').click();__LW.loadPreset('2p+');await w(150);by('STORE B').click();
+  const tr=[...document.querySelectorAll('.dev[data-id=spectrum] .sp-ab .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('STORE A').click();__LW.loadPreset('2p+');await __LW.settle();by('STORE B').click();
   const sc=document.querySelector('.stage-colour');sc.value='#203040';sc.dispatchEvent(new Event('input',{bubbles:true}));
   __LW.setStage(0);const stage0=__LW.mat.bg.slice();__LW.setStage(1);const stage1=__LW.mat.bg.slice();
   const follow=document.querySelector('.stage-follow');follow.click();const followed=__LW.mat.bg.slice(),retained=sc.value;follow.click();const resumed=__LW.mat.bg.slice();
   const S=__LW.serialize();S.presentation.ui.theme=theme0==='light'?'dark':'light';S.presentation.camera.friction=0.31;
   __LW.camera.setAutoRotate(false);__LW.camera.setFriction(0.1);__LW.kepler.setOn(false);__LW.vortex.setOn(false);__LW.spectrum.setDials(false);__LW.layout.notebookResize(300,200);follow.click();__LW.loadPreset('1s');M.deserialize(null);
   const themeBefore=document.body.dataset.theme,frictionBefore=__LW.camera.friction;
-  const ok=__LW.restore(S);await w(600);const q=__LW.serialize().presentation;const errs=__e.slice();const theme=document.body.dataset.theme,friction=__LW.camera.friction;__LW.camera.setFriction(fric0);
+  const ok=__LW.restore(S);await __LW.settle();await __until(__rest);const q=__LW.serialize().presentation;const errs=__e.slice();const theme=document.body.dataset.theme,friction=__LW.camera.friction;__LW.camera.setFriction(fric0);
   return {ok,theme,themeBefore,foreignTheme:S.presentation.ui.theme,friction,frictionBefore,stage:q.ui.stage.custom,stageFollow:q.ui.stage.follow,
     stageLaw:{stage0,stage1,followed,retained,resumed},auto:q.camera.autoRotate,kepler:q.overlays.kepler,vortex:q.overlays.vortex.on,dials:q.overlays.dials,ab:!!(q.ab&&q.ab.a&&q.ab.b),nb:q.notebook,routes:(q.modulation.routes||[]).map(r=>[r.min,r.max]),modwin:!!q.modwin,cards:q.layout&&q.layout.cards.length,errs}`);
  assert.equal(daw.ok,true); assert.notEqual(daw.foreignTheme,daw.themeBefore); assert.equal(daw.theme,daw.themeBefore); assert.deepEqual(daw.stage.map(v=>Math.round(v*255)),[32,48,64]); assert.equal(daw.stageFollow,false);
@@ -177,7 +183,7 @@ try {
   Object.assign(P.camera,{friction:.31,speed:.9,dragGain:3.3,fling:1.7,camLock:!live0.feel[4]});   /* 0.5.3 M6: a file that names the other LOCK changes nothing */
   Object.assign(P.mat,{frame:false,axis:false,frameMode:'dots',axisMode:'corner',cornerSide:'left',invert:true,axisInk:'rgb'});
   P.obs.mode=mode0==='free'?'turntable':'free';
-  const ok=__LW.restore(S);await w(600);const after=strip(),live1=live(),mode1=__LW.camMode,settings=raw(),q=__LW.serialize().presentation;
+  const ok=__LW.restore(S);await __LW.settle();await __until(__rest);const after=strip(),live1=live(),mode1=__LW.camMode,settings=raw(),q=__LW.serialize().presentation;
   const PREF={ui:['theme','card','frost','disc','accent'],camera:['friction','speed','dragGain','fling','camLock'],mat:['frame','axis','frameMode','axisMode','cornerSide','invert','axisInk']};
   const leaked=Object.entries(PREF).flatMap(([s,ks])=>ks.filter(k=>q[s]&&k in q[s]).map(k=>s+'.'+k));
   __LW.setCamMode(mode0,true);
@@ -200,14 +206,14 @@ try {
   const pal=__LW.paletteGroups.flatMap(g=>g.items).find(id=>id!==__LW.paletteId);__LW.setPalette(pal);__LW.palette.load([{at:.08,rgb:[.1,.2,.3]},{at:.47,rgb:[.7,.4,.2]},{at:.82,rgb:[.2,.8,.5]}],1);__LW.palette.setOn(true);
   const macro=M.macroList()[0];M.setMacro(macro.id,{value:.88,masterDepth:.73});const added=M.addRoute(macro.id,'material.exposure',.12,.42);__LW.mod.clock.applyAll(true);
   const current=R.state('material.exposure').current,base=R.baseOf('material.exposure'),route={...added.route};
-  __LW.layout.modulation.expand();const audioId=__LW.mod.addSource('audio');await w(250);document.querySelector('.m2dev.audio [data-band="high"] .aud-range-name').click();__LW.mod.view.select(macro.id);
-  __LW.history.note('project test edit');await w(450);const historyBefore=__LW.history.depth;
+  __LW.layout.modulation.expand();const audioId=__LW.mod.addSource('audio');await __until(()=>__shown('.m2dev.audio [data-band="high"] .aud-range-name'));document.querySelector('.m2dev.audio [data-band="high"] .aud-range-name').click();__LW.mod.view.select(macro.id);
+  __LW.history.note('project test edit');await __until(()=>__LW.history.depth>0&&!__LW.history.pendingLabel&&!__LW.history.holding);const historyBefore=__LW.history.depth;
   P.save('acceptance/complete-state');const disk=JSON.parse(localStorage.getItem('lambdawaves.q0.projects')).items['acceptance/complete-state'].data;
   __LW.ab.set(false);R.setBase('material.gamma',.8);R.setBase('material.exposure',.4);R.setBase('transport.rate',4);__LW.spectrum.select(-1);__LW.spectrum.setDials(true);
   __LW.slice.load({mode:'space',half:3,gain:.2,rotor:{qL:[1,0,0,0],qR:[1,0,0,0]}});__LW.setPalette(__LW.paletteGroups[0].items[0]);__LW.palette.load([{at:0,rgb:[1,0,0]},{at:.5,rgb:[0,0,1]}],0);
   __LW.ladder.set({nbar:20,sigma:1,d:0,teeth:3});__LW.particles.setTrail(8);__LW.particleUI.n.set(40);
-  const opened=P.open('acceptance/complete-state');await w(600);const restored=__LW.serialize().presentation,restoredRoute=M.routeList().find(r=>r.id===route.id),restoredSlice=__LW.slice.save(),poseNow={yaw:__LW.obs.yaw,pitch:__LW.obs.pitch,quat:__LW.obs.quat.slice()};
-  const beforePlay={t:__LW.clock.t,playing:__LW.clock.playing,transition:__LW.ab.on,theta:__LW.reg.mixAngle(__LW.clock.t)};__LW.play();await w(250);
+  const opened=P.open('acceptance/complete-state');await __LW.settle();await __until(__rest);const restored=__LW.serialize().presentation,restoredRoute=M.routeList().find(r=>r.id===route.id),restoredSlice=__LW.slice.save(),poseNow={yaw:__LW.obs.yaw,pitch:__LW.obs.pitch,quat:__LW.obs.quat.slice()};
+  const beforePlay={t:__LW.clock.t,playing:__LW.clock.playing,transition:__LW.ab.on,theta:__LW.reg.mixAngle(__LW.clock.t)};__LW.play();await __until(()=>__LW.clock.t>0&&__LW.reg.mixAngle(__LW.clock.t)!==0);
   const afterPlay={t:__LW.clock.t,theta:__LW.reg.mixAngle(__LW.clock.t),transition:__LW.ab.on};__LW.pause();
   const result={opened,diskT:disk.experiment.t,diskBase:disk.presentation.modulationBases['material.exposure'],diskMirror:disk.presentation.mat.exposure,
     base,current,restoredBase:R.baseOf('material.exposure'),route:[route.min,route.max,route.bi,route.enabled,route.curve],restoredRoute:restoredRoute&&[restoredRoute.min,restoredRoute.max,restoredRoute.bi,restoredRoute.enabled,restoredRoute.curve],
@@ -228,12 +234,13 @@ try {
  /* THE HAND ON A ROUTED KNOB (Josh, 2026-09-10): a click leaves the base and the range alone; a drag moves the BASE by
     the drag — never to where the modulator happened to be showing the needle. */
  const hand=await g.ev(`const M=__LW.mod.model,R=__LW.mod.registry,w=n=>new Promise(r=>setTimeout(r,n));M.deserialize(null);__LW.loadPreset('1s+2pz');
-  M.addSource('lfo');__LW.layout.modulation.expand();await w(300);const m=M.macroList()[0];M.addRoute(m.id,'material.exposure',0.5,4);M.setMacro(m.id,{value:0.8});__LW.mod.clock.applyAll(true);await w(300);
+  M.addSource('lfo');__LW.layout.modulation.expand();await __until(()=>__shown('.m2dev.lfo')&&__rest());const m=M.macroList()[0];M.addRoute(m.id,'material.exposure',0.5,4);M.setMacro(m.id,{value:0.8});__LW.mod.clock.applyAll(true);
+  await __until(()=>__LW.mat.exposure>R.baseOf('material.exposure')*2);
   const k=[...document.querySelectorAll('.k')].find(e=>e.querySelector('.k-lbl')?.textContent==='EXPOSURE'),d=k.querySelector('.k-dial'),b=d.getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2;
   const base=()=>+R.baseOf('material.exposure').toFixed(3);const shown0=+__LW.mat.exposure.toFixed(3),base0=base();
   d.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,clientX:cx,clientY:cy,pointerId:71,isPrimary:true}));d.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,clientX:cx,clientY:cy,pointerId:71,isPrimary:true}));await w(200);
   const click={base:base(),shown:+__LW.mat.exposure.toFixed(3)};
-  d.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,clientX:cx,clientY:cy,pointerId:72,isPrimary:true}));for(let i=1;i<=3;i++)d.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:cx,clientY:cy+10*i,pointerId:72,isPrimary:true}));d.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,clientX:cx,clientY:cy+30,pointerId:72,isPrimary:true}));await w(300);
+  d.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,clientX:cx,clientY:cy,pointerId:72,isPrimary:true}));for(let i=1;i<=3;i++)d.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:cx,clientY:cy+10*i,pointerId:72,isPrimary:true}));d.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,clientX:cx,clientY:cy+30,pointerId:72,isPrimary:true}));await __until(()=>base()!==base0);
   return {shown0,base0,click,drag:{base:base(),shown:+__LW.mat.exposure.toFixed(3)},errs:__e.slice()}`);
  assert.ok(hand.shown0>hand.base0*2, 'the modulator shows well above the base: '+JSON.stringify(hand)); assert.equal(hand.click.base,hand.base0); assert.equal(hand.click.shown,hand.shown0);
  assert.ok(hand.drag.base<hand.base0&&hand.drag.base>hand.base0*0.4,'a 30 px drag moved the base by the drag, not to the shown value: '+JSON.stringify(hand.drag)); assert.deepEqual(hand.errs,[]);
@@ -241,7 +248,7 @@ try {
  /* THE BUNDLED DEMO (2026-09-11; iteration 009: the one demo, WAVE DANCER PROTOTYPE, re-saved at KNEE 3): it ships under lab/demos/ and opens through the projects road — eight
     modes, three macros, five routes, the A/B stores and the notebook, with no page error.  0.3.1 · S2: the button asks before it
     discards unsaved changes (the scenes above leave some), so the confirm is accepted here. */
- const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));window.confirm=()=>true;__LW.projects.demo('wave-dancer');await w(1500);
+ const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));window.confirm=()=>true;__LW.projects.demo('wave-dancer');await __until(()=>/opened demo/.test(__LW.projects.status));await __LW.settle();
   const S=__LW.serialize(),nb=document.querySelector('[data-mir-window="notebook"]');return {status:__LW.projects.status,modes:S.experiment.modes.length,routes:(S.presentation.modulation.routes||[]).length,macros:(S.presentation.modulation.macros||[]).length,title:nb.querySelector('.nb-title').value,knee:__LW.mat.knee,ab:!!(S.presentation.ab&&S.presentation.ab.a&&S.presentation.ab.b),errs:__e.slice()}`);
  assert.equal(demo.status,'opened demo DEMOS/WAVE DANCER PROTOTYPE'); assert.equal(demo.modes,8); assert.equal(demo.routes,5); assert.equal(demo.macros,3); assert.equal(demo.title,'WAVE DANCER PROTOTYPE'); assert.equal(demo.knee,3); assert.equal(demo.ab,true); assert.deepEqual(demo.errs,[]);
  console.log('PASS the bundled demo: WAVE DANCER PROTOTYPE opens with its modes, macros, routes, A/B and notebook, at KNEE 3');

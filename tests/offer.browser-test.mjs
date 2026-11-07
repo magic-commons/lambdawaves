@@ -11,6 +11,9 @@
 // follows STATUS TAGS switched with the pane up; a link pasted over an edit asks first (the hashchange road, wave 56's hole).
 // 032 (Josh 11-01): the pane became a popup — the kit's notice (the photosensitivity warning's look), UPDATE AVAILABLE · RELOAD PAGE ·
 // LATER; the caret and the mask left with the pane, and scene 15 proves Escape is LATER (the popup holds the focus).
+// 039 S4 · A RED MEANS A BUG: every wait before a read of a state is on that state (the popup up and at rest, gone, the kit's question there or
+// gone, the take under way, the window's resize landed, a hash change handled) through __until, 25 ms apart with a ceiling; the two quiet
+// windows that precede a "nothing more happened" read (scene 14's hide 0.9 s after LATER, scene 13's 100 ms) stay windows.
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -44,6 +47,11 @@ const HELPERS = `
   window.__btn = (label) => { __pane(); return [...document.querySelectorAll('#lwOffer .mir-dialog-actions .trig')].find((b) => b.textContent.trim() === label); };
   window.__quiet = async () => { await __LW.settle(); for (let i = 0; i < 40; i++) { const h = __LW.history;
     if (h.entries().length === 1 && !h.canUndo && !h.pendingLabel && !h.holding) return true; await new Promise((q) => setTimeout(q, 100)); } return false; };
+  window.__until = async (ok, ms = 10000) => { const t0 = performance.now(); for (;;) { let v = false; try { v = !!ok(); } catch (_) {}
+    if (v) return Math.round(performance.now() - t0); if (performance.now() - t0 > ms) return -1; await new Promise((q) => setTimeout(q, 25)); } };
+  window.__rest = () => !document.getAnimations().some((a) => a.playState === 'running' && a.effect && a.effect.getTiming().iterations !== Infinity);
+  window.__up = () => __pane().shown && __rest();
+  window.__resizes = 0; addEventListener('resize', () => { window.__resizes++; });
   window.__reloads = 0; __LW.sw.reload = () => { window.__reloads++; window.__reloadAt = performance.now(); };
   window.__masks = null; { const f = __LW.field, o = f.setOcclusion; f.setOcclusion = function (rects) { window.__masks = rects.map((r) => r.slice()); return o.call(f, rects); }; }
   /* what buildReady does with THIS session right now — taken quietly (untouched) or offered — and then put back */
@@ -111,7 +119,7 @@ try {
     const t0 = performance.now();
     const kind = __LW.sw.message({ type: 'LW_SW_BUSY', windows: 2 });
     const t1 = performance.now();
-    await new Promise((q) => setTimeout(q, 400));   // the popup's own entrance
+    await __until(__up);   // the popup's own entrance, at rest
     const P = __LW.sw.offering, B = document.querySelector('#badges > .badge.build');
     return { kind, state: __LW.sw.state, asked: __LW.sw.asked, taken: window.__taken ?? null, pane: __pane(), tagsOff: document.body.classList.contains('no-badges'), badges: __badges(),
       hit: { update: __hit(__btn('RELOAD PAGE')), later: __hit(__btn('LATER')), badge: __hit(B) },
@@ -136,11 +144,11 @@ try {
   /* ── 3 · LATER keeps the badge; the badge's own press takes it, as a press (no alone) ── */
   await g.ev('__pane(); return 1;');
   let t = await g.tap('#lwOffer .mir-dialog-actions .trig:last-child'); assert.equal(t.ok, 1, 'LATER not pressable: ' + JSON.stringify(t));
-  const s3a = await g.ev(`await new Promise((q) => setTimeout(q, 50)); return { pane: __pane(), badge: __badges().build, state: __LW.sw.state, taken: window.__taken ?? null };`);
+  const s3a = await g.ev(`await __until(() => !__pane().shown); return { pane: __pane(), badge: __badges().build, state: __LW.sw.state, taken: window.__taken ?? null };`);
   assert.equal(s3a.pane.shown, false); assert.equal(s3a.pane.hidden, true);
   assert.notEqual(s3a.badge.display, 'none'); assert.equal(s3a.badge.text, 'A NEW BUILD IS READY · UPDATE');
   assert.equal(s3a.state, 'ready'); assert.equal(s3a.taken, null);
-  await g.ev('await new Promise((q) => setTimeout(q, 400)); return 1;');   // the popup's leave, then the badge's own press
+  await g.ev(`await __until(() => __hit(document.querySelector('#badges > .badge.build')) && __rest()); return 1;`);   // the popup's leave, then the badge's own press
   t = await g.tap('#badges > .badge.build'); assert.equal(t.ok, 1, 'the build badge not pressable: ' + JSON.stringify(t));
   const s3b = await g.ev(`return { taken: window.__taken ?? null, state: __LW.sw.state, badge: __badges().build.text };`);
   assert.ok(s3b.taken && !s3b.taken.alone, 'a press asks without alone: ' + JSON.stringify(s3b.taken));
@@ -165,16 +173,16 @@ try {
     window.__answer = (re) => { const a = __ask(); const b = a && [...a.querySelectorAll('button')].find((x) => re.test(x.textContent)); if (b) b.click(); return !!b; };
     return { dirty: __LW.projects.dirty, shown: __pane().shown };`);
   assert.equal(d0.dirty, true, 'the edit left the project clean — scene 5 would prove nothing'); assert.equal(d0.shown, true);
-  await g.ev('await new Promise((q) => setTimeout(q, 400)); __pane(); return 1;');
+  await g.ev('await __until(__up); __pane(); return 1;');
   t = await g.tap('#lwOffer .mir-dialog-actions .trig:first-child'); assert.equal(t.ok, 1, 'RELOAD PAGE not pressable: ' + JSON.stringify(t));
-  const s5q = await g.ev(`await new Promise((q) => setTimeout(q, 150)); const a = __ask(); return { asked: !!a, title: a ? (a.querySelector('h1, h2, .mir-dialog-title') || a).textContent.trim().slice(0, 40) : null, taken: window.__taken ?? null, state: __LW.sw.state };`);
+  const s5q = await g.ev(`await __until(() => __ask()); const a = __ask(); return { asked: !!a, title: a ? (a.querySelector('h1, h2, .mir-dialog-title') || a).textContent.trim().slice(0, 40) : null, taken: window.__taken ?? null, state: __LW.sw.state };`);
   assert.ok(s5q.asked, 'the kit\'s question did not appear: ' + JSON.stringify(s5q)); assert.equal(s5q.taken, null); assert.equal(s5q.state, 'ready');
   await g.ev(`return __answer(/KEEP WORKING/);`);
-  const s5a = await g.ev(`await new Promise((q) => setTimeout(q, 400)); __pane(); return { asked: !!__ask(), taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown };`);
+  const s5a = await g.ev(`await __until(() => !__ask() && __up()); __pane(); return { asked: !!__ask(), taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown };`);
   assert.deepEqual(s5a, { asked: false, taken: null, state: 'ready', dirty: true, shown: true });
   t = await g.tap('#lwOffer .mir-dialog-actions .trig:first-child'); assert.equal(t.ok, 1, 'RELOAD PAGE not pressable the second time: ' + JSON.stringify(t));
-  await g.ev(`await new Promise((q) => setTimeout(q, 150)); return __answer(/UPDATE ANYWAY/);`);
-  const s5b = await g.ev(`await new Promise((q) => setTimeout(q, 500)); return { asked: !!__ask(), taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown, errors: __e.slice() };`);
+  await g.ev(`await __until(() => __ask()); return __answer(/UPDATE ANYWAY/);`);
+  const s5b = await g.ev(`await __until(() => __LW.sw.state === 'taking' && !__ask()); return { asked: !!__ask(), taken: window.__taken ?? null, state: __LW.sw.state, dirty: __LW.projects.dirty, shown: __pane().shown, errors: __e.slice() };`);
   assert.equal(s5b.asked, false); assert.ok(s5b.taken && !s5b.taken.alone, 'yes did not take: ' + JSON.stringify(s5b)); assert.equal(s5b.state, 'taking');
   assert.equal(s5b.dirty, false, 'yes must mark the project clean before the take'); assert.equal(s5b.shown, false);
   assert.deepEqual(s5b.errors, []);
@@ -218,7 +226,7 @@ try {
   /* ── 8 · a moved clock is offered in the foreground — a reload would return it to t = 0 — and the hide still takes it ── */
   const s8 = await g2.ev(`__LW.scrub(0); await __LW.settle(); const zero = __probe();
     __LW.scrub(5); await __LW.settle(); const scrubbed = __probe();
-    __LW.scrub(0); __LW.play(); await new Promise((q) => setTimeout(q, 500)); __LW.pause(); await __LW.settle(); const tPlayed = __LW.clock.t; const played = __probe();
+    __LW.scrub(0); __LW.play(); await __until(() => __LW.clock.t > 0.05); __LW.pause(); await __LW.settle(); const tPlayed = __LW.clock.t; const played = __probe();
     window.__taken = undefined; const sw = __LW.sw; sw.state = 'idle'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'clock-hide' };
     sw.buildReady((o) => { window.__taken = o; });
     const shown = { taken: window.__taken ?? null, pane: __pane().shown };
@@ -256,13 +264,14 @@ try {
   const SIZES = [[1500, 1000], [1366, 1024], [1024, 1366], [1140, 800], [1000, 700], [500, 930]];
   const reads = [];
   for (const [W, H] of SIZES) {
+    const r0 = await g2.ev('return window.__resizes;');
     await setRect(g2.s, W, H);
-    await g2.ev(`await new Promise((q) => setTimeout(q, 500)); try { await __LW.settle(); } catch (e) {} return 1;`);
-    const off = await g2.ev(`const m = await __sizeRead(false); await new Promise((q) => setTimeout(q, 400)); m.paneShown = __pane().shown; return m;`), on = await g2.ev(`const m = await __sizeRead(true); await new Promise((q) => setTimeout(q, 400)); m.paneShown = __pane().shown; return m;`);
+    await g2.ev(`await __until(() => window.__resizes > ${r0} || innerWidth === ${W}); await __until(__rest); try { await __LW.settle(); } catch (e) {} return 1;`);
+    const off = await g2.ev(`const m = await __sizeRead(false); await __until(__up); m.paneShown = __pane().shown; return m;`), on = await g2.ev(`const m = await __sizeRead(true); await __until(__up); m.paneShown = __pane().shown; return m;`);
     reads.push({ W, H, off, on });
   }
   await g2.ev(`document.body.classList.add('no-badges'); __LW.sw.closeOffer(); __LW.sw.state = 'idle'; return 1;`);
-  await setRect(g2.s, 1500, 1000); await g2.ev(`await new Promise((q) => setTimeout(q, 500)); return 1;`);
+  { const r0 = await g2.ev('return window.__resizes;'); await setRect(g2.s, 1500, 1000); await g2.ev(`await __until(() => window.__resizes > ${r0} || innerWidth === 1500); await __until(__rest); return 1;`); }
   for (const r of reads) {
     for (const [tag, m] of [['off', r.off], ['on', r.on]]) {
       const at = `${r.W}×${r.H} tags ${tag}`;
@@ -299,7 +308,7 @@ try {
   const s11c = await g2.ev(`const sw = __LW.sw; window.__taken = undefined; sw.take = (o) => { window.__taken = o; };
     sw.state = 'ready'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'busy-press' }; sw.accept();
     const kind = sw.message({ type: 'LW_SW_BUSY', windows: 3 });
-    await new Promise((q) => setTimeout(q, 400)); const P = __LW.sw.offering;
+    await __until(__up); const P = __LW.sw.offering;
     return { kind, state: sw.state, others: sw.others, pane: __pane().shown, lead: P.querySelector('.mir-dialog-body').textContent,
       buttons: [...P.querySelectorAll('.mir-dialog-actions .trig')].map((b) => b.textContent.trim()) };`);
   assert.deepEqual([s11c.kind, s11c.state, s11c.others, s11c.pane], ['busy', 'ready', 2, true], 'a refused press must be re-offered with the count: ' + JSON.stringify(s11c));
@@ -307,7 +316,7 @@ try {
   assert.deepEqual(s11c.buttons, ['RELOAD ALL', 'LATER']);
   await g2.ev('__pane(); return 1;');
   t = await g2.tap('#lwOffer .mir-dialog-actions .trig:first-child'); assert.equal(t.ok, 1, 'RELOAD ALL not pressable: ' + JSON.stringify(t));
-  const s11d = await g2.ev(`await new Promise((q) => setTimeout(q, 50)); return { taken: window.__taken ?? null, state: __LW.sw.state };`);
+  const s11d = await g2.ev(`await __until(() => __LW.sw.state === 'taking'); return { taken: window.__taken ?? null, state: __LW.sw.state };`);
   assert.deepEqual(s11d, { taken: { force: true }, state: 'taking' }, 'RELOAD ALL must take with force: true');
   await g2.ev(`__LW.sw.others = 0; __LW.scrub(0); await __LW.settle(); return 1;`);
   pass(`a replaced tab holding no work reloads at once (${s11.clean.reloads}); one holding work is told ("${s11.told.badge}") and a real press on its badge reloads; ` +
@@ -327,7 +336,7 @@ try {
     const r = sw.buildReady((o) => { window.__taken = o; });
     return { r, taken: window.__taken ?? null, pane: __pane().shown, state: sw.state };`);
   assert.deepEqual(s14a, { r: true, taken: null, pane: true, state: 'ready' }, 'at t = 137 the session is offered, with the take-on-hide armed');
-  await g2.ev('await new Promise((q) => setTimeout(q, 400)); __pane(); return 1;');
+  await g2.ev('await __until(__up); __pane(); return 1;');
   t = await g2.tap('#lwOffer .mir-dialog-actions .trig:last-child'); assert.equal(t.ok, 1, 'LATER not pressable: ' + JSON.stringify(t));
   const s14b = await g2.ev(`await new Promise((q) => setTimeout(q, 900));
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange'));
@@ -340,11 +349,11 @@ try {
   /* ── 15 · (032) the popup holds the focus, and Escape — a real key — is LATER: nothing taken, the badge stays, the hide takes nothing ── */
   const s15a = await g2.ev(`const sw = __LW.sw; __LW.scrub(42); await __LW.settle(); window.__taken = undefined;
     sw.state = 'idle'; sw.asked = false; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'escape-is-later' };
-    sw.buildReady((o) => { window.__taken = o; }); await new Promise((q) => setTimeout(q, 400));
+    sw.buildReady((o) => { window.__taken = o; }); await __until(() => __up() && !!(sw.offering && sw.offering.contains(document.activeElement)));
     return { pane: __pane().shown, focus: document.activeElement && document.activeElement.textContent.trim(), inside: !!(sw.offering && sw.offering.contains(document.activeElement)) };`);
   assert.deepEqual(s15a, { pane: true, focus: 'RELOAD PAGE', inside: true }, 'the popup must be up with RELOAD PAGE holding the focus');
   await g2.press('\uE00C');
-  const s15b = await g2.ev(`await new Promise((q) => setTimeout(q, 100));
+  const s15b = await g2.ev(`await __until(() => !__pane().shown);
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange'));
     const out = { pane: __pane().shown, taken: window.__taken ?? null, state: __LW.sw.state, badge: __badges().build.text };
     delete document.visibilityState; document.dispatchEvent(new Event('visibilitychange'));
@@ -387,15 +396,15 @@ try {
   /* ── 16 · a link pasted into the address bar (the hashchange road): over an unedited session it opens and reads clean; over
           an edited one it asks first — no keeps the edit and the ring, yes opens it clean; an in-page anchor asks nothing ── */
   const hashB = new URL(linkB).hash, hashA = new URL(linkHref).hash;
-  const s16 = await g3.ev(`const w = (n) => new Promise((q) => setTimeout(q, n)), H = __LW.history;
+  const s16 = await g3.ev(`const H = __LW.history, go = (h) => { const done = new Promise((q) => { const t = setTimeout(q, 10000); addEventListener('hashchange', () => { clearTimeout(t); q(); }, { once: true }); }); location.hash = h; return done; };
     const read = () => ({ exposure: +__LW.mat.exposure.toFixed(3), rows: H.entries().map((e) => e.label), dirty: __LW.projects.dirty, canUndo: H.canUndo, confirms: window.__confirms });
     window.__confirms = 0; const saved = window.confirm; let answer = false; window.confirm = () => { window.__confirms++; return answer; };
     await __LW.settle(); const start = read();
-    location.hash = ${JSON.stringify(hashB)}; await w(400); await __LW.settle(); const unedited = read();
+    await go(${JSON.stringify(hashB)}); await __LW.settle(); const unedited = read();
     __LW.loadPreset('1s'); H.flush(); await __LW.settle(); const edited = read();
-    location.hash = ${JSON.stringify(hashA)}; await w(400); await __LW.settle(); const no = read();
-    answer = true; location.hash = ${JSON.stringify(hashB)}; await w(400); await __LW.settle(); const yes = read();
-    __LW.loadPreset('1s'); H.flush(); await __LW.settle(); location.hash = '#rack'; await w(400); const anchor = read();
+    await go(${JSON.stringify(hashA)}); await __LW.settle(); const no = read();
+    answer = true; await go(${JSON.stringify(hashB)}); await __LW.settle(); const yes = read();
+    __LW.loadPreset('1s'); H.flush(); await __LW.settle(); await go('#rack'); const anchor = read();
     window.confirm = saved;
     return { start, unedited, edited, no, yes, anchor, errors: __e.slice() };`);
   assert.equal(s16.start.dirty, false);
