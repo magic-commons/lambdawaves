@@ -716,6 +716,7 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 /* iteration 011 Q4: the MOLECULAR deck is molecules only — a record not yet on this device keeps its picture and wears the kit's download glyph */
 #lwMenu .mm-dl { position: absolute; right: 5%; bottom: 5%; width: clamp(20px, calc(var(--t) * .15), 32px); height: clamp(20px, calc(var(--t) * .15), 32px); display: grid; place-items: center; border-radius: 50%; color: var(--fg); background: hsl(var(--glass-tint) / .7); pointer-events: none; }
 #lwMenu .mm-dl .mm-ico { width: 62%; height: 62%; } #lwMenu .mm-dl[hidden] { display: none; }
+#lwMenu .mm-mol.away .mm-pic { inset: 3% auto auto 3%; width: 72%; height: 72%; }   /* 038 close (D-REVIEW 4): a tile that waits for its download keeps its drawing out of the badge's corner */
 /* iteration 014 C2 ISOMERS: the corner mark (the count of the molecule and its structural isomers) and THE ISOMER DECK over the volume's deck */
 #lwMenu .mm-iso { position: absolute; right: 6%; top: 6%; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; display: grid; place-items: center; border-radius: 9px;
   font: var(--w-bold, 600) 10px/1 var(--font-ui, sans-serif); letter-spacing: .04em; color: var(--fg); background: hsl(var(--glass-tint) / .72);
@@ -747,7 +748,7 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 @media (max-width: 700px) {
   #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
   #lwMenu .mm-tabs { gap: 14px; } #lwMenu .mm-tab { font-size: 12px; letter-spacing: .08em; } #lwMenu .mm-tab .mm-ico { display: none; }
-  #lwMenu .mm-prev { right: auto; left: 2px; } #lwMenu .mm-next { left: auto; right: 2px; } #lwMenu .mm-caption { min-height: 76px; }
+  #lwMenu .mm-caption { min-height: 76px; }   /* 038 close: the page arrows stay outside the deck (picker.js size() keeps 60 px a side for them) */
   #lwMenu .mm-shelf { gap: 16px; } #lwMenu .mm-vol { --vol-h: min(clamp(300px, calc(100dvh - 400px), 540px), calc((100vw - 56px) * 8 / 9)); } }   /* 032: two portraits a row */
 @media (prefers-reduced-motion: reduce) {
   #lwMenu { clip-path: none; transition: none; } #lwMenu .mm-pic, #lwMenu .mm-pill, #lwMenu .mm-under, #lwMenu .mm-ring-ink, #lwMenu .mm-arrow, #lwMenu .mm-arrow .mm-ico { transition: none; }

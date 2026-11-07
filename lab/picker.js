@@ -532,7 +532,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       /* iteration 012 L2: on a desktop the deck keeps off the racks behind the Picker (a rack's width and 20 px a side, Josh: "not overlap the
          blurred racks too much" on a 16:9 screen); the ATOMIC table is not a deck and keeps its size */
       const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
-      const side = narrow ? 12 : innerWidth >= 1100 ? Math.min(rackW + 20, (innerWidth - 900) / 2) : 75;
+      const side = narrow ? 60 : innerWidth >= 1100 ? Math.min(rackW + 20, (innerWidth - 900) / 2) : 75;   // 038 close (D-REVIEW 4): a phone's side holds the 44-px page arrow outside the deck, never on a tile
       const H = Math.max(150, scroller.clientHeight - above - 70), W = Math.max(200, Math.min(scroller.clientWidth - 2 * side, 1900));
       /* 037 M6 THE DENSE GRID (Josh 11-05: "show as many rows and columns as you can for the molecules"): as many rows (≤ 7) and columns (≤ 16)
          as fit at the least tile — 120 px, 80 on a phone — then the tile as large as both leave, ≤ 200 (so a desktop page is eight across
