@@ -25,7 +25,12 @@ body[data-theme="light"] :is(.k-arcknob, .mir-swatch-seat) { --arc-groove: hsl(0
   --arc-sm-w-routed: 54px;                                       /* room for the dial and the RANGE dial the modulation window seats beside it */
   --arc-sm-dial: 22px;
   --arc-sm-reach: -8px -12px;                                    /* the 46 × 38 finger SOLEIL's lane measured */
+  --arc-grad-ink: var(--fg);                                     /* 1.5.7-alpha.15 a gradient track's stops lean toward the theme's ink … */
+  --arc-grad-weight: 18%;                                        /* … this much: a yellow end reads on a pale card, a blue one on a dark card */
+  --arc-thumb-ring: hsl(0 0% 100% / .92);                        /* the thumb: a disc in the colour beneath, this ring, */
+  --arc-thumb-halo: hsl(0 0% 0% / .38);                          /* and this halo, so it reads on any colour of its track */
 }
+body[data-theme="light"] .k-arcknob { --arc-thumb-halo: hsl(0 0% 0% / .28); }
 .k-arcknob.k-lg { --dial-size: 42px; }
 .mir-swatch-seat {
   --swatch-size: 30px;
@@ -70,6 +75,12 @@ body[data-theme="light"] :is(.k-arcknob, .mir-swatch-seat) { --arc-groove: hsl(0
 .k-arc-track { stroke: var(--arc-groove); stroke-dasharray: var(--arc-span, 360) 360; }
 .k-arc-value { stroke: var(--lane-ink, var(--swatch, var(--acc))); stroke-dasharray: var(--arc-dash, 0) 360; }
 .k-arc-value[data-off] { visibility: hidden; }                  /* a zero-length round cap would draw a dot */
+/* 1.5.7-alpha.15 THE ARC WEARS A GRADIENT (arcRing's `stops`): the track's segments butt-joined in their own colour (--arc-seg, written per
+   segment), the two ends round; the thumb a disc in the colour beneath it, ringed and haloed */
+.k-arc-seg { stroke: color-mix(in oklab, var(--arc-seg), var(--arc-grad-ink) var(--arc-grad-weight)); stroke-linecap: butt; }
+.k-arc-seg.k-arc-end { stroke-linecap: round; }
+.k-arc-halo { fill: var(--arc-thumb-halo); stroke: none; }
+.k-arc-disc { fill: color-mix(in oklab, var(--arc-seg), var(--arc-grad-ink) var(--arc-grad-weight)); stroke: var(--arc-thumb-ring); stroke-width: 1.4; }
 
 /* the knob wearing it: no body.  Every selector is a CHILD chain: the modulation window seats its own RANGE dial, a kit
    knob, INSIDE a routed knob's root, and a descendant selector would strip that dial's body and needle too.  The three

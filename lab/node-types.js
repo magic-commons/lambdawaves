@@ -1,6 +1,7 @@
 /* lab/node-types.js — NODES' TABLE and MATRIX types, and the one node factory (iteration 019 N2; NODES-DESIGN.md).  Josh (2026-10-27):
  * "basic ones … from photoshop's adjustments/after effects FX and whatnot. Posterize, Threshold, levels, and perhaps a film grain effect".
- * A type is data: { cls, label, hint, knobs: [{ k, label, min, max, home, step?, log?, unit?, colour?, options? }], neutral(v), fn | matrix }.
+ * A type is data: { cls, label, hint, knobs: [{ k, label, min, max, home, step?, log?, unit?, colour?, options?, stops? }], neutral(v), fn | matrix }.
+ * 038 P1 · THE ARC WEARS A GRADIENT (MIR 1.5.7-alpha.15): a knob's `stops` (CSS colours, evenly spaced) make it the kit's arc with that track and a thumb.
  *   TABLE   (lab/nodes-compile.js folds them into one feComponentTransfer)  LEVELS · POSTERIZE · THRESHOLD (on luma) · INVERT · GAMMA ·
  *           EXPOSURE · CONTRAST — fn(values) → (y, channel) → y, the same on every channel
  *   MATRIX  (folded into one feColorMatrix)  HUE · SATURATION · LUMA · TINT (a colour and an amount) · TEMPERATURE — matrix(values) → 20
@@ -66,7 +67,7 @@ export function nodeBody(parent, node, T, { idOf, hand }) {
   const ctls = {};
   for (const K of T.knobs) {
     const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: K.hint, min: K.min, max: K.max, step: K.step, log: K.log, home: K.home, unit: K.unit,
-      fmt: K.fmt, colour: K.colour, options: K.options, value: node.values[K.k], onInput: (v) => hand(K.k, v, false), onChange: (v) => hand(K.k, v, true) });
+      fmt: K.fmt, colour: K.colour, options: K.options, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, v, false), onChange: (v) => hand(K.k, v, true) });
     parent.appendChild(c.root);
     if (c.targets[0]) c.targets[0].root.dataset.param = idOf(K.k);
   }
