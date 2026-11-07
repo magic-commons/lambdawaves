@@ -86,10 +86,10 @@ check('the empty register → \'\'; an all-zero one and a vanishing term are not
 });
 check('an oscillator label → \\mathrm{…} with a legal subscript (the m bound to its word, spaces \\,)', () => {
   const t = copy([st(3, 2, 2, 1)], HAMILTONIANS.qho);
-  assert.equal(t, '$\\mathrm{N2\\,n_r0\\,d_{+2}}$\n$\\psi = \\mathrm{N2\\,n_r0\\,d_{+2}}$');
+  assert.equal(t, '$\\mathrm{N2\\,n_r0\\,d_{2}}$\n$\\psi = \\mathrm{N2\\,n_r0\\,d_{2}}$');   // 039 X5: m ≥ 0 unsigned, as hydrogen's
 });
 check('BOX and QUARKONIUM labels, whose m follows a space, keep the subscript on the word (never after \\,)', () => {
-  assert.equal(lines(copy([st(3, 0, 0, 1)], HAMILTONIANS.well))[0], '$\\mathrm{3s\\,well_{+0}}$');
+  assert.equal(lines(copy([st(3, 0, 0, 1)], HAMILTONIANS.well))[0], '$\\mathrm{3s\\,well_{0}}$');
   assert.equal(lines(copy([st(2, 1, -1, 1)], HAMILTONIANS.cornell))[0], '$\\mathrm{1P_{-1}}$');
 });
 check('ATOM names its shells as hydrogen does (the notebook spelling, chemistry order)', () => {

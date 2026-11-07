@@ -17,7 +17,7 @@
  *   Under a Zeeman or Stark field, an A ↔ B transition or the Sturmian scale the amplitudes move as well; the copy is
  *   still exactly c(t) at that t (STATE-A/B: the live register IS the mix, and the mix is what is copied).
  * NAMES: hydrogen (any Z) and ATOM name a state by n, l, m — `2p_{-1}`, `4d_{2}`, `1s_{0}`, the notebook's spelling.
- *   Any other operator keeps its own labelOf, made LaTeX-safe: `\mathrm{…}`, a `₊2` / `₋2` becomes `_{+2}` / `_{-2}`
+ *   Any other operator keeps its own labelOf, made LaTeX-safe: `\mathrm{…}`, a `₊2` / `₋2` becomes `_{2}` / `_{-2}` (hydrogen's form)
  *   bound to the word before it (KaTeX refuses a subscript after `\,` — "Got group of unknown type: 'internal'"),
  *   and the remaining spaces become `\,`.
  */
@@ -32,7 +32,7 @@ const PI_TOL = 1e-3, PI_QMAX = 12; // φ/π within PI_TOL of p/q, q ≤ PI_QMAX,
 function latexName(s, H) {
   if (!H || H.id === 'hydrogen' || H.id === 'atom' || typeof H.labelOf !== 'function') return atomForms(s).latex;
   const safe = String(H.labelOf(s)).trim()
-    .replace(/\s*([₊₋])(\d+)/g, (_, sg, d) => `_{${sg === '₊' ? '+' : '-'}${d}}`)
+    .replace(/\s*([₊₋])(\d+)/g, (_, sg, d) => `_{${sg === '₋' ? '-' : ''}${d}}`)   // 039 X5: m ≥ 0 unsigned, as hydrogen's 2p_{0} (CENTRAL wrote '1s+0')
     .replace(/\s+/g, '\\,');
   return `\\mathrm{${safe}}`;
 }
