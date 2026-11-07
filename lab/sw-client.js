@@ -56,6 +56,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
   const brief = (why) => { const w = String(why || '').replace(/^precache \.\//, '').replace(/\s+/g, ' '); return w.length > 72 ? w.slice(0, 69) + '…' : w; };   // 033: the badge's share of a reason
   const ART = './img/icon.svg';
   const UNSAVED = 'Your unsaved project changes will be lost. Save first, or go on without them.';
+  const UPDATE_TEXT = 'UPDATE APP reloads λWAVES with its newest build, or with a clean copy of this one when there is none. Saved projects, settings, the notebook and your installed volumes are kept. ' + UNSAVED;
   const BODY = 'A newer λWAVES is ready. Reload the page to start using it; it takes a few seconds. Saved projects, settings, the notebook and your installed volumes are kept; unsaved changes are lost, so save first.';
   /* iteration 028 R-03: a press refused because other windows are open — the popup says so, and RELOAD PAGE becomes RELOAD ALL */
   const busyText = (n) => n + ' other window' + (n > 1 ? 's are' : ' is') + ' open on this build. RELOAD ALL reloads ' + (n > 1 ? 'them' : 'it')
@@ -187,7 +188,8 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       let discardApproved = false;
       const projects = getProjects();
       if (projects && projects.dirty) {
-        if (!(await confirmDialog(UNSAVED, { title: 'REPAIR WITHOUT SAVING?', yes: 'REPAIR ANYWAY', no: 'KEEP WORKING', danger: true }))) return false;   // 033: the kit's dialog
+        /* 039 W8 UPDATE APP SAYS UPDATE: the question names the press it answers and what the press does (033: the kit's dialog) */
+        if (!(await confirmDialog(UPDATE_TEXT, { title: 'UPDATE WITHOUT SAVING?', yes: 'UPDATE ANYWAY', no: 'KEEP WORKING', danger: true }))) return false;
         discardApproved = true;
       }
       swClient.state = 'refreshing';
