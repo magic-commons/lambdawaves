@@ -156,7 +156,7 @@ export function createProjects(port) {
     /* 039 X9 · SAVE AND SAVE NEW (WALK-A #9, WALK-B #16: two floppies, one meaning unclear): SAVE writes over the open project; PROJECT reads SAVE NEW
        (its id `project` kept) and wears its own drawing (fieldIcons, below) — the words say the difference */
     copy: { save: ['SAVE', 'this project', 'Save over the open project (a new one if none is open)'] },
-    galleryCopy: { project: ['SAVE NEW', 'a new project', 'Save what is on screen as a new project, here'],
+    galleryCopy: { project: ['SAVE NEW', 'a new project', 'Save what is on screen as a new project, where SAVE TO says'],   // 039 F2 (X-REVIEW #2): in DEMOS SAVE TO is empty and the save lands at ROOT, never "here"
       factory: 'RESTORE THE DEMOS', factoryNote: 'puts back the demos λWAVES ships with — adds only what is missing, and never touches anything you saved',
       /* 036 K5 (Josh: not 'DEMOS' and 'DEMOS' — greyed 'Name File' and 'Folder Name'; inside a folder of your own, SAVE TO names it): MIR 1.5.7-alpha.5 */
       namePlaceholder: 'NAME FILE', saveToPlaceholder: 'FOLDER NAME', proposeName: false },

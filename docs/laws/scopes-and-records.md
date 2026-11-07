@@ -27,7 +27,7 @@ seeded from a deleted demo stays the reader's, opens from their store (the DEMOS
 (`tests/molecule-demos.browser-test.mjs`, re-aimed). ITERATION 026 adds three conducted demos after it — STAR LOOP, BENZENE π, WATER ESP
 (`docs/conductor/`) — and `demos/` is a sw.js DATA root (never precached; the boot's seed stores each demo in FOLDERS once per browser). The DEMOS wear their covers (a 4:3 middle of
 `lab/demos/covers`, refreshed in place once by the starters' `·cover` revision; only a starter being added or refreshed fetches one),
-folder cards the kit's `folder` glyph, RESTORE THE DEMOS in the foot, the toolbar SAVE · SAVE NEW · DUPLICATE · NEW (039 X9: PROJECT reads SAVE NEW and wears `saveNew`, a page with a +; SAVE writes over the open project; SAVE TO's hint says a save left empty lands at ROOT), ⓘ the RENDER card's
+folder cards the kit's `folder` glyph, RESTORE THE DEMOS in the foot, the toolbar SAVE · SAVE NEW · DUPLICATE · NEW (039 X9: PROJECT reads SAVE NEW and wears `saveNew`, a page with a +; SAVE writes over the open project; SAVE TO's hint says a save left empty lands at ROOT; 039 F2: SAVE NEW's hint says it lands "where SAVE TO says", never "here" — inside DEMOS, a folder of read-only starters, SAVE TO stands empty and the save lands at ROOT, the kit's 1.5.7-alpha.5 law), ⓘ the RENDER card's
 SUBJECT, a save also its modulation preset in CAPS (a rack with routes). Its doors: O, WINDOW › FOLDERS, the notebook's ▤, FILE (NEW,
 OPEN, the recent rows ask FOLDERS' own "Save this first?"), and the FOLDERS rack card (`projects`, the kit's mountGallery, 8 a page,
 closed at the top of the LEFT rack, built at its first open); each puts the front page away first (the port's `cover`). RENDER carries
