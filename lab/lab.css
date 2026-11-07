@@ -227,6 +227,11 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 .mb-sub-list.mb-accordion { position: static; flex: 0 0 auto; min-width: 0; max-height: none; overflow: visible; margin: 0 0 4px 12px; box-shadow: none; }
 .mb-item.mb-check, .mb-item.mb-radio { position: relative; padding-inline-start: 26px; }
 .mb-item:has(> .mb-icon) { align-items: center; }
+/* 039 X8 · ONE COLUMN OF WORDS (WALK-A #15, WALK-C #18): in a list where any row wears an icon, a row without one starts its word in the icons'
+   word column (10 + 16 − 8 + 18 = 36 px); a check or radio row WITH an icon keeps the icons' padding and wears its ✓ or • at the row's end */
+.mb-list:has(> .mb-item > .mb-icon) > .mb-item:not(:has(> .mb-icon)) { padding-inline-start: 36px; }
+.mb-item:is(.mb-check, .mb-radio):has(> .mb-icon) { padding-inline-start: 10px; }
+.mb-item:is(.mb-check, .mb-radio):has(> .mb-icon) > .mb-mark { position: static; flex: 0 0 auto; }
 
 
 .mb-item > .mb-num { margin-left: auto; flex: 0 0 auto; display: inline-flex; align-items: center;

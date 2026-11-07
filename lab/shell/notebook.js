@@ -1,7 +1,7 @@
 /* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el } from '../mir/kit.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
+import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, label } from '../mir/kit.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
@@ -78,7 +78,7 @@ export function createNotebook(app) {
         return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), m ? m[1] : () => A.run(id, o.args), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon || (a.icon && !o.radio) ? { icon: o.icon || (typeof a.icon === 'function' ? a.icon() : a.icon) } : {}) }]; };   // 022 E2: a row wears its action's glyph (the registry's `icon`)
       const sub = (text, entries, icon) => [text, entries, null, '', { sub: true, ...(icon ? { icon } : {}) }];
       const radio = (id, group, choices, cur) => choices.map(([v, w]) => item(id, w, { args: { id: v }, radio: group, on: () => cur() === v }));
-      const reveal = A.reveal, H = () => app.sh.historyApi, wins = () => [...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')];
+      const reveal = A.reveal, H = () => app.sh.historyApi, wins = () => [...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')], TOOL_SEAT = new Set(['modulation', 'timeline', 'pattern', 'nodes', 'notebook', 'folders', 'history']);
       const tool = (id, w, win, icon) => item(id, w, { on: () => !!A.get(id).get && !!A.get(id).get(), icon });
       const MENUS = {
         /* iteration 004 · FILE GOES THROUGH FOLDERS (BASINS shell.js FILE): NEW, OPEN and a recent project open FOLDERS first and let it ask
@@ -113,11 +113,11 @@ export function createNotebook(app) {
           item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK'), item('settings.playLock', 'PLAYBACK LOCK'), null,
           sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
         WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'search' }), item('gui', 'MIR OPTIONS…'), null,   // 038 M3 (Josh 11-06): the kit's OPTIONS window, a WINDOW row
-          sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'MINIMIZE ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
+          sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'FOLD ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
           sub('TOOLS', () => [tool('modulation', 'MODULATION', null, 'modulation'), tool('timeline', 'TIMELINE', null, 'timeline'), tool('pattern', 'PATTERN', null, 'pattern'), tool('nodes', 'NODES', null, 'nodes'), tool('notebook', 'NOTEBOOK', null, 'notebook'), tool('folders', 'FOLDERS', null, 'folders'), item('history', 'HISTORY', { icon: 'history' }), tool('help', 'KEYBOARD', null, 'keyboard')]), null,
           /* 018 E6 · one submenu per KIND (window-chrome.js data-kind), each window ✓ while open: a press opens a closed one by the FINDER's road
              (kit rk.reveal) and closes an open one */
-          ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k);
+          ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k && !TOOL_SEAT.has(d.dataset.id));   // 039 X8: a window TOOLS seats is listed there alone
             return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['none', null, true]]; }))],   // 021 V2: each window its one glyph
         HELP: () => [item('about', 'ABOUT λWAVES'), item('guiAbout', 'ABOUT MIR'), item('help', 'KEYBOARD SHORTCUTS…'),
           item('photosensitivity', 'PHOTOSENSITIVITY WARNING…', { hint: 'show the photosensitivity notice now and next load' }), null, item('update', 'UPDATE APP', { hint: 'check for a new build, rebuild the offline cache, and reload' }), item('diagnostics', 'COPY DIAGNOSTICS', { hint: 'the build, the worker, the stores and the last errors' })],
@@ -363,6 +363,7 @@ export function createNotebook(app) {
       abWin.tools.prepend(abI);
       const abShow = (f) => {
         abFace = f === 'mir' ? 'mir' : 'lw'; faces.about.hidden = abFace !== 'lw'; mirFace.hidden = abFace !== 'mir';
+        { const t = abWin.root.querySelector('.mir-win-title'); if (t) label(t, abFace === 'lw' ? 'ABOUT λWAVES' : 'ABOUT MIR'); }   // 039 X8: the title names the face shown
         abI.title = abFace === 'lw' ? 'MIR ABOUT — the kit this app is built on' : 'ABOUT λWAVES — back to the app'; abI.setAttribute('aria-pressed', String(abFace === 'mir'));
         if (abFace === 'mir') { const g = mirGui(), page = g && g.aboutPage ? g.aboutPage(mirFace) : null; if (page && abWatch) abWatch.observe(page); }   // lent again each time: the kit's own window may have taken it back
         const logo = faces.about.querySelector('.nb-logo');

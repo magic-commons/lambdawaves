@@ -10,7 +10,7 @@
  * Escape none; a selected title drags the whole selection; arrows nudge 1 px (shift 10).  THE KEYS ARE THE GROUND'S: they fire only with the
  * ground focused (tabindex 0) and stop there, so the kit's one key table never sees them — Delete · Ctrl-D · M · Tab / Shift-A · Home ·
  * Ctrl-Z / Ctrl-Shift-Z (NODES' own ring, lab/nodes-undo.js).
- * 020 X2 THE CARD: the chevron (H) collapses a card to its bar and its PREVIEW strip, COLLAPSE ALL / EXPAND ALL at the head; a double-click
+ * 020 X2 THE CARD: the chevron (H) folds a card to its bar and its PREVIEW strip, FOLD ALL / UNFOLD ALL at the head (039 X8: one word family); a double-click
  * on the title RENAMES it (Enter / Escape; empty = the type's name); every TABLE and MATRIX card draws a 128 × 10 strip — a grey ramp and a
  * hue ramp through the node's OWN transfer (nodes-compile.js transfer(): the compiler's fn / matrix), redrawn when its values move; the
  * right-click menus (a card's, the ground's) and TIDY (the cards back in one column, in list order).
@@ -124,7 +124,7 @@ export function createView(parent, kind, M) {
   function make(q) {
     const t = T[q.type], n = node(q.id, t.label, true, true, q.type, MARK[t.cls]);
     n.c.dataset.type = q.type; n.c.title = t.hint || '';
-    const v = el('button', 'nodes-chev', null); v.type = 'button'; chip(v, 'chevronDown', 'COLLAPSE'); n.bar.prepend(v); v.addEventListener('click', () => M.setFold(q.id, !q.fold));
+    const v = el('button', 'nodes-chev', null); v.type = 'button'; chip(v, 'chevronDown', 'FOLD OR UNFOLD'); n.bar.prepend(v); v.addEventListener('click', () => M.setFold(q.id, !q.fold));
     if (!W) n.name.addEventListener('dblclick', () => renameAt(q.id));
     if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip' + (t.draw ? ' nodes-drawn' : '')); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
     const eye = el('button', 'nodes-eye', n.bar); eye.type = 'button'; chip(eye, 'eye', 'VIEW HERE'); eye.addEventListener('click', () => M.setView(q.id));
@@ -258,11 +258,11 @@ export function createView(parent, kind, M) {
   const popup = (x, y, rows) => { const m = pop = contextMenu({ x, y, entries: rows.map((r) => (r ? [r[0], r[1], false, '', r.length > 2 ? { checked: !!r[2] } : {}] : null)), onClose: () => { if (pop === m) pop = null; } }); };
   const folded = () => M.list().length > 0 && M.list().every((q) => q.fold);
   const foldAll = () => M.setFold(M.list().map((q) => q.id), !folded());
-  const cardRows = (q) => [['VIEW HERE', () => M.setView(q.id), M.flags.view === q.id], ['SOLO', () => M.setSolo(q.id), M.flags.solo === q.id], ['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'EXPAND' : 'COLLAPSE', () => M.setFold(q.id, !q.fold)],
+  const cardRows = (q) => [['VIEW HERE', () => M.setView(q.id), M.flags.view === q.id], ['SOLO', () => M.setSolo(q.id), M.flags.solo === q.id], ['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'UNFOLD' : 'FOLD', () => M.setFold(q.id, !q.fold)],
     ['DUPLICATE', () => pick(M.duplicate(q.id, at()))], ['RENAME', () => renameAt(q.id)], ['RESET', () => M.reset(q.id)], null,
     ['MOVE UP', () => M.move(q.id, -1)], ['MOVE DOWN', () => M.move(q.id, 1)], null, ['REMOVE', () => M.remove(q.id)]];
   const wireRows = (q) => { const k = mixOf(T[q.type]); return [[q.plug === false ? 'PLUG IN' : 'UNPLUG', () => M.setPlug(q.id, q.plug === false)], k && ['RESET MIX', () => M.hand(q, k, homeOf(T[q.type], k))]].filter(Boolean); };
-  const groundRows = () => [['ADD…', () => openMenu()], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()],
+  const groundRows = () => [['ADD…', () => openMenu()], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'UNFOLD ALL' : 'FOLD ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()],
     ...(wsel && M.byId(wsel) ? [null, wireRows(M.byId(wsel))[0]] : [])].filter((r) => r !== false);
   onContext(ground, ({ x, y, target }) => { if (target.closest('input') || (drag && drag.zoom)) return;   // a Mac's ctrl + press is a zoom here, not a menu
     const hd = target.closest('.nodes-hand'), hq = hd && M.byId(hd.dataset.wire); if (hq) { pickWire(hq.id); popup(x, y, wireRows(hq)); return; }
@@ -339,7 +339,7 @@ export function createView(parent, kind, M) {
   const tools = ground.insertBefore(el('div', 'nodes-tools'), plane), tool = (cls, g, word, run) => { const b = el('button', cls, tools); b.type = 'button'; chip(b, g, word); b.addEventListener('click', run); return b; };
   const addB = tool('nodes-add', 'plus', 'ADD NODE', () => openMenu());
   if (W) tool('nodes-fit', 'home', 'FIT — every card in view (Home)', () => fit());
-  const foldB = tool('nodes-folds', 'compact', 'COLLAPSE ALL', () => foldAll());
+  const foldB = tool('nodes-folds', 'compact', 'FOLD ALL', () => foldAll());
   const offB = tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
   const back = () => { if (W) ground.focus({ preventScroll: true }); };   // a pick or an Escape gives the ground its keys back
   const kindRow = (type, t) => [t.label + '\t' + MARK[t.cls] + (t.heavy ? ' HEAVY' : ''), () => { M.add(type); back(); }, type === 'curves' && M.has(), t.hint, { icon: nodeGlyph(type), id: type }];
@@ -410,7 +410,7 @@ export function createView(parent, kind, M) {
         n.c.classList.toggle('past', !!(M.flags.solo ? M.flags.solo !== q.id : M.flags.view && L.findIndex((p) => p.id === M.flags.view) < L.indexOf(q))); n.bar.querySelector('.nodes-chev').setAttribute('aria-expanded', String(!q.fold));
         if (q.name) { label(n.name, ''); n.name.textContent = q.name; } else label(n.name, T[q.type].label); }
       offB.setAttribute('aria-pressed', String(M.off())); ground.classList.toggle('nodes-off', M.off());
-      chip(foldB, folded() ? 'expand' : 'compact', folded() ? 'EXPAND ALL' : 'COLLAPSE ALL');
+      chip(foldB, folded() ? 'expand' : 'compact', folded() ? 'UNFOLD ALL' : 'FOLD ALL');
       paintSel(); api.place();
     },
     place() {

@@ -187,7 +187,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       let discardApproved = false;
       const projects = getProjects();
       if (projects && projects.dirty) {
-        if (!(await confirmDialog(UNSAVED, { title: 'REPAIR WITHOUT SAVING?', yes: 'REPAIR ANYWAY', no: 'KEEP WORKING', danger: true }))) return false;   // 033: the kit's dialog
+        if (!(await confirmDialog(UNSAVED, { title: 'UPDATE WITHOUT SAVING?', yes: 'UPDATE ANYWAY', no: 'KEEP WORKING', danger: true }))) return false;   // 033: the kit's dialog
         discardApproved = true;
       }
       swClient.state = 'refreshing';
