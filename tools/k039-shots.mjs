@@ -61,10 +61,10 @@ try {
     /* every seg in a fit row (hydrogen, a molecule, three nodes with their feet open): its cells now, the room it needs, one cell's width — so the
        one-cell default can be judged row by row; k3 also takes the nodes' full cards (FILM GRAIN's KIND · BLEND, ABERRATION's MODE, the feet) */
     const measure = () => g.ev(`await __LW.settle(); const rows = [...document.querySelectorAll('.row.fit')], out = [];
-      for (const r of rows) { if (!r.offsetParent) continue; const cols = getComputedStyle(r).gridTemplateColumns.split(' ').filter((x) => /px$/.test(x)).map(parseFloat);
+      for (const r of rows) { const cols = getComputedStyle(r).gridTemplateColumns.split(' ').filter((x) => /px$/.test(x)).map(parseFloat);
         for (const s of r.querySelectorAll(':scope > .segw, :scope > .seg')) { const bs = [...s.querySelectorAll('.seg-b')], need = bs.reduce((n, b) => n + b.scrollWidth, 0);
           const where = (s.closest('.dev') && s.closest('.dev').dataset.id) || (s.closest('[data-mir-window]') && s.closest('[data-mir-window]').dataset.mirWindow) || '?';
-          out.push({ where, opts: bs.map((b) => b.textContent.trim()).join('|'), span: getComputedStyle(s).gridColumnStart + '/' + getComputedStyle(s).gridColumnEnd, w: Math.round(s.getBoundingClientRect().width), need: Math.round(need), cell: Math.round(cols[0] || 0), cols: cols.length, cls: s.className }); } }
+          out.push({ shown: !!r.offsetParent, where, opts: bs.map((b) => b.textContent.trim()).join('|'), span: getComputedStyle(s).gridColumnStart + '/' + getComputedStyle(s).gridColumnEnd, w: Math.round(s.getBoundingClientRect().width), need: Math.round(need), cell: Math.round(cols[0] || 0), cols: cols.length, cls: s.className }); } }
       return out;`);
     out.hydrogen = await measure();
     await g.ev(`__LW.run('mode', { id: 'molecules' }); await new Promise((r) => setTimeout(r, 2500)); return 1;`);

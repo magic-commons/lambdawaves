@@ -11,6 +11,7 @@
  *   (controls/factory.js — the kind of value chooses it), a number knob stamped `data-param` with its stable modulation target id
  *   `nodes.<node>.<knob>` (idOf), so it is a drop target like any rack dial; the hand's write goes to `hand`. */
 import { control } from './mir/controls/factory.js';
+import { row } from './mir/kit.js';
 import { colourMatrix } from './mir/panels/picture-filter.js';
 import { IDENTITY, LUMA } from './nodes-compile.js';
 
@@ -152,7 +153,7 @@ export function nodeBody(parent, node, T, { idOf, hand }) {
   const ctls = {}, at = {};
   /* 038 P2 · A FULL NODE'S FACE: `face` lays the knobs out one fit row per line (a knob it does not name joins the last); `bare` hides the labels,
      and the readout (its name in `fmt`) shows only while a knob is edited (nodes.css) */
-  if (T.face) for (const keys of T.face) { const r = document.createElement('div'); r.className = 'nodes-face row fit'; parent.appendChild(r); for (const k of keys) at[k] = r; at[''] = r; }
+  if (T.face) for (const keys of T.face) { const r = row(parent, { fit: true, seg: 1, cls: 'nodes-face' }); for (const k of keys) at[k] = r; at[''] = r; }
   if (T.bare) parent.classList.add('nodes-bare');
   const order = T.face ? [...T.face.flat(), ...T.knobs.map((K) => K.k)].filter((k, i, a) => a.indexOf(k) === i) : T.knobs.map((K) => K.k);
   for (const K of order.map((k) => T.knobs.find((J) => J.k === k))) {

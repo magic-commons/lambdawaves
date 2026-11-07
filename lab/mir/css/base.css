@@ -285,7 +285,9 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
    (six at 262 px) and a row never adds a line for a control that fits.  A knob's cell is the cell (no 62-px seat) and its face scales
    with it, between --knob-min and --knob-max (62 % of the cell; the arc's viewBox scales with the dial, the needle and the base tick
    are shares of it, the 44-px finger stays the dial's ::before outset); a switch, a trigger, a readout or a select stretches to its
-   cell, a segmented select (and anything marked `.wide`) takes two, `.full` the whole line.  The sizes are tokens (css/tokens.css). */
+   cell, a segmented select (and anything marked `.wide`) takes two, `.full` the whole line.  The sizes are tokens (css/tokens.css).
+   1.5.7-alpha.19 · THE FIT ROW KEEPS ITS CELLS (λWAVES 039 K3): a row marked `data-seg="1"` (`row(parent, { fit: true, seg: 1 })`) gives a
+   segmented select ONE cell, so two segs share a row of three (a node face's KIND · BLEND); `.wide` and `.full` still span there. */
 .row.fit { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(var(--cell-min, 40px), 100%), 1fr)); gap: var(--row-gap, 4px) 4px;
   align-items: start; justify-content: stretch; }
 .row.fit[data-knob="sm"] { --knob-max: var(--knob, 34px); }                    /* the face at most the plain knob's */
@@ -297,6 +299,7 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
 .row.fit > :is(.sw, .trig, .ro, .segw, .seg, select.sel) { width: auto; min-width: 0; max-width: 100%; box-sizing: border-box; justify-self: stretch; }
 .row.fit > :is(.sw, .trig) { overflow: hidden; justify-content: center; }
 .row.fit > :is(.seg, .segw, .wide) { grid-column: span 2; }
+.row.fit[data-seg="1"] > :is(.seg, .segw):not(.wide, .full) { grid-column: auto; }   /* the row keeps its cells: a seg takes one */
 .row.fit > .full { grid-column: 1 / -1; }
 /* 1.5.6-alpha.7 · THE SURFACE PARTS (kit.js lamp · meter · section · knobBank; λWAVES 022 C1).  A section is a hairline frame on its surface's
    well with its name in a strip at the top-left; a bank is a fit row of always-n slots (a knob's face scales with its slot, as in a fit row; an

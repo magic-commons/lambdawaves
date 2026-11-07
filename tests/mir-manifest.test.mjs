@@ -66,6 +66,8 @@ const ACCEPTED = {
   '1.5.7-alpha.17': '8ff1ef8c8dcfa662d11b0a3281f7ac108afe7898a32e229974b22a2001682e6c',
   /* 039 K2 · MIR 1.5.7-alpha.18 THE ROOT WEARS THE HINT (kit-039 @ d8e5701): seg({ title }) and stepper({ title }) hint their root */
   '1.5.7-alpha.18': '094a93a051a31ea903d6fea7b13c8b049b19b359a7f51e9c03f85650a241eb0c',
+  /* 039 K3 · MIR 1.5.7-alpha.19 THE FIT ROW KEEPS ITS CELLS (kit-039 @ b1942e8): row({ fit: true, seg: 1 }) — a seg takes one cell in that row */
+  '1.5.7-alpha.19': '9da2d21097bac38a0ab50dda78801780077587ec82737c02a6700acf97ed7290',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

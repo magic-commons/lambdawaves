@@ -783,11 +783,14 @@ export function group(parent, text) {
 
 /** 1.5.6-alpha.6 · a row of controls.  `fit: true` is THE FIT ROW (base.css `.row.fit`): auto-fit cells of at least `cellMin` px
  *  (default the `--cell-min` token, 40), the knob faces scaled to the cell; `knob: 'sm'` caps a face at the plain knob's (`--knob`),
- *  'lg' floors it there, 'md' (the default) leaves it between `--knob-min` and `--knob-max`.  Without `fit` it is the plain wrapping row. */
-export function row(parent, { fit = false, cellMin, knob: size, cls } = {}) {
+ *  'lg' floors it there, 'md' (the default) leaves it between `--knob-min` and `--knob-max`.  `seg: 1` (THE FIT ROW KEEPS ITS CELLS,
+ *  1.5.7-alpha.19) gives a segmented select one cell instead of two (`data-seg="1"`), so two segs share a row of three; one marked `.wide`
+ *  or `.full` still spans.  Without `fit` it is the plain wrapping row. */
+export function row(parent, { fit = false, cellMin, knob: size, seg, cls } = {}) {
   const r = el('div', 'row' + (fit ? ' fit' : '') + (cls ? ' ' + cls : ''), parent);
   if (fit && Number.isFinite(cellMin)) r.style.setProperty('--cell-min', cellMin + 'px');
   if (fit && (size === 'sm' || size === 'lg')) r.dataset.knob = size;
+  if (fit && seg === 1) r.dataset.seg = '1';
   return r;
 }
 
