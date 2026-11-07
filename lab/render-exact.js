@@ -765,7 +765,7 @@ export function createFilm(LW, opts = {}) {
       if (J.poseAt && !pc) Object.assign(LW.obs, J.poseAt(i, J.N, t) || {});
       if (pinned('jitter') && f && f.stats) f.stats.presents = JITTER_SEED;         // H1: the seed, pinned for THIS frame
       shot = opts.grab ? await opts.grab({ t, w, h, wit, k: i, seed: JITTER_SEED, pinned })
-        : await readback(f, canvas, w, h, () => f.frame({ modes: LW.modesAt(t), obs: LW.obs, mat: LW.mat }), wit);   // H8: modesAt inline, nothing between
+        : await readback(f, canvas, w, h, () => f.frame({ modes: LW.modesAt(t), obs: LW.obs, mat: LW.mat }), wit, !(bake && J.nodes !== false && f.objectMask));   // H8: modesAt inline, nothing between; 038 N6: the object codes for the bake's targets (its closing run makes the frame opaque)
       const fail = witnesses(J, wit, t, w, h);
       if (!fail.length) break;
       J.contended++;

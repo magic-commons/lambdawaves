@@ -1,11 +1,13 @@
 /* lab/nodes.css — NODES (lab/nodes.js, 018 D3): the ground (a dotted plane that pans), the node cards (a title bar, a top in-port, a bottom
-   out-port), the wires (one SVG layer under the cards), + and the window ↔ rack door in the ground's top corners.  Glass and ink from the skin. */
+   out-port), the wires (one SVG layer under the cards), the tools in the ground's top corner (the window ↔ rack door is in the bars, 038 N3).
+   Glass and ink from the skin. */
 .nodes-host { display: flex; flex-direction: column; gap: 6px; height: 100%; min-height: 0; }
 .nodes-ground { position: relative; overflow: hidden; touch-action: none; cursor: grab; border-radius: var(--r-md); box-shadow: var(--relief-well, var(--neu-inset));
   background: radial-gradient(circle, color-mix(in srgb, var(--ink-faint) 35%, transparent) 1px, transparent 1.5px) 0 0 / 22px 22px, var(--glass-well); }
 .nodes-host > .nodes-ground { flex: 1 1 auto; min-height: 0; }
 .dev .nodes-ground { height: min(70vh, 680px); }
 .nodes-ground:active { cursor: grabbing; }
+.nodes-ground:is(.nodes-zkey, .nodes-zooming) { cursor: zoom-in; }   /* 038 N2: ctrl / ⌘ held over the ground, or a ctrl-drag under way: the drag zooms */
 .nodes-plane { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
 .nodes-wires { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
 .nodes-wires path { fill: none; stroke: var(--acc); stroke-width: 2; opacity: .75; }
@@ -27,16 +29,21 @@
 .nodes-port { position: absolute; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 2px var(--glass-well); }
 .nodes-port.in { top: -5px; }
 .nodes-port.out { bottom: -5px; }
-.nodes-tools button, :is(.nodes-x, .nodes-rm, .nodes-door) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
+.nodes-tools button, :is(.nodes-x, .nodes-rm) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
   background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
 .nodes-x, .nodes-rm { width: 18px; height: 18px; margin-right: -4px; }
 .nodes-x[aria-pressed="true"] { color: var(--dim); opacity: .6; }   /* 036 P3: ⏻ MUTE — a muted node's power reads OFF (dim), a live one the bar's ink */
-:is(.nodes-tools button, .nodes-x, .nodes-rm, .nodes-door):is(:hover, :focus-visible) { color: var(--acc); }
-:is(.nodes-tools button, .nodes-x, .nodes-rm, .nodes-door) svg { width: 16px; height: 16px; }
-.nodes-tools, .nodes-door { position: absolute; top: 6px; z-index: 1; }
-.nodes-tools { left: 6px; display: flex; gap: 2px; }
-:is(.nodes-tools button, .nodes-door) { border-radius: var(--r-sm); background: var(--glass-tint); }
-.nodes-door { right: 6px; }
+:is(.nodes-tools button, .nodes-x, .nodes-rm):is(:hover, :focus-visible) { color: var(--acc); }
+:is(.nodes-tools button, .nodes-x, .nodes-rm) svg { width: 16px; height: 16px; }
+.nodes-tools { position: absolute; top: 6px; left: 6px; z-index: 1; display: flex; gap: 2px; }
+.nodes-tools button { border-radius: var(--r-sm); background: var(--glass-tint); }
+/* 038 N3 · THE BAR: the window's dock door is a title-bar head button (the kit's .mir-win-btn), its glyph a size under the bar's 18; the card's
+   pop-out door wears × 's look before it (22 px, round, the dim ink, the head's 14-px glyph) — the seat's size under :where() so a finger's 44 still wins */
+.mir-win-btn.nodes-door > svg { width: 16px; height: 16px; }
+.dev-util > .nodes-door { padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--dim); cursor: pointer; }
+.dev-util > :where(.nodes-door) { width: 22px; height: 22px; }
+.dev-util > .nodes-door:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
+.dev-util > .nodes-door > svg { width: 14px; height: 14px; }
 /* 020 X1 · the ground: focus, the selection's accent outline, the shift-drag box */
 .nodes-ground:focus-visible { outline: 1px solid color-mix(in srgb, var(--acc) 50%, transparent); outline-offset: -1px; }
 .nodes-card.sel { outline: 2px solid var(--acc); outline-offset: 2px; }
@@ -56,30 +63,49 @@
 .nodes-card.past { opacity: .4; }
 .nodes-passes > span + span::before { content: ' · '; }
 .nodes-off .nodes-wires { opacity: .3; }
+/* 038 N4 · THE WIRE HAS A KNOB: the handles over the cards (a round puck, the track and the value arc in the accent, a dot at the hub), the selected
+   wire lit, the value only while it turns; an unplugged wire dashed to its hollow handle and its node dimmed; a live port a drag target */
+.nodes-hands { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; }
+.nodes-hand { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; color: var(--acc); cursor: ns-resize; touch-action: none;
+  background: var(--glass-raise, var(--glass-tint)); box-shadow: 0 0 0 1.5px var(--glass-well), var(--relief-raise, var(--neu-raise)); }
+.nodes-hand > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.nodes-hand circle { fill: none; stroke-width: 2.4; stroke-linecap: round; }
+.nodes-hand .t { stroke: color-mix(in srgb, var(--ink-faint) 40%, transparent); }
+.nodes-hand .v { stroke: currentColor; }
+.nodes-hand .c { fill: currentColor; stroke: none; }
+.nodes-hand.sel { box-shadow: 0 0 0 2px var(--acc), var(--relief-raise, var(--neu-raise)); }
+.nodes-hand.nomix { cursor: pointer; }
+.nodes-hand.cut { opacity: .6; }
+.nodes-hand.cut .c { fill: none; stroke: currentColor; stroke-width: 1.2; }
+.nodes-hand.turn::after { content: attr(data-val); position: absolute; left: 50%; bottom: calc(100% + 4px); translate: -50% 0; padding: 2px 6px; border-radius: var(--r-sm); white-space: nowrap; pointer-events: none;
+  background: var(--glass-well); color: var(--fg); font: var(--w-bold) var(--fs-micro) / 1.2 var(--font-ui); letter-spacing: var(--tr-wide); }
+.nodes-wires path.cut { stroke-dasharray: 4 4; opacity: .55; }
+.nodes-wires path:is(.sel, .hot) { stroke-width: 3; opacity: 1; }
+.nodes-wires path.ghost { stroke-dasharray: 3 3; opacity: .9; }
+.nodes-port.live { cursor: crosshair; }
+.nodes-port.live::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; }
+.nodes-card.unplug { opacity: .5; }
+/* 038 N5 · THE MINIMAP: a well at the ground's bottom-right; the cards faint ink (STAGE IN / OUT the accent), the view an accent frame */
+.nodes-map { position: absolute; right: 8px; bottom: 8px; z-index: 1; width: 120px; height: 80px; box-sizing: border-box; overflow: hidden; cursor: crosshair; touch-action: none;
+  border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+.nodes-map > svg { display: block; width: 100%; height: 100%; }
+.nodes-map .c { fill: color-mix(in srgb, var(--ink-faint) 60%, transparent); }
+.nodes-map .c.io { fill: color-mix(in srgb, var(--acc) 55%, transparent); }
+.nodes-map .c.dim { opacity: .4; }
+.nodes-map .v { fill: color-mix(in srgb, var(--acc) 10%, transparent); stroke: var(--acc); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.nodes-column .nodes-card.unplug::before { border-left-style: dashed; }
 /* 020 X4 · the foot fold: FADE · MASK · SOFT under the knobs; lit while either is off home */
 .nodes-foot { margin-top: 6px; border-top: 1px solid var(--glass-hairline); }
 .nodes-foot-t { display: block; width: 100%; padding: 5px 0 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
 .nodes-foot-t.on, .nodes-foot-t:hover { color: var(--acc); }
 .nodes-foot > .nodes-knobs { padding-top: 4px; }
+.nodes-foot > .nodes-knobs > :is(.seg, .segw) { grid-column: 1 / -1; }   /* 038 N6: TARGET's three words on one line (two cells wrap OBJECT) */
 .nodes-card.fold > .nodes-foot { display: none; }
 .nodes-box { display: none; position: absolute; z-index: 1; pointer-events: none; border: 1px dashed var(--acc); background: color-mix(in srgb, var(--acc) 8%, transparent); }
-.nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: flex; flex-direction: column; min-width: 200px; max-height: calc(100% - 44px); overflow: auto; padding: 4px; border-radius: var(--r-md); }   /* 022 P3: a menu pane (.glass[data-mir-surface=menu]) — the skin's, no control's raise */
-.nodes-item { padding: 6px 12px; border: 0; background: transparent; box-shadow: none; color: var(--fg); font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui);
-  letter-spacing: var(--tr-wide); text-align: left; cursor: pointer; }
-.nodes-item:hover:not(:disabled) { color: var(--acc); }
-.nodes-item:disabled { opacity: .45; cursor: default; }
-/* 019 N5 · the + menu by class (each class's cost mark), the graphs, the foot's passes, the rack card's column */
-.nodes-head { display: flex; gap: 6px; padding: 4px 12px 2px; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--fg-soft); }
-.nodes-item { display: flex; align-items: center; gap: 8px; }
-.nodes-item .nodes-mark { margin-left: auto; }
-/* 020 X0 · the + menu is one list: a search line, a hairline with the class's icon between classes (no word), the empty graph's one line */
-.nodes-sep { display: flex; align-items: center; gap: 6px; padding: 6px 12px 2px; color: var(--fg-soft); }
-.nodes-sep::after { content: ''; flex: 1 1 auto; border-top: 1px solid var(--glass-hairline); }
-.nodes-find { margin: 2px 4px 4px; padding: 5px 8px; border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); color: var(--fg); box-shadow: var(--relief-well, var(--neu-inset)); font: var(--fs-tiny) / 1.2 var(--font-ui); }
+/* 038 N1 · the + menu is the kit's contextMenu pane (its rows, its plate): the search line on top; the empty graph's one line */
+.nodes-find { flex: none; margin: 2px 2px 4px; padding: 5px 8px; border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); color: var(--fg); box-shadow: var(--relief-well, var(--neu-inset)); font: var(--fs-tiny) / 1.2 var(--font-ui); }
 .nodes-empty { position: absolute; translate: -50% 0; z-index: 1; padding: 3px 8px; border-radius: var(--r-sm); background: var(--glass-well); white-space: nowrap; pointer-events: none; font: var(--fs-tiny) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-faint); opacity: .7; }
 .nodes-column .nodes-empty { position: static; translate: none; align-self: center; }
-.nodes-heavy { font-style: normal; font-size: .8em; color: var(--acc); }
-.nodes-menu .sp-prex { margin-left: auto; }
 .nodes-passes { position: absolute; left: 8px; bottom: 6px; z-index: 1; pointer-events: none; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
 .dev .nodes-ground.nodes-column { height: auto; cursor: default; }
 .nodes-column .nodes-plane { position: static; width: auto; height: auto; display: flex; flex-direction: column; gap: 18px; padding: 40px 8px 26px; translate: none !important; }

@@ -12,9 +12,9 @@
  * A NEUTRAL NODE COSTS NOTHING: a bypassed node, or one whose type says it is at home (`neutral`), emits nothing; a matrix run that
  * multiplies out to the identity is dropped.  A TABLE run is rebuilt only when one of its nodes moved (its key: ids and versions; the
  * tables are handed back BY IDENTITY otherwise, and the kit does not rewrite them).
- *   compile(list, TYPES, cache, { upTo, solo, off }) → { runs, layers, passes }
+ *   compile(list, TYPES, cache, { upTo, solo, off }) → { runs, layers, passes, mask }   mask: a run reads the field's object codes (038 N6)
  *     upTo    VIEW HERE (020 X3): the chain up to and including this node id · solo  this node alone · off  BYPASS ALL: nothing
- *     list    [{ id, type, values, bypass, v }] in graph order (v: a version the owner bumps on every change of the node)
+ *     list    [{ id, type, values, bypass, plug?, v }] in graph order (v: a version the owner bumps on every change of the node; plug false: unplugged)
  *     TYPES   { type: { cls: 'table' | 'matrix' | 'prim' | 'layer', neutral?(values, node), fn?(values, node) → (y, ch) → y,
  *               luma?, matrix?(values) → 20 numbers, prim?(values, id) → [[tag, attrs, children?], …] } }
  *     cache   a Map the caller keeps between compiles (the TABLE runs by key)
@@ -26,6 +26,11 @@
  * feComponentTransfer / feColorMatrix markup on $IN, the mask in an alpha channel (LIGHTS · DARKS · MIDS: the luma into alpha and a soft
  * threshold table; CENTRE · EDGES: an feImage of a radial PNG drawn once on a 64 × 64 canvas, cached by kind + soft, stretched over the
  * picture) times the FADE, then the node's output `in` the mask, `over` the input.  The cost mark follows (ownRun → ···).
+ * 038 N6 A NODE HAS A TARGET (Josh: "an option so that it can only affect either the 'stage', 'object', or 'both'"; CALLS 4: one picture, a mask,
+ * a TARGET seg): every node but a LAYER or a SHADER carries TARGET (both · stage · object; absent = both, today's bytes).  The mask is the field's
+ * alpha code (lab/field.js setObjectMask, chain F: 255 where an atom carries the pixel, 254 the stage — which pixel is which is F's rule): a targeted
+ * node is its own run whose mask is SourceAlpha through feFuncA (OBJECT 255·A − 254, STAGE 255 − 255·A, × the FADE; times the MASK when one is
+ * set), softened 1.2 px, so out = mix(in, fx, mask) on the `in` / `over` road; `mask: true` asks the field for its codes, and a closing run puts A back to 1.
  *   Pure helpers: IDENTITY · LUMA · mul(B, A) · isIdentity(m) · tableOf(fns, n) · fadeOf(q, T) · ownRun(q, T) · weight(kind, x, soft) */
 import { TABLE_N } from './mir/panels/picture-filter.js';
 
@@ -63,8 +68,11 @@ const smooth = (e0, e1, x) => { const t = clamp01((x - e0) / (e1 - e0)); return 
 export const over = (T) => T.cls === 'layer' || T.cls === 'shader';
 const fadeOf = (q, T) => (over(T) || !Number.isFinite(+q.values.fade) ? 1 : clamp01(+q.values.fade));
 const maskOf = (q, T) => (over(T) ? 'none' : q.values.mask || 'none');
-/** ownRun(q, T): the node is a run of its own — masked, or a faded PRIMITIVE or luma TABLE (whose fade is a composite, not a fold) */
-export const ownRun = (q, T) => maskOf(q, T) !== 'none' || (fadeOf(q, T) < 1 && (T.cls === 'prim' || !!T.luma));
+const targetOf = (q, T) => (!over(T) && (q.values.target === 'stage' || q.values.target === 'object') ? q.values.target : 'both');
+/** ownRun(q, T): the node is a run of its own — masked, targeted, or a faded PRIMITIVE or luma TABLE (whose fade is a composite, not a fold) */
+export const ownRun = (q, T) => maskOf(q, T) !== 'none' || targetOf(q, T) !== 'both' || (fadeOf(q, T) < 1 && (T.cls === 'prim' || !!T.luma));
+/** the closing run while a target lives: alpha back to 1 (the field's codes never reach the page) — one identity, so never rewritten */
+const OPAQUE = Object.freeze({ prim: [['feComponentTransfer', {}, [['feFuncA', { type: 'linear', slope: 0, intercept: 1 }]]]] });
 /** weight(kind, x, soft) → 0..1: where a mask lets the node through — x the luma (lights · darks · mids) or the distance from the centre */
 function weight(kind, x, soft = 0.5) {
   const h = 0.02 + 0.48 * soft, L = smooth(0.5 - h, 0.5 + h, x), C = 1 - smooth(0.6 - h, 0.6 + h, x);
@@ -80,24 +88,30 @@ function shape(kind, soft) {
 }
 /** a node as its own run: its output named `<id>x`, then the fade (arithmetic) or the mask (`<id>m`, alpha) — in, over its input */
 function own(q, T) {
-  const id = q.id, X = id + 'x', a = fadeOf(q, T), kind = maskOf(q, T), soft = clamp01(+q.values.soft || 0), out = [];
+  const id = q.id, X = id + 'x', a = fadeOf(q, T), kind = maskOf(q, T), soft = clamp01(+q.values.soft || 0), out = [], tgt = targetOf(q, T), M = id + 'm';
+  /* 038 N6: the target's alpha from the field's code in SourceAlpha (OBJECT 255·A − 254: 1 on a ball or stick, 0 on the stage; STAGE the other), × s,
+     softened 1.2 px (the code's edge is the march's stipple, F7: it moves with the jitter unless PLAYBACK LOCK pins it) */
+  const tA = (s, result) => [['feComponentTransfer', { in: 'SourceAlpha' }, [['feFuncA', { type: 'linear', slope: (tgt === 'object' ? 255 : -255) * s, intercept: (tgt === 'object' ? -254 : 255) * s }]]],
+    ['feGaussianBlur', { stdDeviation: 1.2, result }]];
   if (T.cls === 'table') { if (T.luma) out.push(['feColorMatrix', { in: '$IN', type: 'matrix', values: S(LUMA) }]);
     const t = tableOf([T.fn(q.values, q)]); out.push(['feComponentTransfer', T.luma ? {} : { in: '$IN' }, [['feFuncR', { type: 'table', tableValues: S(t.r) }], ['feFuncG', { type: 'table', tableValues: S(t.g) }], ['feFuncB', { type: 'table', tableValues: S(t.b) }]]]); }
   else if (T.cls === 'matrix') out.push(['feColorMatrix', { in: '$IN', type: 'matrix', values: S(T.matrix(q.values)) }]);
   else out.push(...T.prim(q.values, id));
   out[out.length - 1][1].result = X;
-  if (kind === 'none') return [...out, ['feComposite', { in: X, in2: '$IN', operator: 'arithmetic', k1: 0, k2: a, k3: 1 - a, k4: 0 }]];
-  const mask = kind === 'centre' || kind === 'edges'
-    ? [['feImage', { href: shape(kind, soft), preserveAspectRatio: 'none' }], ['feComponentTransfer', { result: id + 'm' }, [['feFuncA', { type: 'linear', slope: a, intercept: 0 }]]]]
+  if (kind === 'none' && tgt === 'both') return [...out, ['feComposite', { in: X, in2: '$IN', operator: 'arithmetic', k1: 0, k2: a, k3: 1 - a, k4: 0 }]];
+  const mask = kind === 'none' ? tA(a, M) : kind === 'centre' || kind === 'edges'
+    ? [['feImage', { href: shape(kind, soft), preserveAspectRatio: 'none' }], ['feComponentTransfer', { result: M }, [['feFuncA', { type: 'linear', slope: a, intercept: 0 }]]]]
     : [['feColorMatrix', { in: '$IN', type: 'matrix', values: '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ' + S(LUMA.slice(0, 3)) + ' 0 0' }],
-      ['feComponentTransfer', { result: id + 'm' }, [['feFuncA', { type: 'table', tableValues: S(Array.from({ length: 33 }, (_, i) => a * weight(kind, i / 32, soft))) }]]]];
-  return [...out, ...mask, ['feComposite', { in: X, in2: id + 'm', operator: 'in' }], ['feComposite', { in2: '$IN', operator: 'over' }]];
+      ['feComponentTransfer', { result: M }, [['feFuncA', { type: 'table', tableValues: S(Array.from({ length: 33 }, (_, i) => a * weight(kind, i / 32, soft))) }]]]];
+  const both = kind !== 'none' && tgt !== 'both';                     // a MASK and a TARGET: the two alphas multiplied
+  if (both) mask.push(...tA(1, id + 't'), ['feComposite', { in: M, in2: id + 't', operator: 'in', result: id + 'n' }]);
+  return [...out, ...mask, ['feComposite', { in: X, in2: both ? id + 'n' : M, operator: 'in' }], ['feComposite', { in2: '$IN', operator: 'over' }]];
 }
 
 export function compile(list, TYPES, cache = new Map(), o = {}) {
   const runs = [], layers = [], keep = new Map(), at = o.upTo ? list.findIndex((q) => q.id === o.upTo) : -1;
   list = o.off ? [] : o.solo ? list.filter((q) => q.id === o.solo) : at >= 0 ? list.slice(0, at + 1) : list;
-  let tab = null;                                                    // the TABLE run being folded: its nodes
+  let tab = null, mask = false;                                      // the TABLE run being folded: its nodes; a run reads the object codes
   const close = () => {
     if (!tab) return;
     const key = tab.map((q) => q.id + ':' + q.v).join('|');
@@ -107,18 +121,19 @@ export function compile(list, TYPES, cache = new Map(), o = {}) {
   const matrix = (m) => { close(); const last = runs[runs.length - 1]; if (last && last.matrix) last.matrix = mul(m, last.matrix); else runs.push({ matrix: m }); };
   for (const q of list) {
     const T = TYPES[q.type];
-    if (!T || q.bypass || (T.neutral && T.neutral(q.values, q)) || fadeOf(q, T) === 0) continue;
+    if (!T || q.bypass || q.plug === false || (T.neutral && T.neutral(q.values, q)) || fadeOf(q, T) === 0) continue;   // 038 N4: an unplugged node emits nothing
     const a = fadeOf(q, T);
-    if (!over(T) && ownRun(q, T)) { close(); const k = 'o' + q.id + ':' + q.v; keep.set(k, cache.get(k) || { prim: own(q, T) }); runs.push(keep.get(k)); }
+    if (!over(T) && ownRun(q, T)) { close(); const k = 'o' + q.id + ':' + q.v; keep.set(k, cache.get(k) || { prim: own(q, T) }); runs.push(keep.get(k)); if (targetOf(q, T) !== 'both') mask = true; }
     else if (T.cls === 'table') { if (T.luma) matrix(LUMA); (tab || (tab = [])).push(q); }
     else if (T.cls === 'matrix') { const m = T.matrix(q.values); matrix(a < 1 ? m.map((x, i) => a * x + (1 - a) * IDENTITY[i]) : m); }
     else if (T.cls === 'prim') { close(); runs.push({ prim: T.prim(q.values, q.id) }); }
     else if (over(T)) layers.push({ id: q.id, type: q.type, values: q.values, ...(T.cls === 'shader' && { gpu: true }) });
   }
   close();
+  if (mask) runs.push(OPAQUE);
   cache.clear(); for (const [k, t] of keep) cache.set(k, t);
   const out = runs.filter((r) => !r.matrix || !isIdentity(r.matrix));
-  return { runs: out, layers, passes: out.reduce((s, r) => s + (r.prim ? r.prim.length : 1), 0) + layers.length };
+  return { runs: out, layers, passes: out.reduce((s, r) => s + (r.prim ? r.prim.length : 1), 0) + layers.length, mask };
 }
 
 /** transfer(q, T) → (rgb) → rgb, or null: what this node ALONE does to one colour, through the same fn / matrix the compiler folds — the

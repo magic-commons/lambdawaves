@@ -2,6 +2,44 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 038
+
+THE + MENU IS THE KIT'S (038 N1, Josh: "Nodes dropdown seems to be missing it's background"). The + menu is the kit's `contextMenu` anchored under the +, on the page as every kit menu is. Inside the window or the rack card the old pane blurred only the card's own glass (a nested backdrop root), and the short card clipped it to a scroller.
+- **It holds:** a search line (typed, the pane reopens with up to ten matches; Enter adds the first), then GROUPS, then GRAPHS ›.
+- **GROUPS:** TONE · COLOUR · PASSES · LAYERS · SHADERS, each a submenu. A kind joins one by `group`, else by its class; a new group is a row of `GROUPS` in `lab/nodes-view.js`; a group with no kind is hidden.
+- **GRAPHS ›:** the shipped graphs, the reader's, SAVE THIS GRAPH (the `saveInto` glyph, its name asked in the kit's dialog) and REMOVE ›.
+- **The keys:** the kit's ↑ ↓ → ← and Enter. Escape closes it and gives the ground its keys back.
+- No scroller. The REFRACTIVE · DARK · FROST tie of the menu floor is the kit's (FOR-MIR).
+
+THE GROUND ZOOMS BY CTRL (038 N2): Ctrl/⌘ + drag on the empty ground zooms about the press (up is in, 0.5–2×), as the wheel and the pinch do; the cursor says so while the key is held.
+
+THE DOORS ARE IN THE BARS (038 N3).
+- **The window:** its DOCK IN THE RACK is a title-bar head button beside × (`win.tools`, glyph 16 px).
+- **The rack card:** its OPEN AS A WINDOW sits before × in `.dev-util`, in × 's look.
+- **The glyphs:** `rackIn` / `rackOut`, λWAVES' line drawings; the kit's solid arrow reads heavy beside ×.
+- The ground keeps no door.
+
+THE WIRE HAS A KNOB (038 N4, FL Studio's Patcher). Every wire into a node carries a round handle at its middle.
+- **What it turns:** that node's MIX — its FADE (folded, already the target `nodes.<id>.fade`), or a LAYER's / SHADER's own 0–1 MIX or AMOUNT. The wire into STAGE OUT has no handle.
+- **The hand:** a vertical drag turns it with the kit's law (220 px, Shift 1/8); two presses come home; the wheel turns it (nothing scrolls in the window; Ctrl + wheel still zooms). The value shows only while it turns.
+- **The selection:** a press selects the wire. Delete unplugs it, the arrows turn it. Right-click gives PLUG IN / UNPLUG · RESET MIX.
+- **UNPLUG** is the node's `plug: false`, written only when false, so every graph saved before reads plugged. The node emits nothing (compiled beside bypass). Its card dims, and its wire is drawn dashed from above to its hollow handle. The rack column's connector is dashed.
+- **CONNECT keeps THE COLUMN IS THE CHAIN.** A card's port carried onto a wire, or onto another card's port (the wire it ends), moves its node into that wire and plugs it in: under the wire's upstream card, every card from the downstream one on shifted down. The order is kept, no card is covered, and it is one step of NODES' ring.
+- **Pulling a cable off:** an in-port let go on the empty ground unplugs its node. An unplugged node's own wire plugs it back in place.
+- A drag on the handle turns it; re-routing is the ports' (Patcher's way).
+
+THE MINIMAP (038 N5): the window's viewfinder at the ground's bottom-right.
+- **What it draws:** an SVG of the cards' union and the view, the view as an accent frame, redrawn once a frame when the view or a card moves.
+- **The hand:** a drag centres the view on its point; the wheel zooms about the view's centre.
+- It is hidden while every card is in view. The rack card has none.
+
+A NODE HAS A TARGET (038 N6, CALLS 4: one picture, a mask, a TARGET seg). Every TABLE, MATRIX and PRIM node carries TARGET: BOTH · STAGE · OBJECT. It is the foot fold's last row (FADE · MASK · TARGET); absent means BOTH, today's bytes.
+- **The mask** is the field's alpha code (`field.setObjectMask`, chain F; which pixel is OBJECT is F's rule — the atom carries at least half of it).
+- **The run:** a targeted node is its own run (cost ···) whose mask is SourceAlpha through feFuncA (OBJECT 255·A − 254, STAGE 255 − 255·A), × its FADE, × its MASK when set. It is softened 1.2 px, because the code's edge follows the march's stipple. Then out = mix(in, fx, mask) on the `in` / `over` road.
+- **The field** writes its codes only while a compiled run reads them (`compile().mask`), so an untargeted graph and THE LOCK see the opaque canvas. A closing run sets the alpha back to 1. The field's premultiplied returns clamp their colour to 1 first (an overbright 255 over 254 unpremultiplies past 255).
+- **A film reads the codes:** the readback keeps the alpha for the bake's filter while the mask lives. A still keeps 255 (≤ 1 level darker on the stage while a target lives).
+- LAYERs and SHADERs carry no TARGET.
+
 ## The law of 036
 
 THE GRAPH IS THE PROJECT'S (036 S1, Josh 2026-11-03: "Nodes currently don't save into any project. Make sure that nodes get saved and that new projects removes all nodes" — his word reverses 021 R2 call 3). The graph and its CURVES grade are `presentation.nodes` = `{ v: 1, seq, list, at, curves? }` (`lab/nodes.js` `graph()`), written only while the graph is not THE DEFAULT one (a node, a grade off flat, or an id once given), so NEW, the demos and every older file keep their bytes; the window's place (`pan`, `zoom`, `win`, `off`) stays the device's. AN OPEN REPLACES THE GRAPH, as it replaces the timeline: `restore()` lands it through `nodes.load()` (the undo's road, one batch, the window rebuilt once, NODES' ring started afresh) right BEFORE the rack, so the file's `nodes.*` routes, lanes and bases find their targets; a file without one — every project saved before 036, NEW, a link — opens on the empty graph, the grade flat; an UNDO leaves it (NODES keeps its own ring; the edit scope never writes it); a RESUME of a session written before 036 keeps the graph the device record holds. A node edit dirties the project (`projectKey`) and books the session's save (`onEdit`). `lambdawaves.q0.nodes` and `.q0.curves` are the live mirror a reload boots from (RECORDS: PROJECT; the window's place WORKSPACE); the reader's graphs and curves (`.nodePresets`, `.curvePresets`) stay PREFERENCE and NEW never touches them. `tests/new-project.browser-test.mjs` scene 9 is its guard.
