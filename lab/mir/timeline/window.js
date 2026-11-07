@@ -83,7 +83,9 @@ export function createTimeline(host, port) {
     win.resize({ h: Math.min(size.h, Math.max(min.h, r.height - editor.view.viewport.clientHeight + lanes)) }); }
   /* THE LOOP (1.5.6-alpha.25): the ruler's range › the ACTIVE range › the clips' extent, on the kit's controller.
      THE EMPTY TIMELINE RESTS (1.5.7-alpha.8, λWAVES 038 T1): with no clip playing the loop is the first bar — never a free
-     run to bar 200 — so the clock lives (every synced LFO keeps its phase) and a first clip lands at 1.1 under the head */
+     run to bar 200 — so the clock keeps running and a first clip lands at 1.1 under the head.  At each wrap a synced LFO whose
+     period divides the bar is continuous; a dotted one (and 1/1 T) re-phases, a synced S&H or drift repeats its bar, and a
+     free (Hz) LFO does not follow the bar at all (1.5.7-alpha.14 says it as it is) */
   if (port.loop !== false && typeof controller.loopFrom === 'function') controller.loopFrom({ range: () => editor.range(), active: () => editor.activeRange(), extent: () => model.extent() || { start: 0, end: model.meter() } });
 
   /* THE ONE PLAY, in the work bar: the kit's transport in BASINS' timeline form */

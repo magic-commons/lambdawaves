@@ -6,10 +6,11 @@
  * the pad.  The pad PAINTS FROM THE KNOBS' VALUES (the base, or the modulated value a route shows), so a modulated pair moves the dot and
  * the hand's base stays a ring: it cannot disagree with them.  The hand is the one knob law (kit.js): a press brings the dot to the
  * pointer; ⅛ fine on any modifier or a second finger, on a virtual point (nothing jumps when the gear engages); a double-tap centres.
- *   xyPad({ label, aria, x, y, home, tags, onInput, onChange, cls })
+ *   xyPad({ label, aria, x, y, home, tags, wrap, onInput, onChange, cls })
  *     x, y    each the options of the kit's knob() for that axis: { label, min, max, value, log, step, fmt, unit, title, … }
  *     home    [x, y] where Home and a double-tap go (default: the middle of each range)
  *     tags    { bl, br, tl, tr } words in the pad's corners (AUTOMATA's A B C D); words go through label()
+ *     wrap    1.5.7-alpha.13 THE PAD WRAPS: 'plane' or 'sphere' (padWrap below); absent, the drag and the arrows stop at the edge, as before
  *     onInput(x, y) while the hand or a key moves it; onChange(x, y) when it lands
  *   → { root, pad, x, y, get() → [x, y], set(x, y), setDisabled(on), paint(), lattice(reset?), destroy() }   x and y are the knob widgets: register them as the targets
  *
@@ -31,6 +32,24 @@ import { motionToken } from '../core/motion.js';
 import { fxAllowed, fxEnv } from '../fx/pointer-light.js';
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
+/** 1.5.7-alpha.13 THE PAD WRAPS (λWAVES 038 K3, Josh: "if my cursor keeps going up and the XY thing hits the top edge, it will teleport to the bottom
+ *  and keep going … in the stage, it just looks like the lighting is going round and round").  padWrap(wrap, ux, uy, press) → [ux, uy]: the pad's
+ *  point (0…1 each, y up) after the hand pushed it to (ux, uy) — pure.  The drag's virtual point and the arrows pass through it, so a hand that keeps
+ *  going keeps going; the value's range stays the app's.
+ *    'plane'   a torus on the square: past an edge the point comes back in at the opposite edge (pacman)
+ *    'sphere'  the disc inscribed in the square is a sphere of directions seen azimuthal-equidistant (the centre faces the eye, the rim is the one
+ *              point straight behind): past the rim at angle θ the point comes back in at θ + π with r → 2 − r, the great circle going on over the
+ *              back; a press outside the disc lands on its rim
+ *    anything else  the square's clamp, as before */
+export function padWrap(wrap, ux, uy, press = false) {
+  if (wrap === 'plane' && !press) return [ux < 0 || ux > 1 ? ux - Math.floor(ux) : ux, uy < 0 || uy > 1 ? uy - Math.floor(uy) : uy];
+  if (wrap !== 'sphere') return [clamp01(ux), clamp01(uy)];
+  const cx = 2 * ux - 1, cy = 2 * uy - 1, r = Math.hypot(cx, cy);
+  if (r <= 1) return [ux, uy];
+  const s = r % 2, k = press ? 1 / r : (s <= 1 ? s : s - 2) / r;
+  return [(1 + cx * k) / 2, (1 + cy * k) / 2];
+}
 
 /* a token colour as [r, g, b]: the canvas parses whatever CSS the skin wrote (hsl, oklch, color-mix …); cached by its text */
 const rgbs = new Map(); let probe = null;
@@ -184,14 +203,14 @@ export function xyPad(o = {}) {
     g = { id: e.pointerId, lx: e.clientX, ly: e.clientY, w: r.width || 1, h: r.height || 1, ux: norm('x', kx.get()), uy: norm('y', ky.get()) };
     pad.classList.add('drag'); lat.hold(true);                   // the hand is the point: the cursor's swell steps aside while it drags
     if (gearOf(e, e.pointerId) === 1) {                          // a press brings the dot to the pointer; with the gear engaged nothing jumps
-      g.ux = clamp01((e.clientX - r.left) / g.w); g.uy = clamp01(1 - (e.clientY - r.top) / g.h);
+      [g.ux, g.uy] = padWrap(o.wrap, (e.clientX - r.left) / g.w, 1 - (e.clientY - r.top) / g.h, true);
       put(denorm('x', g.ux), denorm('y', g.uy));
     }
   });
   pad.addEventListener('pointermove', (e) => {
     if (!g || e.pointerId !== g.id) return;
     const k = gearOf(e, g.id);                                   // the virtual point: gear · Δ / size on each axis
-    g.ux = clamp01(g.ux + k * (e.clientX - g.lx) / g.w); g.uy = clamp01(g.uy - k * (e.clientY - g.ly) / g.h);
+    [g.ux, g.uy] = padWrap(o.wrap, g.ux + k * (e.clientX - g.lx) / g.w, g.uy - k * (e.clientY - g.ly) / g.h);   // 1.5.7-alpha.13: past an edge, wrapped (or clamped)
     g.lx = e.clientX; g.ly = e.clientY;
     put(denorm('x', g.ux), denorm('y', g.uy));
   });
@@ -205,7 +224,7 @@ export function xyPad(o = {}) {
     const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1], PageUp: [0, 1], PageDown: [0, -1] }[e.code];
     if (!dir && e.code !== 'Home' && e.code !== 'Delete' && e.code !== 'Backspace') return;   // Home and Delete: home, as on a knob
     e.preventDefault(); e.stopPropagation();
-    if (dir) put(denorm('x', norm('x', kx.get()) + dir[0] * d), denorm('y', norm('y', ky.get()) + dir[1] * d)); else put(home[0], home[1]);
+    if (dir) { const [ux, uy] = padWrap(o.wrap, norm('x', kx.get()) + dir[0] * d, norm('y', ky.get()) + dir[1] * d); put(denorm('x', ux), denorm('y', uy)); } else put(home[0], home[1]);   // the arrows wrap as the drag does
     land();
   });
   paintPad();
