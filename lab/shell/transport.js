@@ -85,6 +85,14 @@ export function createTransport(app) {
       places: ['rack', 'stage'],
       onDock: (v) => { const rk = app.sh.rk; if (!rk) return; if (v && rk.isOpen('transport')) transportDock(rk).open(rk.window('transport'));   // 038 S6: the open card read from the rack (app.sh carries no wTr: this road never ran, and a press on an open, empty card did nothing)
         else if (v) rk.open('transport', { index: app.sh.layout.dockIndex }); else rk.close('transport'); } });
+    /* 039 W3 · THE BAR IS IN THE TAB ORDER as the kit made it: one Tab stop (Play), and ← → Home End walk every control.  Two lacks stopped
+       the kit's walk (FOR-KIT): the BPM pill keeps ← → for the tempo (here it keeps ↑ ↓, PageUp/PageDown and Shift+← →), and its list holds
+       the controls a mode hides by visibility (HYDROGEN's molecule chooser), which take no focus.  The app walks the shown ones */
+    const walkable = (n) => !n.hidden && !n.disabled && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden' && !n.closest('.native-tempo, [inert]') && !n.classList.contains('tr-back');
+    T.addEventListener('keydown', (e) => { const k = e.code; if (!/^(ArrowLeft|ArrowRight|Home|End)$/.test(k) || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.target.tagName === 'INPUT') return;
+      const list = [...T.querySelectorAll('button, input')].filter(walkable), i = list.indexOf(e.target); if (i < 0) return;
+      const to = k === 'Home' ? 0 : k === 'End' ? list.length - 1 : (i + (k === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
+      e.preventDefault(); e.stopPropagation(); list[to].focus({ preventScroll: true }); }, true);
     /* the rack's ☆ list opens beside its button, wherever the bar sits (it is the stage's, never the bar's: the bar clips) */
     for (const [b, l] of [['rackFav', 'rackFavList']]) { const btnEl = byId(b), list = byId(l); if (!btnEl || !list) continue;
       btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const z = cssZoom(list), r = btnEl.getBoundingClientRect(), h = list.offsetHeight * z, w = list.offsetWidth * z, up = r.top - h - 8 >= 8;   // 036 K2: seen, written ÷ UI SCALE
