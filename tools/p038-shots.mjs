@@ -160,8 +160,7 @@ im = Image.open(sys.argv[1]).convert('RGB'); print(json.dumps([list(im.getpixel(
     await shot('038-P7-perspective-stage', [200, 120, 1300, 820]);
     await ev(`N.set(N.nodes()[0].id, 'mode', 'shift'); await w(500); return 1;`);
     await shot('038-P7-shift-stage', [200, 120, 1300, 820]);
-    await ev(`N.open(); await w(500); N.set(N.nodes()[0].id, 'mode', 'perspective'); await w(300); return 1;`);
-    const b = out.runs.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
+    const b = await ev(`N.open(); await w(500); N.win.place({ x: 700, y: 60, w: 440, h: 480 }); N.set(N.nodes()[0].id, 'mode', 'perspective'); await w(400); return rect(card('aberration'));`), crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
     for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P7-aberration-' + t, crop, 2); }
   }
   if (scene === 'p8') {
