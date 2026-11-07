@@ -105,6 +105,91 @@ try {
     const b = out.table.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
     for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot(`038-${scene.toUpperCase()}-${type}-${t}`, crop, 2); }
   }
+  if (scene === 'p4') {
+    /* HUE/SATURATION: its matrix against the one-knob HUE at the same turn, its three ends (S −100 grey, L +100 white, L −100 black), its arcs, its card */
+    out.matrix = await ev(`N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 520 }); await w(300);
+      const mx = () => N.compile().runs[0].matrix, apply = (m, c) => [0, 1, 2].map((r) => +(m[r * 5] * c[0] + m[r * 5 + 1] * c[1] + m[r * 5 + 2] * c[2] + m[r * 5 + 4]).toFixed(4));
+      const one = N.add('hue'); N.set(one, 'hue', 120); await w(100); const m1 = mx(); N.remove(one);
+      const id = N.add('color'); await w(100); const o = { home: N.compile().runs.length }; N.set(id, 'hue', 120); await w(100); const m2 = mx();
+      o.sameAsHue = m1.every((x, i) => Math.abs(x - m2[i]) < 1e-9); N.set(id, 'hue', 0);
+      N.set(id, 'saturation', -100); await w(100); o.grey = apply(mx(), [0.9, 0.3, 0.1]); N.set(id, 'saturation', 0);
+      N.set(id, 'lightness', 100); await w(100); o.white = apply(mx(), [0.9, 0.3, 0.1]); N.set(id, 'lightness', -100); await w(100); o.black = apply(mx(), [0.9, 0.3, 0.1]);
+      N.set(id, 'lightness', 50); await w(100); o.half = apply(mx(), [0.9, 0.3, 0.1]);
+      N.set(id, 'hue', -35); N.set(id, 'saturation', 30); N.set(id, 'lightness', 10); await w(400);
+      const c = card('color'); o.segs = [...c.querySelectorAll('.nodes-body .k-arc')].map((s) => s.querySelectorAll('.k-arc-seg').length);
+      o.labels = [...c.querySelectorAll('.nodes-body .k-lbl')].map((l) => l.textContent); o.title = [c.querySelector('.nodes-name').textContent, c.querySelector('.nodes-name').scrollWidth <= c.querySelector('.nodes-name').clientWidth];
+      o.mark = c.querySelector('.nodes-mark').textContent; o.box = rect(c); o.h = c.offsetHeight; return o;`);
+    const b = out.matrix.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
+    for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P4-color-' + t, crop, 2); }
+  }
+  if (scene === 'p5') {
+    /* BALANCE: its matrix against the one-knob TEMPERATURE and SATURATION, the vibrance run's shape (folded at 0, its own 7-primitive run else), and
+       the vibrance itself through the kit's picture filter on a canvas of four patches (dull, vivid, grey, a dull blue): the dull ones gain the most */
+    out.matrix = await ev(`N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 560 }); await w(300); const mx = () => N.compile().runs[0].matrix;
+      const one = N.add('temperature'); N.set(one, 'warmth', 0.6); await w(100); const m1 = mx(); N.remove(one);
+      const id = N.add('balance'); await w(100); const o = { home: N.compile().runs.length }; N.set(id, 'temperature', 60); await w(100); o.sameAsTemperature = m1.every((x, i) => Math.abs(x - mx()[i]) < 1e-9);
+      N.set(id, 'temperature', 0); N.set(id, 'tint', 100); await w(100); o.tint = [0, 6, 12].map((i) => +mx()[i].toFixed(3)); N.set(id, 'tint', 0);
+      N.set(id, 'vibrance', 60); await w(100); const r = N.compile().runs; o.vib = { runs: r.length, prims: r[0].prim && r[0].prim.map((p) => p[0]), mark: card('balance').querySelector('.nodes-mark').textContent }; return o;`);
+    const pat = await ev(`const c = document.createElement('canvas'); c.id = 'p5test'; c.width = 400; c.height = 100; Object.assign(c.style, { position: 'fixed', left: '20px', top: '600px', width: '400px', height: '100px', zIndex: 99999 });
+      document.body.appendChild(c); const g2 = c.getContext('2d'); [[153, 128, 115], [230, 51, 26], [128, 128, 128], [100, 115, 150]].forEach((p, i) => { g2.fillStyle = 'rgb(' + p + ')'; g2.fillRect(i * 100, 0, 100, 100); });
+      const { pictureFilter } = await import('./mir/panels/picture-filter.js'); window.__p5f = pictureFilter(c); return 1;`);
+    const read = async (tag) => { const png = `.tmp/p-p5-${tag}.png`; writeFileSync(png, Buffer.from(await g.snap(), 'base64'));
+      return JSON.parse(execFileSync('python3', ['-I', '-c', `import sys, json
+from PIL import Image
+im = Image.open(sys.argv[1]).convert('RGB'); print(json.dumps([list(im.getpixel((70 + 100 * i, 650))) for i in range(4)]))`, png]).toString()); };
+    out.before = await read('before');
+    await ev(`window.__p5f.setChain(N.compile().runs).flush(); await w(400); return 1;`); out.v60 = await read('v60');
+    await ev(`N.set(N.nodes()[0].id, 'vibrance', -60); await w(200); window.__p5f.setChain(N.compile().runs).flush(); await w(400); return 1;`); out.vm60 = await read('vm60');
+    const chroma = (p) => Math.max(...p) - Math.min(...p);
+    out.gain = out.before.map((p, i) => [chroma(p), chroma(out.v60[i]), chroma(out.vm60[i])]);
+    await ev(`window.__p5f.setChain([]).flush(); document.getElementById('p5test').remove(); const id = N.nodes()[0].id; N.set(id, 'vibrance', 35); N.set(id, 'temperature', 25); N.set(id, 'tint', -15); N.set(id, 'saturation', 10); await w(400); return 1;`);
+    out.card = await ev(`const c = card('balance'); return { rows: [...c.querySelectorAll('.nodes-face')].map((r) => [...r.children].map((k) => k.dataset.param.split('.').pop())), labels: [...c.querySelectorAll('.nodes-body .k-lbl')].map((l) => l.textContent),
+      box: rect(c), h: c.offsetHeight, mark: c.querySelector('.nodes-mark').textContent };`);
+    const b = out.card.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
+    for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P5-balance-' + t, crop, 2); }
+  }
+  if (scene === 'p7') {
+    /* CHROMATIC ABERRATION's PERSPECTIVE: the run's primitives in each mode, the card's MODE seg, and the stage in each mode at AMOUNT 12 px (a crop
+       at the centre and one at the edge: SHIFT moves the fringe the same everywhere, PERSPECTIVE leaves the centre still and grows outward) */
+    out.runs = await ev(`N.open(); await w(600); N.win.place({ x: 980, y: 60, w: 420, h: 480 }); await w(300); const id = N.add('aberration'); N.set(id, 'shift', 12); await w(300);
+      const kinds = () => N.compile().runs[0].prim.map((p) => p[0]); const o = { shift: kinds() }; N.set(id, 'mode', 'perspective'); await w(300); o.perspective = kinds();
+      o.img = N.compile().runs[0].prim.find((p) => p[0] === 'feImage')[1].href.slice(0, 22); o.scales = N.compile().runs[0].prim.filter((p) => p[0] === 'feDisplacementMap').map((p) => p[1].scale);
+      const c = card('aberration'); o.seg = [...c.querySelectorAll('.nodes-body .seg button')].map((b) => b.textContent); o.labels = [...c.querySelectorAll('.nodes-body .k-lbl')].map((l) => l.textContent);
+      o.box = rect(c); o.film = N.compileAt ? 1 : 0; return o;`);
+    await ev(`N.win.close(); await w(400); return 1;`);
+    await shot('038-P7-perspective-stage', [200, 120, 1300, 820]);
+    await ev(`N.set(N.nodes()[0].id, 'mode', 'shift'); await w(500); return 1;`);
+    await shot('038-P7-shift-stage', [200, 120, 1300, 820]);
+    await ev(`N.open(); await w(500); N.set(N.nodes()[0].id, 'mode', 'perspective'); await w(300); return 1;`);
+    const b = out.runs.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
+    for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P7-aberration-' + t, crop, 2); }
+  }
+  if (scene === 'p8') {
+    /* FILM GRAIN's row and TONE, and THE BLEND FIX: the stage's middle under each LAYER at AMOUNT 1, with the host as it was (z 8: an isolated group) and as
+       it is (z auto, each layer z 8) — mean and spread of a 200 × 120 crop, and the vignette's centre and corner */
+    const stat = async (tag) => { const png = `.tmp/p-p8-${tag}.png`; writeFileSync(png, Buffer.from(await g.snap(), 'base64'));
+      return JSON.parse(execFileSync('python3', ['-I', '-c', `import sys, json
+from PIL import Image, ImageStat
+im = Image.open(sys.argv[1]).convert('L'); W, H = im.size; c = im.crop((W // 2 - 100, H // 2 - 60, W // 2 + 100, H // 2 + 60)); s = ImageStat.Stat(c)
+print(json.dumps({ 'mean': round(s.mean[0], 1), 'sd': round(s.stddev[0], 1), 'centre': im.getpixel((W // 2, H // 2)), 'corner': im.getpixel((40, H - 40)) }))`, png]).toString()); };
+    await ev(`N.close && N.close(); await w(300); return 1;`);
+    out.none = await stat('none');
+    const old = `const h = document.getElementById('nodeLayers'); h.style.zIndex = '8'; for (const d of h.children) d.style.zIndex = 'auto'; await w(300); return 1;`;
+    const now = `const h = document.getElementById('nodeLayers'); h.style.zIndex = ''; for (const d of h.children) d.style.zIndex = ''; await w(300); return 1;`;
+    for (const k of ['grain', 'vignette', 'scanlines']) {
+      await ev(`for (const q of N.nodes()) N.remove(q.id); const id = N.add('${k}'); N.set(id, 'amount', 1); await w(500); return 1;`);
+      await ev(old); out[k + 'Before'] = await stat(k + '-before'); if (k !== 'scanlines') await shot(`038-P8-${k}-before`, [450, 175, 1050, 775]);
+      await ev(now); out[k + 'After'] = await stat(k + '-after'); if (k !== 'scanlines') await shot(`038-P8-${k}-after`, [450, 175, 1050, 775]);
+    }
+    out.host = await ev(`const h = document.getElementById('nodeLayers'); return { host: getComputedStyle(h).zIndex, layer: getComputedStyle(h.firstElementChild).zIndex, sk: getComputedStyle(document.getElementById('skeleton')).zIndex };`);
+    await ev(`for (const q of N.nodes()) N.remove(q.id); const id = N.add('grain'); N.set(id, 'amount', 1); await w(400); return 1;`);
+    for (const t of [-1, 1]) { await ev(`N.set(N.nodes()[0].id, 'tone', ${t}); await w(400); return 1;`); out['tone' + t] = await stat('tone' + t); }
+    await ev(`const id = N.nodes()[0].id; N.set(id, 'tone', 0.4); N.set(id, 'amount', 0.35); N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 520 }); await w(400); return 1;`);
+    out.card = await ev(`const c = card('grain'); return { rows: [...c.querySelectorAll('.nodes-face')].map((r) => [...r.children].map((k) => k.dataset.param ? k.dataset.param.split('.').pop() : k.className)),
+      foot: !!c.querySelector('.nodes-foot'), box: rect(c), h: c.offsetHeight, bg: getComputedStyle(document.querySelector('.node-layer[data-type="grain"]')).backgroundImage.slice(0, 60) };`);
+    const b = out.card.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
+    for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P8-grain-' + t, crop, 2); }
+  }
   out.errors = (await g.errors()).errs;
   console.log(JSON.stringify(out, null, 1));
 } finally { await g.close(); }

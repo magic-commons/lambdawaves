@@ -85,6 +85,16 @@ export const MATRIX_TYPES = {
     matrix: (v) => { const c = v.colour; return mix(IDENTITY, [...W.map((w) => w * c[0]), 0, 0, ...W.map((w) => w * c[1]), 0, 0, ...W.map((w) => w * c[2]), 0, 0, 0, 0, 0, 1, 0], v.amount); } },
   temperature: { cls: 'matrix', label: 'TEMPERATURE', hint: 'warm (amber) ↔ cool (blue)', knobs: [{ k: 'warmth', label: 'WARMTH', min: -1, max: 1, home: 0 }],
     matrix: (v) => { const w = v.warmth * 0.25; return [1 + w, 0, 0, 0, 0, 0, 1 + w * 0.15, 0, 0, 0, 0, 0, 1 - w, 0, 0, 0, 0, 0, 1, 0]; } },
+  /* 038 P4 · HUE/SATURATION, Photoshop's (Josh: "For Hue, use photoshop's Hue, Saturation, and Lightness sliders but in knob forms and show the arcs as
+     knob wrapped versions of the photoshop sliders"): one matrix — Photoshop's LIGHTNESS (toward white: (1 − L)·c + L; toward black: (1 + L)·c) after
+     saturate(1 + S/100) after hue-rotate(H).  HUE's track is the colour red becomes at each value (red at home, cyan at ±180), SATURATION's grey → the
+     accent, LIGHTNESS' black → white */
+  color: { cls: 'matrix', group: 'colour', label: 'HUE/SATURATION', hint: 'Photoshop\'s hue, saturation and lightness',
+    knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, stops: [180, 240, 300, 0, 60, 120, 180].map((h) => `hsl(${h} 100% 50%)`), hint: 'HUE — every colour turned; its thumb: what red becomes', fmt: (x) => signed(x) + '°' },
+      { k: 'saturation', label: 'SATURATION', min: -100, max: 100, home: 0, stops: ['hsl(0 0% 50%)', 'var(--acc)'], hint: 'SATURATION — −100 is grey, +100 twice as vivid', fmt: signed },
+      { k: 'lightness', label: 'LIGHTNESS', min: -100, max: 100, home: 0, stops: ['#000', 'hsl(0 0% 50%)', '#fff'], hint: 'LIGHTNESS — every colour toward black or white', fmt: signed }],
+    matrix: (v) => { const L = v.lightness / 100, k = 1 - Math.abs(L);
+      return colourMatrix(1 + v.saturation / 100, v.hue).map((x, i) => (i >= 15 ? x : x * k + (i % 5 === 4 && L > 0 ? L : 0))); } },
 };
 
 /** 020 X4 · FADE AND MASK: the foot of every node but a LAYER (whose AMOUNT is its fade) — lab/nodes-compile.js folds FADE; a MASK makes the
