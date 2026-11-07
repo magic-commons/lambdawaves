@@ -326,8 +326,8 @@ export function createView(parent, kind, M) {
      so its plate reads over the stage and its blur takes what lies behind (inside the card or the window it blurred nothing and the card clipped it
      to a scroller) — with the kit's ↑ ↓ → ←, Enter, Escape and a press outside.  The kinds by GROUP, each group a submenu (no scroller); GRAPHS a
      submenu (the shipped ones, the reader's, SAVE THIS GRAPH, REMOVE ›); a search line on top: typed, the matches as one list, Enter adds the first.
-     A kind joins a group by `group` (else its class); a new group is a GROUPS row.  The view's other door: the window ↔ the rack card (the bar) */
-  const tools = el('div', 'nodes-tools', ground), tool = (cls, g, word, run) => { const b = el('button', cls, tools); b.type = 'button'; chip(b, g, word); b.addEventListener('click', run); return b; };
+     A kind joins a group by `group` (else its class); a new group is a GROUPS row.  The tools sit before the plane, so Tab meets + first (038 N7) */
+  const tools = ground.insertBefore(el('div', 'nodes-tools'), plane), tool = (cls, g, word, run) => { const b = el('button', cls, tools); b.type = 'button'; chip(b, g, word); b.addEventListener('click', run); return b; };
   const addB = tool('nodes-add', 'plus', 'ADD NODE', () => openMenu());
   if (W) tool('nodes-fit', 'home', 'FIT — every card in view (Home)', () => fit());
   const foldB = tool('nodes-folds', 'compact', 'COLLAPSE ALL', () => foldAll());

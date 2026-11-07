@@ -185,6 +185,40 @@ n = sum(1 for p, q in zip(A.getdata(), B.getdata()) if max(abs(p[i] - q[i]) for 
 from PIL import Image
 Image.open(sys.argv[1]).convert('RGB').crop(tuple(map(int, sys.argv[3:7]))).save(sys.argv[2], quality=80)`, `.tmp/n6-${n}.png`, `${DIR}/038-N6-invert-${n}.jpg`, ...box.map(String)]);
   }
+  if (scene === 'n7') {
+    /* THE FINISH: the window empty (no map, no handle) and with ten nodes, the rack card with ten, light and dark, REFRACTIVE and TINTED; the + menu
+       open over each; the hints of every new part; nothing scrolls in the window; Tab from the ground */
+    const TEN = ['levels', 'hue', 'blur', 'grain', 'curves', 'saturation', 'vignette', 'posterize', 'feedback', 'tint'];
+    out.empty = await ev(`N.open(); await w(600); N.win.place({ x: 640, y: 40, w: 480, h: 640 }); await w(400);
+      return { hands: $$(WIN + '.nodes-hand').length, map: $(WIN + '.nodes-map').hidden, wires: $$(WIN + '.nodes-wires path').length, empty: !$(WIN + '.nodes-empty').hidden, scroll: (() => { const b = $(WIN + '.mir-win-body'); return b.scrollHeight > b.clientHeight + 1; })() };`);
+    for (const [theme, card] of [['light', 'refractive'], ['dark', 'refractive'], ['dark', 'tinted']]) {
+      const tag = theme + '-' + card;
+      await ev(`__LW.look.set({ theme: '${theme}' }); __LW.setCardStyle('${card}'); await w(500); return 1;`);
+      if (tag === 'light-refractive') await shot('038-N7-win-empty-' + tag, [630, 30, 1130, 690]);
+      if (tag === 'light-refractive') out.ten = await ev(`for (const t of ${JSON.stringify(TEN)}) N.add(t); await w(600); N.views[1].place(); await w(300); $(WIN + '.nodes-ground').focus(); key($(WIN + '.nodes-ground'), 'Home', { code: 'Home' }); await w(400);
+        const hints = { hand: $(WIN + '.nodes-hand').getAttribute('data-help-en') || $(WIN + '.nodes-hand').title, port: ($(WIN + '.nodes-port.live') || {}).title || $(WIN + '.nodes-port.live').getAttribute('data-help-en'), map: $(WIN + '.nodes-map').getAttribute('data-help-en') || $(WIN + '.nodes-map').title, door: $(WIN + '.nodes-door').getAttribute('aria-label') };
+        return { n: N.nodes().length, hands: $$(WIN + '.nodes-hand').length, map: !$(WIN + '.nodes-map').hidden, hints, scroll: (() => { const b = $(WIN + '.mir-win-body'); return b.scrollHeight > b.clientHeight + 1; })() };`);
+      await shot('038-N7-win-ten-' + tag, [630, 30, 1130, 690]);
+      out['menu-' + tag] = await ev(`$(WIN + '.nodes-add').click(); await w(300); const p = $('.mir-ctx .nodes-add-menu'); p.querySelector('[data-id="group:prim"]').click(); await w(300); return { bg: getComputedStyle(p).backgroundColor, sub: [...$$('.mir-ctx .mb-sub-list .mb-item')].length };`);
+      await shot('038-N7-menu-' + tag, [630, 30, 1130, 690]);
+      await ev(`key(document.activeElement, 'Escape', { code: 'Escape' }); await w(100); key(document.activeElement, 'Escape', { code: 'Escape' }); await w(200); return 1;`);
+    }
+    await ev(`$(WIN + '.nodes-ground').focus(); return 1;`); out.tab = [];
+    for (let i = 0; i < 5; i++) { await g.press('\uE004'); out.tab.push(await ev(`const a = document.activeElement; return (a.getAttribute('aria-label') || a.className || a.tagName).slice(0, 40);`)); }
+    out.card = await ev(`N.win.close(); __LW.layout.reopen('nodes'); __LW.layout.raise('nodes'); await w(900); const d = $('.dev[data-id="nodes"]'); d.scrollIntoView(); await w(300); return { box: rect(d), hands: d.querySelectorAll('.nodes-hand').length, map: !!d.querySelector('.nodes-map'), door: !!d.querySelector('.dev-util .nodes-door') };`);
+    await shot('038-N7-card-ten-dark-tinted', [out.card.box[0] - 4, Math.max(0, out.card.box[1] - 4), out.card.box[2] + 4, Math.min(out.card.box[3], 860)]);
+  }
+  if (scene === 'n7h') {
+    /* the plate with its blur (run with N_HEADED=1: headless Firefox composites no backdrop-filter): the + menu over the window and the stage, dark REFRACTIVE FROST */
+    out.h = await ev(`__LW.look.set({ theme: 'dark' }); __LW.setCardStyle('refractive'); N.open(); await w(600); N.win.place({ x: 640, y: 40, w: 480, h: 640 }); for (const t of ['levels', 'hue', 'blur']) N.add(t); await w(600);
+      $(WIN + '.nodes-add').click(); await w(300); $('.mir-ctx .nodes-add-menu [data-id="group:table"]').click(); await w(500); return { frost: document.body.classList.contains('frost'), bg: getComputedStyle($('.mir-ctx .nodes-add-menu')).backgroundColor, bf: getComputedStyle($('.mir-ctx .nodes-add-menu')).backdropFilter };`);
+    await shot('038-N7-menu-dark-frost-headed', [630, 30, 1130, 690]);
+    await ev(`key(document.activeElement, 'Escape', { code: 'Escape' }); await w(200); const c = $(WIN + '.nodes-card[data-node="n1"] .nodes-title').getBoundingClientRect(); window.__c = [c.left + 40, c.top + 10]; return 1;`);
+    const at = await ev(`return __c.map(Math.round);`);
+    await drv.actions(g.s, [{ type: 'pointer', id: 'nr' + ++nA, parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', x: at[0], y: at[1], origin: 'viewport' }, { type: 'pointerDown', button: 2 }, { type: 'pointerUp', button: 2 }] }]); await drv.relActions(g.s);
+    out.ctx = await ev(`await w(400); const p = $('.mir-ctx .mir-ctx-pane'); return p ? { bg: getComputedStyle(p).backgroundColor, cls: p.className } : null;`);
+    await shot('038-N7-kit-ctx-dark-frost-headed', [630, 30, 1130, 690]);
+  }
   if (scene === 'n6b') {
     /* the experiment: an arithmetic copy of the source first (does it clamp the colour to the alpha?) */
     await ev(`__LW.verbs.run([{ verb: 'molecule', args: { id: 'C6H6' } }], { who: 'SHOTS' }); return 1;`);
