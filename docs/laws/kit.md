@@ -2,6 +2,15 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 038
+
+THE PAD WRAPS (038 K3, chain K, Opus 5.5; the clone road on kit branch `kit-038`, alpha.13 @ 25e0836 on chain T's alpha.8 … 12, adopted as
+`1.5.7-alpha.13`): `xyPad({ wrap })` — `'plane'` a torus on the square, `'sphere'` the inscribed disc read as a sphere of directions (past the rim at θ,
+back in at θ + π with r → 2 − r) — passes the drag's virtual point, the press and the arrows through `padWrap(wrap, ux, uy, press)` (pure, exported);
+the value's range stays the app's, and with no `wrap` the pad stops at its edge as before. `control()` hands a pair's `wrap` to its pad;
+`createCameraView({ panWrap })` gives it to the PAN pad. λWAVES' side: the LIGHTING sun `'sphere'`, CAMERA's PAN `'plane'` (look-and-camera.md).
+Its BUILT line is in docs/FOR-MIR.md § 038.
+
 ## The laws of 037
 
 THE DOORS OF 037 (chain H, Opus 5.5; the clone road on kit branch `kit-037` from kit-032 a3dcb80, adopted as `1.5.7-alpha.7`): alpha.6 THE REVERSED DIAL (a descriptor or a camera port range may say `reverse`, and the panel passes it to `knob()`: the ZOOM dial turns clockwise to zoom in while `obs.dist` stays the distance) · alpha.7 THE SPHERE TAKES A PLANE (`directionSphere({ plane })`: the normal as the tip and look line, the plane as the square, the three world rings, no letters; the CLIP window mounts it in place of plane-model, which PLANE still uses). THE CAMERA/OBJECT FRAME is the app side: `mat.slice.frame` turns the slice normal by the camera basis under CAMERA; absent = OBJECT = the old road, so every LOCK leaf and saved project is unchanged. The next door is 1.5.7-alpha.8. Each door has its BUILT line in docs/FOR-MIR.md § 037.

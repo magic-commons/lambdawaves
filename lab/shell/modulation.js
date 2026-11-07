@@ -191,7 +191,7 @@ export function createModSeam(app) {
         options: () => (ui.styleList ? ui.styleList().map(([s]) => STYLE[s]) : null), seg: () => ui.styleSeg, of: (s) => STYLE[s],
         hint: 'WAVE STYLE, in the seg’s order (its visible styles)',
         get: () => mat.style | 0,
-        set: (v) => { const s = drawStyle(STYLE_NAMES[v | 0]), b = ui.styleSeg && ui.styleSeg.button(s); if (!b || b.hidden || mat.style === STYLE[s]) return; const from = mat.style | 0; mat.style = STYLE[s]; ui.styleRecall(from, mat.style); ui.styleSeg.set(s); schedule(TIER.PRESENT); } },   // 038 K1: a lane's switch recalls as a hand's does
+        set: (v) => { const s = drawStyle(STYLE_NAMES[v | 0]), b = ui.styleSeg && ui.styleSeg.button(s); if (!b || b.hidden || mat.style === STYLE[s]) return; const from = mat.style | 0; mat.style = STYLE[s]; ui.styleRecall(from, mat.style, true); ui.styleSeg.set(s); schedule(TIER.PRESENT); } },   // 038 K1: a lane's switch recalls the hand's memory (and starts none)
       { id: 'material.view', label: 'VIEW', map: 'integer', min: 0, max: WAVE_VIEWS.length - 1, step: 1, group: 'material', knob: () => null,
         options: WAVE_VIEWS.map((_, i) => i), seg: () => ui.viewSeg, of: (w) => WAVE_VIEWS.indexOf(w),
         hint: 'the observable by number: 0 ρ · 1 phase · 2 Re · 3 Im',

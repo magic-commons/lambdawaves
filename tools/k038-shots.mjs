@@ -48,6 +48,8 @@ try {
     const turn = async (id, dy) => { const c = mid(await rectOf(K(id))); await drag([c, [c[0], c[1] - dy / 2], [c[0], c[1] - dy]]); await nap(500); };
     const press = async (v) => { await g.tap(S(v)); await nap(700); };
     out.home = await read();
+    /* the lane's road (the STYLE target's set, as an EVENT clip writes it) starts no memory: SIGNED and back leave styleMem absent */
+    out.lane = await g.ev(`const R = __LW.mod.registry; R.write('material.style', 3); await new Promise((r) => setTimeout(r, 200)); const s1 = __LW.mat.style; R.write('material.style', 0); await new Promise((r) => setTimeout(r, 200)); return { s1, s2: __LW.mat.style, mem: __LW.mat.styleMem || null };`);
     await press(8); out.shellPM0 = await read();
     await turn('material.exposure', -50); await turn('material.knee', 50); await turn('material.iso', 30); out.shellPM = await read();
     await press(3); out.signed0 = await read();
@@ -61,7 +63,7 @@ try {
       await new Promise((r) => setTimeout(r, 400)); return { rid, clip: !!clip };`);
     const pre = await read();
     await g.ev(`__LW.run('style', { id: 'glassSigned' }); await new Promise((r) => setTimeout(r, 400)); return 1;`); out.tethered = { pre, post: await read() };
-    out.ok = out.shellPM0.exposure === out.home.exposure && out.signed0.exposure === out.shellPM.exposure && out.signed0.knee === out.shellPM.knee
+    out.ok = out.lane.s1 === 3 && out.lane.s2 === 0 && out.lane.mem === null && out.shellPM0.exposure === out.home.exposure && out.signed0.exposure === out.shellPM.exposure && out.signed0.knee === out.shellPM.knee
       && out.shellPM1.exposure === out.shellPM.exposure && out.shellPM1.knee === out.shellPM.knee && out.shellPM1.iso === out.shellPM.iso
       && out.signed1.exposure === out.signed.exposure && out.signed1.iso === out.signed.iso && out.signed1.rows === out.shellPM1.rows + 1
       && out.undo.style === 8 && out.undo.exposure === out.shellPM.exposure && out.redo.style === 3 && out.redo.exposure === out.signed.exposure
@@ -161,6 +163,65 @@ try {
     out.shots = shots;
     out.ok = L.length === 9 && iAuto === iLock + 1 && out.centre.rows[iAuto].checked === 'true' && out.order.auto0 === true && out.order.afterPress === false && out.order.shownOff === 'false'
       && shots.light.on && shots.dark.on && /fling/i.test(out.centre.rows[iAuto].hint);
+  }
+  if (scene === 'k5') {
+    /* THE FINISH: (a) WAVE through every style twice with EXPOSURE routed (a macro) and HUE free — HUE comes back per style, EXPOSURE stays the route's;
+       pictures docked at the rack's width and floated, light and dark; (b) no window scrolls (WAVE, LIGHTING, PALETTE, CAMERA, hydrogen and benzene);
+       (c) LIGHTING by the keyboard: the Tab order from FRAME, Enter on RESET; (d) Escape closes the stage's menu */
+    const S = (v) => `[data-event="material.style"] .seg-b[data-v="${v}"]`, K = (id) => `.dev[data-id="observer"] .k[data-param="${id}"]`;
+    const styles = async () => g.ev(`return [...document.querySelectorAll('[data-event="material.style"] .seg-b')].filter((b) => !b.hidden).map((b) => +b.dataset.v);`);
+    const turn = async (id, dy) => { const c = mid(await rectOf(K(id))); await drag([c, [c[0], c[1] - dy / 2], [c[0], c[1] - dy]]); await nap(350); };
+    const noScroll = () => g.ev(`return [...document.querySelectorAll('.dev[data-id="observer"], .dev[data-id="light"], .dev[data-id="palette"], .dev[data-id="camera"]')].filter((d) => d.offsetHeight)
+      .map((d) => { const b = d.querySelector('.dev-body') || d; return { id: d.dataset.id, h: Math.round(d.getBoundingClientRect().height), scrolls: b.scrollHeight > b.clientHeight + 1 }; });`);
+    await float('light', 40, 40, 262); await float('palette', 1020, 520, 300); await float('camera', 1020, 40, 300);
+    out.dockedWave = await rectOf('.dev[data-id="observer"]');
+    if (out.dockedWave) await shot('038-K5-wave-docked-light', out.dockedWave);
+    await float('observer', 560, 40, 420);
+    out.route = await g.ev(`const mc = __LW.mod.addMacro(); return __LW.mod.route(mc, 'material.exposure', 0, 0.5);`); await nap(400);
+    const list = await styles(), first = {}, second = {};
+    for (let i = 0; i < list.length; i++) { await g.tap(S(list[i])); await nap(450); await turn('material.hue', 12 + 9 * i); first[list[i]] = await g.ev(`return { hue: +__LW.mat.hueShift.toFixed(4), exp: +__LW.mat.exposure.toFixed(4) };`); }
+    for (const v of list) { await g.tap(S(v)); await nap(450); second[v] = await g.ev(`return { hue: +__LW.mat.hueShift.toFixed(4), exp: +__LW.mat.exposure.toFixed(4) };`); }
+    out.styles = { list, first, second };
+    out.recallOk = list.every((v) => second[v].hue === first[v].hue) && new Set(list.map((v) => second[v].exp)).size === 1 && new Set(list.map((v) => first[v].hue)).size === list.length;
+    await shot('038-K5-wave-float-light', await rectOf('.dev[data-id="observer"]'));
+    await theme('dark'); await g.tap(S(8)); await nap(400); await shot('038-K5-wave-float-dark', await rectOf('.dev[data-id="observer"]'));
+    await shot('038-K5-light-262-dark', await rectOf('.dev[data-id="light"]'));
+    out.scrollHydrogen = await noScroll();
+    /* (b) benzene: the molecule rows show; nothing scrolls */
+    await g.ev(`__LW.verbs.run([{ verb: 'molecule', args: { id: 'C6H6' } }], { who: 'SHOTS' }); return 1;`);
+    await g.waitFor('window.__LW.chem.on && window.__LW.chem.solution()', 900, 200); await g.ev(`await __LW.settle(); return 1;`);
+    out.scrollBenzene = await noScroll();
+    await shot('038-K5-wave-benzene-dark', await rectOf('.dev[data-id="observer"]'));
+    /* (c) LIGHTING's keys: Tab from FRAME's first button; a dial moved, then Enter on RESET empties the record */
+    out.tab = await g.ev(`const b = document.querySelector('.dev[data-id="light"] .lw-light-frame .seg-b'); b.focus(); return document.activeElement.textContent.trim();`);
+    const order = [];
+    for (let i = 0; i < 5; i++) { await g.press(''); order.push(await g.ev(`const a = document.activeElement; return (a.getAttribute('aria-label') || a.dataset.fold || a.textContent.trim().slice(0, 16) || a.className.split(' ')[0]) + ' · ' + (a.closest('.dev') || {}).dataset?.id;`)); }
+    out.tabOrder = order;
+    await g.ev(`const k = document.querySelector('.dev[data-id="light"] .lw-light-surf .k'); k.focus(); return 1;`); for (let i = 0; i < 4; i++) await g.press('');
+    out.dialMoved = await g.ev(`return __LW.mat.light ? { ...__LW.mat.light } : null;`);
+    await g.ev(`document.querySelector('.dev[data-id="light"] .lw-light-reset').focus(); return 1;`); await g.press(''); await nap(200);
+    out.afterEnter = await g.ev(`return __LW.mat.light || null;`);
+    /* (d) Escape closes the stage's menu */
+    await g.ev(`document.querySelector('#field').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 760, clientY: 600 })); return 1;`); await nap(300);
+    const opened = await g.ev(`return !!document.querySelector('.mir-ctx');`); await g.press(''); await nap(300);
+    out.escape = { opened, closed: await g.ev(`return !document.querySelector('.mir-ctx');`) };
+    const flat = [...out.scrollHydrogen, ...out.scrollBenzene];
+    out.ok = out.recallOk && flat.every((w) => !w.scrolls) && !!out.dialMoved && out.afterEnter === null && out.escape.opened && out.escape.closed;
+  }
+  if (scene === 'k5m') {
+    /* THE FINISH, full: benzene (the molecule rows shown) — WAVE floated and no window scrolls; a style switch with SIZE raised keeps SIZE (not a
+       style's knob) and recalls the knobs it should; pictures light and dark */
+    await g.ev(`__LW.verbs.run([{ verb: 'molecule', args: { id: 'C6H6' } }], { who: 'SHOTS' }); return 1;`);
+    out.mol = await g.waitFor('window.__LW.chem.on && window.__LW.chem.solution()', 900, 200); await g.ev(`await __LW.settle(); await __LW.settle(); return 1;`);
+    await float('observer', 560, 40, 420);
+    const S = (v) => `[data-event="material.style"] .seg-b[data-v="${v}"]`;
+    out.rows = await g.ev(`const d = document.querySelector('.dev[data-id="observer"]'), b = d.querySelector('.dev-body'); return { h: Math.round(d.getBoundingClientRect().height), scrolls: b.scrollHeight > b.clientHeight + 1,
+      size: !d.querySelector('.k[data-param], .k') || !!document.querySelector('.dev[data-id="observer"] .k:not([hidden])'), esp: !document.querySelector(${JSON.stringify(S(11))}).hidden };`);
+    await g.ev(`__LW.mat.atomSize = 0.35; return 1;`);
+    await g.tap(S(6)); await nap(400); await g.tap(S(3)); await nap(400); await g.tap(S(6)); await nap(400);
+    out.size = await g.ev(`return { size: __LW.mat.atomSize, mem: JSON.parse(JSON.stringify(__LW.mat.styleMem || {})) };`);
+    for (const t of ['light', 'dark']) { await theme(t); await shot(`038-K5-wave-benzene-${t}`, await rectOf('.dev[data-id="observer"]')); }
+    out.ok = out.mol.ok && !out.rows.scrolls && out.rows.esp && out.size.size === 0.35 && !Object.values(out.size.mem).some((m) => 'atomSize' in m);
   }
 } catch (e) { out.error = String(e && e.stack || e); }
 finally { out.errors = (await g.errors()).errs; await g.close(); }
