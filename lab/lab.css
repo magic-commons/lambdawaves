@@ -599,7 +599,7 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
  * until the script clears the animation.
  *   The X half of every transform is `-50%` because that is what centres the pill (§12); a keyframe
  * that wrote only Y would throw it to the left edge mid-flight. */
-#transport.mini.at-top { top: calc(env(safe-area-inset-top) + max(52px, var(--csb-clear, 0px))); bottom: auto; }   /* 038 M6: under the left rack's last card where they share columns (shell/modulation.js clearRack) */
+#transport.mini.at-top { top: calc(env(safe-area-inset-top) + max(52px, var(--csb-clear, 0px))); bottom: auto; }   /* 038 M6 · M7: under the racks' last cards where they share columns (shell/modulation.js clearRack) */
 
 @media (prefers-reduced-motion: reduce) {
   /* "fewer and gentler, never zero": the palette turn and the busy breath are COLOUR and OPACITY and they stay
