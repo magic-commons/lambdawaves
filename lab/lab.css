@@ -945,6 +945,9 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .dev[data-id="render"] .sr-fold-head[hidden] { display: none; }
 .dev[data-id="render"] .sr-fold-box { display: contents; }
 .dev[data-id="render"] .sr-view > .sr-subject { padding: 0; margin: 0; background: none; border: 0; box-shadow: none; }
+/* 039 V8 · THE DOCK BUTTON HAS AREA (C #13: on a floating window "dock this window back into the rack" had zero area — the kit's skin hides the pop
+   chip): a floating card shows it, in the kit's `dock` face, its press the kit's (the rack's toggleFloat); the CONTROL SURFACE's card keeps csb.css' */
+body:not(.phone) .dev.floating > .dev-head > .dev-util > .dev-pop { display: inline-flex; }
 /* 017 R4 (call 14) · a WIDE readout in a rack window is CLAMPED to its two lines (modhost.css gives it `overflow: auto`, a tiny scroller) */
 [data-mir-rack] > .dev .ro.wide .ro-val { overflow: hidden; }
 /* 037 H4 · CLIP's frame (CAMERA | OBJECT, material.js sliceFrameSeg) beside the plane's picture, its two cells stacked */

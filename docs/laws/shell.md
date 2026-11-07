@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 039
+
+THE DOCK BUTTON HAS AREA (039 V8, C #13: on a floating PALETTE "dock this window back into the rack" had zero area — the kit's skin hides `.dev-util > .dev-pop` — and the grip's hint said only "PALETTE"): a floating card shows its pop chip (lab.css, never on a phone), in the kit's `dock` face, its press the kit's toggleFloat (the CONTROL SURFACE's card keeps csb.css' chip and its own act). THE GRIP SAYS WHAT IT DOES: a pointer over a card's title bar (not its buttons) gives the head's hint the gesture — "PALETTE · drag to detach" in a rack, "PALETTE · drag back to dock" floating, the name alone before it where the whole would pass 60 characters (`shell/rack-wiring.js`, a capture-phase pointerover writing the title the kit's hop turns into its data-help; the kit's status rewrite is answered at the next hover). Probe: the chip 22 × 22 on the floating head, a real tap docks the card.
+
 ## The laws of 038
 
 THE MENUS' ROWS (038 M2 · M3, Josh 11-06: "For Window Dropdown menu, it should move the 'Main Menu' option to the 'File' section"; "MIR Options should be available in the 'Window' dropdown menu"; CALLS 4: MAIN MENU at FILE's foot): FILE ends QUICK ›, a rule, MAIN MENU (the `menu` action — its id, its key L, its glyph and the KEYBOARD window's row unchanged; a plain row, no ✓, since the bar is hidden while the menu is up); WINDOW opens FINDER… · MIR OPTIONS… (the `gui` action, the kit's OPTIONS window — LOOK · LIGHT · WINDOWS — its hint and glyph the registry's), then RACKS › and TOOLS ›, which no longer lists MAIN MENU. The stage's right-click and the CSB's ⚙ still reach MIR OPTIONS. THE FIRST RUN CHOOSES (SIMPLE · ADVANCED, the folded eleven) is picker.md's.

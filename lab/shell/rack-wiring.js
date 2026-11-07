@@ -10,6 +10,18 @@ export function createRackWiring(app) {
   const { bowCancel, bowMove, bowRelease, bowStart, kepler, keplerDragTo } = app.w;
   const { field, look, occlusion, setGovernor, setKeepFrames } = app.ctl;
   const devById = (id) => document.querySelector('.dev[data-id="' + id + '"]');
+  /* 039 V8 · THE GRIP SAYS WHAT IT DOES (C #13: the title bar's hint said only "PALETTE"): a card's title bar is its grip — when the hand comes to it the
+     kit's hint (the name, and the status where it is one) gains the gesture, "drag to detach" in a rack and "drag back to dock" floating (the name alone
+     before it where the whole would pass 60 characters).  The kit's hop has made the title its data-help by then and rewrites it on a status change;
+     the next hover says it again */
+  document.addEventListener('pointerover', (e) => {
+    const h = e.target && e.target.closest ? e.target.closest('.dev-head') : null; if (!h || e.target.closest('button')) return;
+    const d = h.parentElement; if (!d || !d.classList.contains('dev')) return;
+    const how = d.classList.contains('floating') ? 'drag back to dock' : 'drag to detach', now = h.dataset.helpEn || h.title || '';
+    if (now.endsWith(how)) return;
+    const was = now.split(' · drag ')[0], name = ((h.querySelector('.dev-title') || {}).textContent || was).trim();
+    h.title = (was + ' · ' + how).length <= 60 ? was + ' · ' + how : name + ' · ' + how;
+  }, true);
   /** a rack card's width, from the RACK's own content box — the scrollbar is already out of clientWidth */
   const rackCardWidth = () => { const cs = getComputedStyle(rack); return Math.max(180, Math.round(rack.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0))); };
   /** the TRANSPORT's pop chip wears the act its next press performs; every other card's is the kit's.  038 S1 BACK TO THE STAGE: popped off the rack
