@@ -26,9 +26,10 @@ export const LAYER_TYPES = {
       { k: 'blend', label: 'BLEND', home: 'soft-light', hint: 'how the grain meets the picture', options: [{ id: 'soft-light', label: 'SOFT' }, { id: 'overlay', label: 'OVERLAY' }] },
       { k: 'tone', label: 'TONE', min: -1, max: 1, home: 0, hint: 'TONE — the grain darker or lighter, through its blend', fmt: (x) => (x >= 0.005 ? '+' : x <= -0.005 ? '−' : '') + Math.round(Math.abs(x) * 100) }] },
   vignette: { cls: 'layer', label: 'VIGNETTE', hint: 'the edges darkened, as a lens does', neutral: off,
-    knobs: [AMOUNT(0.6), { k: 'feather', label: 'FEATHER', min: 0, max: 1, home: 0.5 }, { k: 'round', label: 'ROUNDNESS', min: 0, max: 1, home: 0.5 }] },
+    knobs: [{ ...AMOUNT(0.6), hint: 'AMOUNT — how dark the edges' }, { k: 'feather', label: 'FEATHER', min: 0, max: 1, home: 0.5, hint: 'FEATHER — where the dark begins' },
+      { k: 'round', label: 'ROUNDNESS', min: 0, max: 1, home: 0.5, hint: 'ROUNDNESS — the frame\'s ellipse to a circle' }] },
   scanlines: { cls: 'layer', label: 'SCANLINES', hint: 'a CRT\'s lines', neutral: off,
-    knobs: [{ k: 'pitch', label: 'PITCH', min: 2, max: 12, step: 1, home: 3, unit: ' px' }, AMOUNT(0.3)] },
+    knobs: [{ k: 'pitch', label: 'PITCH', min: 2, max: 12, step: 1, home: 3, unit: ' px', hint: 'PITCH — the lines\' spacing, in px' }, { ...AMOUNT(0.3), hint: 'AMOUNT — how dark the lines' }] },
 };
 
 const tiles = {}, canvases = {};

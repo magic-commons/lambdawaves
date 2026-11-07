@@ -194,6 +194,19 @@ print(json.dumps({ 'mean': round(s.mean[0], 1), 'sd': round(s.stddev[0], 1), 'ce
     const b = out.card.box, crop = [b[0] - 10, b[1] - 10, b[2] + 10, b[3] + 10];
     for (const t of ['dark', 'light']) { await ev(`await theme('${t}'); return 1;`); await shot('038-P8-grain-' + t, crop, 2); }
   }
+  if (scene === 'p9') {
+    /* the + menu's words (its groups, each group's rows and their glyphs) and every control of every offered TABLE · MATRIX · PRIM · LAYER kind hinted */
+    out.menu = await ev(`N.open(); await w(600); N.win.place({ x: 700, y: 60, w: 440, h: 600 }); await w(300); $(WIN + '.nodes-add').click(); await w(300); const p = $('.mir-ctx .nodes-add-menu');
+      const rows = (q) => [...q.querySelectorAll(':scope > .mb-item')].map((x) => [x.querySelector('.mb-lbl').textContent, !!x.querySelector('svg')]), o = { groups: rows(p) };
+      for (const g of ['colour', 'tone', 'one', 'prim', 'layer']) { p.querySelector('[data-id="group:' + g + '"]').click(); await w(250); const s = [...document.querySelectorAll('.mir-ctx .mb-sub-list')].pop(); o[g] = s ? rows(s) : null; }
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return o;`);
+    await g.press('');
+    out.hints = await ev(`const o = {}, kinds = ['color', 'balance', 'levels2', 'exposure2', 'bc', 'posterize', 'threshold', 'invert', 'gamma', 'exposure', 'contrast', 'hue', 'saturation', 'luma', 'tint', 'temperature', 'blur', 'sharpen', 'aberration', 'bloom', 'displace', 'grain', 'vignette', 'scanlines', 'levels'];
+      for (const t of kinds) { for (const q of N.nodes()) N.remove(q.id); N.add(t); await w(150); const c = card(t), f = c.querySelector('.nodes-foot-t'); if (f) f.click(); await w(60);
+        const miss = [...c.querySelectorAll('[data-control]')].filter((k) => !(k.dataset.tTitle || k.dataset.helpEn || k.querySelector('[data-t-title], [data-help-en]'))).map((k) => (k.querySelector('.k-lbl') || k).textContent.trim() || k.dataset.control);
+        if (miss.length) o[t] = miss; }
+      return { unhinted: o, n: kinds.length };`);
+  }
   if (scene === 'p10') {
     /* THE FINISH: every new face in the window (all seven at once, the empty state first) and in the rack card, each kind's TARGET (on TABLE · MATRIX ·
        PRIM, never a LAYER), every control hinted and every word upper-case, nothing scrolling, the knobs at home and at their ends, the keys on a knob */
@@ -203,7 +216,7 @@ print(json.dumps({ 'mean': round(s.mean[0], 1), 'sd': round(s.stddev[0], 1), 'ce
       ids.forEach((id, i) => { const c = $(WIN + '.nodes-card[data-node="' + id + '"]'); c.style.left = (20 + (i % 4) * 300) + 'px'; c.style.top = (60 + Math.floor(i / 4) * 330) + 'px'; }); await w(400);
       const o = {};
       for (const t of ${JSON.stringify(KINDS)}) { const c = card(t), foot = c.querySelector('.nodes-foot'), ctl = [...c.querySelectorAll('.nodes-body [data-control]')];
-        o[t] = { target: !!(foot && [...foot.querySelectorAll('button')].some((b) => b.textContent.trim() === 'OBJECT')), hinted: ctl.filter((k) => !(k.title || k.dataset.hint || k.getAttribute('aria-description') || (k.querySelector('[title]') || {}).title)).map((k) => k.dataset.control),
+        o[t] = { target: !!(foot && [...foot.querySelectorAll('button')].some((b) => b.textContent.trim() === 'OBJECT')), hinted: ctl.filter((k) => !(k.dataset.tTitle || k.dataset.helpEn || k.querySelector('[data-t-title], [data-help-en]'))).map((k) => k.dataset.control),
           words: [...c.querySelectorAll('.nodes-body .k-lbl, .nodes-body .seg button, .nodes-name')].map((l) => l.textContent.trim()).filter((s) => s !== s.toUpperCase()), h: c.offsetHeight, w: c.offsetWidth,
           scroll: [...c.querySelectorAll('*')].some((e) => e.scrollHeight > e.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(e).overflowY)) }; }
       const body = $(WIN + '.mir-win-body'); o.winScroll = body.scrollHeight > body.clientHeight + 1; return o;`);

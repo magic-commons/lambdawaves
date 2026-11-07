@@ -11,6 +11,7 @@
  *   (controls/factory.js — the kind of value chooses it), a number knob stamped `data-param` with its stable modulation target id
  *   `nodes.<node>.<knob>` (idOf), so it is a drop target like any rack dial; the hand's write goes to `hand`. */
 import { control } from './mir/controls/factory.js';
+import { hint } from './mir/kit.js';
 import { colourMatrix } from './mir/panels/picture-filter.js';
 import { IDENTITY, LUMA } from './nodes-compile.js';
 
@@ -37,9 +38,9 @@ function levelsStrip(g, v, f) {
 
 export const TABLE_TYPES = {
   levels: { cls: 'table', label: 'LEVELS', hint: 'input and output black/white, gamma (levels)', menu: false,   // 038 P2: kept for every saved graph; the + menu adds levels2
-    knobs: [{ k: 'inblack', label: 'IN BLACK', min: 0, max: 1, home: 0 }, { k: 'inwhite', label: 'IN WHITE', min: 0, max: 1, home: 1 },
-      { k: 'gamma', label: 'GAMMA', min: 0.1, max: 10, home: 1, log: true }, { k: 'outblack', label: 'OUT BLACK', min: 0, max: 1, home: 0 },
-      { k: 'outwhite', label: 'OUT WHITE', min: 0, max: 1, home: 1 }],
+    knobs: [{ k: 'inblack', label: 'IN BLACK', min: 0, max: 1, home: 0, hint: 'IN BLACK — the input that turns black' }, { k: 'inwhite', label: 'IN WHITE', min: 0, max: 1, home: 1, hint: 'IN WHITE — the input that turns white' },
+      { k: 'gamma', label: 'GAMMA', min: 0.1, max: 10, home: 1, log: true, hint: 'GAMMA — above 1 lifts the middle tones' }, { k: 'outblack', label: 'OUT BLACK', min: 0, max: 1, home: 0, hint: 'OUT BLACK — what black becomes' },
+      { k: 'outwhite', label: 'OUT WHITE', min: 0, max: 1, home: 1, hint: 'OUT WHITE — what white becomes' }],
     fn: (v) => (y) => { y = clamp01((y - v.inblack) / Math.max(1e-4, v.inwhite - v.inblack)); if (v.gamma !== 1) y = Math.pow(y, 1 / Math.max(1e-3, v.gamma)); return v.outblack + y * (v.outwhite - v.outblack); } },
   posterize: { cls: 'table', label: 'POSTERIZE', hint: 'so many flat steps per channel',
     knobs: [{ k: 'steps', label: 'STEPS', min: 2, max: 32, step: 1, home: 4, fmt: (x) => String(Math.round(x)) }], neutral: () => false,
@@ -87,7 +88,8 @@ export const MATRIX_TYPES = {
   saturation: { cls: 'matrix', label: 'SATURATION', hint: '0 is grey, above 1 is more vivid', knobs: [{ k: 'saturation', label: 'SATURATION', min: 0, max: 3, home: 1 }],
     matrix: (v) => colourMatrix(v.saturation, 0) },
   luma: { cls: 'matrix', label: 'LUMA', hint: 'the luminance alone: greyscale', knobs: [AMOUNT()], neutral: (v) => v.amount === 0, matrix: (v) => mix(IDENTITY, LUMA, v.amount) },
-  tint: { cls: 'matrix', label: 'TINT', hint: 'the luminance in one colour, sepia\'s way', knobs: [{ k: 'colour', label: 'COLOUR', colour: true, home: [1, 0.78, 0.52] }, AMOUNT(0.6)],
+  tint: { cls: 'matrix', label: 'TINT', hint: 'the luminance in one colour, sepia\'s way', knobs: [{ k: 'colour', label: 'COLOUR', colour: true, home: [1, 0.78, 0.52], hint: 'COLOUR — the tint\'s colour' },
+    { ...AMOUNT(0.6), hint: 'AMOUNT — how much of the tint' }],
     neutral: (v) => v.amount === 0,
     matrix: (v) => { const c = v.colour; return mix(IDENTITY, [...W.map((w) => w * c[0]), 0, 0, ...W.map((w) => w * c[1]), 0, 0, ...W.map((w) => w * c[2]), 0, 0, 0, 0, 0, 1, 0], v.amount); } },
   temperature: { cls: 'matrix', label: 'TEMPERATURE', hint: 'warm (amber) ↔ cool (blue)', knobs: [{ k: 'warmth', label: 'WARMTH', min: -1, max: 1, home: 0 }],
@@ -132,7 +134,7 @@ function vibrance(V, id, src) {
 /** 020 X4 · FADE AND MASK: the foot of every node but a LAYER (whose AMOUNT is its fade) — lab/nodes-compile.js folds FADE; a MASK makes the
  *  node its own run.  FADE and SOFT are knobs, so modulation targets (`nodes.<node>.fade`, `.soft`) */
 export const FOOT = [{ k: 'fade', label: 'FADE', min: 0, max: 1, home: 1, hint: 'the node mixed back with its input: 100 % is all of it', fmt: (x) => Math.round(x * 100) + ' %' },
-  { k: 'mask', label: 'MASK', home: 'none', options: ['none', 'lights', 'darks', 'mids', 'centre', 'edges'].map((id) => ({ id, label: id.toUpperCase() })) },
+  { k: 'mask', label: 'MASK', home: 'none', hint: 'MASK — only the lights, darks, mids, centre or edges', options: ['none', 'lights', 'darks', 'mids', 'centre', 'edges'].map((id) => ({ id, label: id.toUpperCase() })) },
   { k: 'soft', label: 'SOFT', min: 0, max: 1, home: 0.5, hint: 'the mask\'s edge: 0 hard, 1 a long ramp' },
   /* 038 N6 · A NODE HAS A TARGET (nodes-compile.js): BOTH · STAGE · OBJECT (the balls and sticks), appended — a file without it reads BOTH */
   { k: 'target', label: 'TARGET', home: 'both', hint: 'where it acts: the stage, the balls and sticks, or both', options: ['both', 'stage', 'object'].map((id) => ({ id, label: id.toUpperCase() })) }];
@@ -149,8 +151,10 @@ export function nodeBody(parent, node, T, { idOf, hand }) {
   if (T.bare) parent.classList.add('nodes-bare');
   const order = T.face ? [...T.face.flat(), ...T.knobs.map((K) => K.k)].filter((k, i, a) => a.indexOf(k) === i) : T.knobs.map((K) => K.k);
   for (const K of order.map((k) => T.knobs.find((J) => J.k === k))) {
-    const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: K.hint, min: K.min, max: K.max, step: K.step, log: K.log, home: K.home, unit: K.unit,
+    const tip = K.hint || (T.knobs.length === 1 ? T.hint : undefined);   // 038 P9: a one-knob node's knob takes the node's hint (the knob is the node)
+    const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: tip, min: K.min, max: K.max, step: K.step, log: K.log, home: K.home, unit: K.unit,
       fmt: K.fmt, colour: K.colour, options: K.options, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, v, false), onChange: (v) => hand(K.k, v, true) });
+    if (tip && !c.targets[0]) hint(c.root, tip);                          // a seg or a stepper: the kit hints its options, not the control
     (at[K.k] || at[''] || parent).appendChild(c.root);
     if (c.targets[0]) c.targets[0].root.dataset.param = idOf(K.k);
   }
