@@ -4,6 +4,17 @@ import { TIER } from '../tier.js'; import { paintedRect } from '../occlusion.js'
 export function createInk(app) {
   const { dom } = app, { schedule } = app.loop, { rack, rackL, floats } = app.host, { occlusion, field } = app.ctl;
   const NO_OCCLUSION = [];
+  /* 039 V5 · THE LAYERS LIE UNDER THE WINDOWS (B #6: a VIGNETTE greyed the SPECTRUM header 250 → 206 and grain lay over every window — the layers sit
+     under the racks (z 8 against 30), but a window's glass is translucent and showed the vignetted stage beneath it): the same rects the line pass
+     skips cut NODES' layers (`--lw-glass-cut` on #nodeLayers, read by every .node-layer, nodes.css) — an even-odd path, the stage less each window —
+     written only when it changes; a film paints its layers itself (node-layers.js paintLayer), whole */
+  let cut = '', host = null;
+  function glassCut(rects, w, h) {
+    const d = rects.length && w > 0 ? `path(evenodd, 'M0 0H${w}V${h}H0Z` + rects.map(([x0, y0, x1, y1]) => `M${Math.round(x0)} ${Math.round(y0)}H${Math.round(x1)}V${Math.round(y1)}H${Math.round(x0)}Z`).join('') + `')` : '';
+    const now = document.getElementById('nodeLayers'); if (d === cut && now === host) return; cut = d; host = now;
+    if (host) { if (d) host.style.setProperty('--lw-glass-cut', d); else host.style.removeProperty('--lw-glass-cut'); }
+  }
+  new MutationObserver(() => { if (document.getElementById('nodeLayers') !== host) { app.state.occludeDirty = true; schedule(TIER.PRESENT); } }).observe(dom.stage, { childList: true });   // the host is built with the first layer: ask again
   function refreshOcclusion(nowMs) {
     app.state.occludeDirty = false; app.state.occludeAt = nowMs;
     /* LA3 · HIDDEN, NOTHING IS PAINTED, SO NOTHING MASKS.  Under body.ui-hidden every surface below is display:none
@@ -13,11 +24,12 @@ export function createInk(app) {
        slice outline) and the rectangles from before the hide must not punch holes in it; setOcclusion compares its
        signature, so an already-empty block costs a string compare.  The body-class observer below re-dirties the
        burst on the way back. */
-    if (document.body.classList.contains('ui-hidden')) { if (field.setOcclusion(NO_OCCLUSION)) schedule(TIER.PRESENT); return; }
+    if (document.body.classList.contains('ui-hidden')) { glassCut(NO_OCCLUSION, 0, 0); if (field.setOcclusion(NO_OCCLUSION)) schedule(TIER.PRESENT); return; }
     const cb = dom.canvas.getBoundingClientRect();
     const toCanvas = (r) => { const x0 = r.left - cb.left, y0 = r.top - cb.top, x1 = r.right - cb.left, y1 = r.bottom - cb.top;
       return x1 - x0 < 2 || y1 - y0 < 2 || x1 <= 0 || y1 <= 0 || x0 >= cb.width || y0 >= cb.height ? null : [x0, y0, x1, y1]; };
-    if (field.setOcclusion(occlusion.rects(toCanvas))) schedule(TIER.PRESENT);
+    const rects = occlusion.rects(toCanvas); glassCut(rects, cb.width, cb.height);
+    if (field.setOcclusion(rects)) schedule(TIER.PRESENT);
     landing(); tint();
   }
   /* iteration 016 W1 · TINT UNDER THE WORDS (Josh, call 4: "With FROST off, a translucent window over the stage words takes a tint like the drop-down
