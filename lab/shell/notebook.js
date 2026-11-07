@@ -189,6 +189,8 @@ export function createNotebook(app) {
       const nbPaint = coalesce(paint => paint());
       /* the title, subtitle and text are the part's: each input tells the session (projects.changed, the part's subscribe) */
       const nbStore = () => { if (layout.projects) layout.projects.changed(); };
+      /* the text keeps its keys from the app's rows; Ctrl+S and Ctrl+, travel on, and Escape (039 W4: the notebook's layer of THE ESCAPE STACK) */
+      const travels = (e) => e.code === 'Escape' || ((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'));
       titleIn.addEventListener('input', nbStore);
       titleIn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -197,7 +199,7 @@ export function createNotebook(app) {
           else titleIn.blur();
         }
         if (e.key === 'ArrowDown' && subIn && !subIn.hidden) { e.preventDefault(); subIn.focus(); }
-        if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
+        if (!travels(e)) e.stopPropagation();
       });
       if (subIn) {
         subIn.addEventListener('input', nbStore);
@@ -205,7 +207,7 @@ export function createNotebook(app) {
           if (e.key === 'Enter') { e.preventDefault(); subIn.blur(); }
           else if (e.key === 'Backspace' && !subIn.value) { e.preventDefault(); subIn.hidden = true; nbStore(); titleIn.focus(); }
           else if (e.key === 'ArrowUp') { e.preventDefault(); titleIn.focus(); }
-          if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
+          if (!travels(e)) e.stopPropagation();
         });
       }
       const renderMarkdown = renderNotebook;
@@ -217,7 +219,7 @@ export function createNotebook(app) {
       nb.dataset.mode = 'edit';
       nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
-        if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
+        if (!travels(e)) e.stopPropagation(); });
       /* 0.5.1 D8 · `lw:` LINKS in the VIEW (R6-K): `[water](lw:molecule=h2o)` runs a WHITELIST of hand verbs — preset (STATE's), molecule
          (the MOLECULE dropdown's pick, MOLECULES on), view (the V key's), orbital (the ORBITAL dial by name or number, VIEW orbital), volume
          (iteration 004 V2: `volume=vol-1&id=aspirin[&basis=6-31g]`, a volume's molecule on its record — chemview openVolume) — one
@@ -307,7 +309,9 @@ export function createNotebook(app) {
       }
       /* RENDER's SUBJECT says THIS VIEW's system: an open card is painted again when a project lands or ⓘ points (iteration 004) */
       const renderPaint = () => { const fc = app.state.filmCard; if (fc && !fc.card.root.classList.contains('closed')) fc.view.paint(); };
+      let fdDrop = null;   // 039 W4: FOLDERS is a layer of THE ESCAPE STACK while it is up (from its NAME field too)
       const projects = createProjects({ host: floats || document.body, part,
+        shown: () => { if (fdDrop) fdDrop(); fdDrop = app.sh.ACTIONS.escape.push(() => projects.folders.close(), { fields: true, alive: () => projects.folders.isOpen() }); },
         snapshot: () => JSON.parse(JSON.stringify(app.sh.serialize())), rollback: (S) => app.sh.restore(S) === true,   // M5b: the instrument as it stood, through the same road
         busy: (d) => { busy.n = Math.max(0, busy.n + d); busySync(); },   // wave 48: a project load rebuilds the register, the operator and the field — BUSY work
         notice: () => app.state.restoreNotice, thumbnail: () => app.sh.LW.thumbnail(), confirm: (text) => window.confirm(text), onMoved: () => occlusion.dirty(),
@@ -328,6 +332,8 @@ export function createNotebook(app) {
            text: no flag.  S3: the ring's bottom row is named for the file. */
         opened(label) { if (label === 'new project') freshWindows(); count(); if (app.state.history) app.state.history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); renderPaint(); },
         titleAfterSave(name) { if (titleIn.value !== 'NOTEBOOK') return false; titleIn.value = name; return true; } });
+      /* 039 W4: the kit's NAME and SAVE TO fields stop every key's travel, so the Escape that closes FOLDERS is taken before them (FOR-KIT) */
+      addEventListener('keydown', (e) => { if (e.code === 'Escape' && !e.isComposing && e.target.closest && e.target.closest('.sv-fields') && projects.folders.isOpen() && projects.folders.win.root.contains(e.target)) { e.preventDefault(); projects.folders.close(); } }, true);
       addEventListener('beforeunload', (e) => {
         if (!projects.dirty) return;
         /* 034 F8 (Josh: "'Repair - Installed - Reloading' seems to be stuck … the firefox warning"): REPAIR asked already (its own dialog,
@@ -420,7 +426,12 @@ export function createNotebook(app) {
         if (abFace === 'mir' && was && mirFace.offsetWidth === was[0] && p.offsetHeight !== was[1]) requestAnimationFrame(abFit); }) : null;
       abI.addEventListener('click', () => { abShow(abFace === 'lw' ? 'mir' : 'lw'); abFit(); });
       occlusion.register('about', () => (abWin.isOpen() ? [paintedRect(abWin.root)] : [])); occlusion.watch(abWin.root, { attributes: true, attributeFilter: ['hidden'] });
-      layout.about = { open(f = 'lw') { abShow(f); abWin.open(); abWin.raise(); abFit(); return true; }, close() { abWin.close(); }, toggle(f) { if (abWin.isOpen() && (!f || f === abFace)) abWin.close(); else layout.about.open(f || abFace); },
+      /* 039 W4 · ESCAPE STEPS BACK EVERYWHERE: ABOUT, FOLDERS and the notebook are layers of THE ESCAPE STACK (lab/actions.js) while they are up —
+         ABOUT closes wherever the focus is; the notebook's text gives the keyboard back first, then the notebook closes */
+      const escLayer = (close, alive, fields) => { let drop = null; return () => { if (drop) drop(); drop = app.sh.ACTIONS.escape.push(close, { alive, fields }); }; };
+      const abEsc = escLayer(() => abWin.close(), () => abWin.isOpen());
+      const nbEsc = escLayer(() => { const f = document.activeElement; if (nb.contains(f) && f.matches('textarea, input')) { f.blur(); nbEsc(); } else nb.hidden = true; }, () => !nb.hidden, true);
+      layout.about = { open(f = 'lw') { abShow(f); abWin.open(); abWin.raise(); abFit(); abEsc(); return true; }, close() { abWin.close(); }, toggle(f) { if (abWin.isOpen() && (!f || f === abFace)) abWin.close(); else layout.about.open(f || abFace); },
         get isOpen() { return abWin.isOpen(); }, get face() { return abFace; }, win: abWin };
       const show = (face) => {
         if (face === 'projects') { projects.show(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS' (iteration 004: the front page put away first)
@@ -434,7 +445,7 @@ export function createNotebook(app) {
           nb.style.left = 'calc(50% - ' + Math.round(w / 2) + 'px)';
           nb.style.top = '12%';
         }
-        ta.focus();
+        ta.focus(); nbEsc();
       };
       nb.querySelector('.nb-close').addEventListener('click', () => { nb.hidden = true; });
       nb.querySelector('.nb-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ta.value); } catch (e) {} });
