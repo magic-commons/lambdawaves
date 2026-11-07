@@ -35,7 +35,8 @@ import { onForget } from './settings-store.js';   // 021 R4: FORGET cancels the 
 
 /* 019 N5 · the shipped graphs (Josh's call 3: the recipes are the builder's) — every node but CURVES, which stays as it is */
 const SHIPPED = {
-  FILM: [{ type: 'levels2', values: { outblack: 0.05, outwhite: 0.95, gamma: 1.08 } },   // 038 P2: the new LEVELS' face (the same keys, the same table, the same picture) { type: 'temperature', values: { warmth: 0.3 } }, { type: 'saturation', values: { saturation: 0.82 } },
+  /* 038 P2: FILM opens on the new LEVELS' face (levels2: the same keys, the same table, the same picture as 037's) */
+  FILM: [{ type: 'levels2', values: { outblack: 0.05, outwhite: 0.95, gamma: 1.08 } }, { type: 'temperature', values: { warmth: 0.3 } }, { type: 'saturation', values: { saturation: 0.82 } },
     { type: 'grain', values: { amount: 0.32, size: 1.2 } }, { type: 'vignette', values: { amount: 0.45, feather: 0.6, round: 0.35 } }],
   POSTER: [{ type: 'saturation', values: { saturation: 1.45 } }, { type: 'posterize', values: { steps: 5, fade: 0.85 } }, { type: 'sharpen', values: { amount: 0.4 } }],
   PRINT: [{ type: 'luma', values: { amount: 1 } }, { type: 'contrast', values: { contrast: 1.5, mask: 'mids', soft: 0.6 } }, { type: 'tint', values: { colour: [1, 0.93, 0.8], amount: 0.5 } },
