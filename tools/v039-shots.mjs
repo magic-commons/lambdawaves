@@ -1,7 +1,7 @@
 /* v039-shots.mjs — iteration 039 chain V's pictures and its one light check per row (a diagnostic, not a gate).
  *   LW_PORT=9631 GD_PORT=5631 node tools/v039-shots.mjs <scene> [out-dir]
  * Scenes: bar (every bar control's centre hit-tests to itself: racks folded, one unfolded, EXPAND ALL; at 1300 × 850 and 1000 × 700) ·
- * JPEGs into <out-dir> (default .tmp/V-shots).  V_W / V_H set one size; the scene walks both when unset. */
+ * JPEGs into <out-dir> (default .tmp/V-shots).  V_W / V_H set one size; the scene walks both when unset; V_TL=1 opens the TIMELINE first. */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { open } from './gate/gatekit.mjs';
@@ -60,7 +60,8 @@ try {
   if (scene === 'bar') {
     for (const [w, h] of SIZES) {
       await boot(w, h);
-      const tag = `${w}x${h}`;
+      const tag = `${w}x${h}${process.env.V_TL ? '-tl' : ''}`;
+      if (process.env.V_TL) { await g.ev(`__LW.run('timeline'); return 1;`); await wait(1400); }   // the top seat under a docked TIMELINE
       out.log.push({ tag, folded: await g.ev(BAR) });
       /* one unfolded window per rack column: SPECTRUM (left, the tallest) and PALETTE (right) */
       for (const id of ['spectrum', 'palette', 'settings']) {

@@ -317,7 +317,10 @@ export function createModSeam(app) {
       const meet = s ? racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => ({ rk, r: rk.getBoundingClientRect() })).filter(({ r }) => r.width && r.right > s.left && r.left < s.right) : [];
       const hang = meet.filter(({ r }) => r.top < 52);
       if (hang.length) {   // a narrow stage's right rack lies along the foot (its top is not the stage's): never one to clear by going lower
-        const b = t.getBoundingClientRect(), foot = narrowNow() ? (document.getElementById('rack') || t).getBoundingClientRect().top : innerHeight - 60;
+        /* 039 V2: …nor lower than an open work bar's top (the TIMELINE or MODULATION docked below holds the foot): the bar stays above it and the
+           rack stops above the bar (V1), never the bar across the timeline's lanes */
+        const b = t.getBoundingClientRect(), work = Object.values(dodging).filter((r) => r && r.top > 52 * (cssZoom(t) || 1) + b.height).map((r) => r.top);
+        const foot = Math.min(narrowNow() ? (document.getElementById('rack') || t).getBoundingClientRect().top : innerHeight - 60, ...work);
         const cards = Math.max(...hang.map(({ rk, r }) => r.top + contentBottom(rk) * (cssZoom(rk) || 1)));
         v = Math.max(0, Math.round((Math.min(cards + 10, foot - b.height - 10) - (t.offsetParent || document.body).getBoundingClientRect().top) / (cssZoom(t) || 1)));
       }
@@ -361,8 +364,8 @@ export function createModSeam(app) {
        bar's right half, FOLDERS over CAMERA and the timeline's chips): a window that opens — a kit window a menu, a key, a bar button or a restore
        shows, a card floated off its rack by anything but a hand's drag (FILE › RENDER…), the notebook — moves once to the seat nearest its own that
        covers neither the bar (its PLAY and mini-viewer), nor the λWAVES logo and the menu row's band, nor an open TIMELINE or MODULATION and their
-       rails, nor a rack column where the stage has the room (summon.js clearSeat).  A resizable window with no such seat is made as short as the room
-       above the bar; any other keeps its seat and lies over the bar as V1 lets a tall one.  The work bars and PATTERN keep their own seats (the
+       rails, nor a rack column where the stage has the room (summon.js clearSeat; the order under `fit`).  A window with no seat at all keeps the one
+       it opened in and lies over the bar as V1 lets a tall one (`data-seat="over"`).  The work bars and PATTERN keep their own seats (the
        magnet, the dock, the dodge, the anchor); a hand's later drag is never undone while the window stays open.  Measured by layout (offset*,
        never the entrance's scale), in the observer's microtask, before the window is painted where it opened */
     const laid = (e) => { const p = e.offsetParent, o = p ? p.getBoundingClientRect() : { left: 0, top: 0 }, z = cssZoom(e) || 1, l = o.left + e.offsetLeft * z, tp = o.top + e.offsetTop * z;
@@ -376,23 +379,27 @@ export function createModSeam(app) {
     for (const k of ['pointerup', 'pointercancel']) addEventListener(k, () => { pressed = false; }, true);
     const summoned = (n) => !!n && !n.hidden && n.offsetWidth > 0 && (n === nbEl || (n.classList.contains('mir-win') && !n.classList.contains('mir-transport-free'))
       || (n.classList.contains('dev') && n.classList.contains('floating') && !n.classList.contains('closed') && n.dataset.id !== 'transport')) && !workRoots().includes(n) && n.dataset.mirWindow !== 'pattern';
-    function seatOpen(n) {
+    function seatOpen(n, floor = { h: 280, w: 300 }) {
       const kit = n.classList.contains('mir-win') ? windowOf(n) : null; if (kit && typeof kit.place !== 'function') return;
       const pane = laid(n), rail = kit ? railOf(n) : null, box = spanOf([pane, ...(rail ? [laid(rail)] : [])]), s = barSpan(), title = document.getElementById('title');
-      const rest = [title && title.offsetWidth ? title.getBoundingClientRect() : null, ...workRoots().filter((r) => !r.hidden && r.offsetWidth).flatMap((r) => [laid(r), ...(railOf(r) ? [laid(railOf(r))] : [])])].filter(Boolean), hard = s ? [s, ...rest] : rest;
+      const door = [s, title && title.offsetWidth ? title.getBoundingClientRect() : null].filter(Boolean), work = workRoots().filter((r) => !r.hidden && r.offsetWidth).flatMap((r) => [laid(r), ...(railOf(r) ? [laid(railOf(r))] : [])]), hard = [...door, ...work];
       const soft = document.body.classList.contains('rack-hidden') ? [] : racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => rk.getBoundingClientRect()).filter((r) => r.width);
-      const view = { width: innerWidth, height: innerHeight }, top = 52 * (cssZoom(title) || 1), ph = pane.bottom - pane.top, rim = box.bottom - box.top - ph;
-      /* the full height first, then shorter (never below 280 px, the tallest minimum of the windows that come here): clear of everything, then of all but
-         the rack columns; a floated card keeps its height (V3 folds RENDER) */
-      const fit = (avoid) => { for (let k = 0; k < 12; k++) { const hh = k ? Math.floor(ph * (1 - k * 0.06)) : ph; if (k && (!(kit || n === nbEl) || hh < 280)) break;
-        const at = clearSeat(k ? { ...box, bottom: box.top + rim + hh } : box, { avoid, view, top }); if (at) return { at, h: k ? hh : 0 }; } return null; };
-      const got = fit([...hard, ...soft]) || fit(hard);
+      const view = { width: innerWidth, height: innerHeight }, top = 52 * (cssZoom(title) || 1), ph = pane.bottom - pane.top, pw = pane.right - pane.left, rim = box.bottom - box.top - ph, wim = box.right - box.left - pw;
+      /* the full size first, then shorter (6 % a step, never below 280 px, the tallest minimum of the windows that come here) and narrower (4 % a step,
+         three at most, never below 300 px): clear of everything; then of all but the rack columns; then — a stage too small for a work bar and a window
+         beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without.  A floated card keeps its size (V3 folds RENDER) */
+      const sizes = (kit || n === nbEl) ? 12 * 4 : 1;
+      const fit = (avoid) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = Math.floor(pw * (1 - j * 0.04)); if (i && (hh < floor.h || ww < floor.w)) continue;
+        const at = clearSeat({ ...box, right: box.left + wim + ww, bottom: box.top + rim + hh }, { avoid, view, top }); if (at) return { at, h: k ? hh : 0, w: j ? ww : 0 }; } return null; };
+      const got = fit([...hard, ...soft]) || fit(hard) || fit([...door, ...soft]) || fit(door);
       if (n.dataset.seat === 'over') delete n.dataset.seat;
       if (!got) { if (s && hits(box, s)) n.dataset.seat = 'over'; return; }   // no room on this stage: it stays where it opened, over the bar (021 V3)
-      const { at, h } = got; if (at.left === Math.round(box.left) && at.top === Math.round(box.top) && !h) return;
+      const { at, h, w } = got; if (at.left === Math.round(box.left) && at.top === Math.round(box.top) && !h && !w) return;
       const z = cssZoom(n) || 1, x = pane.left + at.left - box.left, y = pane.top + at.top - box.top;
-      if (kit) kit.place({ left: x / z, top: y / z, ...(h ? { height: h / z } : {}) });
-      else if (n === nbEl) { const o = n.offsetParent ? n.offsetParent.getBoundingClientRect() : { left: 0, top: 0 }; n.style.left = (x - o.left) / z + 'px'; n.style.top = (y - o.top) / z + 'px'; if (h) n.style.height = h / z + 'px'; }
+      if (kit) { kit.place({ left: x / z, top: y / z, ...(h ? { height: h / z } : {}), ...(w ? { width: w / z } : {}) });
+        const was = laid(n), wh = was.bottom - was.top, wd = was.right - was.left;   // the kit's floor (min) can be above ours: once more from there, never shorter than it
+        if (floor.h === 280 && ((h && wh > h + 2) || (w && wd > w + 2))) seatOpen(n, { h: Math.ceil(wh), w: Math.ceil(wd) }); }
+      else if (n === nbEl) { const o = n.offsetParent ? n.offsetParent.getBoundingClientRect() : { left: 0, top: 0 }; n.style.left = (x - o.left) / z + 'px'; n.style.top = (y - o.top) / z + 'px'; if (h) n.style.height = h / z + 'px'; if (w) n.style.width = w / z + 'px'; }
       else app.sh.layout.moveFloat(n.dataset.id, x, y);
     }
     const seatNew = (gone = []) => {
@@ -417,6 +424,7 @@ export function createModSeam(app) {
          zero rect): a window that is not open has nothing to dodge */
       const was = dodging[who];
       dodging[who] = rect && (who === 'mod' ? app.state.modView && app.state.modView.isOpen : app.state.tl && app.state.tl.isOpen()) ? rect : null;
+      if (!clearBooked) clearBooked = requestAnimationFrame(clearRack);   // 039 V2: the top seat's clear stops above an open work bar
       if (who === 'tl' && !was && dodging.tl && cycle('tl')) return;   // 016 W5: the timeline opened where the two cannot stack — the window gave way
       if (who === 'tl') magnetSeat();   // 015 T5: the modulation window follows the timeline it sits on
       const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
