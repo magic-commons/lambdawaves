@@ -9,6 +9,7 @@ THE DOORS OF 039 · CHAIN K (THE KIT RETURN, Opus 5.5; the clone road on kit bra
 - alpha.18 THE ROOT WEARS THE HINT (`kit.js` `seg({ title })`, `controls/stepper.js` `stepper({ title })`): the control's hint on its root, as every kit control; an option keeps its own. λWAVES: `nodeBody` no longer hints a seg's root itself (node-types.js).
 - alpha.19 THE FIT ROW KEEPS ITS CELLS (`kit.js` `row(parent, { fit: true, seg: 1 })` → `data-seg="1"`, `css/base.css`): in that row a seg takes one cell; `.wide` / `.full` still span; a plain fit row keeps the two-cell seg. λWAVES: the node faces' rows (node-types.js), nodes.css's override gone.
 - alpha.20 THE POWER WORD PASSES THROUGH (`timeline/window.js`): `installTimeline({ transport: { powerWord } })` builds the work bar's power seat with the word face. λWAVES: `powerWord: 'MOD'` (shell/keys.js), no relabel after install.
+- A TARGET HAS ONE AUTOMATION (Josh 2026-10-18) is NOT a door yet: three 1.5.6 laws collide with it (→ TL sends a routed target by construction, alpha.27; a hand macro layers over a clip, alpha.27; ROUTE NEW PARAMETER… re-targets a clip, alpha.26), so its design waits for a word in docs/FOR-MIR.md § 039 and the number it was planned for, alpha.21, went to the next door.
 Each door has its BUILT line in docs/FOR-MIR.md § 039.
 
 ## The laws of 038
