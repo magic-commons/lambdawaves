@@ -171,7 +171,11 @@ export function createRackWiring(app) {
       if (id === 'transport') { if (layout.docked) layout.dockTransport(); return true; }
       const a = { ...(at || {}), w: (at && at.w) || rackCardWidth() };
       if (at && at.home) a.home = { side: sideKey(at.home.side) || 'right', index: Math.max(0, at.home.index | 0) };
-      const ok = rk.float(id, a); occlusion.dirty(); return ok;   // 017 P2 (R4's note): the placement itself marks a paused mask stale
+      /* 039 F4a · THE PLACEMENT STANDS (latex-copy's CALCULUS popped out at 520 px went back to its rack as two columns: 983 px on a 914-px page, F3's
+         tall-card seat took it): an `at` with its own x, y or w is a placement, not a summons — `data-placed` keeps the open's seat (modulation.js
+         seatOpen) from racking it; the seat drops the mark when the card docks */
+      const d = devById(id), placed = !!at && (at.x != null || at.y != null || !!at.w); if (d) { if (placed) d.dataset.placed = ''; else delete d.dataset.placed; }
+      const ok = rk.float(id, a); if (!ok && d) delete d.dataset.placed; occlusion.dirty(); return ok;   // 017 P2 (R4's note): the placement itself marks a paused mask stale
     },
     dockWindow(id) { if (id === 'transport') { if (!layout.docked) layout.dockTransport(); return true; } const ok = rk.dock(id); occlusion.dirty(); return ok; },
     toggleFloat(id) { if (id === 'transport') { layout.dockTransport(); return true; } return rk.toggleFloat(id); },
