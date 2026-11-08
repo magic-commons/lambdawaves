@@ -239,7 +239,7 @@ try {
     await __LW.chem.run(20);
     await new Promise((r) => setTimeout(r, 250));
     const after = { view: __LW.mat.view, kind: __LW.field.moleculeInfo.kind, model: __LW.molsession.selected,
-      stats: await __LW.field.readStats(), counters: __LW.molsession.counters, chemView: __LW.chem.state().view };
+      stats: await __LW.field.readStats(), counters: __LW.molsession.counters, chemView: __LW.chem.state().view, delta: __LW.chem.state().delta };
     __LW.chem.stop(); __LW.chem.reset();
     await new Promise((r) => setTimeout(r, 150));
     __LW.chem.setOn(false);
@@ -250,10 +250,11 @@ try {
   judge('L7 the card starts on a density and the funnel says which model is playing',
     !l7.E && l7.before.kind === 'density' && l7.before.view === VIEW.density && l7.before.model === 'ground'
     && l7.before.molecule && l7.before.molecule.nAO === nAO, { ...l7.before, threw: l7.E });
+  /* iteration 008 U THE ONE CARD (445124af): Δρ is a switch beside KICK — setView('diff') turns `delta` on and the VIEW seg keeps its view */
   judge('L7 CHEMISTRY\'s DIFF control now produces a SIGNED product, read by the \'real\' view',
-    l7.after.kind === 'signed' && l7.after.view === VIEW.real && l7.after.chemView === 'diff'
+    l7.after.kind === 'signed' && l7.after.view === VIEW.real && l7.after.delta === true && l7.after.chemView === 'density'
     && l7.after.stats.rhoMax > 0 && l7.after.model === 'ground',
-    { fieldKind: l7.after.kind, observable: l7.after.view, cardView: l7.after.chemView,
+    { fieldKind: l7.after.kind, observable: l7.after.view, delta: l7.after.delta, cardView: l7.after.chemView,
       'max |Δρ|': Math.sqrt(l7.after.stats.rhoMax), model: l7.after.model, counters: l7.after.counters });
   judge('L7 nothing was dropped as stale, unselected or molecule-less; the replacements are gestures and worker replies landing between two frames, and only the last of each reached the volume',
     l7.after.counters.stale === 0 && l7.after.counters.unselected === 0 && l7.after.counters.noMolecule === 0

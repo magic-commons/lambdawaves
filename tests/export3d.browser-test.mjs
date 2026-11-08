@@ -27,13 +27,19 @@ try {
     const cap = __LW.captureUI.capture;            // force it into existence so the stub lands on the SAME object export3d.js's env.save calls
     cap.save = (r) => { window.__exports.push(r); return true; };
 
+    /* 021 I3 THE MENUS (a9b6d61c): the five rows live in FILE › EXPORT › SHAPE / GRID — a path 'A › B › C' presses each
+       submenu row (it opens beside its row) and answers the last, menubar.browser-test.mjs's __find */
+    window.__find = async (btn, label) => { let list = btn.parentElement.querySelector('.mb-list'); const parts = label.split(' › ');
+      for (let i = 0; i < parts.length; i++) { const it = [...list.querySelectorAll(':scope > .mb-item')].find((x) => x.querySelector('.mb-lbl').textContent.startsWith(parts[i]));
+        if (!it || i === parts.length - 1) return it || null; if (it.getAttribute('aria-expanded') !== 'true') it.click(); await new Promise((q) => setTimeout(q, 30));
+        list = [...document.querySelectorAll('#menubar .mb-sub-list')].find((l) => l.mbRow === it); if (!list) return null; } };
     window.__row = async (menu, label) => {
       __LW.layout.menu.open();
       const bar = document.getElementById('menubar');
       const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu);
       if (!btn) return { found: false, why: 'no menu ' + menu };
       btn.click();
-      const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith(label));
+      const it = await __find(btn, label);
       if (!it) { btn.click(); return { found: false, why: 'no row ' + label, rows: [...btn.parentElement.querySelectorAll('.mb-lbl')].map((l) => l.textContent) }; }
       const disabled = it.disabled;
       if (!disabled) it.click(); else btn.click();
@@ -77,7 +83,7 @@ try {
   /* ── GLB: the row, the header, the accessors, the camera, every vertex inside ±half, and (1s) a centred,
          symmetric mesh ── */
   const glbR = await g.ev(`
-    const p = await __press('EXPORT SHAPE · GLB');
+    const p = await __press('EXPORT › SHAPE › GLB');
     const last = __LW.shapeExport.last, entry = window.__exports[window.__exports.length - 1];
     const bytes = new Uint8Array(await entry.blob.arrayBuffer());
     const G = __readGLB(bytes), P = G.acc(0), half = __LW.domain.half;
@@ -103,7 +109,7 @@ try {
 
   /* ── OBJ ── */
   const objR = await g.ev(`
-    const p = await __press('EXPORT SHAPE · OBJ');
+    const p = await __press('EXPORT › SHAPE › OBJ');
     const last = __LW.shapeExport.last, entry = window.__exports[window.__exports.length - 1];
     const text = await entry.blob.text(), lines = text.split('\\n');
     const V = lines.filter((l) => l.startsWith('v ')).length, F = lines.filter((l) => l.startsWith('f ')).length;
@@ -116,7 +122,7 @@ try {
 
   /* ── STL: its triangle count must equal the GLB's (same grid, same ISO, same marching cubes) ── */
   const stlR = await g.ev(`
-    const p = await __press('EXPORT SHAPE · STL');
+    const p = await __press('EXPORT › SHAPE › STL');
     const entry = window.__exports[window.__exports.length - 1];
     const bytes = new Uint8Array(await entry.blob.arrayBuffer());
     const nt = new DataView(bytes.buffer).getUint32(80, true);
@@ -130,7 +136,7 @@ try {
 
   /* ── NPZ ── */
   const npzR = await g.ev(`
-    const p = await __press('EXPORT GRID · NPZ');
+    const p = await __press('EXPORT › GRID › NPZ');
     const entry = window.__exports[window.__exports.length - 1];
     const bytes = new Uint8Array(await entry.blob.arrayBuffer());
     const files = __unzip(bytes), psi = __readNpy(files['psi.npy']), axis = __readNpy(files['axis.npy']);
@@ -147,7 +153,7 @@ try {
 
   /* ── CUBE ── */
   const cubeR = await g.ev(`
-    const p = await __press('EXPORT GRID · CUBE');
+    const p = await __press('EXPORT › GRID › CUBE');
     const entry = window.__exports[window.__exports.length - 1];
     const text = await entry.blob.text(), lines = text.split('\\n');
     const na = +lines[2].trim().split(/\\s+/)[0], n = +lines[3].trim().split(/\\s+/)[0];
@@ -165,7 +171,7 @@ try {
     __LW.perf.resetRing(); __LW.play();
     await new Promise((r) => setTimeout(r, 1200));
     const before = __LW.perf.loopMedian;
-    const p = await __press('EXPORT GRID · NPZ');
+    const p = await __press('EXPORT › GRID › NPZ');
     await new Promise((r) => setTimeout(r, 800));
     const after = __LW.perf.loopMedian;
     __LW.pause();
@@ -206,7 +212,7 @@ try {
   const noField = await g.ev(`
     const real = __LW.field.ok;
     __LW.field.ok = false;                 // the field.js own flag a device loss flips (field.ok, read, never set, elsewhere)
-    const row = await __row('FILE', 'EXPORT SHAPE · GLB');
+    const row = await __row('FILE', 'EXPORT › SHAPE › GLB');
     const r = await __LW.shapeExport.run('glb');
     __LW.field.ok = real;
     return { disabled: row.disabled, refused: !r.ok, error: r.error };

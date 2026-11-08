@@ -1,8 +1,8 @@
 // tests/camera-shift.browser-test.mjs — THE LENS SHIFT in the real app, on the GPU (0.4.0 S2, BRIEF-S2-CAMERA.md §3).
 //   LW_PORT=… GD_PORT=… node tests/camera-shift.browser-test.mjs
 // 1 ONE FRAME CORNER, ONE PIXEL: at p = (0.4, −0.3) the box's leftmost corner lands on the same pixel through the line pass
-//   (linePixels, the box alone), the ray pass (readPixels with GAMMA 2.4 and no chrome: the box's silhouette, where the march
-//   begins) and the pointer (its ray through that pixel passes the corner) — and that pixel is the +p prediction, 0.4·W/2 px
+//   (linePixels, the box alone), the ray pass (readPixels with no chrome, read plain and DITHERed: the box's silhouette, where the
+//   march begins) and the pointer (its ray through that pixel passes the corner) — and that pixel is the +p prediction, 0.4·W/2 px
 //   from the unshifted one and 0.4·W px from the −p one, which is the test that decides the matrix sign.
 // 2 THE CURSOR-ANCHORED POINT: read back through unproject, the pivot-plane point under the cursor moves ≤ 0.5 px across a real
 //   wheel step, a real two-finger pinch about it and a FOV step anchored there, at a non-zero shift.
@@ -25,16 +25,22 @@ try {
   await g.ev(`__LW.pause(); __LW.governor.on = false; __LW.camera.setLock(false); __LW.camera.setAutoRotate(false); await __LW.settle(); return 1;`);   // 037 H3: a fresh profile boots LOCKed with AUTO-ROTATE on; this file judges the free pan, and § 5 presses LOCK itself
 
   /* ── 1 · ONE FRAME CORNER, ONE PIXEL ──
-     At ZOOM 8 the whole box is on the frame; the stage is a flat grey for the two readbacks (either theme), the ray pass's
-     GAMMA is 2.4 and its chrome off, so the box's silhouette — where the march begins and the stage's bg^(1/γ) appears — is
-     the ray pass's own picture of the FRAME; linePixels draws the box alone.  The GPU's corner is the lit pixel nearest the
-     prediction in each image's leftmost lit column (the left vertex of the silhouette and of the box). */
+     At ZOOM 8 the whole box is on the frame; the stage is a flat grey for the readbacks (either theme) and the ray pass's chrome
+     is off.  The ray pass is read twice, DITHER 0 and DITHER 255: the dither is the march's last step (field.js, after the
+     gamma) and a ray that misses the box returns the stage undithered, so the pixels the two disagree on are the box's
+     silhouette — where the march begins — the ray pass's own picture of the FRAME (bayer8 is never 0: at 255 LSB every such pixel
+     moves ≥ 1.99 levels).  Until 037 T3 GAMMA EVERYWHERE (f73557dd) the marker was GAMMA 2.4, which then reached only the march; it now
+     reaches the miss path too and lit every column.  linePixels draws the box alone.  The GPU's corner is the lit pixel nearest
+     the prediction in each image's leftmost lit column (the left vertex of the silhouette and of the box). */
   const CORNER = `
     const LW = __LW, F = LW.field, cv = document.getElementById('field'), fm = await import('/lab/field.js');
     const w = cv.clientWidth, h = cv.clientHeight, half = LW.domain.half;
     LW.camera.reset(); LW.camera.setDist(8); LW.camera.setShift(P[0], P[1]); F.setOcclusion([]);
     const base = { ...LW.mat, dither: 0, invert: false, bg: [0.25, 0.25, 0.25], slice: { ...LW.mat.slice, mode: 0 } };
-    const ray = await F.readPixels(LW.obs, { ...base, gamma: 2.4, frame: false, axis: false }, w, h, true);
+    const plain = await F.readPixels(LW.obs, { ...base, frame: false, axis: false }, w, h, true);
+    F.setOcclusion([]);
+    const dith = await F.readPixels(LW.obs, { ...base, dither: 255, frame: false, axis: false }, w, h, true);
+    const ray = { bpr: plain.bpr, px: plain.px.map((v, i) => Math.abs(v - dith.px[i])) };   /* the march's pixels: what the dither moved */
     F.setOcclusion([]);   /* S2-VERIFY S1: a frame between the two readbacks puts the racks' mask back; clear it again just before the line pass */
     const line = await F.linePixels(LW.obs, { ...base, frame: true, frameMode: 'box', axis: false }, w, h, true);
     const gl = (line.ground[0] + line.ground[1] + line.ground[2]) / 3;
@@ -42,7 +48,7 @@ try {
     const pick = (shift) => { const S = fm.toScreen({ ...LW.obs, shift }, half, w, h); return corners.map((X) => ({ X, q: S.at(...X) })).filter((o) => o.q).sort((m, n) => m.q[0] - n.q[0])[0]; };
     const plus = pick(P), zero = pick([0, 0]), minus = pick([-P[0], -P[1]]), Q = plus.q;
     const gpu = (r, lit) => { for (let x = 0; x < w; x++) { let best = null; for (let y = 0; y < h; y++) { const o = y * r.bpr + x * 4; if (lit((r.px[o] + r.px[o + 1] + r.px[o + 2]) / 3)) { const c = [x + 0.5, y + 0.5]; if (!best || Math.hypot(c[0] - Q[0], c[1] - Q[1]) < Math.hypot(best[0] - Q[0], best[1] - Q[1])) best = c; } } if (best) return best; } return null; };
-    const R = gpu(ray, (v) => v > 105), L = gpu(line, (v) => Math.abs(v - gl) > 12);
+    const R = gpu(ray, (v) => v >= 1), L = gpu(line, (v) => Math.abs(v - gl) > 12);
     const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
     /* the pointer: its ray through the line pass's pixel passes the corner — the miss, in pixels at the corner's depth */
     const S = fm.toScreen(LW.obs, half, w, h), pr = LW.camera.pointer.ray(L[0], L[1]), X = plus.X, toX = [X[0] - pr.cam[0], X[1] - pr.cam[1], X[2] - pr.cam[2]];
