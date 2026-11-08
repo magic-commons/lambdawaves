@@ -118,7 +118,7 @@ export function createFilmCard(o) {
   const foldIn = (s, key, what, word, tip) => { if (!s) return null; const row = headRow(s, word, tip), box = el('div', 'sr-fold-box');
     box.append(...[...s.children].filter((c) => c !== row)); s.append(box); return fold(row, box, { what, key }); };
   const subj = W.querySelector(':scope > .sr-subject');
-  if (subj) { const s = el('section', 'sr-section sr-view'); subj.before(s); const f = fold(headRow(s, 'THIS VIEW', 'What the picture and the film are of: COPY · JSON'), subj, { what: 'what the picture is of', key: 'render-view' });
+  if (subj) { const s = el('section', 'sr-section sr-view'); subj.before(s); const f = fold(headRow(s, 'THIS VIEW', 'What the film will show; copy it as text or JSON'), subj, { what: 'this view\'s summary', key: 'render-view' });   // 039 F3 (V-REVIEW 9): the user's words
     s.append(subj); new MutationObserver(() => { if (subj.querySelector('.sr-back')) f.set(true); }).observe(subj, { childList: true }); }   // FOLDERS' ⓘ inspected a project: say so
   foldIn(W.querySelector(':scope > .sr-picture'), 'render-image', 'the picture');
   if (C.recoveryRow) { const rr = C.recoveryRow, row = el('div', 'row tight sr-fold-head'); rr.before(row); label(el('div', 'sv-title sr-title', row), 'STORED RENDER');

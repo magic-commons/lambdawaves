@@ -1,7 +1,7 @@
 /* lab/shell/rack-wiring.js — §19a THE RACK IS THE KIT'S (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): createRack, the layout verbs (aliases over the
  * kit's rack; captureLayout's v3 the WORKSPACE record), the TRANSPORT card, the phone and tablet crossings, the stage gestures.  Two seats, as the code stood:
  * createRackWiring(app) at §19a's, wireStage() after the notebook's.  rk, layout, phone, tablet, winHint and devById are registered on app.sh at creation. */
-import { TIER } from '../tier.js'; import { chip } from '../mir/kit.js'; import { transportDock } from '../mir/shell/transport.js'; import { createRack, readLayout, layoutLabel as rackLayoutLabel } from '../mir/shell/rack.js';
+import { TIER } from '../tier.js'; import { chip, hint } from '../mir/kit.js'; import { transportDock } from '../mir/shell/transport.js'; import { createRack, readLayout, layoutLabel as rackLayoutLabel } from '../mir/shell/rack.js';
 import { WINDOW_GLYPH } from '../icons.js'; import { setGlyph } from '../mir/glyph.js'; import { uiSpace } from '../mir/shell/scene-guard.js'; import { bindStageGestures } from '../stage-gestures.js'; import { CAM } from '../camera-law.js'; import { paintedRect } from '../occlusion.js';
 const SHELLS_FOLDED = [7];   // iteration 008 A7: SPECTRUM's shells folded by default (spectrum.js FOLD_DEFAULT)
 export function createRackWiring(app) {
@@ -19,8 +19,8 @@ export function createRackWiring(app) {
     const d = h.parentElement; if (!d || !d.classList.contains('dev')) return;
     const how = d.classList.contains('floating') ? 'drag back to dock' : 'drag to detach', now = h.dataset.helpEn || h.title || '';
     if (now.endsWith(how)) return;
-    const was = now.split(' · drag ')[0], name = ((h.querySelector('.dev-title') || {}).textContent || was).trim();
-    h.title = (was + ' · ' + how).length <= 60 ? was + ' · ' + how : name + ' · ' + how;
+    const was = now.startsWith('{what}') ? JSON.parse(h.dataset.tHvars || '{}').what || '' : now.split(' · drag ')[0], name = ((h.querySelector('.dev-title') || {}).textContent || was).trim();
+    hint(h, d.classList.contains('floating') ? '{what} · drag back to dock' : '{what} · drag to detach', { what: (was + ' · ' + how).length <= 60 ? was : name });   // 039 F3 (V-REVIEW 12): through hint(), not a hand-written title
   }, true);
   /** a rack card's width, from the RACK's own content box — the scrollbar is already out of clientWidth */
   const rackCardWidth = () => { const cs = getComputedStyle(rack); return Math.max(180, Math.round(rack.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0))); };
