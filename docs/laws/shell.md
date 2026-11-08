@@ -8,7 +8,7 @@ THE DOCK BUTTON HAS AREA (039 V8, C #13: on a floating PALETTE "dock this window
 
 METERS SHOWS ITS READINGS (039 V9, C #21: WINDOW › INFO › METERS opened a 280 × 62 empty strip — LEAN, on by a first run, hides every `.ro` and METERS is nothing else, and with HELP off its Aa is not drawn; every other LEAN window keeps a control or a plot, measured): METERS' readouts are the window, not its commentary, as CALCULUS' tiles (lab.css; its note still goes). AND IS NEVER TALL (shown whole it is 888 px in a 626-px page): the state's five — NORM · ⟨E⟩ · t · AUTOCORR · MODES — and the last IMPULSE stand open; the engine's — FIELD CACHE · CLOCKS · LAST TIER · FLOOR · STATUS · FRAME PROFILE · COHERENCE and the GOVERNOR — are one fold row, ENGINE (`windows/readouts.js` over lab/fold.js, `data-fold` `meters-engine`: closed on a first run, an open one kept in the WORKSPACE record). At 1000 × 700 the card is 274 × 319, the readings move while the clock plays.
 
-A FOLD ROW SAYS WHAT IT FOLDS (039 V10, THE FINISH): every press `lab/fold.js` makes wears the hint "Show or hide {what}" (its `what`, the same words as its aria label), so RENDER's folds, METERS' ENGINE and every older fold row are hinted.
+A FOLD ROW SAYS WHAT IT FOLDS (039 V10, THE FINISH): every press `lab/fold.js` makes wears the hint "Show or hide {what}" (its `what`, the same words as its aria label), so RENDER's folds, METERS' ENGINE and every older fold row are hinted; the two presses built by hand — MOLECULES' MORE (`chemview.js`) and SHADOW's details (`native-ui.js`) — wear the same face through `foldFace(button, what)`, fold.js' one road for the chevron, the aria name and the hint (039 F3, the fresh eyes on V row 8).
 
 ## The laws of 038
 
