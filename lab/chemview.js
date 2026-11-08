@@ -32,6 +32,7 @@ import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storage
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
 import { planePoints } from './slice.js';   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
 import * as V from './volumes.js'; import { setPic } from './picker-fx.js'; import { parseLwm, rungRecord, espOf, espGrid } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
+import { foldFace } from './fold.js';   // 039 F3: MOLECULES' MORE wears the fold rows' face (V-REVIEW 8)
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -551,7 +552,7 @@ export function createChem(host, api) {
     roH2.setSub(`UHF leaves RHF at the Coulson–Fischer point, ${h2T.cf.toFixed(3)} bohr · S: the one-orbital entanglement entropy of the FCI state, ln 2 = 0.693 at the break`); drawCurve(h2Cv, h2T, R); }
   const probeLine = el('div', 'note', more); probeLine.hidden = true; probeLine.title = 'Electron potential at each nucleus (a.u.)';   // 0.6.5 X1 THE PROBE
   const moreToggle = el('button', 'trig mol-more-toggle lw-fold', rM); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
-  chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
+  foldFace(moreToggle, 'the kick, run and spectrum controls');
   const setMore = (open) => {
     more.hidden = !open; moreToggle.setAttribute('aria-expanded', String(open));
     moreToggle.setAttribute('aria-label', open ? 'Hide the kick, run and spectrum controls' : 'Show the kick, run and spectrum controls');
