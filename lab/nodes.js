@@ -260,7 +260,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     onOpen: () => requestAnimationFrame(() => vCard.place()) });
   const wbody = el('div', 'nodes-host');
   const vWin = createView(wbody, 'win', M); views.push(vWin);
-  win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'close', resizable: true, size: { w: 440, h: 640 }, min: { w: 300, h: 280 }, body: wbody,
+  win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'close', resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
     persist: { read: () => rec().win || null, write: (st) => put({ win: st }) },
     onOpen: () => { onWin(true); requestAnimationFrame(() => vWin.place()); }, onClose: () => onWin(false), onMoved: () => occlusion.dirty() });   // 021 I1: the bar's NODES seat lights on these
   /* 038 N3 · THE BAR (Josh: "Move the dock to rack button besides the 'x' button and make the icon slightly smaller and match the styling of the nodes

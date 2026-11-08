@@ -76,7 +76,9 @@ export function createInk(app) {
     occlusion.register('floats', () => rects([...floats.children].filter((d) => d.classList.contains('dev') && shown(d)).flatMap(panes)));
     occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'rackFavList'].map((id) => document.getElementById(id))));
     occlusion.register('keymap', () => rects([document.querySelector('[data-mir-window="keyboard"]'), ...document.querySelectorAll('[data-mir-rail="keyboard"] .mir-chip')]));   // C3: the kit's window and its rail
-    occlusion.register('rack', () => rects([rack, rackL].flatMap((rk) => rk && rackShown(rk) ? [...rk.children] : []).filter((d) => d.classList.contains('dev') && !d.classList.contains('closed')).flatMap(panes)),
+    /* 039 F3 · A STOPPED COLUMN'S HIDDEN CARDS ARE NO GLASS (V-REVIEW 1: below V1's stop SPECTRUM's overflow still masked the frame and lifted the
+       VIGNETTE, a bright strip beside the bar): a rack card's rect is clipped by its column's box, the rack's own clip */
+    occlusion.register('rack', () => [rack, rackL].flatMap((rk) => rk && rackShown(rk) ? [...rk.children].filter((d) => d.classList.contains('dev') && !d.classList.contains('closed')).flatMap(panes).map((s) => paintedRect(s, rk)) : []),
       { standIn: () => [rack, rackL].filter((rk) => rk && rackShown(rk)).map((rk) => paintedRect(rk)) });   // past the block's 32 the two columns stand in for their cards
     for (const el of [floats, rack, rackL]) occlusion.watch(el, { childList: true });
     /* A paused field has no periodic frame to notice a source card sliding under the run's clip. */

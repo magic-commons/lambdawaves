@@ -318,20 +318,33 @@ export function createModSeam(app) {
     const fitOf = (e) => parseFloat(e.style.getPropertyValue('--lw-fit')) || 1;
     const setFit = (e, f) => { f = Math.max(0.5, Math.min(1, Math.floor(f * 100) / 100)); if (Math.abs(f - fitOf(e)) < 0.01) return false;
       if (f >= 1) e.style.removeProperty('--lw-fit'); else e.style.setProperty('--lw-fit', String(f)); return true; };
-    const menuRow = document.getElementById('menubar'), logoEl = document.getElementById('title');
+    const logoEl = document.getElementById('title'); let menuRow = null;   // 039 F3: the kit's menubar is built after this seam (notebook.js), so V4's menu-row fit never ran — found, and watched, at the first fitHead
+    /* 039 F3 · THE MENUS STAND ABOVE THE RACKS (V-REVIEW 6: at UI SCALE 150 % on a 1000-px page the menu row lay across SETTINGS' head, WINDOW and HELP
+       over its power button and ×, and no room beside the logo holds the row): while the row shows, a rack whose cards it meets starts below it —
+       `--rack-top` on the rack, lab.css' top, in the rack's own px — and clearRack (the row's show asks it at once) takes the stop from there; the
+       row hidden, the rack is back; the logo's fit reads the rack where it rests */
+    const rackTop = new Map(), restTop = (rk, r) => r.top - (rackTop.get(rk) || 0) * (cssZoom(rk) || 1);
     function fitHead() {
+      if (!menuRow && (menuRow = document.getElementById('menubar'))) new MutationObserver(() => clearRack()).observe(menuRow, { attributes: true, attributeFilter: ['hidden'] });
       const phone = document.body.classList.contains('phone');
       if (logoEl && logoEl.offsetWidth) { const r = logoEl.getBoundingClientRect(), rk = document.getElementById('rack'), rr = !phone && rk && !document.body.classList.contains('rack-hidden') && [...rk.children].some(shownCard) ? rk.getBoundingClientRect() : null;
-        setFit(logoEl, phone ? 1 : fitOf(logoEl) * ((rr && rr.top < r.bottom && rr.left > r.left ? rr.left : innerWidth) - 8) / r.right); }   // its left and its width both scale with its zoom
-      if (!menuRow || menuRow.hidden || !menuRow.offsetWidth) return;
-      let rtl = false; try { rtl = menuRow.matches(':dir(rtl)'); } catch (_) {}
-      const r = menuRow.getBoundingClientRect();
-      if (setFit(menuRow, phone || rtl ? 1 : fitOf(menuRow) * (innerWidth - 8 - r.left) / (r.right - r.left)) && !phone && !rtl) {
-        const z = cssZoom(menuRow) || 1, l = logoEl ? logoEl.getBoundingClientRect() : r;   // the kit's place() in the new zoom: beside the logo, level with it
-        menuRow.style.left = (l.right + 8) / z + 'px'; menuRow.style.top = Math.max(0, l.top + l.height / 2 - menuRow.offsetHeight * z / 2) / z + 'px';
+        setFit(logoEl, phone ? 1 : fitOf(logoEl) * ((rr && restTop(rk, rr) < r.bottom && rr.left > r.left ? rr.left : innerWidth) - 8) / r.right); }   // its left and its width both scale with its zoom
+      const shown = !!menuRow && !menuRow.hidden && menuRow.offsetWidth > 0;
+      if (shown) {
+        let rtl = false; try { rtl = menuRow.matches(':dir(rtl)'); } catch (_) {}
+        const r = menuRow.getBoundingClientRect();
+        if (setFit(menuRow, phone || rtl ? 1 : fitOf(menuRow) * (innerWidth - 8 - r.left) / (r.right - r.left)) && !phone && !rtl) {
+          const z = cssZoom(menuRow) || 1, l = logoEl ? logoEl.getBoundingClientRect() : r;   // the kit's place() in the new zoom: beside the logo, level with it
+          menuRow.style.left = (l.right + 8) / z + 'px'; menuRow.style.top = Math.max(0, l.top + l.height / 2 - menuRow.offsetHeight * z / 2) / z + 'px';
+        }
+      }
+      const mr = shown && !phone && !document.body.classList.contains('rack-hidden') ? menuRow.getBoundingClientRect() : null;
+      for (const rk of racksEl) {
+        const cs = mr ? [...rk.children].filter(shownCard).map((c) => c.getBoundingClientRect()) : [], z = cssZoom(rk) || 1, top0 = cs.length ? restTop(rk, rk.getBoundingClientRect()) : 0;
+        const px = cs.length && Math.min(...cs.map((c) => c.left)) < mr.right && Math.max(...cs.map((c) => c.right)) > mr.left && top0 < mr.bottom ? Math.ceil((mr.bottom - top0) / z) : 0;
+        if (px !== (rackTop.get(rk) || 0)) { rackTop.set(rk, px); if (px) rk.style.setProperty('--rack-top', px + 'px'); else rk.style.removeProperty('--rack-top'); }
       }
     }
-    if (menuRow) new MutationObserver(fitHead).observe(menuRow, { attributes: true, attributeFilter: ['hidden'] });
     function clearRack() {
       clearBooked = 0;
       const t = document.getElementById('transport'); if (!t) return;
@@ -363,6 +376,7 @@ export function createModSeam(app) {
         if (stops.get(rk) !== stop) { stops.set(rk, stop); if (stop) rk.style.setProperty('--rack-stop', stop + 'px'); else rk.style.removeProperty('--rack-stop'); }
       }
       under(blocked);
+      nbFollow();
     }
     /* no ResizeObserver on the racks (M7: a card another observer resized inside the racks left theirs undelivered — the browser's "loop" error):
        a card opened, closed or folded (its class, in either rack), the bar's class, the body's class and a resize ask once a frame, and once more when
@@ -405,32 +419,50 @@ export function createModSeam(app) {
     const spanOf = (rs) => (rs.length ? { left: Math.min(...rs.map((r) => r.left)), top: Math.min(...rs.map((r) => r.top)), right: Math.max(...rs.map((r) => r.right)), bottom: Math.max(...rs.map((r) => r.bottom)) } : null);
     const railOf = (n) => { const w = windowOf(n), r = w && w.pair && w.pair.rail; return r && !r.hidden && r.offsetWidth ? r : null; };
     const workRoots = () => [document.querySelector('[data-mir-window="timeline"]'), app.state.modView && app.state.modView.root].filter(Boolean);
+    /** a fold press `f` in a rack column: scroll the column so what it opened shows, never pushing the press above the column's top */
+    const bring = (f) => { const col = f.closest('#rack, #rackL'), body = document.getElementById((f.getAttribute('aria-controls') || '').split(' ')[0]); if (!col || !body || body.hidden) return;
+      const c = col.getBoundingClientRect(), p = f.getBoundingClientRect(), r = body.getBoundingClientRect(), b = r.height ? r.bottom : Math.max(0, ...[...body.children].map((k) => k.getBoundingClientRect().bottom));   // a `display: contents` body (RENDER's .sr-fold-box) is its children's
+      if (b > c.bottom) col.scrollTop += Math.max(0, Math.min(b - c.bottom + 8, p.top - c.top - 8)); };
     const nbEl = document.getElementById('notebook'), seated = new WeakSet();
     let pressed = false;   // a card added to the float layer under a pressed pointer is a hand's detach: never moved
     addEventListener('pointerdown', () => { pressed = true; }, true);
     for (const k of ['pointerup', 'pointercancel']) addEventListener(k, () => { pressed = false; }, true);
     const summoned = (n) => !!n && !n.hidden && n.offsetWidth > 0 && (n === nbEl || (n.classList.contains('mir-win') && !n.classList.contains('mir-transport-free'))
       || (n.classList.contains('dev') && n.classList.contains('floating') && !n.classList.contains('closed') && n.dataset.id !== 'transport')) && !workRoots().includes(n) && n.dataset.mirWindow !== 'pattern';
-    function seatOpen(n, floor = { h: 280, w: 300 }) {
+    function seatOpen(n, floor = { h: 280, w: 280 }, again = false, show = null) {
       const kit = n.classList.contains('mir-win') ? windowOf(n) : null; if (kit && typeof kit.place !== 'function') return;
       const pane = laid(n), rail = kit ? railOf(n) : null, box = spanOf([pane, ...(rail ? [laid(rail)] : [])]), s = barSpan(), title = document.getElementById('title');
-      const door = [s, title && title.offsetWidth ? title.getBoundingClientRect() : null].filter(Boolean), work = workRoots().filter((r) => !r.hidden && r.offsetWidth).flatMap((r) => [laid(r), ...(railOf(r) ? [laid(railOf(r))] : [])]), hard = [...door, ...work];
+      const open = workRoots().filter((r) => !r.hidden && r.offsetWidth), rails = open.map(railOf).filter(Boolean).map(laid);
+      const door = [s, title && title.offsetWidth ? title.getBoundingClientRect() : null].filter(Boolean), work = [...open.map(laid), ...rails], hard = [...door, ...work];
+      const ctl = [...open.map((r) => spanOf([...r.querySelectorAll('button, .tl-clip')].filter((b) => b.offsetWidth).map((b) => b.getBoundingClientRect()))).filter(Boolean), ...rails];   // a work bar's controls and clips, and its rail
       const soft = document.body.classList.contains('rack-hidden') ? [] : racksEl.filter((rk) => [...rk.children].some(shownCard)).map((rk) => rk.getBoundingClientRect()).filter((r) => r.width);
       const view = { width: innerWidth, height: innerHeight }, top = 52 * (cssZoom(title) || 1), ph = pane.bottom - pane.top, pw = pane.right - pane.left, rim = box.bottom - box.top - ph, wim = box.right - box.left - pw;
       /* the full size first, then shorter (6 % a step, never below 280 px, the tallest minimum of the windows that come here) and narrower (4 % a step,
-         three at most, never below 300 px): clear of everything; then of all but the rack columns; then — a stage too small for a work bar and a window
-         beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without.  A floated card keeps its size (V3 folds RENDER) */
+         three at most): clear of everything; then of all but the rack columns; then (039 F3, V-REVIEW 3: at 1300 × 850 the columns beside a docked
+         TIMELINE are 284–286 px and NODES, FOLDERS and the notebook lay on its controls) at the floor's width, 280 px, clear of everything and of all but
+         the racks; then over the work bar's empty lanes, clear of its controls, its clips and its rail (full, then the floor's width); then — a stage too small for a work bar and a
+         window beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without.  A floated card keeps its size */
+      /* 039 F3 · A FLOATED CARD TALLER THAN THE ROOM GOES TO ITS RACK (V-REVIEW 4 · 5: RENDER floated at 1000 × 700 was 609 px in the 566 below the
+         menu band — over the band and the bar — and 666–764 with a fold open, the opened PERIOD's PLAN off the foot, nothing scrolling, the card
+         unmoved): a floated card taller than the room below the menu row's band is seated in its home rack, whose column stops above the bar and
+         scrolls (V1), and `show` (the fold press that opened) and what it opened, or the card, are brought into view there.  Not folds: RENDER closed is
+         already taller than that room, and folding its DETERMINISTIC RENDER would hide RENDER, PREVIEW and CANCEL, the reason it was opened; a window
+         never scrolls inside */
+      if (!kit && n !== nbEl && ph > innerHeight - top - 8 && !document.body.classList.contains('rack-hidden') && !document.body.classList.contains('phone')) {
+        app.sh.layout.dockWindow(n.dataset.id); requestAnimationFrame(() => { if (show && n.contains(show)) { show.scrollIntoView({ block: 'nearest' }); bring(show); } else n.scrollIntoView({ block: 'nearest' }); }); return; }
       const sizes = (kit || n === nbEl) ? 12 * 4 : 1;
-      const fit = (avoid) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = Math.floor(pw * (1 - j * 0.04)); if (i && (hh < floor.h || ww < floor.w)) continue;
-        const at = clearSeat({ ...box, right: box.left + wim + ww, bottom: box.top + rim + hh }, { avoid, view, top }); if (at) return { at, h: k ? hh : 0, w: j ? ww : 0 }; } return null; };
-      const got = fit([...hard, ...soft]) || fit(hard) || fit([...door, ...soft]) || fit(door);
+      const fit = (avoid, narrow = false) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = narrow ? floor.w : Math.floor(pw * (1 - j * 0.04));
+        if (narrow ? j || ww >= pw * 0.88 || hh < floor.h : i && (hh < floor.h || ww < floor.w)) continue;
+        const at = clearSeat({ ...box, right: box.left + wim + ww, bottom: box.top + rim + hh }, { avoid, view, top }); if (at) return { at, h: k ? hh : 0, w: narrow || j ? ww : 0 }; } return null; };
+      const thin = (avoid) => sizes > 1 && fit(avoid, true), lanes = [...door, ...ctl];
+      const got = fit([...hard, ...soft]) || fit(hard) || thin([...hard, ...soft]) || thin(hard) || fit([...lanes, ...soft]) || fit(lanes) || thin([...lanes, ...soft]) || thin(lanes) || fit([...door, ...soft]) || fit(door);
       if (n.dataset.seat === 'over') delete n.dataset.seat;
       if (!got) { if (s && hits(box, s)) n.dataset.seat = 'over'; return; }   // no room on this stage: it stays where it opened, over the bar (021 V3)
       const { at, h, w } = got; if (at.left === Math.round(box.left) && at.top === Math.round(box.top) && !h && !w) return;
       const z = cssZoom(n) || 1, x = pane.left + at.left - box.left, y = pane.top + at.top - box.top;
       if (kit) { kit.place({ left: x / z, top: y / z, ...(h ? { height: h / z } : {}), ...(w ? { width: w / z } : {}) });
         const was = laid(n), wh = was.bottom - was.top, wd = was.right - was.left;   // the kit's floor (min) can be above ours: once more from there, never shorter than it
-        if (floor.h === 280 && ((h && wh > h + 2) || (w && wd > w + 2))) seatOpen(n, { h: Math.ceil(wh), w: Math.ceil(wd) }); }
+        if (!again && ((h && wh > h + 2) || (w && wd > w + 2))) seatOpen(n, { h: h && wh > h + 2 ? Math.ceil(wh) : floor.h, w: w && wd > w + 2 ? Math.ceil(wd) : floor.w }, true); }
       else if (n === nbEl) { const o = n.offsetParent ? n.offsetParent.getBoundingClientRect() : { left: 0, top: 0 }; n.style.left = (x - o.left) / z + 'px'; n.style.top = (y - o.top) / z + 'px'; if (h) n.style.height = h / z + 'px'; if (w) n.style.width = w / z + 'px'; }
       else app.sh.layout.moveFloat(n.dataset.id, x, y);
     }
@@ -443,12 +475,26 @@ export function createModSeam(app) {
         try { seatOpen(n); } catch (_) {}   // a seat is a courtesy: never a thrown open
       }
     };
-    if (nbEl) new MutationObserver(() => seatNew()).observe(nbEl, { attributes: true, attributeFilter: ['hidden'] });
+    /* 039 F3 · EVERY ROAD SEATS THE NOTEBOOK (V-REVIEW 2: WAVE DANCER's notebook, shown by the open before the bar rose above the docked MODULATION,
+       covered 14 of the bar's 23 controls; J twice seated it): the summons' seat is taken when the notebook shows (J), and again at every clearRack
+       where its size (a project or demo open, RESUME, a layout's `nb`) or the doors under it (the bar's seat, a work bar) have moved since; a hand's
+       press on its head, grip or corner keeps it where the hand puts it until it closes (a placement alone, the facade's moveTo, is never undone) */
+    let nbKey = '', nbHand = false;
+    const nbDoors = () => JSON.stringify([barSpan(), ...workRoots().filter((r) => !r.hidden && r.offsetWidth).map(laid)].map((r) => r && [r.left, r.top, r.right, r.bottom].map(Math.round)).concat([nbEl.offsetWidth, nbEl.offsetHeight]));
+    function nbFollow() { if (!nbEl || nbHand || !seated.has(nbEl) || !summoned(nbEl)) return; const k = nbDoors(); if (k === nbKey) return; try { seatOpen(nbEl); } catch (_) {} nbKey = nbDoors(); }
+    if (nbEl) { nbEl.addEventListener('pointerdown', (e) => { const g = e.target; if (g === nbEl || g.closest('.nb-grip') || (g.closest('.nb-head') && !g.closest('button, input'))) nbHand = true; }, true);
+      new MutationObserver(() => { if (nbEl.hidden) { nbHand = false; nbKey = ''; } seatNew(); if (!nbHand && !clearBooked) clearBooked = requestAnimationFrame(clearRack); }).observe(nbEl, { attributes: true, attributeFilter: ['hidden', 'style'] }); }
     if (floatsEl) {   // a float opened, closed, moved or resized: ask again, once a frame
       let booked = 0; const book = () => { if (!booked) booked = requestAnimationFrame(() => { booked = 0; if (!trMoving) under(blocked); }); };
       const mo = new MutationObserver((list) => { const gone = []; for (const m of list) { for (const n of m.addedNodes || []) if (n.nodeType === 1) watch(n); gone.push(...(m.removedNodes || [])); } seatNew(gone); book(); });
       const watch = (n) => mo.observe(n, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
       mo.observe(floatsEl, { childList: true }); for (const n of floatsEl.children) watch(n);
+      /* 039 F3 · A FOLD'S OPEN RE-SEATS ITS FLOATING CARD (V-REVIEW 4: RENDER's opened section ran off the foot and the card stayed): a press that opens a
+         fold row (a hand's click or its key; a restore's set() is no press) asks a floating card's summons seat again — clear of the doors, or its rack
+         when it no longer fits the room — and in a rack column brings what it opened into view, never scrolling the press itself out of it (`bring`) */
+      for (const host of [floatsEl, ...racksEl]) host.addEventListener('click', (e) => { const f = e.target && e.target.closest ? e.target.closest('.lw-fold') : null; if (!f || f.getAttribute('aria-expanded') !== 'true') return;
+        const card = f.closest('.dev'); if (card && card.classList.contains('floating') && card.parentElement === floatsEl) { if (summoned(card)) try { seatOpen(card, undefined, false, f); } catch (_) {} }
+        else requestAnimationFrame(() => bring(f)); });
       addEventListener('resize', book);
     }
     function modDodge(rect, who = 'mod') {
@@ -498,7 +544,7 @@ export function createModSeam(app) {
         t.style.animation = arriving + ' 160ms cubic-bezier(.23,1,.32,1) forwards';
         let ended = false;
         const done = () => { if (ended) return; ended = true;
-          t.removeEventListener('animationend', done); t.style.animation = ''; trMoving = false; under(blocked); };   // 021 V3: landed, the floats asked again
+          t.removeEventListener('animationend', done); t.style.animation = ''; trMoving = false; under(blocked); if (!clearBooked) clearBooked = requestAnimationFrame(clearRack); };   // 021 V3: landed, the floats asked again (F3: and the stops and the notebook's seat)
         t.addEventListener('animationend', done);
         setTimeout(done, 400);                                  // the belt: an animation that never fires must not wedge the flag
       };

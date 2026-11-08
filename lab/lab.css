@@ -29,10 +29,11 @@ body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-head { -webkit-backdr
 #field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 #field.khover { cursor: pointer; } #field.kdrag { cursor: grabbing; }
 #field.drag { cursor: grabbing; }
-#rack, #rackL { position: absolute; top: 0; right: 0; bottom: auto; max-height: min(100%, var(--rack-stop, 100%)); width: var(--rack-w); z-index: var(--z-chrome); min-height: 0; overflow: hidden auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+#rack, #rackL { position: absolute; top: var(--rack-top, 0px); right: 0; bottom: auto; max-height: min(100%, var(--rack-stop, 100%)); width: var(--rack-w); z-index: var(--z-chrome); min-height: 0; overflow: hidden auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   padding: var(--sp-2); display: flex; flex-direction: column; gap: var(--sp-2); background: transparent; border: 0; scrollbar-width: thin; pointer-events: auto; touch-action: pan-y;
   transition: transform .28s ease, opacity .28s ease; }
-/* 039 V1 · THE RACKS STOP ABOVE THE BAR: --rack-stop (shell/modulation.js clearRack) is the room above the bar's top on a rack whose columns it shares */
+/* 039 V1 · THE RACKS STOP ABOVE THE BAR: --rack-stop (shell/modulation.js clearRack) is the room above the bar's top on a rack whose columns it shares;
+   039 F3 · THE MENUS STAND ABOVE THE RACKS: --rack-top (fitHead) starts a rack below the menu row while the row shows and meets its cards */
 /* iteration 006 R: a column whose laid-out content fits has no bar to show, so the rack motion's FLIP transforms must not raise one
    (the bar's 6 px re-sized every card inside a ResizeObserver delivery: "undelivered notifications").  rack-wiring.js sets it. */
 #rack.rack-fits, #rackL.rack-fits { overflow-y: hidden; }
@@ -61,9 +62,9 @@ body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
 .mb-item:hover .fav-x { color: var(--acc2); }
 body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
 /* ── the NOTEBOOK: a free glass — real blur, no colour overlay ── */
-#notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
+#notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 280px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
   border: 1px solid hsl(0 0% 100% / .45); background: transparent; -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%);
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); color: var(--fg); overflow: hidden; }
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); color: var(--fg); overflow: hidden; }   /* 039 F3: min-width 280 — the seat beside a docked TIMELINE (the 286-px column at 1300 × 850) */
 body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
 body[data-theme="dark"] #notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; background: hsl(0 0% 0% / .22); pointer-events: none; }   /* a shade behind the blur on DARK, the glass itself stays clear */
 .nb-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 16px 10px 12px 14px; cursor: grab; user-select: none; touch-action: none; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title") */

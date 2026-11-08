@@ -1,16 +1,18 @@
 /* meters.js — METERS: norm, ⟨E⟩, autocorrelation, active modes, logical time, the badge (§10.6), the picture's f16 FLOOR. */
 import { AU_TIME_AS, HARTREE_EV, BASIS } from './hydrogen.js';
-import { el, readout } from './mir/kit.js';
+import { el, readout, hint } from './mir/kit.js';
 import { FIELD_LAW as L } from './status.js'; import { SQUEEZE } from './kick.js'; import { coherence } from './equalizer.js'; import { densityPeriod, fmtPeriod } from './period.js'; import { toLUT } from './mir/palette.js';
 
 export function createMeters(host, src = null, measure = null) {
   const grid = el('div', 'meters', host);
-  const norm = readout({ label: 'NORM  ⟨ψ|ψ⟩^½', value: '—' }); grid.appendChild(norm.root);
+  const norm = readout({ label: 'NORM', value: '—' }); grid.appendChild(norm.root);
+  /* 039 F3 (V-REVIEW 10, X5's road): in the 274-px card NORM's, t's and MODES' labels were cut ("NORM ⟨ψ|ψ⟩^…") — the word that fits, the hint the whole */
+  hint(norm.root, 'The norm ⟨ψ|ψ⟩^½: 1 while nothing is lost');
   const energy = readout({ label: '⟨E⟩  hartree', value: '—', sub: '' }); grid.appendChild(energy.root);
-  const tlog = readout({ label: 't  LOGICAL  a.u.', value: '—', sub: '' }); grid.appendChild(tlog.root);
+  const tlog = readout({ label: 't  a.u.', value: '—', sub: '' }); grid.appendChild(tlog.root); hint(tlog.root, 'The logical time t in atomic units; below it in attoseconds');
   const auto = readout({ label: '|⟨ψ(0)|ψ(t)⟩|  AUTOCORR', value: '—', cls: 'two' }); grid.appendChild(auto.root);
   const abar = el('div', 'abar', auto.root); const abarI = el('i', '', abar);
-  const modes = readout({ label: `MODES  rend / pop / ${BASIS.length}`, value: '—', sub: '' }); grid.appendChild(modes.root);
+  const modes = readout({ label: 'MODES', value: '—', sub: '' }); grid.appendChild(modes.root); hint(modes.root, 'Modes drawn / populated / of {n}', { n: BASIS.length });
   const field = readout({ label: 'FIELD CACHE', value: '—', sub: '' }); grid.appendChild(field.root);
   const rates = readout({ label: 'CLOCKS Hz  disp · field · phys', value: '—', sub: '' }); grid.appendChild(rates.root);
   const tier = readout({ label: 'LAST TIER', value: '—', sub: '' }); grid.appendChild(tier.root);
