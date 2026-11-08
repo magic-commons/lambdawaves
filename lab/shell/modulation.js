@@ -447,8 +447,9 @@ export function createModSeam(app) {
          unmoved): a floated card taller than the room below the menu row's band is seated in its home rack, whose column stops above the bar and
          scrolls (V1), and `show` (the fold press that opened) and what it opened, or the card, are brought into view there.  Not folds: RENDER closed is
          already taller than that room, and folding its DETERMINISTIC RENDER would hide RENDER, PREVIEW and CANCEL, the reason it was opened; a window
-         never scrolls inside */
-      if (!kit && n !== nbEl && ph > innerHeight - top - 8 && !document.body.classList.contains('rack-hidden') && !document.body.classList.contains('phone')) {
+         never scrolls inside.  039 F4a · THE PLACEMENT STANDS: a card the facade placed (popOut with its own x, y or w: `data-placed`, rack-wiring.js)
+         gave no height to read the room against, so its open never racks it; a fold press is a new ask and still may */
+      if (!kit && n !== nbEl && (show || !('placed' in n.dataset)) && ph > innerHeight - top - 8 && !document.body.classList.contains('rack-hidden') && !document.body.classList.contains('phone')) {
         app.sh.layout.dockWindow(n.dataset.id); requestAnimationFrame(() => { if (show && n.contains(show)) { show.scrollIntoView({ block: 'nearest' }); bring(show); } else n.scrollIntoView({ block: 'nearest' }); }); return; }
       const sizes = (kit || n === nbEl) ? 12 * 4 : 1;
       const fit = (avoid, narrow = false) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = narrow ? floor.w : Math.floor(pw * (1 - j * 0.04));
@@ -467,7 +468,7 @@ export function createModSeam(app) {
       else app.sh.layout.moveFloat(n.dataset.id, x, y);
     }
     const seatNew = (gone = []) => {
-      for (const n of gone) if (n.nodeType === 1 && n.parentElement !== floatsEl) { seated.delete(n); if (n.dataset && n.dataset.seat === 'over') delete n.dataset.seat; }   // docked: no float's mark
+      for (const n of gone) if (n.nodeType === 1 && n.parentElement !== floatsEl) { seated.delete(n); if (n.dataset) { if (n.dataset.seat === 'over') delete n.dataset.seat; delete n.dataset.placed; } }   // docked: no float's mark (F4a: nor the placement's)
       for (const n of [...(floatsEl ? floatsEl.children : []), nbEl]) {
         if (!summoned(n)) { if (n) seated.delete(n); continue; }
         if (seated.has(n)) continue; seated.add(n);
