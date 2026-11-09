@@ -31,10 +31,9 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
   const viewport=el('div','tl-viewport',shell),content=el('div','tl-content',viewport),rows=el('div','tl-rows',content);
   const head=el('div','tl-playhead',shell),tail=el('div','tl-playhead-tail',head),marquee=el('div','tl-marquee',content);
   const status=el('div','tl-status',surface);status.setAttribute('role','status');
-  // THE EMPTY LANE SAYS HOW (1.5.7-alpha.23, λWAVES 039 K8): with no clip, one line over the lanes names the roads a clip arrives by; an empty
-  // lane's band and pane hint say it too (HOW, ≤ 60 characters in English); a lane with a clip is hinted by its name, as before
-  const empty=el('div','tl-empty',shell);empty.hidden=true;
-  label(empty,'No clips yet — right-click or hold a knob: {:CLIP} › {:CREATE AUTOMATION CLIP}; or {:→TL} on an LFO in {:MODULATION}');
+  // THE EMPTY LANE SAYS HOW (1.5.7-alpha.23, λWAVES 039 K8) in its hints alone — THE EMPTY LANE IS QUIET (1.5.7-alpha.44, λWAVES 040 T7; Josh:
+  // "There's a random text that says 'no clips yet...' remove it"): no line over the lanes; an empty lane's band and pane hint the road
+  // (HOW, ≤ 60 characters in English); a lane with a clip is hinted by its name, as before
   const HOW=phrase('{lane} is empty — right-click a knob › {:CLIP} to make a clip');
   const laneNodes=new Map(),clipNodes=new Map();let doc,revision=0,curves=new Map(),byLane=new Map(),rulerKey='',height=48,range=null,active=null;
   function setDocument(value){doc=value;revision++;curves=new Map(doc.curves.map(c=>[c.id,c]));byLane=new Map(doc.lanes.map(l=>[l.id,[]]));for(const c of doc.clips)byLane.get(c.laneId)?.push(c);}
@@ -104,7 +103,6 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
         let entry=clipNodes.get(c.id);if(entry?.key!==key)entry=renderClip(c,curve,row,px,key);entry.title.style.left=entry.block.style.left=(c.start*px-x)+'px';}
     }
     for(const[id,n]of clipNodes)if(!keep.has(id)){n.title.remove();n.block.remove();clipNodes.delete(id);}
-    if(empty.hidden!==!!doc.clips.length)empty.hidden=!!doc.clips.length;
     const first=Math.max(0,Math.floor(x/(doc.meter*px))),last=Math.ceil((x+width)/(doc.meter*px))+1,stride=Math.max(1,Math.ceil(32/(doc.meter*px))),key=[first,last,px,doc.meter,stride,range?.start,range?.end,active?.start,active?.end].join(':');
     // THE ACTIVE RANGE is a faint band under the selection range; both live in the strip's ink.
     const band=(r,cls)=>{const n=el('div',cls,ink);n.style.left=r.start*px+'px';n.style.width=(r.end-r.start)*px+'px';};

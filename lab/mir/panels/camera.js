@@ -43,7 +43,7 @@ import { registerProjectPart } from '../core/project.js';
 import { handWrite } from '../modulation/registry.js';
 import {
   HAND_IDS, ANGLE_UNIT, createCameraRig, setCameraValue, atNorth, northStep, wrapDegrees, fmtDeg,
-  describe, present, SPHERE, lookDir, project, depthOf, splitDepth, sphereDrag, transform2d, transform3d, planeDrag, fromView, toView,
+  describe, present, SPHERE, lookDir, project, depthOf, splitDepth, ballPoint, arcballTurn, sphereTurn, transform2d, transform3d, planeDrag, fromView, toView,
 } from './camera-rig.js';
 
 const DEG = Math.PI / 180;
@@ -94,8 +94,10 @@ export function createCssPort(canvas, { mode = '2d', values } = {}) {
 /* ═══ THE DIRECTION SPHERE ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
  * plane-model.js's drawing (the same sphere, rings and isometric projection) for a direction: the arrow is where the camera looks and the
  * film plane stands across it, rolled by ROLL.  AUTOMATA's pad contract (a pad for the hand, its two knobs the targets): the sphere PAINTS
- * FROM THE KNOBS (the base, or the modulated value a route shows), the hand turns it so the arrow's TIP FOLLOWS THE FINGER (sphereDrag: no
- * gimbal lock at the pole), under the one knob law (⅛ gear on any modifier or a second finger, a double-tap is home, arrows nudge).
+ * FROM THE KNOBS (the base, or the modulated value a route shows); the hand turns the BALL and the arrow rides it (1.5.7-alpha.46 THE
+ * ARCBALL, camera-rig.js: a tip grabbed inside the disc stays under the finger, a finger past the rim keeps turning it and comes back the
+ * way it went, the tip stops at a pole instead of flipping the yaw), under the one knob law (⅛ gear on any modifier or a second finger,
+ * a double-tap is home, arrows nudge).
  *   directionSphere({ label, aria, yaw, pitch, unit, roll, turn(dyaw, dpitch) in radians, home(), onChange() })
  *     yaw, pitch   the arc knobs' options ({ min, max, value, wrap, fmt, … }) in the port's unit; `unit` is port-units per degree
  *     roll         () → the roll in degrees now, for the film's turn
@@ -103,12 +105,23 @@ export function createCssPort(canvas, { mode = '2d', values } = {}) {
  * 1.5.7-alpha.7 THE SPHERE TAKES A PLANE — the same drawing for a plane (CLIP's), in place of plane-model.js's canvas:
  *   directionSphere({ plane: { normal() → [x, y, z], pos?() → −1…1, set(n), view?() → bool }, home(), onChange(), label, aria })
  *     the normal is the look line and the tip, the plane the film-like square through n·pos (no camera film), the three world rings, no
- *     letters and no arcs; the drag moves the tip after the finger IN 3-D (planeDrag: no yaw / pitch, so no pole — a plane's home normal
- *     z sits exactly there) and hands the new unit normal to set(); the arrows nudge the tip on the screen (Shift the kit's fine gear);
+ *     letters and no arcs; the drag turns the ball and the normal rides it IN 3-D (the arcball, alpha.46; no yaw / pitch, so no pole — a
+ *     plane's home normal z sits exactly there) and hands the new unit normal to set(); the arrows nudge the tip on the screen (planeDrag;
+ *     Shift the kit's fine gear);
  *     a double-tap, Home or Delete is home().  view() true: the normal is in the VIEWER's frame (x right, y up, z toward the eye), drawn as
  *     that viewer sees it (camera-rig.js VIEW_FRAME) — a plane that rides with a camera; set() is handed the viewer's frame back.
  *   → { root, svg, body, yaw: null, pitch: null, paint(), setDisabled(on), destroy() }   paint() redraws only when the normal, pos or view
  *     changed, so a frame loop may call it */
+/* THE GRAB (alpha.46): the drawing's scale and origin on the screen at the press (the viewBox is centred in a wider box, as λWAVES'
+   CAMERA widens it), and the ball point under the finger; fingerAt reads a later event in the drawing's units */
+function grab(svg, e) {
+  const r = svg.getBoundingClientRect(), s = Math.min(r.width / SPHERE.W, r.height / SPHERE.H) || 1;
+  const g = { id: e.pointerId, s, ox: r.left + (r.width - SPHERE.W * s) / 2, oy: r.top + (r.height - SPHERE.H * s) / 2 };
+  g.p = ballPoint(...fingerAt(g, e));
+  return g;
+}
+const fingerAt = (g, e) => [(e.clientX - g.ox) / g.s, (e.clientY - g.oy) / g.s];
+
 export function directionSphere(o = {}) {
   const unit = o.unit || 1, toRad = (v) => v * DEG / unit;
   const root = el('div', 'mir-camsphere' + (o.plane ? ' plane' : ''));
@@ -160,22 +173,20 @@ export function directionSphere(o = {}) {
   watchTouches();
   let g = null, homed = false;
   const tap = tapWatcher(() => { homed = true; if (o.home) o.home(); });
-  const scale = () => { const r = svg.getBoundingClientRect(); return { r, s: Math.min(r.width / SPHERE.W, r.height / SPHERE.H) || 1 }; };
   svg.addEventListener('pointerdown', (e) => {
     if (g || e.button || svg.getAttribute('aria-disabled') === 'true') return;
     e.preventDefault(); svg.focus({ preventScroll: true });
     homed = false; tap(e); if (homed) return;                                      // the second tap is home, and starts no drag
     try { svg.setPointerCapture(e.pointerId); } catch (_) { /* a pointer already gone */ }
-    g = { id: e.pointerId, lx: e.clientX, ly: e.clientY, s: scale().s };
+    g = grab(svg, e);
     svg.classList.add('drag');
   });
   svg.addEventListener('pointermove', (e) => {
     if (!g || e.pointerId !== g.id) return;
-    const gear = gearOf(e, g.id);                                                  // ⅛ on any modifier or a second finger: the step is scaled, so nothing jumps
-    const dsx = gear * (e.clientX - g.lx) / g.s, dsy = gear * (e.clientY - g.ly) / g.s;
-    g.lx = e.clientX; g.ly = e.clientY;
-    const [dy, dp] = sphereDrag(toRad(shown(ky)), toRad(shown(kp)), dsx, dsy);
-    if (o.turn) o.turn(dy, dp);
+    const p1 = ballPoint(...fingerAt(g, e));                                       // THE ARCBALL (alpha.46): the ball turns from the last point to this one
+    const [dy, dp] = sphereTurn(toRad(shown(ky)), toRad(shown(kp)), g.p, p1, gearOf(e, g.id));   // ⅛ on any modifier or a second finger: the turn is scaled, so nothing jumps
+    g.p = p1;
+    if (o.turn && (dy || dp)) o.turn(dy, dp);
   });
   const end = (e) => { if (!g || (e && e.pointerId !== g.id)) return; g = null; svg.classList.remove('drag'); paint(); if (o.onChange) o.onChange(); };
   svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end); svg.addEventListener('lostpointercapture', end);
@@ -224,15 +235,14 @@ function planeSphere(o, { root, body, svg, film, look, tip }) {
     e.preventDefault(); svg.focus({ preventScroll: true });
     homed = false; tap(e); if (homed) return;
     try { svg.setPointerCapture(e.pointerId); } catch (_) { /* a pointer already gone */ }
-    const r = svg.getBoundingClientRect();
-    g = { id: e.pointerId, lx: e.clientX, ly: e.clientY, s: Math.min(r.width / SPHERE.W, r.height / SPHERE.H) || 1 };
+    g = grab(svg, e);
     svg.classList.add('drag');
   });
   svg.addEventListener('pointermove', (e) => {
     if (!g || e.pointerId !== g.id) return;
-    const gear = gearOf(e, g.id), dsx = gear * (e.clientX - g.lx) / g.s, dsy = gear * (e.clientY - g.ly) / g.s;
-    g.lx = e.clientX; g.ly = e.clientY;
-    put(planeDrag(drawn(), dsx, dsy));
+    const p1 = ballPoint(...fingerAt(g, e));                                       // THE ARCBALL (alpha.46): the normal rides the ball's turn, in 3-D
+    put(arcballTurn(drawn(), g.p, p1, gearOf(e, g.id)));
+    g.p = p1;
   });
   const end = (e) => { if (!g || (e && e.pointerId !== g.id)) return; g = null; svg.classList.remove('drag'); paint(); if (o.onChange) o.onChange(); };
   svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end); svg.addEventListener('lostpointercapture', end);
@@ -353,7 +363,11 @@ export function createCameraView(parent, o = {}) {
     const knobOpts = (d, id) => ({ label: d.label, title: d.hint, min: d.min, max: d.max, value: port.get(id), home: d.home, wrap: !!d.wrap, fmt: d.fmt, step: d.step, onInput: (v) => { write(id, v); schedule(); } });
     const turnBy = (dyawRad, dpitchRad) => {
       const toPort = 180 / Math.PI * unit;
-      if (typeof port.turn === 'function' && !routed('yaw') && !routed('pitch')) { port.turn(dyawRad * toPort, dpitchRad * toPort); schedule(); return; }
+      if (typeof port.turn === 'function' && !routed('yaw') && !routed('pitch')) {
+        port.turn(dyawRad * toPort, dpitchRad * toPort);
+        sphere.yaw.set(port.get('yaw')); sphere.pitch.set(port.get('pitch'));      // alpha.46: the arcs follow the hand per move (sync skips a sphere mid-drag), so the next turn starts from the live arrow, not a stale one (λWAVES 0.5.3 M5 did this app-side)
+        schedule(); return;
+      }
       const wrapTo = (v, lo, hi) => lo + ((((v - lo) % (hi - lo)) + (hi - lo)) % (hi - lo));
       const yaw = dy.wrap ? wrapTo(base('yaw') + dyawRad * toPort, dy.min, dy.max) : clamp(base('yaw') + dyawRad * toPort, dy.min, dy.max);
       const pitch = clamp(base('pitch') + dpitchRad * toPort, dp.min, dp.max);

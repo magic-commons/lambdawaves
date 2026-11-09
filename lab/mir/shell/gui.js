@@ -208,6 +208,9 @@ export function lookSchema({ tier = () => null } = {}) {
     { key: 'badges', type: 'bool', default: false, apply: [{ on: 'body', cls: 'no-badges', when: (v) => !v }] },
     /* TRANSPORT BAR (BASINS skin.js setTransportBar): off is body.no-transport-bar, which the transport's sheet reads */
     { key: 'transportBar', type: 'bool', default: true, apply: [{ on: 'body', cls: 'no-transport-bar', when: (v) => !v }] },
+    /* DRAG HANDLE (1.5.7-alpha.48 THE GRIP CAN HIDE, λWAVES 040 C3; Josh: "purely an aesthetic change"): off is body.no-grip — the dot grip
+       of a card's head and of a window rail's move chip go, their seats stay, both still drag (skin.css) */
+    { key: 'grip', type: 'bool', default: true, apply: [{ on: 'body', cls: 'no-grip', when: (v) => !v }] },
     { key: 'menuBar', type: 'enum', values: ['hover', 'always'], default: 'hover', apply: [{ on: 'html', attr: 'data-menu-bar', map: (v) => v === 'always' ? v : null }] },
     { key: 'logo', type: 'bool', default: true, apply: [{ on: 'html', attr: 'data-logo', map: (v) => v ? null : 'hidden' }] },
     /* SAMPLING (BASINS docs/TIMELINE-SAMPLING-2026-10-01.md): SCRUB is read by the timeline's transport controller at each
@@ -524,6 +527,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   line(g, 'gui-sws').append(swOf('disconnected', phrase('DISCONNECTED'), phrase('Separate window headers from their bodies')).root,
     /* TRANSPORT BAR (BASINS Settings › DISPLAY): the main transport bar in every seat; the transport's sheet reads the class */
     swOf('transportBar', phrase('TRANSPORT BAR'), phrase('Show the main transport bar, floating or docked')).root);
+  line(g, 'gui-sws').append(swOf('grip', phrase('DRAG HANDLE'), phrase('The dot grip on window heads; off, they still drag')).root);   // 1.5.7-alpha.48
   line(g).append(segOf('spacing', phrase('SPACING'), [['0', '0', phrase('Rack windows flush to each other and to the screen’s edge')], ['tight', phrase('TIGHT'), phrase('3 px between rack windows and from the edge')],
     ['default', phrase('DEFAULT'), phrase('6 px between rack windows and from the edge')], ['airy', phrase('AIRY'), phrase('16 px between rack windows and from the edge')]]).root);   // BASINS' row (settings-window.js), and AIRY
   const kScale = knobOf('scale', phrase('UI SCALE'), { min: 50, max: 200, step: 5, fmt: pct, toUi: (v) => v * 100, fromUi: (v) => v / 100, title: 'The size of every window, menu and bar; the picture keeps its resolution' });   // tr[UI SCALE]: the size of the interface (windows, menus, bars), not of the picture

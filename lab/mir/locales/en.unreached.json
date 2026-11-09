@@ -181,13 +181,13 @@
  },
  {
   "file": "mir/panels/camera-rig.js",
-  "line": 198,
+  "line": 250,
   "why": "fragment",
   "text": "px, "
  },
  {
   "file": "mir/panels/camera.js",
-  "line": 438,
+  "line": 452,
   "why": "fragment",
   "text": "NORTH · back to "
  },
@@ -481,7 +481,7 @@
  },
  {
   "file": "mir/shell/gui.js",
-  "line": 303,
+  "line": 306,
   "why": "fragment",
   "text": "the bench threw: "
  }

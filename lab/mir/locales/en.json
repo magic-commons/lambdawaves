@@ -160,7 +160,6 @@
   "COPY TO PROJECT": "COPY TO PROJECT",
   "COPY TO SHELF": "COPY TO SHELF",
   "CORNERS": "CORNERS",
-  "CREATE AUTOMATION CLIP": "CREATE AUTOMATION CLIP",
   "CURVE": "CURVE",
   "CURVES AMOUNT": "CURVES AMOUNT",
   "CUSTOM": "CUSTOM",
@@ -181,6 +180,7 @@
   "Choose at least one project component before saving.": "Choose at least one project component before saving.",
   "Choose where the transport sits": "Choose where the transport sits",
   "Clear saved interface settings and reload": "Clear saved interface settings and reload",
+  "Clear the time range (two presses within 300 ms at one spot); no single click clears it": "Clear the time range (two presses within 300 ms at one spot); no single click clears it",
   "Click the strip to add a stop; drag a stop to move it, off the strip to remove it": "Click the strip to add a stop; drag a stop to move it, off the strip to remove it",
   "Clip color": "Clip color",
   "Clip options": "Clip options",
@@ -228,6 +228,7 @@
   "Ctrl/Cmd + Shift + drag a clip’s edge": "Ctrl/Cmd + Shift + drag a clip’s edge",
   "Ctrl/Cmd + drag a clip": "Ctrl/Cmd + drag a clip",
   "Ctrl/Cmd + drag a clip’s edge": "Ctrl/Cmd + drag a clip’s edge",
+  "Ctrl/Cmd + drag a tension handle": "Ctrl/Cmd + drag a tension handle",
   "Ctrl/Cmd + vertical drag on the ruler": "Ctrl/Cmd + vertical drag on the ruler",
   "Current gallery folder": "Current gallery folder",
   "Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it (Shift is fine, Ctrl locks its time); left-drag a tension handle to bend it (Shift is fine); right-click or double-click a tension handle resets it; Alt-click a point deletes it.": "Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it (Shift is fine, Ctrl locks its time); left-drag a tension handle to bend it (Shift is fine); right-click or double-click a tension handle resets it; Alt-click a point deletes it.",
@@ -254,6 +255,7 @@
   "DOWNLOAD {name}": "DOWNLOAD {name}",
   "DRAFT": "DRAFT",
   "DRAG": "DRAG",
+  "DRAG HANDLE": "DRAG HANDLE",
   "DRAG — how far the view turns for a drag; Shift is finer; double-tap resets": "DRAG — how far the view turns for a drag; Shift is finer; double-tap resets",
   "DRIFT": "DRIFT",
   "DRIVES": "DRIVES",
@@ -261,6 +263,7 @@
   "DROP SHADOW": "DROP SHADOW",
   "DUPLICATE": "DUPLICATE",
   "Dead-send inspector": "Dead-send inspector",
+  "Delete every clip the pointer crosses, tab or body (one undo); down on a tab deletes it at once": "Delete every clip the pointer crosses, tab or body (one undo); down on a tab deletes it at once",
   "Delete it": "Delete it",
   "Delete macro {i}": "Delete macro {i}",
   "Delete the selection": "Delete the selection",
@@ -276,6 +279,7 @@
   "Disconnect the source from this macro": "Disconnect the source from this macro",
   "Dock the bar into the rack": "Dock the bar into the rack",
   "Dock the transport into the rack": "Dock the transport into the rack",
+  "Double-click the ruler": "Double-click the ruler",
   "Download image — capture first": "Download image — capture first",
   "Download image — {name}, {size}": "Download image — {name}, {size}",
   "Download the captured image to your photos or files.": "Download the captured image to your photos or files.",
@@ -299,7 +303,8 @@
   "Drag ✥ onto a slider or knob to route it (a PAD’s ✥ makes that control get hit) · drop it there again to release · a macro bar: drag sideways to set, double-tap to reset, tap to rename or unassign · number ring: up/down = master depth, double-tap = 100% · route ring: up/down = depth, sideways = direction.": "Drag ✥ onto a slider or knob to route it (a PAD’s ✥ makes that control get hit) · drop it there again to release · a macro bar: drag sideways to set, double-tap to reset, tap to rename or unassign · number ring: up/down = master depth, double-tap = 100% · route ring: up/down = depth, sideways = direction.",
   "Drawn for {m} choices; the target now has {n}. Edit a point to redraw it for {n}.": "Drawn for {m} choices; the target now has {n}. Edit a point to redraw it for {n}.",
   "Duplicate the selected saved project, including its thumbnail and settings.": "Duplicate the selected saved project, including its thumbnail and settings.",
-  "Duplicate the selection while moving it (title or body)": "Duplicate the selection while moving it (title or body)",
+  "Duplicate the selection (the clip joins it) and move the copies (tab or body)": "Duplicate the selection (the clip joins it) and move the copies (tab or body)",
+  "Duplicate the selection while moving it (title or body): an alias of Shift + drag, kept": "Duplicate the selection while moving it (title or body): an alias of Shift + drag, kept",
   "Duplicate the selection, placed to its right": "Duplicate the selection, placed to its right",
   "Duplicated — {name}": "Duplicated — {name}",
   "Duplicated — {name} · made room by deleting {n} projects": {
@@ -368,14 +373,16 @@
   "FL — Select tool": "FL — Select tool",
   "FL — Shift+Right-Click is non-destructive add": "FL — Shift+Right-Click is non-destructive add",
   "FL — Shift+arrows move clips": "FL — Shift+arrows move clips",
+  "FL — Shift-drag clones a clip": "FL — Shift-drag clones a clip",
   "FL — Slice tool": "FL — Slice tool",
   "FL — Zoom in": "FL — Zoom in",
   "FL — Zoom out": "FL — Zoom out",
   "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it": "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it",
-  "FL — drag a clip’s edge; a selection resizes together": "FL — drag a clip’s edge; a selection resizes together",
+  "FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves": "FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves",
   "FL — drag a node or a tension handle": "FL — drag a node or a tension handle",
   "FL — dragging the bar-ruler selects time": "FL — dragging the bar-ruler selects time",
   "FL — pattern clips move from their body": "FL — pattern clips move from their body",
+  "FL — right-click deletes a clip; MIR sweeps while the button is held": "FL — right-click deletes a clip; MIR sweeps while the button is held",
   "FL — the Slice tool cuts at the click": "FL — the Slice tool cuts at the click",
   "FL — the pencil places the last clip; MAKE UNIQUE detaches it": "FL — the pencil places the last clip; MAKE UNIQUE detaches it",
   "FL — the playlist scrolls under a drag held at its edge": "FL — the playlist scrolls under a drag held at its edge",
@@ -535,6 +542,8 @@
   "MIR is free software under the GNU GPL v3.0 only (GPL-3.0-only) — no warranty.": "MIR is free software under the GNU GPL v3.0 only (GPL-3.0-only) — no warranty.",
   "MIR is the shared Magic Commons interface kit behind its controls, window system, gestures, and modulation. MIR is an open source platform and will continuously be updated, allowing for ‘LLM Mods’ support and customizable skins.": "MIR is the shared Magic Commons interface kit behind its controls, window system, gestures, and modulation. MIR is an open source platform and will continuously be updated, allowing for ‘LLM Mods’ support and customizable skins.",
   "MIR {version} · SKIN {theme}": "MIR {version} · SKIN {theme}",
+  "MIR — Ctrl shapes (Josh, 040)": "MIR — Ctrl shapes (Josh, 040)",
+  "MIR — Josh 2026-11-09; FL clears the selection on a click": "MIR — Josh 2026-11-09; FL clears the selection on a click",
   "MIR — Shift is the fine gear": "MIR — Shift is the fine gear",
   "MIR — length and speed change together": "MIR — length and speed change together",
   "MOD": "MOD",
@@ -568,7 +577,7 @@
   "More tools and actions": "More tools and actions",
   "Move": "Move",
   "Move it": "Move it",
-  "Move it (Ctrl copies, right-button deletes); it has no points": "Move it (Ctrl copies, right-button deletes); it has no points",
+  "Move it (Shift or Ctrl copies, right-button deletes); it has no points": "Move it (Shift or Ctrl copies, right-button deletes); it has no points",
   "Move macros to either side": "Move macros to either side",
   "Move macros to left or right end": "Move macros to left or right end",
   "Move the selection down a lane": "Move the selection down a lane",
@@ -604,7 +613,6 @@
   "No blur, no relief, no shadows, no motion": "No blur, no relief, no shadows, no motion",
   "No clip placed: the arrangement is full.": "No clip placed: the arrangement is full.",
   "No clips pasted: the selected lanes or source budget cannot fit this group.": "No clips pasted: the selected lanes or source budget cannot fit this group.",
-  "No clips yet — right-click or hold a knob: {:CLIP} › {:CREATE AUTOMATION CLIP}; or {:→TL} on an LFO in {:MODULATION}": "No clips yet — right-click or hold a knob: {:CLIP} › {:CREATE AUTOMATION CLIP}; or {:→TL} on an LFO in {:MODULATION}",
   "No copies made: select clips with room in the arrangement.": "No copies made: select clips with room in the arrangement.",
   "No copies made: source budget reached.": "No copies made: source budget reached.",
   "No envelopes on the rack — add one with +": "No envelopes on the rack — add one with +",
@@ -802,6 +810,7 @@
   "Render failed: {why}": "Render failed: {why}",
   "Render — this project, and the picture or film you make of it": "Render — this project, and the picture or film you make of it",
   "Reorder {noun} {n} — drag, or the arrow keys": "Reorder {noun} {n} — drag, or the arrow keys",
+  "Repeat the segment between its two points: up adds copies of its shape (one per 24 px), down makes mirrored copies, or takes back copies made going up": "Repeat the segment between its two points: up adds copies of its shape (one per 24 px), down makes mirrored copies, or takes back copies made going up",
   "Reset it": "Reset it",
   "Resize at the edges; shift inside; double-click to reset": "Resize at the edges; shift inside; double-click to reset",
   "Resize the clip from its left edge": "Resize the clip from its left edge",
@@ -814,6 +823,7 @@
   "Return this window to its rack": "Return this window to its rack",
   "Reveal or trim curve end": "Reveal or trim curve end",
   "Reverse the curve in time": "Reverse the curve in time",
+  "Right-button drag on empty lane space (or between lanes)": "Right-button drag on empty lane space (or between lanes)",
   "Right-click a tension handle": "Right-click a tension handle",
   "Right-click or tap: FILL · CLEAR · LENGTH · PATTERN ON/OFF": "Right-click or tap: FILL · CLEAR · LENGTH · PATTERN ON/OFF",
   "Right-drag empty clip space": "Right-drag empty clip space",
@@ -911,7 +921,7 @@
   "Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)": "Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)",
   "Scrub the timeline playhead": "Scrub the timeline playhead",
   "Scrub tool": "Scrub tool",
-  "Scrub: the playhead follows the hand, free of Snap": "Scrub: the playhead follows the hand, free of Snap",
+  "Scrub: the playhead follows the hand, free of Snap; the range stays": "Scrub: the playhead follows the hand, free of Snap; the range stays",
   "Seek about once every three moves. The hand always stays smooth.": "Seek about once every three moves. The hand always stays smooth.",
   "Seek the picture on every scrub move. Smoothest when a frame is fast; can lag at a deep place.": "Seek the picture on every scrub move. Smoothest when a frame is fast; can lag at a deep place.",
   "Seek to the beginning": "Seek to the beginning",
@@ -919,7 +929,7 @@
   "Seek to the previous measure": "Seek to the previous measure",
   "Select a band for timing": "Select a band for timing",
   "Select a curve before reversing it": "Select a curve before reversing it",
-  "Select a time range (no key, so touch can); a tap seeks": "Select a time range (no key, so touch can); a tap seeks",
+  "Select a time range (no key, so touch can); a tap seeks and keeps the range": "Select a time range (no key, so touch can); a tap seeks and keeps the range",
   "Select a time range; + Ctrl/Cmd extends it": "Select a time range; + Ctrl/Cmd extends it",
   "Select all clips": "Select all clips",
   "Select clips to slice them at the playhead.": "Select clips to slice them at the playhead.",
@@ -948,6 +958,7 @@
   "Shift (held) while dragging a point or tension": "Shift (held) while dragging a point or tension",
   "Shift + click a clip": "Shift + click a clip",
   "Shift + drag (empty)": "Shift + drag (empty)",
+  "Shift + drag a clip": "Shift + drag a clip",
   "Shift + drag the ruler": "Shift + drag the ruler",
   "Shift + right-click a clip": "Shift + right-click a clip",
   "Show Mac and iPad key names": "Show Mac and iPad key names",
@@ -1038,6 +1049,7 @@
   "The browser has WebGPU but found no graphics adapter to use.": "The browser has WebGPU but found no graphics adapter to use.",
   "The browser keeps this key for itself: the page never sees it.": "The browser keeps this key for itself: the page never sees it.",
   "The controls take the panes’ light: one {:ANGLE} for everything": "The controls take the panes’ light: one {:ANGLE} for everything",
+  "The dot grip on window heads; off, they still drag": "The dot grip on window heads; off, they still drag",
   "The dotted guide where a dragged window will land": "The dotted guide where a dragged window will land",
   "The envelope drives the target and the file plays with the transport": "The envelope drives the target and the file plays with the transport",
   "The envelope drives the target; the file stays silent": "The envelope drives the target; the file stays silent",
@@ -1082,7 +1094,7 @@
   "Transport": "Transport",
   "Trigger": "Trigger",
   "Trigger this envelope. Start modulation to advance it.": "Trigger this envelope. Start modulation to advance it.",
-  "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start": "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start",
+  "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start. The zone is centred on the edge; where two clips meet, the side you are on names the clip, and its edge lights first": "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start. The zone is centred on the edge; where two clips meet, the side you are on names the clip, and its edge lights first",
   "Trim the clip end": "Trim the clip end",
   "Turn this window on or off": "Turn this window on or off",
   "Type the tempo in BPM": "Type the tempo in BPM",
@@ -1168,7 +1180,7 @@
   "adapted — FL’s Ctrl+click toggles": "adapted — FL’s Ctrl+click toggles",
   "adapted — FL’s Ctrl+drag; in MIR Shift selects": "adapted — FL’s Ctrl+drag; in MIR Shift selects",
   "adapted — FL’s P is the Draw tool; BASINS has one modeless curve editor": "adapted — FL’s P is the Draw tool; BASINS has one modeless curve editor",
-  "adapted — FL’s Shift-drag clones; in MIR Ctrl shapes": "adapted — FL’s Shift-drag clones; in MIR Ctrl shapes",
+  "adapted — FL’s Shift-drag clones; MIR’s Ctrl alias stays": "adapted — FL’s Shift-drag clones; MIR’s Ctrl alias stays",
   "adapted — FL’s Y is the Playback/Preview tool": "adapted — FL’s Y is the Playback/Preview tool",
   "adapted — FL’s manual names Right-Alt+click specifically": "adapted — FL’s manual names Right-Alt+click specifically",
   "add a page": "add a page",
@@ -2241,9 +2253,6 @@
   "CORNERS": [
    "mir/shell/gui.js"
   ],
-  "CREATE AUTOMATION CLIP": [
-   "mir/timeline/view.js"
-  ],
   "CURVE": [
    "mir/modulation/window.js"
   ],
@@ -2303,6 +2312,9 @@
   ],
   "Clear saved interface settings and reload": [
    "mir/shell/gui.js"
+  ],
+  "Clear the time range (two presses within 300 ms at one spot); no single click clears it": [
+   "mir/timeline/shortcuts.js"
   ],
   "Click the strip to add a stop; drag a stop to move it, off the strip to remove it": [
    "mir/panels/ramp.js"
@@ -2451,6 +2463,9 @@
   "Ctrl/Cmd + drag a clip’s edge": [
    "mir/timeline/shortcuts.js"
   ],
+  "Ctrl/Cmd + drag a tension handle": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Ctrl/Cmd + vertical drag on the ruler": [
    "mir/timeline/shortcuts.js"
   ],
@@ -2529,6 +2544,9 @@
   "DRAG": [
    "mir/panels/camera-rig.js"
   ],
+  "DRAG HANDLE": [
+   "mir/shell/gui.js"
+  ],
   "DRAG — how far the view turns for a drag; Shift is finer; double-tap resets": [
    "mir/panels/camera-rig.js"
   ],
@@ -2550,6 +2568,9 @@
   ],
   "Dead-send inspector": [
    "mir/modulation/modwindow/modwindow.js"
+  ],
+  "Delete every clip the pointer crosses, tab or body (one undo); down on a tab deletes it at once": [
+   "mir/timeline/shortcuts.js"
   ],
   "Delete it": [
    "mir/timeline/shortcuts.js"
@@ -2595,6 +2616,9 @@
   ],
   "Dock the transport into the rack": [
    "mir/shell/transport.js"
+  ],
+  "Double-click the ruler": [
+   "mir/timeline/shortcuts.js"
   ],
   "Download image — capture first": [
    "mir/folders/gallery.js"
@@ -2668,7 +2692,10 @@
   "Duplicate the selected saved project, including its thumbnail and settings.": [
    "mir/folders/gallery.js"
   ],
-  "Duplicate the selection while moving it (title or body)": [
+  "Duplicate the selection (the clip joins it) and move the copies (tab or body)": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Duplicate the selection while moving it (title or body): an alias of Shift + drag, kept": [
    "mir/timeline/shortcuts.js"
   ],
   "Duplicate the selection, placed to its right": [
@@ -2873,6 +2900,9 @@
   "FL — Shift+arrows move clips": [
    "mir/timeline/shortcuts.js"
   ],
+  "FL — Shift-drag clones a clip": [
+   "mir/timeline/shortcuts.js"
+  ],
   "FL — Slice tool": [
    "mir/timeline/shortcuts.js"
   ],
@@ -2885,7 +2915,7 @@
   "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it": [
    "mir/timeline/shortcuts.js"
   ],
-  "FL — drag a clip’s edge; a selection resizes together": [
+  "FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves": [
    "mir/timeline/shortcuts.js"
   ],
   "FL — drag a node or a tension handle": [
@@ -2895,6 +2925,9 @@
    "mir/timeline/shortcuts.js"
   ],
   "FL — pattern clips move from their body": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — right-click deletes a clip; MIR sweeps while the button is held": [
    "mir/timeline/shortcuts.js"
   ],
   "FL — the Slice tool cuts at the click": [
@@ -3375,6 +3408,12 @@
   "MIR {version} · SKIN {theme}": [
    "mir/shell/gui.js"
   ],
+  "MIR — Ctrl shapes (Josh, 040)": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — Josh 2026-11-09; FL clears the selection on a click": [
+   "mir/timeline/shortcuts.js"
+  ],
   "MIR — Shift is the fine gear": [
    "mir/timeline/shortcuts.js"
   ],
@@ -3392,8 +3431,7 @@
   ],
   "MODULATION": [
    "mir/app.js",
-   "mir/modulation/window.js",
-   "mir/timeline/view.js"
+   "mir/modulation/window.js"
   ],
   "MORE KEYS": [
    "mir/keyboard/keyboard.js"
@@ -3479,7 +3517,7 @@
   "Move it": [
    "mir/timeline/shortcuts.js"
   ],
-  "Move it (Ctrl copies, right-button deletes); it has no points": [
+  "Move it (Shift or Ctrl copies, right-button deletes); it has no points": [
    "mir/timeline/shortcuts.js"
   ],
   "Move macros to either side": [
@@ -3589,9 +3627,6 @@
   ],
   "No clips pasted: the selected lanes or source budget cannot fit this group.": [
    "mir/timeline/editor.js"
-  ],
-  "No clips yet — right-click or hold a knob: {:CLIP} › {:CREATE AUTOMATION CLIP}; or {:→TL} on an LFO in {:MODULATION}": [
-   "mir/timeline/view.js"
   ],
   "No copies made: select clips with room in the arrangement.": [
    "mir/timeline/editor.js"
@@ -4193,6 +4228,9 @@
   "Reorder {noun} {n} — drag, or the arrow keys": [
    "mir/controls/list.js"
   ],
+  "Repeat the segment between its two points: up adds copies of its shape (one per 24 px), down makes mirrored copies, or takes back copies made going up": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Reset it": [
    "mir/timeline/shortcuts.js"
   ],
@@ -4228,6 +4266,9 @@
   ],
   "Reverse the curve in time": [
    "mir/modulation/window.js"
+  ],
+  "Right-button drag on empty lane space (or between lanes)": [
+   "mir/timeline/shortcuts.js"
   ],
   "Right-click a tension handle": [
    "mir/timeline/shortcuts.js"
@@ -4528,7 +4569,7 @@
   "Scrub tool": [
    "mir/timeline/shortcuts.js"
   ],
-  "Scrub: the playhead follows the hand, free of Snap": [
+  "Scrub: the playhead follows the hand, free of Snap; the range stays": [
    "mir/timeline/shortcuts.js"
   ],
   "Seek about once every three moves. The hand always stays smooth.": [
@@ -4553,7 +4594,7 @@
   "Select a curve before reversing it": [
    "mir/modulation/window.js"
   ],
-  "Select a time range (no key, so touch can); a tap seeks": [
+  "Select a time range (no key, so touch can); a tap seeks and keeps the range": [
    "mir/timeline/shortcuts.js"
   ],
   "Select a time range; + Ctrl/Cmd extends it": [
@@ -4638,6 +4679,9 @@
    "mir/timeline/shortcuts.js"
   ],
   "Shift + drag (empty)": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Shift + drag a clip": [
    "mir/timeline/shortcuts.js"
   ],
   "Shift + drag the ruler": [
@@ -4916,6 +4960,9 @@
   "The controls take the panes’ light: one {:ANGLE} for everything": [
    "mir/shell/gui.js"
   ],
+  "The dot grip on window heads; off, they still drag": [
+   "mir/shell/gui.js"
+  ],
   "The dotted guide where a dragged window will land": [
    "mir/shell/gui.js"
   ],
@@ -5048,7 +5095,7 @@
   "Trigger this envelope. Start modulation to advance it.": [
    "mir/modulation/window.js"
   ],
-  "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start": [
+  "Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start. The zone is centred on the edge; where two clips meet, the side you are on names the clip, and its edge lights first": [
    "mir/timeline/shortcuts.js"
   ],
   "Trim the clip end": [
@@ -5314,7 +5361,7 @@
   "adapted — FL’s P is the Draw tool; BASINS has one modeless curve editor": [
    "mir/timeline/shortcuts.js"
   ],
-  "adapted — FL’s Shift-drag clones; in MIR Ctrl shapes": [
+  "adapted — FL’s Shift-drag clones; MIR’s Ctrl alias stays": [
    "mir/timeline/shortcuts.js"
   ],
   "adapted — FL’s Y is the Playback/Preview tool": [
@@ -6632,8 +6679,7 @@
    "mir/shell/notebook.js"
   ],
   "→TL": [
-   "mir/modulation/window.js",
-   "mir/timeline/view.js"
+   "mir/modulation/window.js"
   ],
   "≈ {time} to render": [
    "mir/render/panel.js"

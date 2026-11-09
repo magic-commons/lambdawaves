@@ -12,6 +12,7 @@
  * `bindNumber` is that behaviour on a button and an input the caller already has (bindTempoField is now one call to it); `number()` builds
  * the pair and a label.  `numberTravel` and `parseNumber` are the pure parts.
  *   numberTravel(start, p, { min, max, step, range, round }) → the value after a travel `p` (0..1 is the whole range), clamped and rounded
+ *   fineSteps(dy) → the steps one frame of a fine-gear drag moves a stepped number (1.5.7-alpha.45: one a pixel while slow, a velocity gear)
  *   parseNumber(text) → a finite number (a comma is a point) or null
  *   bindNumber({ button, input, model, parse, enabled, drag, click, paint, chars, step, range, signal })   (click: false leaves the click to the host)
  *     model  { get(), set(v), commit?(), min?, max?, round?(v) } — what createTempo hands the tempo field, as it is
@@ -43,6 +44,12 @@ export function numberTravel(start, p, { min = -Infinity, max = Infinity, step =
   if (round) v = round(v); else if (step > 0) v = Math.round(v / step) * step;
   return Math.min(max, Math.max(min, Number(v.toFixed(10))));
 }
+
+/** fineSteps(dy) — THE FINE DRAG LANDS ON THE STEP (1.5.7-alpha.45, λWAVES 040 T8; Josh: "even when I use the shift for fine, I get the annoying
+ *  situation where I can't get integers per pixel notch movement like 59.9 to 60.1 … Perhaps a cursor/input acceleration detection would help"):
+ *  the steps one frame of a fine-gear drag moves a stepped number — one a pixel while the hand is slow (≤ 2 px a frame: no step is ever
+ *  skipped, 59.9 → 60.0 → 60.1), more a pixel as it speeds up (a velocity gear: ×1.5 at 3 px, ×8 from 16 px a frame).  Up is +.  PURE */
+export function fineSteps(dy) { const a = Math.abs(dy); return Math.sign(dy) * (a <= 2 ? a : a * Math.min(8, a / 2)); }
 
 /** bindNumber — see the header */
 export function bindNumber({ button, input, model, parse = parseNumber, format = String, enabled = () => true, drag: dragToo = true, click = true, paint = () => {}, chars = NUMBER.chars, step = 0, range, signal } = {}) {
@@ -77,8 +84,13 @@ export function bindNumber({ button, input, model, parse = parseNumber, format =
   input.addEventListener('blur', () => close(true), on);
   let g = null;
   const gesture = dragToo ? pointerDrag(button, { slop: NUMBER.slop,
-    onStart: (s) => { if (!enabled()) return; g = { v0: model.get(), vd: verticalDrag({ pointerId: s.pointerId, pointerType: s.pointerType, clientX: s.x0, clientY: s.y0 }) }; },
-    onMove: (s) => { if (!g) return; const p = g.vd.move({ ...s, clientX: s.x, clientY: s.y }); model.set(numberTravel(g.v0, p, { min: lo(), max: hi(), step, range, round: model.round })); paint(); },
+    onStart: (s) => { if (!enabled()) return; g = { v0: model.get(), p0: 0, y: s.y, acc: 0, vd: verticalDrag({ pointerId: s.pointerId, pointerType: s.pointerType, clientX: s.x0, clientY: s.y0 }) }; },
+    // THE FINE DRAG LANDS ON THE STEP (1.5.7-alpha.45): under the fine gear a stepped number counts steps (fineSteps; the slop is not counted),
+    // not travel; the coarse drag resumes from where the fine one left it (re-origined); ONE KNOB LAW's ⅛ stands where there is no step
+    onMove: (s) => { if (!g) return; const p = g.vd.move({ ...s, clientX: s.x, clientY: s.y }), dy = g.y - s.y, o = { min: lo(), max: hi(), step, range, round: model.round }; g.y = s.y;
+      if (step > 0 && g.vd.gear < 1) { g.acc += fineSteps(dy); const k = Math.trunc(g.acc); g.acc -= k; if (k) model.set(numberTravel(model.get() + k * step, 0, o)); g.v0 = model.get(); g.p0 = p; }
+      else model.set(numberTravel(g.v0, p - g.p0, o));
+      paint(); },
     onEnd: () => { if (!g) return; g = null; dragged = true; commit(); },
     onCancel: () => { if (!g) return; const v = g.v0; g = null; model.set(v); paint(); } }) : null;
   if (dragToo) button.addEventListener('pointerdown', () => { dragged = false; }, on);

@@ -6,7 +6,8 @@
  *   THE VOCABULARY            VOCAB — every id a port may implement, with its words, its range and its kind; the panel shows only
  *                             the ids the port has.  describe(id, port) merges the port's own range over it and resolves the unit.
  *   NORTH                     atNorth · northStep: off north → go there and remember; at north → go back (BASINS' one-button law)
- *   THE SPHERE                lookDir · anglesOf · project · sphereDrag: the arrow's tip follows the finger, with no gimbal lock
+ *   THE SPHERE                lookDir · anglesOf · project · ballPoint · turnBetween · arcballTurn · sphereTurn: the ball turns under the finger
+ *                             (1.5.7-alpha.46 THE ARCBALL); sphereDrag · planeDrag, the tip's least-squares step, kept pure
  *   THE CSS CAMERA            transform2d · transform3d: the zero-engine default (a picture turned by a CSS transform)
  *
  * Angles in a port's own unit (`port.angle`: 'deg' by default, or 'rad'); every readout is in degrees. */
@@ -189,6 +190,57 @@ export function planeDrag(d, dsx, dsy) {
   const m00 = a[0] * a[0] + a[1] * a[1] + lam, m01 = a[0] * b[0] + a[1] * b[1], m11 = b[0] * b[0] + b[1] * b[1] + lam;
   const r0 = a[0] * dsx + a[1] * dsy, r1 = b[0] * dsx + b[1] * dsy, det = m00 * m11 - m01 * m01, x = (r0 * m11 - r1 * m01) / det, y = (m00 * r1 - m01 * r0) / det;
   return nrm(d.map((v, i) => v + x * t1[i] + y * t2[i]));
+}
+
+/* ── 1.5.7-alpha.46 THE SPHERE TURNS SMOOTHLY (λWAVES 040 C1): THE ARCBALL ─────────────────────────────────────────────────────────
+ * The hand turns the BALL and the arrow rides it.  sphereDrag and planeDrag (above, kept as pure helpers; the keys still nudge a plane
+ * through planeDrag) moved the tip by a damped least-squares step of its screen position: exact where the Jacobian is full, but at the
+ * rim (the silhouette) one screen direction has no answer, so the tip stalled while the finger ran on and the next inward move no
+ * longer sat under it, and at a pole the yaw column vanished and the readout spun (Josh, 2026-11-09: "controls VERY roughly and
+ * doesn't smoothly rotate it and is an unreliable rotation source").  The arcball has no seam: the finger's point on the drawing is a
+ * point of the ball (ballPoint — Holroyd's map: the sphere over the inner disc, the hyperbolic sheet past R/√2, so EVERY point of the
+ * plane has one, the map is continuous, a finger past the rim keeps turning the ball, slower, and comes back the way it went — nothing
+ * is mirrored), and each move is the one rotation taking the last point onto the new one (turnBetween), applied to the direction in
+ * 3-D.  A tip grabbed inside the disc stays under the finger exactly; grabbed anywhere else, the ball turns and the arrow follows the
+ * turn.  The gear (⅛) scales each move's angle, so engaging or leaving it moves nothing. */
+const SUBSTEP = Math.PI / 72;                                                     // 2.5°: a move is read on the yaw / pitch chart in steps this small
+const PCAP = Math.PI / 2 - Math.PI / 180;                                         // 89°: the sphere's hand stops a degree short of the pole
+const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const wrapPi = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+/** ballPoint(sx, sy) → the unit vector (the drawing's world) under the finger at (sx, sy), in the drawing's units: Holroyd's ball — the
+ *  sphere where ρ ≤ R/√2, the hyperbolic sheet z = R²/2ρ beyond it; on the inner disc it is project's inverse for the front hemisphere */
+export function ballPoint(sx, sy) {
+  const x = (sx - SPHERE.cx) / SPHERE.R, y = -(sy - SPHERE.cy) / SPHERE.R, r2 = x * x + y * y;
+  const z = r2 <= 0.5 ? Math.sqrt(1 - r2) : 0.5 / Math.sqrt(r2), n = Math.hypot(x, y, z);
+  return fromView([x / n, y / n, z / n]);
+}
+/** turnBetween(a, b, k) → the rotation (as a function of a vector) about a × b by k times the angle from unit a to unit b (Rodrigues);
+ *  the identity when a and b coincide */
+export function turnBetween(a, b, k = 1) {
+  const c = cross3(a, b), s = Math.hypot(c[0], c[1], c[2]);
+  if (!(s > 1e-12)) return (v) => v.slice();
+  const th = Math.atan2(s, dot3(a, b)) * k, n = [c[0] / s, c[1] / s, c[2] / s], co = Math.cos(th), si = Math.sin(th);
+  return (v) => { const nv = dot3(n, v), x = cross3(n, v); return [0, 1, 2].map((i) => v[i] * co + x[i] * si + n[i] * nv * (1 - co)); };
+}
+/** arcballTurn(d, p0, p1, k) → the unit direction d carried by the ball's turn from p0 to p1 (k the gear) */
+export function arcballTurn(d, p0, p1, k = 1) { const r = turnBetween(p0, p1, k)(d), n = Math.hypot(r[0], r[1], r[2]) || 1; return [r[0] / n, r[1] / n, r[2] / n]; }
+/** sphereTurn(yaw, pitch, p0, p1, k) → [dyaw, dpitch] (radians): the ball's turn from p0 to p1, read on the yaw / pitch chart in
+ *  steps of at most 2.5°, yaw wrapped to (−π, π].  THE POLAR CAP: a level horizon has poles (PITCH is bounded, TURNTABLE clamps) and
+ *  the chart's yaw is wild there, so the tip stops a degree short of the pole, and a step that would turn the yaw more than 45° (only
+ *  possible within ~3° of the pole) is not taken — the ball slips under the finger and the tip stays; pulled back, it comes down
+ *  the way the finger goes.  The readout never flips. */
+export function sphereTurn(yaw, pitch, p0, p1, k = 1) {
+  const c = cross3(p0, p1), s = Math.hypot(c[0], c[1], c[2]);
+  if (!(s > 1e-12)) return [0, 0];
+  const th = Math.atan2(s, dot3(p0, p1)) * k, n = Math.max(1, Math.ceil(Math.abs(th) / SUBSTEP)), rot = turnBetween(p0, p1, k / n);
+  let y = yaw, p = Math.max(-PCAP, Math.min(PCAP, pitch));
+  for (let i = 0; i < n; i++) {
+    const a = anglesOf(rot(lookDir(y, p))), dy = wrapPi(a.yaw - y);
+    if (Math.abs(a.pitch) > PCAP || Math.abs(dy) > Math.PI / 4) break;           // the polar cap: the ball slips, the tip stays
+    y += dy; p = a.pitch;
+  }
+  return [wrapPi(y - yaw), p - pitch];
 }
 
 /* ── THE CSS CAMERA: what a picture does with no engine ── */

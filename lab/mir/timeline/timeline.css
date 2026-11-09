@@ -213,10 +213,18 @@
 .mir-win.mir-timeline .tl-toolbar .tl-setting-word { order: 2; font: var(--w-bold) var(--tl-pill-word-size) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-key, var(--dim)); }
 .mir-win.mir-timeline .tl-toolbar .tl-setting .mir-step-name { background: transparent; box-shadow: none; font: var(--w-bold) var(--tl-pill-num-size) / 1 var(--font-num); color: var(--acc2); }
 .mir-timeline .tl-select-wrap { position: relative; display: inline-flex; align-items: center; flex: none; }
-/* THE KIT'S OWN CHOOSERS, never a native select (Josh, 2026-10-07, call 19): the scope is a SEGMENT at the tools' height (its
-   track 34 px: 28 px segments in the well's 2 px), and SNAP a compact STEPPER whose name wears the select's well and chevron —
+/* THE KIT'S OWN CHOOSERS, never a native select (Josh, 2026-10-07, call 19): the scope is a SEGMENT at the tools' height (since
+   alpha.47 two chips of 36 px, below, not 28 px segments in a well), and SNAP a compact STEPPER whose name wears the select's well and chevron —
    its seat is its longest word (the stepper's own), so a choice moves nothing */
-.mir-win.mir-timeline .tl-toolbar .tl-scope-seg .seg-b { min-height: var(--tl-setting-h); height: var(--tl-setting-h); font-size: var(--tl-action-size); letter-spacing: var(--tl-action-track); }
+.mir-win.mir-timeline .tl-toolbar .tl-scope-seg .seg-b { font-size: var(--tl-action-size); letter-spacing: var(--tl-action-track); }
+/* 1.5.7-alpha.47 · THE CHIP WEARS THE DEPTH: CLIPS · POINTS are two of the bar's chips, not a well — each the trigger's raise at the tools'
+   height with no face and no outline, the hover wash, the press; the chosen one wears ON's frost face and rim (INTENT) */
+.mir-win.mir-timeline .tl-toolbar .tl-scope-seg .seg { gap: var(--tl-bar-gap); padding: 0; border-color: transparent; background: transparent; box-shadow: none; }
+.mir-win.mir-timeline .tl-toolbar .tl-scope-seg .seg-b { min-height: var(--tl-action-h); height: var(--tl-action-h); padding: var(--tl-action-pad); border-color: transparent; border-radius: var(--tl-action-r);
+  background: transparent; box-shadow: var(--relief-raise, var(--neu-raise)); }
+.mir-win.mir-timeline .tl-toolbar .tl-scope-seg .seg-b:hover { box-shadow: var(--relief-raise, var(--neu-raise)), var(--state-hover-wash); }
+.mir-win.mir-timeline .tl-toolbar .tl-scope-seg .seg-b:active { box-shadow: var(--trig-press-relief); }
+.mir-win.mir-timeline .tl-toolbar .tl-scope-seg .seg-b.on { background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
 .mir-timeline .tl-select-wrap .mir-step-name { min-width: 0; min-height: var(--tl-setting-h); height: var(--tl-setting-h); padding: var(--tl-select-pad); border-radius: var(--tl-select-r);
   font-size: var(--tl-action-size); color: inherit; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 .mir-timeline .tl-select-wrap::after { content: ''; position: absolute; right: 9px; top: 50%; width: var(--tl-chevron); height: var(--tl-chevron); border-right: var(--tl-chevron-w) solid currentColor; border-bottom: var(--tl-chevron-w) solid currentColor;
@@ -306,15 +314,21 @@
 .mir-timeline .tl-clip-title.narrow .tl-trim { width: 6px; }
 .mir-timeline .tl-clip-title.micro :is(.tl-clip-name, .tl-clip-more) { display: none; }
 .mir-timeline .tl-clip-title.micro .tl-trim { width: 50%; min-width: 0; }
+/* THE EDGE IS THE EDGE (1.5.7-alpha.41): every trim zone is centred on the clip's visual edge — half in, half out (the tab's 2-px inline
+   padding added back); the editor names the edge by the same geometry (timelineEdgeAt), and the named edge lights before the press */
+.mir-timeline .tl-trim-left { translate: calc(-50% - 2px); }
+.mir-timeline .tl-trim-right { translate: calc(50% + 2px); }
+.mir-timeline .tl-clip-title.narrow .tl-trim-left { translate: -50%; }
+.mir-timeline .tl-clip-title.narrow .tl-trim-right { translate: 50%; }
 .mir-timeline .tl-edge { position: absolute; top: 0; bottom: 0; width: var(--tl-edge-w); padding: 0; border: 0; border-radius: 0; background: transparent; color: inherit; cursor: ew-resize; touch-action: none; }
-.mir-timeline .tl-edge-left { left: 0; }
-.mir-timeline .tl-edge-right { right: 0; }
+.mir-timeline .tl-edge-left { left: 0; translate: -50%; }
+.mir-timeline .tl-edge-right { right: 0; translate: 50%; }
 .mir-timeline .tl-edge::after { content: ''; position: absolute; top: 50%; width: var(--tl-grip-w); height: 16px; margin-top: -8px; border-radius: var(--tl-grip-r); background: currentColor; opacity: 0; transition: opacity var(--tl-tab-t) var(--tl-ease); }
-.mir-timeline .tl-edge-left::after { left: 1px; }
-.mir-timeline .tl-edge-right::after { right: 1px; }
+.mir-timeline .tl-edge::after { inset-inline: 0; margin-inline: auto; }
 .mir-timeline :is(.tl-clip:is(:hover, .held) .tl-edge, .tl-edge:focus-visible)::after { opacity: .5; }
 .mir-timeline .tl-edge:focus-visible { outline: var(--tl-edge-focus); outline-offset: -1px; }
 .mir-timeline .tl-clip.narrow .tl-edge { width: 50%; }
+.mir-timeline :is(.tl-clip-title, .tl-clip) [data-trim][data-hot]::after { opacity: .9; }
 @media (pointer: coarse) { .mir-timeline :is(.tl-trim, .tl-edge) { width: var(--tl-edge-touch); } }
 /* no positional tween on authored geometry: a pointer edit is exact; feedback animates paint only */
 .mir-timeline .timeline-surface[data-gesture] :is(.tl-fill, .tl-tab-tint, .tl-tab-rim) { transition: none; }
@@ -346,11 +360,6 @@
 .mir-timeline .timeline-surface[data-tool="slice"] :is(.tl-viewport, .tl-clip svg, .tl-clip-title, .tl-point, .tl-tension) { cursor: col-resize; }
 
 /* ── THE EMPTY LANE SAYS HOW (1.5.7-alpha.23): with no clip, one line over the lanes on how a clip arrives (view.js); never in the way ── */
-/* THE EMPTY LINE SITS UNDER THE RULER (1.5.7-alpha.25, λWAVES 039 F1): at the lanes' top, never their middle — a short floating timeline
-   lies over its app's bar, and a centred line landed on the bar's band (λWAVES at 1000 × 700) */
-.mir-timeline .tl-empty { position: absolute; inset: var(--tl-ruler-h) 0 0 0; z-index: 2; display: flex; align-items: flex-start; justify-content: center; padding: var(--sp-4) var(--sp-5) 0;
-  pointer-events: none; text-align: center; text-wrap: balance; font: var(--w-semi) var(--fs-base)/1.4 var(--font-ui); color: var(--dim); }
-.mir-timeline .tl-empty[hidden] { display: none; }
 
 /* ── THE STATUS LINE (fix 6): no message, no row — laid over the lanes' foot only while it says something ── */
 .mir-timeline .tl-status { position: absolute; left: var(--tl-status-left); bottom: var(--tl-status-foot); max-width: calc(100% - 24px); height: auto; padding: 0; pointer-events: none; z-index: 3;

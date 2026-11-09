@@ -37,7 +37,7 @@
  *      transport"), and the kit's double click types through the same binder.
  *
  * The pure helpers are exported for node tests. */
-import { bindNumber } from '../controls/number.js';
+import { bindNumber, fineSteps } from '../controls/number.js';
 import { el, label, ariaLabel, trig, gripDots, tapWatcher, knob, lamp, knobBank } from '../kit.js';
 import { onLanguage, phrase } from '../core/i18n.js';
 import { drag } from '../core/pointer.js';
@@ -402,9 +402,12 @@ export function tempoPill({ tempo, panel = null, work = () => false, typed = fal
   /* one gesture, two laws: on the stage the digit under the pointer is the step (BASINS transport.js); in a work bar
      the travel law of the one tempo field (BASINS tempo-editor.js) */
   const g = drag(root, { slop: TRANSPORT.slop,
-    onStart: (s) => { const touch = s.pointerType === 'touch'; g0 = { bpm: tempo.get(), touch, travel: !!work(), step: touch ? 1 : stepAt(s.x0) }; root.classList.add('drag'); },
-    onMove: (s) => { if (!g0) return;
-      tempo.set(g0.travel ? travelBpm(g0.bpm, -s.dy, { shift: s.shiftKey, touch: g0.touch, min: tempo.min, max: tempo.max }) : dragBpm(g0.bpm, -s.dy, g0.step, g0.touch, tempo)); sync(); },
+    onStart: (s) => { const touch = s.pointerType === 'touch'; g0 = { bpm: tempo.get(), touch, travel: !!work(), step: touch ? 1 : stepAt(s.x0), y: s.y, r0: 0, acc: 0 }; root.classList.add('drag'); },
+    // THE FINE DRAG LANDS ON THE STEP (1.5.7-alpha.45, λWAVES 040 T8): in a work bar Shift counts tenths (fineSteps: one a pixel while slow, a
+    // velocity gear when fast; the slop not counted), and the travel law resumes from where the fine drag left it
+    onMove: (s) => { if (!g0) return; const dy = g0.y - s.y; g0.y = s.y;
+      if (g0.travel && s.shiftKey) { g0.acc += fineSteps(dy); const k = Math.trunc(g0.acc); g0.acc -= k; if (k) tempo.set(clampBpm(tempo.get() + k / 10, tempo.min, tempo.max)); g0.bpm = tempo.get(); g0.r0 = -s.dy; }
+      else tempo.set(g0.travel ? travelBpm(g0.bpm, -s.dy - g0.r0, { touch: g0.touch, min: tempo.min, max: tempo.max }) : dragBpm(g0.bpm, -s.dy, g0.step, g0.touch, tempo)); sync(); },
     onEnd: () => { if (!g0) return; g0 = null; dragged = true; root.classList.remove('drag'); tempo.commit(); },
     onCancel: () => { if (!g0) return; const b = g0.bpm; g0 = null; root.classList.remove('drag'); tempo.set(b); sync(); } });
   root.addEventListener('pointerdown', () => { dragged = false; }, on);

@@ -88,6 +88,8 @@ const ACCEPTED = {
   /* 039 F1 · MIR 1.5.7-alpha.26 THE FOLDER ROW KEEPS ITS SEAT (kit-039 @ 3086c0b): a paged gallery draws its first page's folder row on every page
      (hidden seats), so the page buttons never move; λWAVES: the MAIN MENU page fits its rows to the chrome that is there (picker.js, skin.css) */
   '1.5.7-alpha.26': '017a7bafc19f3111cee3daa49f2db703abe1ec73c3ce65415fb65a31c0595cfa',
+  /* 040 T + C · MIR 1.5.7-alpha.48 (kit-040 @ a0e32f5: T alpha.38–45 THE TIMELINE'S HANDS, C alpha.46–48 THE CONTROLS; Focus's 27–37 live on the kit's `focus` branch, not here) */
+  '1.5.7-alpha.48': '65b230cf3401a28d7efe405fa398c68669d601d6e41e2318feddea8b34fb0f9b',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

@@ -2348,7 +2348,8 @@ body.mod-arming :is(.sw, .seg, .trig, .k:not([data-param]), .fd:not([data-param]
 #modwin.mir-modwindow .m2workbar .tbtn[hidden], #modwin.mir-modwindow .m2workbar .tbtn.m2predead.off { display: none; }
 #modwin.mir-modwindow .m2workbar .tbtn.m2presave.m2arm { color: var(--acc); }
 /* the keys */
-#modwin.mir-modwindow .m2workbar .tbtn.trig { padding: 0 10px; border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--xport-work-r, 8px);
+#modwin.mir-modwindow .m2workbar .tbtn.trig { padding: 0 10px; border: var(--glass-border) solid var(--ctl-hairline, var(--glass-hairline));   /* alpha.47: a chip has no outline (skin.css) */
+  border-radius: var(--xport-work-r, 8px);
   background: var(--trig-face, var(--glass-raise)); box-shadow: var(--relief-raise, var(--neu-raise)); }
 #modwin.mir-modwindow .m2workbar .tbtn.trig:hover { color: var(--fg); background: var(--trig-face, var(--glass-raise)); box-shadow: var(--relief-raise, var(--neu-raise)), inset 0 0 0 99px var(--state-hover, var(--glass-raise)); }
 #modwin.mir-modwindow .m2workbar .tbtn.trig:active { box-shadow: none; background: var(--state-press, var(--glass-press)); }

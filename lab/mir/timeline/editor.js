@@ -24,6 +24,11 @@
  * clip's toggle, ⅛ on a point, a tension or a stretch); Ctrl shapes (the ruler's zoom, a clip's clone and stretch, a point's
  * time lock); Alt bypasses Snap and deletes a point.  The EDIT tool's click on empty lane space stamps the clip last pressed
  * (THE PENCIL: its curve, shared).  The words are shortcuts.js TIMELINE_POINTER.
+ * THE TIMELINE'S HANDS (λWAVES 040, 1.5.7-alpha.38 …): THE RIGHT CLICK DELETES — a right-button press on empty lane space or
+ * between the lanes sweeps every clip the pointer crosses (one undo); the lane's right-click menu is gone.  SHIFT-DRAG CLONES
+ * (alpha.39): Shift + drag on a clip duplicates the selection and moves the copies, a Shift click still toggles, Shift on empty
+ * space is still the marquee; Ctrl + drag's clone stays as an alias.  THE RANGE STAYS (alpha.40): no press on the ruler clears
+ * the range; a double-tap at one spot (TAP: 300 ms, 14 px) does.
  * THE LAWS (BASINS', unchanged): one musical-to-pixel mapping (geometry.js) for drawing, hit tests and edits; a gesture is
  * one model transaction (begin … commit, or cancel on Escape, a lost capture, a blur, a hidden page or a hidden interface); a drag's last
  * pointer sample is flushed before its commit; the nearest lane is resolved from content coordinates, never from
@@ -35,17 +40,18 @@
  * key table (keys.js timelineActions: this file only exposes the verbs); toasts through `say`; the frame coalescer is
  * core/frame.js; the popups are the house's menu pane; BASINS' CURVE_VIEW numbers live in geometry.js. */
 import { svgPoint, curveHit, curveAction, pointDrag, pointAddValue, tensionDelta, fineGear } from '../modulation/curve-gesture.js';
-import { el, label, ariaLabel, seg, stepper, number } from '../kit.js';
+import { el, label, ariaLabel, seg, stepper, number, TAP } from '../kit.js';
 import { confirmDialog } from '../shell/dialog.js';
 import { glyphSvg } from '../glyph.js';
 import { frame } from '../core/frame.js';
 import { isField } from '../core/pointer.js';
 import { t, tn } from '../core/i18n.js';
 import { coalesce } from './readout.js';
-import { TIMELINE_TAB_HEIGHT, TIMELINE_ROW_GAP, TIMELINE_CURVE_GRAB, TIMELINE_TENSION_TRAVEL, resizeTimelineClip, glueTimelineClips, createClipCoordinates, snapTimelineBeat, timelineResizeDelta, nearestTimelineLane } from './geometry.js';
+import { TIMELINE_TAB_HEIGHT, TIMELINE_ROW_GAP, TIMELINE_CURVE_GRAB, TIMELINE_TENSION_TRAVEL, resizeTimelineClip, glueTimelineClips, createClipCoordinates, snapTimelineBeat, timelineResizeDelta, nearestTimelineLane, timelineEdgeAt } from './geometry.js';
 import { createTimelinePlot } from './curve-view.js';
 import { evaluateTimelineSource, normalizeTimelinePoints } from './source.js';
 import { clipKind } from './kinds.js';
+import { timelineFamily } from './model.js';
 import { sliceClips } from './slice.js';
 import { timelineStepSamples } from './draw.js';
 import { createTimelineView } from './view.js';
@@ -69,7 +75,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   const chordOf=id=>{const k=typeof keys==='function'?keys():keys;return k&&k.get&&k.get('timeline.'+id)?k.menuKey('timeline.'+id):'';};
   const withKey=(node,id)=>{const c=id&&chordOf(id);if(c)el('span','tl-key',node).textContent=' · '+c;return node;};
   let doc=model.state(),selectedLane=doc.lanes[0].id,selected=null,selection=new Set(),pointSelection=null;
-  let px=20,snap=1,range=null,menu=null,drag=null,lastTap=null,clipboard=null,lastClip=null;   // lastClip: THE PENCIL's memory, the clip last pressed
+  let px=20,snap=1,range=null,menu=null,drag=null,lastTap=null,rulerTap=null,clipboard=null,lastClip=null;   // lastClip: THE PENCIL's memory, the clip last pressed; rulerTap: the ruler's last press (THE RANGE STAYS)
   let stepMode=false,slideMode=false,drawTension=0,tool='edit',scope='clips',workLane='top';
   const dropHandlers=new Set();
   const transportBeat=()=>mod.host.model.transport.beats;
@@ -176,13 +182,14 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     for(const a of actions){if(!a){el('div','tl-pop-sep',menu).setAttribute('role','separator');continue;}const [text,fn,id,chosen]=a;const b=withKey(button(menu,text,()=>{closeMenu();fn();}),id);if(id)b.dataset.row=id;if(typeof chosen==='boolean'){b.setAttribute('aria-pressed',String(chosen));b.classList.toggle('on',chosen);}}
     placeMenu(x,y);menu.querySelector('button')?.focus();
   }
-  function editIdentity(x,y,curve) {
+  function editIdentity(x,y,curve,clip) {
     pop(x,y,'CLIP TITLE / COLOR',[],'identity');menu.setAttribute('role','dialog');ariaLabel(menu,'Clip title and color');
     const titleLabel=el('label','tl-field',menu),input=el('input','tl-value-input',titleLabel);titleLabel.prepend(label(el('span','tl-field-word'),'TITLE'));input.value=curve.name;input.maxLength=80;ariaLabel(input,'Clip title');
     const colorLabel=el('label','tl-field tl-color-field',menu),color=el('input','tl-color-input',colorLabel);colorLabel.prepend(label(el('span','tl-field-word'),'TINT'));color.type='color';color.value=curve.color;ariaLabel(color,'Clip color');
     const swatches=el('div','tl-swatches',menu);
     for(const tint of SWATCHES){const b=el('button','tl-swatch',swatches);b.type='button';b.dataset.tint=tint;b.style.setProperty('--tl-clip-tint',tint);ariaLabel(b,'Tint {tint}',{tint});b.onclick=()=>{color.value=tint;};}
-    const apply=()=>{model.updateCurve(curve.id,{name:input.value.trim()||curve.targetId,color:color.value});closeMenu();};
+    // THE COPIES WEAR ONE COLOUR (1.5.7-alpha.42): a new tint paints the clip's family (timelineFamily) — one undo
+    const apply=()=>{const tint=color.value,family=clip&&tint!==curve.color?timelineFamily(model.state(),clip.id):[];model.begin();model.updateCurve(curve.id,{name:input.value.trim()||curve.targetId,color:tint});for(const id of family)if(id!==curve.id)model.updateCurve(id,{color:tint});model.commit();closeMenu();};
     button(menu,'APPLY',apply).dataset.tlAction='apply';button(menu,'CANCEL',closeMenu).dataset.tlAction='cancel';
     input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();apply();}});placeMenu(x,y);input.focus();input.select();
   }
@@ -217,7 +224,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     // A kind keeps the instance actions, drops the point ones, keeps OUTPUT RANGE only when it drives, and adds its own.
     const kind=clipKind(curve),drives=!kind||kind.drives!==false;
     pop(x,y,{raw:curve.name},[
-      ['TITLE / COLOR',()=>editIdentity(x,y,curve),'identity'],
+      ['TITLE / COLOR',()=>editIdentity(x,y,curve,c),'identity'],
       [c.mute?'ENABLE CLIP':'DISABLE CLIP',()=>model.updateClip(c.id,{mute:!c.mute}),'mute'],   // T25: the MUTE row's words (clip.mute, the row id unchanged)
       ['DUPLICATE',()=>{selectOnly(c.id);duplicateSelection();},'duplicate'],
       ...(drives&&typeof mod.view?.api?.armFor==='function'?[['ROUTE NEW PARAMETER…',()=>routeClip(c.id,curve),'route']]:[]),   // T20: arm the controls, the tap re-targets the clip
@@ -230,12 +237,10 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   }
 
   /* THE LANE ASK (T9, 1.5.6-alpha.24): a lane with clips asks through the kit's confirmDialog (danger) before it goes; the
-     rail's chip removes the bottom lane, a lane's own menu (right-click its empty space) that lane.  → Promise<boolean> */
+     rail's chip removes the bottom lane (the lane's own right-click menu went in 1.5.7-alpha.38: the right click deletes).  → Promise<boolean> */
   async function removeLane(laneId=doc.lanes.at(-1)?.id){const result=model.removeLane(laneId);if(result.ok||!result.confirm)return !!result.ok;
     const yes=await confirmDialog(tn(result.count,'Remove {n} clip in {lane}?','Remove {n} clips in {lane}?',{n:result.count,lane:result.name}),{yes:'REMOVE LANE',danger:true});
     return !!(yes&&doc.lanes.some(l=>l.id===laneId)&&model.removeLane(laneId,true)?.ok);}
-  function laneMenu(x,y,laneId){const lane=doc.lanes.find(l=>l.id===laneId);if(!lane)return;
-    pop(x,y,{raw:lane.name},[['ADD LANE',()=>model.addLane(),'add-lane'],...(doc.lanes.length>1?[['REMOVE LANE',()=>removeLane(laneId),'remove-lane']]:[])],'lane');}
   /* ROUTE NEW PARAMETER… (T20, 1.5.6-alpha.26): the modulation window's arming with no macro — every routable control lights;
      the one tapped becomes the clip's target (its curve copied first when other clips share it); Escape or a tap elsewhere ends it */
   function routeClip(clipId,curve){say(t('Tap a lit control to route {clip} to it; Escape cancels.',{clip:curve.name}));
@@ -290,15 +295,17 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(drag.kind==='pan'){viewport.scrollLeft=drag.scrollX-(e.x-drag.x);viewport.scrollTop=drag.scrollY-(e.y-drag.y);return;}
     // a scrub's beat stays inside the lanes on view (1.5.7-alpha.14): past an edge the head waits at that edge while the pump scrolls, and where the content ends it stops there, never off the view
     if(drag.kind==='scrub'){controller.scrub(bounded(pos.x,viewport.scrollLeft,viewport.scrollLeft+viewport.clientWidth)/px,{snap,alt:!!e.altKey,snapped:!!(e.ctrlKey||e.metaKey)});return;}
-    if(drag.kind==='range'){const beat=snapBeat(pos.x/px,e),start=Math.min(beat,drag.startBeat),end=Math.max(beat,drag.startBeat);range=end-start>=.0625?{start:drag.addRange?Math.min(start,drag.addRange.start):start,end:drag.addRange?Math.max(end,drag.addRange.end):end}:null;view.setRange(range);paint();return;}
+    if(drag.kind==='range'){const beat=snapBeat(pos.x/px,e),start=Math.min(beat,drag.startBeat),end=Math.max(beat,drag.startBeat);range=end-start>=.0625?{start:drag.addRange?Math.min(start,drag.addRange.start):start,end:drag.addRange?Math.max(end,drag.addRange.end):end}:drag.oldRange;view.setRange(range);paint();return;}   // under a sixteenth the old range stands (alpha.40)
     if(drag.kind==='select'){
       const rect=selectionRect(drag.startWorld,pos);Object.assign(view.marquee.style,{display:'block',left:rect.left+'px',top:rect.top+'px',width:rect.right-rect.left+'px',height:rect.bottom-rect.top+'px'});
       if(scope==='points'){const c=view.getClip(selected),curve=view.getCurve(c?.curveId);if(c&&curve){const indices=pointsInRectangle(c,curve,rect,px,view.height(),doc.lanes.findIndex(l=>l.id===c.laneId));pointSelection={clipId:c.id,curveId:curve.id,indices:new Set([...drag.basePoints,...indices])};}}
       else{selection=new Set([...drag.baseClips,...clipsInRectangle(doc,rect,px,view.height())]);selected=selection.values().next().value||null;pointSelection=null;}paintSelection();return;
     }
     if(drag.kind==='delete'){
-      const id=document.elementFromPoint(e.x,e.y)?.closest('.tl-clip-title,svg[data-kind]')?.dataset.clip;
-      if(id&&doc.clips.some(x=>x.id===id))model.deleteClip(id);return;
+      // THE RIGHT CLICK DELETES (1.5.7-alpha.38, λWAVES 040 T1): every clip the pointer crosses, tab or body, by the one geometry — the path
+      // since the last sample as a rectangle (clipsInRectangle), so a fast hand skips none; a narrow clip between two samples dies too
+      const ids=clipsInRectangle(doc,selectionRect(drag.sweep||drag.startWorld,pos),px,view.height());drag.sweep=pos;
+      if(ids.length)model.deleteClips(ids);return;
     }
     const{clip:c,curve}=drag;
     if(drag.kind==='move'){
@@ -332,6 +339,9 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       if(drag.kind==='points'){model.movePoints(curve.id,drag.indices,beat-drag.pointBeat,value-drag.pointValue,{slide:slideMode,original:curve});}
       else{const moved=model.movePoint(curve.id,drag.index,Math.max(0,beat),value,{slide:slideMode});if(moved?.index>=0)drag.index=moved.index;}return;
     }
+    // THE TENSION REPEATS (1.5.7-alpha.43, λWAVES 040 T6): Ctrl + a tension handle's drag — every 24 px up one more copy of the segment's shape,
+    // past the press downward mirrored copies (an upward drag coming back takes copies away first); always from the press's curve, one undo
+    if(drag.kind==='repeat'){const k=Math.round((drag.y-e.y)/24),n=Math.min(32,1+Math.abs(k));if(n!==drag.n||k<0!==drag.mirror){drag.n=n;drag.mirror=k<0;model.repeatSegment(curve.id,drag.index,n,{mirror:k<0,original:curve});}return;}
     if(drag.kind==='tension'){const a=curve.points[drag.index],b=curve.points[drag.index+1],sign=b.v<a.v?-1:1;drawTension=bounded(drag.tension+sign*tensionDelta(drag.y,e.y,e,drag.gear)/TIMELINE_TENSION_TRAVEL,-1,1);model.setTension(curve.id,drag.index,drawTension);}
   });
   function finish(e,cancel=false,rewind=false){
@@ -342,18 +352,25 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       const L=controller.loop?.();if(L&&mod.host.clock.isPlaying()&&transportBeat()>=L.end&&L.start*px<viewport.scrollLeft)viewport.scrollLeft=Math.max(0,L.start*px-20);}
     if(held.kind==='range'&&cancel){range=held.oldRange;view.setRange(range);view.paint();}
     if(held.kind==='zoom'&&cancel)zoomAt(held.px0,held.anchor,held.anchorBeat);
-    // A SELECT-tool tap on the strip (no drag, no Shift) clears the range and seeks there, as a ruler click does in FL.
-    if(held.kind==='range'&&!cancel&&held.tap&&!held.moved&&!held.addRange){range=null;view.setRange(null);controller.seek(held.startBeat);view.paint();}
+    // A SELECT-tool tap on the strip (no drag, no Shift) seeks there; the range stays (alpha.40 — until then it cleared it, as a ruler click does in FL).
+    if(held.kind==='range'&&!cancel&&held.tap&&!held.moved&&!held.addRange)controller.seek(held.startBeat);
     if(held.author){if(cancel){model.cancel();selection=held.selectionBefore||selection;reconcile();}else{if(held.curve&&['point','points','tension','step'].includes(held.kind))syncSteps(held.curve.id);model.commit();}}
+    // a Shift press on a clip that never moved is a click: it toggles the clip in the selection (alpha.39; the clone needs the drag)
+    if(held.kind==='move'&&held.toggle&&!held.moved&&!cancel){const id=held.clip.id;if(selection.has(id))selection.delete(id);else selection.add(id);selected=selection.has(id)?id:selection.values().next().value||null;}
     if(held.kind==='select'){
       if(cancel){selection=held.oldClips;pointSelection=held.oldPoints;selected=held.activeBefore;}
       else if(!held.moved&&held.clickedClip&&scope==='clips'){const id=held.clickedClip;selection=held.additive?new Set(held.oldClips):new Set();if(held.additive&&selection.has(id))selection.delete(id);else selection.add(id);selected=selection.values().next().value||null;}
     }
     if(!cancel&&e&&['move','point','tension'].includes(held.kind)&&!held.moved&&!held.copy&&!held.added){const now=performance.now(),id=held.clip.id+':'+held.kind+':'+(held.index??'');
-      if(lastTap?.id===id&&now-lastTap.time<400&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<16){lastTap=null;const current=view.getCurve(held.curve.id);if(held.kind==='move'&&current)editIdentity(e.clientX,e.clientY,current);else if(held.kind==='point'&&current)fieldMenu(e.clientX,e.clientY,current,held.index,held.clip);else if(held.kind==='tension'){drawTension=0;model.setTension(held.curve.id,held.index,0);}}
+      if(lastTap?.id===id&&now-lastTap.time<400&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<16){lastTap=null;const current=view.getCurve(held.curve.id);if(held.kind==='move'&&current)editIdentity(e.clientX,e.clientY,current,held.clip);else if(held.kind==='point'&&current)fieldMenu(e.clientX,e.clientY,current,held.index,held.clip);else if(held.kind==='tension'){drawTension=0;model.setTension(held.curve.id,held.index,0);}}
       else lastTap={id,time:now,x:e.clientX,y:e.clientY};}else lastTap=null;paintSelection();headPaint.reset();
   }
   function begin(e,value,author=false){drag={...value,x:e.clientX,y:e.clientY,pointerId:e.pointerId,startWorld:view.world(e),author,activeBefore:selected,selectionBefore:new Set(selection)};surface.dataset.gesture=value.kind;if(value.clip)surface.dataset.dragClip=value.clip.id;if(author)model.begin();e.preventDefault();surface.setPointerCapture(e.pointerId);}
+  /* THE EDGE IS THE EDGE (1.5.7-alpha.41): the clip edge under the pointer — on a title band the tabs', in a lane the bodies' — each zone as wide
+     as that clip's own trim element (8 px, 12 px on a tab, 14 px on touch, half a narrow clip), centred on the edge (timelineEdgeAt) */
+  function edgeUnder(e){const band=e.target.closest?.('.tl-titleband,.tl-pane');if(!band)return null;const body=band.classList.contains('tl-pane');
+    const rim=timelineEdgeAt([...band.querySelectorAll(body?':scope > .tl-clip':':scope > .tl-clip-title')].map(n=>{const r=n.getBoundingClientRect();return{id:n.dataset.clip,start:r.left,end:r.right,zone:n.querySelector('[data-trim]')?.offsetWidth||0};}),e.clientX);
+    return rim&&{...rim,node:band.querySelector(`:scope > [data-clip="${rim.id}"] [data-trim="${rim.edge}"]`)};}
   function beginPointGroup(e,c,curve,index,additive=false){
     if(pointSelection?.curveId!==curve.id)pointSelection={clipId:c.id,curveId:curve.id,indices:new Set()};
     if(additive){if(pointSelection.indices.has(index))pointSelection.indices.delete(index);else pointSelection.indices.add(index);}else if(!pointSelection.indices.has(index))pointSelection.indices=new Set([index]);
@@ -373,9 +390,13 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       // needs no key; a tap seeks); Ctrl picks its axis at 6 px — vertical zooms about the pointer's beat (up = in), horizontal
       // scrubs snapped to SNAP; a plain drag scrubs free; Alt always bypasses Snap.  The zoom holds the pressed beat itself, so a
       // scroll clamped while the arrangement is narrow never drifts it.
+      // THE RANGE STAYS (1.5.7-alpha.40, λWAVES 040 T3; Josh: "clicking anywhere should not delete the selection; however double clicking fast enough in
+      // the same spot can remove the selection"): no press on the strip clears the range — only the second press of a double-tap at one spot (the kit's
+      // TAP law: 300 ms, 14 px); a scrub press and a SELECT tap seek and leave it; a Shift-drag draws a new one
+      const now=performance.now();if(rulerTap&&now-rulerTap.time<TAP.ms&&Math.hypot(e.clientX-rulerTap.x,e.clientY-rulerTap.y)<TAP.px){rulerTap=null;if(range){range=null;view.setRange(null);paint();}}else rulerTap={time:now,x:e.clientX,y:e.clientY};
       const anchor=e.clientX-viewport.getBoundingClientRect().left,pick=cmd&&!shift,strip={pick,px0:px,anchor,anchorBeat:(viewport.scrollLeft+anchor)/px,oldRange:range};
       if(!pick&&(shift||tool==='select')){begin(e,{kind:'range',startBeat:snapBeat(view.world(e).x/px,e),addRange:shift&&cmd?range:null,tap:!shift,...strip});}
-      else if(controller.beginScrub()){begin(e,{kind:'scrub',...strip});range=null;view.setRange(null);controller.scrub(view.world(e).x/px,{snap,alt:!!e.altKey,snapped:cmd});paint();}else say(t('The renderer currently owns the clock.'));return;
+      else if(controller.beginScrub()){begin(e,{kind:'scrub',...strip});controller.scrub(view.world(e).x/px,{snap,alt:!!e.altKey,snapped:cmd});paint();}else say(t('The renderer currently owns the clock.'));return;
     }
     if(e.button===0&&tool==='scrub'){if(controller.beginScrub()){begin(e,{kind:'scrub'});controller.scrub(view.world(e).x/px,{snap,alt:!!e.altKey,snapped:cmd});}return;}
     // THE SLICE TOOL (C): a click on a clip, tab or body, cuts it at the pointer's beat (Snap applies, Alt bypasses).
@@ -384,20 +405,30 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(clip&&curve)lastClip={curveId:curve.id,duration:clip.duration,offset:clip.offset,scale:clip.scale,followSourceEnd:!!clip.followSourceEnd,kind:curve.kind||'curve'};
     let hit=null,pos=null,geometry=null;
     if(plot&&!kind){pos=svgPoint(plot,e);const{width,height}=plot.viewBox.baseVal,p=createTimelinePlot(clip,curve,px,height),r=plot.getBoundingClientRect();geometry=p.geometry;hit=curveHit({x:e.clientX,y:e.clientY},p.points.map(p=>({...p,x:r.left+p.x/width*r.width,y:r.top+p.y/height*r.height})),p.handles.map(p=>({...p,x:r.left+p.x/width*r.width,y:r.top+p.y/height*r.height})),TIMELINE_CURVE_GRAB);}
-    const edge=target.closest('.tl-edge'),trimZone=target.closest('[data-trim]');
+    const rim=edgeUnder(e),rimClip=rim&&view.getClip(rim.id);
     // A kind without points has no curve gestures: its body handles like its tab (move, Ctrl-copy, right-delete).
     const grab=handle||(kind?plot||target.closest('.tl-clip'):null);
     // AN EDGE: a plain drag trims; Ctrl stretches (the shape keeps); Ctrl+Shift stretches at ⅛.  Shift alone selects (below).
     // THE SELECTION RESIZES TOGETHER (1.5.7-alpha.11, λWAVES 038 T5): an edge pressed on a clip inside a selection of several keeps the
     // selection — a trim moves that edge of every selected clip by the same snapped beats (each keeps its own start on a right edge);
     // a stretch first closes the gaps between them (glueTimelineClips: lane by lane), then scales the block about its other edge.
-    const edgeFrom=(edgeName,stretch)=>{const many=selection.has(clip.id)&&selection.size>1;if(many){selected=clip.id;pointSelection=null;}else selectOnly(clip.id);
+    // THE EDGE IS THE EDGE (1.5.7-alpha.41, λWAVES 040 T4): the edge is found by geometry (edgeUnder), not by the element under the pointer —
+    // the zone is centred on the clip's visual edge (the tab's and the body's), and at a seam the pointer's side names the clip; a curve's point
+    // or handle under the pointer still wins.
+    const edgeFrom=(clip,edgeName,stretch)=>{const curve=view.getCurve(clip.curveId),many=selection.has(clip.id)&&selection.size>1;if(many){selected=clip.id;pointSelection=null;}else selectOnly(clip.id);
       const originals=many?doc.clips.filter(c=>selection.has(c.id)):null;
       begin(e,{kind:stretch?'stretch':'trim',edge:edgeName,clip,curve,originals,glued:stretch&&many?glueTimelineClips(originals):null,original:{start:clip.start,duration:clip.duration,scale:clip.scale},gear:fineGear(view.world(e))},true);paintSelection();};
-    if(e.button===0&&edge&&clip&&tool==='edit'&&!hit?.kind&&(cmd||!shift)){edgeFrom(edge.dataset.trim,cmd);return;}
+    if(e.button===0&&rimClip&&tool==='edit'&&!hit?.kind&&(cmd||!shift)){edgeFrom(rimClip,rim.edge,cmd);return;}
+    // SHIFT-DRAG CLONES (1.5.7-alpha.39, λWAVES 040 T2; Josh: "Shift+drag on a clip handle should duplicate a clip; Shift+drag on empty space will
+    // create a selection"): a Shift press on a clip — its tab, a kind's body, or a curve body with no point or handle under it — holds; a drag
+    // duplicates the selection (the clip joins it) and moves the copies (FL's Shift-drag); a click without a drag still toggles the clip in the
+    // selection (finish).  Shift on empty space stays the marquee (below); Ctrl+drag's clone stays as an alias; POINTS scope keeps its point marquee.
+    if(e.button===0&&shift&&!cmd&&clip&&(grab||plot&&!kind&&!hit?.kind&&scope!=='points')){
+      const ids=selection.has(clip.id)?[...selection]:[clip.id];
+      begin(e,{kind:'move',copy:true,toggle:true,clip,curve,ids,originals:doc.clips.filter(c=>ids.includes(c.id))},true);return;}
     // SHIFT SELECTS: on empty space a drag is the marquee (Ctrl+Shift adds to the selection), a click on a clip toggles it; the
     // SELECT tool's plain drag is the same marquee (and its Shift adds).  A Shift press on a point or a handle is the fine gear.
-    if(e.button===0&&(tool==='select'||shift&&!(plot&&hit?.kind)&&!(cmd&&trimZone))){
+    if(e.button===0&&(tool==='select'||shift&&!(plot&&hit?.kind))){
       if(scope==='points'&&clip){if(pointSelection?.curveId!==curve.id){selected=clip.id;selection=new Set([clip.id]);pointSelection={clipId:clip.id,curveId:curve.id,indices:new Set()};}if(hit?.kind==='point'){beginPointGroup(e,clip,curve,hit.i,shift);return;}}
       const adds=shift&&(cmd||tool==='select');
       begin(e,{kind:'select',baseClips:adds?new Set(selection):new Set(),basePoints:adds?new Set(pointSelection?.indices||[]):new Set(),oldClips:new Set(selection),oldPoints:pointSelection?{...pointSelection,indices:new Set(pointSelection.indices)}:null,clickedClip:clip?.id,additive:shift});return;
@@ -407,7 +438,6 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       // other tabs deletes each of those too, the whole sweep as one undo transaction (begin here,
       // commit/cancel in finish()). The MIR plot curve law and the tab's ⋯ menu are untouched.
       if(e.button===2){e.preventDefault();lastTap=null;closeMenu();begin(e,{kind:'delete',clip,curve},true);if(doc.clips.some(x=>x.id===clip.id))model.deleteClip(clip.id);return;}if(e.button!==0)return;
-      if(trimZone){edgeFrom(trimZone.dataset.trim,cmd);return;}
       // CTRL CLONES (call 1): a Ctrl-drag on a title (or a kind's body) duplicates the selection while moving it.
       if(!selection.has(clip.id))selectOnly(clip.id);else selected=clip.id;begin(e,{kind:'move',copy:cmd,clip,curve,ids:[...selection],originals:doc.clips.filter(c=>selection.has(c.id))},true);paintSelection();return;
     }
@@ -421,12 +451,16 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       if(action==='reset-tension'){e.preventDefault();drawTension=0;model.begin();model.setTension(curve.id,hit.i,0);syncSteps(curve.id);model.commit();return;}
       if(!action){paintSelection();return;}
       if(action==='move-point'&&pointSelection?.curveId===curve.id&&pointSelection.indices.has(hit.i)&&pointSelection.indices.size>1){beginPointGroup(e,clip,curve,hit.i);return;}
+      if(action==='move-tension'&&cmd){pointSelection=null;begin(e,{kind:'repeat',clip,curve,index:hit.i,n:1,mirror:false},true);paintSelection();return;}
       // THE FINE GEAR (Shift, ⅛): a tension's in client px, a point's in the plot's own coordinates
       pointSelection=null;let index=hit.i,edited=curve;begin(e,{kind:action==='move-tension'?'tension':'point',added:action==='add-point',clip,curve,index,tension:curve.points[hit.i]?.tension||0,gear:action==='move-tension'?fineGear({x:e.clientX,y:e.clientY}):fineGear(pos)},true);
       if(action==='add-point'){const beat=Math.max(0,geometry.sourceBeatAtWorldBeat(snapBeat(geometry.worldBeatAtX(pos.x),e))),value=pointAddValue(e,bounded(geometry.valueAtY(pos.y)),evaluateTimelineSource(curve,beat)),added=model.addPoint(curve.id,beat,value,0);if(!added||added.index<0){finish(null,true);return;}index=added.index;edited=added.source;}
       const p=edited.points[index];Object.assign(drag,{curve:edited,index,pointBeat:p.t*edited.length,pointValue:p.v});paintSelection();return;
     }
-    if(e.button===2&&lane&&!clip){e.preventDefault();laneMenu(e.clientX,e.clientY,lane.dataset.lane);return;}   // a lane's own menu: ADD LANE · REMOVE LANE (T9)
+    // THE RIGHT CLICK DELETES (1.5.7-alpha.38, λWAVES 040 T1; Josh: "right clicking on an empty space on the lane (and even in-between the lanes …) and
+    // while holding the click, the cursor will delete anything in its path"): a right-button press on empty lane space, on a title band or in the
+    // gap between lanes starts the delete sweep (one undo: begin here, commit in finish); the lane menu of 1.5.6-alpha.24 is gone — the chips add and remove lanes
+    if(e.button===2&&!clip&&viewport.contains(target)){e.preventDefault();lastTap=null;begin(e,{kind:'delete',clip:null,curve:null},true);return;}
     if(e.button===0&&tool==='edit'&&lane&&!clip&&!shift&&!cmd&&stamp(e,lane.dataset.lane))return;
     if(e.button===0){selection.clear();pointSelection=null;selected=null;}paintSelection();
   });
@@ -442,6 +476,9 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   listen(viewport,'dragover',e=>{if(!dropHandlers.size)return;e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect='copy';});
   listen(viewport,'drop',e=>{if(!dropHandlers.size)return;e.preventDefault();const where=at(e.clientX,e.clientY),files=[...(e.dataTransfer?.files||[])];for(const fn of dropHandlers)if(fn({event:e,files,dataTransfer:e.dataTransfer,...where}))break;});
   listen(surface,'contextmenu',e=>e.preventDefault());listen(surface,'auxclick',e=>{if(e.button===1)e.preventDefault();});listen(surface,'lostpointercapture',e=>finish(e,true));
+  // FL's indicator: before the press the edge a press would take lights (data-hot); a drag keeps it until the hand moves again
+  let hot=null;const light=n=>{if(hot===n)return;if(hot)delete hot.dataset.hot;hot=n;if(hot)hot.dataset.hot='';};
+  listen(viewport,'pointermove',e=>{if(!drag)light(tool==='edit'&&!e.buttons&&edgeUnder(e)?.node||null);});listen(viewport,'pointerleave',()=>{if(!drag)light(null);});
   listen(document,'pointermove',e=>{if(drag&&e.pointerId===drag.pointerId){e.preventDefault();updates.post(pointer(e));if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6)drag.moved=true;   // the slop, as updates reads it
       if(drag.moved&&PUMPED.includes(drag.kind)){pumpX=e.clientX;if(!pumpId)pumpId=requestAnimationFrame(edgePump);}}},{passive:false});listen(document,'pointerup',e=>finish(e));listen(document,'pointercancel',e=>finish(e,true));
   listen(document,'pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!surface.contains(e.target))closeMenu();});

@@ -73,7 +73,8 @@ body.frost.frost-hold[data-card="refractive"] .mir-rail { --chip-fill: var(--sur
 .mir-win[data-mir-material="modulation"] .seg-b:not(.on) { color: var(--fg); }
 /* a disabled control says so under the pointer, as the plugin's own (modwindow.css: button:disabled, input:disabled) */
 .mir-win[data-mir-material="modulation"] :is(button, input, select):disabled, .mir-win[data-mir-material="modulation"] :is(.k, .fd, .sw).disabled { cursor: not-allowed; }
-.mir-win[data-mir-material="modulation"] .trig:not(.on):not(:where(.sv-toolbar *)) { border-radius: var(--m2-button-r); padding: var(--m2-button-pad); color: var(--fg);
+.mir-win[data-mir-material="modulation"] .trig:not(.on):not(:where(.sv-toolbar *, .tl-toolbar *)) {   /* not a toolbar's chip (alpha.47: no face, no outline) */
+  border-radius: var(--m2-button-r); padding: var(--m2-button-pad); color: var(--fg);
   border-color: var(--glass-border-color); background: var(--glass-raise); }   /* … and its face: the material's .06 and the pane's edge (GLASS faces still clear it) */
 .mir-win[data-mir-material="modulation"] .mir-win-resize {
   width: var(--win-corner); height: var(--win-corner); right: var(--win-corner-inset); bottom: var(--win-corner-inset); z-index: var(--win-corner-z);

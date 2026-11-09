@@ -287,7 +287,7 @@ html[data-shine] body {
   --dev-carried-edge: 1px solid color-mix(in srgb, var(--acc) calc(35% * var(--ctl-stroke)), transparent);     /* CARRIED: the accent ring beside the float, drawn as an outline, outside the pane shadow's list */
   --dev-tab-ring: color-mix(in srgb, var(--acc) calc(70% * var(--ctl-stroke)), transparent);                   /* the TAB-cycle mark */
 }
-.k-dial, .trig { --state-hover-wash: inset 0 0 0 99px var(--state-hover, var(--glass-raise)); }   /* HOVER: a full inset wash, a lighter face */
+.k-dial, .trig, .seg-b { --state-hover-wash: inset 0 0 0 99px var(--state-hover, var(--glass-raise)); }   /* HOVER: a full inset wash, a lighter face (.seg-b: a segment worn as a chip, alpha.47) */
 .k-dial { --knob-face: hsl(var(--glass-tint) / 1); --k-live-ring: 0 0 0 1px color-mix(in srgb, var(--acc) calc(60% * var(--ctl-stroke)), transparent); }
 .k-val { --k-val-fill: hsl(var(--glass-tint) / .96); }
 .trig { --trig-face: hsl(var(--glass-tint) / 1); }
@@ -339,6 +339,11 @@ body[data-theme="light"] :is(.mir-modwindow, .kwin-chiprail, .m2ghost, [data-mir
      modulation rail's reorder handle, so every "drag me" in the lab is one mark. */
   background-image: radial-gradient(circle at 50% 50%, currentColor 1.25px, transparent 1.45px); background-size: 5px 5px; background-position: 0 0; background-repeat: repeat; }
 .dev:hover .dev-head::before, .dev.dragging .dev-head::before { color: var(--fg-soft); }
+/* 1.5.7-alpha.48 · THE GRIP CAN HIDE (λWAVES 040 C3): MIR OPTIONS › WINDOWS › DRAG HANDLE off is body.no-grip — the dot grip goes from a
+   card's head and from a window rail's move chip; the head's 28-px seat and the chip's seat stay (nothing moves), both still drag, and
+   the chip shows itself again when the keyboard focuses it */
+body.no-grip .dev-head::before { content: none; }
+body.no-grip :is(.mir-chip, .crail-chip):has(> .kwin-grip-dots):not(:focus-visible) { opacity: 0; }
 
 
 .dev-head > .dev-util { grid-column: 3; justify-self: end; gap: 4px; }
@@ -422,6 +427,11 @@ body[data-theme="light"] :is(.mir-modwindow, .kwin-chiprail, .m2ghost, [data-mir
 .trig:active { box-shadow: var(--trig-press-relief); background: var(--state-press, var(--glass-press)); translate: none; }   /* sunk: the raise goes, the wash comes */
 .trig.on { background: var(--state-on, var(--glass-raise)); border-color: transparent; box-shadow: var(--state-on-rim, var(--neu-flat)); color: var(--acc); text-shadow: var(--state-on-light, var(--acc-glow)); }
 select.sel { border-color: transparent; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg-soft); }
+/* 1.5.7-alpha.47 · THE CHIP WEARS THE DEPTH (λWAVES 040 C2; Josh: "They should all be like the play pause button but without the fill"):
+   a window's verbs — TIMELINE's bar, MODULATION's work bar, FOLDERS' toolbar — are the trigger's raise with no face and no outline,
+   in every FACES and CARD; the hover wash, the press, ON's frost face and rim, RELIEF and its ANGLE stay the trigger's own.  Tokens,
+   so the sheets that draw these chips read them (modhost.css TAP · WALL · HOLD, folders.css the options button, timeline.css). */
+:is(.tl-toolbar, .m2workbar, .sv-toolbar) :is(.trig, .sv-options) { --trig-face: transparent; --ctl-hairline: transparent; }
 /* CONTROL FACES · GLASS: the outline a clear face loses with its fill is the hairline (BASINS material.css §1).  ON and
    pressed keep their own (later, heavier) rules. */
 /* 1.5.0-alpha.7 · BASINS' GLASS FACES, exactly (material.css §1): every neutral face is clear in every state — a chosen

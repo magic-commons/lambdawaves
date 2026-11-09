@@ -10,7 +10,7 @@
  *     nothing the store does not own.
  *   · A THEME IS WHOLE.  Each theme states every option in THEME_KEYS (BASE fills what it does not say), so stepping from
  *     one theme to another never leaves a trace of the last.  The user's own choices — THEME (light · dark · system),
- *     HINTS, HELP, DROP GUIDES — are in neither list, and no theme touches them but one: a theme that is only itself
+ *     HINTS, HELP, DROP GUIDES, DRAG HANDLE — are in neither list, and no theme touches them but one: a theme that is only itself
  *     in one mode may also state THEME (NEON: near-black panes, so dark in either mode).
  *   · ONE TABLE TO EDIT.  Josh renames and cuts: a name is the `name` string, a theme is one entry of THEMES, a tone one
  *     row of its `tones`.  The first tone is the theme's own, applied with it.

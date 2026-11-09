@@ -62,6 +62,21 @@ export function resizeTimelineClip(clip, edge, delta, minimum = 1 / 16) {
   return { start: clip.start + movement, duration: clip.duration - movement };
 }
 
+/* THE EDGE IS THE EDGE (1.5.7-alpha.41, λWAVES 040 T4; Josh: "FL Studio makes an indicator of which edge is going to resize based on if
+   the cursor is more on the right or more on the left"): the trim zone is centred on the clip's visual edge, `zone` px wide (half
+   inside, half outside); where two clips abut, the side of the seam the pointer is on names the clip — a right edge holds x while
+   x < end, a left edge while x ≥ start (exactly on the seam: the right clip's left edge); else the nearer edge.  PURE.
+   entries [{ id, start, end, zone }] in px → { id, edge: 'left' | 'right' } | null */
+export function timelineEdgeAt(entries, x) {
+  let best = null;
+  for (const c of entries) for (const [edge, at] of [['left', c.start], ['right', c.end]]) {
+    const d = Math.abs(x - at); if (d > c.zone / 2) continue;
+    const side = (edge === 'right' ? x < at : x >= at) ? 0 : 1;
+    if (!best || side < best.side || side === best.side && d < best.d) best = { id: c.id, edge, side, d };
+  }
+  return best && { id: best.id, edge: best.edge };
+}
+
 /* THE GLUE (1.5.7-alpha.11, λWAVES 038 T5; Josh: "the key-combo that stretches will glue their edges together then stretch"): lane by
    lane, the clips in start order close the gaps between them — a clip after a gap moves left to the end of the one before (the first
    keeps its start; an overlap stays an overlap).  PURE.  → { list: [{ id, start, duration, scale }], start, end } (the glued block) */

@@ -3,7 +3,7 @@
  * `timeline` restores here byte for byte).  PURE: no DOM, no clock; node runs it (tests/timeline-*.node.mjs).
  *   createTimelineModel() → { state, serialize, subscribe, beforeReplace, begin, commit, cancel, undo, redo, restore,
  *     addLane, removeLane, create, updateClip, updateCurve, addPoint, movePoint, movePoints, removePoints, drawPoints,
- *     removePoint, setTension, setSegment, deleteClip, deleteClips, copyClips, pasteClips, duplicateClips, moveClips,
+ *     removePoint, setTension, setSegment, repeatSegment(curveId, index, n, { mirror, original }), deleteClip, deleteClips, copyClips, pasteClips, duplicateClips, moveClips,
  *     duplicate, makeUnique, value(targetId, beat), setActive, activeClips(beat, kind?), needsClock(has), signature,
  *     rederive(patches), lastRefusal, extent({ unmuted }), meter(), stretchClip(id, edge, duration, { original }),
  *     placeClip(curveId, { laneId, start, duration, offset, scale }), retarget(clipId, targetId, { name }) }
@@ -18,7 +18,7 @@
 import { clipKind, isKindCurve } from './kinds.js';
 import './pattern-kind.js';                 // the kit's two kinds are registered before any model restores a project
 import { audioBudgetAdding } from './audio-kind.js';   // registers the audio kind, and holds the one budget every way of making an audio clip answers to
-import { normalizeTimelinePoints, evaluateTimelineSource, addTimelinePoint, moveTimelinePoint, slideTimelinePoint, moveTimelinePoints, removeTimelinePoints, drawTimelinePoints, removeTimelinePoint, setTimelineTension, setTimelineSegment, timelineSteps, TIMELINE_MAX_TOTAL_POINTS } from './source.js';
+import { normalizeTimelinePoints, evaluateTimelineSource, addTimelinePoint, moveTimelinePoint, slideTimelinePoint, moveTimelinePoints, removeTimelinePoints, drawTimelinePoints, removeTimelinePoint, setTimelineTension, setTimelineSegment, repeatTimelineSegment, timelineSteps, TIMELINE_MAX_TOTAL_POINTS } from './source.js';
 const clone = v => JSON.parse(JSON.stringify(v));
 const finite = (n, d = 0) => Number.isFinite(n) ? n : d;
 const clamp = n => Math.max(0, Math.min(1, finite(n)));
@@ -173,6 +173,8 @@ export function createTimelineModel() {
     removePoint(curveId, index) { return editPoint(curveId, c => removeTimelinePoint(c, index)); },
     setTension(curveId, index, tension) { return editPoint(curveId, c => setTimelineTension(c, index, tension)); },
     setSegment(curveId, index, segment) { return editPoint(curveId, c => setTimelineSegment(c, index, segment)); },
+    // THE TENSION REPEATS (1.5.7-alpha.43): from `original` (the press's curve) when given, so a drag that changes its count never compounds
+    repeatSegment(curveId, index, n, { mirror = false, original } = {}) { return editPoint(curveId, c => repeatTimelineSegment(original || c, index, n, { mirror })); },
     deleteClip(clipId) { return edit(d=>{d.clips=d.clips.filter(c=>c.id!==clipId);cleanCurves();}); },
     deleteClips(ids) {
       const chosen=new Set(ids);if(!chosen.size||[...chosen].some(id=>!data.clips.some(c=>c.id===id)))return false;
@@ -297,6 +299,19 @@ export function timelineExtent(clips, { unmuted = true } = {}) {
   let start = Infinity, end = -Infinity;
   for (const c of clips) { if (unmuted && c.mute) continue; if (c.start < start) start = c.start; if (c.start + c.duration > end) end = c.start + c.duration; }
   return end > start ? { start, end } : null;
+}
+
+/** THE COPIES WEAR ONE COLOUR (1.5.7-alpha.42, λWAVES 040 T5; Josh: "All similar clips on the timeline needs to recolor if one of copies gets
+ *  recolored. If one is unique among the rest, it doesn't recolor"): the curves a recolour of `clipId` paints — its own (every clip that
+ *  shares it: the pencil's stamps) and every BYTE-EQUAL curve (Shift-drag's and Ctrl+B's own copies: the curve's JSON with its id, name
+ *  and colour set aside) that a clip of the same duration, offset and scale plays. A copy edited apart (its curve, length or scale)
+ *  leaves the family and keeps its colour — the odd colour is the indicator.  PURE.  → [curveId], the clip's own first */
+export function timelineFamily(doc, clipId) {
+  const clip = doc.clips.find((c) => c.id === clipId), curve = clip && doc.curves.find((c) => c.id === clip.curveId); if (!curve) return [];
+  const body = ({ id, name, color, ...rest }) => JSON.stringify(rest), mine = body(curve), ids = new Set([curve.id]);
+  for (const c of doc.clips) if (!ids.has(c.curveId) && c.duration === clip.duration && c.offset === clip.offset && c.scale === clip.scale) {
+    const k = doc.curves.find((x) => x.id === c.curveId); if (k && body(k) === mine) ids.add(k.id); }
+  return [...ids];
 }
 
 export function isTimelineSnapshot(input) { return input == null || createTimelineModel().restore(input); }

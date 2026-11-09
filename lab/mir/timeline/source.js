@@ -105,6 +105,28 @@ export function setTimelineSegment(source, index, segment) {
   return { source: { ...source, points }, points, length: source.length, index };
 }
 
+/* THE TENSION REPEATS (1.5.7-alpha.43, λWAVES 040 T6; Josh: "let ctrl+drag create repeating copies from the point to point. Dragging up can
+   make multiple copies of the curve while dragging down can create reverse copies"): segment index → index+1 as n copies of its shape,
+   each 1/n of its time, between the same two points.  Plain copies each run a → b (a jump back to a.v at every seam: two points at one
+   time, the later read); mirrored copies alternate a → b, b → a — a copy run back wears the tension negated (bend's exact time
+   reversal: 1 − bend(1 − f, τ) = bend(f, −τ)), and an even count, ending at a.v, jumps to b.v at the end's time.  n = 1 is the segment
+   itself.  PURE. */
+export function repeatTimelineSegment(source, index, n, { mirror = false } = {}) {
+  const points = source.points, a = points[index], b = points[index + 1];
+  if (!a || !b || !Number.isInteger(n) || n < 1) return unchanged(source, { invalid: true });
+  const hold = a.segment === 'hold' ? { segment: 'hold' } : {}, step = (b.t - a.t) / n, inner = [];
+  for (let k = 1; k < n; k++) {
+    const t = a.t + k * step, back = mirror && k % 2 === 1;
+    if (!mirror) inner.push({ t, v: b.v, tension: 0 });
+    inner.push(back ? { t, v: b.v, tension: -a.tension, ...hold } : { t, v: a.v, tension: a.tension, ...hold });
+  }
+  if (mirror && n % 2 === 0) inner.push({ t: b.t, v: a.v, tension: 0 });
+  const next = [...points.slice(0, index + 1), ...inner, ...points.slice(index + 1)];
+  if (next.length > TIMELINE_MAX_SOURCE_POINTS) return unchanged(source, { full: true });
+  const normalized = normalizeTimelinePoints(next);
+  return { source: { ...source, points: normalized }, points: normalized, length: source.length, index };
+}
+
 // Slide moves musical times at and after the grabbed point by ONE delta.
 // Downstream values/tensions stay authored; the preceding point bounds a
 // leftward move. Source growth renormalizes without stretching earlier beats.
