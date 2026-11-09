@@ -15,7 +15,7 @@ export function createInformational(app) {
   /* one control per row, its value the record's: a hand sets the row (a dial live, as before), nothing else is written */
   const ctl = {};
   for (const r of INFO_ROWS) {
-    if (r.key === 'espBarSide') continue;   // a cycle button, below
+    if (r.key === 'espBarSide' || r.key === 'infoPos') continue;   // cycle buttons, below
     const d = { id: 'info.' + r.key, label: r.label, hint: r.hint, value: P.get(r.key) };
     if (r.type === 'bool') d.type = 'boolean';
     else if (r.type === 'enum') d.options = r.options;
@@ -25,17 +25,23 @@ export function createInformational(app) {
   }
   /* iteration 018 B7: the ESP bar's SIDE is one press that cycles RIGHT → LEFT → TOP → BOTTOM (Josh: "a toggle that just cycles"), not a seg */
   /* 022 H1 · A GLYPH REPLACES THE WORDS: the button wears the side it is on (icons.js sideRight · sideLeft · sideTop · sideBottom); the word is its name */
-  { const r = INFO_ROWS.find((q) => q.key === 'espBarSide'), word = (v) => r.options.find((o) => o.id === v).label, gly = (v) => 'side' + v[0].toUpperCase() + v.slice(1); let shown = P.get(r.key);
-    const b = trig({ label: '', glyph: gly(shown), title: r.hint, cls: 'info-side', onFire: () => P.set(r.key, r.values[(r.values.indexOf(P.get(r.key)) + 1) % r.values.length]) });
-    const name = (v) => { b.root.dataset.side = v; ariaLabel(b.root, 'ESP bar side: {side}', { side: { t: word(v) } }); }; name(shown);
-    ctl[r.key] = { root: b.root, get: () => shown, set: (v) => { shown = v; b.setGlyph(gly(v)); name(v); } }; }
-  P.subscribe((st, changed) => { for (const k of changed) if (ctl[k] && ctl[k].get() !== st[k]) ctl[k].set(st[k]); });
+  /* 040 I3 (Josh 11-09: "make the 'position: top/bottom' switch … into a toggle"): POSITION is the same press, TOP ⇄ BOTTOM, wearing the side it is on */
+  const cycle = (key, cls, aria) => { const r = INFO_ROWS.find((q) => q.key === key), word = (v) => r.options.find((o) => o.id === v).label, gly = (v) => 'side' + v[0].toUpperCase() + v.slice(1); let shown = P.get(key);
+    const b = trig({ label: '', glyph: gly(shown), title: r.hint, cls, onFire: () => P.set(key, r.values[(r.values.indexOf(P.get(key)) + 1) % r.values.length]) });
+    const name = (v) => { b.root.dataset.side = v; ariaLabel(b.root, aria, { side: { t: word(v) } }); }; name(shown);
+    ctl[key] = { root: b.root, get: () => shown, set: (v) => { shown = v; b.setGlyph(gly(v)); name(v); } }; };
+  cycle('espBarSide', 'info-side', 'ESP bar side: {side}'); cycle('infoPos', 'info-pos', 'Formula position: {side}');
+  /* 040 I3 · ANNOUNCE ALL (Josh: "a toggle/button in the announce section … to tick all of the announcements on or off"): no key of its own — on
+     while every announcement is on; a press writes them all, the record repaints the switches (and this one) */
+  const SAY = INFO_ROWS.filter((r) => r.group === 'announce' && r.type === 'bool').map((r) => r.key), allOn = () => SAY.every((k) => P.get(k));
+  ctl.announceAll = control({ id: 'info.announceAll', type: 'boolean', label: 'ANNOUNCE ALL', hint: 'Every announcement on or off', value: allOn(), onChange: (v) => P.set(Object.fromEntries(SAY.map((k) => [k, !!v]))) });
+  P.subscribe((st, changed) => { for (const k of changed) if (ctl[k] && ctl[k].get() !== st[k]) ctl[k].set(st[k]); if (changed.some((k) => SAY.includes(k)) && ctl.announceAll.get() !== allOn()) ctl.announceAll.set(allOn()); });
   /* the names other roads press: verbs.js `switch formula|labels`, the notebook's command list */
   ui.molFormulaSw = ctl.molFormula.widget; ui.atomLabelsSw = ctl.atomLabels.widget;
   const row = (parent, keys, cls = '') => { const r = el('div', 'row tight fit' + (cls ? ' ' + cls : ''), parent);   /* 022 F2 (call 7): every hand grid a fit row */ for (const k of keys) r.appendChild(ctl[k].root); return r; };
   /* iteration 012 R1 (Josh 10-20): the headings THE WORDS and ANNOUNCE · CURSOR · MARKS are hidden — the rows say what they are */
   const words = group(w.body, 'THE WORDS'); words.querySelector(':scope > .grp-lbl')?.remove();
-  row(words, ['molFormula', 'molFormulaSize'], 'info-words');
+  row(words, ['molFormula', 'infoPos', 'molFormulaSize'], 'info-words');   // 040 I3: POSITION between STAGE FORMULA and its SIZE (the button column)
   row(words, ['molName', 'molSubtitle', 'listCap'], 'info-words info-name');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes; 018 B9: SUBTITLE between
   row(words, ['atomLabels', 'atomLabelsSize'], 'info-words');
   row(words, ['skeleton', 'skeletonOpacity', 'skeletonSize'], 'info-words info-ball');   // iteration 011 Q1: its own row; 012 R1: BALL AND STICK, shorter, OPACITY between it and SIZE
@@ -43,10 +49,11 @@ export function createInformational(app) {
   /* the frame reads the BONDS as one object (rack.js → skeleton.draw) and the skeleton tells which road drew them in this card's status line */
   ui.bondsOf = () => { const c = app.state.chem; return { order: P.get('bondOrder'), aromatic: P.get('bondAromatic'), ionic: P.get('bondIonic'), hbond: P.get('bondHydrogen'), charges: c && c.chargesNow ? c.chargesNow() : null, rec: c && c.bondsNow ? c.bondsNow() : null }; };
   ui.bondSay = (line) => w.setStatus(line, 'live');
-  const seat = row(words, ['infoPos', 'infoPad'], 'info-seat');
-  ui.espBarRow = row(words, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar');   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it)
-  ui.espBarRow.hidden = !(app.state.chem && app.state.chem.on);   // 018 B10: a molecule's row — hidden under hydrogen or an atom; WAVE's modeSync re-syncs it
+  const seat = row(words, ['announceAll'], 'info-seat');   // 040 I3: ANNOUNCE ALL · the fold's chevron · PAD — always shown
   const announce = group(w.body, 'ANNOUNCE');
+  /* 040 I3 (Josh: "move the ESP bar row into the hidden expanded section"): the fold's first row; its own `hidden` (a molecule's row) stays its own */
+  ui.espBarRow = row(announce, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar');   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it)
+  ui.espBarRow.hidden = !(app.state.chem && app.state.chem.on);   // 018 B10: a molecule's row — hidden under hydrogen or an atom; WAVE's modeSync re-syncs it
   /* iteration 012 R1: ORBITALS is one switch for the two orbital kinds, so the pop-ups' SIZE takes the grid's last cell (where STYLE · PALETTE stood) */
   row(announce, [...INFO_ROWS.filter((r) => r.group === 'announce' && r.type === 'bool').map((r) => r.key), 'popSize'], 'info-grid');
   /* iteration 012 R1: CURSOR and MARKS are two columns of switches, side by side */
@@ -61,8 +68,8 @@ export function createInformational(app) {
   /* THE FOLD (lab/fold.js): ANNOUNCE · CURSOR · MARKS behind one chevron — open on a desktop, folded on a phone (as MOLECULES' MORE); iteration 013
      N1 (Josh: "Shorten the buttons for position move pad knob to fit the expand window button so it's on the same row"): the chevron is the
      seat row's last cell, after POSITION and PAD — one row less */
-  fold(seat, [announce, cols], { what: 'announcements, cursor and marks', open: !isPhone() });
-  seat.appendChild(ctl.infoPad.root);   // 023 R2: PAD in the knob column (over ESP BAR's PAD), the chevron in the button column (over the SIDE glyph)
+  fold(seat, [announce, cols], { what: 'the ESP bar, announcements, cursor and marks', key: 'announcements, cursor and marks', open: !isPhone() });   // 040 I3: the key is the WORKSPACE `folds` name, kept
+  seat.appendChild(ctl.infoPad.root);   // 023 R2: PAD in the knob column, the chevron in the button column (over POSITION and the SIDE glyph)
   /* 0.5.4 P4 · STATUS (PLAN R8, Q12): lab/status.js' line for what owns the field — MOLECULES' kept one (per VIEW; its molecule-level line beneath), else the
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
   /* iteration 011 Q1 (Josh 10-19: "a button that hides the extra status thingy"): the STATUS switch above it shows or hides the readout's row — the record's

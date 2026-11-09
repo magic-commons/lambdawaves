@@ -876,11 +876,10 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
  * a knob column of 56 px for each SIZE and PAD, the headings the kit's group labels, the fold its own line.  A switch fills its cell. */
 .lw-info-card .grp { margin: 0 0 6px; gap: 0; }
 .lw-info-card .grp > .row { display: grid; gap: 6px 8px; align-items: center; justify-items: stretch; margin: 2px 0; }   /* 023 R2: 4 px between rows = the 4 px between a row's lines (even gaps) */
-.lw-info-card .info-bar > .info-side { width: 100%; min-width: 0; }   /* 018 B7: ESP BAR · SIDE · PAD */
-.lw-info-card .info-seat > .lw-fold { width: 30px; min-width: 0; height: 26px; min-height: 26px; padding: 0; justify-self: center; }
-.lw-info-card .info-grid > .sw, .lw-info-card .info-words > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
-.lw-info-card .info-grid > .sw .sw-lbl, .lw-info-card .info-words > .sw .sw-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lw-info-card .info-seat > .segw .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lw-info-card :is(.info-bar > .info-side, .info-words > .info-pos) { width: 100%; min-width: 0; }   /* 018 B7: ESP BAR · SIDE · PAD; 040 I3: STAGE FORMULA · POSITION · SIZE */
+.lw-info-card .row.info-seat > .lw-fold { width: 30px; min-width: 0; height: 26px; min-height: 26px; padding: 0; justify-self: center; }
+.lw-info-card :is(.info-grid, .info-words, .info-seat) > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
+.lw-info-card :is(.info-grid, .info-words, .info-seat) > .sw .sw-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* iteration 012 R1: BALL AND STICK's switch shortened to one column, OPACITY and SIZE beside it; CURSOR and MARKS two columns of switches side by side */
 .lw-info-card .info-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 4px; align-items: start; }
 .lw-info-card .info-col > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
