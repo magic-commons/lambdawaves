@@ -11,8 +11,11 @@
 .nodes-plane { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
 .nodes-wires { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
 .nodes-wires path { fill: none; stroke: var(--acc); stroke-width: 2; opacity: .75; }
+/* 040 N5 · A NODE KEEPS ITS TINT (Josh: "the individual nodes should keep their tint because the background already blurs if blur is on. That way I don't
+   have to see the dot matrix in the back"): the card's raise lies over the pane's own tint, opaque, so the ground's dots stop at its edge; the layers
+   (038 P8) are untouched */
 .nodes-card { position: absolute; width: 120px; box-sizing: border-box; padding: 0 8px 8px; cursor: default; border-radius: var(--r-md);
-  background: var(--glass-raise, var(--glass-tint)); border: 1px solid var(--glass-border); box-shadow: var(--relief-raise, var(--neu-raise)); }
+  background: linear-gradient(var(--glass-raise), var(--glass-raise)), hsl(var(--glass-tint)); border: 1px solid var(--glass-border); box-shadow: var(--relief-raise, var(--neu-raise)); }
 .nodes-card[data-node="curves"] { width: 250px; }
 .nodes-card[data-type] { width: 236px; }
 .nodes-card[data-type="curves"] { width: 250px; }
