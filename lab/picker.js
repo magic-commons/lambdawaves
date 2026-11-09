@@ -318,10 +318,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* 036 G2 (Josh 11-03: "When scrolling between Atomic, Molecular, and Expansions, there needs to be a gradient blur or gradual something … Right
      now, it's a sharp cuttoff"): WHILE a deck or the tutorial's wall scrolls (`mm-moving`, held 220 ms past the last scroll event), the scroller
      fades over its first and last 72 px and two bands of PROGRESSIVE BLUR lie over its edges (under FROST; skin.css) — a section passes the
-     edges gradually; at rest nothing is faded, so a deck's first and last rows stay whole */
+     edges gradually; (040 I5: the fade now stands where more lies beyond an edge, below) */
   for (const side of ['top', 'foot']) { const e = el('div', 'mm-edge ' + side, root); e.setAttribute('aria-hidden', 'true'); el('i', '', e); el('i', '', e); }
   let edgeT = 0; const edging = () => { root.classList.add('mm-moving'); clearTimeout(edgeT); edgeT = setTimeout(() => root.classList.remove('mm-moving'), 220); };
   for (const sc of [scroller, tutEl]) sc.addEventListener('scroll', edging, { passive: true });
+  /* 040 I5 · THE LIBRARY'S EDGES FADE: the decks' mask stands on each edge with more beyond it (skin.css .mm-up · .mm-down), read on a scroll and a lay */
+  const edges = () => { const t = scroller.scrollTop, m = scroller.scrollHeight - scroller.clientHeight - t; scroller.classList.toggle('mm-up', t > 1); scroller.classList.toggle('mm-down', m > 1); };
+  scroller.addEventListener('scroll', edges, { passive: true });
   /* 034 M1 · THE VIEWS: the face (over the decks, which stay laid out under it), the decks, FOLDERS' gallery and the tutorial (each in the
      decks' seat); one at a time, one hero playing at most, and leaving a view puts its hero to rest */
   /* 039 W9 (WALK-D #11): a view that changes under a still pointer wakes no hint — a control that arrived under it is hovered once the pointer
@@ -1021,7 +1024,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   let current = sections[0]; paintLooks();
   const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = amode.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
-  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); fitH(); movePill(current.b); } }); });   // observed only while the Picker is open
+  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); fitH(); movePill(current.b); edges(); } }); });   // observed only while the Picker is open
 
   /* ── going there ── */
   function goMolecule(id) { close(); const C = app.state.chem; if (!C) return; if (!C.on) C.setOn(true); C.pick(id); }

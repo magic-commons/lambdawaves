@@ -2,4 +2,4 @@
  * precache list WITHOUT this file (sw.js computes the same, PAGE_BUILD, and answers it in LW_SW_BUILD / ACTIVE / WAITING), so a page
  * can tell whether the worker that controls it serves the build it was loaded from — a MIXED BUILD is said, never guessed.
  * Never hand-edit: the test fails when this value is not the list's. */
-export const BUILD_ID = '1w0bflw1w7vull';
+export const BUILD_ID = '1l7gmi81be2s11';
