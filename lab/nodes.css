@@ -126,6 +126,17 @@
 .nodes-column .nodes-card + .nodes-card::before { content: ''; position: absolute; left: 50%; top: -19px; height: 18px; border-left: 2px solid var(--acc); opacity: .75; }
 .nodes-host > .note { flex: none; }
 [data-mir-window="nodes"] .mir-win-body { display: flex; flex-direction: column; min-height: 0; }
+/* 040 N4 · THE NODES' PRESETS in the title bar (nodes.js): the title keeps its own width, the bar takes the rest — the save glyph, the name's well
+   (MOD's, 22 px: nothing taller than the head), ◀ ▶; the bar's buttons narrower than the head's so the name keeps room at the 280-px floor */
+[data-mir-window="nodes"] .mir-win-title { flex: 0 0 auto; }
+.nodes-presets { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 2px; }
+.nodes-presets > .nodes-prebtn { width: 24px; }
+.nodes-prename { flex: 1 1 auto; min-width: 36px; max-width: 168px; height: 22px; margin: 0 2px; padding: 0 6px; box-sizing: border-box; border: 1px solid transparent;
+  border-radius: var(--r-md); background: color-mix(in srgb, var(--fg) 7%, transparent); color: var(--fg); text-align: center; text-transform: uppercase; cursor: text;
+  font: var(--w-bold) var(--fs-tiny)/1 var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wide)); }
+.nodes-prename::placeholder { color: var(--fg-soft); opacity: 1; }
+.nodes-prename:focus { outline: 0; border-color: var(--acc); }
+.nodes-prename.dirty { border-color: color-mix(in srgb, var(--acc) 60%, transparent); }
 /* 040 N1 · THE FOCAL POINT (lab/node-focus.js): a ring with a cross-hair on the stage, at z 19 beside the widgets, only while its node is edited; the host
    takes no pointer, the handle does; H and the menu take it out with the rest */
 .nodes-focus-host { position: absolute; inset: 0; z-index: 19; pointer-events: none; }

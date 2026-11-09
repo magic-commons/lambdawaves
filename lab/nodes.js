@@ -16,7 +16,7 @@
  * `lambdawaves.q0.curves`.  The reader's curves `.curvePresets` and graphs `.nodePresets` stay PREFERENCE.
  *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field, mat, present, onEdit }) → { model, filter, nodes(), add(type), remove(id),
  *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on), graph(), load(graph) } */
-import { el, ariaLabel, chip } from './mir/kit.js';
+import { el, ariaLabel, chip, hint, placeholder } from './mir/kit.js';
 import { createWindow } from './mir/window/window.js';
 import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
@@ -28,7 +28,7 @@ import { PRIM_TYPES } from './node-prims.js';
 import { SHADER_TYPES, createShaderHost } from './node-shader.js';
 import { createFocusHandles } from './node-focus.js';   // 040 N1: a kind's point on the stage, shown while the node is edited
 import { jsonStore } from './mir/core/prefs.js';
-import { createUserPresets } from './user-presets.js';
+import { createUserPresets, uniqueName } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
 import { createView, keysAt } from './nodes-view.js';
 import { createUndo } from './nodes-undo.js';
@@ -177,8 +177,9 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   /** the rack's CURVES door: absent = off; on adds CURVES (or lifts its bypass), off bypasses it */
   function setHas(on) { const c = curvesNode(); if (on) add('curves'); else if (c) setBypass(c.id, true); }
   /** a graph preset (a shipped one, or the reader's): every node but CURVES replaced by its list, laid out afresh */
-  function applyGraph(list) {
-    undo.mark();
+  let showPreset = () => {};   // 040 N4: the title bar's PRESET NAME (below), told which graph a pick loaded
+  function applyGraph(list, name = '') {
+    undo.mark(); showPreset(name);
     batch(() => {
       for (const q of nodes) if (q.type !== 'curves') unenroll(q);
       nodes = nodes.filter((q) => q.type === 'curves'); for (const q of nodes) q.at = null;
@@ -225,7 +226,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   }
   function loadGraph(g) {
     const o = g && typeof g === 'object' && Array.isArray(g.list) ? g : { list: [] };
-    undo.clear(); flags.view = flags.solo = null;
+    undo.clear(); flags.view = flags.solo = null; showPreset('');   // 040 N4: an open replaces the graph, so no preset is named
     batch(() => { for (const q of nodes) unenroll(q); nodes = listOf(o.list); for (const q of nodes) enroll(q); });
     seq = seqOf(o.seq);
     model.restore(o.curves && typeof o.curves === 'object' ? o.curves : FLAT);
@@ -282,6 +283,26 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      card's OPEN AS A WINDOW door before × in its head (× 's own look) — the ground keeps no door */
   const door = (cls, glyph, word, run) => { const b = el('button', cls); b.type = 'button'; chip(b, glyph, word); b.addEventListener('click', run); return b; };
   win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'DOCK IN THE RACK', () => M.door('win')));
+  /* 040 N4 · THE NODES' PRESETS (Josh: "I want to add the modulation window's preset saving thing into Nodes and put it into the window title bar"):
+     MOD's bar — the save glyph · PRESET NAME · ◀ ▶ — on the left after the title.  A preset is the graph: every node but CURVES (whose grade keeps its
+     own presets), the shipped FILM · POSTER · PRINT then the reader's — the GRAPHS › list, `lambdawaves.q0.nodePresets` (PREFERENCE).  ◀ ▶ step through
+     them and load each (one step of NODES' ring); SAVE keeps the typed name in CAPS (Enter too; a taken name becomes NAME 2, 016 W9); Escape puts the
+     shown name back; the field rims while what is typed is not the shown preset */
+  { const bar = el('div', 'nodes-presets'), L = () => [...Object.entries(SHIPPED).map(([name, list]) => ({ name, list })), ...graphs.list().map((u) => ({ name: u.name, list: u.data && u.data.nodes }))];
+    let cur = '';
+    const save = door('mir-win-btn nodes-prebtn', 'save', 'SAVE THE GRAPH AS A PRESET', () => keep()); bar.append(save);
+    const name = el('input', 'nodes-prename', bar); name.type = 'text'; name.maxLength = 40; name.spellcheck = false; name.setAttribute('autocapitalize', 'characters');
+    placeholder(name, 'PRESET NAME'); ariaLabel(name, 'preset name'); hint(name, 'PRESET NAME — type one, then SAVE');
+    const nav = (d, glyph, word) => { const b = door('mir-win-btn nodes-prebtn', glyph, word, () => step(d)); hint(b, word); bar.append(b); };
+    nav(-1, 'dirPrev', 'PREVIOUS PRESET'); nav(1, 'dirNext', 'NEXT PRESET'); hint(save, 'SAVE THE GRAPH AS A PRESET');
+    showPreset = (n) => { cur = n || ''; name.value = cur; name.classList.remove('dirty'); };
+    const step = (d) => { const P = L(), i = P.findIndex((p) => p.name === cur), j = i < 0 ? (d > 0 ? 0 : P.length - 1) : (i + d + P.length) % P.length; if (P[j]) applyGraph(P[j].list, P[j].name); };
+    const keep = () => { const n = name.value.trim().toUpperCase(); if (!n) { name.focus(); return; } showPreset(graphs.add(uniqueName(n, Object.keys(SHIPPED)), { nodes: graphOf() })); };
+    name.addEventListener('input', () => name.classList.toggle('dirty', name.value.trim().toUpperCase() !== cur));
+    name.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); keep(); } else if (e.key === 'Escape') { e.preventDefault(); showPreset(cur); name.blur(); } });
+    bar.addEventListener('pointerdown', (e) => { if (e.target !== bar) e.stopPropagation(); });   // a press on its controls is theirs, never the grip's
+    graphs.watch(() => { if (cur && !L().some((p) => p.name === cur)) showPreset(''); });
+    win.tools.before(bar); }
   const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'OPEN AS A WINDOW', () => M.door('card')), util.querySelector('.dev-close'));
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });

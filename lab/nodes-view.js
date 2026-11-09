@@ -347,7 +347,7 @@ export function createView(parent, kind, M) {
   const back = () => { if (W) ground.focus({ preventScroll: true }); };   // a pick or an Escape gives the ground its keys back
   const kindRow = (type, t) => [t.label + '\t' + MARK[t.cls] + (t.heavy ? ' HEAVY' : ''), () => { M.add(type); back(); }, type === 'curves' && M.has(), t.hint, { icon: nodeGlyph(type), id: type }];
   const kinds = ([g, , , cls = [g]]) => Object.entries(T).filter(([, t]) => t.menu !== false && cls.includes(t.group || t.cls)).map(([type, t]) => kindRow(type, t));
-  const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list); back(); }, false, hint, { id: 'graph:' + name, raw }];
+  const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list, name); back(); }, false, hint, { id: 'graph:' + name, raw }];   // 040 N4: the bar names it
   const graphRows = () => { const U = M.graphs.list();
     return [...Object.entries(M.SHIPPED).map(([name, list]) => graph(name, list, 'a shipped graph: every node but CURVES replaced')),
       ...(U.length ? [null, ...U.map((u) => graph(u.name, u.data && u.data.nodes, 'your graph (kept on this device)', true))] : []),
