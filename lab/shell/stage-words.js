@@ -192,9 +192,13 @@ export function createStageWords(app) {
        so the words and the ESP bar keep the furniture's resting boxes AND the stage box they were last placed against — the picture under them
        may widen, the words do not move; H again places them on the live furniture */
     /* 023 R6: the bar's box apart (`tr`), so a side ESP strip can be seated from the stage edge and its own rack only (`free(false)`) */
+    /* 040 I1 · INFORMATIONAL IGNORES A HIDDEN CSB (Josh 11-09): the bar is furniture only while it stands on the stage — racked (docked in its card)
+       or hidden with the racks (B; a FREE bar stays shown, csb.css) the words, the pop-ups and the ESP bar are laid as if it were absent; the racks
+       keep S5's resting boxes */
+    const barAway = (t) => app.sh.layout.docked || (document.body.classList.contains('rack-hidden') && !(t && t.dataset.place === 'free'));
     let kept = null;
     const rest = () => { if (kept && document.body.classList.contains('ui-hidden')) return kept;
-      const tr = app.sh.layout.docked ? null : resting(document.getElementById('transport')), rs = racks().map(resting).filter(Boolean);
+      const t = document.getElementById('transport'), tr = barAway(t) ? null : resting(t), rs = racks().map(resting).filter(Boolean);
       return (kept = { rs: tr ? [...rs, tr] : rs, racks: rs, sb: dom.stage.getBoundingClientRect() }); };
     function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
       const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
@@ -240,7 +244,7 @@ export function createStageWords(app) {
        closed, floated or docked back changes the free stage, so the key carries it and the racks are watched for it */
     let settle = 0;
     const place = (again = true) => { stats.places++; layer.viewChanged({ land: true }); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
-    const rackKey = () => ['rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('') + racks().map((r) => r.id).join();
+    const rackKey = () => ['rack-l', 'ui-hidden', 'rack-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('') + racks().map((r) => r.id).join();   // 040 I1: B takes the bar out of the furniture, so it re-places
     /* iteration 013 N2 (Josh: "When 'cursor' settings are off, the text should stay fixed and not sway"): the kit's layer parts its bodies from a
        moving pointer (mir/info/bodies.js, 260 px of reach) whatever follow and parallax say, so with PARALLAX and DRIFT off the layer is held by
        its own freeze while the pointer is within that reach of the block, and let go as it leaves (a rest that moved meanwhile is reached then);
