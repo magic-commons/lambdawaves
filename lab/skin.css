@@ -497,8 +497,11 @@ body.window-info-off .settings-help { display:none; }
 .palette-enable > .mir-ramp-sel { flex: 0 0 auto; }
 .palette-enable > .mir-ramp-sel > .mir-ramp-remove { margin-left: 0; }
 .lw-pop { position: fixed; left: 50%; top: 0; z-index: 21; pointer-events: none; user-select: none; white-space: nowrap; opacity: 0;
-  transform: translateX(-50%); font-size: calc(15px * var(--lw-pop-size, 1)); letter-spacing: .08em; font-weight: 600;
+  transform: translateX(-50%); font-size: calc(15px * var(--lw-pop-size, 1)); letter-spacing: .08em; font-family: var(--font-math); font-weight: 400;
   color: hsl(40 33% 96%); text-shadow: 0 0 8px hsl(228 40% 4% / .55), 0 0 2px hsl(228 40% 4% / .55); }
+/* 040 I4 · THE MATH FACE (Josh 11-09: "Re, Im, p … is supposed to be a math font, even the psi … the classical greek font they use in LaTeX"; "some of the
+   other announcements … a serif font"): every pop-up is set in STIX Two Math (its one weight; its Latin is the serif); WAVE VIEW's is KaTeX's (stage-words.js) */
+.lw-pop[data-kind="view"] { letter-spacing: 0; font-size: calc(17px * var(--lw-pop-size, 1)); }
 [data-theme="light"] .lw-pop { color: hsl(232 22% 10%); text-shadow: 0 0 8px hsl(42 45% 97% / .85), 0 0 2px hsl(42 45% 97% / .85); }
 .lw-pop.go { animation: lw-pop 1.6s ease-out forwards; }
 @keyframes lw-pop { 0% { opacity: 0; transform: translate(-50%, 6px); } 12% { opacity: 1; transform: translate(-50%, 0); } 65% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -4px); } }

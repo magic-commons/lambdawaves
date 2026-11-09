@@ -312,20 +312,22 @@ export function createStageWords(app) {
       dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },
       /** a POP-UP: one short line on the side away from the formula that fades out; another press restarts it (iteration 001).
        *  { hold: true } (a dial under the hand, iteration 007): the line stays lit and follows the number, and fades 1.2 s after the last held one */
-      pop(text, { hold = false } = {}) {
+      pop(text, { hold = false, kind = '', tex = '' } = {}) {
         if (!on || !text) return false;
         clearTimeout(popHold);
         const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 1200); };   // the hand let go: the held line fades from where it is
         if (hold && pop.classList.contains('hold')) { if (pop.textContent !== text) pop.textContent = text; letGo(); return true; }
         const { rs, sb } = rest(), F = freeOf(rs, sb);
-        pop.textContent = text; pop.classList.remove('go', 'hold', 'out');
+        pop.textContent = text; pop.dataset.kind = kind; pop.classList.remove('go', 'hold', 'out');   // 040 I4: the pop wears its kind (skin.css)
+        /* 040 I4 · THE MATH FACE: a line that comes with its TeX (WAVE VIEW's) is set by the page's KaTeX — LaTeX's own italic 𝜓 — the text its fallback */
+        if (tex && globalThis.katex) try { pop.innerHTML = globalThis.katex.renderToString(tex, { throwOnError: false, output: 'html' }); } catch (_) { /* the text stands */ }
         pop.style.left = (sb.left + (F.L + F.R) / 2) + 'px'; pop.style.top = (sb.top + Math.max(F.T, at(F, pop.offsetHeight, !seat.bottom))) + 'px';
         void pop.offsetWidth; pop.classList.add(hold ? 'hold' : 'go'); if (hold) letGo(); return true;
       },
       /** THE ONE VERB an emitter speaks through (iteration 007): `kind` is a row of KINDS; nothing is written while that kind's switch is off */
       say(kind, text, o = {}) {
         const k = KIND.get(kind); if (!k || !P.get(k.key)) return false;
-        return k.seat === 'fade' ? api.announce(text, o.ttl) : k.seat === 'pop' ? api.pop(text, o) : false;
+        return k.seat === 'fade' ? api.announce(text, o.ttl) : k.seat === 'pop' ? api.pop(text, { ...o, kind }) : false;
       },
       /** is this kind on? (THE HEAD asks before it waits for a landing) */
       wants: (kind) => { const k = KIND.get(kind); return !!(k && on && P.get(k.key)); },

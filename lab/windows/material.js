@@ -26,10 +26,13 @@ export function createMaterial(app) {
     const r1 = el('div', 'row', gSpace);
     /* iteration 008 W (Josh: "delta p AND Re+Im … where is this different from the other viewpoints other than color?"): FOUR observables.
        Re+Im was two pictures in one volume (PHASE carries both as hue); Δρ is MOLECULES' Δ beside KICK.  A saved one maps by waveView. */
+    /* 040 I4 · THE MATH FACE (Josh 11-09: "the classical greek font they use in LaTeX math fonts; I think we already have one built in"): the
+       announcement is the observable as LaTeX writes it, set by the page's KaTeX (the stage formula's); the plain line is its fallback */
+    const VIEW_SAY = { density: ['ρ = |ψ|²', '\\rho = |\\psi|^2'], phase: ['arg ψ', '\\arg\\psi'], real: ['Re ψ', '\\operatorname{Re}\\psi'], imag: ['Im ψ', '\\operatorname{Im}\\psi'] };
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
       { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density (palette θ = 0; off: the old blue)' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
       { id: 'real', label: '<m>Re ψ</m>', title: 'signed: palette 0 and π, or the original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>', title: 'signed: palette ±π/2, a quarter turn from Re' }],   // 038 F4
-      onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('view', ui.viewSeg.button(v).textContent); } });
+      onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('view', VIEW_SAY[v][0], { tex: VIEW_SAY[v][1] }); } });
     r1.appendChild(ui.viewSeg.root).dataset.keyAction = 'view';
     const r2 = el('div', 'row tight', gSpace);
     ui.expK = knob({ label: 'EXPOSURE', min: 0.08, max: 12, value: 1, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.exposure', v)) return; mat.exposure = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.expK.root);
