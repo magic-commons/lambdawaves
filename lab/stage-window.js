@@ -13,7 +13,7 @@
  * homes (the shader's old arithmetic), read by the field (lab/field.js stageWash, p16.w · p17.xyz · p18.xyz); PROJECT `presentation.stage` through
  * stageOfProject / loadStage (shell/persist.js); targets `stage.*` (shell/modulation.js).  A file from before 040 ({ pulse, shape, rate }: SHAPE
  * CENTRE | EDGE, RATE in Hz) opens as POSITION 0° or 180° at the full BAND WIDTH — the standing wash it drew. */
-import { el, knob, group } from './mir/kit.js';
+import { el, knob, label } from './mir/kit.js'; import { fold } from './fold.js';
 import { TIER } from './tier.js'; import { strobeBeats } from './field.js';
 const HOME = Object.freeze({ pulse: 0, position: 0, rate: 2, strobe: 0, strobeRate: 1, strobeDuty: 0.5, beam: 0, beamAngle: 0, beamWidth: 30 });
 const RANGE = { pulse: [0, 1], rate: [0, 2], strobe: [0, 1], strobeRate: [0.25, 4], strobeDuty: [0.05, 0.95], beam: [0, 1], beamWidth: [5, 180] }, KEYS = Object.keys(HOME);
@@ -61,11 +61,13 @@ export function createStageWindow(app) {
   /* THE FX: a hand writes `mat.stage` and asks for a present; a modulator's set takes the same road (ui.setPulse, ui.stageFx[key]) */
   const go = (p) => { apply(mat, { ...HOME, ...mat.stage, ...p }); schedule(TIER.PRESENT); };
   ui.setPulse = go; ui.stageFx = {};
-  const rows = {};
-  for (const [g, key, label, title, o] of FX) {
-    const k = ui.stageFx[key] = knob({ label, title, min: 0, max: 1, value: HOME[key], ...o, onInput: (v) => { if (!modHand('stage.' + key.toLowerCase(), v)) go({ [key]: v }); } });
-    (rows[g] || (rows[g] = row('fit stage-pulse', group(w.body, g)))).appendChild(k.root);
+  const grp = {}, rows = {};
+  for (const [g, key, name, title, o] of FX) {
+    const k = ui.stageFx[key] = knob({ label: name, title, min: 0, max: 1, value: HOME[key], ...o, onInput: (v) => { if (!modHand('stage.' + key.toLowerCase(), v)) go({ [key]: v }); } });
+    if (!grp[g]) { grp[g] = el('div', 'grp', w.body); label(el('div', 'grp-lbl', el('div', 'stage-fx-head', grp[g])), g); rows[g] = row('fit stage-pulse', grp[g]); }
+    rows[g].appendChild(k.root);
   }
+  fold(grp.PULSE.firstChild, [grp.STROBE, grp.BEAM], { what: 'the strobe and the beam', key: 'stage-festival' });   // the body stays short: the festival lights behind PULSE's chevron
   paint = () => { const s = { ...HOME, ...mat.stage }, setKnob = app.ctl.setKnob; for (const k of KEYS) setKnob(ui.stageFx[k], s[k]); };
   return w;
 }
