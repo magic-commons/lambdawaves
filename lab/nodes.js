@@ -16,18 +16,20 @@
  * `lambdawaves.q0.curves`.  The reader's curves `.curvePresets` and graphs `.nodePresets` stay PREFERENCE.
  *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field, mat, present, onEdit }) → { model, filter, nodes(), add(type), remove(id),
  *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on), graph(), load(graph) } */
-import { el, ariaLabel, chip } from './mir/kit.js';
+import { el, ariaLabel, chip, hint, placeholder } from './mir/kit.js';
 import { createWindow } from './mir/window/window.js';
 import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
 import { frame } from './mir/core/frame.js';
+import { createProximity } from './mir/core/proximity.js';   // 040 N6: the dock's guide
 import { compile, over } from './nodes-compile.js';
 import { TABLE_TYPES, MATRIX_TYPES, homeOf, FOOT } from './node-types.js';
 import { LAYER_TYPES, createLayerHost } from './node-layers.js';
 import { PRIM_TYPES } from './node-prims.js';
 import { SHADER_TYPES, createShaderHost } from './node-shader.js';
+import { createFocusHandles } from './node-focus.js';   // 040 N1: a kind's point on the stage, shown while the node is edited
 import { jsonStore } from './mir/core/prefs.js';
-import { createUserPresets } from './user-presets.js';
+import { createUserPresets, uniqueName } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
 import { createView, keysAt } from './nodes-view.js';
 import { createUndo } from './nodes-undo.js';
@@ -77,6 +79,18 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       fn: () => { const T = curveTables(); return (y, ch) => { if (T.MASTER) y = lookup(T.MASTER, y); if (T[ch]) y = lookup(T[ch], y); return y; }; } },
     ...TABLE_TYPES, ...MATRIX_TYPES, ...PRIM_TYPES, ...LAYER_TYPES, ...SHADER_TYPES,
   };
+  /* 040 N1 · A NODE IS EDITED while a view says so (its card selected in the window, hovered or holding the focus — nodes-view.js) or the hand is on its
+     stage handle: `editing(id, why, on)` keeps the reasons; a reason lets go 600 ms late, so the hand can cross from the card to the handle.  The handles
+     (lab/node-focus.js) follow the graph and every value write */
+  const edits = new Map(), editT = new Map();
+  const edited = (id) => { const s = edits.get(id); return !!s && s.size > 0; };
+  const focus = createFocusHandles(canvas.parentElement, { list: () => nodes, types: TYPES, hand: (q, k, v) => hand(q, k, v), edited });
+  function editing(id, why, on) {
+    const key = id + ':' + why; let s = edits.get(id); if (!s) { if (!on) return; edits.set(id, (s = new Set())); }
+    clearTimeout(editT.get(key)); editT.delete(key);
+    if (on) { if (!s.has(why)) { s.add(why); focus.sync(); } return; }
+    if (s.has(why)) editT.set(key, setTimeout(() => { editT.delete(key); s.delete(why); if (!s.size) edits.delete(id); focus.sync(); }, 600));
+  }
 
   /* THE LIST: the record's nodes as saved (at most one CURVES); else 018's one-node graph, or a reader who graded before NODES kept a
      record; else THE DEFAULT GRAPH, which is EMPTY */
@@ -119,7 +133,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     if (!mod || !mod.register) return;
     const T = TYPES[q.type];
     for (const K of knobsOf(q)) try {
-      mod.register(ID(q, K.k), { label: (q.name || T.label) + ' ' + K.label, min: K.min, max: K.max, step: K.step || 0, map: K.log ? 'log' : K.step === 1 ? 'integer' : 'linear', unit: K.unit, hint: K.hint || T.hint,
+      mod.register(ID(q, K.k), { label: (q.name || T.label) + ' ' + K.label, min: K.min, max: K.max, step: K.step || 0, map: K.wrap ? 'wrap' : K.log ? 'log' : K.step === 1 ? 'integer' : 'linear', unit: K.unit, hint: K.hint || T.hint,
         def: K.home, group: 'nodes', flash: flashStep(K), get: () => q.values[K.k], set: (v) => setValue(q, K.k, v, 'mod'), knob: () => knobOf(q, K.k) });
     } catch (e) { console.warn('NODES: a knob is no target', e); }
   }
@@ -130,6 +144,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     recompile();
     const shown = from === 'mod' && routed(ID(q, k));
     for (const view of views) { view.paint(q, k, v, shown); view.strip(q); }
+    if (TYPES[q.type].focus) focus.sync();   // 040 N1: the stage handle follows the point (a hand's or a modulator's write, the MODE flip)
     if (from === 'hand') { saveList(); onEdit(); }
   }
   const hand = (q, k, v) => { undo.touch(); if (routed(ID(q, k))) mod.registry.write(ID(q, k), v); else setValue(q, k, v, 'hand'); };
@@ -141,7 +156,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const many = (x) => (Array.isArray(x) ? x : [x]);
 
   /* THE VERBS: add · remove · bypass · a graph · reorder (by the graph's top → bottom) */
-  const changed = (rebuild) => { saveList(true); recompile(); for (const v of views) v.sync(rebuild); onEdit(); };   // 036 S1: an edit books the session's save
+  const changed = (rebuild) => { saveList(true); recompile(); for (const v of views) v.sync(rebuild); focus.sync(); onEdit(); };   // 036 S1: an edit books the session's save
   function add(type, o) {
     if (!TYPES[type]) return null;
     undo.mark();
@@ -163,8 +178,9 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   /** the rack's CURVES door: absent = off; on adds CURVES (or lifts its bypass), off bypasses it */
   function setHas(on) { const c = curvesNode(); if (on) add('curves'); else if (c) setBypass(c.id, true); }
   /** a graph preset (a shipped one, or the reader's): every node but CURVES replaced by its list, laid out afresh */
-  function applyGraph(list) {
-    undo.mark();
+  let showPreset = () => {};   // 040 N4: the title bar's PRESET NAME (below), told which graph a pick loaded
+  function applyGraph(list, name = '') {
+    undo.mark(); showPreset(name);
     batch(() => {
       for (const q of nodes) if (q.type !== 'curves') unenroll(q);
       nodes = nodes.filter((q) => q.type === 'curves'); for (const q of nodes) q.at = null;
@@ -211,7 +227,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   }
   function loadGraph(g) {
     const o = g && typeof g === 'object' && Array.isArray(g.list) ? g : { list: [] };
-    undo.clear(); flags.view = flags.solo = null;
+    undo.clear(); flags.view = flags.solo = null; showPreset('');   // 040 N4: an open replaces the graph, so no preset is named
     batch(() => { for (const q of nodes) unenroll(q); nodes = listOf(o.list); for (const q of nodes) enroll(q); });
     seq = seqOf(o.seq);
     model.restore(o.curves && typeof o.curves === 'object' ? o.curves : FLAT);
@@ -249,7 +265,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   let win = null;
   const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, setPlug, duplicate, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
     setFold, rename, reset, move, tidy, flags, setView: (id) => flag('view', id), setSolo: (id) => flag('solo', id), setOff, off: () => !!rec().off,
-    undo: () => undo.undo(), redo: () => undo.redo(),
+    undo: () => undo.undo(), redo: () => undo.redo(), editing,
     door: (kind) => { if (kind === 'win') { win.close(); raise('nodes'); } else { rk.close('nodes'); win.open(); } } };
 
   /* the rack card (the CURVES card's seat, after RENDER, closed) and the MIR window, each its own view */
@@ -268,12 +284,53 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      card's OPEN AS A WINDOW door before × in its head (× 's own look) — the ground keeps no door */
   const door = (cls, glyph, word, run) => { const b = el('button', cls); b.type = 'button'; chip(b, glyph, word); b.addEventListener('click', run); return b; };
   win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'DOCK IN THE RACK', () => M.door('win')));
+  /* 040 N4 · THE NODES' PRESETS (Josh: "I want to add the modulation window's preset saving thing into Nodes and put it into the window title bar"):
+     MOD's bar — the save glyph · PRESET NAME · ◀ ▶ — on the left after the title.  A preset is the graph: every node but CURVES (whose grade keeps its
+     own presets), the shipped FILM · POSTER · PRINT then the reader's — the GRAPHS › list, `lambdawaves.q0.nodePresets` (PREFERENCE).  ◀ ▶ step through
+     them and load each (one step of NODES' ring); SAVE keeps the typed name in CAPS (Enter too; a taken name becomes NAME 2, 016 W9); Escape puts the
+     shown name back; the field rims while what is typed is not the shown preset */
+  { const bar = el('div', 'nodes-presets'), L = () => [...Object.entries(SHIPPED).map(([name, list]) => ({ name, list })), ...graphs.list().map((u) => ({ name: u.name, list: u.data && u.data.nodes }))];
+    let cur = '';
+    const save = door('mir-win-btn nodes-prebtn', 'save', 'SAVE THE GRAPH AS A PRESET', () => keep()); bar.append(save);
+    const name = el('input', 'nodes-prename', bar); name.type = 'text'; name.maxLength = 40; name.spellcheck = false; name.setAttribute('autocapitalize', 'characters');
+    placeholder(name, 'PRESET NAME'); ariaLabel(name, 'preset name'); hint(name, 'PRESET NAME — type one, then SAVE');
+    const nav = (d, glyph, word) => { const b = door('mir-win-btn nodes-prebtn', glyph, word, () => step(d)); hint(b, word); bar.append(b); };
+    nav(-1, 'dirPrev', 'PREVIOUS PRESET'); nav(1, 'dirNext', 'NEXT PRESET'); hint(save, 'SAVE THE GRAPH AS A PRESET');
+    showPreset = (n) => { cur = n || ''; name.value = cur; name.classList.remove('dirty'); };
+    const step = (d) => { const P = L(), i = P.findIndex((p) => p.name === cur), j = i < 0 ? (d > 0 ? 0 : P.length - 1) : (i + d + P.length) % P.length; if (P[j]) applyGraph(P[j].list, P[j].name); };
+    const keep = () => { const n = name.value.trim().toUpperCase(); if (!n) { name.focus(); return; } showPreset(graphs.add(uniqueName(n, Object.keys(SHIPPED)), { nodes: graphOf() })); };
+    name.addEventListener('input', () => name.classList.toggle('dirty', name.value.trim().toUpperCase() !== cur));
+    name.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); keep(); } else if (e.key === 'Escape') { e.preventDefault(); showPreset(cur); name.blur(); } });
+    bar.addEventListener('pointerdown', (e) => { if (e.target !== bar) e.stopPropagation(); });   // a press on its controls is theirs, never the grip's
+    graphs.watch(() => { if (cur && !L().some((p) => p.name === cur)) showPreset(''); });
+    win.tools.before(bar); }
+  /* 040 N6 · THE NODES WINDOW DOCKS (Josh: "If dragging the node title bar close enough to the rack window, allow it the option to dock to it; it's
+     another way to convert it to rack window and back").  The kit's dock road does not reach a title-bar window (FOR-KIT), so the app's minimum: while
+     the bar drags, a rack within 160 px glows and the one under the pointer lights the slot the card would take (the kit's proximity guide, at the place
+     the release lands); a release there closes the window and opens the card in that slot.  And back: the card dragged off its rack (the kit floats it)
+     opens as the window where it was let go.  Escape, a blur or a hidden page drop the guide and dock nothing */
+  { let drag = null, hit = null;
+    const prox = createProximity({ layer: document.body, reach: 160, capture: 0, onCancel: () => { hit = null; } });
+    const columns = () => [['left', 'rackL'], ['right', 'rack']].map(([side, id]) => { const R = document.getElementById(id), r = R && !R.hidden && R.getBoundingClientRect(); if (!r || r.width < 2) return null;
+      return { side, r, cs: [...R.children].filter((c) => c.classList.contains('dev') && !c.hidden && !c.classList.contains('closed')).map((c) => c.getBoundingClientRect()) }; }).filter(Boolean);
+    const slot = ({ side, r, cs }, y) => { const i = cs.filter((b) => b.top + b.height / 2 < y).length, a = cs[i - 1], b = cs[i], at = !a && !b ? r.top + 8 : !a ? b.top - 4 : !b ? a.bottom + 4 : (a.bottom + b.top) / 2;
+      const x = cs[0] || r;   // the line spans the cards (the rack's padding is not a place)
+      return { id: side, index: i, rect: { left: x.left, top: at - 3, width: x.width, height: 6 }, hit: { left: r.left, top: 0, width: r.width, height: innerHeight }, shape: 'slot' }; };
+    const move = (e) => { if (e.pointerId === drag) hit = prox.update({ x: e.clientX, y: e.clientY }, columns().map((c) => slot(c, e.clientY))); };
+    const done = (e) => { if (e.pointerId !== drag) return; drag = null; for (const [t, f] of on) removeEventListener(t, f);
+      const m = e.type === 'pointerup' && hit && hit.captured; hit = null; prox.end();
+      if (m) { win.close(); rk.open('nodes', { side: m.id, index: m.index }); rk.reveal('nodes'); } };
+    const on = [['pointermove', move], ['pointerup', done], ['pointercancel', done]];
+    win.head.addEventListener('pointerdown', (e) => { if (e.button !== 0 || drag !== null) return; drag = e.pointerId; hit = null; for (const [t, f] of on) addEventListener(t, f, { passive: true }); });
+    /* the hand's drag only (the kit's `dragging` let go while the card floats): a card floated by a road of its own (popOut, the header's Enter) stays a card */
+    new MutationObserver((recs) => { const c = card.root.classList; if (!c.contains('floating') || c.contains('dragging') || !recs.some((m) => / dragging( |$)/.test(' ' + m.oldValue))) return;
+      const r = card.root.getBoundingClientRect(); rk.dock('nodes'); rk.close('nodes'); win.open(); win.place({ x: r.left, y: r.top }); }).observe(card.root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }); }
   const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'OPEN AS A WINDOW', () => M.door('card')), util.querySelector('.dev-close'));
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
   return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, setView: M.setView, setSolo: M.setSolo, setOff, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
-    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, keysAt, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close(), graph, load: loadGraph,
+    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, tick: (t) => layers.tick(t), keysAt, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close(), graph, load: loadGraph,
     /* 025 B1 · the film's compile: the graph as the stage runs it, a PRIMITIVE's px knobs × k (film px per stage CSS px; DISPLACE's frequency ÷ k), and the
        SHADER host the film bakes its SHADER layers through (render-exact.js frame → lab/film-bake.js) */
     compileAt: (k) => compile(nodes.map((q) => { const T = TYPES[q.type]; if (!T || T.cls !== 'prim' || k === 1) return q;

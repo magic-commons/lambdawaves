@@ -66,7 +66,8 @@ export function createView(parent, kind, M) {
   const empty = el('div', 'nodes-empty', plane); label(empty, 'Hit + to add a node');
   /* 038 N8 · A CARD THAT GROWS PUSHES THE CARDS BELOW (the window: its cards are placed, not flowed): a card that grows — its FADE · MASK · TARGET fold,
      its body unfolded — moves the cards under it (overlapping its width) down until the gap is GAP again, kept as a nudge; no card is covered */
-  const ro = new ResizeObserver((es) => { if (W) { let pushed = false; for (const e of es) { const c = e.target; if (c === ground) continue; const h = c.offsetHeight; if (c.h0 !== undefined && h > c.h0 && clear(c)) pushed = true; c.h0 = h; } if (pushed) moved(true); } wires(); });
+  /* 040 N7: a card that grows from 0 was laid out while the window was closed (no size): the open's place() seats it, so it pushes nothing and pins nothing */
+  const ro = new ResizeObserver((es) => { if (W) { let pushed = false; for (const e of es) { const c = e.target; if (c === ground) continue; const h = c.offsetHeight; if (c.h0 > 0 && h > c.h0 && clear(c)) pushed = true; c.h0 = h; } if (pushed) moved(true); } wires(); });
   const cards = {}, sel = new Set();
   const hands = el('div', 'nodes-hands', plane), H = new Map(), P = new Map();   // 038 N4: the wires' handles and paths, by their downstream node
   let wsel = null;                                                   // the selected wire: its downstream node's id
@@ -86,7 +87,7 @@ export function createView(parent, kind, M) {
     const gw = ground.clientWidth, gh = ground.clientHeight, zz = clampZ(Math.min((gw - 48) / (x1 - x0), (gh - 48) / (y1 - y0)));
     setPan([(gw - (x1 - x0) * zz) / 2 - x0 * zz, (gh - (y1 - y0) * zz) / 2 - y0 * zz], zz); keep();
   }
-  const paintSel = () => { for (const [id, n] of Object.entries(cards)) n.c.classList.toggle('sel', sel.has(id));
+  const paintSel = () => { for (const [id, n] of Object.entries(cards)) { n.c.classList.toggle('sel', sel.has(id)); if (W && id !== 'in' && id !== 'out') M.editing(id, 'sel', sel.has(id)); }   // 040 N1: a selected node is edited
     for (const [id, h] of H) h.classList.toggle('sel', id === wsel); for (const [id, p] of P) p.classList.toggle('sel', id === wsel); };
   const pick = (ids, add) => { if (!add) sel.clear(); for (const id of ids) sel.add(id); wsel = null; paintSel(); };
   const pickWire = (id) => { sel.clear(); wsel = id; paintSel(); };
@@ -124,6 +125,9 @@ export function createView(parent, kind, M) {
   function make(q) {
     const t = T[q.type], n = node(q.id, t.label, true, true, q.type, MARK[t.cls]);
     n.c.dataset.type = q.type; n.c.title = t.hint || '';
+    /* 040 N1 · the node is EDITED while its card is under the pointer or holds the focus (the stage's focal handle shows, lab/node-focus.js) */
+    n.c.addEventListener('pointerenter', () => M.editing(q.id, kind + ':hover', true)); n.c.addEventListener('pointerleave', () => M.editing(q.id, kind + ':hover', false));
+    n.c.addEventListener('focusin', () => M.editing(q.id, kind + ':focus', true)); n.c.addEventListener('focusout', (e) => { if (!n.c.contains(e.relatedTarget)) M.editing(q.id, kind + ':focus', false); });
     const v = el('button', 'nodes-chev', null); v.type = 'button'; chip(v, 'chevronDown', 'FOLD OR UNFOLD'); n.bar.prepend(v); v.addEventListener('click', () => M.setFold(q.id, !q.fold));
     if (!W) n.name.addEventListener('dblclick', () => renameAt(q.id));
     if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip' + (t.draw ? ' nodes-drawn' : '')); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
@@ -344,7 +348,7 @@ export function createView(parent, kind, M) {
   const back = () => { if (W) ground.focus({ preventScroll: true }); };   // a pick or an Escape gives the ground its keys back
   const kindRow = (type, t) => [t.label + '\t' + MARK[t.cls] + (t.heavy ? ' HEAVY' : ''), () => { M.add(type); back(); }, type === 'curves' && M.has(), t.hint, { icon: nodeGlyph(type), id: type }];
   const kinds = ([g, , , cls = [g]]) => Object.entries(T).filter(([, t]) => t.menu !== false && cls.includes(t.group || t.cls)).map(([type, t]) => kindRow(type, t));
-  const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list); back(); }, false, hint, { id: 'graph:' + name, raw }];
+  const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list, name); back(); }, false, hint, { id: 'graph:' + name, raw }];   // 040 N4: the bar names it
   const graphRows = () => { const U = M.graphs.list();
     return [...Object.entries(M.SHIPPED).map(([name, list]) => graph(name, list, 'a shipped graph: every node but CURVES replaced')),
       ...(U.length ? [null, ...U.map((u) => graph(u.name, u.data && u.data.nodes, 'your graph (kept on this device)', true))] : []),

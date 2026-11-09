@@ -83,8 +83,12 @@ export const TABLE_TYPES = {
       { k: 'contrast', label: 'CONTRAST', min: -100, max: 100, home: 0, stops: ['hsl(0 0% 50%)', 'var(--fg)'], hint: 'CONTRAST — the tones pushed from mid-grey, or pulled in', fmt: signed }],
     fn: (v) => { const b = v.brightness / 200, c = v.contrast >= 0 ? 1 + v.contrast / 50 : 1 + v.contrast / 100; return (y) => (y - 0.5) * c + 0.5 + b; } },
 };
+/** HUE's track (038 P4, 040 N3): the colour red becomes, from home (red, the dial's top) round the wheel and back */
+const WHEEL = [0, 60, 120, 180, 240, 300, 360].map((h) => `hsl(${h} 100% 50%)`);
 export const MATRIX_TYPES = {
-  hue: { cls: 'matrix', label: 'HUE', hint: 'turn every colour round the wheel', knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, unit: '°' }],
+  /* 040 N3 · THE HUE KNOB WRAPS (Josh: "Hue knob should be 360 degree free spinning instead of left and right only"): HUE here and HUE/SATURATION's HUE
+     are the kit's free arc (`wrap`) on the colour wheel's track; the value stays −180 … 180 (nodeBody folds the dial's turn back), so a file keeps its bytes */
+  hue: { cls: 'matrix', label: 'HUE', hint: 'turn every colour round the wheel', knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, wrap: true, stops: WHEEL, fmt: (x) => signed(x) + '°' }],
     neutral: (v) => ((v.hue % 360) + 360) % 360 === 0, matrix: (v) => colourMatrix(1, v.hue) },
   saturation: { cls: 'matrix', label: 'SATURATION', hint: '0 is grey, above 1 is more vivid', knobs: [{ k: 'saturation', label: 'SATURATION', min: 0, max: 3, home: 1 }],
     matrix: (v) => colourMatrix(v.saturation, 0) },
@@ -96,7 +100,7 @@ export const MATRIX_TYPES = {
      saturate(1 + S/100) after hue-rotate(H).  HUE's track is the colour red becomes at each value (red at home, cyan at ±180), SATURATION's grey → the
      accent, LIGHTNESS' black → white */
   color: { cls: 'matrix', group: 'colour', label: 'HUE/SATURATION', hint: 'Photoshop\'s hue, saturation and lightness',
-    knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, stops: [180, 240, 300, 0, 60, 120, 180].map((h) => `hsl(${h} 100% 50%)`), hint: 'HUE — every colour turned; its thumb: what red becomes', fmt: (x) => signed(x) + '°' },
+    knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, wrap: true, stops: WHEEL, hint: 'HUE — every colour turned; its thumb: what red becomes', fmt: (x) => signed(x) + '°' },
       { k: 'saturation', label: 'SATURATION', min: -100, max: 100, home: 0, stops: ['hsl(0 0% 50%)', 'var(--acc)'], hint: 'SATURATION — −100 is grey, +100 twice as vivid', fmt: signed },
       { k: 'lightness', label: 'LIGHTNESS', min: -100, max: 100, home: 0, stops: ['#000', 'hsl(0 0% 50%)', '#fff'], hint: 'LIGHTNESS — every colour toward black or white', fmt: signed }],
     matrix: (v) => { const L = v.lightness / 100, k = 1 - Math.abs(L);
@@ -158,8 +162,11 @@ export function nodeBody(parent, node, T, { idOf, hand }) {
   const order = T.face ? [...T.face.flat(), ...T.knobs.map((K) => K.k)].filter((k, i, a) => a.indexOf(k) === i) : T.knobs.map((K) => K.k);
   for (const K of order.map((k) => T.knobs.find((J) => J.k === k))) {
     const tip = K.hint || (T.knobs.length === 1 ? T.hint : undefined);   // 038 P9: a one-knob node's knob takes the node's hint (the knob is the node)
-    const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: tip, min: K.min, max: K.max, step: K.step, log: K.log, home: K.home, unit: K.unit,
-      fmt: K.fmt, colour: K.colour, options: K.options, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, v, false), onChange: (v) => hand(K.k, v, true) });
+    /* 040 N3 · a `wrap` knob is the kit's free arc whose dial starts at HOME (its top), [home, home + span); its turn folds back into [min, max) on the
+       way to the node, so the saved value keeps its range (HUE: −180 … 180) */
+    const span = K.max - K.min, f = K.wrap ? (x) => K.min + ((((x - K.min) % span) + span) % span) : (x) => x;
+    const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: tip, min: K.wrap ? K.home : K.min, max: K.wrap ? K.home + span : K.max, wrap: K.wrap, step: K.step, log: K.log, home: K.home, unit: K.unit,
+      fmt: K.wrap && K.fmt ? (x) => K.fmt(f(x)) : K.fmt, colour: K.colour, options: K.options, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, f(v), false), onChange: (v) => hand(K.k, f(v), true) });
     (at[K.k] || at[''] || parent).appendChild(c.root);
     if (c.targets[0]) c.targets[0].root.dataset.param = idOf(K.k);
   }
