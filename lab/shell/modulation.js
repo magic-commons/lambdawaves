@@ -49,8 +49,8 @@ export function createModSeam(app) {
     /* 040 A3 · THE LANE ANNOUNCES AS THE HAND DOES (Josh: "Whenever orbital is tied to the timeline, the timeline doesn't show the announcements... it must
        work as if I myself am turning the knob"): a lane's or a route's change of the STYLE, the observable, the RATE, the ORBITAL, MOLECULES' VIEW and BASIS
        speaks the hand's own words through the same `say` kinds, so INFORMATIONAL › ANNOUNCE's switches govern both; a restore — a project, an undo, a link, a
-       demo, the facade's rack restore — says nothing: persist's restore() and restoreModulation() hold the port's `hush` while their sets land */
-    const restoring = () => mod.hush > 0, laneSay = (kind, text, o) => { if (!restoring() && app.state.stageText) app.state.stageText.say(kind, text, o); };
+       demo, the facade's rack restore, the boot — says nothing: persist's restore() and restoreModulation() land inside the look's batch (look.landing) */
+    const restoring = () => app.ctl.look.landing, laneSay = (kind, text, o) => { if (!restoring() && app.state.stageText) app.state.stageText.say(kind, text, o); };
     const rateWord = (v) => 'RATE · ' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' a.u./s';   // the hand's words (shell/transport.js)
     const SLICE_MODES = ['off', 'clip', 'slab'];   // mat.slice.mode 0 · 1 · 2 (CLIP's ON switch and its CLIP | SLAB)
     const defs = [

@@ -148,7 +148,7 @@ export function createPersist(app) {
                        app.state.modHost.model.MOD_STATE_READS.join(' · '), 'warn');
       return false;
     }
-    const P = app.ctl.mod; if (P) P.hush++;   // 040 A3: a restore's sets say nothing (the facade's rack restore comes here too)
+    app.ctl.markBatchBegin();   // 040 A3: a rack restore is a batch (the facade's comes here too), so a target's set says nothing (shell/modulation.js laneSay)
     try {
     app.state.modHost.clock.pause();
     /* Capture the project values before restoreAll hands the previous rack's live targets back.
@@ -166,7 +166,7 @@ export function createPersist(app) {
     if (app.state.modView && !opening) app.state.modView.rebuild();                    // wave 127: a window the file opens is rebuilt by its open() (the kit's window.js restore → open → rebuild)
     schedule(TIER.PRESENT);
     return ok;
-    } finally { if (P) P.hush--; }
+    } finally { app.ctl.markBatchEnd(); }
   }
   function save() { try { const s = serialize(); localStorage.setItem(LS_EXP, JSON.stringify(s.experiment)); localStorage.setItem(LS_PRES, JSON.stringify(s.presentation)); wState.setStatus('saved', 'live'); return true; } catch (e) { wState.setStatus('save failed', 'warn'); return false; } }
   /** the whole session as JSON on the clipboard — STATE's COPY JSON and the FILE menu's row are this one road (N1) */
@@ -178,8 +178,7 @@ export function createPersist(app) {
   function restore(obj, opt) {
     const hist = !!(opt && opt.history), gone = [], cut = []; let said = '';   // cut: iteration 008 W's views that left WAVE (Re+Im, Δρ), named once below                  // D9: the retired legacy windows this file used, named once below
     if (!hist) app.state.restoreNotice = '';
-    app.ctl.markBatchBegin();                                                // M7: released in the finally below
-    if (app.ctl.mod) app.ctl.mod.hush++;                                     // 040 A3: a restore's registry sets announce nothing (the lanes' words are the hand's, not a file's)
+    app.ctl.markBatchBegin();                                                // M7: released in the finally below · 040 A3: the batch is the lanes' hush (look.landing)
     try {
       if (opt && opt.project && app.state.modHost) { app.state.modHost.clock.pause(); app.state.modHost.registry.restoreAll(); }   // S2 · a project open puts the running modulation down FIRST (wave 127's law): a route still holding the stage wrote its old base back over the file's mix
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
@@ -368,7 +367,7 @@ export function createPersist(app) {
     } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
     /* OPTIMIZATION 2026-09-24 · M5: a restore that throws half-way has still moved state, and an early throw left it
        never rebuilt — so the rebuild is asked for on EVERY exit (on success it is the same coalesced request as above). */
-    finally { schedule(TIER.REBUILD); app.ctl.markBatchEnd(); if (app.ctl.mod) app.ctl.mod.hush--; }
+    finally { schedule(TIER.REBUILD); app.ctl.markBatchEnd(); }
   }
   app.sh.serialize = serialize; app.sh.restore = restore; app.sh.save = save; app.sh.copyJSON = copyJSON; app.sh.restoreModulation = restoreModulation;
   return { modSeats, serialize, restoreModulation, save, copyJSON, restore };

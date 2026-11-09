@@ -99,8 +99,6 @@ export function createModPort({ available, present, view, onCapture, save, say }
   const audioSilence = () => { if (!host || !host.model.audioReset) return; for (const q of host.model.sourceList()) if (q.kind === 'audio') host.model.audioReset(q.id); };
   const P = {
     get host() { return host; }, get syncing() { return syncing; }, knobs, gets, held, cadence,
-    /** 040 A3 · the restore's hush: > 0 while persist's restore() / restoreModulation() land a file's rack, so a target's set says nothing (shell/modulation.js laneSay) */
-    hush: 0,
     setCadence(hz) { cadence.hz = hz === 120 ? 120 : 60; save(); return cadence.hz; },
     knobOf: (id) => (knobs[id] ? knobs[id]() : null),
     /** guard(id, spec) — a runtime target (LW.mod.register) that declares `flash` (its 10 % step) joins the one limiter (021 R2) */
