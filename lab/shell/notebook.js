@@ -1,12 +1,12 @@
 /* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, hint, label } from '../mir/kit.js'; import { hoverable } from '../mir/core/kbm.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
+import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, hint, label, ariaLabel } from '../mir/kit.js'; import { hoverable } from '../mir/core/kbm.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle, quatFromYawPitch } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
-import { createWindow } from '../mir/window/window.js'; import { glyphEl, glyphSvg } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
+import { createWindow, windowOf } from '../mir/window/window.js'; import { glyphEl, glyphSvg } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
 import { MODE } from './settings.js';   // 021 R5: ONE MODE (the FINDER's greys)
 import { NOTEBOOK_KEYS } from '../settings-store.js';   // 021 R4: the notebook's 0.4 keys, read once and retired
 export function createNotebook(app) {
@@ -75,7 +75,9 @@ export function createNotebook(app) {
       const A = app.sh.ACTIONS, keyFor = (id) => app.sh.kt.keyText(id);
       /** item(id, text, opts) — a row for an action: its key after the TAB, a toggle checked from get(), `args` run with arguments */
       const item = (id, text, o = {}) => { const a = A.get(id); if (!a) return null; const m = !o.args && app.sh.kt.table.menuItem(id, text), k = o.args ? '' : keyFor(id), on = o.on !== undefined ? o.on() : a.kind === 'toggle' && a.get ? !!a.get() : undefined;
-        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), m ? m[1] : () => A.run(id, o.args), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { id, ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon || (a.icon && !o.radio) ? { icon: o.icon || (typeof a.icon === 'function' ? a.icon() : a.icon) } : {}) }]; };   // 022 E2: a row wears its action's glyph (the registry's `icon`)
+        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), o.run || (m ? m[1] : () => A.run(id, o.args)), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { id, ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon || (a.icon && !o.radio) ? { icon: o.icon || (typeof a.icon === 'function' ? a.icon() : a.icon) } : {}) }]; };   // 022 E2: a row wears its action's glyph (the registry's `icon`); 040 M1: `run` an opener over a toggle's run
+      /** 040 M1 · an OPENER row for a toggle action (FILE › FOLDERS…): a plain row (no ✓) that runs the action only while its window is closed, so the row never closes what it names */
+      const opener = (id, text, o = {}) => item(id, text, { ...o, on: () => undefined, run: () => { const a = A.get(id); if (!(a.get && a.get())) A.run(id); } });
       const sub = (text, entries, icon) => [text, entries, null, '', { sub: true, ...(icon ? { icon } : {}) }];
       const radio = (id, group, choices, cur) => choices.map(([v, w]) => item(id, w, { args: { id: v }, radio: group, on: () => cur() === v }));
       const reveal = A.reveal, H = () => app.sh.historyApi, wins = () => [...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')], TOOL_SEAT = new Set(['modulation', 'timeline', 'pattern', 'nodes', 'notebook', 'folders', 'history']);
@@ -85,6 +87,7 @@ export function createNotebook(app) {
            "Save this first?" (SAVE & OPEN · OPEN WITHOUT SAVING, SAVE & NEW · NEW WITHOUT SAVING) — no window.confirm on these rows */
         FILE: () => [item('new', 'NEW', { icon: 'plus' }), item('open', 'OPEN…', { icon: 'folder' }),
           sub('OPEN RECENT', () => { const r = layout.projects.recent().slice(0, 8); return r.length ? r.map((p) => [p, () => { const P = layout.projects, e = P.entryOf(p); P.show(e ? { folder: e.folder } : {}); if (e) P.folders.openEntry(e.id); }, null, '', { raw: true }]) : [['nothing yet', null, true]]; }),
+          opener('folders', 'FOLDERS…', { icon: 'folders', hint: 'Open FOLDERS — the projects, the demos, the saves' }),   // 040 M1 · FILE › FOLDERS (Josh 11-09: "Have an option in 'File' to open the 'Folders' window"): the `folders` action (O), an opener row
           item('save', 'SAVE' + (layout.projects.current ? '  ' + layout.projects.current : '…'), { icon: 'save' }), item('saveAs', 'SAVE AS…'), null,
           item('import', 'IMPORT…', { icon: 'upload' }),
           sub('EXPORT', () => [sub('PROJECT', () => [item('export.json', '.json'), item('export.mir', '.mir'), item('export.png', '.png — the picture carrying the project')]),
@@ -132,6 +135,16 @@ export function createNotebook(app) {
       const mb = createMenubar({ opener: title, host: document.getElementById('lab'), phone: isPhone,
         menus: Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => wrap(rows())])) });
       layout.menu = { open: mb.open, close: mb.close, get isOpen() { return mb.isOpen; }, scale: 1.04, get enlarged() { return title.classList.contains('menu-open'); } };
+      /* 040 M2 · THE FINDER MENU (Josh 11-09: "Add a new dropdown menu between the logo and 'File' that is: 'Finder', and it would just automatically
+         open the finder system"): the kit's bar builds a list under every group (FOR-KIT: an acting entry), so the app seats one plain group before
+         FILE — a press opens the FINDER (the `windowPicker` action; its hint the registry's), a cursor arriving on it closes the list its hover left
+         open and opens none; W2's walk (below) reads it as a group with no list: Enter · ↓ · ↑ press it, ← → Home End pass over it */
+      const closeList = () => { const o = mb.bar.querySelector('.mb-btn[aria-expanded="true"]'); if (o) o.click(); };   // the kit's own toggle: a synthetic click (detail 0) closes the list
+      { const grp = el('div', 'mb-group mb-act'), b = el('button', 'mb-btn', grp); b.type = 'button'; b.dataset.menu = 'FINDER'; b.dataset.id = 'windowPicker';
+        label(b, 'FINDER'); hint(b, A.get('windowPicker').hint); b.setAttribute('aria-haspopup', 'dialog');
+        b.addEventListener('click', (e) => { e.stopPropagation(); mb.close(); back(() => A.run('windowPicker'))(); });
+        b.addEventListener('pointerenter', (e) => { if (hoverable(e)) closeList(); });
+        mb.bar.prepend(grp); }
       /* 039 W5 · THE TITLE'S FIRST CLICK: a cursor reaching the logo shows the bar on its hover, so the kit's click toggle hid it again under the
          same hand (A #4: five first clicks of five did nothing) — a cursor's click keeps the bar its hover showed, as the kit's groups keep their
          lists (FOR-KIT); a finger's tap still toggles.  W9 · D #3: its hint names the menus and the MAIN MENU's key */
@@ -142,12 +155,14 @@ export function createNotebook(app) {
          groups (an open list follows the focus); in a list ← → step to the next group's list where no submenu takes the key; Escape closes
          the list back to its group, then the bar (the kit's: the focus back on the logo) */
       { const groups = () => [...mb.bar.querySelectorAll('.mb-btn')], isOpen = (b) => b.getAttribute('aria-expanded') === 'true';
-        const openAt = (b, last) => { if (!isOpen(b)) mb.openGroup(b.dataset.menu); const rows = [...b.nextElementSibling.querySelectorAll(':scope > .mb-item:not(:disabled)')];
+        const openAt = (b, last) => { if (!b.nextElementSibling) { closeList(); b.focus({ preventScroll: true }); return; }   // 040 M2: FINDER has no list — the walk lands on it with the lists closed
+          if (!isOpen(b)) mb.openGroup(b.dataset.menu); const rows = [...b.nextElementSibling.querySelectorAll(':scope > .mb-item:not(:disabled)')];
           (rows[last ? rows.length - 1 : 0] || b).focus({ preventScroll: true }); };
         mb.bar.addEventListener('keydown', (e) => { if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
           const k = e.code, g = groups(), btn = e.target.closest('.mb-btn'), item = e.target.closest('.mb-item');
           const step = (b, d) => g[(g.indexOf(b) + d + g.length) % g.length];
           if (btn) {
+            if (!btn.nextElementSibling && (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === 'NumpadEnter')) { e.preventDefault(); btn.click(); return; }   // 040 M2: the FINDER entry presses
             if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === 'NumpadEnter') { e.preventDefault(); openAt(btn, k === 'ArrowUp'); }
             else if (k === 'ArrowRight' || k === 'ArrowLeft') { e.preventDefault(); const to = step(btn, k === 'ArrowRight' ? 1 : -1); if (isOpen(btn)) openAt(to); else to.focus({ preventScroll: true }); }
             else if (k === 'Home' || k === 'End') { e.preventDefault(); g[k === 'Home' ? 0 : g.length - 1].focus({ preventScroll: true }); }
@@ -174,12 +189,38 @@ export function createNotebook(app) {
         light: 'lighting sun shadow lamp', stage: 'background colour color gamma axes frame', palette: 'colours colors gradient hue', observer: 'style look cloud',
         camera: 'view zoom rotate orbit fov', clip: 'cut plane slice section', chem: 'molecule chemistry benzene water orbitals', spectrum: 'states hydrogen orbitals levels',
         projects: 'save open files projects', history: 'undo redo', widgets: 'clock text', equalizer: 'audio sound music', informational: 'labels words captions text',
-        settings: 'quality performance theme' };   // the FINDER lists rack windows alone: TIMELINE, MODULATION and the CONTROL SURFACE open from the bar
+        settings: 'quality performance theme' };   // the FINDER lists rack windows alone: TIMELINE, MODULATION and the CONTROL SURFACE are its SPECIAL rows (040 M3)
       { const F = layout.finder, q = F.root.querySelector('.wp-search');
         if (q) q.addEventListener('input', () => { const s = q.value.trim().toLowerCase(); if (!s) return; let first = null;
           for (const b of F.root.querySelectorAll('.wp-list [data-win]')) { if (b.hidden && (FIND_WORDS[b.dataset.win] || '').split(' ').some((w) => w.startsWith(s))) b.hidden = false;
             if (!first && !b.hidden && !b.classList.contains('off')) first = b; }
           if (first && !F.root.querySelector('.wp-list .on')) first.dispatchEvent(new PointerEvent('pointermove')); }); }
+      /* 040 M3 · THE SPECIAL SECTION (Josh 11-09: "Include a new section in finder that is the 'Special' windows which is 'Modulation', 'Timeline', and
+         'Control Surface' (CSB)"): the kit's picker lists rack windows alone (FOR-KIT: `sections`), so a SPECIAL head and its three rows sit under the
+         list, always in view; the search filters them by name, and where no window row matches the first of them is the default Enter takes.  A closed
+         one opens, an open one rises; the CONTROL SURFACE is switched back on where MIR OPTIONS turned it off, scrolled to in its rack, else its play
+         button takes the focus.  The kit's ↑ ↓ walk its own rows (FOR-KIT); Tab reaches these */
+      { const F = layout.finder, q = F.root.querySelector('.wp-search'), bar = () => app.sh.transport && app.sh.transport.bar;
+        const rise = (r) => { const w = r && windowOf(r); if (w) w.raise(); };
+        const sec = el('div', 'wp-special', F.root); sec.setAttribute('role', 'listbox'); ariaLabel(sec, 'SPECIAL');
+        label(el('div', 'wp-head', sec), 'SPECIAL');
+        const rows = [['modulation', 'MODULATION', 'modulation', 'Open MODULATION, or raise it', () => !!layout.modulation.open, () => rise(app.state.modView && app.state.modView.root), () => A.run('modulation')],
+          ['timeline', 'TIMELINE', 'timeline', 'Open the TIMELINE, or raise it', () => !!(app.state.tl && app.state.tl.isOpen()), () => rise(document.querySelector('[data-mir-window="timeline"]')), () => A.run('timeline')],
+          ['transport', 'CONTROL SURFACE', 'controlSurface', 'Show the CONTROL SURFACE where it sits', () => !!bar() && !bar().closed,
+            () => { const b = bar(); if (b.docked) reveal('transport'); else if (b.el.play) b.el.play.focus({ preventScroll: true }); }, () => mirGui().prefs.set('transportBar', true)]]
+          .map(([id, name, glyph, words, open, up, run]) => { const b = el('button', 'wp-row', sec); b.type = 'button'; b.dataset.special = id; b.setAttribute('role', 'option');
+            b.style.setProperty('--i', '12'); b.appendChild(glyphEl(glyph, 'wp-glyph', 16)); label(el('span', 'wp-name', b), name); hint(b, words);
+            const r = { b, name: name.toLowerCase(), go: () => { F.close(); (open() ? up : run)(); } };
+            b.addEventListener('click', r.go); b.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); r.go(); } });   // before the kit's Enter (its marked row)
+            r.open = open; return r; });
+        const def = () => (F.root.querySelector('.wp-list .on') ? null : rows.find((r) => !r.b.hidden));
+        const sync = () => { const s = q.value.trim().toLowerCase();   // after the kit's filter and X7's words (their listeners came first)
+          for (const r of rows) { r.b.hidden = !!s && !r.name.includes(s); r.b.toggleAttribute('data-open', r.open()); }
+          sec.hidden = rows.every((r) => r.b.hidden); const d = s && def(); for (const r of rows) r.b.classList.toggle('on', r === d); };
+        q.addEventListener('input', sync);
+        q.addEventListener('keydown', (e) => { const d = e.key === 'Enter' && !e.shiftKey && def(); if (d) { e.preventDefault(); e.stopPropagation(); d.go(); } });
+        F.root.querySelector('.wp-list').addEventListener('pointermove', () => { for (const r of rows) r.b.classList.remove('on'); });
+        new MutationObserver(() => { if (!F.root.hidden) sync(); }).observe(F.root, { attributeFilter: ['hidden'] }); }
     }
     /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
     installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });

@@ -47,14 +47,14 @@ export function createTransport(app) {
        buttons plus folders should be directly underneath … Move the rate knob and tempo column to the far left … 'MOD' … near the rate and tempo
        … a dedicated icon to expand the CSB … Remove the t = n thing from the CSB"): PLAY floats outside the bar's left edge; LEFT = RATE over the
        typed BPM pill, MOD over EXPAND, then ⏮ · TIMELINE / the door · the dock; CENTRE = MOLECULES' chooser over LIBRARY · MOLECULAR · HYDROGEN ·
-       FOLDERS (lab.css centres it with two equal side tracks); RIGHT = SEARCH · FINDER · ♥ · ◧ · FOLDS / NODES · INFORMATIONAL · THEME · ⚙ (020 T2).  Every seat is one
+       FOLDERS (lab.css centres it with two equal side tracks); RIGHT = SEARCH · FINDER · ♥ · ◧ · ⚙ / NODES · INFORMATIONAL · THEME · FOLDS (020 T2; 040 M5, Josh: "swap positions of the expand all windows with the settings knob").  Every seat is one
        36-px box, its icon one 20-px glyph (021 V2: lab/icons.js through the kit's roads).  t lives in the TIMELINE's TIME reader, its hint (036 W2, keys.js ui.tlTime).  The layout is λWAVES' own array
        under the kit's 'csb' drawing name, so the docked card keeps the kit's CONTROL SURFACE title. */
     const CSB = Object.assign([{ group: 'csb-play', items: ['play'] },
       { group: 'csb-side csb-left', items: [{ group: 'csb-col csb-tempo', items: ['app:rate', 'tempo'] }, { group: 'csb-col csb-mod', items: ['power', 'expand'] },
         { group: 'csb-ico', items: ['app:begin', 'app:home', 'openers', 'door'] }] },   // 032 T14: ⏮ (bar 1) then ↺ (t → 0), each an action's seat, over TIMELINE · the door
       { group: 'csb-mid', items: ['app:chooser', { group: 'csb-row csb-lib', items: ['app:modes', 'app:folders'] }] },
-      { group: 'csb-side csb-right csb-ico', items: ['app:search', 'app:finder', 'app:fav', 'app:rack', 'app:folds', 'app:nodes', 'app:info', 'app:theme', 'app:gear', 'dock'] },   // 032 T14: the dock chip takes the right grid's tenth cell (the left 2 × 2 is ⏮ ↺ over TIMELINE · the door), so the bar keeps 674 px and its height
+      { group: 'csb-side csb-right csb-ico', items: ['app:search', 'app:finder', 'app:fav', 'app:rack', 'app:gear', 'app:nodes', 'app:info', 'app:theme', 'app:folds', 'dock'] },   // 032 T14: the dock chip takes the right grid's tenth cell (the left 2 × 2 is ⏮ ↺ over TIMELINE · the door), so the bar keeps 674 px and its height
       'panel'], { name: 'csb', title: 'CONTROL SURFACE' });
     /* 021 I1 · THE SEATS READ THE REGISTRY (lab/actions.js): `seat(id)` takes its word (`word()` where it changes, else the label; its hint the action's short `hint`, 022 H1), its icon, its
        light (a toggle's get()) and its key hint (data-key-action) from the action, and a press runs the action — FOLDS, NODES, INFORMATIONAL, THEME

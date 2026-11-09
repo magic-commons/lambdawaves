@@ -91,6 +91,9 @@ export function createSettingsCard(app) {
     /* 037 T1 · THE STAGE WINDOW: the rows above leave DISPLAY for `stage` (the controls move, the roads do not); DISPLAY keeps EDIT STAGE (native-ui.js seats it) */
     createStageWindow(app);
     ui.editStage = trig({ label: 'EDIT STAGE', glyph: 'stage', title: 'Open STAGE below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'stage') });   // 037 T2 · THE SUMMONS (lab/summon.js)
+    /* 040 M4 (Josh 11-09: "Like stage window, have informational window and widgets also be opened in the settings > display section"): the same summons */
+    ui.editInfo = trig({ label: 'INFORMATIONAL', glyph: 'informational', title: 'Open INFORMATIONAL below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'informational') });
+    ui.editWidgets = trig({ label: 'WIDGETS', glyph: 'widgets', title: 'Open WIDGETS below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'widgets') });
     const gamutSup = field.ok && field.gamutSupport ? field.gamutSupport : { canvas: false, css: false, display: false, reason: 'no WebGPU device: the canvas has no colour space to set' };
     const gamutOK = !!(gamutSup.canvas && gamutSup.css);
     const rg = el('div', 'row tight', gt);

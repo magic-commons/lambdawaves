@@ -471,7 +471,13 @@ export function createModSeam(app) {
          gave no height to read the room against, so its open never racks it; a fold press is a new ask and still may */
       if (!kit && n !== nbEl && (show || !('placed' in n.dataset)) && ph > innerHeight - top - 8 && !document.body.classList.contains('rack-hidden') && !document.body.classList.contains('phone')) {
         app.sh.layout.dockWindow(n.dataset.id); requestAnimationFrame(() => { if (show && n.contains(show)) { show.scrollIntoView({ block: 'nearest' }); bring(show); } else n.scrollIntoView({ block: 'nearest' }); }); return; }
-      const sizes = (kit || n === nbEl) ? 12 * 4 : 1;
+      /* 040 M7 · MIR OPTIONS FITS (Josh 11-09: "The MIR Options window sometimes shows up cut off and disconnected with the scroll bar activated …
+         It shows up when the timeline and nodes is open"): the kit fits OPTIONS and ABOUT to their content (gui.js fitTo — too tall for the page, the
+         body scrolls; at any other width OPTIONS re-packs its columns), and at 1300 × 850 with the TIMELINE docked the shortened and narrowed seats
+         below found room before the full one did — 280 × 510 over NODES, the body scrolling 470 of 632.  The fitted windows are seated WHOLE: their
+         full size only, clear of the doors where the stage has the room, else where the kit put them, over the bar as 039 V1 lets a tall one */
+      const whole = !!kit && /^gui(-about)?$/.test(n.dataset.mirWindow || '');
+      const sizes = (kit || n === nbEl) && !whole ? 12 * 4 : 1;
       const fit = (avoid, narrow = false) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = narrow ? floor.w : Math.floor(pw * (1 - j * 0.04));
         if (narrow ? j || ww >= pw * 0.88 || hh < floor.h : i && (hh < floor.h || ww < floor.w)) continue;
         const at = clearSeat({ ...box, right: box.left + wim + ww, bottom: box.top + rim + hh }, { avoid, view, top }); if (at) return { at, h: k ? hh : 0, w: narrow || j ? ww : 0 }; } return null; };
