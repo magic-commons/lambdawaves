@@ -1664,7 +1664,11 @@ export async function createField(canvas, opts = {}) {
   const MOL_PARAMS = new ArrayBuffer(32), MOL_PARAMS_U = new Uint32Array(MOL_PARAMS), MOL_PARAMS_F = new Float32Array(MOL_PARAMS);
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
   const lineVerts = 44;                                            // box 24 + axes 6 + slice 8, then the corner axis 6
-  const latticeVerts = 17 * 17 * 17 * 6;                           // the larger of the two: dots (6 per node) 29 478 · lattice 27 744
+  /* 040 S1 · DOTS AND LATTICE (Josh: "twice as dense and 50% further … lattice also go a little further"): DOTS stand every half-width out to
+     24 half-widths (49³ nodes; was every 2 out to 16), LATTICE's cells out to 20 (21³; was 16).  The eye's plane through the origin keeps at most
+     (49³ + 49²) / 2 nodes, so that is the buffer; the far plane went 20 → 48 half-widths with them (no depth is kept: x and y keep their bits) */
+  const DOTS_RAD = 24, LATTICE_RAD = 10;
+  const latticeVerts = 49 * 49 * 25 * 6;                           // the larger of the two: dots (6 per node) 360 150 · lattice 52 920
   let latticeCount = 0; const cornerStart = 38;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
@@ -1693,10 +1697,10 @@ export async function createField(canvas, opts = {}) {
   const PARAMS = new ArrayBuffer(32), PARAMS_U = new Uint32Array(PARAMS), PARAMS_F = new Float32Array(PARAMS), ZERO_U32 = new Uint32Array([0]);
   const VIEW = new Float32Array(96), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
   /* LATTICE MESH (wave 108 zero-allocation law): pre-allocated unit grid lines.
-     Radius 8 grid (17^3 nodes). Segments: X (16*17*17), Y (17*16*17), Z (17*17*16) = 13872 segments. */
-  const LATTICE_SEGS = new Int8Array(13872 * 6);
+     Radius 10 grid (21^3 nodes). Segments: 3 × 20 × 21 × 21 = 26460 segments. */
+  const LATTICE_SEGS = new Int8Array(26460 * 6);
   {
-    const rad = 8;
+    const rad = LATTICE_RAD;
     let idx = 0;
     for (let x = -rad; x <= rad; x++) {
       for (let y = -rad; y <= rad; y++) {
@@ -1959,7 +1963,7 @@ export async function createField(canvas, opts = {}) {
     const ps = mat.stage;   // 037 T4 · PULSE: p16.w AMOUNT, p17.x SHAPE, p17.y RATE, p17.z the phase; absent = the homes (AMOUNT 0: bg untouched). p16.xyz and p17.w are chain L's
     v[83] = ps ? ps.pulse : 0; v[84] = ps && ps.shape === 'edge' ? 1 : 0; v[85] = ps ? ps.rate : 0; v[86] = ps && ps.rate > 0 ? pulsePhase(ps.rate) : 0;
     v[87] = lightView(v, mat.light);   // 037 L2: THE LIGHT (p12 … p16.xyz) and THE LEGACY GATE (p17.w)
-    perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
+    perspective(obs.fov || 0.6, aspect, 0.05 * half, 48 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
     device.queue.writeBuffer(viewBuf, 0, v);
     lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);
     device.queue.writeBuffer(vpBuf, 0, M_VP);
@@ -2051,7 +2055,7 @@ export async function createField(canvas, opts = {}) {
     k = cornerStart * 7; latticeCount = 0;
     if (mat.frame !== false && (mat.frameMode === 'lattice' || mat.frameMode === 'dots')) {
       const L = LATTICE; let q = 0;
-      const radius = 8, spacing = h * 2;
+      const dots = mat.frameMode === 'dots', radius = dots ? DOTS_RAD : LATTICE_RAD, spacing = dots ? h : h * 2;
       const camX = VIEW[0], camY = VIEW[1], camZ = VIEW[2];
       const invMaxDist = 1 / (spacing * radius);
       const baseAlpha = mat.lightUI ? 0.22 : 0.16;
@@ -2061,7 +2065,7 @@ export async function createField(canvas, opts = {}) {
       INK_V[0] = inkR; INK_V[1] = inkG; INK_V[2] = inkB; INK_V[3] = 1;
 
       if (mat.frameMode === 'lattice') {
-        const segCount = 13872;
+        const segCount = 26460;
         for (let s = 0; s < segCount; s++) {
           const base = s * 6;
           let ax = LATTICE_SEGS[base] * spacing;
@@ -2100,7 +2104,8 @@ export async function createField(canvas, opts = {}) {
               const da = px * camX + py * camY + pz * camZ;
               if (da > 0) continue;
               const dist = Math.hypot(px, py, pz) * invMaxDist;
-              const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
+              const alpha = baseAlpha * (1 - dist * 0.7);
+              if (!(alpha > 0) || q + 24 > L.length) continue;       // faded out (the corners), or an eye at the origin
 
               L[q++] = px - tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
               L[q++] = px + tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;

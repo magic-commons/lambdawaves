@@ -150,9 +150,9 @@
     "warm": 108,
     "yellow": 0
    },
-   "darkest": 152,
-   "line": "d1ce64b6",
-   "rp": "2e500db0"
+   "darkest": 111,
+   "line": "c795f742",
+   "rp": "212e1bf8"
   },
   "dots+corner": {
    "buckets": {
@@ -164,9 +164,9 @@
     "warm": 9,
     "yellow": 0
    },
-   "darkest": 152,
-   "line": "7c1bbb86",
-   "rp": "7f10bacb"
+   "darkest": 95,
+   "line": "1f02295e",
+   "rp": "5c11968d"
   },
   "dots+corner@occ": {
    "buckets": {
@@ -178,9 +178,9 @@
     "warm": 9,
     "yellow": 0
    },
-   "darkest": 152,
-   "line": "a49bff8e",
-   "rp": "76060a56"
+   "darkest": 95,
+   "line": "b2dbcf1b",
+   "rp": "3e185936"
   },
   "dots+ink": {
    "buckets": {
@@ -193,8 +193,8 @@
     "yellow": 140
    },
    "darkest": 177,
-   "line": "76ca4610",
-   "rp": "564be639"
+   "line": "b2f639d6",
+   "rp": "c77c4c33"
   },
   "dots+ink@occ": {
    "buckets": {
@@ -207,8 +207,8 @@
     "yellow": 140
    },
    "darkest": 177,
-   "line": "714610c0",
-   "rp": "51ff2458"
+   "line": "2275fb2b",
+   "rp": "218fcbf5"
   },
   "dots@occ": {
    "buckets": {
@@ -220,9 +220,9 @@
     "warm": 108,
     "yellow": 0
    },
-   "darkest": 152,
-   "line": "f19fd9da",
-   "rp": "7dd22981"
+   "darkest": 123,
+   "line": "6502f62d",
+   "rp": "51a8af68"
   },
   "lattice": {
    "buckets": {
@@ -234,9 +234,9 @@
     "warm": 108,
     "yellow": 0
    },
-   "darkest": 138,
-   "line": "9c3095c5",
-   "rp": "4e8b294f"
+   "darkest": 124,
+   "line": "c633fef8",
+   "rp": "2c1f245b"
   },
   "lattice+corner": {
    "buckets": {
@@ -248,9 +248,9 @@
     "warm": 9,
     "yellow": 0
    },
-   "darkest": 138,
-   "line": "542c9ade",
-   "rp": "a54e1819"
+   "darkest": 124,
+   "line": "5ee955e5",
+   "rp": "30e50323"
   },
   "lattice+corner@occ": {
    "buckets": {
@@ -262,9 +262,9 @@
     "warm": 9,
     "yellow": 0
    },
-   "darkest": 138,
-   "line": "a24bfd33",
-   "rp": "afdc1673"
+   "darkest": 124,
+   "line": "871fbc00",
+   "rp": "e9dc5c51"
   },
   "lattice+ink": {
    "buckets": {
@@ -277,8 +277,8 @@
     "yellow": 140
    },
    "darkest": 176,
-   "line": "4fd723fd",
-   "rp": "fa6c2473"
+   "line": "e349ff5a",
+   "rp": "9a8795d2"
   },
   "lattice+ink@occ": {
    "buckets": {
@@ -291,8 +291,8 @@
     "yellow": 140
    },
    "darkest": 176,
-   "line": "41284a4c",
-   "rp": "fea2077b"
+   "line": "5fb58d0e",
+   "rp": "3b0d0c0d"
   },
   "lattice@occ": {
    "buckets": {
@@ -304,9 +304,9 @@
     "warm": 108,
     "yellow": 0
    },
-   "darkest": 138,
-   "line": "db9dd153",
-   "rp": "988fdfc6"
+   "darkest": 124,
+   "line": "273b48b2",
+   "rp": "755036fe"
   },
   "off": {
    "buckets": {
