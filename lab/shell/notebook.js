@@ -135,6 +135,16 @@ export function createNotebook(app) {
       const mb = createMenubar({ opener: title, host: document.getElementById('lab'), phone: isPhone,
         menus: Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => wrap(rows())])) });
       layout.menu = { open: mb.open, close: mb.close, get isOpen() { return mb.isOpen; }, scale: 1.04, get enlarged() { return title.classList.contains('menu-open'); } };
+      /* 040 M2 · THE FINDER MENU (Josh 11-09: "Add a new dropdown menu between the logo and 'File' that is: 'Finder', and it would just automatically
+         open the finder system"): the kit's bar builds a list under every group (FOR-KIT: an acting entry), so the app seats one plain group before
+         FILE — a press opens the FINDER (the `windowPicker` action; its hint the registry's), a cursor arriving on it closes the list its hover left
+         open and opens none; W2's walk (below) reads it as a group with no list: Enter · ↓ · ↑ press it, ← → Home End pass over it */
+      const closeList = () => { const o = mb.bar.querySelector('.mb-btn[aria-expanded="true"]'); if (o) o.click(); };   // the kit's own toggle: a synthetic click (detail 0) closes the list
+      { const grp = el('div', 'mb-group mb-act'), b = el('button', 'mb-btn', grp); b.type = 'button'; b.dataset.menu = 'FINDER'; b.dataset.id = 'windowPicker';
+        label(b, 'FINDER'); hint(b, A.get('windowPicker').hint); b.setAttribute('aria-haspopup', 'dialog');
+        b.addEventListener('click', (e) => { e.stopPropagation(); mb.close(); back(() => A.run('windowPicker'))(); });
+        b.addEventListener('pointerenter', (e) => { if (hoverable(e)) closeList(); });
+        mb.bar.prepend(grp); }
       /* 039 W5 · THE TITLE'S FIRST CLICK: a cursor reaching the logo shows the bar on its hover, so the kit's click toggle hid it again under the
          same hand (A #4: five first clicks of five did nothing) — a cursor's click keeps the bar its hover showed, as the kit's groups keep their
          lists (FOR-KIT); a finger's tap still toggles.  W9 · D #3: its hint names the menus and the MAIN MENU's key */
@@ -145,12 +155,14 @@ export function createNotebook(app) {
          groups (an open list follows the focus); in a list ← → step to the next group's list where no submenu takes the key; Escape closes
          the list back to its group, then the bar (the kit's: the focus back on the logo) */
       { const groups = () => [...mb.bar.querySelectorAll('.mb-btn')], isOpen = (b) => b.getAttribute('aria-expanded') === 'true';
-        const openAt = (b, last) => { if (!isOpen(b)) mb.openGroup(b.dataset.menu); const rows = [...b.nextElementSibling.querySelectorAll(':scope > .mb-item:not(:disabled)')];
+        const openAt = (b, last) => { if (!b.nextElementSibling) { closeList(); b.focus({ preventScroll: true }); return; }   // 040 M2: FINDER has no list — the walk lands on it with the lists closed
+          if (!isOpen(b)) mb.openGroup(b.dataset.menu); const rows = [...b.nextElementSibling.querySelectorAll(':scope > .mb-item:not(:disabled)')];
           (rows[last ? rows.length - 1 : 0] || b).focus({ preventScroll: true }); };
         mb.bar.addEventListener('keydown', (e) => { if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
           const k = e.code, g = groups(), btn = e.target.closest('.mb-btn'), item = e.target.closest('.mb-item');
           const step = (b, d) => g[(g.indexOf(b) + d + g.length) % g.length];
           if (btn) {
+            if (!btn.nextElementSibling && (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === 'NumpadEnter')) { e.preventDefault(); btn.click(); return; }   // 040 M2: the FINDER entry presses
             if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === 'NumpadEnter') { e.preventDefault(); openAt(btn, k === 'ArrowUp'); }
             else if (k === 'ArrowRight' || k === 'ArrowLeft') { e.preventDefault(); const to = step(btn, k === 'ArrowRight' ? 1 : -1); if (isOpen(btn)) openAt(to); else to.focus({ preventScroll: true }); }
             else if (k === 'Home' || k === 'End') { e.preventDefault(); g[k === 'Home' ? 0 : g.length - 1].focus({ preventScroll: true }); }
