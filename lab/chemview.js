@@ -88,7 +88,7 @@ export function createChem(host, api) {
      10-18 cap of one step per 334 ms is retired by his word.  Every step rebuilds the volume, so a modulator's writes still coalesce — the first
      lands at once, as the hand's does, and the rest of that frame's wait for the next one, the latest value winning — so a routed sweep steps
      every orbital it crosses at the frame's pace. */
-  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepFrame = 0, clamped = null, stepParked = false;
+  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepFrame = 0, clamped = null, stepParked = false, stepSay = true;
   let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
@@ -824,7 +824,7 @@ export function createChem(host, api) {
     seats();
   }
   /** the modulator's road (chem.orbital's set): one step a frame, the latest value wins; `held` paints the dial over the base (show), else sets it */
-  function stepOrbital(v, held) { stepWant = v; stepHeld = !!held; if (!stepFrame) stepTick(); }
+  function stepOrbital(v, held, say = true) { stepWant = v; stepHeld = !!held; stepSay = say !== false; if (!stepFrame) stepTick(); }   // 040 A3: `say` false under a restore (a parked write keeps it)
   /** a step now, and the road shut until the next frame, which takes the latest write that came meanwhile (a parked write waits for its landing) */
   function stepTick() { stepFrame = 0; if (stepWant === null) return; stepApply(); if (stepWant === null) stepFrame = requestAnimationFrame(stepTick); }
   function stepApply() {
@@ -840,6 +840,7 @@ export function createChem(host, api) {
     orbital = k;
     if (view === 'orbital') pushMatrix();
     refresh();
+    if (stepSay) sayOrbital();   // 040 A3 · THE LANE ANNOUNCES AS THE HAND DOES: the lane's step on the stage, as the dial under the hand (INFORMATIONAL › ORBITALS)
   }
 
   /* ── the real-time run ────────────────────────────────────────────────────────────────────────── */
@@ -1523,6 +1524,8 @@ export function createChem(host, api) {
     get kappa() { return kappa; }, setKappa(v) { if (!Number.isFinite(v)) return kappa; kappa = Math.min(1e-2, Math.max(1e-4, v)); return kappa; },
     get speed() { return speed; }, setSpeed(v) { if (!Number.isFinite(v)) return speed; speed = Math.min(50, Math.max(1, Math.round(v))); return speed; },
     knobs: { kick: () => kapKnob, speed: () => spdKnob, orbital: () => orbKnob },
+    /* 040 A4 · the BASIS and VIEW segs (shell/modulation.js' chem.basis · chem.view EVENT targets) and the seg's own basis road, the say left to the caller */
+    segs: { basis: () => bSeg, view: () => vSeg }, pressBasis,
     /* iteration 007 O · chem.orbital: the range a landing re-registers, the modulator's stepped road, and a file's clamp */
     span() { return span(); }, stepOrbital, get clamped() { return clamped; },
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */

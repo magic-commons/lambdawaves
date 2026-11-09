@@ -219,7 +219,7 @@ export function createStageWords(app) {
       } });
     const pop = el('div', 'lw-pop', dom.stage); pop.setAttribute('aria-hidden', 'true');
     layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
-    const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves
+    const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0, pops: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves, pop-ups (040 A3)
     let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0, popHold = 0;
     function show() {                                                // the markdown wanted now, as a new block if it changed and KaTeX's quarter second has passed
       if (!on) return;
@@ -310,7 +310,7 @@ export function createStageWords(app) {
        *  { hold: true } (a dial under the hand, iteration 007): the line stays lit and follows the number, and fades 1.2 s after the last held one */
       pop(text, { hold = false } = {}) {
         if (!on || !text) return false;
-        clearTimeout(popHold);
+        stats.pops++; clearTimeout(popHold);
         const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 1200); };   // the hand let go: the held line fades from where it is
         if (hold && pop.classList.contains('hold')) { if (pop.textContent !== text) pop.textContent = text; letGo(); return true; }
         const { rs, sb } = rest(), F = freeOf(rs, sb);
