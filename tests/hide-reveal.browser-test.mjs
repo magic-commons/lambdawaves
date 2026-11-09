@@ -180,7 +180,7 @@ try {
   const seat = await tipAt(`document.querySelector('#transport [data-help]')`);
   const knob = await tipAt(`[...document.querySelectorAll('.dev:not(.closed):not(.folded) .k[data-help], .dev:not(.closed):not(.folded) .k [data-help]')].find(__shown)`);
   const menu = await tipAt(`[...document.querySelectorAll('#menubar .mb-item[data-help], #menubar [data-help]')].find(__shown)`,
-    `const tl = document.getElementById('title'); tl.click(); await __w(300); const b = document.querySelector('#menubar .mb-btn'); if (b) { b.click(); await __w(300); }`);
+    `const tl = document.getElementById('title'); tl.click(); await __w(300); const b = document.querySelector('#menubar .mb-btn[aria-haspopup="true"]'); if (b) { b.click(); await __w(300); }`);
   for (const [name, t] of [['a control-surface seat', seat], ['a window knob', knob], ['a menubar row', menu]]) {
     assert.ok(t.shown, 'no hint on ' + name + ': ' + JSON.stringify(t));
     assert.ok(t.inside, 'the hint on ' + name + ' left the viewport: ' + JSON.stringify(t));
