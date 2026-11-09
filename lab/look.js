@@ -130,6 +130,8 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
     setGamut(fn) { gamutCss = fn; },
     markBatchBegin() { batch++; },
     markBatchEnd() { if (batch > 0 && --batch === 0 && dirty) { dirty = false; paintMarks(); } },
+    /** 040 A3: a batch is the boot or a restore landing (persist's restore() · restoreModulation()) — the lanes' words hush under it */
+    get landing() { return batch > 0; },
     /** one scratch context: the CSS colour parser the views use, reachable by a gate (__LW.ink) */
     inkCtx: () => (inkCv || (inkCv = document.createElement('canvas'))).getContext('2d'),
     /** the nine × 37 colours the mark's turn animates through (__LW.mark.stops) */

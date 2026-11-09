@@ -46,6 +46,12 @@ export function createModSeam(app) {
     /* 032 W3: an event target's set is its seg's own road — the option `id` as a hand's press takes it (onChange), refused while its button is hidden
        or greyed, nothing while it is the one held */
     const segRoad = (g, id) => { const b = g && g.button(id); if (!b || b.hidden || b.disabled || g.get() === id) return; g.set(id); if (g.spec && g.spec.onChange) g.spec.onChange(id); };
+    /* 040 A3 · THE LANE ANNOUNCES AS THE HAND DOES (Josh: "Whenever orbital is tied to the timeline, the timeline doesn't show the announcements... it must
+       work as if I myself am turning the knob"): a lane's or a route's change of the STYLE, the observable, the RATE, the ORBITAL, MOLECULES' VIEW and BASIS
+       speaks the hand's own words through the same `say` kinds, so INFORMATIONAL › ANNOUNCE's switches govern both; a restore — a project, an undo, a link, a
+       demo, the facade's rack restore, the boot — says nothing: persist's restore() and restoreModulation() land inside the look's batch (look.landing) */
+    const restoring = () => app.ctl.look.landing, laneSay = (kind, text, o) => { if (!restoring() && app.state.stageText) app.state.stageText.say(kind, text, o); };
+    const rateWord = (v) => 'RATE · ' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' a.u./s';   // the hand's words (shell/transport.js)
     const SLICE_MODES = ['off', 'clip', 'slab'];   // mat.slice.mode 0 · 1 · 2 (CLIP's ON switch and its CLIP | SLAB)
     const defs = [
       /* 0.5.0 C1 · the six saved observer.* routes keep their ids, maps and ranges, and stay HERE (the registry's road writes the pose
@@ -86,7 +92,7 @@ export function createModSeam(app) {
          Its setter schedules NOTHING: while it matters the loop is already running an EVOLVE of its own. */
       { id: 'transport.rate', label: 'RATE', unit: ' a.u./s', map: 'log', min: 0.1, max: 3000, group: 'transport', knob: () => ui.rateKnob,
         hint: 'Set the physics clock rate',
-        get: () => clock.rate, set: (v) => { clock.setRate(v); setKnob(ui.rateKnob, v); } },
+        get: () => clock.rate, set: (v) => { clock.setRate(v); setKnob(ui.rateKnob, v); laneSay('rate', rateWord(v), { hold: true }); } },   // 040 A3: the lane's turn speaks as the hand's
 
       { id: 'material.slice.pos', label: 'CLIP POS', map: 'bipolar', min: -1, max: 1, def: 0, group: 'material', knob: () => ui.slicePosK,
         hint: 'Set the clip or slab position',
@@ -153,7 +159,21 @@ export function createModSeam(app) {
       { id: 'chem.orbital', label: 'MOLECULES ORBITAL', map: 'integer', min: 1, max: MOL_LIMITS.ao, step: 1, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.orbital() : null),
         hint: 'the orbital VIEW ORBITAL draws, ascending in ε',
         get: () => { const k = app.state.chem ? app.state.chem.orbital() : null; return Number.isFinite(k) ? k : NaN; },   // NaN before a molecule: the base is not synced from nothing
-        set: (v) => { if (app.state.chem) app.state.chem.stepOrbital(v, app.state.modHost.registry.isModulated('chem.orbital')); } },
+        set: (v) => { if (app.state.chem) app.state.chem.stepOrbital(v, app.state.modHost.registry.isModulated('chem.orbital'), !restoring()); } },   // 040 A3: the step speaks (ORBITAL · …) unless a restore parked it
+      /* 040 A4 · EVENTS FOR THE BASIS AND THE VIEW (Josh: "Currently I can't make event with basis sets and view mode (orbital, density, mix, etc.)"): MOLECULES'
+         BASIS and VIEW segs as banded targets under the `chem` root (POWER OFF swallows them as every chem.* write, 038 C1).  A set is the seg's own road and
+         THE EVENT IS A HAND: VIEW goes through chemview's toView(id, true) — THE HAND DECIDES THE VIEW, the register follows, the words speak — and BASIS through
+         pressBasis (a live solve or the volume's rung; a rung the molecule lacks is greyed and stands down).  MODE and molSession.selected are untouched */
+      ...(app.state.chem && app.state.chem.segs ? (() => { const C = app.state.chem, CS = C.segs, ids = (g) => g.spec.options.map((o) => o.id), B = ids(CS.basis()), W = ids(CS.view());
+        return [
+          { id: 'chem.basis', label: 'MOLECULES BASIS', map: 'integer', min: 0, max: B.length - 1, step: 1, group: 'chem', knob: () => null, options: B.map((_, i) => i), seg: () => CS.basis(), of: (b) => B.indexOf(b),
+            hint: 'MOLECULES BASIS: the ladder STO-3G … 6-31+G* by number',
+            get: () => B.indexOf(C.basis),
+            set: (v) => { const g = CS.basis(), id = B[v | 0], b = id && g.button(id); if (!b || b.hidden || b.disabled || g.get() === id) return; g.set(id); C.pressBasis(id); laneSay('basis', 'BASIS · ' + b.textContent); } },
+          { id: 'chem.view', label: 'MOLECULES VIEW', map: 'integer', min: 0, max: W.length - 1, step: 1, group: 'chem', knob: () => null, options: W.map((_, i) => i), seg: () => CS.view(), of: (w) => W.indexOf(w),
+            hint: 'MOLECULES VIEW by number: DENSITY · ORBITAL · MIX · ESP …',
+            get: () => W.indexOf(C.view),
+            set: (v) => { const g = CS.view(), id = W[v | 0], b = id && g.button(id); if (!b || b.hidden || b.disabled || C.view === id) return; C.setView(id, !restoring()); } }]; })() : []),
       /* THE REGISTER's SLOTS (REGISTER-WINDOW-SPEC §6): MORPH, and eight lane slots in lane order — S₀ is slot 1.
          PRESENT-only like every target here: a setter stores a number and the register's own frame push reads it.
          A slot with no lane behind it is a no-op, which is the present-only law for a lane that is not there. */
@@ -191,12 +211,12 @@ export function createModSeam(app) {
         options: () => (ui.styleList ? ui.styleList().map(([s]) => STYLE[s]) : null), seg: () => ui.styleSeg, of: (s) => STYLE[s],
         hint: 'WAVE STYLE, in the seg’s order (its visible styles)',
         get: () => mat.style | 0,
-        set: (v) => { const s = drawStyle(STYLE_NAMES[v | 0]), b = ui.styleSeg && ui.styleSeg.button(s); if (!b || b.hidden || mat.style === STYLE[s]) return; const from = mat.style | 0; mat.style = STYLE[s]; ui.styleRecall(from, mat.style, true); ui.styleSeg.set(s); schedule(TIER.PRESENT); } },   // 038 K1: a lane's switch recalls the hand's memory (and starts none)
+        set: (v) => { const s = drawStyle(STYLE_NAMES[v | 0]), b = ui.styleSeg && ui.styleSeg.button(s); if (!b || b.hidden || mat.style === STYLE[s]) return; const from = mat.style | 0; mat.style = STYLE[s]; ui.styleRecall(from, mat.style); ui.styleSeg.set(s); schedule(TIER.PRESENT); laneSay('style', 'STYLE · ' + b.textContent); } },   // 038 K1 · 040 A2: a lane's switch saves and recalls as a hand's · 040 A3: and speaks
       { id: 'material.view', label: 'VIEW', map: 'integer', min: 0, max: WAVE_VIEWS.length - 1, step: 1, group: 'material', knob: () => null,
         options: WAVE_VIEWS.map((_, i) => i), seg: () => ui.viewSeg, of: (w) => WAVE_VIEWS.indexOf(w),
         hint: 'the observable by number: 0 ρ · 1 phase · 2 Re · 3 Im',
         get: () => WAVE_VIEWS.indexOf(waveView(mat.view) || 'density'),
-        set: (v) => { const w = WAVE_VIEWS[v | 0], b = ui.viewSeg && ui.viewSeg.button(w); if (!b || b.hidden || b.disabled || mat.view === VIEW[w]) return; mat.view = VIEW[w]; ui.viewSeg.set(w); schedule(TIER.PRESENT); } },
+        set: (v) => { const w = WAVE_VIEWS[v | 0], b = ui.viewSeg && ui.viewSeg.button(w); if (!b || b.hidden || b.disabled || mat.view === VIEW[w]) return; mat.view = VIEW[w]; ui.viewSeg.set(w); schedule(TIER.PRESENT); laneSay('view', b.textContent); } },   // 040 A3
       { id: 'palette.index', label: 'PALETTE', map: 'integer', min: 0, max: PALETTES.length - 1, step: 1, group: 'material', knob: () => null, options: PALETTES.map((_, i) => i),
         hint: 'the palette by number, in the PALETTE menu order',
         get: () => { const P = app.state.palette, i = P ? PALETTES.findIndex((q) => q.id === P.id) : -1; return i >= 0 ? i : NaN; },

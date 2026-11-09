@@ -2,6 +2,15 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 040
+
+EVENTS FOR THE BASIS AND THE VIEW (040 A4, Josh: "Currently I can't make event with basis sets and view mode (orbital, density, mix, etc.)"):
+`chem.basis` (MOLECULES BASIS, the ladder STO-3G … 6-31+G* by number) and `chem.view` (MOLECULES VIEW: DENSITY · ORBITAL · MIX · ESP · SPIN ·
+Δ LDA−RHF by number) join AN EVENT IS A STEP CLIP ON A BANDED TARGET — their segs carry `data-event`, their buttons `data-v`, so CREATE EVENT and
+COPY VALUE stand on them. A set is the seg's own road (`lab/shell/modulation.js`): the BASIS through chemview's `pressBasis` (a live solve, or the
+rung an installed volume holds; a greyed rung stands down), the VIEW through `toView(id, true)` — the event is a hand (THE HAND DECIDES THE VIEW).
+Both sit under the `chem` root, so MOLECULES' POWER quiets them (038 C1); MODE and `molSession.selected` are untouched.
+
 ## The laws of 038 (chain T, MIR 1.5.7-alpha.8 … 12; the fix T8, alpha.14)
 
 THE EMPTY TIMELINE RESTS AT ONE (038 T1, alpha.8; Josh 11-06: "If there are no clips in the timeline, the timeline shouldn't play all the way

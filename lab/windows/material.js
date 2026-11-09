@@ -137,21 +137,26 @@ export function createMaterial(app) {
     /* 038 K1 · A STYLE REMEMBERS ITS KNOBS (Josh: "Each style mode … if not tethered to a macro/timeline clip should retain their information"): leaving a
        style keeps the knobs it reads (EXPOSURE and HUE always, SOFT · ISO · GRAIN · KNEE as STYLE_READS has them) in `mat.styleMem[<style>]`, and entering
        one puts its remembered values back.  A knob a route (the modulation window's list) or a timeline clip holds is TETHERED, skipped both ways: the route
-       owns it (`isModulated` is true only while a modulator writes, so the routes and the clips are read).  A hand's switch (the seg, C, the stage's STYLE ›)
-       and the STYLE target's set only; a restore, an undo, a demo and LW.setStyle keep the file's own values.  `styleMem` rides presentation.mat (absent:
-       nothing remembered; never in NEW; a link does not carry it); it is replaced, never mutated, because a restore hands it the history's own record */
+       owns it (the routes and the clips are read; 040 A1 A ROUTED KNOB IGNORES THE STYLE'S MEMORY, Josh: "if exposure is now tied to the timeline, then it
+       should completely ignore the style-parameter saving rule": a target a modulator is writing now — `isModulated`, a film's drive — is tethered too, so
+       the automation's value always stands).  A hand's switch (the seg, C, the stage's STYLE ›) and the STYLE target's set only; a restore, an undo, a demo
+       and LW.setStyle keep the file's own values.  `styleMem` rides presentation.mat (absent: nothing remembered; never in NEW; a link does not carry it);
+       it is replaced, never mutated, because a restore hands it the history's own record.
+       040 A2 · THE STYLE'S MEMORY SURVIVES AN EVENT (Josh: "If I change the exposure knob, and then the event switches to the next style and then returns
+       back to the style, the exposure is different"): the STYLE target's set (an EVENT lane) saves and restores exactly as a hand's switch does; what a
+       playing lane writes into the memory is derived, so projectKey leaves `styleMem` out (shell/notebook.js: A DEMO PLAYS CLEAN, 039 R4) */
     const MEM = [['expK', 'exposure', 'material.exposure'], ['hueK', 'hueShift', 'material.hue'], ['softK', 'softness', 'material.softness'],
       ['isoK', 'iso', 'material.iso'], ['grainK', 'grain', 'material.grain'], ['kneeK', 'knee', 'material.knee']];
     const tethered = () => { const h = mod.host, ed = app.state.tl && app.state.tl.editor, T = new Set(h ? h.model.routeList().map((r) => r.targetId) : []);
       if (ed && ed.model) { const doc = ed.model.state(), on = new Set(doc.clips.map((c) => c.curveId)); for (const c of doc.curves) if (on.has(c.id)) T.add(c.targetId); }
+      if (h) for (const [, , id] of MEM) if (h.registry.has(id) && h.registry.isModulated(id)) T.add(id);   // 040 A1: and whatever a modulator writes now
       return T; };
-    /* `lane` (the STYLE target's road): a lane only refreshes a style the hand already remembered — it starts no memory, so a demo or a file
-       whose STYLE lane plays gains no `styleMem` it did not have */
-    ui.styleRecall = (from, to, lane = false) => {
+    /* a tethered knob keeps its last hand-set number for when it is let go */
+    ui.styleRecall = (from, to) => {
       if (from === to) return;
       const T = tethered(), M = { ...mat.styleMem }, keep = {}, back = M[drawStyle(to)] || {};
       for (const [k, key, id] of MEM) if ((k === 'expK' || k === 'hueK' || STYLE_READS[k].includes(from)) && !T.has(id) && Number.isFinite(mat[key])) keep[key] = mat[key];
-      if (Object.keys(keep).length && (!lane || M[drawStyle(from)])) { M[drawStyle(from)] = { ...M[drawStyle(from)], ...keep }; mat.styleMem = M; }   // a tethered knob keeps its last hand-set number for when it is let go
+      if (Object.keys(keep).length) { M[drawStyle(from)] = { ...M[drawStyle(from)], ...keep }; mat.styleMem = M; }
       for (const [k, key, id] of MEM) if (Number.isFinite(back[key]) && !T.has(id) && back[key] !== mat[key]) { mat[key] = back[key]; ui[k].set(back[key]); if (k === 'hueK') { applyAccent(); paintBar(); } }
     };
     /* the kit's muted look on the three shapes: a knob's own setDisabled, a switch's button, a seg's buttons */
@@ -206,7 +211,7 @@ export function createMaterial(app) {
       ui.espRangeK.set(Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE); ui.espSurfSeg.set(mat.espSurf || 'iso'); ui.espLiveSw.set(!!mat.espLive); ui.espBareSw.set(!!mat.espBare);
       styleSync();
     };
-    { const set0 = ui.styleSeg.set; ui.styleSeg.set = (v) => { set0(v); styleSync(); }; }   // LW.setStyle and a restore set mat.style first
+    { const set0 = ui.styleSeg.set; ui.styleSeg.set = (v) => { set0(v); styleSync(); }; }   // LW.setStyle, a restore and a lane set mat.style first
     styleSync();   // the first paint: the boot's style shows only its own controls
     el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are. Under MOLECULES, SIZE &gt; 0 draws the atoms and RADIUS &gt; 0 the bonds inside any style. ESP spans ±RANGE through a signed log, and beyond it the colour holds; LIVE solves φ again while the density moves, at most once a second — off, once per molecule, basis and VIEW.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
 

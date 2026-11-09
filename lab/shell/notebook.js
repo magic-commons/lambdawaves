@@ -309,7 +309,7 @@ export function createNotebook(app) {
            window is not "unsaved work"; nor is QUALITY, advice the device clamps (D5), nor mat.steps, its shadow (applyRebuild
            writes it from quality.steps: WAVE DANCER's 240 became this device's 160 a frame after its open and read as an edit).
            0.3.1 · S2: the stage is the work (S1 left only the stage in `ui`) and counts, as the overlays and the A/B transition do. */
-        delete pr.quality; delete pr.mat.steps;
+        delete pr.quality; delete pr.mat.steps; delete pr.mat.styleMem;   // 040 A2: the style's memory is a cache a playing STYLE lane writes too (material.js)
         delete pr.layout; delete pr.modwin; delete pr.camera; delete pr.notebook;
         if (pr.domain.auto) delete pr.domain.half; // computed during rebuild, not a project edit
         for (const m of (pr.modulation && pr.modulation.macros) || []) if (m.sourceId) delete m.value;   // S2: a bound macro reads its source (deserialize overwrites the value) — NEW's LFO playing is not an edit

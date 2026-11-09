@@ -2,6 +2,18 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 040
+
+AN AUTOMATED KNOB BELONGS TO THE LANE (040 A1, Josh: "if exposure is now tied to the timeline, then it should completely ignore the style-parameter
+saving rule"): A STYLE REMEMBERS ITS KNOBS' tether reads the route list, every clip's curve AND the registry's `isModulated` — a knob a modulator is
+writing now (a film's drive, a route or a clip whose editor was never built) is skipped both ways by a style switch, so the automation's value stands.
+
+THE STYLE'S MEMORY SURVIVES AN EVENT (040 A2, Josh: "If I change the exposure knob, and then the event switches to the next style and then returns
+back to the style, the exposure is different"): the `material.style` target's set (an EVENT lane) saves and restores the style's knob set exactly as a
+hand's switch does — 038 K1's "a lane refreshes a style the hand remembered and starts no memory" is retired. A DEMO PLAYS CLEAN still holds: what a
+playing lane writes into `mat.styleMem` is derived, so projectKey (lab/shell/notebook.js) leaves `styleMem` out of the unsaved mark (it is a cache;
+the style and every knob still count). Measured: CLOUD 2 → lane SOLID 0.5 → lane CLOUD 2; STAR LOOP and WATER ESP clean through 9 s of PLAY.
+
 ## The laws of 039
 
 THE SUMMONS CLEARS THE DOORS (039 V2, the walks: NODES over the λWAVES logo and 14–17 bar buttons, FOLDERS over CAMERA and the timeline's chips, KEYS over the bar's top row): a window that OPENS — a kit window a menu, a key, a bar button or a restore shows, a card floated off its rack by anything but a hand's drag (a pressed pointer marks the hand's detach), the notebook — moves once, in the float layer's observer microtask, to the seat nearest its own (`lab/summon.js` `clearSeat`, pure) that covers neither the bar (its PLAY and mini-viewer), nor the logo and the menu row's 52-px band, nor an open TIMELINE or MODULATION and their rails, nor a rack column. The order (`shell/modulation.js` `seatOpen`): the full size, then narrower (4 % a step, three at most, ≥ 300 px) and shorter (6 % a step, ≥ 280 px) for a kit window or the notebook, clear of everything; then of all but the racks; then — a stage too small for a work bar and a window beside it (1000 × 700 with the TIMELINE) — of the bar and the logo alone, with the racks and without. The kit's own floor (`min`, FOLDERS' 360 px) can be above ours: placed taller than asked, the window is seated once more from there. With no seat at all it stays where it opened and, if it meets the bar, carries `data-seat="over"` (the bar goes under it, 021 V3). The work bars and PATTERN keep their own seats (the magnet, the dock, the dodge, the anchor); MODULATION has no host `place()` (its floating rail on a rack column is a FOR-KIT line); a hand's later drag is never undone while the window stays open; measured by layout (`offset*`, never the entrance's scale). Probe `tools/v039-shots.mjs summons` (1600 × 900, 1000 × 700, each with and without the TIMELINE).
