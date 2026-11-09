@@ -2,6 +2,15 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 040
+
+THE LANE ANNOUNCES AS THE HAND DOES (040 A3, Josh: "it must work as if I myself am turning the knob ... If I disable announcements, then it shouldn't
+show announcements"): a lane's or a route's write (the registry's modulated set, their one road) of WAVE's STYLE and observable, the transport's RATE,
+MOLECULES' ORBITAL, VIEW and BASIS speaks the hand's own words through the same `say` kinds (`lab/shell/modulation.js` laneSay; the ORBITAL's step
+says on its landing, chemview.js `stepSay`), so INFORMATIONAL › ANNOUNCE's switches govern both. A restore — a project, a demo, an undo, a link, the
+facade's rack restore, the boot — says nothing: its sets land inside the look's batch (`look.landing`; persist's restore() and restoreModulation()
+hold it). A let-go (a clip ends, PAUSE in BASE) is a lane's write too and speaks. `tests/stage-text.browser-test.mjs` §5 (`stageText.stats.pops`).
+
 ## The laws of 039
 
 THE MENUBAR CLEARS THE STAGE CAPTION (039 V6, A #14 · C #18: at 1300 WINDOW and HELP sat on "1s₀ and 2p₀", at 1000 FILE, EDIT, VIEW and PLAY were crossed by the caption): the top of the free stage (`shell/stage-words.js` `freeOf`, the words' and the head's seat) is never above the menu row's band — the kit windows' 52 px times UI SCALE, read off <html> so H (which hides the logo) moves nothing; the caption sits below the menus whether they show or not (at 1000 and 1300: its first glyph at y 53, the row 8–34). FILE › EXPORT's list opens beside FILE's (the kit's menubar: right when it fits, else left — at 1000 × 700 right, 644–884 against 407–647; at UI SCALE 150 % left, 191–551 against 547–907): C #17's "over FILE" is not met at the tip.

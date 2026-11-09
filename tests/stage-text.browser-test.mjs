@@ -120,6 +120,29 @@ try {
   assert.deepEqual(t4.split, { both: { labels: true, formula: true }, labOff: { labels: false, formula: true, caption: t4.mol }, fOff: { labels: true, formula: false } }, 'the two switches are not independent: ' + JSON.stringify(t4.split));
   assert.deepEqual(t4.errs, []);
   pass(`the picture carries "${t4.caption}" (its bytes differ from the captionless picture, which is byte-identical twice); STAGE TEXT off hides the text and takes a clean picture; MOLECULES captions "${t4.mol}"; INFORMATIONAL holds STAGE FORMULA and ATOM LABELS, each its own switch (labels off keep the formula and its caption; formula off keeps the labels), and DISPLAY neither`);
+
+  /* ── 5 · 040 A3 THE LANE ANNOUNCES AS THE HAND DOES: a modulated write (a lane's and a route's one road) on STYLE, the observable, RATE, MOLECULES'
+     VIEW and ORBITAL speaks the hand's words under the same ANNOUNCE switches; a link open and an undo with the lanes holding say nothing (the
+     restore's batch); switched off, a lane's write says nothing ── */
+  const t5 = await ev(`const S = __LW.stageText, R = __LW.mod.registry, H = __LW.history, C = __LW.chem, pop = () => document.querySelector('.lw-pop').textContent;
+    const said = async (id, v, ms = 300) => { const p0 = S.stats.pops; R.applyModulated(id, v); await __w(ms); return [S.stats.pops - p0, pop()]; };
+    S.prefs.set({ sayStyle: true, sayView: true, sayRate: true, sayRegistry: true, sayBasis: true });
+    const on = { style: await said('material.style', 1), view: await said('material.view', 1), rate: await said('transport.rate', 40) };
+    await C.solve('H2O'); C.setOn(true); await __LW.settle(); await __w(400); H.flush(); await __w(450); H.flush();
+    C.setView('density'); await __w(300); on.chemView = await said('chem.view', 1); on.viewIs = C.view;   /* section 4 left VIEW ORBITAL */
+    const k0 = C.orbital(); on.orbital = await said('chem.orbital', k0 > 1 ? k0 - 1 : k0 + 1, 600);
+    __LW.run('style', { id: 'cloud' }); await __w(450); H.flush(); await said('material.style', 1);   /* a hand's row to undo, then the lane holds SOLID again */
+    const p0 = S.stats.pops, undid = H.undo(); await __w(800); const link = __LW.link.open(__LW.link.mint().href); await __w(800); const hushed = S.stats.pops - p0;
+    S.prefs.set({ sayStyle: false, sayView: false, sayRate: false, sayRegistry: false, sayBasis: false });
+    const off = [await said('material.style', 0), await said('transport.rate', 4), await said('chem.view', 0)];
+    C.setOn(false); await __LW.settle();
+    return { on, hushed, link: !!(link && link.opened && link.ok), undid, off: off.map((x) => x[0]), errs: __e.slice() };`);
+  assert.deepEqual([t5.on.style, t5.on.rate, t5.on.chemView, t5.on.viewIs], [[1, 'STYLE · SOLID'], [1, 'RATE · 40.0 a.u./s'], [1, 'VIEW · ORBITAL'], 'orbital'], 'a lane does not speak as the hand: ' + JSON.stringify(t5));
+  assert.ok(t5.on.view[0] === 1 && t5.on.view[1] && t5.on.orbital[0] >= 1 && /^ORBITAL · /.test(t5.on.orbital[1]), 'the observable or the ORBITAL lane is mute: ' + JSON.stringify(t5));
+  assert.ok(t5.link && t5.undid && t5.hushed === 0, 'a link open or an undo with the lanes holding spoke: ' + JSON.stringify(t5));
+  assert.deepEqual(t5.off, [0, 0, 0], 'a lane spoke with its ANNOUNCE switch off: ' + JSON.stringify(t5));
+  assert.deepEqual(t5.errs, []);
+  pass(`a lane's STYLE, observable ("${t5.on.view[1]}"), RATE, MOLECULES VIEW and ORBITAL ("${t5.on.orbital[1]}") speak the hand's words; a link open and an undo with the lanes holding say nothing; with the switches off a lane's write says nothing`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {
