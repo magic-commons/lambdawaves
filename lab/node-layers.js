@@ -1,8 +1,9 @@
 /* lab/node-layers.js — NODES' LAYER types and the one layer host (iteration 019 N3; NODES-DESIGN.md).  A LAYER node is not a filter primitive:
  * it is one absolutely placed div over the stage, blended by the GPU (`mix-blend-mode`): no main-thread work a frame, a fixed GPU cost (019 N,
  * headless rig: VIGNETTE nothing measurable, FILM GRAIN ≈ −20 % presents — a full-screen blended noise layer; research/iteration-019/N-BUILD.md).
- *   FILM GRAIN  a 256² noise tile drawn ONCE per kind (MONO | COLOUR) and repeated; it jumps to a fresh offset 24 times a second by a CSS
- *               stepped animation (`transform` only, keyframes in percentages; none under reduced motion); AMOUNT is its
+ *   FILM GRAIN  a 256² noise tile drawn ONCE per kind (MONO | COLOUR) and repeated; it jumps to a fresh offset 6 times per unit of the
+ *               clock's t (24 a second at the home rate; 040 N2 THE GRAIN KEEPS TIME: `tick(t)`, so a paused clock holds a still grain and a
+ *               scrub moves it; none under reduced motion); AMOUNT is its
  *               opacity, SIZE the tile's scale, SOFT (soft-light) | OVERLAY its blend
  *   VIGNETTE    a radial gradient, multiplied: AMOUNT · FEATHER (where the dark starts) · ROUNDNESS (the frame's ellipse → a circle)
  *   SCANLINES   a repeating gradient, multiplied: PITCH (px) · AMOUNT
@@ -88,8 +89,14 @@ export function paintLayer(g, l, w, h, k, i) {
 }
 
 export function createLayerHost(stage, gpu = null) {   // 024 S2: a `gpu` layer (a SHADER node) is the canvas of `gpu`, lab/node-shader.js
-  let host = null; const divs = new Map();
+  let host = null, j = 0; const divs = new Map();
+  /* 040 N2 · THE GRAIN KEEPS TIME (Josh: "Film grain always plays despite play/pause modes"): the tile's jump is the clock's — jump j = ⌊6·t⌋ hashed
+     to an offset of up to a third of the 1.5 × tile (the film's paintLayer hashes its frame index the same way); written as two custom properties the
+     CSS reads, so reduced motion keeps the tile still */
+  const jump = (i) => { const a = hash32(j * 2 + 1), b = hash32(a ^ 0x9e3779b9), s = i.style; s.setProperty('--gx', ((a / 4294967296) * 33).toFixed(1) + '%'); s.setProperty('--gy', ((b / 4294967296) * 33).toFixed(1) + '%'); };
   return {
+    /** the loop's CPU frame (rack.js, beside the widgets): a new jump only when ⌊6·t⌋ moves */
+    tick(t) { const n = Math.floor(6 * t); if (n === j) return; j = n; for (const d of divs.values()) if (d.dataset.type === 'grain') jump(d.firstElementChild); },
     set(layers) {
       if (!host && !layers.length) return;
       if (!host) { host = document.createElement('div'); host.id = 'nodeLayers'; host.setAttribute('aria-hidden', 'true'); const sk = stage.querySelector('#skeleton'); stage.insertBefore(host, sk ? sk.nextSibling : stage.firstChild); }
@@ -97,7 +104,7 @@ export function createLayerHost(stage, gpu = null) {   // 024 S2: a `gpu` layer 
       for (const [id, d] of divs) if (!live.has(id)) { d.remove(); if (gpu) gpu.drop(d); divs.delete(id); }
       layers.forEach((l, i) => {
         let d = divs.get(l.id);
-        if (!d || d.dataset.type !== l.type) { if (d) { d.remove(); if (gpu) gpu.drop(d); } d = l.gpu && gpu ? gpu.make(l) : document.createElement('div'); d.className = 'node-layer'; d.dataset.type = l.type; if (l.type === 'grain') d.append(document.createElement('i')); divs.set(l.id, d); }
+        if (!d || d.dataset.type !== l.type) { if (d) { d.remove(); if (gpu) gpu.drop(d); } d = l.gpu && gpu ? gpu.make(l) : document.createElement('div'); d.className = 'node-layer'; d.dataset.type = l.type; if (l.type === 'grain') jump(d.appendChild(document.createElement('i'))); divs.set(l.id, d); }
         if (host.children[i] !== d) host.insertBefore(d, host.children[i] || null);   // graph order: a later layer over an earlier one (moved only when it is not there)
         if (l.gpu) { if (gpu) gpu.paint(d, l); return; }
         const s = d.style, { amount, ...look } = l.values, key = JSON.stringify(look);
