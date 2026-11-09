@@ -66,7 +66,8 @@ export function createView(parent, kind, M) {
   const empty = el('div', 'nodes-empty', plane); label(empty, 'Hit + to add a node');
   /* 038 N8 · A CARD THAT GROWS PUSHES THE CARDS BELOW (the window: its cards are placed, not flowed): a card that grows — its FADE · MASK · TARGET fold,
      its body unfolded — moves the cards under it (overlapping its width) down until the gap is GAP again, kept as a nudge; no card is covered */
-  const ro = new ResizeObserver((es) => { if (W) { let pushed = false; for (const e of es) { const c = e.target; if (c === ground) continue; const h = c.offsetHeight; if (c.h0 !== undefined && h > c.h0 && clear(c)) pushed = true; c.h0 = h; } if (pushed) moved(true); } wires(); });
+  /* 040 N7: a card that grows from 0 was laid out while the window was closed (no size): the open's place() seats it, so it pushes nothing and pins nothing */
+  const ro = new ResizeObserver((es) => { if (W) { let pushed = false; for (const e of es) { const c = e.target; if (c === ground) continue; const h = c.offsetHeight; if (c.h0 > 0 && h > c.h0 && clear(c)) pushed = true; c.h0 = h; } if (pushed) moved(true); } wires(); });
   const cards = {}, sel = new Set();
   const hands = el('div', 'nodes-hands', plane), H = new Map(), P = new Map();   // 038 N4: the wires' handles and paths, by their downstream node
   let wsel = null;                                                   // the selected wire: its downstream node's id
