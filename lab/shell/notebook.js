@@ -1,12 +1,12 @@
 /* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, hint, label } from '../mir/kit.js'; import { hoverable } from '../mir/core/kbm.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
+import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, hint, label, ariaLabel } from '../mir/kit.js'; import { hoverable } from '../mir/core/kbm.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle, quatFromYawPitch } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
-import { createWindow } from '../mir/window/window.js'; import { glyphEl, glyphSvg } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
+import { createWindow, windowOf } from '../mir/window/window.js'; import { glyphEl, glyphSvg } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
 import { MODE } from './settings.js';   // 021 R5: ONE MODE (the FINDER's greys)
 import { NOTEBOOK_KEYS } from '../settings-store.js';   // 021 R4: the notebook's 0.4 keys, read once and retired
 export function createNotebook(app) {
@@ -189,12 +189,38 @@ export function createNotebook(app) {
         light: 'lighting sun shadow lamp', stage: 'background colour color gamma axes frame', palette: 'colours colors gradient hue', observer: 'style look cloud',
         camera: 'view zoom rotate orbit fov', clip: 'cut plane slice section', chem: 'molecule chemistry benzene water orbitals', spectrum: 'states hydrogen orbitals levels',
         projects: 'save open files projects', history: 'undo redo', widgets: 'clock text', equalizer: 'audio sound music', informational: 'labels words captions text',
-        settings: 'quality performance theme' };   // the FINDER lists rack windows alone: TIMELINE, MODULATION and the CONTROL SURFACE open from the bar
+        settings: 'quality performance theme' };   // the FINDER lists rack windows alone: TIMELINE, MODULATION and the CONTROL SURFACE are its SPECIAL rows (040 M3)
       { const F = layout.finder, q = F.root.querySelector('.wp-search');
         if (q) q.addEventListener('input', () => { const s = q.value.trim().toLowerCase(); if (!s) return; let first = null;
           for (const b of F.root.querySelectorAll('.wp-list [data-win]')) { if (b.hidden && (FIND_WORDS[b.dataset.win] || '').split(' ').some((w) => w.startsWith(s))) b.hidden = false;
             if (!first && !b.hidden && !b.classList.contains('off')) first = b; }
           if (first && !F.root.querySelector('.wp-list .on')) first.dispatchEvent(new PointerEvent('pointermove')); }); }
+      /* 040 M3 · THE SPECIAL SECTION (Josh 11-09: "Include a new section in finder that is the 'Special' windows which is 'Modulation', 'Timeline', and
+         'Control Surface' (CSB)"): the kit's picker lists rack windows alone (FOR-KIT: `sections`), so a SPECIAL head and its three rows sit under the
+         list, always in view; the search filters them by name, and where no window row matches the first of them is the default Enter takes.  A closed
+         one opens, an open one rises; the CONTROL SURFACE is switched back on where MIR OPTIONS turned it off, scrolled to in its rack, else its play
+         button takes the focus.  The kit's ↑ ↓ walk its own rows (FOR-KIT); Tab reaches these */
+      { const F = layout.finder, q = F.root.querySelector('.wp-search'), bar = () => app.sh.transport && app.sh.transport.bar;
+        const rise = (r) => { const w = r && windowOf(r); if (w) w.raise(); };
+        const sec = el('div', 'wp-special', F.root); sec.setAttribute('role', 'listbox'); ariaLabel(sec, 'SPECIAL');
+        label(el('div', 'wp-head', sec), 'SPECIAL');
+        const rows = [['modulation', 'MODULATION', 'modulation', 'Open MODULATION, or raise it', () => !!layout.modulation.open, () => rise(app.state.modView && app.state.modView.root), () => A.run('modulation')],
+          ['timeline', 'TIMELINE', 'timeline', 'Open the TIMELINE, or raise it', () => !!(app.state.tl && app.state.tl.isOpen()), () => rise(document.querySelector('[data-mir-window="timeline"]')), () => A.run('timeline')],
+          ['transport', 'CONTROL SURFACE', 'controlSurface', 'Show the CONTROL SURFACE where it sits', () => !!bar() && !bar().closed,
+            () => { const b = bar(); if (b.docked) reveal('transport'); else if (b.el.play) b.el.play.focus({ preventScroll: true }); }, () => mirGui().prefs.set('transportBar', true)]]
+          .map(([id, name, glyph, words, open, up, run]) => { const b = el('button', 'wp-row', sec); b.type = 'button'; b.dataset.special = id; b.setAttribute('role', 'option');
+            b.style.setProperty('--i', '12'); b.appendChild(glyphEl(glyph, 'wp-glyph', 16)); label(el('span', 'wp-name', b), name); hint(b, words);
+            const r = { b, name: name.toLowerCase(), go: () => { F.close(); (open() ? up : run)(); } };
+            b.addEventListener('click', r.go); b.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); r.go(); } });   // before the kit's Enter (its marked row)
+            r.open = open; return r; });
+        const def = () => (F.root.querySelector('.wp-list .on') ? null : rows.find((r) => !r.b.hidden));
+        const sync = () => { const s = q.value.trim().toLowerCase();   // after the kit's filter and X7's words (their listeners came first)
+          for (const r of rows) { r.b.hidden = !!s && !r.name.includes(s); r.b.toggleAttribute('data-open', r.open()); }
+          sec.hidden = rows.every((r) => r.b.hidden); const d = s && def(); for (const r of rows) r.b.classList.toggle('on', r === d); };
+        q.addEventListener('input', sync);
+        q.addEventListener('keydown', (e) => { const d = e.key === 'Enter' && !e.shiftKey && def(); if (d) { e.preventDefault(); e.stopPropagation(); d.go(); } });
+        F.root.querySelector('.wp-list').addEventListener('pointermove', () => { for (const r of rows) r.b.classList.remove('on'); });
+        new MutationObserver(() => { if (!F.root.hidden) sync(); }).observe(F.root, { attributeFilter: ['hidden'] }); }
     }
     /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
     installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });
