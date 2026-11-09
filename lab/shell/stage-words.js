@@ -192,9 +192,13 @@ export function createStageWords(app) {
        so the words and the ESP bar keep the furniture's resting boxes AND the stage box they were last placed against — the picture under them
        may widen, the words do not move; H again places them on the live furniture */
     /* 023 R6: the bar's box apart (`tr`), so a side ESP strip can be seated from the stage edge and its own rack only (`free(false)`) */
+    /* 040 I1 · INFORMATIONAL IGNORES A HIDDEN CSB (Josh 11-09): the bar is furniture only while it stands on the stage — racked (docked in its card)
+       or hidden with the racks (B; a FREE bar stays shown, csb.css) the words, the pop-ups and the ESP bar are laid as if it were absent; the racks
+       keep S5's resting boxes */
+    const barAway = (t) => app.sh.layout.docked || (document.body.classList.contains('rack-hidden') && !(t && t.dataset.place === 'free'));
     let kept = null;
     const rest = () => { if (kept && document.body.classList.contains('ui-hidden')) return kept;
-      const tr = app.sh.layout.docked ? null : resting(document.getElementById('transport')), rs = racks().map(resting).filter(Boolean);
+      const t = document.getElementById('transport'), tr = barAway(t) ? null : resting(t), rs = racks().map(resting).filter(Boolean);
       return (kept = { rs: tr ? [...rs, tr] : rs, racks: rs, sb: dom.stage.getBoundingClientRect() }); };
     function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
       const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
@@ -240,7 +244,7 @@ export function createStageWords(app) {
        closed, floated or docked back changes the free stage, so the key carries it and the racks are watched for it */
     let settle = 0;
     const place = (again = true) => { stats.places++; layer.viewChanged({ land: true }); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
-    const rackKey = () => ['rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('') + racks().map((r) => r.id).join();
+    const rackKey = () => ['rack-l', 'ui-hidden', 'rack-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('') + racks().map((r) => r.id).join();   // 040 I1: B takes the bar out of the furniture, so it re-places
     /* iteration 013 N2 (Josh: "When 'cursor' settings are off, the text should stay fixed and not sway"): the kit's layer parts its bodies from a
        moving pointer (mir/info/bodies.js, 260 px of reach) whatever follow and parallax say, so with PARALLAX and DRIFT off the layer is held by
        its own freeze while the pointer is within that reach of the block, and let go as it leaves (a rest that moved meanwhile is reached then);
@@ -308,20 +312,22 @@ export function createStageWords(app) {
       dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },
       /** a POP-UP: one short line on the side away from the formula that fades out; another press restarts it (iteration 001).
        *  { hold: true } (a dial under the hand, iteration 007): the line stays lit and follows the number, and fades 1.2 s after the last held one */
-      pop(text, { hold = false } = {}) {
+      pop(text, { hold = false, kind = '', tex = '' } = {}) {
         if (!on || !text) return false;
         stats.pops++; clearTimeout(popHold);
         const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 1200); };   // the hand let go: the held line fades from where it is
         if (hold && pop.classList.contains('hold')) { if (pop.textContent !== text) pop.textContent = text; letGo(); return true; }
         const { rs, sb } = rest(), F = freeOf(rs, sb);
-        pop.textContent = text; pop.classList.remove('go', 'hold', 'out');
+        pop.textContent = text; pop.dataset.kind = kind; pop.classList.remove('go', 'hold', 'out');   // 040 I4: the pop wears its kind (skin.css)
+        /* 040 I4 · THE MATH FACE: a line that comes with its TeX (WAVE VIEW's) is set by the page's KaTeX — LaTeX's own italic 𝜓 — the text its fallback */
+        if (tex && globalThis.katex) try { pop.innerHTML = globalThis.katex.renderToString(tex, { throwOnError: false, output: 'html' }); } catch (_) { /* the text stands */ }
         pop.style.left = (sb.left + (F.L + F.R) / 2) + 'px'; pop.style.top = (sb.top + Math.max(F.T, at(F, pop.offsetHeight, !seat.bottom))) + 'px';
         void pop.offsetWidth; pop.classList.add(hold ? 'hold' : 'go'); if (hold) letGo(); return true;
       },
       /** THE ONE VERB an emitter speaks through (iteration 007): `kind` is a row of KINDS; nothing is written while that kind's switch is off */
       say(kind, text, o = {}) {
         const k = KIND.get(kind); if (!k || !P.get(k.key)) return false;
-        return k.seat === 'fade' ? api.announce(text, o.ttl) : k.seat === 'pop' ? api.pop(text, o) : false;
+        return k.seat === 'fade' ? api.announce(text, o.ttl) : k.seat === 'pop' ? api.pop(text, { ...o, kind }) : false;
       },
       /** is this kind on? (THE HEAD asks before it waits for a landing) */
       wants: (kind) => { const k = KIND.get(kind); return !!(k && on && P.get(k.key)); },

@@ -59,7 +59,10 @@ export function createRackWiring(app) {
       /* 039 R8 · THE DROPPED CARD GOES TO THE TOP (S-REVIEW #9, 018 C4): the kit lays a card dropped into a rack where the hand let go — the
          detached CONTROL SURFACE card too; the docked bar's card is the left rack's top whatever the hand did, so the kit's persisted change re-seats it */
       if (t && layout.docked && !t.classList.contains('floating') && layout.dockHost().querySelector('.dev') !== t) { layout.seatTransport(); saveSettings(); } } });   // a kit-side act moved a window: the mask follows (what is remembered is saveSettings', on its own edges); 038 S1: the TRANSPORT's pop chip says where it is
-  for (const [id, g] of [['rackToggle', 'rackToggle'], ['rackFav', 'heart']]) { const b = document.getElementById(id); if (b) setGlyph(b, g); }   // 021 V2: the kit wrote its text ◧ ☆ into λWAVES' own nodes; the table's glyphs (no kit seat needed)
+  for (const [id, g] of [['rackToggle', 'rackToggle'], ['rackFav', 'heart']]) { const b = document.getElementById(id); if (b) setGlyph(b, g); }
+  /* 040 I6 · THE GHOST: the ◧ wears the ghost before its window, behind it under B — rk.setHidden writes body.rack-hidden alone, so the class is watched */
+  { const t = document.getElementById('rackToggle'), ghost = () => { const g = rk.hidden ? 'rackHidden' : 'rackToggle'; if (t && t.dataset.gly !== g) setGlyph(t, g); };
+    ghost(); new MutationObserver(ghost).observe(document.body, { attributes: true, attributeFilter: ['class'] }); }   // 021 V2: the kit wrote its text ◧ ☆ into λWAVES' own nodes; the table's glyphs (no kit seat needed)
   const devTitle = (d) => ((d.querySelector('.dev-eyebrow') || {}).textContent || d.dataset.id).trim();
   for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), glyph: WINDOW_GLYPH[d.dataset.id], hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
   /* ── iteration 006 R · A RACK'S SCROLLBAR ANSWERS ITS CONTENT, NEVER ITS MOTION ─────────────────────────────────────────────

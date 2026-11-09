@@ -497,8 +497,11 @@ body.window-info-off .settings-help { display:none; }
 .palette-enable > .mir-ramp-sel { flex: 0 0 auto; }
 .palette-enable > .mir-ramp-sel > .mir-ramp-remove { margin-left: 0; }
 .lw-pop { position: fixed; left: 50%; top: 0; z-index: 21; pointer-events: none; user-select: none; white-space: nowrap; opacity: 0;
-  transform: translateX(-50%); font-size: calc(15px * var(--lw-pop-size, 1)); letter-spacing: .08em; font-weight: 600;
+  transform: translateX(-50%); font-size: calc(15px * var(--lw-pop-size, 1)); letter-spacing: .08em; font-family: var(--font-math); font-weight: 400;
   color: hsl(40 33% 96%); text-shadow: 0 0 8px hsl(228 40% 4% / .55), 0 0 2px hsl(228 40% 4% / .55); }
+/* 040 I4 · THE MATH FACE (Josh 11-09: "Re, Im, p … is supposed to be a math font, even the psi … the classical greek font they use in LaTeX"; "some of the
+   other announcements … a serif font"): every pop-up is set in STIX Two Math (its one weight; its Latin is the serif); WAVE VIEW's is KaTeX's (stage-words.js) */
+.lw-pop[data-kind="view"] { letter-spacing: 0; font-size: calc(17px * var(--lw-pop-size, 1)); }
 [data-theme="light"] .lw-pop { color: hsl(232 22% 10%); text-shadow: 0 0 8px hsl(42 45% 97% / .85), 0 0 2px hsl(42 45% 97% / .85); }
 .lw-pop.go { animation: lw-pop 1.6s ease-out forwards; }
 @keyframes lw-pop { 0% { opacity: 0; transform: translate(-50%, 6px); } 12% { opacity: 1; transform: translate(-50%, 0); } 65% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -4px); } }
@@ -584,13 +587,19 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 /* 036 G2 · THE DECKS' EDGES (picker.js, the two .mm-edge bands): WHILE a deck or the tutorial's wall scrolls (#lwMenu.mm-moving) the scroller
    fades a section out over its first and last 72 px (--mm-edge eases 0 → 72 px), and under FROST a band of PROGRESSIVE BLUR grows over each
    edge — two layers, 6 px over the whole band and 16 px near the edge, each masked so the blur grows toward the edge — so ATOMIC, MOLECULAR and
-   EXPANSIONS pass one another gradually; at rest nothing is faded (a deck's first row sits 8 px under the edge).  The rows are placed by name,
+   EXPANSIONS pass one another gradually; (040 I5, below: the fade stands where more lies beyond an edge).  The rows are placed by name,
    so the bands share the scroller's cell; the head stays above them; FOLDERS and the face have none. */
 @property --mm-edge { syntax: '<length>'; inherits: false; initial-value: 0px; }
+/* 040 I5 · THE LIBRARY'S EDGES FADE (Josh 11-09: "the transition looks like it's fading away when scrolling above and below vs a hard clip-off"): the
+   decks' fade stands — not only while they move — on each edge with more beyond it (picker.js `edges()`: .mm-up · .mm-down), so a section passing
+   an edge fades from the first pixel of the motion; the first deck's top and the last deck's foot stay whole; the blur bands are as they were */
+@property --mm-top { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --mm-foot { syntax: '<length>'; inherits: false; initial-value: 0px; }
 #lwMenu .mm-top { grid-row: 1; } #lwMenu .mm-scroll { grid-row: 2; grid-column: 1; } #lwMenu .mm-caption { grid-row: 3; }
-#lwMenu .mm-scroll { --mm-edge: 0px; transition: --mm-edge 260ms var(--ease);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); }
-#lwMenu.mm-moving > .mm-scroll { --mm-edge: 72px; }
+#lwMenu .mm-scroll { --mm-top: 0px; --mm-foot: 0px; transition: --mm-top 260ms var(--ease), --mm-foot 260ms var(--ease);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-top), #000 calc(100% - var(--mm-foot)), transparent); mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-top), #000 calc(100% - var(--mm-foot)), transparent); }
+#lwMenu .mm-scroll.mm-up { --mm-top: 32px; } #lwMenu .mm-scroll.mm-down { --mm-foot: 32px; }   /* at rest a short fade, clear of a deck's first row */
+#lwMenu.mm-moving > .mm-scroll.mm-up { --mm-top: 72px; } #lwMenu.mm-moving > .mm-scroll.mm-down { --mm-foot: 72px; }   /* moving, 036's 72 px */
 #lwMenu .mm-edge { grid-row: 2; grid-column: 1; position: relative; z-index: 2; --mm-edge: 0px; height: var(--mm-edge); transition: --mm-edge 260ms var(--ease); pointer-events: none; display: none; }   /* it grows from the edge: an opacity under 1 would cut its blur off from the backdrop */
 #lwMenu.mm-moving > .mm-edge { --mm-edge: 72px; }
 #lwMenu .mm-edge.top { align-self: start; } #lwMenu .mm-edge.foot { align-self: end; }
@@ -876,11 +885,10 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
  * a knob column of 56 px for each SIZE and PAD, the headings the kit's group labels, the fold its own line.  A switch fills its cell. */
 .lw-info-card .grp { margin: 0 0 6px; gap: 0; }
 .lw-info-card .grp > .row { display: grid; gap: 6px 8px; align-items: center; justify-items: stretch; margin: 2px 0; }   /* 023 R2: 4 px between rows = the 4 px between a row's lines (even gaps) */
-.lw-info-card .info-bar > .info-side { width: 100%; min-width: 0; }   /* 018 B7: ESP BAR · SIDE · PAD */
-.lw-info-card .info-seat > .lw-fold { width: 30px; min-width: 0; height: 26px; min-height: 26px; padding: 0; justify-self: center; }
-.lw-info-card .info-grid > .sw, .lw-info-card .info-words > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
-.lw-info-card .info-grid > .sw .sw-lbl, .lw-info-card .info-words > .sw .sw-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lw-info-card .info-seat > .segw .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lw-info-card :is(.info-bar > .info-side, .info-words > .info-pos) { width: 100%; min-width: 0; }   /* 018 B7: ESP BAR · SIDE · PAD; 040 I3: STAGE FORMULA · POSITION · SIZE */
+.lw-info-card .row.info-seat > .lw-fold { width: 30px; min-width: 0; height: 26px; min-height: 26px; padding: 0; justify-self: center; }
+.lw-info-card :is(.info-grid, .info-words, .info-seat) > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
+.lw-info-card :is(.info-grid, .info-words, .info-seat) > .sw .sw-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* iteration 012 R1: BALL AND STICK's switch shortened to one column, OPACITY and SIZE beside it; CURSOR and MARKS two columns of switches side by side */
 .lw-info-card .info-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 4px; align-items: start; }
 .lw-info-card .info-col > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
