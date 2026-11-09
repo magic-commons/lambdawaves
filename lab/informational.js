@@ -52,7 +52,7 @@ export function createInformational(app) {
   const seat = row(words, ['announceAll'], 'info-seat');   // 040 I3: ANNOUNCE ALL · the fold's chevron · PAD — always shown
   const announce = group(w.body, 'ANNOUNCE');
   /* 040 I3 (Josh: "move the ESP bar row into the hidden expanded section"): the fold's first row; its own `hidden` (a molecule's row) stays its own */
-  ui.espBarRow = row(announce, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar');   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it)
+  ui.espBarRow = row(announce, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar'); announce.prepend(ui.espBarRow);   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it); 040 I3: above the ANNOUNCE heading
   ui.espBarRow.hidden = !(app.state.chem && app.state.chem.on);   // 018 B10: a molecule's row — hidden under hydrogen or an atom; WAVE's modeSync re-syncs it
   /* iteration 012 R1: ORBITALS is one switch for the two orbital kinds, so the pop-ups' SIZE takes the grid's last cell (where STYLE · PALETTE stood) */
   row(announce, [...INFO_ROWS.filter((r) => r.group === 'announce' && r.type === 'bool').map((r) => r.key), 'popSize'], 'info-grid');
