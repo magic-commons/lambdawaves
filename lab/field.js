@@ -1033,7 +1033,9 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
         return vec4<f32>(oa + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);   // the skeleton: alpha 1 whether or not THE OBJECT MASK lives
       }
     }
-    let a0 = objA(false); return vec4<f32>(min(bgOut, vec3<f32>(1.0)) * a0, a0);
+    /* 040 S3 · DITHER REACHES THE STAGE (Josh's 039 close: "DITHER reaches only the march, not the stage outside the box"): the miss takes the
+       dither the march's ending takes, so the box is no patch of grain on a smooth ground.  DITHER 0 adds ± 0: THE LOCK's bits */
+    let a0 = objA(false); return vec4<f32>(min(bgOut + bayer8(in.pos.xy) * (V.p2.w / 255.0), vec3<f32>(1.0)) * a0, a0);
   }
   let steps = max(V.fwd.w, 8.0);
   let ds = (tf - t0) / steps;

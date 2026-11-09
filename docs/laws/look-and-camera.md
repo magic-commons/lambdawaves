@@ -97,6 +97,8 @@ summons (index 0, no mitosis). EDIT STAGE is `summon(rk, 'settings', 'stage')`; 
 GAMMA EVERYWHERE (037 T3, Josh: "gamma seems to only work for inside the box"): a ray that misses the box or the cut, and the three NaN
 fallbacks, take the same output gamma as a ray through the field (`lab/field.js` `bgOut`), selected out at GAMMA 1 so that picture — THE LOCK's
 — is bit-identical.
+DITHER REACHES THE STAGE (040 S3): the same miss takes the dither the march's ending takes (`bayer8` × DITHER ÷ 255 after the gamma), so the box
+is no patch of grain on a smooth ground; DITHER 0 adds ± 0 — THE LOCK's bits. `tests/camera-shift` marks the march by EXPOSURE 1e12 since.
 
 PULSE REDUX (040 S2, over 037 T4's first STAGE FX; Josh: "Redo the whole thing but keep the machinery. Have a 360 knob go from center to the edge
 and back to the glow of the center; find a way to make it cyclic. That way I can modulate it"): the STAGE FX wash the stage — `bg` × 2.2 + 0.035 on
