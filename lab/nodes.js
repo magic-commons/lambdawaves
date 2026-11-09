@@ -132,7 +132,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     if (!mod || !mod.register) return;
     const T = TYPES[q.type];
     for (const K of knobsOf(q)) try {
-      mod.register(ID(q, K.k), { label: (q.name || T.label) + ' ' + K.label, min: K.min, max: K.max, step: K.step || 0, map: K.log ? 'log' : K.step === 1 ? 'integer' : 'linear', unit: K.unit, hint: K.hint || T.hint,
+      mod.register(ID(q, K.k), { label: (q.name || T.label) + ' ' + K.label, min: K.min, max: K.max, step: K.step || 0, map: K.wrap ? 'wrap' : K.log ? 'log' : K.step === 1 ? 'integer' : 'linear', unit: K.unit, hint: K.hint || T.hint,
         def: K.home, group: 'nodes', flash: flashStep(K), get: () => q.values[K.k], set: (v) => setValue(q, K.k, v, 'mod'), knob: () => knobOf(q, K.k) });
     } catch (e) { console.warn('NODES: a knob is no target', e); }
   }
