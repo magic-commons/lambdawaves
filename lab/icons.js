@@ -100,7 +100,11 @@ const ICONS = {
   notebook: box(6, 3, 13, 18, 2) + p('M9.5 8h6M9.5 12h6M9.5 16h3.5') + p('M6 7H4M6 12H4M6 17H4'),                // a bound, lined page
   informational: p('M4.5 4h15A1.5 1.5 0 0 1 21 5.5v10a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17h-1A1.5 1.5 0 0 1 3 15.5v-10A1.5 1.5 0 0 1 4.5 4Z') +
     dot(12, 7.6, 1.15) + p('M12 10.4v3.6'),                                                                      // an i in a speech line: the stage's words
-  palette: dot(19, 12, 2.3) + dot(15.5, 18.06, 2.3) + dot(8.5, 18.06, 2.3) + dot(5, 12, 2.3) + dot(8.5, 5.94, 2.3) + dot(15.5, 5.94, 2.3),   // a ring of swatches
+  /* 040 M6 · THE PALETTE (Josh: "an actual palette with a paintbrush" — a filled palette, three round paint wells, a brush laid across its right
+     side): the disc cut along the brush (the knockout), the wells cut out of it, the bristles solid and the handle the house stroke */
+  palette: solid('M16.28 6.89A8.2 8.2 0 1 0 10.54 20.59Z M3.8 12.4a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0Z M5.92 8.42a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0Z ' +
+    'M10.4 7.95a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0Z M16.39 11.29 15.65 13.04 14.97 13.52Q13.91 16.05 14.5 18.9 16.95 17.32 18.01 14.79L17.86 13.97 18.6 12.22Z') +
+    p('M21.2 2.9 17.34 12.12'),
   lens: p('M3 8.5A1.5 1.5 0 0 1 4.5 7h3L9 4.5h6L16.5 7h3A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z') + c(12, 13, 3.6),   // CAMERA: a lens
   stage: box(3, 4.5, 18, 15, 2.5) + c(12, 12, 2.6) + p('M7 8.5 8.8 10M17 8.5 15.2 10M7 15.5 8.8 14M17 15.5 15.2 14'),   // 037 T1 STAGE: the frame, its centre and the wash between
   widgets: box(3, 3, 8, 8, 2) + box(13, 3, 8, 8, 2) + box(3, 13, 8, 8, 2) + c(17, 17, 4),   // 037 W3 WIDGETS: a home screen's tiles, one of them round
