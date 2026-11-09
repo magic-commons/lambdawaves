@@ -135,8 +135,15 @@ export function createNotebook(app) {
       /* 039 W5 · THE TITLE'S FIRST CLICK: a cursor reaching the logo shows the bar on its hover, so the kit's click toggle hid it again under the
          same hand (A #4: five first clicks of five did nothing) — a cursor's click keeps the bar its hover showed, as the kit's groups keep their
          lists (FOR-KIT); a finger's tap still toggles.  W9 · D #3: its hint names the menus and the MAIN MENU's key */
-      document.addEventListener('click', (e) => { if (title.contains(e.target) && mb.isOpen && e.detail > 0 && hoverable(e)) e.stopPropagation(); }, true);
-      hint(title, 'the menus — L opens the MAIN MENU: tutorial · library');
+      /* 040 I2 · THE LOGO'S TWO ROADS (Josh 11-09: "Clicking Logo when UI is showing opens finder" · "Clicking on the logo during hide/reveal UI
+         would disable hide/reveal mode"): a cursor's click never runs the kit's toggle (its hover shows the menus) — with the interface shown it
+         opens the FINDER, in the reveal mode (B: the logo is the flag alone) it ends the mode; a finger's tap keeps the kit's toggle, Enter keeps
+         THE MENUS BY KEYBOARD; H (no logo) stays H's and the context menu's */
+      const away = () => document.body.classList.contains('rack-hidden');
+      document.addEventListener('click', (e) => { if (!title.contains(e.target) || !(e.detail > 0) || !hoverable(e)) return;
+        e.stopPropagation(); mb.close(); A.run(away() ? 'rack' : 'windowPicker'); }, true);
+      const titleHint = () => hint(title, away() ? 'Click: bring the interface back · hover: the menus' : 'Click: the FINDER · hover: the menus · L: MAIN MENU');
+      titleHint(); title.addEventListener('pointerenter', titleHint); title.addEventListener('focus', titleHint);
       /* 039 W2 · THE MENUS BY KEYBOARD (the kit's bar walks a list's rows ↑ ↓ and opens a submenu on →, but a group takes no arrow and a key's
          open leaves the focus on the group — FOR-KIT): on a group Enter or ↓ opens it at its first row (↑ its last), ← → Home End walk the
          groups (an open list follows the focus); in a list ← → step to the next group's list where no submenu takes the key; Escape closes
