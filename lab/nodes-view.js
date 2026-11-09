@@ -86,7 +86,7 @@ export function createView(parent, kind, M) {
     const gw = ground.clientWidth, gh = ground.clientHeight, zz = clampZ(Math.min((gw - 48) / (x1 - x0), (gh - 48) / (y1 - y0)));
     setPan([(gw - (x1 - x0) * zz) / 2 - x0 * zz, (gh - (y1 - y0) * zz) / 2 - y0 * zz], zz); keep();
   }
-  const paintSel = () => { for (const [id, n] of Object.entries(cards)) n.c.classList.toggle('sel', sel.has(id));
+  const paintSel = () => { for (const [id, n] of Object.entries(cards)) { n.c.classList.toggle('sel', sel.has(id)); if (W && id !== 'in' && id !== 'out') M.editing(id, 'sel', sel.has(id)); }   // 040 N1: a selected node is edited
     for (const [id, h] of H) h.classList.toggle('sel', id === wsel); for (const [id, p] of P) p.classList.toggle('sel', id === wsel); };
   const pick = (ids, add) => { if (!add) sel.clear(); for (const id of ids) sel.add(id); wsel = null; paintSel(); };
   const pickWire = (id) => { sel.clear(); wsel = id; paintSel(); };
@@ -124,6 +124,9 @@ export function createView(parent, kind, M) {
   function make(q) {
     const t = T[q.type], n = node(q.id, t.label, true, true, q.type, MARK[t.cls]);
     n.c.dataset.type = q.type; n.c.title = t.hint || '';
+    /* 040 N1 · the node is EDITED while its card is under the pointer or holds the focus (the stage's focal handle shows, lab/node-focus.js) */
+    n.c.addEventListener('pointerenter', () => M.editing(q.id, kind + ':hover', true)); n.c.addEventListener('pointerleave', () => M.editing(q.id, kind + ':hover', false));
+    n.c.addEventListener('focusin', () => M.editing(q.id, kind + ':focus', true)); n.c.addEventListener('focusout', (e) => { if (!n.c.contains(e.relatedTarget)) M.editing(q.id, kind + ':focus', false); });
     const v = el('button', 'nodes-chev', null); v.type = 'button'; chip(v, 'chevronDown', 'FOLD OR UNFOLD'); n.bar.prepend(v); v.addEventListener('click', () => M.setFold(q.id, !q.fold));
     if (!W) n.name.addEventListener('dblclick', () => renameAt(q.id));
     if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip' + (t.draw ? ' nodes-drawn' : '')); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }

@@ -14,36 +14,49 @@ const H = 'HEAVY — a full-screen pass every frame: it costs on a slow card';
 const CH = (r, g, b) => `${r} 0 0 0 0 0 ${g} 0 0 0 0 0 ${b} 0 0 0 0 0 1 0`;
 const lin = (slope, intercept) => ['R', 'G', 'B'].map((c) => ['feFunc' + c, { type: 'linear', slope, intercept }]);
 /* 038 P7 · CHROMATIC ABERRATION's PERSPECTIVE (Josh: "have a toggle where it can shift to perspective mode similar to 'Procreate's chrom-aberration"):
-   MODE SHIFT (the home: red and blue offset opposite ways along ANGLE, as before) · PERSPECTIVE — red pushed out and blue pulled in from the centre,
-   still at the middle and AMOUNT px at the corners, growing as r²: an feImage of a 64² ramp (R = ½ + ½·u·r/√2, G = ½ + ½·v·r/√2, u and v from the
-   centre, drawn once) read by two feDisplacementMaps of scale ±2·AMOUNT, then screened over green as SHIFT is — 8 primitives, the same ··· class;
-   AMOUNT stays px, so the film's × k holds */
-let RAMP = null;
-const ramp = () => { if (RAMP) return RAMP; const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), im = g.createImageData(64, 64);
-  for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) { const u = x / 31.5 - 1, v = y / 31.5 - 1, r = Math.hypot(u, v) / Math.SQRT2, o = (y * 64 + x) * 4;
-    im.data[o] = 127.5 + 127.5 * u * r; im.data[o + 1] = 127.5 + 127.5 * v * r; im.data[o + 2] = 128; im.data[o + 3] = 255; }
-  g.putImageData(im, 0, 0); return (RAMP = c.toDataURL('image/png')); };
-const perspective = (s, id) => { const map = (scale, rgb, n) => [['feDisplacementMap', { in: '$IN', in2: id + 'm', scale, xChannelSelector: 'R', yChannelSelector: 'G', result: id + 'o' + n }],
+   MODE SHIFT (the home: red and blue offset opposite ways along ANGLE, as before) · PERSPECTIVE — red pushed out and blue pulled in from a point,
+   an feImage ramp read by two feDisplacementMaps, then screened over green as SHIFT is; AMOUNT stays px, so the film's × k holds.
+   040 N1 · THE FOCAL POINT AND THE BLUR BLEND (Josh: "Chromatic abberation should have a blur blend knob. Perspective chromatic abberation also doesn't
+   work; it's supposed to come with a movable focal point; show focal point when editing the node"): PERSPECTIVE parts the colours from a FOCAL POINT
+   (FOCUS X · FOCUS Y, stage fractions, home the centre — targets like every knob; a handle on the stage while the node is edited, lab/node-focus.js)
+   and grows LINEARLY with the distance from it — 038's r² law hid the effect in the corners, so a centred orbital never moved: AMOUNT px at the
+   stage's corner from a centred point (twice that at the far corner from a point on an edge).  The ramp is 128², R = ½ + u/4, G = ½ + v/4 with
+   u = 2(x − fx), v = 2(y − fy), drawn per focal point (eight kept) and read at scale ±4·AMOUNT.  BLUR BLEND softens the parted red and blue (one
+   feGaussianBlur each, px, × k in a film) before they screen back over green — SHIFT and PERSPECTIVE alike; at 0 it adds nothing */
+const RAMPS = new Map();
+const ramp = (fx, fy) => { const key = fx.toFixed(3) + ',' + fy.toFixed(3); if (RAMPS.has(key)) return RAMPS.get(key);
+  const N = 128, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d'), im = g.createImageData(N, N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const o = (y * N + x) * 4;
+    im.data[o] = 127.5 + 127.5 * (x / (N - 1) - fx); im.data[o + 1] = 127.5 + 127.5 * (y / (N - 1) - fy); im.data[o + 2] = 128; im.data[o + 3] = 255; }
+  g.putImageData(im, 0, 0); if (RAMPS.size >= 8) RAMPS.clear(); const url = c.toDataURL('image/png'); RAMPS.set(key, url); return url; };
+const f01 = (x, d) => (Number.isFinite(+x) ? Math.min(1, Math.max(0, +x)) : d);
+const perspective = (v, id) => { const s = v.shift, map = (scale, rgb, n) => [['feDisplacementMap', { in: '$IN', in2: id + 'm', scale, xChannelSelector: 'R', yChannelSelector: 'G', result: id + 'o' + n }],
   ['feColorMatrix', { in: id + 'o' + n, type: 'matrix', values: CH(...rgb), result: id + (n === 1 ? 'r' : 'b') }]];
-  return [['feImage', { href: ramp(), preserveAspectRatio: 'none', result: id + 'm' }], ...map(+(2 * s).toFixed(2), [1, 0, 0], 1), ...map(+(-2 * s).toFixed(2), [0, 0, 1], 2),
+  return [['feImage', { href: ramp(f01(v.fx, 0.5), f01(v.fy, 0.5)), preserveAspectRatio: 'none', result: id + 'm' }], ...map(+(4 * s).toFixed(2), [1, 0, 0], 1), ...map(+(-4 * s).toFixed(2), [0, 0, 1], 2), ...screen(v, id)]; };
+/** the parted red (`<id>r`) and blue (`<id>b`), each softened by BLUR BLEND when it is on, screened back over the picture's green */
+const screen = (v, id) => { const b = +(+v.blur || 0).toFixed(2), on = b > 0;
+  return [...(on ? ['r', 'b'].map((c) => ['feGaussianBlur', { in: id + c, stdDeviation: b, edgeMode: 'duplicate', result: id + c + 's' }]) : []),
     ['feColorMatrix', { in: '$IN', type: 'matrix', values: CH(0, 1, 0), result: id + 'g' }],
-    ['feBlend', { in: id + 'r', in2: id + 'g', mode: 'screen', result: id + 'rg' }], ['feBlend', { in: id + 'rg', in2: id + 'b', mode: 'screen' }]]; };
+    ['feBlend', { in: id + (on ? 'rs' : 'r'), in2: id + 'g', mode: 'screen', result: id + 'rg' }], ['feBlend', { in: id + 'rg', in2: id + (on ? 'bs' : 'b'), mode: 'screen' }]]; };
+const pct = (x) => Math.round(x * 100) + ' %';
 export const PRIM_TYPES = {
   blur: { cls: 'prim', label: 'BLUR', hint: 'a gaussian blur', knobs: [{ k: 'radius', label: 'RADIUS', min: 0, max: 24, home: 2, unit: ' px' }], neutral: (v) => v.radius === 0,
     prim: (v) => [['feGaussianBlur', { stdDeviation: v.radius, edgeMode: 'duplicate' }]] },
   sharpen: { cls: 'prim', label: 'SHARPEN', hint: 'edges crisper', knobs: [{ k: 'amount', label: 'AMOUNT', min: 0, max: 2, home: 0.5 }], neutral: (v) => v.amount === 0,
     prim: (v) => { const a = -v.amount; return [['feConvolveMatrix', { order: 3, kernelMatrix: `0 ${a} 0 ${a} ${1 + 4 * v.amount} ${a} 0 ${a} 0`, preserveAlpha: 'true', edgeMode: 'duplicate' }]]; } },
-  aberration: { cls: 'prim', label: 'CHROMATIC ABERRATION', hint: 'red and blue pulled apart, as a cheap lens does', face: [['mode'], ['shift', 'angle']],
+  aberration: { cls: 'prim', label: 'CHROMATIC ABERRATION', hint: 'red and blue pulled apart, as a cheap lens does', face: [['mode'], ['shift', 'angle', 'blur'], ['fx', 'fy']],
     knobs: [{ k: 'shift', label: 'AMOUNT', min: 0, max: 16, home: 2, unit: ' px', hint: 'AMOUNT — how far red and blue part, in px' },
       { k: 'angle', label: 'ANGLE', min: 0, max: 360, home: 0, unit: '°', hint: 'ANGLE — which way they part (SHIFT only)', off: (v) => v.mode === 'perspective' },
-      { k: 'mode', label: 'MODE', home: 'shift', hint: 'SHIFT one way · PERSPECTIVE out from the centre', options: [{ id: 'shift', label: 'SHIFT' }, { id: 'perspective', label: 'PERSPECTIVE' }] }],
+      { k: 'blur', label: 'BLUR BLEND', min: 0, max: 8, home: 0, unit: ' px', hint: 'BLUR BLEND — the parted red and blue softened, in px' },
+      { k: 'fx', label: 'FOCUS X', min: 0, max: 1, home: 0.5, fmt: pct, hint: 'FOCUS X — the focal point across the stage (PERSPECTIVE)', off: (v) => v.mode !== 'perspective' },
+      { k: 'fy', label: 'FOCUS Y', min: 0, max: 1, home: 0.5, fmt: pct, hint: 'FOCUS Y — the focal point down the stage (PERSPECTIVE)', off: (v) => v.mode !== 'perspective' },
+      { k: 'mode', label: 'MODE', home: 'shift', hint: 'SHIFT one way · PERSPECTIVE out from the focal point', options: [{ id: 'shift', label: 'SHIFT' }, { id: 'perspective', label: 'PERSPECTIVE' }] }],
+    focus: { x: 'fx', y: 'fy', when: (v) => v.mode === 'perspective' },   // 040 N1: the stage handle (lab/node-focus.js)
     neutral: (v) => v.shift === 0,
-    prim: (v, id) => { if (v.mode === 'perspective') return perspective(v.shift, id);
+    prim: (v, id) => { if (v.mode === 'perspective') return perspective(v, id);
       const a = (v.angle * Math.PI) / 180, dx = +(v.shift * Math.cos(a)).toFixed(2), dy = +(v.shift * Math.sin(a)).toFixed(2);
       return [['feOffset', { in: '$IN', dx, dy, result: id + 'o1' }], ['feColorMatrix', { in: id + 'o1', type: 'matrix', values: CH(1, 0, 0), result: id + 'r' }],
-        ['feOffset', { in: '$IN', dx: -dx, dy: -dy, result: id + 'o2' }], ['feColorMatrix', { in: id + 'o2', type: 'matrix', values: CH(0, 0, 1), result: id + 'b' }],
-        ['feColorMatrix', { in: '$IN', type: 'matrix', values: CH(0, 1, 0), result: id + 'g' }],
-        ['feBlend', { in: id + 'r', in2: id + 'g', mode: 'screen', result: id + 'rg' }], ['feBlend', { in: id + 'rg', in2: id + 'b', mode: 'screen' }]]; } },
+        ['feOffset', { in: '$IN', dx: -dx, dy: -dy, result: id + 'o2' }], ['feColorMatrix', { in: id + 'o2', type: 'matrix', values: CH(0, 0, 1), result: id + 'b' }], ...screen(v, id)]; } },
   bloom: { cls: 'prim', label: 'BLOOM', hint: 'the highlights glow · ' + H, heavy: true,
     knobs: [{ k: 'radius', label: 'RADIUS', min: 1, max: 40, home: 10, unit: ' px', hint: 'RADIUS — how far the glow spreads, in px' }, { k: 'amount', label: 'AMOUNT', min: 0, max: 2, home: 0.6, hint: 'AMOUNT — how bright the glow' }], neutral: (v) => v.amount === 0,
     prim: (v, id) => [['feComponentTransfer', { in: '$IN', result: id + 'h' }, lin(2, -1)], ['feGaussianBlur', { in: id + 'h', stdDeviation: v.radius, result: id + 'g' }],
