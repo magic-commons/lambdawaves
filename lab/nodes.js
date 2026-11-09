@@ -287,7 +287,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
   return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, setView: M.setView, setSolo: M.setSolo, setOff, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
-    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, tick: (t) => layers.tick(t),   // 040 N2: the loop's CPU frame → the grain's jump keysAt, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close(), graph, load: loadGraph,
+    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, tick: (t) => layers.tick(t), keysAt, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close(), graph, load: loadGraph,
     /* 025 B1 · the film's compile: the graph as the stage runs it, a PRIMITIVE's px knobs × k (film px per stage CSS px; DISPLACE's frequency ÷ k), and the
        SHADER host the film bakes its SHADER layers through (render-exact.js frame → lab/film-bake.js) */
     compileAt: (k) => compile(nodes.map((q) => { const T = TYPES[q.type]; if (!T || T.cls !== 'prim' || k === 1) return q;
