@@ -14,7 +14,7 @@ the timeline and plays where they meet, then the earlier start — the app's own
 in the report's `notes`. A lane with `"mute": true` is placed DISABLED (its curve kept, never played; the timeline's DISABLE CLIP row).
 
 **AN EVENT IS A STEP LANE ON A BANDED TARGET** (032). A target with a `bands` column in TARGETS.md (`material.style`, `material.view`,
-`material.space`, `material.slice.mode`, `state.scale`, `state.index`, `palette.index`; the toggles `action.view.frame` / `action.view.axis`)
+`material.space`, `material.slice.mode`, `state.scale`, `state.index`, `palette.index`, `chem.basis`, `chem.view` (040 A4, by number in the seg's order); the toggles `action.view.frame` / `action.view.axis`)
 cuts its 0…1 into that many equal bands; a `"shape": "step"` lane whose points are the option names or numbers is the event (`[[0, "cloud"], [4, "glass"]]`),
 and the conductor writes the lane's `steps`, so the clip draws its bands and wears ⚠ in the app if the option count later changes. `state.index`
 plays only from a clip (a hand never writes it); `balls` / `sticks` are not styles any more — as `look.style` they open SHELL with SIZE 100 % or
