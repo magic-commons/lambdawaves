@@ -21,6 +21,7 @@ import { createWindow } from './mir/window/window.js';
 import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
 import { frame } from './mir/core/frame.js';
+import { createProximity } from './mir/core/proximity.js';   // 040 N6: the dock's guide
 import { compile, over } from './nodes-compile.js';
 import { TABLE_TYPES, MATRIX_TYPES, homeOf, FOOT } from './node-types.js';
 import { LAYER_TYPES, createLayerHost } from './node-layers.js';
@@ -303,6 +304,27 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     bar.addEventListener('pointerdown', (e) => { if (e.target !== bar) e.stopPropagation(); });   // a press on its controls is theirs, never the grip's
     graphs.watch(() => { if (cur && !L().some((p) => p.name === cur)) showPreset(''); });
     win.tools.before(bar); }
+  /* 040 N6 · THE NODES WINDOW DOCKS (Josh: "If dragging the node title bar close enough to the rack window, allow it the option to dock to it; it's
+     another way to convert it to rack window and back").  The kit's dock road does not reach a title-bar window (FOR-KIT), so the app's minimum: while
+     the bar drags, a rack within 160 px glows and the one under the pointer lights the slot the card would take (the kit's proximity guide, at the place
+     the release lands); a release there closes the window and opens the card in that slot.  And back: the card dragged off its rack (the kit floats it)
+     opens as the window where it was let go.  Escape, a blur or a hidden page drop the guide and dock nothing */
+  { let drag = null, hit = null;
+    const prox = createProximity({ layer: document.body, reach: 160, capture: 0, onCancel: () => { hit = null; } });
+    const columns = () => [['left', 'rackL'], ['right', 'rack']].map(([side, id]) => { const R = document.getElementById(id), r = R && !R.hidden && R.getBoundingClientRect(); if (!r || r.width < 2) return null;
+      return { side, r, cs: [...R.children].filter((c) => c.classList.contains('dev') && !c.hidden && !c.classList.contains('closed')).map((c) => c.getBoundingClientRect()) }; }).filter(Boolean);
+    const slot = ({ side, r, cs }, y) => { const i = cs.filter((b) => b.top + b.height / 2 < y).length, a = cs[i - 1], b = cs[i], at = !a && !b ? r.top + 8 : !a ? b.top - 4 : !b ? a.bottom + 4 : (a.bottom + b.top) / 2;
+      const x = cs[0] || r;   // the line spans the cards (the rack's padding is not a place)
+      return { id: side, index: i, rect: { left: x.left, top: at - 3, width: x.width, height: 6 }, hit: { left: r.left, top: 0, width: r.width, height: innerHeight }, shape: 'slot' }; };
+    const move = (e) => { if (e.pointerId === drag) hit = prox.update({ x: e.clientX, y: e.clientY }, columns().map((c) => slot(c, e.clientY))); };
+    const done = (e) => { if (e.pointerId !== drag) return; drag = null; for (const [t, f] of on) removeEventListener(t, f);
+      const m = e.type === 'pointerup' && hit && hit.captured; hit = null; prox.end();
+      if (m) { win.close(); rk.open('nodes', { side: m.id, index: m.index }); rk.reveal('nodes'); } };
+    const on = [['pointermove', move], ['pointerup', done], ['pointercancel', done]];
+    win.head.addEventListener('pointerdown', (e) => { if (e.button !== 0 || drag !== null) return; drag = e.pointerId; hit = null; for (const [t, f] of on) addEventListener(t, f, { passive: true }); });
+    /* the hand's drag only (the kit's `dragging` let go while the card floats): a card floated by a road of its own (popOut, the header's Enter) stays a card */
+    new MutationObserver((recs) => { const c = card.root.classList; if (!c.contains('floating') || c.contains('dragging') || !recs.some((m) => / dragging( |$)/.test(' ' + m.oldValue))) return;
+      const r = card.root.getBoundingClientRect(); rk.dock('nodes'); rk.close('nodes'); win.open(); win.place({ x: r.left, y: r.top }); }).observe(card.root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }); }
   const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'OPEN AS A WINDOW', () => M.door('card')), util.querySelector('.dev-close'));
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
