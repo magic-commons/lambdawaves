@@ -26,11 +26,11 @@ try {
 
   /* ── 1 · ONE FRAME CORNER, ONE PIXEL ──
      At ZOOM 8 the whole box is on the frame; the stage is a flat grey for the readbacks (either theme) and the ray pass's chrome
-     is off.  The ray pass is read twice, DITHER 0 and DITHER 255: the dither is the march's last step (field.js, after the
-     gamma) and a ray that misses the box returns the stage undithered, so the pixels the two disagree on are the box's
-     silhouette — where the march begins — the ray pass's own picture of the FRAME (bayer8 is never 0: at 255 LSB every such pixel
-     moves ≥ 1.99 levels).  Until 037 T3 GAMMA EVERYWHERE (f73557dd) the marker was GAMMA 2.4, which then reached only the march; it now
-     reaches the miss path too and lit every column.  linePixels draws the box alone.  The GPU's corner is the lit pixel nearest
+     is off.  The ray pass is read twice, EXPOSURE as it stands and EXPOSURE 1e12: the march saturates wherever ψ is not exactly 0 — the
+     whole box — and a ray that misses the box returns the stage, which no exposure reaches, so the pixels the two disagree on are the box's
+     silhouette — where the march begins — the ray pass's own picture of the FRAME.  Until 037 T3 GAMMA EVERYWHERE (f73557dd) the marker
+     was GAMMA 2.4 and until 040 S3 DITHER REACHES THE STAGE it was DITHER 255; each then reached the miss path too and lit every column
+     (EXPOSURE 1e12 and DITHER 255 marked the same 160 679 pixels and the same corner on the tree before S3).  linePixels draws the box alone.  The GPU's corner is the lit pixel nearest
      the prediction in each image's leftmost lit column (the left vertex of the silhouette and of the box). */
   const CORNER = `
     const LW = __LW, F = LW.field, cv = document.getElementById('field'), fm = await import('/lab/field.js');
@@ -39,8 +39,8 @@ try {
     const base = { ...LW.mat, dither: 0, invert: false, bg: [0.25, 0.25, 0.25], slice: { ...LW.mat.slice, mode: 0 } };
     const plain = await F.readPixels(LW.obs, { ...base, frame: false, axis: false }, w, h, true);
     F.setOcclusion([]);
-    const dith = await F.readPixels(LW.obs, { ...base, dither: 255, frame: false, axis: false }, w, h, true);
-    const ray = { bpr: plain.bpr, px: plain.px.map((v, i) => Math.abs(v - dith.px[i])) };   /* the march's pixels: what the dither moved */
+    const hot = await F.readPixels(LW.obs, { ...base, exposure: 1e12, frame: false, axis: false }, w, h, true);
+    const ray = { bpr: plain.bpr, px: plain.px.map((v, i) => Math.abs(v - hot.px[i])) };   /* the march's pixels: what the exposure moved */
     F.setOcclusion([]);   /* S2-VERIFY S1: a frame between the two readbacks puts the racks' mask back; clear it again just before the line pass */
     const line = await F.linePixels(LW.obs, { ...base, frame: true, frameMode: 'box', axis: false }, w, h, true);
     const gl = (line.ground[0] + line.ground[1] + line.ground[2]) / 3;

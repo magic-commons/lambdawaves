@@ -79,7 +79,7 @@ the eye sees it (`view`), so neither the sphere nor the cut moves while the eye 
 
 THE STAGE WINDOW (037 T1, Josh: "New MIR rack window called 'Stage' where the stage can have different effects"): a rack card `stage`
 (`lab/stage-window.js`, glyph `stage`, KIND core, CLOSED on a first run, in the FINDER, `window.stage.*` generated) holding FRAME, then AXES ·
-AXIS COLOUR, then the stage colour · FOLLOW THEME, then STAGE · GAMMA, then PULSE. A LABEL MOVES, A KEY STAYS: those rows left SETTINGS › DISPLAY
+AXIS COLOUR, then the stage colour · FOLLOW THEME, then STAGE · GAMMA, then PULSE · STROBE · BEAM. A LABEL MOVES, A KEY STAYS: those rows left SETTINGS › DISPLAY
 as the same controls (settings-card.js still makes them), so FIELD_CHROME, `presentation.ui.stage`, `presentation.mat.gamma`, `material.stage`
 and `material.gamma` are untouched; DISPLAY keeps one row, EDIT STAGE. The body is short and never scrolls. FOLLOW THEME SAYS WHAT IT DOES (039 X4, WALK-A #10):
 its hint follows its state (On: the theme's ground · Off: your colour), and a HAND turning it off lifts a resting STAGE knob (≤ 5 %) to 100 % by P7's road, so the
@@ -97,14 +97,26 @@ summons (index 0, no mitosis). EDIT STAGE is `summon(rk, 'settings', 'stage')`; 
 GAMMA EVERYWHERE (037 T3, Josh: "gamma seems to only work for inside the box"): a ray that misses the box or the cut, and the three NaN
 fallbacks, take the same output gamma as a ray through the field (`lab/field.js` `bgOut`), selected out at GAMMA 1 so that picture — THE LOCK's
 — is bit-identical.
+DITHER REACHES THE STAGE (040 S3): the same miss takes the dither the march's ending takes (`bayer8` × DITHER ÷ 255 after the gamma), so the box
+is no patch of grain on a smooth ground; DITHER 0 adds ± 0 — THE LOCK's bits. `tests/camera-shift` marks the march by EXPOSURE 1e12 since.
 
-PULSE (037 T4, the first STAGE FX): a radial wash of the stage — `bg` × 2.2 + 0.035 on a dark stage (× 1.6 alone moved the dark ground by two
-codes), × 0.7 on a light one, chosen by the stage colour's own luminance — weighted by `w` = 1 − smoothstep(k − 1, k, r) for CENTRE or
-smoothstep(1 − k, 2 − k, r) for EDGE (r: 0 at the centre, 1 in the corners, the frame's aspect kept). RATE 0 stands the wash at reach k = 1; above 0 the reach breathes 0 → 1 → 0 at RATE Hz of the clock's
-play (t ÷ the clock's rate, re-anchored when either rate moves, so a turn never jumps it; paused, it stands — one clock). AMOUNT 0 returns
-`bg` untouched (THE LOCK). Uniforms p16.w (AMOUNT), p17.x (SHAPE), p17.y (RATE), p17.z (the phase, written by `writeView`). `mat.stage
-{ pulse, shape, rate }`, absent at home; PROJECT `presentation.stage` (absent = homes, never in NEW; the history keeps it); targets
-`stage.pulse` (flash-guarded, its own `flash` step) and `stage.rate` under the `stage` root.
+PULSE REDUX (040 S2, over 037 T4's first STAGE FX; Josh: "Redo the whole thing but keep the machinery. Have a 360 knob go from center to the edge
+and back to the glow of the center; find a way to make it cyclic. That way I can modulate it"): the STAGE FX wash the stage — `bg` × 2.2 + 0.035 on
+a dark stage (× 1.6 alone moved the dark ground by two codes), × 0.7 on a light one, chosen by the stage colour's own luminance — by the sum of
+three lights, each home-off (A NEW STAGE FX IS HOME-OFF: every INTENSITY 0 returns `bg` untouched — THE LOCK). PULSE is a BAND: INTENSITY
+(`pulse`) · POSITION (0° the centre's glow, 180° the edge, 360° the centre again; the band's radius is ½ − ½ cos, r 0 at the centre and 1 in the
+corners, the frame's aspect kept; the knob and the target wrap, so an LFO runs it round) · BAND WIDTH (`rate`: 0 a ring 5 % wide … 2 the whole
+stage, w = 1 − smoothstep(0, width, |r − radius|)). STROBE flashes the whole stage on the beat: INTENSITY · RATE (¼ · ½ · 1 · 2 · 4 beats of the
+transport, read only — ONE clock; paused, it stands) · DUTY; THE STROBE NEVER PASSES THREE A SECOND (the period is held at a third of a second
+whatever the tempo, WCAG 2.3.1). BEAM is a wedge of light from the centre: INTENSITY · ANGLE (0° up, clockwise, cyclic) · WIDTH. A LABEL
+MOVES, A KEY STAYS: AMOUNT is INTENSITY and RATE is BAND WIDTH over the same `pulse` and `rate`; a record without `position` is from before 040
+({ pulse, shape, rate }) and opens as POSITION 0° (CENTRE) or 180° (EDGE) at the full BAND WIDTH — the standing wash it drew (its RATE in Hz, the
+breath, is the LFO's work now). Uniforms p16.w (PULSE), p17.x · y (the band's radius and width), p17.z (STROBE now, decided by `writeView`),
+p18.xyz (BEAM). `mat.stage { pulse, position, rate, strobe, strobeRate, strobeDuty, beam, beamAngle, beamWidth }`, absent at home; PROJECT
+`presentation.stage` (absent = homes, never in NEW; the history keeps it); one table in `lab/stage-window.js` (`FX`) makes the nine knobs and the
+nine targets of the `stage` root: `stage.pulse` · `stage.position` · `stage.rate` · `stage.strobe` · `stage.stroberate` · `stage.strobeduty` ·
+`stage.beam` · `stage.beamangle` · `stage.beamwidth` (the three INTENSITIES flash-guarded by their own `flash` step; the two angles wrap and,
+like HUE, stand outside the guard).
 THE LIGHTING WINDOW (037 L, Josh: "I see that light shine/shadow in solid and ESP; let me edit/modulate it!" and "powerful like Blender's or
 Houdini's … no scrolling … don't make the window too tall"): the rack card `light` (`lab/light-window.js`, at the lab root; glyph sun; first run
 closed; in the FINDER; `window.light.*`) is a three-point rig on the old light. THE SUN PAD is the kit's XY pad dressed as a disc — its lattice

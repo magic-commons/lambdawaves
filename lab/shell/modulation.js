@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { cssZoom } from '../mir/core/zoom.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow, windowOf } from '../mir/window/window.js'; import { clearSeat } from '../summon.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js'; import { lightDefs } from '../light-window.js';   // 037 L3: THE LIGHT's targets
+import { TIER } from '../tier.js'; import { stageTargets } from '../stage-window.js'; import { knob } from '../mir/kit.js'; import { cssZoom } from '../mir/core/zoom.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { installPattern } from '../mir/pattern/window.js'; import { registerWindow, windowOf } from '../mir/window/window.js'; import { clearSeat } from '../summon.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js'; import { lightDefs } from '../light-window.js';   // 037 L3: THE LIGHT's targets
 /** 032 W3 · AN OLDER CURVE ON A BANDED TARGET (the project open road, shell/persist.js): a curve drawn before its target had `options` carries no
  *  `steps` and meant the old integer line — k at k / (max − min) — so each point is read back as that integer (an older GRAIN as DUST, BALLS or
  *  STICKS as SHELL), seated at the centre of its option's band, and the curve remembers the count (WATER ESP's, STAR LOOP's and BENZENE π's STYLE
@@ -248,12 +248,7 @@ export function createModSeam(app) {
         hint: 'Set the A–B transition rate',
         get: () => app.hooks.ab.omega,
         set: (v) => { app.hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
-      /* 037 T4 · PULSE (lab/stage-window.js), the `stage` root: the wash's AMOUNT — a luminance route, so it declares its own `flash` step (a light
-         stage's × 0.7 moves the picture 10 % at about a third of the range) — and its RATE */
-      { id: 'stage.pulse', label: 'PULSE', map: 'linear', min: 0, max: 1, def: 0, group: 'stage', flash: 0.3, knob: () => ui.pulseK, hint: 'STAGE › PULSE: how strongly the stage washes',
-        get: () => (mat.stage ? mat.stage.pulse : 0), set: (v) => { ui.setPulse({ pulse: v }); setKnob(ui.pulseK, v); } },
-      { id: 'stage.rate', label: 'PULSE RATE', unit: ' Hz', map: 'linear', min: 0, max: 2, def: 0, group: 'stage', knob: () => ui.pulseRateK, hint: 'STAGE › PULSE: breaths a second while playing',
-        get: () => (mat.stage ? mat.stage.rate : 0), set: (v) => { ui.setPulse({ rate: v }); setKnob(ui.pulseRateK, v); } },
+      ...stageTargets(ui, mat, setKnob),   // 037 T4 · 040 S2: the `stage` root — PULSE (stage.pulse · stage.position · stage.rate), STROBE and BEAM (lab/stage-window.js)
       /* 037 L3 · THE LIGHT (lab/light-window.js): light.az · light.el (the SUN pad's; no dial) and the LIGHTING window's ten dials, their ranges the dials' own;
          a route's value is written as a hand's is (mat.light, off its home), the hand's base is the registry's */
       ...lightDefs(app),

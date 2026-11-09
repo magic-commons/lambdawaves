@@ -52,7 +52,7 @@ export function createPersist(app) {
       'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'], 'transport.rate': [data.experiment, 'rate'],
       'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'], 'state.defect.l2': [pr.rotationRates, 'def'], 'state.rabi': [pr.ab, 'omega'],
       ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((n) => ['shell.rate.n' + n, [shellSeat(pr.rates, n), 'v']])),
-      'stage.pulse': [pr.stage, 'pulse'], 'stage.rate': [pr.stage, 'rate'],   // 037 T4: absent at the homes (no seat, so nothing is written)
+      ...Object.fromEntries(Object.keys(pr.stage || {}).map((k) => ['stage.' + k.toLowerCase(), [pr.stage, k]])),   // 037 T4 · 040 S2: absent at the homes (no seat, so nothing is written)
       'chem.kick': [I.chem, 'kappa'], 'chem.speed': [I.chem, 'speed'], 'chem.orbital': [I.chem && Number.isFinite(I.chem.orbital) ? I.chem : null, 'orbital'],   // iteration 007 O: an orbital not yet chosen (null, HOMO by default) is never seated
       ...Object.fromEntries(LIGHT_KEYS.map((k) => ['light.' + k, [pr.mat.light, k]])),   // 037 L3: a light a hand never moved has no record, so no seat
       'reg.morph': [st, 'morph'], [OMORPH]: [I.orbitals, 'morph'], 'reg.e0': [st && st.drive, 'e0'], 'reg.w': [st && st.drive, 'omega'],

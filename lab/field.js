@@ -557,9 +557,9 @@ struct View {
   p13: vec4<f32>,    // KEY colour rgb, w SPOT cone (degrees; 180 = none)
   p14: vec4<f32>,    // FILL direction xyz, w FILL intensity
   p15: vec4<f32>,    // AMBIENT, SPECULAR, SHINE, RIM
-  p16: vec4<f32>,    // SPOT blend, SOFTNESS, FRAME (0 CAMERA · 1 WORLD), w chain T: PULSE amount
-  p17: vec4<f32>,    // PULSE shape, PULSE rate, PULSE phase, w THE LEGACY GATE (0 = every light at home: the old expressions run)
-  p18: vec4<f32>,    // spare
+  p16: vec4<f32>,    // SPOT blend, SOFTNESS, FRAME (0 CAMERA · 1 WORLD), w chain T: PULSE's INTENSITY
+  p17: vec4<f32>,    // PULSE's band: its radius (0 the centre … 1 the corners), its width; z STROBE's level now; w THE LEGACY GATE (0 = every light at home: the old expressions run)
+  p18: vec4<f32>,    // 040 S2 · BEAM: INTENSITY, ANGLE (rad, 0 up, clockwise), half WIDTH (rad); w spare
   p19: vec4<f32>,    // spare
 };
 @group(0) @binding(0) var<uniform> V: View;
@@ -975,19 +975,25 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, b0: f32, bf: f32, ha
   let am = clamp(0.8 * V.p0.y, 0.05, 1.0);
   return vec4<f32>(mix(back, c, am), open * (1.0 - am));               // 038 F8: the stage's share under the map
 }
-/* 037 T4 · PULSE (lab/stage-window.js), the first STAGE FX: a radial wash of the stage — × 2.2 + 0.035 on a dark stage, × 0.7 on a light one (by
-   the stage colour's own luminance) — weighted from the centre outward (CENTRE, p17.x 0) or from the edge inward (EDGE, 1); r is 0 at the centre and 1
-   in the corners, the frame's aspect kept; the reach k stands at 1 while RATE (p17.y) is 0, else breathes 0 → 1 → 0 on writeView's phase (p17.z).
-   AMOUNT (p16.w) 0 returns bg itself: the old arithmetic, THE LOCK's bits */
+/* 037 T4 · 040 S2 · THE STAGE FX (lab/stage-window.js): a wash of the stage — × 2.2 + 0.035 on a dark stage, × 0.7 on a light one (by the stage
+   colour's own luminance) — weighted by the sum of three lights.  PULSE is a BAND round the radius p17.x (r is 0 at the centre and 1 in the
+   corners, the frame's aspect kept), falling to nothing p17.y away: at the full width it is the old standing wash, from the centre (radius 0) or
+   from the edge (1).  STROBE is the whole stage at p17.z (writeView decides the beat).  BEAM is a wedge from the centre, p18.z either side of
+   the angle p18.y, soft at its sides and at its root.  All three INTENSITIES 0 returns bg itself: the old arithmetic, THE LOCK's bits */
 fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
-  let a = V.p16.w;
-  if (a <= 0.0) { return bg; }
+  let a = V.p16.w; let beam = V.p18.x;
+  var w = V.p17.z;
+  if (a <= 0.0 && w <= 0.0 && beam <= 0.0) { return bg; }
   let s = vec2<f32>(V.right.w / max(V.up.w, 1e-6), 1.0);
-  let r = length(uv * s) / length(s);
-  let k = select(1.0, 0.5 - 0.5 * cos(6.2831853 * V.p17.z), V.p17.y > 0.0);
-  let w = select(1.0 - smoothstep(k - 1.0, k, r), smoothstep(1.0 - k, 2.0 - k, r), V.p17.x > 0.5);
+  let q = uv * s;
+  let r = length(q) / length(s);
+  w += a * (1.0 - smoothstep(0.0, V.p17.y, abs(r - V.p17.x)));
+  if (beam > 0.0) {
+    let d = abs(fract((atan2(q.x, q.y + 1e-9) - V.p18.y) / 6.2831853 + 0.5) - 0.5) * 6.2831853;   // the angle off the beam's axis, 0 … π
+    w += beam * (1.0 - smoothstep(V.p18.z, V.p18.z * 1.2 + 0.02, d)) * smoothstep(0.0, 0.06, r);
+  }
   let lit = select(bg * 2.2 + vec3<f32>(0.035), bg * 0.7, dot(V.p5.xyz, vec3<f32>(0.2126, 0.7152, 0.0722)) > 0.5);   // a dark ground glows (× 1.6 alone moved 0.03 by two codes)
-  return mix(bg, lit, clamp(a * w, 0.0, 1.0));
+  return mix(bg, lit, clamp(w, 0.0, 1.0));
 }
 @fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
   let pxA = abs(dpdy(in.uv.y)) * V.up.w;                          // DUST: one pixel's angle (uniform control flow: before any branch)
@@ -1027,7 +1033,9 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
         return vec4<f32>(oa + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);   // the skeleton: alpha 1 whether or not THE OBJECT MASK lives
       }
     }
-    let a0 = objA(false); return vec4<f32>(min(bgOut, vec3<f32>(1.0)) * a0, a0);
+    /* 040 S3 · DITHER REACHES THE STAGE (Josh's 039 close: "DITHER reaches only the march, not the stage outside the box"): the miss takes the
+       dither the march's ending takes, so the box is no patch of grain on a smooth ground.  DITHER 0 adds ± 0: THE LOCK's bits */
+    let a0 = objA(false); return vec4<f32>(min(bgOut + bayer8(in.pos.xy) * (V.p2.w / 255.0), vec3<f32>(1.0)) * a0, a0);
   }
   let steps = max(V.fwd.w, 8.0);
   let ds = (tf - t0) / steps;
@@ -1264,6 +1272,8 @@ const AXIS_NORMALS = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
    the eye — from the basis writeView has just written (VIEW 4–6 right, 8–10 up, 12–14 fwd = −toward), so the slice rides with the camera;
    absent (OBJECT, every file before 037) the normal is the object's own and no byte moves */
 const eyeTurn = (n, V) => [0, 1, 2].map((i) => n[0] * V[4 + i] + n[1] * V[8 + i] - n[2] * V[12 + i]);
+/** 040 S2 · STROBE's RATE snaps to a power of two of a beat: ¼ · ½ · 1 · 2 · 4 (the STAGE window's knob says the same) */
+export const strobeBeats = (v) => 2 ** Math.round(Math.log2(Math.min(4, Math.max(0.25, +v || 1))));
 export function perspective(fovy, aspect, near, far, out) {
   const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far), o = out || new Float32Array(16);
   o.fill(0); o[0] = f / aspect; o[5] = f; o[10] = far * nf; o[11] = -1; o[14] = far * near * nf;
@@ -1664,7 +1674,11 @@ export async function createField(canvas, opts = {}) {
   const MOL_PARAMS = new ArrayBuffer(32), MOL_PARAMS_U = new Uint32Array(MOL_PARAMS), MOL_PARAMS_F = new Float32Array(MOL_PARAMS);
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
   const lineVerts = 44;                                            // box 24 + axes 6 + slice 8, then the corner axis 6
-  const latticeVerts = 17 * 17 * 17 * 6;                           // the larger of the two: dots (6 per node) 29 478 · lattice 27 744
+  /* 040 S1 · DOTS AND LATTICE (Josh: "twice as dense and 50% further … lattice also go a little further"): DOTS stand every half-width out to
+     24 half-widths (49³ nodes; was every 2 out to 16), LATTICE's cells out to 20 (21³; was 16).  The eye's plane through the origin keeps at most
+     (49³ + 49²) / 2 nodes, so that is the buffer; the far plane went 20 → 48 half-widths with them (no depth is kept: x and y keep their bits) */
+  const DOTS_RAD = 24, LATTICE_RAD = 10;
+  const latticeVerts = 49 * 49 * 25 * 6;                           // the larger of the two: dots (6 per node) 360 150 · lattice 52 920
   let latticeCount = 0; const cornerStart = 38;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
@@ -1693,10 +1707,10 @@ export async function createField(canvas, opts = {}) {
   const PARAMS = new ArrayBuffer(32), PARAMS_U = new Uint32Array(PARAMS), PARAMS_F = new Float32Array(PARAMS), ZERO_U32 = new Uint32Array([0]);
   const VIEW = new Float32Array(96), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
   /* LATTICE MESH (wave 108 zero-allocation law): pre-allocated unit grid lines.
-     Radius 8 grid (17^3 nodes). Segments: X (16*17*17), Y (17*16*17), Z (17*17*16) = 13872 segments. */
-  const LATTICE_SEGS = new Int8Array(13872 * 6);
+     Radius 10 grid (21^3 nodes). Segments: 3 × 20 × 21 × 21 = 26460 segments. */
+  const LATTICE_SEGS = new Int8Array(26460 * 6);
   {
-    const rad = 8;
+    const rad = LATTICE_RAD;
     let idx = 0;
     for (let x = -rad; x <= rad; x++) {
       for (let y = -rad; y <= rad; y++) {
@@ -1920,14 +1934,12 @@ export async function createField(canvas, opts = {}) {
     const pass = enc.beginComputePass(), g = Math.ceil(res / 4); pass.setPipeline(cardPipe); pass.setBindGroup(0, cardBind); pass.dispatchWorkgroups(g, g, g); pass.end();
     cardDirty = false; generation++; stats.generation = generation; stats.reconstructs++;
   }
-  /* 037 T4 · PULSE's phase: RATE Hz of the clock's play (t over the clock's rate: wall seconds while it plays), re-anchored whenever RATE or the
-     clock's rate moves so a turn never jumps it; paused, it stands.  ONE clock: the field reads t (opts.clock), never writes it */
-  const pulse = { t: 0, rate: 1, hz: 0, ph: 0 };
-  const pulseAt = (t) => { const x = pulse.ph + pulse.hz * (t - pulse.t) / pulse.rate; return x - Math.floor(x); };
-  function pulsePhase(hz) {
-    const C = opts.clock; if (!C) return 0;
-    if (hz !== pulse.hz || C.rate !== pulse.rate) { pulse.ph = pulseAt(C.t); pulse.t = C.t; pulse.hz = hz; pulse.rate = C.rate; }
-    return pulseAt(C.t);
+  /* 040 S2 · STROBE's level now: lit for DUTY of every RATE beats of the transport (opts.transport: its beats and bpm, read only — ONE clock; paused,
+     it stands).  The period never falls under a third of a second, whatever the tempo: three flashes a second is the ceiling (WCAG 2.3.1) */
+  function strobeNow(ps) {
+    const T = opts.transport && opts.transport(); if (!T || !(ps.strobe > 0)) return 0;
+    const x = T.beats / Math.max(strobeBeats(ps.strobeRate), T.bpm / 180);
+    return x - Math.floor(x) < ps.strobeDuty ? ps.strobe : 0;
   }
   function writeView(obs, mat, w, h) {
     const E = cameraEye(obs, half), B = E.basis, cam = E.eye, tanH = E.tanH, aspect = w / h;
@@ -1956,10 +1968,11 @@ export async function createField(canvas, opts = {}) {
     v[56] = atomsBound[0]; v[57] = atomsBound[1]; v[58] = atomsBound[2]; v[59] = atomsBound[3] + Math.max(atomsBound[4] * Math.max(asz, 1), srad) + 0.01;
     v[60] = espSoftOf(mat.softness); v[61] = mat.espBare ? 1 : 0;   // iteration 016 S1 · S2
     v[62] = (mat.slice?.balls === false ? 1 : 0) + (mat.slice?.sticks === false ? 2 : 0) + (objMask ? 4 : 0);   // 038 F3: the kinds the CLIP does not cut (absent = cut); F5: THE OBJECT MASK
-    const ps = mat.stage;   // 037 T4 · PULSE: p16.w AMOUNT, p17.x SHAPE, p17.y RATE, p17.z the phase; absent = the homes (AMOUNT 0: bg untouched). p16.xyz and p17.w are chain L's
-    v[83] = ps ? ps.pulse : 0; v[84] = ps && ps.shape === 'edge' ? 1 : 0; v[85] = ps ? ps.rate : 0; v[86] = ps && ps.rate > 0 ? pulsePhase(ps.rate) : 0;
+    const ps = mat.stage;   // 037 T4 · 040 S2 · THE STAGE FX: p16.w PULSE, p17.x its band's radius, p17.y its width, p17.z STROBE now, p18.xyz BEAM; absent = the homes (bg untouched). p16.xyz and p17.w are chain L's
+    v[83] = ps ? +ps.pulse || 0 : 0; v[84] = ps ? 0.5 - 0.5 * Math.cos((+ps.position || 0) * Math.PI / 180) : 0; v[85] = ps ? 0.05 + 0.475 * (ps.rate >= 0 ? ps.rate : 2) : 0; v[86] = ps ? strobeNow(ps) : 0;
+    v[88] = ps ? +ps.beam || 0 : 0; v[89] = ps ? (+ps.beamAngle || 0) * Math.PI / 180 : 0; v[90] = ps ? (ps.beamWidth > 0 ? ps.beamWidth : 30) * Math.PI / 360 : 0;
     v[87] = lightView(v, mat.light);   // 037 L2: THE LIGHT (p12 … p16.xyz) and THE LEGACY GATE (p17.w)
-    perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
+    perspective(obs.fov || 0.6, aspect, 0.05 * half, 48 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
     device.queue.writeBuffer(viewBuf, 0, v);
     lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);
     device.queue.writeBuffer(vpBuf, 0, M_VP);
@@ -2051,7 +2064,7 @@ export async function createField(canvas, opts = {}) {
     k = cornerStart * 7; latticeCount = 0;
     if (mat.frame !== false && (mat.frameMode === 'lattice' || mat.frameMode === 'dots')) {
       const L = LATTICE; let q = 0;
-      const radius = 8, spacing = h * 2;
+      const dots = mat.frameMode === 'dots', radius = dots ? DOTS_RAD : LATTICE_RAD, spacing = dots ? h : h * 2;
       const camX = VIEW[0], camY = VIEW[1], camZ = VIEW[2];
       const invMaxDist = 1 / (spacing * radius);
       const baseAlpha = mat.lightUI ? 0.22 : 0.16;
@@ -2061,7 +2074,7 @@ export async function createField(canvas, opts = {}) {
       INK_V[0] = inkR; INK_V[1] = inkG; INK_V[2] = inkB; INK_V[3] = 1;
 
       if (mat.frameMode === 'lattice') {
-        const segCount = 13872;
+        const segCount = 26460;
         for (let s = 0; s < segCount; s++) {
           const base = s * 6;
           let ax = LATTICE_SEGS[base] * spacing;
@@ -2100,7 +2113,8 @@ export async function createField(canvas, opts = {}) {
               const da = px * camX + py * camY + pz * camZ;
               if (da > 0) continue;
               const dist = Math.hypot(px, py, pz) * invMaxDist;
-              const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
+              const alpha = baseAlpha * (1 - dist * 0.7);
+              if (!(alpha > 0) || q + 24 > L.length) continue;       // faded out (the corners), or an eye at the origin
 
               L[q++] = px - tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
               L[q++] = px + tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;

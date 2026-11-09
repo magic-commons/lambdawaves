@@ -1031,6 +1031,8 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-stage-card .stage-knobs { margin-bottom: 2px; }
 .lw-stage-card .grp { margin: 4px 0 0; padding-top: 8px; border-top: 1px solid var(--glass-hairline); }   /* 037 T4: PULSE under a thin rule */
 .lw-stage-card .stage-pulse { margin-bottom: 2px; }
+.lw-stage-card .stage-fx-head { display: flex; align-items: center; justify-content: space-between; min-height: 26px; }   /* 040 S2: a group's word, and PULSE's chevron (STROBE · BEAM) */
+.lw-stage-card .stage-fx-head > .grp-lbl { margin: 0; }
 .native-clean[data-id="settings"] .lw-edit-stage > .trig { flex: 1 1 100%; }
 .native-clean[data-id="settings"] .lw-edit-more > .trig { flex: 1 1 auto; }   /* 040 M4: INFORMATIONAL · WIDGETS share the row under EDIT STAGE (three never fit 252 px whole; EDIT STAGE keeps its seat) */
 /* 037 T2 · THE MITOSIS (lab/summon.js): the two title-bar pills in one fixed layer over the racks, drawn at the UI scale, gone when they land */
