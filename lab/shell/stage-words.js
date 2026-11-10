@@ -26,7 +26,7 @@ const KIND = new Map(KINDS.map((k) => [k.id, k]));
 const pct = (v) => Math.round(v * 100) + '%';
 /** the rows: { key, type, default, … } is the kit's prefs schema; group · label · hint · options · fmt are the window's (informational.js) */
 export const INFO_ROWS = Object.freeze([
-  { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'STAGE FORMULA', hint: 'Write the playing state on stage' },
+  { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'FORMULA', hint: 'Write the playing state on stage' },
   { key: 'molName', type: 'bool', default: false, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
   /* iteration 018 B9 (Josh: "Since we have isomers, let a secondary subtitle text be optional for the name … the name is a heading type and the subtitle
      should be smaller like a 'body' text"): the line under the NAME that tells a molecule from its isomers — neither the catalogue nor a volume's index

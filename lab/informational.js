@@ -41,7 +41,7 @@ export function createInformational(app) {
   const row = (parent, keys, cls = '') => { const r = el('div', 'row tight fit' + (cls ? ' ' + cls : ''), parent);   /* 022 F2 (call 7): every hand grid a fit row */ for (const k of keys) r.appendChild(ctl[k].root); return r; };
   /* iteration 012 R1 (Josh 10-20): the headings THE WORDS and ANNOUNCE · CURSOR · MARKS are hidden — the rows say what they are */
   const words = group(w.body, 'THE WORDS'); words.querySelector(':scope > .grp-lbl')?.remove();
-  row(words, ['molFormula', 'infoPos', 'molFormulaSize'], 'info-words');   // 040 I3: POSITION between STAGE FORMULA and its SIZE (the button column)
+  row(words, ['molFormula', 'infoPos', 'infoPad', 'molFormulaSize'], 'info-words info-formula');   // 040 I3: POSITION beside the switch; 041 I1 (Josh: "Shorten the text 'Stage Formula' … fit the 'pad' knob between the formula position toggle and the size knob"): FORMULA · POSITION · PAD · SIZE, a column each
   row(words, ['molName', 'molSubtitle', 'listCap'], 'info-words info-name');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes; 018 B9: SUBTITLE between
   row(words, ['atomLabels', 'atomLabelsSize'], 'info-words');
   row(words, ['skeleton', 'skeletonOpacity', 'skeletonSize'], 'info-words info-ball');   // iteration 011 Q1: its own row; 012 R1: BALL AND STICK, shorter, OPACITY between it and SIZE
@@ -49,7 +49,7 @@ export function createInformational(app) {
   /* the frame reads the BONDS as one object (rack.js → skeleton.draw) and the skeleton tells which road drew them in this card's status line */
   ui.bondsOf = () => { const c = app.state.chem; return { order: P.get('bondOrder'), aromatic: P.get('bondAromatic'), ionic: P.get('bondIonic'), hbond: P.get('bondHydrogen'), charges: c && c.chargesNow ? c.chargesNow() : null, rec: c && c.bondsNow ? c.bondsNow() : null }; };
   ui.bondSay = (line) => w.setStatus(line, 'live');
-  const seat = row(words, ['announceAll'], 'info-seat');   // 040 I3: ANNOUNCE ALL · the fold's chevron · PAD — always shown
+  const seat = row(words, ['announceAll'], 'info-seat');   // 040 I3: ANNOUNCE ALL · the fold's chevron — always shown (041 I1: PAD is the FORMULA row's)
   const announce = group(w.body, 'ANNOUNCE');
   /* 040 I3 (Josh: "move the ESP bar row into the hidden expanded section"): the fold's first row; its own `hidden` (a molecule's row) stays its own */
   ui.espBarRow = row(announce, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar'); announce.prepend(ui.espBarRow);   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it); 040 I3: above the ANNOUNCE heading
@@ -69,7 +69,6 @@ export function createInformational(app) {
      N1 (Josh: "Shorten the buttons for position move pad knob to fit the expand window button so it's on the same row"): the chevron is the
      seat row's last cell, after POSITION and PAD — one row less */
   fold(seat, [announce, cols], { what: 'the ESP bar, announcements, cursor and marks', key: 'announcements, cursor and marks', open: !isPhone() });   // 040 I3: the key is the WORKSPACE `folds` name, kept
-  seat.appendChild(ctl.infoPad.root);   // 023 R2: PAD in the knob column, the chevron in the button column (over POSITION and the SIDE glyph)
   /* 0.5.4 P4 · STATUS (PLAN R8, Q12): lab/status.js' line for what owns the field — MOLECULES' kept one (per VIEW; its molecule-level line beneath), else the
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
   /* iteration 011 Q1 (Josh 10-19: "a button that hides the extra status thingy"): the STATUS switch above it shows or hides the readout's row — the record's
@@ -84,7 +83,7 @@ export function createInformational(app) {
   showStatus(); P.subscribe((_, changed) => { if (changed.includes('status')) showStatus(); });
   st.root.title = 'What EXACT, NUMERICAL and UNCHECKED mean: the MODEL sheet';
   /* 022 H1 · A HINT IS ONE LINE: the two sentences the rows' hints no longer carry, in the window's ⓘ */
-  el('div', 'note', w.body).innerHTML = '<b>The words.</b> STAGE FORMULA also captions every picture and recording; off, an export carries no words. A list longer than LIST CAP is written as its count (140 levels · 7 shells) and returns once it fits.'; st.root.addEventListener('click', () => { if (app.hooks.sheet) app.hooks.sheet(); });
+  el('div', 'note', w.body).innerHTML = '<b>The words.</b> FORMULA also captions every picture and recording; off, an export carries no words. A list longer than LIST CAP is written as its count (140 levels · 7 shells) and returns once it fits.'; st.root.addEventListener('click', () => { if (app.hooks.sheet) app.hooks.sheet(); });
   app.hooks.status = () => { const c = app.state.chem, k = c && c.on ? c.said : app.reg.P && app.reg.P.stark ? 'stark' : getHamiltonian().id, m = k === 'hydrogen' && getHamiltonian().mass, A = k === 'atom' && getHamiltonian().element,   // iteration 008 A: the ATOM speaks per element (past Kr)
       key = m ? k + m : A ? k + A.Z : k, s = key === was ? undefined : typeof k === 'string' ? statusOf({ owner: k, label: m ? 'HYDROGEN · ' + m : A ? A.symbol : '', Z: A ? A.Z : 0 }) : k;
     if (s !== undefined) { was = key; st.set(s ? s.line : '—', s && s.word === 'UNCHECKED' ? 'warn' : ''); st.setSub(s && (typeof k !== 'string' || s.atom) ? s.head : ''); } };
