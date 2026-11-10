@@ -29,7 +29,7 @@ try {
 
   /* 1 · closed on a first run; in the FINDER and WINDOW; the one line */
   const first = await g.ev(`const d = document.querySelector('.dev[data-id="nodes"]');
-    __LW.layout.finder.open(); const plus = [...document.querySelectorAll('.mir-window-picker .wp-row:not(.off)')].map((i) => i.dataset.win); __LW.layout.finder.close();
+    __LW.layout.finder.open(); const plus = [...document.querySelectorAll('.mir-window-picker .wp-row:not(.off)')].map((i) => i.dataset.win || i.dataset.row); __LW.layout.finder.close();   // 041 K4: NODES is a row of the FINDER's SPECIAL section
     __LW.layout.menu.open(); const b = [...document.getElementById('menubar').querySelectorAll('.mb-btn')].find((x) => x.dataset.menu === 'WINDOW'); b.click();
     const tools = [...b.parentElement.querySelectorAll('.mb-item')].find((i) => /^TOOLS/.test(i.textContent.trim())); if (tools) { tools.click(); await new Promise((r) => setTimeout(r, 200)); }   // 021 I3: NODES lives in WINDOW › TOOLS
     const win = [...document.querySelectorAll('#menubar .mb-lbl, .mb-list .mb-lbl, [role="menu"] .mb-lbl')].map((l) => l.textContent.trim()); b.click();
