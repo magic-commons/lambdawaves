@@ -21,18 +21,24 @@ const lin = (slope, intercept) => ['R', 'G', 'B'].map((c) => ['feFunc' + c, { ty
    (FOCUS X · FOCUS Y, stage fractions, home the centre — targets like every knob; a handle on the stage while the node is edited, lab/node-focus.js)
    and grows LINEARLY with the distance from it — 038's r² law hid the effect in the corners, so a centred orbital never moved: AMOUNT px at the
    stage's corner from a centred point (twice that at the far corner from a point on an edge).  The ramp is 128², R = ½ + u/4, G = ½ + v/4 with
-   u = 2(x − fx), v = 2(y − fy), drawn per focal point (eight kept) and read at scale ±4·AMOUNT.  BLUR BLEND softens the parted red and blue (one
+   u = 2(x − fx), v = 2(y − fy), read at scale ±4·AMOUNT (041 N3: one centred ramp, the focal point an offset; below).  BLUR BLEND softens the parted red and blue (one
    feGaussianBlur each, px, × k in a film) before they screen back over green — SHIFT and PERSPECTIVE alike; at 0 it adds nothing */
-const RAMPS = new Map();
-const ramp = (fx, fy) => { const key = fx.toFixed(3) + ',' + fy.toFixed(3); if (RAMPS.has(key)) return RAMPS.get(key);
+/* 041 N3 · ONE RAMP (Josh, call 1: "the perspective mode is SUPER laggy and often doesn't work").  Every FOCUS write drew a new 128² ramp, encoded
+   it as a PNG data URL and gave the filter a new feImage to decode — while a hand or a modulator moved the point the map was a picture not yet
+   loaded.  A displacement linear in (p − focus) is the centred ramp's plus a constant, so the ramp is drawn ONCE (centred) and the focal point is an
+   feOffset before each map: red reads 2·AMOUNT·(½ − focus) px further, blue as far back.  The picture is the same; a FOCUS write changes two numbers */
+let RAMP = '';
+const ramp = () => { if (RAMP) return RAMP;
   const N = 128, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d'), im = g.createImageData(N, N);
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const o = (y * N + x) * 4;
-    im.data[o] = 127.5 + 127.5 * (x / (N - 1) - fx); im.data[o + 1] = 127.5 + 127.5 * (y / (N - 1) - fy); im.data[o + 2] = 128; im.data[o + 3] = 255; }
-  g.putImageData(im, 0, 0); if (RAMPS.size >= 8) RAMPS.clear(); const url = c.toDataURL('image/png'); RAMPS.set(key, url); return url; };
+    im.data[o] = 127.5 + 127.5 * (x / (N - 1) - 0.5); im.data[o + 1] = 127.5 + 127.5 * (y / (N - 1) - 0.5); im.data[o + 2] = 128; im.data[o + 3] = 255; }
+  g.putImageData(im, 0, 0); return (RAMP = c.toDataURL('image/png')); };
 const f01 = (x, d) => (Number.isFinite(+x) ? Math.min(1, Math.max(0, +x)) : d);
-const perspective = (v, id) => { const s = v.shift, map = (scale, rgb, n) => [['feDisplacementMap', { in: '$IN', in2: id + 'm', scale, xChannelSelector: 'R', yChannelSelector: 'G', result: id + 'o' + n }],
-  ['feColorMatrix', { in: id + 'o' + n, type: 'matrix', values: CH(...rgb), result: id + (n === 1 ? 'r' : 'b') }]];
-  return [['feImage', { href: ramp(f01(v.fx, 0.5), f01(v.fy, 0.5)), preserveAspectRatio: 'none', result: id + 'm' }], ...map(+(4 * s).toFixed(2), [1, 0, 0], 1), ...map(+(-4 * s).toFixed(2), [0, 0, 1], 2), ...screen(v, id)]; };
+const perspective = (v, id) => { const s = v.shift, cx = +(2 * s * (0.5 - f01(v.fx, 0.5))).toFixed(2), cy = +(2 * s * (0.5 - f01(v.fy, 0.5))).toFixed(2), off = cx !== 0 || cy !== 0;
+  const map = (scale, rgb, n, k) => [...(off ? [['feOffset', { in: '$IN', dx: -k * cx, dy: -k * cy, result: id + 'f' + n }]] : []),
+    ['feDisplacementMap', { in: off ? id + 'f' + n : '$IN', in2: id + 'm', scale, xChannelSelector: 'R', yChannelSelector: 'G', result: id + 'o' + n }],
+    ['feColorMatrix', { in: id + 'o' + n, type: 'matrix', values: CH(...rgb), result: id + (n === 1 ? 'r' : 'b') }]];
+  return [['feImage', { href: ramp(), preserveAspectRatio: 'none', result: id + 'm' }], ...map(+(4 * s).toFixed(2), [1, 0, 0], 1, 1), ...map(+(-4 * s).toFixed(2), [0, 0, 1], 2, -1), ...screen(v, id)]; };
 /** the parted red (`<id>r`) and blue (`<id>b`), each softened by BLUR BLEND when it is on, screened back over the picture's green */
 const screen = (v, id) => { const b = +(+v.blur || 0).toFixed(2), on = b > 0;
   return [...(on ? ['r', 'b'].map((c) => ['feGaussianBlur', { in: id + c, stdDeviation: b, edgeMode: 'duplicate', result: id + c + 's' }]) : []),
