@@ -59,6 +59,15 @@ const SCENES = {
     __LW.register.setMode('states'); await wait(1500); out.states = E(); __LW.chem.setView('density'); await wait(800); out.density = E();
     __LW.register.setMode('orbital'); await wait(800); out.orbital = E(); __LW.register.setMode('states'); await wait(800); out.states2 = E();
     await __LW.chem.solve('NH3'); await wait(3000); out.nh3 = E(); __LW.chem.setView('density'); await wait(800); out.density2 = E(); out.e = (window.__e || []).slice(0, 2); return out;`,
+  /* D5 · THE FINISH ROW: MIR OPTIONS open (its SPACING knob, DRAG HANDLE, LINK as a new user finds them) and INFORMATIONAL unfolded; every control's word
+     upper-case and hinted in the two windows, nothing cut */
+  'finish': `__LW.actions.run('gui'); await wait(900); const G = document.querySelector('[data-mir-window="gui"]') || document.querySelector('.mir-gui');
+    const I = document.querySelector('.dev[data-id="informational"]'); if (I.classList.contains('folded')) I.querySelector('.dev-fold').click(); await wait(500);
+    const walk = (d) => [...d.querySelectorAll('.k, .sw, .trig:not(.lw-fold), .seg')].filter((c) => c.offsetWidth).map((c) => { const t = (c.querySelector('.k-lbl, .seg-lbl') || c).textContent.trim().slice(0, 24), h = c.closest('[data-t-title], [title], [data-hint]') || c.querySelector('[data-t-title], [title], [data-hint]');
+      return { t, upper: t === t.toUpperCase(), hint: !!h, cut: c.scrollWidth > c.clientWidth + 1 }; });
+    const sum = (w) => ({ n: w.length, lower: w.filter((x) => !x.upper).map((x) => x.t), noHint: w.filter((x) => !x.hint).map((x) => x.t), cut: w.filter((x) => x.cut).map((x) => x.t) });
+    const find = (re) => { const k = G && [...G.querySelectorAll('.k, .seg, .sw')].find((c) => re.test(c.textContent)); return k ? k.textContent.trim().replace(/\\s+/g, ' ').slice(0, 60) : null; };
+    return { gui: !!G, guiBox: G && [Math.round(G.getBoundingClientRect().width), Math.round(G.getBoundingClientRect().height)], spacing: find(/SPACING/), handle: find(/DRAG HANDLE|GRIP/), corners: find(/CORNERS/), options: G ? sum(walk(G)) : null, info: sum(walk(I)), page: [innerWidth, innerHeight, document.body.dataset.theme] };`,
   'd0-spacing': `__LW.look.set({ spacing: 24 }); await wait(400); return __LW.look.get('spacing');`,
 };
 const [scene = 'probe-spacing', W = '1300', H = '850', light = '-', sys = ''] = process.argv.slice(2);
