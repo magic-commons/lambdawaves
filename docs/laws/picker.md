@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first. THE MAIN MENU (034) stands over them.
 
+## The laws of 040
+
+THE LIBRARY'S EDGES FADE (040 I5, Josh: "fading away when scrolling above and below vs a hard clip-off"): a deck fades at any edge with more content beyond it, 32 px at rest and 72 px while scrolling; the first deck's top and the last deck's bottom stay whole; the blur bands are unchanged. This amends 036 G2's "at rest nothing is faded".
+
 ## THE MAIN MENU (iteration 034, Josh 11-02; the vault's `research/iteration-034/PLAN.md` chain M)
 
 "It's time to finally make it a 'Main Menu'." The Picker is the MAIN MENU in every word a reader sees (the `menu` action's label, FILE › MAIN MENU — 038 M2, it was WINDOW › TOOLS — the tile rows MAIN MENU › …); the file stays `lab/picker.js`, the ids `menu` / `picker.*`, the hooks `#lwMenu` and `mm-*`, the facade `app.state.picker`.

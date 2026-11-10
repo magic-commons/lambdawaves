@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 040
+
+THE LOCK MOVED BY NAME (040 S1, S3b): DOTS AND LATTICE re-captured the `line` and `rp` of the twelve `lines.dots*` / `lines.lattice*` rows and the `darkest` of the eight without `+ink`; DITHER REACHES THE STAGE re-captured the seven `styles.dither:*` rows (density/cloud, density/signed, diff/cloud, imag/additive, phase/cloud, phase/solid, real/cloud), which are read with DITHER on. Every `off*` and `box*` row and every other leaf held: 843 · 0 and 987 · 0. The law text of both rows is in look-and-camera.md.
+
 ## The laws of 038
 
 THE BLACK PIXELS (038 F1, Josh: "When very zoomed in, there seems to be some random black pixels in the background"): at ZOOM's near end (dist

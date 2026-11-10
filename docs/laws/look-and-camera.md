@@ -4,6 +4,8 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ## The laws of 040
 
+SETTINGS › DISPLAY OPENS INFORMATIONAL AND WIDGETS (040 M4): two buttons on a row under EDIT STAGE open them the way EDIT STAGE opens STAGE (THE SUMMONS).
+
 AN AUTOMATED KNOB BELONGS TO THE LANE (040 A1, Josh: "if exposure is now tied to the timeline, then it should completely ignore the style-parameter
 saving rule"): A STYLE REMEMBERS ITS KNOBS' tether reads the route list, every clip's curve AND the registry's `isModulated` — a knob a modulator is
 writing now (a film's drive, a route or a clip whose editor was never built) is skipped both ways by a style switch, so the automation's value stands.

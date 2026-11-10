@@ -2,6 +2,13 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 040
+
+THE DOORS OF 040 (Josh's 11-09 hands-on list; the clone road on kit branches `kit-040` and `kit-040c` from kit-039's 3086c0b, merged at a0e32f5 = 1.5.7-alpha.48 and adopted whole; Focus's alpha.27…37 live on the kit's `focus` branch and are not in this tree):
+- CHAIN T THE TIMELINE'S HANDS, alpha.38–45: THE RIGHT CLICK DELETES, SHIFT-DRAG CLONES, THE RANGE STAYS, THE EDGE IS THE EDGE, THE COPIES WEAR ONE COLOUR, THE TENSION REPEATS, THE EMPTY LANE IS QUIET, THE FINE DRAG LANDS ON THE STEP. alpha.44 retires alpha.23's `.tl-empty` line and with it alpha.25's seat (Josh: "remove it"); the lane's right-click ADD LANE / REMOVE LANE menu is gone, the chips add and remove. The gestures' table is the kit's docs/TIMELINE.md. λWAVES: nothing app-side.
+- CHAIN C THE CONTROLS, alpha.46–48: THE SPHERE TURNS SMOOTHLY, THE CHIP WEARS THE DEPTH, THE GRIP CAN HIDE. alpha.48's switch is MIR OPTIONS › WINDOWS › DRAG HANDLE (on at home; off hides the grip, the head still drags). λWAVES: nothing app-side; `material.js`'s wrapper that sets the sphere's arcs is now redundant.
+Each door has its BUILT line in docs/FOR-MIR.md § 040.
+
 ## The laws of 039
 
 THE DOORS OF 039 · CHAIN K (THE KIT RETURN, Opus 5.5; the clone road on kit branch `kit-039` from kit-038's eddd2b6, adopted one by one):

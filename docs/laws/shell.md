@@ -2,6 +2,12 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 040
+
+THE FINDER MENU, FILE › FOLDERS, THE SPECIAL SECTION (040 M1–M3): the menubar's first entry is FINDER, a group with no list whose press opens the finder (app-side on the kit's bar — FOR-KIT: an acting entry); 039 W2's "Enter on the logo opens the bar at FILE" now lands on FINDER; FILE has a FOLDERS row; the finder ends in SPECIAL: MODULATION · TIMELINE · CONTROL SURFACE (typed search reaches them; the kit's ↑ ↓ walk its own rows only — FOR-KIT).
+THE LOGO'S TWO ROADS (040 I2, F1): a cursor's click on the logo opens the FINDER while the interface shows and ends the reveal mode under B; a finger's tap and Enter keep the kit's toggle; H (no logo) is H's and the context menu's alone. The logo's hint turns with the mode (a class observer, not the hover).
+THE GHOST, THE MIR GLYPH AND THE PALETTE (040 I6, M5, M6; ICONS SAY WHAT THEY ARE): hide/reveal is a ghost before its window, behind it under B; MIR OPTIONS wears `mirOptions`, the gear with the MIR diamond inside; `palette` is a filled palette with three wells and a brush (when Focus's kit line joins, its line-art `palette` takes the name and the app's key moves).
+
 ## The laws of 039
 
 THE DOCK BUTTON HAS AREA (039 V8, C #13: on a floating PALETTE "dock this window back into the rack" had zero area — the kit's skin hides `.dev-util > .dev-pop` — and the grip's hint said only "PALETTE"): a floating card shows its pop chip (lab.css, never on a phone), in the kit's `dock` face, its press the kit's toggleFloat (the CONTROL SURFACE's card keeps csb.css' chip and its own act). THE GRIP SAYS WHAT IT DOES: a pointer over a card's title bar (not its buttons) gives the head's hint the gesture — "PALETTE · drag to detach" in a rack, "PALETTE · drag back to dock" floating, the name alone before it where the whole would pass 60 characters (`shell/rack-wiring.js`, a capture-phase pointerover writing the title the kit's hop turns into its data-help; the kit's status rewrite is answered at the next hover). Probe: the chip 22 × 22 on the floating head, a real tap docks the card.

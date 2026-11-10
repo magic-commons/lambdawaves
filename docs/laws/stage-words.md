@@ -4,6 +4,10 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ## The laws of 040
 
+INFORMATIONAL IGNORES A HIDDEN CSB (040 I1): with the bar docked, or hidden by B, the stage words, the pops and the ESP bar are laid as if it were absent; a FREE bar still counts (it is shown under B). This amends 020 S5 for the bar alone.
+THE INFORMATIONAL'S ROWS (040 I3): POSITION is one toggle between STAGE FORMULA and its SIZE; ANNOUNCE ALL (no stored key of its own) is always shown; the single announcement switches and the ESP BAR row live in the fold.
+THE MATH FACE (040 I4): the WAVE observable's pop is set by the page's KaTeX, every pop in STIX Two Math; the face's files are the kit's bytes, so no re-subset was made (a kit-side re-subset is a FOR-MIR line).
+
 THE LANE ANNOUNCES AS THE HAND DOES (040 A3, Josh: "it must work as if I myself am turning the knob ... If I disable announcements, then it shouldn't
 show announcements"): a lane's or a route's write (the registry's modulated set, their one road) of WAVE's STYLE and observable, the transport's RATE,
 MOLECULES' ORBITAL, VIEW and BASIS speaks the hand's own words through the same `say` kinds (`lab/shell/modulation.js` laneSay; the ORBITAL's step
