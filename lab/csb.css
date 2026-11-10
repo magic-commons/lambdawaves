@@ -39,7 +39,7 @@
   display: inline-grid; place-items: center; width: 36px; height: 36px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none; }
 #transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand):hover { color: var(--fg); background: var(--glass-raise); }
 #transport[data-layout="csb"] :is(.csb-ico, .csb-mod) svg { width: 20px; height: 20px; }
-#transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .mod-exp.live, .csb-search-b[aria-expanded="true"], #rackFav[aria-expanded="true"], .csb-info.on, .csb-nodes.on, .tr-expand.on) { color: var(--acc); }
+#transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .tr-open.live, .csb-ico .mod-exp.live, .csb-search-b[aria-expanded="true"], #rackFav[aria-expanded="true"], .csb-info.on, .csb-nodes.on, .tr-expand.on) { color: var(--acc); }
 /* 021 V2 · every seat's icon is an SVG from the one table (lab/icons.js through the kit's setGlyph): no masks.  THEME carries the moon and the sun;
    the theme shows one (body[data-theme]) */
 body[data-theme="light"] #transport .csb-theme > .gly-moon, body:not([data-theme="light"]) #transport .csb-theme > .gly-sun { display: none; }

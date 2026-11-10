@@ -107,6 +107,10 @@ export function createKeys(app) {
        (the main bar's ⏮ moves t); one position spanning both is a kit door for 1.5.6 (docs/FOR-MIR.md) */
     { const h = app.state.tl.root.querySelector('.transport-home'); if (h) { h.title = 'beat → bar 1 · the TIMELINE playhead to the start'; h.setAttribute('aria-label', 'timeline back to bar 1'); } }
     /* the window draws no pane of its own: its ruler, lanes and work bar are each a .glass pane (a lane clipped by the scroller), its rail chips */
+    /* 041 P12 (Josh 11-09: "On the CSB, If the timeline has a clip or anything, let the icon show it's highlighted similar to how modulation window is
+       when there's something active on it"): the bar's TIMELINE seat is lit (`live`, csb.css) while the arrangement holds a clip */
+    { const lit = () => { const b = document.querySelector('#transport .tr-open[data-opener="timeline"]'); if (b) b.classList.toggle('live', !!app.state.tl.model.extent({ unmuted: false })); };
+      app.state.tl.model.subscribe(lit); requestAnimationFrame(lit); }
     occlusion.register('timeline', () => app.state.tl.isOpen() ? [...app.state.tl.root.querySelectorAll('.glass'), ...(app.state.tl.rail.el ? app.state.tl.rail.el.querySelectorAll('.mir-chip') : [])].map((s) => paintedRect(s, s.closest('.tl-viewport'))) : []);
     for (const n of [app.state.tl.root, app.state.tl.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });
     /* iteration 007 (the MIR check, B1) · THE TIMELINE'S OWN UNDO: without a `history` the kit offers its undo and redo as rows named
