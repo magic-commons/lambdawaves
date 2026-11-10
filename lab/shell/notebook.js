@@ -214,7 +214,11 @@ export function createNotebook(app) {
         const rows = [['modulation', 'MODULATION', 'modulation', 'Open MODULATION, or raise it', () => !!layout.modulation.open, () => rise(app.state.modView && app.state.modView.root), () => A.run('modulation')],
           ['timeline', 'TIMELINE', 'timeline', 'Open the TIMELINE, or raise it', () => !!(app.state.tl && app.state.tl.isOpen()), () => rise(document.querySelector('[data-mir-window="timeline"]')), () => A.run('timeline')],
           ['transport', 'CONTROL SURFACE', 'controlSurface', 'Show the CONTROL SURFACE where it sits', () => !!bar() && !bar().closed,
-            () => { const b = bar(); if (b.docked) reveal('transport'); else if (b.el.play) b.el.play.focus({ preventScroll: true }); }, () => mirGui().prefs.set('transportBar', true)]]
+            () => { const b = bar(); if (b.docked) reveal('transport'); else if (b.el.play) b.el.play.focus({ preventScroll: true }); }, () => mirGui().prefs.set('transportBar', true)],
+          /* 041 P8 (Josh 11-09: "Include notebook and nodes as one of the other special windows in finder"): NOTEBOOK and NODES — NODES by the
+             FINDER's own road (its rack card where it is docked, else its free window), and its row leaves the list above so it is named once */
+          ['notebook', 'NOTEBOOK', 'notebook', 'Open the NOTEBOOK, or bring it forward', () => layout.notebook.isOpen, () => { const n = document.getElementById('notebook'); rise(n); if (n) n.focus({ preventScroll: true }); }, () => layout.notebook.open()],
+          ['nodes', 'NODES', 'nodes', 'Open NODES, or raise it', () => !!A.get('nodes').get() || !!document.querySelector('.dev[data-id="nodes"]:not(.closed)'), () => { reveal('nodes'); rise(document.querySelector('[data-mir-window="nodes"]')); }, () => reveal('nodes')]]
           .map(([id, name, glyph, words, open, up, run]) => { const b = el('button', 'wp-row', sec); b.type = 'button'; b.dataset.special = id; b.setAttribute('role', 'option');
             b.style.setProperty('--i', '12'); b.appendChild(glyphEl(glyph, 'wp-glyph', 16)); label(el('span', 'wp-name', b), name); hint(b, words);
             const r = { b, name: name.toLowerCase(), go: () => { F.close(); (open() ? up : run)(); } };
@@ -222,7 +226,8 @@ export function createNotebook(app) {
             r.open = open; return r; });
         const def = () => (F.root.querySelector('.wp-list .on') ? null : rows.find((r) => !r.b.hidden));
         const sync = () => { const s = q.value.trim().toLowerCase();   // after the kit's filter and X7's words (their listeners came first)
-          for (const r of rows) { r.b.hidden = !!s && !r.name.includes(s); r.b.toggleAttribute('data-open', r.open()); }
+          for (const r of rows) { r.b.hidden = !!s && !r.name.includes(s) && !(FIND_WORDS[r.b.dataset.special] || '').split(' ').some((w) => w.startsWith(s)); r.b.toggleAttribute('data-open', r.open()); }
+          for (const b of F.root.querySelectorAll('.wp-list [data-win="nodes"]')) b.hidden = true;   // 041 P8: NODES is a SPECIAL row
           sec.hidden = rows.every((r) => r.b.hidden); const d = s && def(); for (const r of rows) r.b.classList.toggle('on', r === d); };
         q.addEventListener('input', sync);
         q.addEventListener('keydown', (e) => { const d = e.key === 'Enter' && !e.shiftKey && def(); if (d) { e.preventDefault(); e.stopPropagation(); d.go(); } });
