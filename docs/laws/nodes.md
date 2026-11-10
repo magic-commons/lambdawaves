@@ -7,6 +7,7 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 NODES' CHIPS (041 N1, on alpha.55): the NODES window wears `chrome: 'both'`, its rail on the left, top to bottom: the drag chip (`gripAt: 'first'`), ADD NODE, FIT, FOLD ALL, BYPASS ALL; the four tools left the window's ground and the chips join the mask (`lab/nodes.js`, `lab/nodes-view.js`); the title bar keeps the presets, the dock door and ×; the rack card, which has no rail, keeps its three in its ground.
 A PRESET CARRIES THE GRADE (041 N2, Josh's call 11): a preset saved since 041 is `{ nodes (CURVES in its place in the chain), curves }` and a pick or the bar's step puts both back; one without `curves` (FILM, POSTER, PRINT, a 040 save) replaces every node but CURVES and leaves the grade. NODES' undo ring does not hold the grade. This amends 040 N4's "every node but CURVES" (below).
 ONE RAMP (041 N3, Josh's call 1): PERSPECTIVE draws one centred 128² ramp, once, and the focal point is an `feOffset` before each displacement map (`lab/node-prims.js`) — the same picture; a FOCUS write changes two numbers. The mode and its handle stay. This replaces 040 N1's ramp per focal point (below).
+FIT STARTS AT THE MARGIN (041 X3): a box the 0.5 floor leaves bigger than the ground is placed 24 px from its top and left, never centred off the view (`lab/nodes-view.js`).
 
 ## The laws of 040
 

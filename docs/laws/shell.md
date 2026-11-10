@@ -6,6 +6,7 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 THE FINDER WEARS THE GLASS; NOTEBOOK AND NODES ARE SPECIAL (041 P8, P8b, K4): the `windowPicker` action wears `search`, the CSB SEARCH's glyph (`windowPlus` left icons.js); SPECIAL is MODULATION · TIMELINE · CONTROL SURFACE · NOTEBOOK · NODES, NODES named there alone (`can('nodes')` null); since alpha.67 the rows are the kit's `sections` inside its filter and its ↑ ↓ Enter walk, and FIND_WORDS its `words` (`lab/shell/notebook.js`).
 THE REVEAL (041 I8, D0 b; the kit's alpha.63): under B the bar's peek arms by the clock, 250 ms after the hide (020 S1 waited for the pointer to leave the bar's reach), so a pointer that never left the bar brings it back; its nearness is the kit's `RACK.barNear` 160, held within `barHold` 220 (I8's 120 × 100 / 160 were the first numbers), the racks' the kit's `peekNear` 140; the racks' and the bar's hide and peek take `--lw-reveal` = the kit's 120 ms (`calc(var(--motion-micro) * 1.5)`, was 280 ms); the bar's return when B goes off keeps its 240 ms (`lab/shell/rack-wiring.js`, lab.css).
+THE VEIL'S FADE TAKES NO PRESS (041 X7): the kit's boot veil wraps its dismissal in a view transition; `::view-transition { pointer-events: none }` (`lab/lab.css`) lets the page under it take the press.
 
 ## The laws of 040
 

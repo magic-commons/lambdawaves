@@ -9,6 +9,8 @@ THE RACKED BAR KEEPS ITS SIZE (041 P10): in the rack card and the free window RA
 THE FAVOURITES' GRIP AND THEIR LEAVE (041 P11): a floating favourite's grip stands centred in its own 14-px row above the knob's word; the pointer's leave plays the arrival backwards before the strip goes home (`lab/csb-favs.js` `leave()`); EXPAND, Escape and the bar hiding still hide at once; none under reduced motion.
 THE TIMELINE SEAT IS LIT WHEN IT HOLDS A CLIP (041 P12): the TIMELINE seat wears the accent (`live`) while the arrangement holds a clip, open or shut (`lab/shell/keys.js`), as MODULATION's door does.
 THE DOCK CHIP WEARS NODES' ARROW (041 P13, K2): the way into the rack wears `rackIn`, named by the kit's `placeGlyphs` (alpha.65; P13's observer is gone); the way back is the kit's.
+THE TOP SEAT IS ASKED AGAIN WHEN ITS CLEAR MOVES (041 X1): a bar the dodge left blocked is seated again the moment clearRack moves `--csb-clear`, so a TIMELINE docked at the foot finds the bar on top (034 F3), never over it (`lab/shell/modulation.js`).
+THE DODGE READS THE SCREEN (041 X2): the work bars' `moved` reports (their own px under UI SCALE) are × #floats' zoom at the one door (`seen`) before any seat is weighed; the magnet hands the kit its own px back.
 
 ## The laws of 040
 

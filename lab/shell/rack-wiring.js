@@ -101,7 +101,8 @@ export function createRackWiring(app) {
      sensitive, if it's close to where the rack/CSB is, then it should appear"): 020 S1 armed the peek only once the pointer had LEFT the bar's reach
      (120 px) since the hide, so a hide pressed on or near the bar left it deaf until the hand went away to a rack and came back.  The peek now arms
      by the clock — 250 ms after the hide, the slide (lab.css --lw-reveal, 120 ms) landed, so the hide still never fights its own peek — and the
-     bar shows under a pointer that never left; near is 120 × 100 px round the bar's rest seat (was 80 × 60), held within 160 (was 120) */
+     bar shows under a pointer that never left; near and held are the kit's (041 D0, below: RACK.barNear 160 px round the bar's rest seat on
+     every side, held within RACK.barHold 220 — I8's own 120 × 100 and 160 are retired) */
   window.addEventListener('pointermove', (e) => {
     const b = document.body, tr = document.getElementById('transport'), on = b.classList.contains('transport-peek');
     if (!b.classList.contains('rack-hidden') || b.classList.contains('ui-hidden') || !tr || !tr.classList.contains('mini')) { if (on) b.classList.remove('transport-peek'); return; }

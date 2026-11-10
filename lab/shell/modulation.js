@@ -384,7 +384,10 @@ export function createModSeam(app) {
         const cards = Math.max(...hang.map(({ rk, r }) => r.top + contentBottom(rk) * (cssZoom(rk) || 1)));
         v = Math.max(0, Math.round((Math.min(cards + 10, foot - b.height - 10) - (t.offsetParent || document.body).getBoundingClientRect().top) / (cssZoom(t) || 1)));
       }
-      if (v !== clearPx) { clearPx = v; if (v) t.style.setProperty('--csb-clear', v + 'px'); else t.style.removeProperty('--csb-clear'); occlusion.dirty(); }   // the line masks follow the bar, paused or not
+      /* 041 X1 · THE TOP SEAT IS ASKED AGAIN WHEN ITS CLEAR MOVES (F-REVIEW FIX 1: a first run's TIMELINE docked at the foot, the dodge read the top
+         seat at the left rack's end, 602, before this frame clamped it above the timeline, 214 — no seat, the bar left UNDER the timeline): a bar the
+         dodge left blocked is seated again with the clear it now has */
+      if (v !== clearPx) { clearPx = v; if (v) t.style.setProperty('--csb-clear', v + 'px'); else t.style.removeProperty('--csb-clear'); occlusion.dirty(); if (blocked) modDodge(dodging.mod || null, 'mod'); }   // the line masks follow the bar, paused or not
       if (trMoving) return;   // the stop is measured on the bar where it landed (the settle asks again)
       for (const rk of racksEl) {
         const m = meet.find((x) => x.rk === rk), stop = m && m.r.top < s.top ? Math.max(0, Math.floor((s.top - 10 - m.r.top) / (cssZoom(rk) || 1))) : 0;
@@ -405,6 +408,11 @@ export function createModSeam(app) {
       addEventListener('resize', book); }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
+    /* 041 X2 · THE DODGE READS THE SCREEN (F-REVIEW FIX 2: at UI SCALE 150 % the docked MODULATION's knob row lay under the bar): the two work bars
+       report their box in their own px (#floats' zoom; MODULATION too since kit alpha.64), the seats are the screen's — a report is × the
+       layer's zoom here, at the one door both come in by, and the magnet hands the kit its own px back (onTimeline) */
+    const zoomOf = () => cssZoom(document.getElementById('floats')) || 1;
+    const seen = (r) => { const z = zoomOf(); return r && z !== 1 ? { left: r.left * z, top: r.top * z, right: r.right * z, bottom: r.bottom * z, width: r.width * z, height: r.height * z } : r; };
     /* 020 T3 · THE BAR IS ON TOP of every window (lab.css, chrome + 3) but these two: when no seat clears them it goes UNDER them for that time.
        021 V3 · …AND UNDER AN OPEN FLOAT IT MEETS — since 039 V1 only one TALLER THAN THE ROOM above the bar (MIR OPTIONS on a short screen: no seat
        could clear it, and its foot would lie under the bar); any other window that meets the bar (a hand's drag) goes under the bar, which stays
@@ -470,8 +478,10 @@ export function createModSeam(app) {
          It shows up when the timeline and nodes is open"): the kit fits OPTIONS and ABOUT to their content (gui.js fitTo — too tall for the page, the
          body scrolls; at any other width OPTIONS re-packs its columns), and at 1300 × 850 with the TIMELINE docked the shortened and narrowed seats
          below found room before the full one did — 280 × 510 over NODES, the body scrolling 470 of 632.  The fitted windows are seated WHOLE: their
-         full size only, clear of the doors where the stage has the room, else where the kit put them, over the bar as 039 V1 lets a tall one */
-      const whole = !!kit && /^gui(-about)?$/.test(n.dataset.mirWindow || '');
+         full size only, clear of the doors where the stage has the room, else where the kit put them, over the bar as 039 V1 lets a tall one.
+         041 X4 (F-REVIEW FIX 4: Shift + ? over a docked TIMELINE seated KEYBOARD 300 px wide, its drawn board 0 px over the action list): KEYBOARD
+         is seated whole too — its board and list are laid side by side for its own size */
+      const whole = !!kit && /^(gui(-about)?|keyboard)$/.test(n.dataset.mirWindow || '');
       const sizes = (kit || n === nbEl) && !whole ? 12 * 4 : 1;
       const fit = (avoid, narrow = false) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = narrow ? floor.w : Math.floor(pw * (1 - j * 0.04));
         if (narrow ? j || ww >= pw * 0.88 || hh < floor.h : i && (hh < floor.h || ww < floor.w)) continue;
@@ -587,14 +597,14 @@ export function createModSeam(app) {
       const mv = app.state.modView, tl = app.state.tl;
       if (!mv || !mv.isOpen || !tl || !tl.isOpen() || !dodging.tl) return false;
       /* the stage's height less the menubar's seat (the kit window's 52 px top clamp) and, on the stage, the control surface with its margin */
-      const t = document.getElementById('transport'), bar = t && t.classList.contains('mini') && t.dataset.place !== 'free' && !document.body.classList.contains('rack-hidden') ? t.offsetHeight + 12 : 0;
-      const stage = ((dom.canvas && dom.canvas.getBoundingClientRect().height) || window.innerHeight) - 52 - bar;
-      if ((dodging.tl.bottom - dodging.tl.top) + mv.root.offsetHeight + 8 <= stage) return false;
+      const t = document.getElementById('transport'), bar = t && t.classList.contains('mini') && t.dataset.place !== 'free' && !document.body.classList.contains('rack-hidden') ? t.offsetHeight * (cssZoom(t) || 1) + 12 : 0;
+      const z = zoomOf(), stage = ((dom.canvas && dom.canvas.getBoundingClientRect().height) || window.innerHeight) - 52 * z - bar;   // 041 X2: the screen's px throughout
+      if ((dodging.tl.bottom - dodging.tl.top) + (mv.root.offsetHeight + 8) * z <= stage) return false;
       if (opened === 'tl') mv.close(); else tl.close();
       return true;
     }
-    const onTimeline = () => { const r = dodging.tl; if (!r) return null; const w = app.state.modView.root.offsetWidth || 0;
-      return { left: r.left + (r.right - r.left - w) / 2, top: r.top }; };
+    const onTimeline = () => { const r = dodging.tl; if (!r) return null; const z = zoomOf(), w = app.state.modView.root.offsetWidth || 0;   // the kit's own px (X2)
+      return { left: (r.left + (r.right - r.left) / 2) / z - w / 2, top: r.top / z }; };
     function magnetSeat() {
       const mv = app.state.modView; if (!mv || !mv.isOpen) return;
       if (magnet.ours && !mv.isStacked) { magnet.ours = false; magnet.released = true; }   // the hand dragged it away
@@ -602,7 +612,7 @@ export function createModSeam(app) {
       else if (magnet.ours) { magnet.ours = false; mv.stackAbove(null); }
     }
     app.state.modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), mod.port({
-      moved: modDodge, persist: () => saveSettings(), note: hNote,
+      moved: (r) => modDodge(seen(r), 'mod'), persist: () => saveSettings(), note: hNote,
       rateControl: () => knob({ label: 'RATE', min: 0.1, max: 3000, value: clock.rate, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (!modHand('transport.rate', v)) { clock.setRate(v); ui.rateKnob.set(v); } } }),
       /* WAVE 102 · THE FIFTH EDGE's memory: the chosen input, kept in this browser's settings so a returning user is not asked to
          pick it again — a device HANDLE, never audio (the kit's mir/modulation/audio-capture.js header says why that distinction matters). */
@@ -626,7 +636,7 @@ export function createModSeam(app) {
     registerWindow({ root: app.state.modView.root, rail: app.state.modView.rail });
     applyAccent();                                    // the two angles reach the window as soon as it exists
     app.state.modView.restore(readSettings().modwin);
-    app.state.dodge = modDodge;                                 // 0.5.0 C7b: the TIMELINE's `moved` gives way through the same seat chooser
+    app.state.dodge = (r, who) => modDodge(seen(r), who);      // 0.5.0 C7b: the TIMELINE's `moved` gives way through the same seat chooser (X2: in the screen's px)
     /* wave 54: the modulation clock's visibility is driven by the ONE authority (setPageHidden), not by a second listener of its own — it still RE-ANCHORS and never jumps */
     if (page.hidden) app.state.modHost.clock.setHidden(true);
   }
