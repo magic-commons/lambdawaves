@@ -241,7 +241,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   icon(faceTheme, 'sun').classList.add('gly-sun'); icon(faceTheme, 'moon').classList.add('gly-moon'); faceTheme.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
   { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'ABOUT MIR'); hint(mir, 'ABOUT MIR — the toolkit this app is built on'); mir.addEventListener('click', () => openAbout('mir', mir));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
-  { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google'); hint(credits, 'Built with Claude, Gemini and GPT · press for the names');   // 039 X16
+  { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');   // 041 P6 (Josh 11-09: "Show no mouse-over hint for the AI thingy in the main menu"): no hint (039 X16's is gone); the names still slide out and the aria name stands
     /* 036 G6 (Josh 11-03: "Claude Logo is incorrect; use the actual real logo. Checkout the screenshot of the correct font and logo styling. Also
        no need to show company who made it"): the about site's real marks and names — Claude's starburst (img/ai/claude-mark.svg, its
        terracotta) and its serif wordmark in the theme's ink (claude-word-{dark,light}.svg) in place of a typed name; GPT in OpenAI Sans and
