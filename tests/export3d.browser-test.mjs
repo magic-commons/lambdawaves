@@ -179,7 +179,7 @@ try {
   `);
   assert.equal(perfR.got, true);
   assert.ok(perfR.before > 0 && perfR.after > 0, `both medians must be real samples (${perfR.before}, ${perfR.after})`);
-  const rel = Math.abs(perfR.after - perfR.before) / perfR.before;
+  const rel = Math.max(0, perfR.after - perfR.before) / perfR.before;   // 041: a stall is a SLOWER loop — the medians are whole ms, and 2 → 1 (faster after a warm run) read as 50 %
   assert.ok(rel <= 0.2, `the loop's median must stay within 20% across a playing export: ${perfR.before.toFixed(3)} → ${perfR.after.toFixed(3)} ms (Δ ${(100 * rel).toFixed(1)}%)`);
   console.log(`PASS the export never stalls the frame path: loop median ${perfR.before.toFixed(3)} ms → ${perfR.after.toFixed(3)} ms across a playing EXPORT GRID · NPZ (Δ ${(100 * rel).toFixed(1)}%)`);
 
