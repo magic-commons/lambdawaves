@@ -311,7 +311,7 @@ export function createStageWords(app) {
       setFormula(md) { formula = md || ''; if (banner === null) show(); },
       /** THE FADE: `md` in the formula's seat for `ttl` (0: until dismiss(md) — the molecule's head, D2), then its exit and the
        *  formula's return.  Only a HAND calls it. */
-      announce(md, ttl = 2400) {
+      announce(md, ttl = 3400) {   // 041 I5 (Josh: "Let the announcements stick around for a second longer"): 3.4 s, was 2.4
         if (!on || !md) return false;
         stats.announced++; clearTimeout(fadeT); banner = md; show();
         if (ttl) fadeT = setTimeout(() => { banner = null; show(); }, ttl);
@@ -319,11 +319,11 @@ export function createStageWords(app) {
       },
       dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },
       /** a POP-UP: one short line on the side away from the formula that fades out; another press restarts it (iteration 001).
-       *  { hold: true } (a dial under the hand, iteration 007): the line stays lit and follows the number, and fades 1.2 s after the last held one */
+       *  { hold: true } (a dial under the hand, iteration 007): the line stays lit and follows the number, and fades 2.2 s after the last held one (041 I5; 1.2 s before) */
       pop(text, { hold = false, kind = '', tex = '' } = {}) {
         if (!on || !text) return false;
         stats.pops++; clearTimeout(popHold);
-        const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 1200); };   // the hand let go: the held line fades from where it is
+        const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 2200); };   // 041 I5: a second longer (was 1.2 s)   // the hand let go: the held line fades from where it is
         if (hold && pop.classList.contains('hold')) { if (pop.textContent !== text) pop.textContent = text; letGo(); return true; }
         const { rs, sb } = rest(), F = freeOf(rs, sb);
         pop.textContent = text; pop.dataset.kind = kind; pop.classList.remove('go', 'hold', 'out');   // 040 I4: the pop wears its kind (skin.css)

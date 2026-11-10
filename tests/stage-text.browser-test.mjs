@@ -59,7 +59,7 @@ try {
     const href = __LW.link.mint().href; const link = __LW.link.open(href); await __w(300);
     const r = await fetch('./demos/wave-dancer.lambdawaves.json', { cache: 'no-cache' }); const path = P.importText(await r.text()); P.open(path); await __w(800);
     window.confirm = c0;
-    await __w(3200);   /* the ttl and the fade */
+    await __w(4200);   /* the ttl and the fade (041 I5: a second longer) */
     return { pressed, undid, link: link.opened && link.ok, n: S.stats.announced - a0, after: { banner: S.banner, md: S.md, title: getComputedStyle(__node()).fontSize, fades: S.layer.root.querySelectorAll('.mir-info-block[data-fade]').length }, errs: __e.slice() };`);
   assert.equal(t2.pressed.banner, '1s \\+ 2s  beat', 'the press did not announce its preset: ' + JSON.stringify(t2));
   assert.equal(t2.pressed.n, 1); assert.equal(t2.undid, true); assert.equal(t2.link, true);
@@ -81,7 +81,7 @@ try {
     const banners = {}; for (const p of ['HOMO', 'LUMO', 'FRONTIER FOUR', 'HOMO SET', 'LUMO SET', 'OCCUPIED']) { __field(sel(), p); await __w(80); banners[p] = S.banner; }   // 0.5.3 M10
     await __LW.chem.solve('NH3'); await __LW.settle(); await __w(600);
     __field(sel(), 'WINDING'); await __w(80); const winding = S.banner;
-    const n = S.stats.announced - a0; await __w(3200); const md = S.md; __LW.chem.setOn(false); await __LW.settle();
+    const n = S.stats.announced - a0; await __w(4200); const md = S.md; __LW.chem.setOn(false); await __LW.settle();
     return { homo, banners, winding, n, md, still, moved, labels: document.querySelectorAll('#atomLabels .atom-label').length, errs: __e.slice() };`);
   assert.equal(t3.homo, 'HOMO + LUMO · $1b_{1}$ + $4a_{1}$', 'HOMO + LUMO: ' + JSON.stringify(t3));
   assert.ok(/^WINDING · \$\d+e\$ \(a\) \+ \(b\)$/.test(t3.winding), 'WINDING: ' + JSON.stringify(t3));

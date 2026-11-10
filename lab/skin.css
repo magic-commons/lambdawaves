@@ -503,9 +503,10 @@ body.window-info-off .settings-help { display:none; }
    other announcements … a serif font"): every pop-up is set in STIX Two Math (its one weight; its Latin is the serif); WAVE VIEW's is KaTeX's (stage-words.js) */
 .lw-pop[data-kind="view"] { letter-spacing: 0; font-size: calc(17px * var(--lw-pop-size, 1)); }
 [data-theme="light"] .lw-pop { color: hsl(232 22% 10%); text-shadow: 0 0 8px hsl(42 45% 97% / .85), 0 0 2px hsl(42 45% 97% / .85); }
-.lw-pop.go { animation: lw-pop 1.6s ease-out forwards; }
-@keyframes lw-pop { 0% { opacity: 0; transform: translate(-50%, 6px); } 12% { opacity: 1; transform: translate(-50%, 0); } 65% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -4px); } }
-@media (prefers-reduced-motion: reduce) { .lw-pop.go { animation: lw-pop-still 1.6s linear forwards; } @keyframes lw-pop-still { 0%, 65% { opacity: 1; } 100% { opacity: 0; } } }
+/* 041 I5 (Josh 11-09: "Let the announcements stick around for a second longer"): 2.6 s, was 1.6 — the same 0.19 s in and 0.56 s out, a second more lit */
+.lw-pop.go { animation: lw-pop 2.6s ease-out forwards; }
+@keyframes lw-pop { 0% { opacity: 0; transform: translate(-50%, 6px); } 7.4% { opacity: 1; transform: translate(-50%, 0); } 78.5% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -4px); } }
+@media (prefers-reduced-motion: reduce) { .lw-pop.go { animation: lw-pop-still 2.6s linear forwards; } @keyframes lw-pop-still { 0%, 78.5% { opacity: 1; } 100% { opacity: 0; } } }
 /* iteration 007 · a dial under the hand (ORBITAL, RATE): the line stays lit while the hand turns, then fades from where it is */
 .lw-pop.hold { opacity: 1; transform: translate(-50%, 0); }
 .lw-pop.out { opacity: 0; transform: translate(-50%, 0); transition: opacity .5s ease-in; }
