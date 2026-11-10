@@ -340,24 +340,26 @@ export function createView(parent, kind, M) {
      to a scroller) — with the kit's ↑ ↓ → ←, Enter, Escape and a press outside.  The kinds by GROUP, each group a submenu (no scroller); GRAPHS a
      submenu (the shipped ones, the reader's, SAVE THIS GRAPH, REMOVE ›); a search line on top: typed, the matches as one list, Enter adds the first.
      A kind joins a group by `group` (else its class); a new group is a GROUPS row.  The tools sit before the plane, so Tab meets + first (038 N7) */
-  const tools = ground.insertBefore(el('div', 'nodes-tools'), plane), tool = (cls, g, word, run) => { const b = el('button', cls, tools); b.type = 'button'; chip(b, g, word); b.addEventListener('click', run); return b; };
-  const addB = tool('nodes-add', 'plus', 'ADD NODE', () => openMenu());
-  if (W) tool('nodes-fit', 'home', 'FIT — every card in view (Home)', () => fit());
-  const foldB = tool('nodes-folds', 'compact', 'FOLD ALL', () => foldAll());
-  const offB = tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
+  /* 041 N1 · NODES' CHIPS (Josh: "remove the icons … add node, reset zoom (home icon), minimize all, and the power button thingy and move them into
+     chips on the left side from top to bottom including a drag handle chip like the rest"): the WINDOW's four tools are chips of its rail (nodes.js;
+     `api.tools` is their hands, `api.onTools` hears the two states); the rack card, which has no rail, keeps its three in the ground */
+  const tools = W ? null : ground.insertBefore(el('div', 'nodes-tools'), plane), tool = (cls, g, word, run) => { const b = el('button', cls, tools); b.type = 'button'; chip(b, g, word); b.addEventListener('click', run); return b; };
+  let addB = W ? null : tool('nodes-add', 'plus', 'ADD NODE', () => openMenu());
+  const foldB = W ? null : tool('nodes-folds', 'compact', 'FOLD ALL', () => foldAll());
+  const offB = W ? null : tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
   const back = () => { if (W) ground.focus({ preventScroll: true }); };   // a pick or an Escape gives the ground its keys back
   const kindRow = (type, t) => [t.label + '\t' + MARK[t.cls] + (t.heavy ? ' HEAVY' : ''), () => { M.add(type); back(); }, type === 'curves' && M.has(), t.hint, { icon: nodeGlyph(type), id: type }];
   const kinds = ([g, , , cls = [g]]) => Object.entries(T).filter(([, t]) => t.menu !== false && cls.includes(t.group || t.cls)).map(([type, t]) => kindRow(type, t));
   const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list, name); back(); }, false, hint, { id: 'graph:' + name, raw }];   // 040 N4: the bar names it
   const graphRows = () => { const U = M.graphs.list();
     return [...Object.entries(M.SHIPPED).map(([name, list]) => graph(name, list, 'a shipped graph: every node but CURVES replaced')),
-      ...(U.length ? [null, ...U.map((u) => graph(u.name, u.data && u.data.nodes, 'your graph (kept on this device)', true))] : []),
+      ...(U.length ? [null, ...U.map((u) => graph(u.name, u.data, 'your graph (kept on this device)', true))] : []),
       null, ['SAVE THIS GRAPH', saveGraph, false, 'the nodes as your own graph (kept on this device)', { icon: 'saveInto', id: 'save' }],
       ...(U.length ? [['REMOVE', () => U.map((u) => [u.name, () => M.graphs.remove(u.name), false, 'remove this graph', { raw: true, id: 'remove:' + u.name }]), null, '', { sub: true, icon: 'trash', id: 'remove' }]] : [])]; };
   const found = (s) => { const S = s.toUpperCase();
     return [...Object.entries(T).filter(([, t]) => t.menu !== false && t.label.includes(S)).map(([type, t]) => kindRow(type, t)),
       ...Object.entries(M.SHIPPED).filter(([n]) => n.includes(S)).map(([n, list]) => graph(n, list, 'a shipped graph')),
-      ...M.graphs.list().filter((u) => u.name.toUpperCase().includes(S)).map((u) => graph(u.name, u.data && u.data.nodes, 'your graph', true))].slice(0, 10); };
+      ...M.graphs.list().filter((u) => u.name.toUpperCase().includes(S)).map((u) => graph(u.name, u.data, 'your graph', true))].slice(0, 10); };
   let find = null;
   /** open the + menu, its caret on the search line; a typed search reopens it with the matches (the line kept, the caret where it was) */
   function openMenu(s = '') {
@@ -379,11 +381,13 @@ export function createView(parent, kind, M) {
     const d = openDialog({ title: 'SAVE THIS GRAPH', body: f, actions: [{ label: 'CANCEL', value: null }, { label: 'SAVE', kind: 'primary', run: () => f.value.trim() || null }] });
     f.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); d.close(f.value.trim() || null); } });
     requestAnimationFrame(() => { f.focus(); f.select(); });
-    d.result.then((n) => { if (n) M.graphs.add(n, { nodes: M.graphOf() }); back(); });
+    d.result.then((n) => { if (n) M.graphs.add(n, M.graphOf()); back(); });
   }
   const foot = el('div', 'nodes-passes', ground);
   if (!W) label(el('div', 'note', parent), NOTE);                   // the card's one line (window notes are a SETTINGS choice)
   const api = {
+    /** 041 N1: the window's rail chips reach the view here — `anchor(el)` names the element the + menu opens under */
+    tools: { add: () => openMenu(), fit: () => fit(), fold: () => foldAll(), off: () => M.setOff(!M.off()), state: () => ({ off: M.off(), folded: folded() }) }, anchor(b) { addB = b; }, onTools: null,
     get view() { return cards.curves && cards.curves.view; },
     widget: (id, k) => { const n = cards[id], c = n && ((n.ctl && n.ctl.ctls[k]) || (n.fctl && n.fctl.ctls[k])); return c ? c.targets[0] || null : null; },
     paint(q, k, v, shown) { const n = cards[q.id]; if (!n) return; for (const c of [n.ctl, n.fctl]) if (c) c.paint(k, v, shown); if (k === mixOf(T[q.type])) paintHand(q, v); api.mark(q); },
@@ -413,8 +417,9 @@ export function createView(parent, kind, M) {
         n.bar.querySelector('.nodes-solo').setAttribute('aria-pressed', String(M.flags.solo === q.id));
         n.c.classList.toggle('past', !!(M.flags.solo ? M.flags.solo !== q.id : M.flags.view && L.findIndex((p) => p.id === M.flags.view) < L.indexOf(q))); n.bar.querySelector('.nodes-chev').setAttribute('aria-expanded', String(!q.fold));
         if (q.name) { label(n.name, ''); n.name.textContent = q.name; } else label(n.name, T[q.type].label); }
-      offB.setAttribute('aria-pressed', String(M.off())); ground.classList.toggle('nodes-off', M.off());
-      chip(foldB, folded() ? 'expand' : 'compact', folded() ? 'UNFOLD ALL' : 'FOLD ALL');
+      ground.classList.toggle('nodes-off', M.off());
+      if (offB) { offB.setAttribute('aria-pressed', String(M.off())); chip(foldB, folded() ? 'expand' : 'compact', folded() ? 'UNFOLD ALL' : 'FOLD ALL'); }
+      if (api.onTools) api.onTools(api.tools.state());
       paintSel(); api.place();
     },
     place() {

@@ -179,14 +179,19 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   function setHas(on) { const c = curvesNode(); if (on) add('curves'); else if (c) setBypass(c.id, true); }
   /** a graph preset (a shipped one, or the reader's): every node but CURVES replaced by its list, laid out afresh */
   let showPreset = () => {};   // 040 N4: the title bar's PRESET NAME (below), told which graph a pick loaded
-  function applyGraph(list, name = '') {
+  /* 041 N2 · A PRESET CARRIES THE GRADE (Josh, 040's call 11: "Node presets carry the CURVES grade: yes"): a preset saved from here on is
+     { nodes (CURVES in its place in the chain), curves (the grade; null = no CURVES node) } and a pick puts both back.  A preset without the `curves`
+     key (the shipped three, one saved in 040) replaces every node but CURVES and leaves the grade alone, as it always did */
+  function applyGraph(g, name = '') {
+    const d = Array.isArray(g) ? { nodes: g } : g || {}, all = 'curves' in d;
     undo.mark(); showPreset(name);
     batch(() => {
-      for (const q of nodes) if (q.type !== 'curves') unenroll(q);
-      nodes = nodes.filter((q) => q.type === 'curves'); for (const q of nodes) q.at = null;
-      for (const p of list || []) if (TYPES[p.type] && p.type !== 'curves') { const q = fresh(nextId(), p.type, p); nodes.push(q); enroll(q); }
+      for (const q of nodes) if (all || q.type !== 'curves') unenroll(q);
+      nodes = all ? [] : nodes.filter((q) => q.type === 'curves'); for (const q of nodes) q.at = null;
+      for (const p of d.nodes || []) if (TYPES[p.type] && (p.type !== 'curves' ? true : all && !curvesNode())) { const q = fresh(p.type === 'curves' ? 'curves' : nextId(), p.type, p); nodes.push(q); enroll(q); }
     });
-    changed();
+    if (all) model.restore(d.curves && typeof d.curves === 'object' ? d.curves : FLAT);
+    changed(all);
   }
   /* 020 X2 · THE CARD's verbs: collapse · rename (the bar and the modulation target's label; ids never change) · reset · move up / down · tidy */
   function setFold(ids, on) { const Q = many(ids).map(byId).filter((q) => q && q.fold !== !!on); if (!Q.length) return; undo.mark(); for (const q of Q) q.fold = !!on; changed(); }
@@ -200,7 +205,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const flag = (f, id) => { flags[f] = id && flags[f] !== id && byId(id) ? id : null; changed(); };
   function setOff(on) { if (!!rec().off === !!on) return; undo.mark(); put({ off: !!on }); changed(); }
   function tidy() { undo.mark(); for (const q of nodes) q.at = null; put({ at: {} }); changed(); }
-  const graphOf = () => nodes.filter((q) => q.type !== 'curves').map(({ type, values, bypass, plug }) => ({ type, values: { ...values }, bypass, ...(plug === false && { plug }) }));
+  const graphOf = () => { const { channel, ...grade } = model.serialize();
+    return { nodes: nodes.map(({ type, values, bypass, plug }) => (type === 'curves' ? { type, bypass } : { type, values: { ...values }, bypass, ...(plug === false && { plug }) })), curves: curvesNode() ? JSON.parse(JSON.stringify(grade)) : null }; };
   /** 038 N4 · setPlug(id, on): a wire unplugged (its node out of the chain, its place and values kept — absent = plugged, so every saved graph reads
    *  as it was) or plugged back; one step of NODES' ring */
   function setPlug(id, on) { const q = byId(id); if (!q || q.plug === !!on) return; undo.mark(); q.plug = !!on; changed(); }
@@ -276,20 +282,28 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     onOpen: () => requestAnimationFrame(() => vCard.place()) });
   const wbody = el('div', 'nodes-host');
   const vWin = createView(wbody, 'win', M); views.push(vWin);
-  win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'close', resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
+  /* 041 N1 · NODES' CHIPS: the title bar keeps the presets, the dock door and ×; ADD · FIT · FOLD ALL · BYPASS ALL stand on the window's left rail
+     under the drag chip (the kit's chrome 'both', alpha.55), as TIMELINE's and FOLDERS' chips do */
+  const T = () => vWin.tools, chips = () => { const { off, folded } = T().state(); win.setChip('off', off); win.setChip('folds', folded); };   // a press flips the chip first: the model says what it reads
+  win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'both', gripAt: 'first', chips: [
+    { name: 'add', kind: 'action', glyph: 'plus', label: 'ADD NODE', hint: 'ADD NODE', press: () => T().add() },
+    { name: 'fit', kind: 'action', glyph: 'home', label: 'FIT', hint: 'FIT — every card in view (Home)', press: () => T().fit() },
+    { name: 'folds', kind: 'toggle', glyph: 'compact', label: 'FOLD ALL', hint: 'FOLD ALL', states: { true: { glyph: 'expand', label: 'UNFOLD ALL', hint: 'UNFOLD ALL', pressed: false } }, press: () => { T().fold(); chips(); } },
+    { name: 'off', kind: 'toggle', glyph: 'power', label: 'BYPASS ALL', hint: 'BYPASS ALL — the picture without the graph (\\)', press: () => { T().off(); chips(); } }], resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
     persist: { read: () => rec().win || null, write: (st) => put({ win: st }) },
     onOpen: () => { onWin(true); requestAnimationFrame(() => vWin.place()); }, onClose: () => onWin(false), onMoved: () => occlusion.dirty() });   // 021 I1: the bar's NODES seat lights on these
   /* 038 N3 · THE BAR (Josh: "Move the dock to rack button besides the 'x' button and make the icon slightly smaller and match the styling of the nodes
      icon and 'x' on the window bar"): the window's DOCK door beside × in its title bar (a head button, its glyph 16 px against the bar's 18), the
      card's OPEN AS A WINDOW door before × in its head (× 's own look) — the ground keeps no door */
   const door = (cls, glyph, word, run) => { const b = el('button', cls); b.type = 'button'; chip(b, glyph, word); b.addEventListener('click', run); return b; };
+  vWin.anchor(win.rail.chip('add')); vWin.onTools = chips; chips();
   win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'DOCK IN THE RACK', () => M.door('win')));
   /* 040 N4 · THE NODES' PRESETS (Josh: "I want to add the modulation window's preset saving thing into Nodes and put it into the window title bar"):
      MOD's bar — the save glyph · PRESET NAME · ◀ ▶ — on the left after the title.  A preset is the graph: every node but CURVES (whose grade keeps its
      own presets), the shipped FILM · POSTER · PRINT then the reader's — the GRAPHS › list, `lambdawaves.q0.nodePresets` (PREFERENCE).  ◀ ▶ step through
      them and load each (one step of NODES' ring); SAVE keeps the typed name in CAPS (Enter too; a taken name becomes NAME 2, 016 W9); Escape puts the
      shown name back; the field rims while what is typed is not the shown preset */
-  { const bar = el('div', 'nodes-presets'), L = () => [...Object.entries(SHIPPED).map(([name, list]) => ({ name, list })), ...graphs.list().map((u) => ({ name: u.name, list: u.data && u.data.nodes }))];
+  { const bar = el('div', 'nodes-presets'), L = () => [...Object.entries(SHIPPED).map(([name, list]) => ({ name, list })), ...graphs.list().map((u) => ({ name: u.name, list: u.data }))];
     let cur = '';
     const save = door('mir-win-btn nodes-prebtn', 'save', 'SAVE THE GRAPH AS A PRESET', () => keep()); bar.append(save);
     const name = el('input', 'nodes-prename', bar); name.type = 'text'; name.maxLength = 40; name.spellcheck = false; name.setAttribute('autocapitalize', 'characters');
@@ -298,7 +312,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     nav(-1, 'dirPrev', 'PREVIOUS PRESET'); nav(1, 'dirNext', 'NEXT PRESET'); hint(save, 'SAVE THE GRAPH AS A PRESET');
     showPreset = (n) => { cur = n || ''; name.value = cur; name.classList.remove('dirty'); };
     const step = (d) => { const P = L(), i = P.findIndex((p) => p.name === cur), j = i < 0 ? (d > 0 ? 0 : P.length - 1) : (i + d + P.length) % P.length; if (P[j]) applyGraph(P[j].list, P[j].name); };
-    const keep = () => { const n = name.value.trim().toUpperCase(); if (!n) { name.focus(); return; } showPreset(graphs.add(uniqueName(n, Object.keys(SHIPPED)), { nodes: graphOf() })); };
+    const keep = () => { const n = name.value.trim().toUpperCase(); if (!n) { name.focus(); return; } showPreset(graphs.add(uniqueName(n, Object.keys(SHIPPED)), graphOf())); };
     name.addEventListener('input', () => name.classList.toggle('dirty', name.value.trim().toUpperCase() !== cur));
     name.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); keep(); } else if (e.key === 'Escape') { e.preventDefault(); showPreset(cur); name.blur(); } });
     bar.addEventListener('pointerdown', (e) => { if (e.target !== bar) e.stopPropagation(); });   // a press on its controls is theirs, never the grip's
@@ -326,7 +340,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     new MutationObserver((recs) => { const c = card.root.classList; if (!c.contains('floating') || c.contains('dragging') || !recs.some((m) => / dragging( |$)/.test(' ' + m.oldValue))) return;
       const r = card.root.getBoundingClientRect(); rk.dock('nodes'); rk.close('nodes'); win.open(); win.place({ x: r.left, y: r.top }); }).observe(card.root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }); }
   const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'OPEN AS A WINDOW', () => M.door('card')), util.querySelector('.dev-close'));
-  occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
+  occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root), ...[...win.rail.el.querySelectorAll('.mir-chip')].map((c) => paintedRect(c))] : []));   // 041 N1: the rail's chips are painted glass too
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
   return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, setView: M.setView, setSolo: M.setSolo, setOff, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),

@@ -255,7 +255,8 @@ export function createMaterial(app) {
        1.5.7-alpha.7) in place of the plane-model canvas — the normal as its tip, the plane as its film, no letters; under CAMERA the normal is
        the eye's own and the sphere draws it as the eye sees it (`view`), so the picture never lies about where the cut is.  rack.js paints it
        each frame CLIP shows; paint() redraws only on a change */
-    const mini = directionSphere({ aria: 'Clip plane: drag to turn it; Home resets', plane: { normal: sliceN, pos: () => mat.slice.pos, view: () => mat.slice.frame === 'camera',
+    const mini = directionSphere({ aria: 'Clip plane: drag to turn it; Home resets', plane: { normal: sliceN, pos: () => mat.slice.pos, view: () => mat.slice.frame === 'camera', delta: true,   // 041 N4: the stage's drag (alpha.54) — the kit turns the normal about the picture's up and right by the raw step, no pole
+     
       set: (n) => { mat.slice.normal = n; schedule(TIER.PRESENT); } }, home: () => { mat.slice.normal = [0, 0, 1]; schedule(TIER.PRESENT); } });
     hint(mini.root, 'PLANE · drag to turn it; double-tap or Home resets'); planeRow.append(mini.root, ui.sliceFrameSeg.root);
     ui.sliceMini = mini;
@@ -385,8 +386,7 @@ export function createMaterial(app) {
        routed dial writes its base (modHand), as everywhere. */
     const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['friction', 'drag', 'fling']); let feelSave = 0;
     const camPanel = createCameraPanel({ mode: '3d', modPrefix: 'observer', project: false, mod, panWrap: 'plane',   // 038 K3 (Josh: "allow the XY thing to do the pacman tunnel effect"): MIR 1.5.7-alpha.13 — the pivot leaves one edge of the frame and comes in at the other
-      port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } },
-        turn(dy, dp) { cameraPort.turn(dy, dp); const s = camView.sphere; s.yaw.set(cameraPort.get('yaw')); s.pitch.set(cameraPort.get('pitch')); } } });   // 0.5.3 M5: the kit's port.turn road never sets the sphere's arcs and its sync skips a sphere mid-drag, so the rings' arrow froze until a later notice (and each step turned from the stale arrow): it follows the hand here, per move (MIR-BRIEF-sphere.md)
+      port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } } } });   // 041 N4: the port's own drag(dx, dy) turns the sphere as the stage turns (camera-law.js); the kit re-reads the arcs per move, so 0.5.3 M5's turn wrapper is gone
     camPanel.spec.build(gc, null);
     const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));

@@ -216,6 +216,11 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
   const pan = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
   const port = { angle: 'rad', get: (id) => (ROADS[id] ? ROADS[id][0]() : undefined), set(id, v) { if (ROADS[id]) ROADS[id][1](v); },
     subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }, notify: tell, turn, home: () => resetView(), setShift, zoomAt, panBy,
+    /* 041 N4 · THE BALL TURNS AS THE STAGE DOES (Josh: "clicking and dragging on the stage already does the behavior perfectly … clicking on the control
+       simply is like clicking on the stage but at a slightly higher sensitivity"): the kit's sphere in its delta mode (MIR 1.5.7-alpha.54) hands the raw
+       pointer step, already × its gain (1.5) and its fine gear; it goes down the stage's own road — orbitBy at the stage's rad per px, FLIP included
+       (lab/stage-gestures.js pointerMove) — so there is no ball point, no pole and no rim to stick on */
+    drag(dx, dy) { const k = camera.radPerPixel; camera.stop(); turn(-dx * k * (flipped ? -1 : 1), dy * k); },
     verbs: Object.freeze([{ label: 'PAN HOME', title: 'PAN HOME — put the pivot back in the middle of the frame', run: () => { setShift(0, 0); } }]),
     modIds: Object.freeze({ yaw: 'observer.yaw', pitch: 'observer.pitch', zoom: 'observer.dist', fov: 'observer.fov', panX: 'observer.panx', panY: 'observer.pany' }),
     ranges: Object.freeze({ zoom: R(...CAM.DIST, H.dist, { log: true, fmt: 'zoom', reverse: true }), fov: R(...CAM.FOV, H.fov), yaw: R(0, 2 * Math.PI, H.yaw),
