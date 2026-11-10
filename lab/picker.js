@@ -195,11 +195,15 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
   /* 035 G1 (Josh 11-03: "a back arrow instead of a home arrow; home icon in library takes you to the lab"): ← is the face (the tutorial's
      one way back, the decks' and the folders' first), ⌂ enters the lab as CONTINUE does */
+  /* 041 P4 · HOME IS THE MAIN MENU, THE ARROW IS THE LAB (Josh 11-09: "swap the functions between the home button and the back arrow in the picker.
+     Home will go straight to main menu while the arrow takes you to the lab. The back arrow in tutorial should be left as is"): over the decks
+     and FOLDERS ← closes the menu (as CONTINUE does) and ⌂ is the face; in the tutorial ← is still the face.  Escape still steps back */
   /* 036 G3 (Josh 11-03: "Instead of the arrow to go back to the main menu in the library mode, have it be a large arrow in the top left"): ← is
      the menu's own, pinned to its top-left corner, large and plateless (skin.css); still `data-nav="back"`, still the face */
-  const backB = el('button', 'mm-navb mm-backb', root); backB.type = 'button'; icon(backB, 'back'); backB.setAttribute('aria-label', 'Main menu'); backB.title = 'Main menu';
-  backB.dataset.nav = 'back'; backB.addEventListener('click', () => showFace());
-  navBtn('home', 'Continue to the lab', () => close()).dataset.nav = 'home';
+  const backB = el('button', 'mm-navb mm-backb', root); backB.type = 'button'; icon(backB, 'back'); 
+  const wayBack = () => { const t = at === 'tutorial' ? 'Main menu' : 'Back to the lab'; backB.title = t; backB.setAttribute('aria-label', t); };
+  backB.dataset.nav = 'back'; backB.addEventListener('click', () => (at === 'tutorial' ? showFace() : close()));
+  navBtn('home', 'Main menu', () => showFace()).dataset.nav = 'home';
   navBtn('folders', 'Folders — your projects and the demos', () => (at === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
   /* the face's two doors (album art in THE CARD'S LIGHT) and the way into the lab.  036 G1 (Josh 11-03: "Show the thumbnail to be the MIR thingy
      from the Lambdawaves about site … for library, use the background image for the title in the about page site which is also light and dark
@@ -329,7 +333,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function showView(name) {
     collage[name === 'face' ? 'show' : 'hide']();   // 035: the collage under the face alone; the decks, folders and tutorial keep the plain ground
     if (name === at) return false;
-    const was = at; at = name; closeDrop(); closeSheet(); restHero();
+    const was = at; at = name; wayBack(); closeDrop(); closeSheet(); restHero();
     unmoved = true; document.dispatchEvent(new Event('controlhintschange'));   // 039 W9 (WALK-D #11): the standing hint goes with the view (the kit's close)
     face.hidden = name !== 'face'; root.classList.toggle('at-face', name === 'face');
     for (const e of [top, scroller, caption, backB]) e.inert = name === 'face';
