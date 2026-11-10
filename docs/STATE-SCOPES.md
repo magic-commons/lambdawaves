@@ -40,7 +40,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 
 | key | scope | version | FORGET | owner |
 |---|---|---|---|---|
-| `lambdawaves.q0.settings` | PREFERENCE + WORKSPACE | gen 16 | yes | shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above |
+| `lambdawaves.q0.settings` | PREFERENCE + WORKSPACE | gen 17 | yes | shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above |
 | `mir.gui` | PREFERENCE | kit prefs | yes | look.js createLook (kit createPrefs over LOOK_SCHEMA; MIR OPTIONS writes it) |
 | `lambdawaves.q0.info` | PROJECT | kit prefs | yes | shell/stage-words.js infoPrefs (INFORMATIONAL) — the live record; the project owns it (presentation.info, 036 S4) |
 | `lambdawaves.q0.widgets` | PROJECT | v 1 | yes | widgets.js createWidgets (WIDGETS) — the live record { items }; the project owns it (presentation.widgets, 037 W1) |
@@ -80,6 +80,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `lw.csb.side` | WORKSPACE | RETIRED | yes | shell/modulation.js: removed at boot (034 F3 — the bar’s home is the bottom; 032 T13 kept a dodge’s landing) |
 | `lw.repair` | PREFERENCE | flag | no | sw-client.js REPAIR (033): sessionStorage, not localStorage — 1 after the cache is cleared, 2 after the reinstall activated, removed at the verdict; one tab, one repair |
 | `lw.mixed` | PREFERENCE | flag | no | sw-client.js mixed() (033): sessionStorage — the page build a MIXED BUILD reloaded for once, so a reload loop is impossible |
+| `lw.stage` | PREFERENCE | flag | no | shell/controller.js stageLost (041 S8): sessionStorage — when a lost GPU device last reloaded the stage, so a second loss inside a minute shows RELOAD STAGE instead of a loop |
 
 <!-- state-scopes:end -->
 
@@ -99,7 +100,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `presentation.nodes` — THE GRAPH (036 S1, Josh: "Make sure that nodes get saved"): NODES' `{ v, seq, list: [{ id, type, values, bypass, at, name, fold }], at, curves? }` (lab/nodes.js `graph()`; `curves` the grade, without the view's CHANNEL, only when it is not flat), written only while the graph is not THE DEFAULT one (a node, a grade, or an id once given), so NEW, the demos and every older file carry none. An open lands it before the rack (`nodes.*` routes, lanes and bases ride with it); a file without it opens on the empty graph; a RESUME of a session older than it keeps the device record's. `lambdawaves.q0.nodes` is its live mirror and keeps the window's place (`pan`, `zoom`, `win`, `off`: WORKSPACE) | project | PROJECT, not in history (NODES keeps its own 30-step ring) |
 | `clockLink` (LINKED / SEPARATE) — RETIRED at 0.5.0 C4 (R-B1, the one clock: THE play plays the modulation, the power never plays). An older blob's key is never read and is dropped by the next save | — | — |
 | camera feel: `friction`, `spin` (speed), `dragGain`, `fling`, and the LOCK `camLock` (0.5.3: the classic camera; the pan is held at the centre and every zoom is from the centre) | settings | PREFERENCE (D4) |
-| field chrome: `frame`, `axis`, `frameMode`, `axisMode`, `cornerSide`, `invert`, `axisInk`, and since iteration 008 (W) `dither` — the ordered 8×8 DITHER's amplitude in output LSB, 0 = OFF, SETTINGS › QUALITY (it was a PROJECT key in `mat` until then: `serialize()` strips it with the chrome and `restore()` ignores an older file's, save once — a profile whose blob has no `dither` yet takes the non-zero DITHER its live session (`lambdawaves.q0.session`) carried, read once at the boot's settings read and never at a project open; the settings blob always writes it, so that lift happens at most once) | settings | PREFERENCE (D1) |
+| field chrome: `frame`, `axis`, `frameMode`, `axisMode`, `cornerSide`, `invert`, `axisInk`, since 041 (S3, S4) `frameStay` — STAGE › KEEP IN HIDE, written only when on — and `frameGain` — STAGE › BRIGHTNESS, 0.25 … 4, written only away from 1 — and since iteration 008 (W) `dither` — the ordered 8×8 DITHER's amplitude in output LSB, 0 = OFF, SETTINGS › QUALITY (it was a PROJECT key in `mat` until then: `serialize()` strips it with the chrome and `restore()` ignores an older file's, save once — a profile whose blob has no `dither` yet takes the non-zero DITHER its live session (`lambdawaves.q0.session`) carried, read once at the boot's settings read and never at a project open; the settings blob always writes it, so that lift happens at most once) | settings | PREFERENCE (D1) |
 | camera MODE, `presentation.obs.mode` (free / turntable) | project | PROJECT (D4's escape hatch, see below), not in history (it travels with the pose) |
 | palette: `paletteId`, `palette {on, selected, stops}` | project | PROJECT (D2) |
 | `ui.stage {mix, custom, follow}` | project | PROJECT |

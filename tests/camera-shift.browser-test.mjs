@@ -22,7 +22,7 @@ async function check(name, script, verify) {
 }
 try {
   assert.equal((await g.waitFor('window.__LW?.ready', 300, 100)).ok, 1);
-  await g.ev(`__LW.pause(); __LW.governor.on = false; __LW.camera.setLock(false); __LW.camera.setAutoRotate(false); await __LW.settle(); return 1;`);   // 037 H3: a fresh profile boots LOCKed with AUTO-ROTATE on; this file judges the free pan, and § 5 presses LOCK itself
+  await g.ev(`__LW.pause(); __LW.governor.on = false; __LW.camera.setLock(false); __LW.camera.setAutoRotate(false); await __LW.settle(); return 1;`);   // 037 H3: a fresh profile boots with AUTO-ROTATE on (041 S6: unlocked again; the setLock is belt and braces); this file judges the free pan, and § 5 presses LOCK itself
 
   /* ── 1 · ONE FRAME CORNER, ONE PIXEL ──
      At ZOOM 8 the whole box is on the frame; the stage is a flat grey for the readbacks (either theme) and the ray pass's chrome
@@ -70,7 +70,7 @@ try {
   });
 
   /* ── 2 · THE CURSOR-ANCHORED POINT, through unproject ── */
-  await check('the point under the cursor holds ≤ 0.5 px across a wheel step, a pinch step and a FOV step at p = (0.4, −0.3)', `
+  await check('the point under the cursor holds ≤ 0.5 px across a pinch step and a FOV step at p = (0.4, −0.3); 041 S6: a wheel step there zooms and leaves the shift alone', `
     const LW = __LW, cv = document.getElementById('field'), r = cv.getBoundingClientRect(), fm = await import('/lab/field.js');
     const w = cv.clientWidth, h = cv.clientHeight, C = [0.62 * w, 0.58 * h], cUV = [2 * C[0] / w - 1, 1 - 2 * C[1] / h];
     const ptr = (type, id, x, y) => cv.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: id, pointerType: 'touch', button: 0, clientX: r.left + x, clientY: r.top + y }));
@@ -88,7 +88,8 @@ try {
     measure('fov', () => LW.camera.setFov(LW.obs.fov * 1.35, cUV));
     LW.camera.reset();
     return steps;`, (v) => {
-    for (const k of ['wheel', 'pinch', 'fov']) {
+    assert.deepEqual(v.wheel.shift, [0.4, -0.3], '041 S6 · THE WHEEL NEVER PANS: the shift is where the hand left it');
+    for (const k of ['pinch', 'fov']) {
       assert.ok(v[k].readback <= 0.5 && v[k].onPixel <= 0.5, k + ' ≤ 0.5 px');
       assert.ok(v[k].r < v[k].cap, k + ": unproject did not clamp");
     }
@@ -235,7 +236,7 @@ try {
     for (const k of ['fov', 'dial', 'route']) assert.deepEqual(v[k], [0, 0], k);
     assert.deepEqual(v.wheel, [[0, 0], true], 'the wheel zoomed from the centre'); assert.deepEqual(v.pinch, [[0, 0], true], 'the pinch zoomed, from the centre');
     assert.deepEqual(v.released, [false, false, false], 'released: the pad answers, the settings say so');
-    assert.equal(v.routeFree[0], 0.5, 'and a route moves the pivot again'); assert.ok(v.wheelFree[0] !== 0 && v.wheelFree[1] !== 0, 'and the wheel zooms at the cursor again');
+    assert.equal(v.routeFree[0], 0.5, 'and a route moves the pivot again'); assert.deepEqual(v.wheelFree, [0, 0], 'and the wheel, free, still leaves the pivot where it is (041 S6)');
   });
 
   const errs = await g.errors();

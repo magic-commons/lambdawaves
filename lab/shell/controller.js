@@ -22,6 +22,7 @@ import { jsonStore } from '../mir/core/prefs.js';                // 0.5.1 D10-24
 import { createModPort } from '../mod-port.js';       // 0.5.0 A5: the port that window takes, and the edges behind it
 import { createBusyMark } from '../busy-mark.js';        // N7 seam 2: the busy mark, out of boot()
 import { createWorkerPool } from '../worker-pool.js';    // N7 seam 3: the maths workers, out of boot()
+import { trig } from '../mir/kit.js';     // 041 S8: the RELOAD STAGE button
 import { createLook } from '../look.js';    // 0.5.0 C2: the look is the kit's — mir.gui (createPrefs over LOOK_SCHEMA rows) and createAccent (once N7 seam 4, accent-wheel.js)
 
 export async function createController(app) {
@@ -221,9 +222,23 @@ export async function createController(app) {
      and the picture is frozen with no explanation.  That is the most likely failure on a phone and it is the
      one this app was silent about.  0.5.0 C9 · R14: this is λWAVES' GPU RECOVERY, `gpuRecovery` (gate: tests/gpu-recovery).
      0.5.0 C6b: the banner is the kit's (main.js installBanner, dom.banner: its pane, its ×, its ink on both themes). */
+  /* 041 S8 · THE STAGE COMES BACK (Josh: "If the GPU runs out of memory and it crashes, have it attempt to reload or have a stage reload button"):
+     a lost device cannot be given back to a live page, so the stage's reload is the page's — the session is flushed on the way out and resumed on
+     the way in (rack.js: a reload of a resumed tab resumes the same session).  ONE reload is taken by itself; a loss inside a minute of it (the
+     reload did not hold), and a device the page itself destroyed, put a RELOAD STAGE button on the stage instead — never a loop.  `lw.stage`
+     (sessionStorage, a RECORDS row) is the time of the last reload this road took */
+  function stageLost(i) {
+    const reload = () => { try { sessionStorage.setItem('lw.stage', String(Date.now())); } catch (_) {} location.reload(); };
+    let last = 0; try { last = +sessionStorage.getItem('lw.stage') || 0; } catch (_) {}
+    if (!(i && i.reason === 'destroyed') && Date.now() - last > 60000) { setTimeout(reload, 800); return; }
+    if (document.querySelector('.lw-stage-lost')) return;
+    const box = document.createElement('div'); box.className = 'lw-stage-lost';
+    box.appendChild(trig({ label: 'RELOAD STAGE', glyph: 'reload', title: 'Reload the stage: your session is kept', onFire: reload }).root);
+    dom.canvas.parentNode.appendChild(box);
+  }
   const field = await createField(dom.canvas, { resolution: quality.res, transport: () => app.state.modHost && app.state.modHost.model.transport,   // 040 S2: STROBE flashes on the transport's beats (read only)
     onError: (m) => dom.banner.fail('GPU error', m),
-    onLost: function gpuRecovery(i) { dom.banner.fail('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); } });
+    onLost: function gpuRecovery(i) { dom.banner.fail('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); stageLost(i); } });
   if (field.ok) look.setGamut((rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')'));   // wave 54: one map, both sides
   /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
      was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */

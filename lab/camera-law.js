@@ -176,9 +176,12 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
      anchor at the frame's centre (c = 0, p′ = p·k).  A modulated ZOOM or FOV leaves the shift alone. */
   /* 0.5.3 M6 · THE LOCK, the classic camera (R3: the PAN only): the pivot stays at the frame's centre, so anchor adds no shift and every zoom
      is from the centre; setShift and panBy answer with a notice and move nothing; FOV, the mode and the turn stay live.  PREFERENCE `camLock`.
-     037 H3 (Josh: "Autorotate and lock should be on by default"): ON from the boot — the PAN pad rests until the reader unlocks it. */
-  const CENTRE = Object.freeze([0, 0]); let locked = true;
-  const anchor = (c, k) => { if (!locked && k !== 1 && Number.isFinite(k)) { const p = obs.shift || CENTRE; setShift(c[0] - (c[0] - p[0]) * k, c[1] - (c[1] - p[1]) * k); } };
+     037 H3 (Josh: "Autorotate and lock should be on by default"): ON from the boot — the PAN pad rests until the reader unlocks it.
+     041 S6 · THE WHEEL NEVER PANS (Josh: "Return camera pan lock to be off BUT, scrolling zooming in or out shouldn't pan or move the object"): OFF
+     from the boot again, and a zoom with NO anchor (c = null: the stage's wheel, stage-gestures.js) leaves the shift as it is — the object keeps
+     its place on the screen and only its size changes; the dials and the keys still anchor at the centre, the pinch at its centroid */
+  const CENTRE = Object.freeze([0, 0]); let locked = false;
+  const anchor = (c, k) => { if (c && !locked && k !== 1 && Number.isFinite(k)) { const p = obs.shift || CENTRE; setShift(c[0] - (c[0] - p[0]) * k, c[1] - (c[1] - p[1]) * k); } };
   function zoomAt(c, v) { const d0 = obs.dist; if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); anchor(c, d0 / obs.dist); present(); return obs.dist; }
   const setDist = (v) => zoomAt(CENTRE, v);
   function setFov(v, c = CENTRE) { const t0 = Math.tan(obs.fov / 2); if (modHand('observer.fov', v)) return obs.fov; obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); anchor(c, t0 / Math.tan(obs.fov / 2)); present(); return obs.fov; }

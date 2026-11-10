@@ -199,7 +199,8 @@ pass('the port as the kit panel\'s: a dial is one axis (a routed PAN X keeps its
    and setFov — so every zoom is from the centre.  ZOOM, FOV, the mode and the turn stay live; released, the pan answers again. */
 {
   const B = law(BOOT(), undefined, true);
-  assert.deepEqual([B.camera.lock, B.port.get('lock'), B.camera.autoRotate, B.camera.mu], [true, true, true, 0], '037 H3: LOCK and AUTO-ROTATE on from the boot (FRICTION read as 0)');
+  assert.deepEqual([B.camera.lock, B.port.get('lock'), B.camera.autoRotate, B.camera.mu], [false, false, true, 0], '041 S6: the LOCK off from the boot again; 037 H3: AUTO-ROTATE on (FRICTION read as 0)');
+  { const o0 = B.obs; o0.shift = [0.3, -0.2]; B.zoomAt(null, 2.5); assert.deepEqual([o0.shift, o0.dist], [[0.3, -0.2], 2.5], '041 S6 · THE WHEEL NEVER PANS: a zoom with no anchor leaves the shift'); }
   const L = law(BOOT(), (id) => id === 'observer.panx'), P = L.port, o = L.obs; let told = 0; P.subscribe(() => told++);
   assert.equal(L.camera.lock, false); assert.equal(P.get('lock'), false, 'released');
   o.shift = [0.4, -0.3];   /* a project's shift, or a route's output */

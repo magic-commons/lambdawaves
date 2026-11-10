@@ -54,7 +54,7 @@ export function createSettings(app) {
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE (host-contract.md's sixth debt): where the window sits, the lanes, each device's
            F/C/M mode, the ribbon, open or not.  The RACK itself rides in the project file. */
         ...(app.state.modView ? { modwin: app.state.modView.presentation() } : {}),
-        frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode: mat.axisMode, cornerSide: mat.cornerSide,
+        frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode: mat.axisMode, cornerSide: mat.cornerSide, frameStay: mat.frameStay || undefined, frameGain: mat.frameGain,   // 041 S3 · S4: written only away from home
         /* WAVE 106 · INVERT and AXIS COLOUR are this browser's, like FRAME and AXIS (0.3.1 S1, D1: the whole field chrome; serialize() strips it) */
         invert: !!mat.invert, axisInk: mat.axisInk || 'theme', dither: +mat.dither || 0,   // iteration 008 W: DITHER is this display's (SETTINGS › QUALITY), always written, so a profile older than it is known by its absence (the lift below)
         phoneTr: !!document.querySelector('.dev[data-id="transport"].folded'),
@@ -62,7 +62,7 @@ export function createSettings(app) {
         ...(document.body.classList.contains('phone') ? { phoneRack: !document.body.classList.contains('rack-hidden') } : {}),
         /* WAVE 54: which colour space this BROWSER asked for.  0.3.1 · S1: the camera MODE and the palette left this key (PROJECT, D2/D4) */
         gamut: document.body.dataset.gamut === 'p3' ? 'p3' : 'srgb', p3Mode: ui.p3Seg ? ui.p3Seg.get() : 'convert',
-        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id), gen: 16 };   // iteration 016 E1: the generation, read by applySettings' `older` table
+        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id), gen: 17 };   // 041 S6: 17 (a `camLock: true` under it is 037's default, not a choice)   // iteration 016 E1: the generation, read by applySettings' `older` table
       const blob = { ...S0, ...owned }; for (const k of RETIRED) delete blob[k];
       settingsStore.write(blob);
     } catch (e) {}
@@ -95,7 +95,7 @@ export function createSettings(app) {
     if (typeof s.friction === 'number') app.host.camera.setFriction(s.friction);   // wave 51: the camera's feel comes back … but AUTO-ROTATE never does (see saveSettings); 018 B4: SPIN left, an old `spin` is read by nothing
     if (typeof s.dragGain === 'number') app.host.camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them
     if (typeof s.fling === 'number') app.host.camera.setFling(s.fling);
-    if (typeof s.camLock === 'boolean') app.host.camera.setLock(s.camLock);       // 0.5.3 M6: the classic camera (pan held at the centre); 037 H3: ON when nothing was said
+    if (typeof s.camLock === 'boolean' && (s.gen >= 17 || !s.camLock)) app.host.camera.setLock(s.camLock);   // 0.5.3 M6: the classic camera (pan held at the centre); 041 S6: OFF when nothing was said — and a blob from before 041 (gen < 17) wrote `true` on every save while 037 H3's default was ON, so its `true` is that default, not a choice, and is not read
     if (s.audio === true && ui.audioSw) { ui.audioSw.set(true); ui.setAudio(true); }   // 0.6.4 S2: the AUDIO consent (SOUND itself is a hand press each session)
     /* SKELETON · BEAD · UNCERTAINTY left this blob for INFORMATIONAL's record in the fix round (C6: shell/stage-words.js lifts them once) */
     if (s.askOk === true) ui.askOk = true; if (typeof s.askUrl === 'string' && ui.askUrlIn) ui.askUrlIn.value = s.askUrl;   // 0.6.6 G2: ASK's consent and Gemma's address (absent: this host at 9443)
@@ -110,6 +110,8 @@ export function createSettings(app) {
     if (['box','corner'].includes(s.axisMode)) mat.axisMode=s.axisMode;
     mat.cornerSide=s.cornerSide==='left'?'left':'right';
     if (s.axis === false) { mat.axis = false; if (ui.axisSw) ui.axisSw.set(false); }
+    if (s.frameGain > 0 && s.frameGain !== 1) { mat.frameGain = Math.max(0.25, Math.min(4, +s.frameGain)); if (ui.frameGainK) app.ctl.setKnob(ui.frameGainK, mat.frameGain); }   // 041 S4: nothing said means 100 %
+    if (s.frameStay === true) { mat.frameStay = true; if (ui.frameStaySw) ui.frameStaySw.set(true); }   // 041 S3: nothing said means the frame hides with the interface
     /* ⚠ and the two that left the WAVE window with them.  Both read the NON-DEFAULT ONLY, on exactly
        the law of the two lines above: NOTHING SAID MEANS THE SHIPPED VALUE, so a profile written
        before this wave opens as it always did instead of inheriting a default nobody chose. */

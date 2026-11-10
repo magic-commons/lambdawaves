@@ -574,6 +574,9 @@ struct View {
    and φ on its cell-centred grid (x fastest) */
 @group(0) @binding(6) var<storage, read> atm: array<vec4<f32>>;
 @group(0) @binding(7) var<storage, read> phiG: array<f32>;
+/* 041 S2 · THE GRID LIES UNDER THE OBJECT: the LATTICE or the DOTS, drawn into a texture the size of the target (premultiplied ink, its coverage
+   in a) before this pass; fs lays it over the stage's ground, so the field is marched OVER it.  No grid: a 1 × 1 of zeros, and bg keeps its bits */
+@group(0) @binding(8) var GRID: texture_2d<f32>;
 
 struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) uv: vec2<f32> };
 @vertex fn vs(@builtin(vertex_index) i: u32) -> VSOut {
@@ -1000,7 +1003,8 @@ fn stageWash(bg: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {
   let half = V.cam.w;
   let ro = V.cam.xyz;
   let rd = normalize(V.fwd.xyz + in.uv.x * V.right.w * V.right.xyz + in.uv.y * V.up.w * V.up.xyz);
-  let bg = stageWash(mix(V.p5.xyz * 0.82, V.p5.xyz * 1.25, in.uv.y * 0.5 + 0.5), in.uv);     // the theme's stage, with the old subtle vertical gradient; 037 T4: PULSE's wash
+  let gridInk = textureLoad(GRID, vec2<i32>(in.pos.xy), 0);                                 // 041 S2: the grid under the object (zeros without one: × 1 + 0)
+  let bg = stageWash(mix(V.p5.xyz * 0.82, V.p5.xyz * 1.25, in.uv.y * 0.5 + 0.5), in.uv) * (1.0 - gridInk.a) + gridInk.rgb;     // the theme's stage, with the old subtle vertical gradient; 037 T4: PULSE's wash
   /* 037 T3 · GAMMA EVERYWHERE (Josh: "gamma seems to only work for inside the box"): a ray that misses the box or the cut, and every NaN
      fallback, takes the output gamma a ray through the field takes — selected out at GAMMA 1, so that picture (THE LOCK's) keeps its bits */
   let bgOut = select(pow(max(bg, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05))), bg, V.p5.w == 1.0);
@@ -1249,20 +1253,40 @@ struct Occ { n: u32, pad0: u32, pad1: u32, pad2: u32, r: array<vec4<f32>, 32> };
 @group(0) @binding(1) var<uniform> OCC: Occ;
 /* the LATTICE / DOTS ink (optimization 2026-09-24, K6): one colour per theme, so it rides here and their vertices carry
    xyz + alpha (16 bytes, was 28) — the vertex stage hands the rasteriser the same four f32 either way */
-@group(0) @binding(2) var<uniform> INK: vec4<f32>;
-struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32> };
+/* 041 S1 · DOTS ARE DOTS: dot.x is a dot's radius in pixels at w = 1, dot.yz one pixel in clip space (2 / the target's size) */
+struct Ink { ink: vec4<f32>, dot: vec4<f32> };
+@group(0) @binding(2) var<uniform> INK: Ink;
+struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32>, @location(1) d: vec3<f32> };
 @vertex fn vs(@location(0) p: vec3<f32>, @location(1) c: vec4<f32>) -> VSOut {
-  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = c; return o;
+  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = c; o.d = vec3<f32>(0.0); return o;
 }
 @vertex fn vsLattice(@location(0) p: vec3<f32>, @location(1) a: f32) -> VSOut {
-  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = vec4<f32>(INK.rgb, a); return o;
+  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = vec4<f32>(INK.ink.rgb, a); o.d = vec3<f32>(0.0); return o;
 }
-@fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
+/* a DOT is one instance (xyz + alpha) drawn as a screen-facing quad: a round disc whose radius follows the perspective, never under 0.8 px
+   (a smaller one keeps that size and fades by its area, so the far field thins instead of flickering) */
+@vertex fn vsDot(@builtin(vertex_index) i: u32, @location(0) p: vec3<f32>, @location(1) a: f32) -> VSOut {
+  var c = array<vec2<f32>, 6>(vec2<f32>(-1.0, -1.0), vec2<f32>(1.0, -1.0), vec2<f32>(-1.0, 1.0), vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, -1.0), vec2<f32>(1.0, 1.0));
+  var o: VSOut; let q = U0.vp * vec4<f32>(p, 1.0);
+  let rw = INK.dot.x / max(q.w, 1e-6); let r = max(rw, 0.8);
+  let k = c[i] * (r + 1.0);
+  o.pos = vec4<f32>(q.xy + k * INK.dot.yz * q.w, q.zw);
+  o.col = vec4<f32>(INK.ink.rgb, a * min(1.0, rw * rw / 0.64)); o.d = vec3<f32>(k, r); return o;
+}
+fn occluded(p: vec2<f32>) -> bool {
   for (var i = 0u; i < OCC.n; i++) {
     let q = OCC.r[i];
-    if (in.pos.x >= q.x && in.pos.x <= q.z && in.pos.y >= q.y && in.pos.y <= q.w) { discard; }
+    if (p.x >= q.x && p.x <= q.z && p.y >= q.y && p.y <= q.w) { return true; }
   }
+  return false;
+}
+@fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
+  if (occluded(in.pos.xy)) { discard; }
   return in.col;
+}
+@fragment fn fsDot(in: VSOut) -> @location(0) vec4<f32> {
+  if (occluded(in.pos.xy)) { discard; }
+  return vec4<f32>(in.col.rgb, in.col.a * clamp(in.d.z + 0.5 - length(in.d.xy), 0.0, 1.0));
 }`;
 
 /* ── small mat4 helpers (column-major, as WGSL reads them) ───────────────── */
@@ -1608,7 +1632,8 @@ export async function createField(canvas, opts = {}) {
     { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     { binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     { binding: 6, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
-    { binding: 7, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }] });
+    { binding: 7, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
+    { binding: 8, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float', viewDimension: '2d' } }] });   // 041 S2: the grid's texture
   const renderLayout = device.createPipelineLayout({ bindGroupLayouts: [renderBGL] });
   const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }] });
   const lineLayout = device.createPipelineLayout({ bindGroupLayouts: [lineBGL] });
@@ -1645,15 +1670,31 @@ export async function createField(canvas, opts = {}) {
     return key ? specEntry(key, fmt, mat.view | 0, mat.style | 0).pipeline || generic : generic;
   }
   /* 038 F5: a line keeps the destination's alpha (THE OBJECT MASK's code under it; 1 on an opaque canvas, as the old blend left it) */
-  const lineTarget = (fmt) => ({ module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'zero', dstFactor: 'one' } } }] });
-  /** { line, lattice }: the box/axes/slice/corner pipeline (xyz + rgba) and the lattice/dots one (xyz + alpha, ink uniform) */
-  const makeLinePipeline = (fmt) => ({
+  const lineTarget = (fmt, entryPoint = 'fs', grid = false) => ({ module: lineModule, entryPoint, targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: grid ? { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } : { srcFactor: 'zero', dstFactor: 'one' } } }] });   // 041 S2: the grid's own texture keeps the coverage
+  /** { line, lattice, dots }: the box/axes/slice/corner pipeline (xyz + rgba), the lattice's (xyz + alpha, ink uniform) and the dots' (the same record, one an instance) */
+  const gridVertex = (entryPoint, stepMode) => ({ module: lineModule, entryPoint, buffers: [{ arrayStride: 16, stepMode, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32' }] }] });
+  const makeLinePipeline = (fmt, grid = false) => ({
     line: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
       vertex: { module: lineModule, entryPoint: 'vs', buffers: [{ arrayStride: 28, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32x4' }] }] } }),
-    lattice: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
-      vertex: { module: lineModule, entryPoint: 'vsLattice', buffers: [{ arrayStride: 16, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32' }] }] } }),
+    lattice: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt, 'fs', grid), vertex: gridVertex('vsLattice', 'vertex') }),
+    dots: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'triangle-list' }, fragment: lineTarget(fmt, 'fsDot', grid), vertex: gridVertex('vsDot', 'instance') }),
   });
   const linePipeline = makeLinePipeline(format);
+  /* 041 S2 · THE GRID LIES UNDER THE OBJECT (Josh: "The lattice and dots seems to draw over the object in the center. Can it be under?"): the grid
+     is drawn first, alone, into a texture of the target's size (gridFor: the canvas's and one readback's are kept), and the present reads it as
+     part of the stage's ground (RENDER_WGSL GRID) — so the wave, the atoms and the sticks stand over it and it shows only where the stage does */
+  const gridNone = device.createTexture({ size: [1, 1], format: 'rgba8unorm', usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT }).createView();
+  const gridPipeline = makeLinePipeline('rgba8unorm', true), grids = new Map();
+  function gridFor(w, h) {
+    const key = w * 65536 + h; let g = grids.get(key);
+    if (!g) {
+      if (grids.size > 1) { const [k0, g0] = grids.entries().next().value; g0.tex.destroy(); grids.delete(k0); }
+      const tex = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT });
+      g = { tex, view: tex.createView(), bind: null }; grids.set(key, g);
+    }
+    if (!g.bind) g.bind = renderBindWith(g.view);
+    return g;
+  }
 
   const paramsBuf = [0, 1].map(() => device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }));
   const modesBuf = [0, 1].map(() => device.createBuffer({ size: MAX_MODES * MODE_BYTES, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }));
@@ -1678,13 +1719,14 @@ export async function createField(canvas, opts = {}) {
      24 half-widths (49³ nodes; was every 2 out to 16), LATTICE's cells out to 20 (21³; was 16).  The eye's plane through the origin keeps at most
      (49³ + 49²) / 2 nodes, so that is the buffer; the far plane went 20 → 48 half-widths with them (no depth is kept: x and y keep their bits) */
   const DOTS_RAD = 24, LATTICE_RAD = 10;
-  const latticeVerts = 49 * 49 * 25 * 6;                           // the larger of the two: dots (6 per node) 360 150 · lattice 52 920
+  const latticeVerts = 49 * 49 * 25;                               // the larger of the two: dots (041 S1: ONE record a node) 60 025 · lattice 52 920
+  const DOT_R = 0.014;                                             // 041 S1: a dot's radius, in half-widths
   let latticeCount = 0; const cornerStart = 38;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
   const latticeBuf = device.createBuffer({ size: latticeVerts * 16, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LATTICE = new Float32Array(latticeVerts * 4);              // xyz + alpha; the ink is inkBuf's
-  const inkBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), INK_V = new Float32Array(4);
+  const inkBuf = device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), INK_V = new Float32Array(8);
 
 
   const LINE_AT = { box: [0, 24], axes: [24, 6], slice: [30, 8] };
@@ -1773,12 +1815,13 @@ export async function createField(canvas, opts = {}) {
     if (eqWritten !== eqTable) { eqWritten = eqTable; EQ_F.set(eqTable.gamma); EQ_F[EQ_G] = eqTable.kappa; EQ_F[EQ_G + 1] = eqTable.mode; EQ_F[EQ_G + 2] = 2e-4; device.queue.writeBuffer(eqBuf, 0, EQ_F); }   // floor: the signed view's 2·10⁻⁴ of the local within-shell ρ
     return true;
   }
-  function bindRender() {
-    renderBind = device.createBindGroup({ layout: renderBGL, entries: [
+  function renderBindWith(grid) {
+    return device.createBindGroup({ layout: renderBGL, entries: [
       { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
       { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
-      { binding: 5, resource: { buffer: palBuf } }, { binding: 6, resource: { buffer: atomBuf } }, { binding: 7, resource: { buffer: phiBuf } }] });
+      { binding: 5, resource: { buffer: palBuf } }, { binding: 6, resource: { buffer: atomBuf } }, { binding: 7, resource: { buffer: phiBuf } }, { binding: 8, resource: grid }] });
   }
+  function bindRender() { renderBind = renderBindWith(gridNone); for (const g of grids.values()) g.bind = null; }   // 041 S2: a grid's group is rebuilt on its next use
   /* ── THE ATOMS AND THE POTENTIAL (iteration 014 B) ─────────────────────────────────────────────────────────────────────
    * setAtoms(atoms, charge) uploads the molecule BALLS, STICKS and ESP draw: two vec4 an atom (centre + r_vdW, negative for an atom no bond
    * reaches; CPK sRGB + Z) and then elements.js' bonds (bondsOf, the 1.3 × (rᵢ + rⱼ) pairs: the one rule, which skeleton.js' richer bondsOf also starts from) — only when the atoms change.  φ is the Poisson pass's (ESP_WGSL,
@@ -1935,10 +1978,11 @@ export async function createField(canvas, opts = {}) {
     cardDirty = false; generation++; stats.generation = generation; stats.reconstructs++;
   }
   /* 040 S2 · STROBE's level now: lit for DUTY of every RATE beats of the transport (opts.transport: its beats and bpm, read only — ONE clock; paused,
-     it stands).  The period never falls under a third of a second, whatever the tempo: three flashes a second is the ceiling (WCAG 2.3.1) */
+     it stands).  041 S7 · STROBE HAS NO CAP (Josh, call 12: "no there shouldn't be a cap, there'a already a photo sensitivity warning in the page"):
+     the period is RATE's beats at the transport's tempo, whatever that is — 040 held it at a third of a second; the page's notice stands as it is */
   function strobeNow(ps) {
     const T = opts.transport && opts.transport(); if (!T || !(ps.strobe > 0)) return 0;
-    const x = T.beats / Math.max(strobeBeats(ps.strobeRate), T.bpm / 180);
+    const x = T.beats / strobeBeats(ps.strobeRate);
     return x - Math.floor(x) < ps.strobeDuty ? ps.strobe : 0;
   }
   function writeView(obs, mat, w, h) {
@@ -1992,7 +2036,7 @@ export async function createField(canvas, opts = {}) {
   /* Chrome changes with the camera, domain, theme and its own controls, but the field can evolve for hundreds
      of frames without any of those changing. Keep the last geometry in the GPU instead of regenerating and
      uploading as much as a megabyte on every presentation. The fixed signature keeps this check allocation-free. */
-  const LINE_STATE = new Array(33).fill(NaN);
+  const LINE_STATE = new Array(34).fill(NaN);
   let lineStateReady = false, cachedHasSlice = false;
   function setLineState(index, value) {
     const changed = !Object.is(LINE_STATE[index], value);
@@ -2032,23 +2076,31 @@ export async function createField(canvas, opts = {}) {
     changed = setLineState(i++, normal ? normal[1] : undefined) || changed;
     changed = setLineState(i++, normal ? normal[2] : undefined) || changed;
     changed = setLineState(i++, eye ? 1 : 0) || changed;
+    changed = setLineState(i++, mat.frameGain) || changed;   // 041 S4
     const same = lineStateReady && !changed;
     lineStateReady = true;
     return same;
   }
-  function writeLines(mat) {
+  function writeLines(mat, tw = canvas.width, th = canvas.height) {
+    /* 041 S1: the dots' pixel scale is the TARGET's (the canvas, or a readback's own size) and the lens's, written when either moved */
+    const dr = Math.fround(DOT_R * half * M_PERSP[5] * th * 0.5), dx = Math.fround(2 / tw), dy = Math.fround(2 / th);
+    if (INK_V[4] !== dr || INK_V[5] !== dx || INK_V[6] !== dy) { INK_V[4] = dr; INK_V[5] = dx; INK_V[6] = dy; device.queue.writeBuffer(inkBuf, 0, INK_V); }
     if (linesUnchanged(mat)) return cachedHasSlice;
     const h = half, v = LINES; let k = 0;
     const push = (a, b, c) => { v[k++] = a[0]; v[k++] = a[1]; v[k++] = a[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; v[k++] = b[0]; v[k++] = b[1]; v[k++] = b[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; };
     const INK = mat.lightUI ? FRAME_INK.light : FRAME_INK.dark;    // the BOX's ink, and the ALPHA of all three axes, in both cases the theme's
     const AX = AXIS_HUE[mat.axisInk] || INK;                       // ⚠ the AXES' hue is the user's — 'theme', and anything unreadable, fall back to the theme's own row
-    const boxC = INK.box;
+    /* 041 S4 · THE FRAME'S BRIGHTNESS (Josh: "a knob in stage that allows you to control how 'bright' the frame/axes are. Currently the dots and
+       lattice seems to dim or grey"): `mat.frameGain` (absent = 1, today's look: × 1 keeps every bit) scales the alpha of the box, the axes, the
+       corner compass, the lattice and the dots (held at 1), and past 1 carries the grid's ink toward the theme's full ink (white · black) */
+    const G = mat.frameGain > 0 ? mat.frameGain : 1, ga = (a) => Math.min(1, a * G);
+    const boxC = G === 1 ? INK.box : [INK.box[0], INK.box[1], INK.box[2], ga(INK.box[3])];
     const corners = [[-h, -h, -h], [h, -h, -h], [h, h, -h], [-h, h, -h], [-h, -h, h], [h, -h, h], [h, h, h], [-h, h, h]];
     const edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
     for (const [a, b] of edges) push(corners[a], corners[b], boxC);
-    push([0, 0, 0], [0.6 * h, 0, 0], axc(AX.x, INK.x[3]));   // x — the hue is the seat's, the alpha is the theme's
-    push([0, 0, 0], [0, 0.6 * h, 0], axc(AX.y, INK.y[3]));   // y
-    push([0, 0, 0], [0, 0, 0.6 * h], axc(AX.z, INK.z[3]));   // z (quantization axis)
+    push([0, 0, 0], [0.6 * h, 0, 0], axc(AX.x, ga(INK.x[3])));   // x — the hue is the seat's, the alpha is the theme's
+    push([0, 0, 0], [0, 0.6 * h, 0], axc(AX.y, ga(INK.y[3])));   // y
+    push([0, 0, 0], [0, 0, 0.6 * h], axc(AX.z, ga(INK.z[3])));   // z (quantization axis)
     let n = 15;
     if (mat.slice && mat.slice.mode) {
       const ax = mat.slice.axis | 0, s = mat.slice.pos * h, c = [1, 0.85, 0.4, 0.55];
@@ -2067,10 +2119,11 @@ export async function createField(canvas, opts = {}) {
       const dots = mat.frameMode === 'dots', radius = dots ? DOTS_RAD : LATTICE_RAD, spacing = dots ? h : h * 2;
       const camX = VIEW[0], camY = VIEW[1], camZ = VIEW[2];
       const invMaxDist = 1 / (spacing * radius);
-      const baseAlpha = mat.lightUI ? 0.22 : 0.16;
-      const inkR = mat.lightUI ? 0.18 : 0.75;
-      const inkG = mat.lightUI ? 0.22 : 0.80;
-      const inkB = mat.lightUI ? 0.28 : 0.88;
+      const baseAlpha = (mat.lightUI ? 0.22 : 0.16) * G;
+      const full = mat.lightUI ? 0 : 1, lift = Math.min(1, Math.max(0, (G - 1) / 3));   // 041 S4: + 0 at home
+      const inkR = (mat.lightUI ? 0.18 : 0.75) + (full - (mat.lightUI ? 0.18 : 0.75)) * lift;
+      const inkG = (mat.lightUI ? 0.22 : 0.80) + (full - (mat.lightUI ? 0.22 : 0.80)) * lift;
+      const inkB = (mat.lightUI ? 0.28 : 0.88) + (full - (mat.lightUI ? 0.28 : 0.88)) * lift;
       INK_V[0] = inkR; INK_V[1] = inkG; INK_V[2] = inkB; INK_V[3] = 1;
 
       if (mat.frameMode === 'lattice') {
@@ -2098,14 +2151,13 @@ export async function createField(canvas, opts = {}) {
           const distA = Math.hypot(ax, ay, az);
           const distB = Math.hypot(bx, by, bz);
           const dist = Math.max(distA, distB) * invMaxDist;
-          const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
+          const alpha = Math.min(1, baseAlpha * Math.max(0, 1 - dist * 0.7));
 
           L[q++] = ax; L[q++] = ay; L[q++] = az; L[q++] = alpha;
           L[q++] = bx; L[q++] = by; L[q++] = bz; L[q++] = alpha;
           latticeCount += 2;
         }
       } else {
-        const tick = h * 0.022;
         for (let x = -radius; x <= radius; x++) {
           for (let y = -radius; y <= radius; y++) {
             for (let z = -radius; z <= radius; z++) {
@@ -2113,16 +2165,10 @@ export async function createField(canvas, opts = {}) {
               const da = px * camX + py * camY + pz * camZ;
               if (da > 0) continue;
               const dist = Math.hypot(px, py, pz) * invMaxDist;
-              const alpha = baseAlpha * (1 - dist * 0.7);
-              if (!(alpha > 0) || q + 24 > L.length) continue;       // faded out (the corners), or an eye at the origin
-
-              L[q++] = px - tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px + tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py - tick; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py + tick; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py; L[q++] = pz - tick; L[q++] = alpha;
-              L[q++] = px; L[q++] = py; L[q++] = pz + tick; L[q++] = alpha;
-              latticeCount += 6;
+              const alpha = Math.min(1, baseAlpha * (1 - dist * 0.7));
+              if (!(alpha > 0) || q + 4 > L.length) continue;        // faded out (the corners), or an eye at the origin
+              L[q++] = px; L[q++] = py; L[q++] = pz; L[q++] = alpha;   // 041 S1: one record a dot (vsDot draws the disc)
+              latticeCount++;
             }
           }
         }
@@ -2141,9 +2187,9 @@ export async function createField(canvas, opts = {}) {
         const ex = px + VIEW[4 + axis] * sx;
         const ey = py + VIEW[8 + axis] * sy;
         v[k++] = px; v[k++] = py; v[k++] = 0.5;
-        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3];
+        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = ga(c[3]);
         v[k++] = ex; v[k++] = ey; v[k++] = 0.5;
-        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3];
+        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = ga(c[3]);
       }
     }
     device.queue.writeBuffer(lineBuf, 0, v, 0, k); stats.chromeWrites++;
@@ -2152,24 +2198,33 @@ export async function createField(canvas, opts = {}) {
     return cachedHasSlice;                                        // whether the slice rectangle is in the buffer (the box and the axes always are)
   }
   /** the chrome, as two independently switched objects over one buffer.  `all` ignores the switches (the ink proofs). */
-  function drawChrome(pass, lp, mat, hasSlice, all) {
+  function drawGrid(pass, lp, mat) { const dots = mat.frameMode === 'dots'; pass.setPipeline(dots ? lp.dots : lp.lattice); pass.setVertexBuffer(0, latticeBuf); if (dots) pass.draw(6, latticeCount); else pass.draw(latticeCount); }
+  /* 041 S2: `grid` draws the lattice or the dots here, over what is there (linePixels: the lines alone); the present draws them UNDER the field (encodeRender) */
+  function drawChrome(pass, lp, mat, hasSlice, all, grid) {
     const box = all || mat.frame !== false, axes = all || mat.axis !== false, slice = hasSlice && box;
     if (!box && !axes) return;
     pass.setPipeline(lp.line); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf);
     if (box && (all || !mat.frameMode || mat.frameMode === 'box')) pass.draw(LINE_AT.box[1], 1, LINE_AT.box[0]);
-    if (box && !all && latticeCount) { pass.setPipeline(lp.lattice); pass.setVertexBuffer(0, latticeBuf); pass.draw(latticeCount, 1, 0); pass.setPipeline(lp.line); pass.setVertexBuffer(0, lineBuf); }   // same order, same blend: the lattice between the box and the axes
+    if (grid && box && !all && latticeCount) { drawGrid(pass, lp, mat); pass.setPipeline(lp.line); pass.setVertexBuffer(0, lineBuf); }   // same order, same blend: the lattice between the box and the axes
     if (axes && (all || mat.axisMode !== 'corner')) pass.draw(LINE_AT.axes[1], 1, LINE_AT.axes[0]);
     if (axes && !all && mat.axisMode === 'corner') { pass.setBindGroup(0,cornerBind); pass.draw(6,1,cornerStart); pass.setBindGroup(0,lineBind); }
     if (slice) pass.draw(LINE_AT.slice[1], 1, LINE_AT.slice[0]);
   }
-  function encodeRender(enc, target, obs, mat, w, h, tw) {
+  /** the present: the grid's own pass (041 S2), then the field over the ground and the chrome over the field.  `rp` · `lp`: a readback's pipelines */
+  function encodeRender(enc, target, obs, mat, w, h, tw, rp, lp = linePipeline) {
     writeView(obs, mat, w, h);
-    const sl = writeLines(mat);
+    const sl = writeLines(mat, w, h);
+    let bind = renderBind;
+    if (latticeCount && mat.frame !== false) {
+      const g = gridFor(w, h); bind = g.bind;
+      const gp = enc.beginRenderPass({ colorAttachments: [{ view: g.view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 0 }, storeOp: 'store' }] });
+      gp.setBindGroup(0, lineBind); drawGrid(gp, gridPipeline, mat); gp.end();
+    }
     const desc = { colorAttachments: [{ view: target, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] };
     if (tw) desc.timestampWrites = tw;
     const pass = enc.beginRenderPass(desc);
-    pass.setPipeline(pickRender(format, mat, renderPipeline)); pass.setBindGroup(0, renderBind); pass.draw(3);
-    drawChrome(pass, linePipeline, mat, sl);
+    pass.setPipeline(rp || pickRender(format, mat, renderPipeline)); pass.setBindGroup(0, bind); pass.draw(3);
+    drawChrome(pass, lp, mat, sl);
     pass.end();
   }
 
@@ -2243,11 +2298,7 @@ export async function createField(canvas, opts = {}) {
       const rp = makeRenderPipeline('rgba8unorm', mat), lp = out._lp;   // K2: selected synchronously — nothing awaits before the submit
       const enc = device.createCommandEncoder();
       encodeEsp(enc, mat);
-      writeView(obs, mat, w, h); const sl = writeLines(mat);
-      const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
-      pass.setPipeline(rp); pass.setBindGroup(0, renderBind); pass.draw(3);
-      drawChrome(pass, lp, mat, sl);
-      pass.end();
+      encodeRender(enc, tex.createView(), obs, mat, w, h, null, rp, lp);
       const bpr = Math.ceil(w * 4 / 256) * 256;
       buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
       enc.copyTextureToBuffer({ texture: tex }, { buffer: buf, bytesPerRow: bpr }, [w, h]);
@@ -2275,10 +2326,10 @@ export async function createField(canvas, opts = {}) {
     try {
       if (!out._lp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
       const enc = device.createCommandEncoder();
-      writeView(obs, mat, w, h); const sl = writeLines(mat);
+      writeView(obs, mat, w, h); const sl = writeLines(mat, w, h);
       const bg = mat.bg || DEFAULT_BG;
       const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: bg[0], g: bg[1], b: bg[2], a: 1 }, storeOp: 'store' }] });
-      drawChrome(pass, out._lp, mat, sl);
+      drawChrome(pass, out._lp, mat, sl, false, true);
       pass.end();
       const bpr = Math.ceil(w * 4 / 256) * 256;
       buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
@@ -2446,11 +2497,7 @@ export async function createField(canvas, opts = {}) {
         for (let i = 0; i < m; i++) {
           if (doCompute) encodeCompute(enc, 0, modes);
           if (doRender) {
-            writeView(obs, mat, w, h); const sl = writeLines(mat);
-            const pass = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
-            pass.setPipeline(makeRenderPipeline('rgba8unorm', mat)); pass.setBindGroup(0, renderBind); pass.draw(3);
-            drawChrome(pass, out._lp, mat, sl);
-            pass.end();
+            encodeRender(enc, view, obs, mat, w, h, null, makeRenderPipeline('rgba8unorm', mat), out._lp);
           }
         }
         device.queue.submit([enc.finish()]);

@@ -13,7 +13,7 @@
  * homes (the shader's old arithmetic), read by the field (lab/field.js stageWash, p16.w · p17.xyz · p18.xyz); PROJECT `presentation.stage` through
  * stageOfProject / loadStage (shell/persist.js); targets `stage.*` (shell/modulation.js).  A file from before 040 ({ pulse, shape, rate }: SHAPE
  * CENTRE | EDGE, RATE in Hz) opens as POSITION 0° or 180° at the full BAND WIDTH — the standing wash it drew. */
-import { el, knob, label } from './mir/kit.js'; import { fold } from './fold.js';
+import { el, knob, label, sw } from './mir/kit.js'; import { fold } from './fold.js';
 import { TIER } from './tier.js'; import { strobeBeats } from './field.js';
 const HOME = Object.freeze({ pulse: 0, position: 0, rate: 2, strobe: 0, strobeRate: 1, strobeDuty: 0.5, beam: 0, beamAngle: 0, beamWidth: 30 });
 const RANGE = { pulse: [0, 1], rate: [0, 2], strobe: [0, 1], strobeRate: [0.25, 4], strobeDuty: [0.05, 0.95], beam: [0, 1], beamWidth: [5, 180] }, KEYS = Object.keys(HOME);
@@ -38,7 +38,7 @@ const FX = [   // group · key · the knob's label · its hint · the knob's sha
   ['PULSE', 'position', 'POSITION', 'Where the band stands: 0° centre, 180° edge', { max: 360, wrap: true, fmt: deg }, 'PULSE POSITION'],
   ['PULSE', 'rate', 'BAND WIDTH', 'How wide the band is: a thin ring to the whole stage', { max: 2, fmt: (v) => pct(v / 2) }, 'PULSE BAND WIDTH'],
   ['STROBE', 'strobe', 'INTENSITY', 'How strongly the stage flashes on the beat', { fmt: pct }, 'STROBE'],
-  ['STROBE', 'strobeRate', 'RATE', 'Beats between flashes (never over 3 a second)', { min: 0.25, max: 4, log: true, fmt: (v) => { const b = strobeBeats(v); return (b < 1 ? '1/' + 1 / b : b) + ' BEAT'; } }, 'STROBE RATE'],
+  ['STROBE', 'strobeRate', 'RATE', 'Beats between flashes', { min: 0.25, max: 4, log: true, fmt: (v) => { const b = strobeBeats(v); return (b < 1 ? '1/' + 1 / b : b) + ' BEAT'; } }, 'STROBE RATE'],
   ['STROBE', 'strobeDuty', 'DUTY', 'How much of each flash the stage stays lit', { min: 0.05, max: 0.95, fmt: pct }, 'STROBE DUTY'],
   ['BEAM', 'beam', 'INTENSITY', 'How strongly the beam lights the stage', { fmt: pct }, 'BEAM'],
   ['BEAM', 'beamAngle', 'ANGLE', 'Where the beam points: 0° up, turning clockwise', { max: 360, wrap: true, fmt: deg }, 'BEAM ANGLE'],
@@ -55,6 +55,16 @@ export function createStageWindow(app) {
   w.root.classList.add('native-clean', 'closed', 'lw-stage-card'); app.host.rack.appendChild(w.root);
   const row = (cls, parent, ...cs) => { const r = el('div', 'row tight ' + cls, parent); for (const c of cs) r.appendChild(c.root); return r; };
   row('stage-frame', w.body, ui.frameSw);                  // native-ui.js turns FRAME and AXIS into their honest segs where they stand
+  /* 041 S3 · THE FRAME CAN STAY (Josh: "have an option in stage where the either box or frame remains in UI full Hide mode (not hide/mouse-reveal)"):
+     a PREFERENCE (`frameStay`, FIELD_CHROME, absent = off) read by shell/keys.js toggleUI — under H the frame stays drawn, the axes go */
+  ui.frameStaySw = sw({ label: 'KEEP IN HIDE', value: !!mat.frameStay, title: 'Keep the frame drawn while the interface is hidden (H)',
+    onChange: (v) => { if (v) mat.frameStay = true; else delete mat.frameStay; app.sh.saveSettings(); } });
+  /* 041 S4 · THE FRAME'S BRIGHTNESS: a PREFERENCE (`frameGain`, FIELD_CHROME, absent = 100 %, today's look — THE LOCK's), 25 % … 400 %, read by
+     field.js writeLines: the box, the axes, the compass, the lattice and the dots; within 2 % of home it IS home */
+  let gainSave = 0;
+  ui.frameGainK = knob({ label: 'BRIGHTNESS', title: 'How bright the frame, axes, dots and lattice draw', min: 0.25, max: 4, log: true, value: mat.frameGain || 1, fmt: pct,
+    onInput: (v) => { if (Math.abs(v - 1) < 0.02) delete mat.frameGain; else mat.frameGain = v; schedule(TIER.PRESENT); clearTimeout(gainSave); gainSave = setTimeout(app.sh.saveSettings, 250); } });
+  row('fit stage-frame-more', w.body, ui.frameGainK, ui.frameStaySw);
   row('stage-axes', w.body, ui.axisSw, ui.axisInkSeg);
   row('stage-ground', w.body, ui.stageSeat);
   row('fit stage-knobs', w.body, ui.stageK, ui.gammaK);

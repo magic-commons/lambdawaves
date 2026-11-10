@@ -22,7 +22,7 @@ export const RETIRED = Object.freeze(['palette', 'camMode', 'clockLink', 'spin',
 const P = 'PREFERENCE', W = 'WORKSPACE', J = 'PROJECT', L = 'LIBRARY';
 const row = (key, scope, version, forget, owner, o = {}) => Object.freeze({ key, scope, version, forget, owner, ...o });
 export const RECORDS = Object.freeze([
-  row(SETTINGS_KEY, P + ' + ' + W, 'gen 16', true, 'shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above'),
+  row(SETTINGS_KEY, P + ' + ' + W, 'gen 17', true, 'shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above'),
   row('mir.gui', P, 'kit prefs', true, 'look.js createLook (kit createPrefs over LOOK_SCHEMA; MIR OPTIONS writes it)'),
   row('lambdawaves.q0.info', J, 'kit prefs', true, 'shell/stage-words.js infoPrefs (INFORMATIONAL) — the live record; the project owns it (presentation.info, 036 S4)'),
   row('lambdawaves.q0.widgets', J, 'v 1', true, 'widgets.js createWidgets (WIDGETS) — the live record { items }; the project owns it (presentation.widgets, 037 W1)'),
@@ -62,6 +62,7 @@ export const RECORDS = Object.freeze([
   row('lw.csb.side', W, 'RETIRED', true, 'shell/modulation.js: removed at boot (034 F3 — the bar’s home is the bottom; 032 T13 kept a dodge’s landing)'),
   row('lw.repair', P, 'flag', false, 'sw-client.js REPAIR (033): sessionStorage, not localStorage — 1 after the cache is cleared, 2 after the reinstall activated, removed at the verdict; one tab, one repair'),
   row('lw.mixed', P, 'flag', false, 'sw-client.js mixed() (033): sessionStorage — the page build a MIXED BUILD reloaded for once, so a reload loop is impossible'),
+  row('lw.stage', P, 'flag', false, 'shell/controller.js stageLost (041 S8): sessionStorage — when a lost GPU device last reloaded the stage, so a second loss inside a minute shows RELOAD STAGE instead of a loop'),
 ]);
 export const FAMILIES = Object.freeze(Object.fromEntries(RECORDS.map((r) => [r.key, r])));
 /** the retired notebook keys (021 R4): read once at boot into the session part, then removed */

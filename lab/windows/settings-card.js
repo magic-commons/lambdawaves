@@ -92,7 +92,7 @@ export function createSettingsCard(app) {
     createStageWindow(app);
     ui.editStage = trig({ label: 'EDIT STAGE', glyph: 'stage', title: 'Open STAGE below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'stage') });   // 037 T2 · THE SUMMONS (lab/summon.js)
     /* 040 M4 (Josh 11-09: "Like stage window, have informational window and widgets also be opened in the settings > display section"): the same summons */
-    ui.editInfo = trig({ label: 'INFORMATIONAL', glyph: 'informational', title: 'Open INFORMATIONAL below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'informational') });
+    ui.editInfo = trig({ label: 'INFO', glyph: 'informational',   /* 041 S10 (Josh's call 9: "make the new row even down the middle … just rename that button to be 'info'") */ title: 'Open INFORMATIONAL below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'informational') });
     ui.editWidgets = trig({ label: 'WIDGETS', glyph: 'widgets', title: 'Open WIDGETS below SETTINGS', onFire: () => summon(app.sh.rk, 'settings', 'widgets') });
     const gamutSup = field.ok && field.gamutSupport ? field.gamutSupport : { canvas: false, css: false, display: false, reason: 'no WebGPU device: the canvas has no colour space to set' };
     const gamutOK = !!(gamutSup.canvas && gamutSup.css);
@@ -159,7 +159,9 @@ export function createSettingsCard(app) {
       { id: 'smooth', label: 'SMOOTH', title: 'Blur stays on; a slightly softer picture while playing' },
       { id: 'balanced', label: 'BALANCED', title: 'The windows’ blur rests while the picture moves' },
       { id: 'light', label: 'LEAN', title: 'Lightest: blur rests, a half-sharp picture while playing' }],   // 039 X16: LEAN (THEME's LIGHT keeps the word; FOR-JOSH), the id `light` kept
-      onChange: (v) => { ui.setTier(v); saveSettings(); } });
+      /* 041 S9 · FULL MEANS FULL (Josh: "Settings > Performance @ Full should toggle 'Auto-Scale' off"): a hand's press of FULL turns AUTO SCALE off
+         (the canvas at its whole size at once); the switch stays the reader's — pressed again it is on again, and leaving FULL leaves it as it is */
+      onChange: (v) => { ui.setTier(v); if (v === 'full' && quality.auto) { quality.auto = false; quality.autoScale = 1; ui.autoSw.set(false); } saveSettings(); } });
     r5b.appendChild(ui.tierSeg.root);
     /* iteration 016 W4 (Josh, call 7: "60 | 120 HZ probably moves into SETTINGS"): the modulation's update rate, beside the GOVERNOR — off the modulation
        window's work bar (mod-port.js `cadenceKey: false`) and the control surface's expander; the kit's record keeps it (controller.js saveMod) */
