@@ -208,10 +208,9 @@ export function createStageWords(app) {
         if (r.left <= 24) L = Math.max(L, x1 + m); else if (r.right >= vw - 24) R = Math.min(R, x0 - m);
         else if ((y0 + y1) / 2 > sb.height / 2) B = Math.min(B, y0 - m); else T = Math.max(T, y1 + m);
       }
-      /* 039 V6 · THE MENUBAR CLEARS THE STAGE CAPTION (A #14, C #18: at 1300 WINDOW and HELP sat on "1s₀ and 2p₀", at 1000 EDIT and VIEW were crossed by
-         "C₆H₆"): the top of the free stage is never above the menu row's band — the kit windows' 52 px, times UI SCALE — so the caption and the head
-         sit below the menus whether they show or not (read off <html>, so H, which hides the logo, moves nothing) */
-      T = Math.max(T, 52 * (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-zoom')) || 1) - sb.top);
+      /* 041 I3 · TOP MEANS THE TOP (Josh 11-09: "Let informational positioned at the top ignore the status/menu bar at the top"): the free stage starts
+         at the stage's own top margin — 039 V6's menu band (52 px × UI SCALE) is gone, so at PAD 0 the words, a pop and a TOP ESP bar stand level
+         with the menu row and pass under it where they meet (z 20 < the chrome) */
       return R - L < 120 ? { L: m, R: sb.width - m, T, B, m } : { L, R, T, B, m };
     }
     const at = (F, h, bottom) => (bottom ? F.B - seat.pad * (F.B - F.T) - h : F.T + seat.pad * (F.B - F.T));   // a body's top edge at its seat
