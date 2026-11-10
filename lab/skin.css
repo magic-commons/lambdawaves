@@ -587,34 +587,16 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-scroll { overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; overscroll-behavior: contain; }
 #lwMenu .mm-scroll::-webkit-scrollbar { display: none; }
 #lwMenu .mm-sec { min-height: 100%; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 8px 16px 14px; box-sizing: border-box; }
-/* 036 G2 · THE DECKS' EDGES (picker.js, the two .mm-edge bands): WHILE a deck or the tutorial's wall scrolls (#lwMenu.mm-moving) the scroller
-   fades a section out over its first and last 72 px (--mm-edge eases 0 → 72 px), and under FROST a band of PROGRESSIVE BLUR grows over each
-   edge — two layers, 6 px over the whole band and 16 px near the edge, each masked so the blur grows toward the edge — so ATOMIC, MOLECULAR and
-   EXPANSIONS pass one another gradually; (040 I5, below: the fade stands where more lies beyond an edge).  The rows are placed by name,
-   so the bands share the scroller's cell; the head stays above them; FOLDERS and the face have none. */
+/* 041 P1 · THE LIBRARY FADES LIKE THE SIDE SCROLL (Josh 11-09: "I just want whatever horizontal is doing"; it replaces 036 G2's bands and 040 I5's
+   edge classes): the decks' scroller fades over its first and last --vfade ALWAYS, as .mm-pages fades its sides — it runs past its cell by the
+   fade less a section's old padding (8 px above, 14 below) and a section is padded by the fade, so at rest nothing sits in the fade and nothing
+   has moved; the outer half of the fade is faint (.22 at 55 %), so what passes under the head's last row is barely there; no band, no blur,
+   nothing that comes while it scrolls and goes after.  --mm-edge is the tutorial scroller's own (below). */
 @property --mm-edge { syntax: '<length>'; inherits: false; initial-value: 0px; }
-/* 040 I5 · THE LIBRARY'S EDGES FADE (Josh 11-09: "the transition looks like it's fading away when scrolling above and below vs a hard clip-off"): the
-   decks' fade stands — not only while they move — on each edge with more beyond it (picker.js `edges()`: .mm-up · .mm-down), so a section passing
-   an edge fades from the first pixel of the motion; the first deck's top and the last deck's foot stay whole; the blur bands are as they were */
-@property --mm-top { syntax: '<length>'; inherits: false; initial-value: 0px; }
-@property --mm-foot { syntax: '<length>'; inherits: false; initial-value: 0px; }
-#lwMenu .mm-top { grid-row: 1; } #lwMenu .mm-scroll { grid-row: 2; grid-column: 1; } #lwMenu .mm-caption { grid-row: 3; }
-#lwMenu .mm-scroll { --mm-top: 0px; --mm-foot: 0px; transition: --mm-top 260ms var(--ease), --mm-foot 260ms var(--ease);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-top), #000 calc(100% - var(--mm-foot)), transparent); mask-image: linear-gradient(to bottom, transparent, #000 var(--mm-top), #000 calc(100% - var(--mm-foot)), transparent); }
-#lwMenu .mm-scroll.mm-up { --mm-top: 32px; } #lwMenu .mm-scroll.mm-down { --mm-foot: 32px; }   /* at rest a short fade, clear of a deck's first row */
-#lwMenu.mm-moving > .mm-scroll.mm-up { --mm-top: 72px; } #lwMenu.mm-moving > .mm-scroll.mm-down { --mm-foot: 72px; }   /* moving, 036's 72 px */
-#lwMenu .mm-edge { grid-row: 2; grid-column: 1; position: relative; z-index: 2; --mm-edge: 0px; height: var(--mm-edge); transition: --mm-edge 260ms var(--ease); pointer-events: none; display: none; }   /* it grows from the edge: an opacity under 1 would cut its blur off from the backdrop */
-#lwMenu.mm-moving > .mm-edge { --mm-edge: 72px; }
-#lwMenu .mm-edge.top { align-self: start; } #lwMenu .mm-edge.foot { align-self: end; }
-body.frost #lwMenu .mm-edge { display: block; }
-#lwMenu .mm-edge > i { position: absolute; inset: 0; }
-#lwMenu .mm-edge > i:first-child { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-#lwMenu .mm-edge > i:last-child { -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
-#lwMenu .mm-edge.top > i:first-child { -webkit-mask-image: linear-gradient(to bottom, #000 25%, transparent); mask-image: linear-gradient(to bottom, #000 25%, transparent); }
-#lwMenu .mm-edge.top > i:last-child { -webkit-mask-image: linear-gradient(to bottom, #000, transparent 55%); mask-image: linear-gradient(to bottom, #000, transparent 55%); }
-#lwMenu .mm-edge.foot > i:first-child { -webkit-mask-image: linear-gradient(to top, #000 25%, transparent); mask-image: linear-gradient(to top, #000 25%, transparent); }
-#lwMenu .mm-edge.foot > i:last-child { -webkit-mask-image: linear-gradient(to top, #000, transparent 55%); mask-image: linear-gradient(to top, #000, transparent 55%); }
-#lwMenu.at-face > .mm-edge, #lwMenu:is([data-sec="folders"], [data-sec="tutorial"]) > .mm-edge { visibility: hidden; }   /* 037 U2: the tutorial's scroller fades its own ends */
+#lwMenu .mm-top { grid-row: 1; z-index: 1; } #lwMenu .mm-scroll { grid-row: 2; grid-column: 1; } #lwMenu .mm-caption { grid-row: 3; }
+#lwMenu .mm-scroll { --vfade: 32px; margin-block: calc(8px - var(--vfade)) calc(14px - var(--vfade));
+  -webkit-mask-image: linear-gradient(to bottom, transparent, rgb(0 0 0 / .22) calc(var(--vfade) * .55), #000 var(--vfade), #000 calc(100% - var(--vfade)), rgb(0 0 0 / .22) calc(100% - var(--vfade) * .55), transparent); mask-image: linear-gradient(to bottom, transparent, rgb(0 0 0 / .22) calc(var(--vfade) * .55), #000 var(--vfade), #000 calc(100% - var(--vfade)), rgb(0 0 0 / .22) calc(100% - var(--vfade) * .55), transparent); }
+#lwMenu .mm-sec { padding-block: var(--vfade); }
 /* a tile: the picture alone moves */
 #lwMenu .mm-tile { position: relative; display: block; aspect-ratio: 1; border-radius: 10px; }
 #lwMenu .mm-tile:hover, #lwMenu .mm-tile:focus-visible { z-index: 3; }
@@ -631,7 +613,7 @@ img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no
   text-shadow: 0 0 6px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 160ms ease, translate 160ms var(--ease); }
 #lwMenu .mm-tile:hover .mm-under, #lwMenu .mm-tile:focus-visible .mm-under { opacity: 1; translate: -50% 4px; }
 /* the periodic table: 18 columns, 7 periods, a gap row, the two f rows; the picture full, the symbol and Z in its corners */
-#lwMenu .mm-table { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 270px) / 10.3)); display: grid; grid-template-columns: repeat(18, var(--t)); grid-template-rows: repeat(7, var(--t)) calc(var(--t) * .35) repeat(2, var(--t)); gap: 2px; }
+#lwMenu .mm-table { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 270px) / 10.3), var(--fit, 100vh)); display: grid; grid-template-columns: repeat(18, var(--t)); grid-template-rows: repeat(7, var(--t)) calc(var(--t) * .35) repeat(2, var(--t)); gap: 2px; }
 #lwMenu .mm-el { border-radius: 6px; } #lwMenu .mm-el .mm-pic { inset: 6%; width: 88%; height: 88%; }
 #lwMenu .mm-sym { position: absolute; left: 7%; bottom: 4%; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: calc(var(--t) * .3); font-weight: 400; line-height: 1; text-shadow: 0 0 5px hsl(var(--glass-tint)); }
 #lwMenu .mm-table[hidden] { display: none; }
@@ -671,7 +653,9 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-dot, .lw-pager .mm-dot { width: 7px; height: 7px; border-radius: 4px; background: currentColor; opacity: .28; transition: width 160ms, opacity 160ms; }
 #lwMenu .mm-dot.on, .lw-pager .mm-dot.on { width: 22px; opacity: 1; background: var(--acc); }
 /* the caption: much larger — the formula in STIX, the name in LW Title, the line under; R6's swap is one line in flight (iteration 008 P: the old line leaves and is gone before the newest rises) */
-#lwMenu .mm-caption { min-height: 96px; display: grid; place-items: center; padding: 2px 16px 20px; overflow: hidden; }
+/* 041 P2 · THE READER'S ROOM IS ALWAYS THERE (Josh 11-09: "let the content of the page assume the informational/reader in the bottom is always there"):
+   the caption is one fixed height, its fullest line's (87 px of words at the largest type), so a hover never resizes the decks above it */
+#lwMenu .mm-caption { height: 110px; display: grid; place-items: center; padding: 2px 16px 20px; overflow: hidden; }
 #lwMenu .mm-line { grid-area: 1 / 1; display: flex; gap: 6px 20px; align-items: baseline; justify-content: center; flex-wrap: wrap; text-align: center; max-width: 92vw; }
 #lwMenu .mm-line.out { pointer-events: none; }
 #lwMenu .mm-cap-f { font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: clamp(24px, 3.1vw, 36px); font-weight: 400; }
@@ -687,7 +671,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 /* 032 THE PORTRAIT SHELF (picker.js card): a volume is album art — 9:16 as tall as the page allows, its still for the theme in use (the hero
    over it on a hover, faded in once it plays), or the λWAVES palette (teal · lilac · violet, placed by the card's --k) until it has one; the
    numeral and its count on the theme's ground at the foot, the WIP cone at the head, the install under the card */
-#lwMenu .mm-vol { --vol-h: clamp(300px, calc(100dvh - 400px), 540px); display: grid; gap: 14px; justify-items: center; border-radius: 18px; }
+#lwMenu .mm-vol { --vol-h: clamp(190px, calc(100dvh - 432px), 540px);   /* 041 P14: 432 (was 400) and a 190-px floor (was 300), so the shelf and THIS DEVICE fit the page over the fixed caption */ display: grid; gap: 14px; justify-items: center; border-radius: 18px; }
 #lwMenu .mm-vol.drop { outline: 2px dashed var(--acc); outline-offset: 6px; }
 #lwMenu .mm-vol-open { position: relative; display: block; height: var(--vol-h); aspect-ratio: 9 / 16; border-radius: 18px; }
 #lwMenu .mm-lit { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; isolation: isolate; background: hsl(var(--glass-tint)); }
@@ -770,8 +754,8 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 @media (max-width: 700px) {
   #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
   #lwMenu .mm-tabs { gap: 14px; } #lwMenu .mm-tab { font-size: 12px; letter-spacing: .08em; } #lwMenu .mm-tab .mm-ico { display: none; }
-  #lwMenu .mm-caption { min-height: 76px; }   /* 038 close: the page arrows stay outside the deck (picker.js size() keeps 60 px a side for them) */
-  #lwMenu .mm-shelf { gap: 16px; } #lwMenu .mm-vol { --vol-h: min(clamp(300px, calc(100dvh - 400px), 540px), calc((100vw - 56px) * 8 / 9)); } }   /* 032: two portraits a row */
+  #lwMenu .mm-caption { height: 92px; }   /* 038 close: the page arrows stay outside the deck (picker.js size() keeps 60 px a side for them) */
+  #lwMenu .mm-shelf { gap: 16px; } #lwMenu .mm-vol { --vol-h: min(clamp(190px, calc(100dvh - 432px), 540px), calc((100vw - 56px) * 8 / 9)); } }   /* 032: two portraits a row */
 @media (prefers-reduced-motion: reduce) {
   #lwMenu { clip-path: none; transition: none; } #lwMenu .mm-pic, #lwMenu .mm-pill, #lwMenu .mm-under, #lwMenu .mm-ring-ink, #lwMenu .mm-arrow, #lwMenu .mm-arrow .mm-ico { transition: none; }
   #lwMenu .mm-pic[data-tilt] { transform: none; } #lwMenu .mm-arrow { scale: 1 !important; } }
@@ -854,7 +838,7 @@ html.mono #lwMenu .mm-hue-ring::after { opacity: 1; background: conic-gradient(f
 #lwMenu .mm-tagrow { display: flex; gap: 4px; flex-wrap: nowrap; width: max-content; }
 #lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { display: none; }   /* inside a volume its head's twin is the one */
 /* iteration 014 D1: inside a volume the seat under the tabs is the search; the head's old seat holds NAME and MASS (3-state, as-is unpressed) */
-#lwMenu .mm-opts .mm-search { display: none; width: 240px; text-align: center; } #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
+#lwMenu .mm-opts .mm-search { display: none; width: 240px; text-align: center; padding-block: 3px; line-height: 16px; }   /* 041 P14: 22 px, the seat's own height — entering a volume no longer grows the head 8 px */ #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
 #lwMenu .mm-sort { flex: none; display: inline-flex; align-items: center; gap: 4px; min-width: 30px; height: 26px; padding: 0 8px; border-radius: 999px; font-size: 11px; letter-spacing: .08em; white-space: nowrap; opacity: .45; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-sort:hover, #lwMenu .mm-sort:focus-visible { opacity: .8; } #lwMenu .mm-sort.on { opacity: 1; color: var(--acc); }
 #lwMenu .mm-sort .mm-ico { width: 14px; height: 14px; } #lwMenu .mm-sort[data-sort="name"] span { min-width: 2.4em; text-align: center; }
@@ -1268,6 +1252,7 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
    scrolls but the scroller of tiles */
 #lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; padding: 6px 24px 28px; box-sizing: border-box; }
 #lwMenu .mm-tut[hidden] { display: none; }
+#lwMenu .mm-tut { position: relative; z-index: 2; }   /* 041 P7: over the still wall and its veil, which stand under the tutorial while the menu's animation is off */
 #lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="back"], .mm-themeb)) { display: none; }   /* 035 G1: the tutorial's way back is ← */
 /* 037 U1 THE DECKS: the head is TUTORIAL_DECKS' two tabs alone — kit seg cells dressed as the decks' tabs (LW Title, .45 → 1, the chosen one
    in the accent on the decks' pill), no well, no word */

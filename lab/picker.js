@@ -195,11 +195,15 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
   /* 035 G1 (Josh 11-03: "a back arrow instead of a home arrow; home icon in library takes you to the lab"): ← is the face (the tutorial's
      one way back, the decks' and the folders' first), ⌂ enters the lab as CONTINUE does */
+  /* 041 P4 · HOME IS THE MAIN MENU, THE ARROW IS THE LAB (Josh 11-09: "swap the functions between the home button and the back arrow in the picker.
+     Home will go straight to main menu while the arrow takes you to the lab. The back arrow in tutorial should be left as is"): over the decks
+     and FOLDERS ← closes the menu (as CONTINUE does) and ⌂ is the face; in the tutorial ← is still the face.  Escape still steps back */
   /* 036 G3 (Josh 11-03: "Instead of the arrow to go back to the main menu in the library mode, have it be a large arrow in the top left"): ← is
      the menu's own, pinned to its top-left corner, large and plateless (skin.css); still `data-nav="back"`, still the face */
-  const backB = el('button', 'mm-navb mm-backb', root); backB.type = 'button'; icon(backB, 'back'); backB.setAttribute('aria-label', 'Main menu'); backB.title = 'Main menu';
-  backB.dataset.nav = 'back'; backB.addEventListener('click', () => showFace());
-  navBtn('home', 'Continue to the lab', () => close()).dataset.nav = 'home';
+  const backB = el('button', 'mm-navb mm-backb', root); backB.type = 'button'; icon(backB, 'back'); 
+  const wayBack = () => { const t = at === 'tutorial' ? 'Main menu' : 'Back to the lab'; backB.title = t; backB.setAttribute('aria-label', t); };
+  backB.dataset.nav = 'back'; backB.addEventListener('click', () => (at === 'tutorial' ? showFace() : close()));
+  navBtn('home', 'Main menu', () => showFace()).dataset.nav = 'home';
   navBtn('folders', 'Folders — your projects and the demos', () => (at === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
   /* the face's two doors (album art in THE CARD'S LIGHT) and the way into the lab.  036 G1 (Josh 11-03: "Show the thumbnail to be the MIR thingy
      from the Lambdawaves about site … for library, use the background image for the title in the about page site which is also light and dark
@@ -237,7 +241,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   icon(faceTheme, 'sun').classList.add('gly-sun'); icon(faceTheme, 'moon').classList.add('gly-moon'); faceTheme.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
   { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'ABOUT MIR'); hint(mir, 'ABOUT MIR — the toolkit this app is built on'); mir.addEventListener('click', () => openAbout('mir', mir));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
-  { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google'); hint(credits, 'Built with Claude, Gemini and GPT · press for the names');   // 039 X16
+  { const credits = el('button', 'mm-corner mm-credits', face); credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');   // 041 P6 (Josh 11-09: "Show no mouse-over hint for the AI thingy in the main menu"): no hint (039 X16's is gone); the names still slide out and the aria name stands
     /* 036 G6 (Josh 11-03: "Claude Logo is incorrect; use the actual real logo. Checkout the screenshot of the correct font and logo styling. Also
        no need to show company who made it"): the about site's real marks and names — Claude's starburst (img/ai/claude-mark.svg, its
        terracotta) and its serif wordmark in the theme's ink (claude-word-{dark,light}.svg) in place of a typed name; GPT in OpenAI Sans and
@@ -315,16 +319,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const foldersEl = el('div', 'mm-folders', root); foldersEl.hidden = true; foldersEl.setAttribute('role', 'region'); foldersEl.setAttribute('aria-label', 'Folders');
   let foldersView = null;
   const tutEl = el('div', 'mm-tut', root); tutEl.hidden = true; tutEl.setAttribute('role', 'region'); tutEl.setAttribute('aria-label', 'Tutorial');
-  /* 036 G2 (Josh 11-03: "When scrolling between Atomic, Molecular, and Expansions, there needs to be a gradient blur or gradual something … Right
-     now, it's a sharp cuttoff"): WHILE a deck or the tutorial's wall scrolls (`mm-moving`, held 220 ms past the last scroll event), the scroller
-     fades over its first and last 72 px and two bands of PROGRESSIVE BLUR lie over its edges (under FROST; skin.css) — a section passes the
-     edges gradually; (040 I5: the fade now stands where more lies beyond an edge, below) */
-  for (const side of ['top', 'foot']) { const e = el('div', 'mm-edge ' + side, root); e.setAttribute('aria-hidden', 'true'); el('i', '', e); el('i', '', e); }
+  /* 041 P1: the decks' scroller fades its top and foot always, in the CSS alone (skin.css --vfade); 036 G2's blur bands and 040 I5's edge
+     classes are gone.  `mm-moving` (held 220 ms past the last scroll event) is the tutorial scroller's alone (037 U2) */
   let edgeT = 0; const edging = () => { root.classList.add('mm-moving'); clearTimeout(edgeT); edgeT = setTimeout(() => root.classList.remove('mm-moving'), 220); };
-  for (const sc of [scroller, tutEl]) sc.addEventListener('scroll', edging, { passive: true });
-  /* 040 I5 · THE LIBRARY'S EDGES FADE: the decks' mask stands on each edge with more beyond it (skin.css .mm-up · .mm-down), read on a scroll and a lay */
-  const edges = () => { const t = scroller.scrollTop, m = scroller.scrollHeight - scroller.clientHeight - t; scroller.classList.toggle('mm-up', t > 1); scroller.classList.toggle('mm-down', m > 1); };
-  scroller.addEventListener('scroll', edges, { passive: true });
   /* 034 M1 · THE VIEWS: the face (over the decks, which stay laid out under it), the decks, FOLDERS' gallery and the tutorial (each in the
      decks' seat); one at a time, one hero playing at most, and leaving a view puts its hero to rest */
   /* 039 W9 (WALK-D #11): a view that changes under a still pointer wakes no hint — a control that arrived under it is hovered once the pointer
@@ -334,9 +331,14 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   root.addEventListener('pointermove', (e) => { if (e.movementX || e.movementY) unmoved = false; }, true);
   let at = 'decks', firstDeal = false;   // firstDeal: a first run's LIBRARY deals MOLECULAR's first page in THE ENTRANCE (iteration 012 L3)
   function showView(name) {
-    collage[name === 'face' ? 'show' : 'hide']();   // 035: the collage under the face alone; the decks, folders and tutorial keep the plain ground
+    /* 035: the collage under the face alone; the decks and folders keep the plain ground.  041 P7 (Josh 11-09: "In the tutorial, show a random
+       still from either from the light and dark backgrounds for the animation disabled main menu"): with the menu's animation off (stillness,
+       or the sheet's COLLAGE off) the tutorial stands on a WALLS still too, picked afresh at each showing, in the theme in use */
+    if (name === 'face') { if (at === 'tutorial') collage.hide(); collage.show(); }
+    else if (name === 'tutorial' && (still() || prefs.collage === false)) { if (name !== at) { collage.hide(); collage.show(true); } }
+    else collage.hide();
     if (name === at) return false;
-    const was = at; at = name; closeDrop(); closeSheet(); restHero();
+    const was = at; at = name; wayBack(); closeDrop(); closeSheet(); restHero();
     unmoved = true; document.dispatchEvent(new Event('controlhintschange'));   // 039 W9 (WALK-D #11): the standing hint goes with the view (the kit's close)
     face.hidden = name !== 'face'; root.classList.toggle('at-face', name === 'face');
     for (const e of [top, scroller, caption, backB]) e.inert = name === 'face';
@@ -386,6 +388,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     animate(foldersEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
   }
   caption.setAttribute('aria-live', 'polite');
+  const VPAD = () => { const cs = getComputedStyle(sections[0].sec); return Math.max(0, parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) - 22) || 0; };   // 041 P1: what the fade adds to a section's old 8 + 14 px (the scroller is that much taller)
   /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
   const opts = el('div', 'mm-opts', top);
   let labelBtns = [];
@@ -561,7 +564,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
          blurred racks too much" on a 16:9 screen); the ATOMIC table is not a deck and keeps its size */
       const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
       const side = narrow ? 60 : innerWidth >= 1100 ? Math.min(rackW + 20, (innerWidth - 900) / 2) : 75;   // 038 close (D-REVIEW 4): a phone's side holds the 44-px page arrow outside the deck, never on a tile
-      const H = Math.max(150, scroller.clientHeight - above - 70), W = Math.max(200, Math.min(scroller.clientWidth - 2 * side, 1900));
+      const H = Math.max(150, scroller.clientHeight - VPAD() - above - 74), W = Math.max(200, Math.min(scroller.clientWidth - 2 * side, 1900));   // 041 P2: 74, what the page's chrome is (22 + 22 of padding, the 12-px gap, the 18-px dots): at 70 a short page stood 3 px over its scroller
       /* 037 M6 THE DENSE GRID (Josh 11-05: "show as many rows and columns as you can for the molecules"): as many rows (≤ 7) and columns (≤ 16)
          as fit at the least tile — 120 px, 80 on a phone — then the tile as large as both leave, ≤ 200 (so a desktop page is eight across
          wherever eight fit at 120).  The catalogue and a volume share this deck */
@@ -639,16 +642,20 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const h = prefs.atomic === 'hydrogen'; table.hidden = h; hTable.hidden = !h;
     for (const b of amodeBtns) { const on = b.dataset.amode === prefs.atomic; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
     if (h && !hSet) { hSet = true; for (const b of BASIS) hTile(b, hTable); }
-    if (h) fitH();
+    fitH();
     if (keep && !root.hidden) enterTiles(h ? [...hTable.children] : [...table.children], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i % 14 + Math.floor(i / 14)));
   }
   /* 039 W9 (WALK-D #5): THE 140 FIT THEIR PAGE — the cell is also bounded by the room ATOMIC's page leaves under its row of words (`--fit`),
      so the tenth row clears the caption; below a 24-px cell the grid keeps 24 and scrolls in itself, before the wheel turns the page */
+  /* 041 P2: the periodic table is bounded the same way (its 9.35 rows), so ATOMIC's page is never taller than the scroller — a taller page
+     was where a scroll to ATOMIC came to rest short and then moved */
   function fitH() {
-    if (root.hidden || hTable.hidden || !hTable.getClientRects().length) return;
+    const tb = hTable.hidden ? table : hTable;
+    if (root.hidden || !tb.getClientRects().length) return;
     const sec = sections[0].sec, cs = getComputedStyle(sec), gap = parseFloat(cs.rowGap) || 0;
     let room = scroller.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0) - 4;
-    for (const c of sec.children) if (c !== hTable && c.getClientRects().length) room -= c.offsetHeight + gap;
+    for (const c of sec.children) if (c !== tb && c.getClientRects().length) room -= c.offsetHeight + gap;
+    if (tb === table) { table.style.setProperty('--fit', Math.max(12, Math.floor((room - 18) / 9.35 * 10) / 10) + 'px'); return; }
     const rows = Math.ceil(BASIS.length / 14), t = Math.floor((room - (rows - 1) * 2) / rows);
     hTable.style.setProperty('--fit', Math.max(24, t) + 'px'); hTable.classList.toggle('mm-hscroll', t < 24); hTable.style.maxHeight = t < 24 ? Math.floor(room) + 'px' : '';
   }
@@ -1017,14 +1024,16 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       vdeck.set(list, (m, host) => { const t = molTile(host, m, true); t.dataset.iso = m.id; return t; });
       enterTiles(vdeck.tiles);   // iteration 012 L2: a tag or a search deals the page in (animate() stands down under reduced motion)
     }
-    return { wake() { if (!woke) { woke = true; paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); }, rest };
+    return { wake() { if (!woke) { woke = true; paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); }, rest,
+      async open(id) { if (cur && cur.id === id) return; if (!woke || !vols.length) { woke = true; await paintShelf(); } const v = vols.find((x) => x.id === id); if (v) enter(v); } };   // 041 P5: a volume's page by its id
   })();
 
   /* ── the tab under the reader's eye ── */
   let current = sections[0]; paintLooks();
-  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = amode.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
+  /* 041 P3: SHOW LABELS only where there are labels — ATOMIC's, MOLECULAR's, and a volume's own twin in its head; never over the shelf of volumes */
+  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = amode.hidden = s.id !== 'atomic'; molOpt.hidden = s.id !== 'molecular'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
-  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); fitH(); movePill(current.b); edges(); } }); });   // observed only while the Picker is open
+  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); fitH(); movePill(current.b); } }); });   // observed only while the Picker is open
 
   /* ── going there ── */
   function goMolecule(id) { close(); const C = app.state.chem; if (!C) return; if (!C.on) C.setOn(true); C.pick(id); }
@@ -1125,7 +1134,14 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   };
   /* 037 M1: the sheet's COLLAGE row reads and sets the wall's switch here (settings-card.js never imports this module) */
   const collageOn = () => prefs.collage !== false, setCollage = (on) => { prefs.collage = !!on; writePrefs(prefs); collage.wake(); };
-  const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggest, suggestTile, collage: collageOn, setCollage };
+  /* 041 P5 · LIBRARY OPENS WHERE YOU ARE (Josh 11-09): the CSB's LIBRARY seat opens the decks on MOLECULAR in molecules mode — on the volume's
+     own page in EXPANSIONS when the molecule on the stage is a volume's — and on ATOMIC in hydrogen mode; a second press closes, as it did */
+  const openLibrary = () => {
+    if (!root.hidden) return close();
+    const C = app.state.chem, vol = C && C.on ? C.volume : null;
+    open({ decks: true }); showDecks(!C || !C.on ? 'atomic' : vol ? 'library' : 'molecular'); if (vol) library.open(vol.volume);
+  };
+  const api = { open, close, toggle, library: openLibrary, get shown() { return !root.hidden; }, root, show(id) { if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggest, suggestTile, collage: collageOn, setCollage };
   app.state.picker = api;
   if (openAtBoot) open();
   return api;

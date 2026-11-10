@@ -68,7 +68,6 @@ const ICONS = {
   rackHidden: box(9, 10, 12, 10.5, 2) + p('M9 16.6Q8 14.5 6.33 17Q4.67 14.5 3 17V8a5 5 0 0 1 10 0v2') + dot(6.3, 7.8, 1.2) + dot(9.7, 7.8, 1.2),
   reverse: p('M4 8h15') + p('M15.5 4.5 19 8l-3.5 3.5') + p('M20 16H5') + p('M8.5 12.5 5 16l3.5 3.5'),
   trash: p('M3.5 6.5h17') + p('M9 6.5V4.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 4.5v2') + p('M5.5 6.5l1 13a2 2 0 0 0 2 1.5h7a2 2 0 0 0 2-1.5l1-13') + p('M10 10.5v6.5') + p('M14 10.5v6.5'),
-  windowPlus: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/>' + p('M3 8.5h18M12 11.5v6M9 14.5h6'),   // the FINDER
   repeat: p('M19.6 13.4A7.7 7.7 0 1 1 17 6.4') + p('M17.6 2.6 17 6.6l-4-.5'),
   reload: p('M5.5 8.75A7.5 7.5 0 1 0 12 5') + p('M14.6 2.4 12 5l2.6 2.6'),   // 032 T14 · 034 F6: ↺, ψ's time back to t = 0 — the common refresh: a 300° arc (centre 12,12.5) open at the upper left, the head on its end at the top, tangent to it, no dot
   /* 022 H1 · THE ESP BAR'S SIDE: the free stage with the bar on its edge (INFORMATIONAL › SIDE wears the side it is on, no word) */
