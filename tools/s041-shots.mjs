@@ -18,6 +18,9 @@ const SCENES = {
   's4-bright': `__LW.layout.reopen('stage'); __LW.layout.popOut('stage', { x: 20, y: 120, w: 300 }); await wait(400); const d = document.querySelector('.dev[data-id="stage"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
     __LW.mat.frameMode = 'dots'; __LW.mat.frameGain = 4; __LW.setFrame(true); await wait(500);
     const r = d.querySelector('.stage-frame-more'); return { row: r && [...r.children].map((c) => c.textContent.trim().slice(0, 24) + ':' + c.offsetWidth), w: r && r.clientWidth };`,
+  'probe-cam': `__LW.layout.reopen('camera'); await wait(300); const R = document.querySelector('.dev[data-id="camera"] .mir-camera');
+    const tree = (n, d) => d > 3 ? '' : '<' + n.tagName.toLowerCase() + '.' + [...n.classList].join('.') + (n.children.length ? '' : ':' + n.textContent.trim().slice(0, 14)) + '>' + [...n.children].map((c) => tree(c, d + 1)).join('');
+    return { pan: tree(R.querySelector('.cam-pan'), 0), hand: tree(R.querySelector('.cam-hand'), 2), padCls: R.querySelector('.cam-pan .mir-xy, .cam-pan [class*=pad]')?.className };`,
   's2-lattice': `__LW.mat.frameMode = 'lattice'; __LW.setFrame(true); await wait(600); return { msgs: __LW.field.shaderMessages };`,
 };
 const [scene = 's1-dots', W = '1300', H = '850', light = ''] = process.argv.slice(2);

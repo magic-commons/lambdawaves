@@ -417,7 +417,11 @@ export function createMaterial(app) {
     { const R = gc.querySelector('.mir-camera'), side = R.querySelector('.mir-camsphere-side'), view = R.querySelector(':scope > .cam-view');
       R.querySelector('.cam-mode .k-lbl')?.remove(); R.querySelector('.mir-camsphere > .k-lbl')?.remove();
       if (side && view) { side.append(...view.children); view.remove(); }
-      const t = R.querySelector('.cam-hand .cam-title'); if (t) { t.textContent = 'CONTROLS'; t.dataset.t = 'CONTROLS'; } }
+      /* 041 S5 · THE CAMERA WINDOW (Josh: "In the expanded camera window, remove text that says 'controls' and 'pan'. Also clicking on the XY pan
+         thing re-activates pan and unlocks it"): the two words leave the kit's DOM (012 R3's road), and a press on the PAN pad's row while the LOCK
+         holds releases it — the port's notice wakes the pad and the switch, and the choice is saved as the switch's own press is */
+      R.querySelector('.cam-hand .cam-title')?.remove(); R.querySelector('.cam-pan .mir-xy > .k-lbl')?.remove();
+      R.querySelector('.cam-pan')?.addEventListener('pointerdown', () => { if (cameraPort.get('lock')) { cameraPort.set('lock', false); saveSettings(); } }, true); }
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt(+Shift)+Drag, two fingers or the PAN pad slide the picture 1:1 (Shift does not make the pan finer); the molecule stays the pivot. Double-click, double-tap or HOME restores the camera. LOCK is the classic camera: the pan stays at the centre and every zoom is from the centre.';
     createLight(app);   // 037 L1: the LIGHTING card (first run closed; in the FINDER; `window.light.*` with every registered card)
   }
