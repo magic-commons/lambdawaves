@@ -1249,20 +1249,40 @@ struct Occ { n: u32, pad0: u32, pad1: u32, pad2: u32, r: array<vec4<f32>, 32> };
 @group(0) @binding(1) var<uniform> OCC: Occ;
 /* the LATTICE / DOTS ink (optimization 2026-09-24, K6): one colour per theme, so it rides here and their vertices carry
    xyz + alpha (16 bytes, was 28) — the vertex stage hands the rasteriser the same four f32 either way */
-@group(0) @binding(2) var<uniform> INK: vec4<f32>;
-struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32> };
+/* 041 S1 · DOTS ARE DOTS: dot.x is a dot's radius in pixels at w = 1, dot.yz one pixel in clip space (2 / the target's size) */
+struct Ink { ink: vec4<f32>, dot: vec4<f32> };
+@group(0) @binding(2) var<uniform> INK: Ink;
+struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) col: vec4<f32>, @location(1) d: vec3<f32> };
 @vertex fn vs(@location(0) p: vec3<f32>, @location(1) c: vec4<f32>) -> VSOut {
-  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = c; return o;
+  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = c; o.d = vec3<f32>(0.0); return o;
 }
 @vertex fn vsLattice(@location(0) p: vec3<f32>, @location(1) a: f32) -> VSOut {
-  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = vec4<f32>(INK.rgb, a); return o;
+  var o: VSOut; o.pos = U0.vp * vec4<f32>(p, 1.0); o.col = vec4<f32>(INK.ink.rgb, a); o.d = vec3<f32>(0.0); return o;
 }
-@fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
+/* a DOT is one instance (xyz + alpha) drawn as a screen-facing quad: a round disc whose radius follows the perspective, never under 0.8 px
+   (a smaller one keeps that size and fades by its area, so the far field thins instead of flickering) */
+@vertex fn vsDot(@builtin(vertex_index) i: u32, @location(0) p: vec3<f32>, @location(1) a: f32) -> VSOut {
+  var c = array<vec2<f32>, 6>(vec2<f32>(-1.0, -1.0), vec2<f32>(1.0, -1.0), vec2<f32>(-1.0, 1.0), vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, -1.0), vec2<f32>(1.0, 1.0));
+  var o: VSOut; let q = U0.vp * vec4<f32>(p, 1.0);
+  let rw = INK.dot.x / max(q.w, 1e-6); let r = max(rw, 0.8);
+  let k = c[i] * (r + 1.0);
+  o.pos = vec4<f32>(q.xy + k * INK.dot.yz * q.w, q.zw);
+  o.col = vec4<f32>(INK.ink.rgb, a * min(1.0, rw * rw / 0.64)); o.d = vec3<f32>(k, r); return o;
+}
+fn occluded(p: vec2<f32>) -> bool {
   for (var i = 0u; i < OCC.n; i++) {
     let q = OCC.r[i];
-    if (in.pos.x >= q.x && in.pos.x <= q.z && in.pos.y >= q.y && in.pos.y <= q.w) { discard; }
+    if (p.x >= q.x && p.x <= q.z && p.y >= q.y && p.y <= q.w) { return true; }
   }
+  return false;
+}
+@fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
+  if (occluded(in.pos.xy)) { discard; }
   return in.col;
+}
+@fragment fn fsDot(in: VSOut) -> @location(0) vec4<f32> {
+  if (occluded(in.pos.xy)) { discard; }
+  return vec4<f32>(in.col.rgb, in.col.a * clamp(in.d.z + 0.5 - length(in.d.xy), 0.0, 1.0));
 }`;
 
 /* ── small mat4 helpers (column-major, as WGSL reads them) ───────────────── */
@@ -1645,13 +1665,14 @@ export async function createField(canvas, opts = {}) {
     return key ? specEntry(key, fmt, mat.view | 0, mat.style | 0).pipeline || generic : generic;
   }
   /* 038 F5: a line keeps the destination's alpha (THE OBJECT MASK's code under it; 1 on an opaque canvas, as the old blend left it) */
-  const lineTarget = (fmt) => ({ module: lineModule, entryPoint: 'fs', targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'zero', dstFactor: 'one' } } }] });
-  /** { line, lattice }: the box/axes/slice/corner pipeline (xyz + rgba) and the lattice/dots one (xyz + alpha, ink uniform) */
+  const lineTarget = (fmt, entryPoint = 'fs') => ({ module: lineModule, entryPoint, targets: [{ format: fmt, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { srcFactor: 'zero', dstFactor: 'one' } } }] });
+  /** { line, lattice, dots }: the box/axes/slice/corner pipeline (xyz + rgba), the lattice's (xyz + alpha, ink uniform) and the dots' (the same record, one an instance) */
+  const gridVertex = (entryPoint, stepMode) => ({ module: lineModule, entryPoint, buffers: [{ arrayStride: 16, stepMode, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32' }] }] });
   const makeLinePipeline = (fmt) => ({
     line: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
       vertex: { module: lineModule, entryPoint: 'vs', buffers: [{ arrayStride: 28, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32x4' }] }] } }),
-    lattice: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt),
-      vertex: { module: lineModule, entryPoint: 'vsLattice', buffers: [{ arrayStride: 16, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }, { shaderLocation: 1, offset: 12, format: 'float32' }] }] } }),
+    lattice: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'line-list' }, fragment: lineTarget(fmt), vertex: gridVertex('vsLattice', 'vertex') }),
+    dots: device.createRenderPipeline({ layout: lineLayout, primitive: { topology: 'triangle-list' }, fragment: lineTarget(fmt, 'fsDot'), vertex: gridVertex('vsDot', 'instance') }),
   });
   const linePipeline = makeLinePipeline(format);
 
@@ -1678,13 +1699,14 @@ export async function createField(canvas, opts = {}) {
      24 half-widths (49³ nodes; was every 2 out to 16), LATTICE's cells out to 20 (21³; was 16).  The eye's plane through the origin keeps at most
      (49³ + 49²) / 2 nodes, so that is the buffer; the far plane went 20 → 48 half-widths with them (no depth is kept: x and y keep their bits) */
   const DOTS_RAD = 24, LATTICE_RAD = 10;
-  const latticeVerts = 49 * 49 * 25 * 6;                           // the larger of the two: dots (6 per node) 360 150 · lattice 52 920
+  const latticeVerts = 49 * 49 * 25;                               // the larger of the two: dots (041 S1: ONE record a node) 60 025 · lattice 52 920
+  const DOT_R = 0.014;                                             // 041 S1: a dot's radius, in half-widths
   let latticeCount = 0; const cornerStart = 38;
   const lineBuf = device.createBuffer({ size: lineVerts * 28, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LINES = new Float32Array(lineVerts * 7);                   // the box, the axes and the slice frame, written in place each frame
   const latticeBuf = device.createBuffer({ size: latticeVerts * 16, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
   const LATTICE = new Float32Array(latticeVerts * 4);              // xyz + alpha; the ink is inkBuf's
-  const inkBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), INK_V = new Float32Array(4);
+  const inkBuf = device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }), INK_V = new Float32Array(8);
 
 
   const LINE_AT = { box: [0, 24], axes: [24, 6], slice: [30, 8] };
@@ -2036,7 +2058,10 @@ export async function createField(canvas, opts = {}) {
     lineStateReady = true;
     return same;
   }
-  function writeLines(mat) {
+  function writeLines(mat, tw = canvas.width, th = canvas.height) {
+    /* 041 S1: the dots' pixel scale is the TARGET's (the canvas, or a readback's own size) and the lens's, written when either moved */
+    const dr = Math.fround(DOT_R * half * M_PERSP[5] * th * 0.5), dx = Math.fround(2 / tw), dy = Math.fround(2 / th);
+    if (INK_V[4] !== dr || INK_V[5] !== dx || INK_V[6] !== dy) { INK_V[4] = dr; INK_V[5] = dx; INK_V[6] = dy; device.queue.writeBuffer(inkBuf, 0, INK_V); }
     if (linesUnchanged(mat)) return cachedHasSlice;
     const h = half, v = LINES; let k = 0;
     const push = (a, b, c) => { v[k++] = a[0]; v[k++] = a[1]; v[k++] = a[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; v[k++] = b[0]; v[k++] = b[1]; v[k++] = b[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; };
@@ -2105,7 +2130,6 @@ export async function createField(canvas, opts = {}) {
           latticeCount += 2;
         }
       } else {
-        const tick = h * 0.022;
         for (let x = -radius; x <= radius; x++) {
           for (let y = -radius; y <= radius; y++) {
             for (let z = -radius; z <= radius; z++) {
@@ -2114,15 +2138,9 @@ export async function createField(canvas, opts = {}) {
               if (da > 0) continue;
               const dist = Math.hypot(px, py, pz) * invMaxDist;
               const alpha = baseAlpha * (1 - dist * 0.7);
-              if (!(alpha > 0) || q + 24 > L.length) continue;       // faded out (the corners), or an eye at the origin
-
-              L[q++] = px - tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px + tick; L[q++] = py; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py - tick; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py + tick; L[q++] = pz; L[q++] = alpha;
-              L[q++] = px; L[q++] = py; L[q++] = pz - tick; L[q++] = alpha;
-              L[q++] = px; L[q++] = py; L[q++] = pz + tick; L[q++] = alpha;
-              latticeCount += 6;
+              if (!(alpha > 0) || q + 4 > L.length) continue;        // faded out (the corners), or an eye at the origin
+              L[q++] = px; L[q++] = py; L[q++] = pz; L[q++] = alpha;   // 041 S1: one record a dot (vsDot draws the disc)
+              latticeCount++;
             }
           }
         }
@@ -2157,14 +2175,14 @@ export async function createField(canvas, opts = {}) {
     if (!box && !axes) return;
     pass.setPipeline(lp.line); pass.setBindGroup(0, lineBind); pass.setVertexBuffer(0, lineBuf);
     if (box && (all || !mat.frameMode || mat.frameMode === 'box')) pass.draw(LINE_AT.box[1], 1, LINE_AT.box[0]);
-    if (box && !all && latticeCount) { pass.setPipeline(lp.lattice); pass.setVertexBuffer(0, latticeBuf); pass.draw(latticeCount, 1, 0); pass.setPipeline(lp.line); pass.setVertexBuffer(0, lineBuf); }   // same order, same blend: the lattice between the box and the axes
+    if (box && !all && latticeCount) { const dots = mat.frameMode === 'dots'; pass.setPipeline(dots ? lp.dots : lp.lattice); pass.setVertexBuffer(0, latticeBuf); if (dots) pass.draw(6, latticeCount); else pass.draw(latticeCount, 1, 0); pass.setPipeline(lp.line); pass.setVertexBuffer(0, lineBuf); }   // same order, same blend: the lattice between the box and the axes
     if (axes && (all || mat.axisMode !== 'corner')) pass.draw(LINE_AT.axes[1], 1, LINE_AT.axes[0]);
     if (axes && !all && mat.axisMode === 'corner') { pass.setBindGroup(0,cornerBind); pass.draw(6,1,cornerStart); pass.setBindGroup(0,lineBind); }
     if (slice) pass.draw(LINE_AT.slice[1], 1, LINE_AT.slice[0]);
   }
   function encodeRender(enc, target, obs, mat, w, h, tw) {
     writeView(obs, mat, w, h);
-    const sl = writeLines(mat);
+    const sl = writeLines(mat, w, h);
     const desc = { colorAttachments: [{ view: target, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] };
     if (tw) desc.timestampWrites = tw;
     const pass = enc.beginRenderPass(desc);
@@ -2243,7 +2261,7 @@ export async function createField(canvas, opts = {}) {
       const rp = makeRenderPipeline('rgba8unorm', mat), lp = out._lp;   // K2: selected synchronously — nothing awaits before the submit
       const enc = device.createCommandEncoder();
       encodeEsp(enc, mat);
-      writeView(obs, mat, w, h); const sl = writeLines(mat);
+      writeView(obs, mat, w, h); const sl = writeLines(mat, w, h);
       const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
       pass.setPipeline(rp); pass.setBindGroup(0, renderBind); pass.draw(3);
       drawChrome(pass, lp, mat, sl);
@@ -2275,7 +2293,7 @@ export async function createField(canvas, opts = {}) {
     try {
       if (!out._lp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
       const enc = device.createCommandEncoder();
-      writeView(obs, mat, w, h); const sl = writeLines(mat);
+      writeView(obs, mat, w, h); const sl = writeLines(mat, w, h);
       const bg = mat.bg || DEFAULT_BG;
       const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: bg[0], g: bg[1], b: bg[2], a: 1 }, storeOp: 'store' }] });
       drawChrome(pass, out._lp, mat, sl);
@@ -2446,7 +2464,7 @@ export async function createField(canvas, opts = {}) {
         for (let i = 0; i < m; i++) {
           if (doCompute) encodeCompute(enc, 0, modes);
           if (doRender) {
-            writeView(obs, mat, w, h); const sl = writeLines(mat);
+            writeView(obs, mat, w, h); const sl = writeLines(mat, w, h);
             const pass = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
             pass.setPipeline(makeRenderPipeline('rgba8unorm', mat)); pass.setBindGroup(0, renderBind); pass.draw(3);
             drawChrome(pass, out._lp, mat, sl);
