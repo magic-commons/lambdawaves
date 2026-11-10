@@ -2,6 +2,10 @@
    a theme resolves, and index.html's theme-color meta and tests/pwa.test.mjs read it from HERE (MIR's base.css owns
    the tokens and the widgets, not the stage). */
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #070a0f; }
+/* 041 X7 · THE VEIL'S FADE TAKES NO PRESS (F's walk: a clean profile's first press on the bar's NODES opened nothing): the kit's boot veil wraps its
+   dismissal in a view transition (mir/shell/boot.js, "a garnish"), and while it runs its pseudo-elements cover the page and a press lands on <html>.
+   The transition is a picture; the page under it takes the press */
+::view-transition { pointer-events: none; }
 
 /* ── G · THE GLASS DEFAULTS (0.5.0 C0; Josh rules each class: research/release-0.5.0/C0-GLASS-RULINGS.md) ─────────────
    MIR 1.5's first look changes seven property classes on the kit's own controls.  PLAN §9's default, class by class: λWAVES'
