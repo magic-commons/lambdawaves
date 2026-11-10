@@ -80,8 +80,8 @@
 /* ── the bar, on the stage (BASINS `#transport.mini`) ─────────────────────────────────────────────────────── */
 .mir-transport {
   position: fixed; left: 50%; right: auto; top: auto; bottom: var(--xport-bottom); transform: translateX(-50%); z-index: var(--z-chrome);
-  box-sizing: border-box; width: max-content; min-width: 0; max-width: calc(calc(100vw / var(--in-zoom, 1)) - 24px); height: var(--xport-h); padding: 2px 7px 3px;   /* as wide as its row (BASINS basins.css `#transport.mini`: 359 px measured) */
-  display: flex; align-items: center; gap: 2px; border-radius: var(--xport-radius);   /* its own corner, as BASINS' bar keeps 16 px under any CORNERS (1.5.0-alpha.7) */
+  box-sizing: border-box; width: max-content; min-width: 0; max-width: calc(calc(100vw / var(--in-zoom, 1)) - 24px); height: var(--xport-h); padding: 2px calc(7px * var(--pad-k, 1)) 3px;   /* as wide as its row (BASINS basins.css `#transport.mini`: 359 px measured) */
+  display: flex; align-items: center; gap: calc(2px * var(--pad-k, 1)); border-radius: var(--xport-radius);   /* its own corner, as BASINS' bar keeps 16 px under any CORNERS (1.5.0-alpha.7) */
   box-shadow: var(--surface-shadow, var(--glass-shadow)); touch-action: manipulation; user-select: none; -webkit-user-select: none;
 }
 .mir-transport[data-seat="top"] { top: var(--xport-top); bottom: auto; }

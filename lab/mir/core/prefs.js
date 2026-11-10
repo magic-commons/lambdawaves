@@ -60,12 +60,15 @@ export function valid(row, v) {
   if (row.type === 'number') return typeof v === 'number' && Number.isFinite(v) && v >= row.min && v <= row.max;
   return false;
 }
+/** legacyOf(row, v) — a row may carry `legacy: { '<old value>': newValue }` (1.5.7-alpha.56: DRAG HANDLE was a switch): a stored or
+ *  handed value that is no longer valid but was once is read as what it meant */
+const legacyOf = (row, v) => (row.legacy && !valid(row, v) && Object.prototype.hasOwnProperty.call(row.legacy, String(v)) ? row.legacy[String(v)] : v);
 /** defaults(schema) — every row at its default */
 export function defaults(schema) { const o = {}; for (const r of schema) o[r.key] = r.default; return o; }
 /** repair(raw, schema) — a stored blob to a whole, valid state: bad or missing values take the default, unknown keys go */
 export function repair(raw, schema) {
   const src = isObj(raw) ? raw : {}, o = {};
-  for (const r of schema) o[r.key] = valid(r, src[r.key]) ? src[r.key] : r.default;
+  for (const r of schema) { const v = legacyOf(r, src[r.key]); o[r.key] = valid(r, v) ? v : r.default; }
   return o;
 }
 /** coerce(row, v) — a value a control hands in: a number is rounded to the row's `step`, then clamped (or wrapped) into range; anything else must be valid */
@@ -75,6 +78,7 @@ export function coerce(row, v) {
     if (row.wrap) { const span = row.max - row.min; return row.min + ((((v - row.min) % span) + span) % span); }
     return Math.min(row.max, Math.max(row.min, v));
   }
+  v = legacyOf(row, v);
   return valid(row, v) ? v : undefined;
 }
 

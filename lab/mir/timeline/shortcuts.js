@@ -53,10 +53,17 @@ export function timelineActions(get) {
     row({ id: 'nudge-forward', label: 'MOVE LATER', hint: 'Move the selection later by the snap (Alt: a sixteenth)', t: 'FL — Shift+arrows move clips' }, ['Shift+ArrowRight', 'Alt+Shift+ArrowRight'], A((a, e) => a.nudge(1, 0, !!(e && e.altKey)))),
     row({ id: 'lane-up', label: 'LANE UP', hint: 'Move the selection up a lane', t: 'BASINS — FL has no lane axis to move on' }, ['Shift+ArrowUp'], A((a) => a.nudge(0, -1))),
     row({ id: 'lane-down', label: 'LANE DOWN', hint: 'Move the selection down a lane', t: 'BASINS — FL has no lane axis to move on' }, ['Shift+ArrowDown'], A((a) => a.nudge(0, 1))),
-    row({ id: 'tool-select', label: 'SELECT TOOL', hint: 'Select tool', t: 'FL — Select tool' }, ['KeyE'], A((a) => a.tool('select'))),
-    row({ id: 'tool-edit', label: 'EDIT TOOL', hint: 'Edit tool', t: 'adapted — FL’s P is the Draw tool; BASINS has one modeless curve editor' }, ['KeyP'], A((a) => a.tool('edit'))),
-    row({ id: 'tool-scrub', label: 'SCRUB TOOL', hint: 'Scrub tool', t: 'adapted — FL’s Y is the Playback/Preview tool' }, ['KeyY'], A((a) => a.tool('scrub'))),
-    row({ id: 'tool-slice', label: 'SLICE TOOL', hint: 'Slice tool', t: 'FL — Slice tool' }, ['KeyC'], A((a) => a.tool('slice'))),
+    row({ id: 'tool-select', label: 'SELECT MODE', hint: 'Select mode', t: 'FL — Select tool' }, ['KeyE'], A((a) => a.tool('select'))),
+    row({ id: 'tool-edit', label: 'PENCIL MODE', hint: 'Pencil mode', t: 'FL — Draw tool (P)' }, ['KeyP'], A((a) => a.tool('edit'))),
+    row({ id: 'tool-scrub', label: 'PREVIEW MODE', hint: 'Preview mode: a press plays from there while held, a drag scrubs', t: 'FL — Playback tool (Y)' }, ['KeyY'], A((a) => a.tool('scrub'))),
+    row({ id: 'tool-slice', label: 'SLICE MODE', hint: 'Slice mode', t: 'FL — Slice tool' }, ['KeyC'], A((a) => a.tool('slice'))),
+    /* THE OTHER MODES (1.5.7-alpha.49, THE MODE MENU): rows with no key of their own — FL's B · N · D · T · Z are the kit's and the apps' (B the rack,
+       T the transport's dock …) — so the KEYBOARD window can give them one; THE MODE MENU and the bar's MODE chip choose them meanwhile */
+    row({ id: 'tool-paint', label: 'PAINT MODE', hint: 'Paint mode: drag to lay the last clip end to end', t: 'FL — Paint tool (B); unbound in MIR' }, [], A((a) => a.tool('paint'))),
+    row({ id: 'tool-paintadd', label: 'PAINT ADD MODE', hint: 'Paint Add mode: lay the last clip a snap step long, step by step', t: 'FL — Paint in drum-sequencer mode (N); unbound in MIR' }, [], A((a) => a.tool('paintadd'))),
+    row({ id: 'tool-delete', label: 'DELETE MODE', hint: 'Delete mode: the left button deletes what it crosses', t: 'FL — Delete tool (D); unbound in MIR' }, [], A((a) => a.tool('delete'))),
+    row({ id: 'tool-mute', label: 'MUTE MODE', hint: 'Mute mode: a press mutes or unmutes a clip', t: 'FL — Mute tool (T); unbound in MIR' }, [], A((a) => a.tool('mute'))),
+    row({ id: 'tool-zoom', label: 'ZOOM MODE', hint: 'Zoom mode: drag a range to zoom to it, click to zoom out', t: 'FL — Zoom tool (Z); unbound in MIR' }, [], A((a) => a.tool('zoom'))),
     row({ id: 'slice', label: 'SLICE AT PLAYHEAD', hint: 'Slice every selected clip at the playhead (one undo)', t: 'BASINS — FL slices with the tool; Insert cuts the selection at the playhead' }, ['Insert'], A((a) => a.sliceAtPlayhead())),
     row({ id: 'stretch-audio', label: 'STRETCH AUDIO', hint: 'Fit each selected audio clip’s remaining audio into its length (varispeed)', t: 'BASINS — Shift+T' }, ['Shift+KeyT'], A((a) => a.stretchAudio())),
   ];
@@ -68,6 +75,7 @@ export function timelineActions(get) {
 // (1.5.6-alpha.23, λWAVES 032): one modifier table — Shift selects and fines, Ctrl shapes, Alt bypasses Snap and deletes.
 export const TIMELINE_POINTER = [   // tr: the timeline's pointer gestures: the gesture, what it does, its FL Studio counterpart
   { label: 'Middle button, hold + drag', hint: 'Pan time and tracks', t: 'FL — Middle-Mouse-Click pans' },
+  { label: 'Middle click on the lanes · middle + right together · the bar’s MODE chip', hint: 'Open THE MODE MENU: the nine modes (the left button’s tool) and this window’s menus', t: 'FL — Middle-Mouse-Click + Right-Click opens the context tool-menu; the lone middle click and the chip are MIR’s' },
   { label: 'Wheel over the timeline', hint: 'Scroll time (Shift + wheel too; with more lanes than fit, the wheel scrolls the lanes); Ctrl/Cmd + wheel zooms', t: 'FL — the wheel scrolls the playlist, Ctrl + wheel zooms' },
   { label: 'Drag past the left or right edge', hint: 'Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)', t: 'FL — the playlist scrolls under a drag held at its edge' },
   { label: 'Right-button drag on empty lane space (or between lanes)', hint: 'Delete every clip the pointer crosses, tab or body (one undo); down on a tab deletes it at once', t: 'FL — right-click deletes a clip; MIR sweeps while the button is held' },
@@ -79,15 +87,21 @@ export const TIMELINE_POINTER = [   // tr: the timeline's pointer gestures: the 
   { label: 'Drag a clip’s edge', hint: 'Trim it: the curve keeps its beats; every selected clip trims with it, each from its own start. The zone is centred on the edge; where two clips meet, the side you are on names the clip, and its edge lights first', t: 'FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves' },
   { label: 'Ctrl/Cmd + drag a clip’s edge', hint: 'Stretch it: the curve keeps its shape; several selected close their gaps, then stretch as one', t: 'MIR — length and speed change together' },
   { label: 'Ctrl/Cmd + Shift + drag a clip’s edge', hint: 'Stretch it finely (⅛, free of Snap)', t: 'MIR — Shift is the fine gear' },
-  { label: 'Edit tool: click empty lane space', hint: 'Place the clip last pressed there (the same curve, shared)', t: 'FL — the pencil places the last clip; MAKE UNIQUE detaches it' },
+  { label: 'Pencil: click empty lane space', hint: 'Place the clip last pressed there (the same curve, shared)', t: 'FL — the pencil places the last clip; MAKE UNIQUE detaches it' },
+  { label: 'Paint: drag over empty lane space', hint: 'Lay the clip last pressed end to end, a copy in every slot the pointer passes (one undo); on a clip it is the pencil', t: 'FL — the Paint tool paints clips while dragging' },
+  { label: 'Paint Add: drag over empty lane space', hint: 'Lay the clip last pressed one snap step long on the grid, its shape squeezed into the step; a press on a clip mutes or unmutes it', t: 'FL — Paint in drum-sequencer mode: one step a click, a click on a note mutes it' },
+  { label: 'Delete: press or drag', hint: 'Delete every clip the pointer crosses (one undo): the right button’s sweep on the left button', t: 'FL — the Delete tool' },
+  { label: 'Mute: press or drag', hint: 'Mute or unmute a clip; a drag gives every clip it crosses the state the first took (one undo). A muted clip is hollow and plays nothing', t: 'FL — the Mute tool' },
+  { label: 'Zoom: drag a range · click', hint: 'Zoom to the range dragged; a click zooms out to the whole arrangement', t: 'FL — the Zoom tool: drag zooms to the selection, a click zooms out' },
+  { label: 'Preview: press · drag', hint: 'Play from the press while it is held; a drag scrubs (the hand leads)', t: 'FL — the Playback tool: a click plays from there, a drag scrubs' },
   { label: 'Shift + drag the ruler', hint: 'Select a time range; + Ctrl/Cmd extends it', t: 'adapted — FL selects by dragging the bar-ruler' },
-  { label: 'Select tool: drag the ruler', hint: 'Select a time range (no key, so touch can); a tap seeks and keeps the range', t: 'FL — dragging the bar-ruler selects time' },
+  { label: 'Select: drag the ruler', hint: 'Select a time range (no key, so touch can); a tap seeks and keeps the range', t: 'FL — dragging the bar-ruler selects time' },
   { label: 'Drag the ruler', hint: 'Scrub: the playhead follows the hand, free of Snap; the range stays', t: 'BASINS — the hand leads' },
   { label: 'Double-click the ruler', hint: 'Clear the time range (two presses within 300 ms at one spot); no single click clears it', t: 'MIR — Josh 2026-11-09; FL clears the selection on a click' },
   { label: 'Ctrl/Cmd + vertical drag on the ruler', hint: 'Zoom time around the pointer’s beat (up = in)', t: 'BASINS — a touch-friendly zoom; a horizontal Ctrl-drag scrubs on Snap' },
   { label: 'Hold a knob', hint: 'Create a timeline clip from it, or locate its clips', t: 'BASINS' },
   { label: 'ACTIVE (toolbar)', hint: 'Mark the ruler’s range, or the whole arrangement, as the active range; again to clear', t: 'BASINS — the range the record window renders' },
-  { label: 'Slice tool: click a clip', hint: 'Cut it at the pointer’s beat (Snap applies, Alt bypasses)', t: 'FL — the Slice tool cuts at the click' },
+  { label: 'Slice: click a clip · drag down the lanes', hint: 'Cut the clip at the pointer’s beat (Snap applies, Alt bypasses); a drag cuts every clip its line crosses there (one undo)', t: 'FL — the Slice tool: click and drag vertically to slice' },
   { label: 'Drag a pattern / audio clip body', hint: 'Move it (Shift or Ctrl copies, right-button deletes); it has no points', t: 'FL — pattern clips move from their body' },
   { label: 'Right-drag empty clip space', hint: 'Add and place a point', t: 'FL — Right-Click + drag adds a point' },
   { label: 'Shift + right-click a clip', hint: 'Add a point that preserves its current value', t: 'FL — Shift+Right-Click is non-destructive add' },
@@ -108,7 +122,7 @@ export const TIMELINE_FIXED = [   // tr: keys the timeline keeps outside the key
 export function shortcutRows(actions, keys = null, platform = 'other') {
   return actions.map((a) => {
     const chords = keys && typeof keys.chords === 'function' ? keys.chords(a.id) : a.keys.map((k) => normalize(k, platform)).filter(Boolean);
-    return { id: a.id, keys: chords.map((c) => displayChord(c, platform)).join(' · '), label: a.label, hint: a.hint, note: a.note };
+    return { id: a.id, keys: chords.map((c) => displayChord(c, platform)).join(' · ') || '—', label: a.label, hint: a.hint, note: a.note };
   });
 }
 

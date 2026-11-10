@@ -90,7 +90,7 @@ body.frost.frost-hold[data-card="refractive"] .mir-rail { --chip-fill: var(--sur
 }
 .mir-win-body {
   flex: 1 1 auto; min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
-  padding: var(--sp-3) var(--sp-4) var(--sp-4); touch-action: pan-y;
+  padding: calc(var(--sp-3) * var(--pad-k, 1)) calc(var(--sp-4) * var(--pad-k, 1)) calc(var(--sp-4) * var(--pad-k, 1)); touch-action: pan-y;   /* 1.5.7-alpha.57: SPACING reaches a floating window (--pad-k, gui.js) */
   scrollbar-width: thin; scrollbar-color: var(--glass-groove-hot) transparent;
 }
 /* the resize corner: two hairlines in the corner; docked at the bottom it moves to the top edge, where the height grows,
@@ -132,7 +132,7 @@ body.frost.frost-hold[data-card="refractive"] .mir-rail { --chip-fill: var(--sur
 body.touch-tablet .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--touch); }
 @media (pointer: coarse) { .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--touch); } }
 /* a title-bar window's body starts under the bar: the bar carries the top inset */
-.mir-win[data-chrome="close"] > .mir-win-body { padding-top: 0; }
+.mir-win:is([data-chrome="close"], [data-chrome="both"]) > .mir-win-body { padding-top: 0; }
 
 /* ── THE RAIL ─────────────────────────────────────────────────────────────────────────────────────────────── */
 .mir-rail {

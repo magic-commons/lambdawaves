@@ -43,7 +43,7 @@ import { registerProjectPart } from '../core/project.js';
 import { handWrite } from '../modulation/registry.js';
 import {
   HAND_IDS, ANGLE_UNIT, createCameraRig, setCameraValue, atNorth, northStep, wrapDegrees, fmtDeg,
-  describe, present, SPHERE, lookDir, project, depthOf, splitDepth, ballPoint, arcballTurn, sphereTurn, transform2d, transform3d, planeDrag, fromView, toView,
+  describe, present, SPHERE, VIEW_FRAME, turnAbout, lookDir, project, depthOf, splitDepth, ballPoint, arcballTurn, sphereTurn, transform2d, transform3d, planeDrag, fromView, toView,
 } from './camera-rig.js';
 
 const DEG = Math.PI / 180;
@@ -118,9 +118,20 @@ function grab(svg, e) {
   const r = svg.getBoundingClientRect(), s = Math.min(r.width / SPHERE.W, r.height / SPHERE.H) || 1;
   const g = { id: e.pointerId, s, ox: r.left + (r.width - SPHERE.W * s) / 2, oy: r.top + (r.height - SPHERE.H * s) / 2 };
   g.p = ballPoint(...fingerAt(g, e));
+  g.x = e.clientX; g.y = e.clientY;
   return g;
 }
 const fingerAt = (g, e) => [(e.clientX - g.ox) / g.s, (e.clientY - g.oy) / g.s];
+
+/* 1.5.7-alpha.54 THE SPHERE IS THE STAGE'S DRAG — the delta mode: the press-drag's raw pointer step (CSS px since the last move, times
+   the gear and the gain) is handed to `fn`, or (fn === true) to the kit's own linear turn `own` */
+export const SPHERE_DELTA = Object.freeze({ gain: 1.5, rad: Math.PI / 450 });   // a little more than the stage's hand; the kit's own turn: 0.4° a px
+function deltaMove(g, e, o, fn, own) {
+  const gear = gearOf(e, g.id), gain = o.gain > 0 ? o.gain : SPHERE_DELTA.gain, dx = (e.clientX - g.x) * gear * gain, dy = (e.clientY - g.y) * gear * gain;
+  g.x = e.clientX; g.y = e.clientY;
+  if (!dx && !dy) return;
+  if (typeof fn === 'function') fn(dx, dy, { gear, gain, event: e }); else own(dx, dy);
+}
 
 export function directionSphere(o = {}) {
   const unit = o.unit || 1, toRad = (v) => v * DEG / unit;
@@ -180,9 +191,11 @@ export function directionSphere(o = {}) {
     try { svg.setPointerCapture(e.pointerId); } catch (_) { /* a pointer already gone */ }
     g = grab(svg, e);
     svg.classList.add('drag');
+    if (o.onStart) o.onStart(e);
   });
   svg.addEventListener('pointermove', (e) => {
     if (!g || e.pointerId !== g.id) return;
+    if (o.delta) { deltaMove(g, e, o, o.delta, (dx, dy) => { if (o.turn) o.turn(-dx * SPHERE_DELTA.rad, -dy * SPHERE_DELTA.rad); }); paint(); return; }   // alpha.54: the stage's drag — linear, no pole law
     const p1 = ballPoint(...fingerAt(g, e));                                       // THE ARCBALL (alpha.46): the ball turns from the last point to this one
     const [dy, dp] = sphereTurn(toRad(shown(ky)), toRad(shown(kp)), g.p, p1, gearOf(e, g.id));   // ⅛ on any modifier or a second finger: the turn is scaled, so nothing jumps
     g.p = p1;
@@ -237,9 +250,14 @@ function planeSphere(o, { root, body, svg, film, look, tip }) {
     try { svg.setPointerCapture(e.pointerId); } catch (_) { /* a pointer already gone */ }
     g = grab(svg, e);
     svg.classList.add('drag');
+    if (o.onStart) o.onStart(e);
   });
   svg.addEventListener('pointermove', (e) => {
     if (!g || e.pointerId !== g.id) return;
+    if (P.delta) {                                                                 // alpha.54: the stage's drag; the kit's own turn is about the drawing's up and right, so it has no pole
+      deltaMove(g, e, o, P.delta, (dx, dy) => { const about = (ax, a, v) => turnAbout(ax, a)(v); put(about(VIEW_FRAME.right, dy * SPHERE_DELTA.rad, about(VIEW_FRAME.up, dx * SPHERE_DELTA.rad, drawn()))); });
+      paint(); return;
+    }
     const p1 = ballPoint(...fingerAt(g, e));                                       // THE ARCBALL (alpha.46): the normal rides the ball's turn, in 3-D
     put(arcballTurn(drawn(), g.p, p1, gearOf(e, g.id)));
     g.p = p1;
@@ -374,7 +392,9 @@ export function createCameraView(parent, o = {}) {
       sphere.yaw.set(yaw); sphere.pitch.set(pitch);                                 // the knobs follow the hand whether or not the app notifies
       write('yaw', yaw); write('pitch', pitch); schedule();
     };
-    sphere = directionSphere({ label: 'DIRECTION', aria: 'Look direction', unit, yaw: knobOpts(dy, 'yaw'), pitch: knobOpts(dp, 'pitch'),
+    /* alpha.54: a port with drag(dx, dy, info) is turned by the raw step (its own stage's hand); `sphereDelta: true` asks the kit's linear turn */
+    const delta = typeof port.drag === 'function' ? (dx, dy, info) => { port.drag(dx, dy, info); sphere.yaw.set(port.get('yaw')); sphere.pitch.set(port.get('pitch')); schedule(); } : !!o.sphereDelta;
+    sphere = directionSphere({ label: 'DIRECTION', aria: 'Look direction', unit, yaw: knobOpts(dy, 'yaw'), pitch: knobOpts(dp, 'pitch'), delta, gain: o.sphereGain, onStart: o.onSphereStart,
       roll: has_('roll') ? () => port.get('roll') / unit : null, turn: turnBy, home: () => { write('yaw', dy.home); write('pitch', dp.home); sphere.yaw.set(dy.home); sphere.pitch.set(dp.home); schedule(); } });
     row('cam-sphere').appendChild(sphere.root);
     for (const [k, id, d] of [[sphere.yaw, 'yaw', dy], [sphere.pitch, 'pitch', dp]]) {

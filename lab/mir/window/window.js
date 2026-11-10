@@ -275,9 +275,13 @@ export function gripGesture(rail, w) {
  *               the window's head buttons in `tools`, a plain × in the corner), the whole bar its grip, Escape closes it
  *               while focus is in it (or on nothing, with it on top).  For a small window with nothing to dock (GUI, ABOUT);
  *               `chips`, `dock`, `railGap` and the seat gestures do not apply.  → the api also carries `head` and `tools`
+ *               'both' (1.5.7-alpha.55 THE CHIPS STAND ON THE LEFT): the title bar (title, `tools`, ×, Escape) AND a chip rail of
+ *               the app's `chips` with the drag chip and no close chip; the bar and the drag chip both move the window, Shift-drag,
+ *               a long press and the arrows on the drag chip relocate the rail; it does not dock
+ *    gripAt     'last' (default) or 'first': where the rail's drag chip stands among the chips
  *    glyph      a glyph name (1.5.6-alpha.3): the window's one drawing — before the title in a title bar, `data-glyph` on the root either way */
 export function createWindow({ id, title = id, host, chips = [], body, panels, size = { w: 520, h: 360 }, min = { w: 240, h: 160 },
-  resizable = false, emptyDrag = false, dock = null, persist = null, material = null, railGap = RAIL.gap, railTier = 1, chrome = 'rail', glyph = '', onMoved, onOpen, onClose } = {}) {
+  resizable = false, emptyDrag = false, dock = null, persist = null, material = null, railGap = RAIL.gap, railTier = 1, chrome = 'rail', gripAt = 'last', glyph = '', onMoved, onOpen, onClose } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView;
   installOnce(doc);
   const mk = (tag, cls, parent) => { const n = doc.createElement(tag); if (cls) n.className = cls; if (parent) parent.appendChild(n); return n; };
@@ -292,8 +296,9 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
   root.hidden = true;
   if (!glyph) glyph = NAMED.get(id) || '';                         // 1.5.6-alpha.3: the app's table by id (windowGlyphs) for a kit factory's window
   if (glyph) root.dataset.glyph = glyph;                             // 1.5.6-alpha.3: drawn in a title bar; a rail window carries the name for a reader
-  const head = chrome === 'close' ? titleBar(doc, root, title, () => api.close(), glyph) : null;
-  if (head) { root.dataset.chrome = 'close'; dock = null; }
+  const railed = chrome === 'both';                                  // 1.5.7-alpha.55: a title bar AND a chip rail of the app's chips
+  const head = chrome === 'close' || railed ? titleBar(doc, root, title, () => api.close(), glyph) : null;
+  if (head) { root.dataset.chrome = chrome; dock = null; }
   const bodyEl = mk('div', 'mir-win-body', root);
   const fill = (target, b) => { const n = typeof b === 'function' ? b(target) : b; if (n && n.nodeType) target.appendChild(n); };
   const panelEls = new Map();
@@ -316,7 +321,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
   const shape = () => ({ x: P.x, y: P.y, w: P.w, h: P.h, open: P.open, dock: P.dock, chipSide: P.chipSide });
   const save = () => { if (persist && persist.write) persist.write(shape()); };
 
-  const rail = head ? head.rail : createRail({ id, title, chips, layer: host,
+  const rail = head && !railed ? head.rail : createRail({ id, title, chips, layer: host, close: !railed, gripAt,
     seats: () => ['left', 'right', 'top', 'bottom'].map((side) => ({ id: side, rect: relocated(side).seat })),
     onChip(name, state, spec) {
       if (spec.kind === 'close') { api.close(); return; }
@@ -334,7 +339,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
   });
   if (rail.el) host.appendChild(rail.el);
   if (mat && rail.el) rail.el.dataset.mirMaterial = String(mat);
-  const pair = { root, rail: rail.el, titled: !!head };              // titled: its pane is its own chrome (the raise above)
+  const pair = { root, rail: rail.el, titled: !!head && !railed };              // titled: its pane is its own chrome (the raise above)
   const shown = (on) => { root.hidden = !on; if (rail.el) rail.el.hidden = !on; };   // a title-bar window has no rail element
   const guide = dock ? createDockGuide({ layer: host, enabled: dock.guide || (() => true), window: id, cls: dock.guideClass || '' }) : null;
 
@@ -378,6 +383,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
       setVar(root, 'width', `${box.width}px`); setVar(root, 'height', `${box.height}px`);
     }
     rail.seat(L.seat, { animate });
+    lastView = viewNow();
     if (onMoved) onMoved({ ...box, right: box.left + box.width, bottom: box.top + box.height });   // a whole rect, as a DOMRect reads (W20 TR: BASINS' shell read `right` and dropped every report)
     return box;
   }
@@ -413,6 +419,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
       button: 0, buttons: e.buttons, clientX: e.clientX, clientY: e.clientY, shiftKey: e.shiftKey, cancelable: true })));
   };
   if (emptyDrag) root.addEventListener('pointerdown', onEmpty);
+  if (railed) head.bar.addEventListener('pointerdown', onEmpty);    // the bar still drags: its press is handed to the rail's grip, as empty glass is
 
   /* ── THE RESIZE CORNER (bottom-right; top-right when docked at the bottom, where the height grows upward) ── */
   let rz = null;
@@ -434,7 +441,17 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
   const raise = () => raisePair(pair);
   root.addEventListener('pointerdown', raise, true);
   if (rail.el) rail.el.addEventListener('pointerdown', raise, true);
-  const resized = () => layout();
+  /* 1.5.7-alpha.59 A WINDOW COMES BACK TO THE EDGE: when UI SCALE or the page changes, a floating window that stood WHOLE on the screen
+     before is brought back whole (to the edge), not left hanging by the drag clamp's 120 px; one the hand parked partly off stays the hand's */
+  const viewNow = () => ({ width: view.innerWidth / zoom(), height: view.innerHeight / zoom() });
+  let lastView = null;
+  const resized = () => {
+    const v = viewNow(), was = lastView; lastView = v;
+    if (P.open && !P.dock && box && was && !(stack && stack()) && box.left >= 0 && box.top >= 0 && box.left + box.width <= was.width + 1 && box.top + box.height <= was.height + 1) {
+      P.x = Math.max(0, Math.min(box.left, v.width - box.width)); P.y = Math.max(0, Math.min(box.top, v.height - box.height));
+    }
+    layout();
+  };
   view.addEventListener('resize', resized, { passive: true });
   /* a title-bar window closes on Escape: when focus is in it, or on nothing while it is the top open window */
   const onEscape = (e) => {

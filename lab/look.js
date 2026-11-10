@@ -36,7 +36,7 @@ const HOME_MAPS = {
     ? null : sp.map(v, s, e)),
   saturation: (sp) => (v, s, e) => (v === 1 ? null : sp.map(v, s, e)),
   dropShadow: (sp) => (sp.attr === 'data-cast' ? (v, s, e) => (lightIsHome(s) ? null : sp.map(v, s, e)) : sp.map),
-  spacing: (sp) => (v, s, e) => (v === 'default' ? null : sp.map(v, s, e)),
+  spacing: (sp) => (v, s, e) => (v === 'default' || v === 6 ? null : sp.map(v, s, e)),  // 041: the kit's SPACING is px (alpha.57); 6 is its home
 };
 /** what the look left the settings blob with; HELP had its own key */
 export const BLOB_LOOK = Object.freeze(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint']);
@@ -65,7 +65,9 @@ export function liftLook(s = {}, help = null) {
 export const LOOK_VERSION = 2;
 export function frostText(b) {
   const F = THEMES.find((x) => x.id === 'frost').values;
-  return b && b.text === 'light' && Object.entries(F).every(([k, v]) => k === 'text' || b[k] === v) ? { ...b, text: F.text } : b;
+  /* 041: the kit's SPACING is px since alpha.57, so the old record's 'default' is FROST's 6 */
+  const same = (k, v) => b[k] === v || (k === 'spacing' && b[k] === 'default' && v === 6);
+  return b && b.text === 'light' && Object.entries(F).every(([k, v]) => k === 'text' || same(k, v)) ? { ...b, text: F.text, spacing: F.spacing } : b;
 }
 
 /** createLook({ settings, defaults, mat, wheelStops, getModView, onTheme }) — the store applied at once (the first

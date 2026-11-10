@@ -30,9 +30,6 @@
   ".MD": ".MD",
   ".mir or picture": ".mir or picture",
   "0% solid · 100% glass. The transition uses color burn in dark mode and color dodge in light mode.": "0% solid · 100% glass. The transition uses color burn in dark mode and color dodge in light mode.",
-  "16 px between rack windows and from the edge": "16 px between rack windows and from the edge",
-  "3 px between rack windows and from the edge": "3 px between rack windows and from the edge",
-  "6 px between rack windows and from the edge": "6 px between rack windows and from the edge",
   "60 Hz": "60 Hz",
   "A": "A",
   "A file the app needs did not load.": "A file the app needs did not load.",
@@ -49,7 +46,6 @@
   "ADD ENV": "ADD ENV",
   "ADD LFO": "ADD LFO",
   "ADD MACRO": "ADD MACRO",
-  "AIRY": "AIRY",
   "ALWAYS": "ALWAYS",
   "AMOUNT": "AMOUNT",
   "AMOUNT — how much of the curves apply: the diagonal at 0, the whole curve at 100 %": "AMOUNT — how much of the curves apply: the diagonal at 0, the whole curve at 100 %",
@@ -140,7 +136,6 @@
   "CENTER PLAYHEAD": "CENTER PLAYHEAD",
   "CHANNEL — which curve the plot edits": "CHANNEL — which curve the plot edits",
   "CLEAR": "CLEAR",
-  "CLIP": "CLIP",
   "CLOSED": "CLOSED",
   "CMP": "CMP",
   "COMPACT": "COMPACT",
@@ -151,6 +146,7 @@
   "CONTRAST": "CONTRAST",
   "CONTRAST — about mid-grey; double-tap for 1": "CONTRAST — about mid-grey; double-tap for 1",
   "CONTROL": "CONTROL",
+  "CONTROL HIGHLIGHT": "CONTROL HIGHLIGHT",
   "CONTROL SURFACE": "CONTROL SURFACE",
   "CONTROLS": "CONTROLS",
   "COPIED": "COPIED",
@@ -233,12 +229,13 @@
   "Current gallery folder": "Current gallery folder",
   "Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it (Shift is fine, Ctrl locks its time); left-drag a tension handle to bend it (Shift is fine); right-click or double-click a tension handle resets it; Alt-click a point deletes it.": "Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it (Shift is fine, Ctrl locks its time); left-drag a tension handle to bend it (Shift is fine); right-click or double-click a tension handle resets it; Alt-click a point deletes it.",
   "Curve point limit reached. Use a wider Snap grid or remove points.": "Curve point limit reached. Use a wider Snap grid or remove points.",
-  "Cut it at the pointer’s beat (Snap applies, Alt bypasses)": "Cut it at the pointer’s beat (Snap applies, Alt bypasses)",
+  "Cut the clip at the pointer’s beat (Snap applies, Alt bypasses); a drag cuts every clip its line crosses there (one undo)": "Cut the clip at the pointer’s beat (Snap applies, Alt bypasses); a drag cuts every clip its line crosses there (one undo)",
   "Cut the selection": "Cut the selection",
   "DEAD SENDS": "DEAD SENDS",
   "DECAY": "DECAY",
   "DEFAULT": "DEFAULT",
   "DELETE": "DELETE",
+  "DELETE MODE": "DELETE MODE",
   "DENIED": "DENIED",
   "DESELECT": "DESELECT",
   "DIRECTION": "DIRECTION",
@@ -263,13 +260,16 @@
   "DROP SHADOW": "DROP SHADOW",
   "DUPLICATE": "DUPLICATE",
   "Dead-send inspector": "Dead-send inspector",
+  "Delete every clip the pointer crosses (one undo): the right button’s sweep on the left button": "Delete every clip the pointer crosses (one undo): the right button’s sweep on the left button",
   "Delete every clip the pointer crosses, tab or body (one undo); down on a tab deletes it at once": "Delete every clip the pointer crosses, tab or body (one undo); down on a tab deletes it at once",
   "Delete it": "Delete it",
   "Delete macro {i}": "Delete macro {i}",
+  "Delete mode: the left button deletes what it crosses": "Delete mode: the left button deletes what it crosses",
   "Delete the selection": "Delete the selection",
   "Delete this snapshot": "Delete this snapshot",
   "Delete trigger {i}": "Delete trigger {i}",
   "Delete {name}": "Delete {name}",
+  "Delete: press or drag": "Delete: press or drag",
   "Deleted — {name}": "Deleted — {name}",
   "Deselect": "Deselect",
   "Devices: Compact. Tap for Minimized": "Devices: Compact. Tap for Minimized",
@@ -312,7 +312,6 @@
    "other": "Duplicated — {name} · made room by deleting {n} projects"
   },
   "EDGE": "EDGE",
-  "EDIT TOOL": "EDIT TOOL",
   "ENGAGE": "ENGAGE",
   "ENV": "ENV",
   "ENV {n}": "ENV {n}",
@@ -333,8 +332,6 @@
   "Each label turns white or black from the picture beneath it": "Each label turns white or black from the picture beneath it",
   "Each label’s ink from the picture under it (this app’s sampler)": "Each label’s ink from the picture under it (this app’s sampler)",
   "Edit or preview the notebook": "Edit or preview the notebook",
-  "Edit tool": "Edit tool",
-  "Edit tool: click empty lane space": "Edit tool: click empty lane space",
   "Enable or bypass modulation": "Enable or bypass modulation",
   "Escape": "Escape",
   "Escape is kept for closing and cancelling.": "Escape is kept for closing and cancelling.",
@@ -357,16 +354,24 @@
   "FL — Ctrl locks horizontal": "FL — Ctrl locks horizontal",
   "FL — Ctrl+Shift+drag adds": "FL — Ctrl+Shift+drag adds",
   "FL — Cut selection": "FL — Cut selection",
+  "FL — Delete tool (D); unbound in MIR": "FL — Delete tool (D); unbound in MIR",
   "FL — Deselect selection": "FL — Deselect selection",
+  "FL — Draw tool (P)": "FL — Draw tool (P)",
   "FL — Horizontal Zoom level 1": "FL — Horizontal Zoom level 1",
   "FL — Horizontal Zoom level 2": "FL — Horizontal Zoom level 2",
   "FL — Horizontal Zoom level 3": "FL — Horizontal Zoom level 3",
   "FL — Horizontal Zoom, show all": "FL — Horizontal Zoom, show all",
   "FL — Invert selection": "FL — Invert selection",
+  "FL — Middle-Mouse-Click + Right-Click opens the context tool-menu; the lone middle click and the chip are MIR’s": "FL — Middle-Mouse-Click + Right-Click opens the context tool-menu; the lone middle click and the chip are MIR’s",
   "FL — Middle-Mouse-Click pans": "FL — Middle-Mouse-Click pans",
   "FL — Move playback marker to start": "FL — Move playback marker to start",
+  "FL — Mute tool (T); unbound in MIR": "FL — Mute tool (T); unbound in MIR",
   "FL — Next bar": "FL — Next bar",
+  "FL — Paint in drum-sequencer mode (N); unbound in MIR": "FL — Paint in drum-sequencer mode (N); unbound in MIR",
+  "FL — Paint in drum-sequencer mode: one step a click, a click on a note mutes it": "FL — Paint in drum-sequencer mode: one step a click, a click on a note mutes it",
+  "FL — Paint tool (B); unbound in MIR": "FL — Paint tool (B); unbound in MIR",
   "FL — Paste selection": "FL — Paste selection",
+  "FL — Playback tool (Y)": "FL — Playback tool (Y)",
   "FL — Previous bar": "FL — Previous bar",
   "FL — Right-Click + drag adds a point": "FL — Right-Click + drag adds a point",
   "FL — Select All": "FL — Select All",
@@ -378,12 +383,18 @@
   "FL — Zoom in": "FL — Zoom in",
   "FL — Zoom out": "FL — Zoom out",
   "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it": "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it",
+  "FL — Zoom tool (Z); unbound in MIR": "FL — Zoom tool (Z); unbound in MIR",
   "FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves": "FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves",
   "FL — drag a node or a tension handle": "FL — drag a node or a tension handle",
   "FL — dragging the bar-ruler selects time": "FL — dragging the bar-ruler selects time",
   "FL — pattern clips move from their body": "FL — pattern clips move from their body",
   "FL — right-click deletes a clip; MIR sweeps while the button is held": "FL — right-click deletes a clip; MIR sweeps while the button is held",
-  "FL — the Slice tool cuts at the click": "FL — the Slice tool cuts at the click",
+  "FL — the Delete tool": "FL — the Delete tool",
+  "FL — the Mute tool": "FL — the Mute tool",
+  "FL — the Paint tool paints clips while dragging": "FL — the Paint tool paints clips while dragging",
+  "FL — the Playback tool: a click plays from there, a drag scrubs": "FL — the Playback tool: a click plays from there, a drag scrubs",
+  "FL — the Slice tool: click and drag vertically to slice": "FL — the Slice tool: click and drag vertically to slice",
+  "FL — the Zoom tool: drag zooms to the selection, a click zooms out": "FL — the Zoom tool: drag zooms to the selection, a click zooms out",
   "FL — the pencil places the last clip; MAKE UNIQUE detaches it": "FL — the pencil places the last clip; MAKE UNIQUE detaches it",
   "FL — the playlist scrolls under a drag held at its edge": "FL — the playlist scrolls under a drag held at its edge",
   "FL — the wheel scrolls the playlist, Ctrl + wheel zooms": "FL — the wheel scrolls the playlist, Ctrl + wheel zooms",
@@ -439,13 +450,16 @@
   "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license}": "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license}",
   "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license} and {notice}": "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license} and {notice}",
   "GRAIN": "GRAIN",
+  "GRIP": "GRIP",
   "Gallery — browse saved projects": "Gallery — browse saved projects",
   "H": "H",
   "HAND": "HAND",
   "HELP": "HELP",
+  "HIDDEN": "HIDDEN",
   "HIDE / SHOW the rack": "HIDE / SHOW the rack",
   "HIDE the interface": "HIDE the interface",
   "HIGH": "HIGH",
+  "HIGHLIGHT": "HIGHLIGHT",
   "HINTS": "HINTS",
   "HISTORY": "HISTORY",
   "HIT": "HIT",
@@ -469,6 +483,7 @@
   "Hold to multiply the tempo, release to return · tap to latch, tap again to release": "Hold to multiply the tempo, release to return · tap to latch, tap again to release",
   "Hover hints on controls": "Hover hints on controls",
   "How far the shadow falls from its pane (and the shine across from it)": "How far the shadow falls from its pane (and the shine across from it)",
+  "ICON": "ICON",
   "IDLE": "IDLE",
   "IMPORT .MD": "IMPORT .MD",
   "IMPORTED": "IMPORTED",
@@ -516,6 +531,8 @@
   "LOW": "LOW",
   "LOWER": "LOWER",
   "LW Title": "LW Title",
+  "Lay the clip last pressed end to end, a copy in every slot the pointer passes (one undo); on a clip it is the pencil": "Lay the clip last pressed end to end, a copy in every slot the pointer passes (one undo); on a clip it is the pencil",
+  "Lay the clip last pressed one snap step long on the grid, its shape squeezed into the step; a press on a clip mutes or unmutes it": "Lay the clip last pressed one snap step long on the grid, its shape squeezed into the step; a press on a clip mutes or unmutes it",
   "Left empty, {:SAVE} names it after its folder": "Left empty, {:SAVE} names it after its folder",
   "Left-drag a point or tension handle": "Left-drag a point or tension handle",
   "Limit modulation updates per second": "Limit modulation updates per second",
@@ -533,6 +550,7 @@
   "MAKING…": "MAKING…",
   "MATERIAL": "MATERIAL",
   "MAX": "MAX",
+  "MENU": "MENU",
   "MENU BAR": "MENU BAR",
   "MENUS": "MENUS",
   "MID": "MID",
@@ -549,6 +567,7 @@
   "MOD": "MOD",
   "MOD off": "MOD off",
   "MOD on": "MOD on",
+  "MODE": "MODE",
   "MODULATION": "MODULATION",
   "MORE KEYS": "MORE KEYS",
   "MOTION": "MOTION",
@@ -559,6 +578,7 @@
   "MP4 unavailable at this size/FPS. Choose PNG frames or a smaller size.": "MP4 unavailable at this size/FPS. Choose PNG frames or a smaller size.",
   "MULTI-SAW": "MULTI-SAW",
   "MULTI-TRI": "MULTI-TRI",
+  "MUTE MODE": "MUTE MODE",
   "MY PRESETS": "MY PRESETS",
   "Mac and iPad": "Mac and iPad",
   "Macro": "Macro",
@@ -570,6 +590,7 @@
   "Master depth for this macro. Double-tap for 100%.": "Master depth for this macro. Double-tap for 100%.",
   "Master depth for {macro}": "Master depth for {macro}",
   "Middle button, hold + drag": "Middle button, hold + drag",
+  "Middle click on the lanes · middle + right together · the bar’s MODE chip": "Middle click on the lanes · middle + right together · the bar’s MODE chip",
   "Modulation ON replays the rack from its first Space edge. Timeline ON replays clips from beat zero. Both skip to “start at”. With both OFF, the current look is frozen. Escape cancels.": "Modulation ON replays the rack from its first Space edge. Timeline ON replays clips from beat zero. Both skip to “start at”. With both OFF, the current look is frozen. Escape cancels.",
   "Modulation cadence": "Modulation cadence",
   "Modulation on or off": "Modulation on or off",
@@ -592,6 +613,9 @@
   "Move {name} to a folder": "Move {name} to a folder",
   "Move {name} to folder": "Move {name} to folder",
   "Moved {name} to {to}": "Moved {name} to {to}",
+  "Mute mode: a press mutes or unmutes a clip": "Mute mode: a press mutes or unmutes a clip",
+  "Mute or unmute a clip; a drag gives every clip it crosses the state the first took (one undo). A muted clip is hollow and plays nothing": "Mute or unmute a clip; a drag gives every clip it crosses the state the first took (one undo). A muted clip is hollow and plays nothing",
+  "Mute: press or drag": "Mute: press or drag",
   "NAME": "NAME",
   "NEW": "NEW",
   "NEXT BAR": "NEXT BAR",
@@ -616,6 +640,7 @@
   "No copies made: select clips with room in the arrangement.": "No copies made: select clips with room in the arrangement.",
   "No copies made: source budget reached.": "No copies made: source budget reached.",
   "No envelopes on the rack — add one with +": "No envelopes on the rack — add one with +",
+  "No grip on window heads; they still drag": "No grip on window heads; they still drag",
   "No macros yet — add one in the modulation window.": "No macros yet — add one in the modulation window.",
   "No name pill while a rack scrolls": "No name pill while a rack scrolls",
   "No room for another curve: remove a curve first.": "No room for another curve: remove a curve first.",
@@ -650,6 +675,7 @@
   "OUTPUT": "OUTPUT",
   "On · {lane}": "On · {lane}",
   "One camera orbit per bar, with a vertical sweep.": "One camera orbit per bar, with a vertical sweep.",
+  "Open THE MODE MENU: the nine modes (the left button’s tool) and this window’s menus": "Open THE MODE MENU: the nine modes (the left button’s tool) and this window’s menus",
   "Open a project file (.mir) or a picture that carries one — or drop it on this window.": "Open a project file (.mir) or a picture that carries one — or drop it on this window.",
   "Open a project saved as one .zip (SAVE AS ZIP): its audio comes back with it and it becomes the current project.": "Open a project saved as one .zip (SAVE AS ZIP): its audio comes back with it and it becomes the current project.",
   "Open folder {name}": "Open folder {name}",
@@ -670,6 +696,8 @@
   "Output minimum": "Output minimum",
   "PAD": "PAD",
   "PAGE {page} / {of}": "PAGE {page} / {of}",
+  "PAINT ADD MODE": "PAINT ADD MODE",
+  "PAINT MODE": "PAINT MODE",
   "PAIR": "PAIR",
   "PAN": "PAN",
   "PAN HOME": "PAN HOME",
@@ -684,6 +712,7 @@
   "PASTE": "PASTE",
   "PATT": "PATT",
   "PATTERN": "PATTERN",
+  "PENCIL MODE": "PENCIL MODE",
   "PHASE": "PHASE",
   "PHOTOSENSITIVITY WARNING": "PHOTOSENSITIVITY WARNING",
   "PITCH": "PITCH",
@@ -697,26 +726,36 @@
   "PRESETS": "PRESETS",
   "PREVIEW": "PREVIEW",
   "PREVIEW FIRST 3 SECONDS": "PREVIEW FIRST 3 SECONDS",
+  "PREVIEW MODE": "PREVIEW MODE",
   "PREVIOUS BAR": "PREVIOUS BAR",
   "PROJECT": "PROJECT",
   "PROJECT COMPONENTS": "PROJECT COMPONENTS",
   "PROJECTS": "PROJECTS",
+  "Paint Add mode: lay the last clip a snap step long, step by step": "Paint Add mode: lay the last clip a snap step long, step by step",
+  "Paint Add: drag over empty lane space": "Paint Add: drag over empty lane space",
+  "Paint mode: drag to lay the last clip end to end": "Paint mode: drag to lay the last clip end to end",
+  "Paint: drag over empty lane space": "Paint: drag over empty lane space",
   "Pan time and tracks": "Pan time and tracks",
   "Pane shadows ({:SHADOW} sets their strength)": "Pane shadows ({:SHADOW} sets their strength)",
   "Paste a compatible device patch": "Paste a compatible device patch",
   "Paste at the playhead, into the active lane": "Paste at the playhead, into the active lane",
   "Pattern: drive this envelope from its step row in the PATTERN window": "Pattern: drive this envelope from its step row in the PATTERN window",
+  "Pencil mode": "Pencil mode",
+  "Pencil: click empty lane space": "Pencil: click empty lane space",
   "Picture made — {w}×{h}. Tap DOWNLOAD IMAGE to keep it.": "Picture made — {w}×{h}. Tap DOWNLOAD IMAGE to keep it.",
   "Picture made — {w}×{h}. Tap the download icon to keep it.": "Picture made — {w}×{h}. Tap the download icon to keep it.",
   "Place the clip last pressed there (the same curve, shared)": "Place the clip last pressed there (the same curve, shared)",
   "Play / pause, exact resume": "Play / pause, exact resume",
+  "Play from the press while it is held; a drag scrubs (the hand leads)": "Play from the press while it is held; a drag scrubs (the hand leads)",
   "Play or pause": "Play or pause",
   "Point time and value": "Point time and value",
   "Point time in beats": "Point time in beats",
   "Point value": "Point value",
   "Preset name — type one, then tap {:SAVE}": "Preset name — type one, then tap {:SAVE}",
+  "Preview mode: a press plays from there while held, a drag scrubs": "Preview mode: a press plays from there while held, a drag scrubs",
   "Preview ready": "Preview ready",
   "Preview the first 3 seconds": "Preview the first 3 seconds",
+  "Preview: press · drag": "Preview: press · drag",
   "Previous page": "Previous page",
   "Previous preset": "Previous preset",
   "Previous project page": "Previous project page",
@@ -776,7 +815,6 @@
   "RUN": "RUN",
   "RUN SELF-TEST": "RUN SELF-TEST",
   "Rack presets, in folders: {factory} ships with the app, the rest are yours": "Rack presets, in folders: {factory} ships with the app, the rest are yours",
-  "Rack windows flush to each other and to the screen’s edge": "Rack windows flush to each other and to the screen’s edge",
   "Raise {name}": "Raise {name}",
   "Raised controls and wells, lit by {:LIGHT ANGLE}": "Raised controls and wells, lit by {:LIGHT ANGLE}",
   "Ramp preset": "Ramp preset",
@@ -846,10 +884,9 @@
   "SCOPE · {value}": "SCOPE · {value}",
   "SCROLL PILL": "SCROLL PILL",
   "SCRUB": "SCRUB",
-  "SCRUB TOOL": "SCRUB TOOL",
   "SCRUB is how the picture follows a ruler drag. AUTOMATION is how playback reads the Timeline into the engine; never during a recorded render.": "SCRUB is how the picture follows a ruler drag. AUTOMATION is how playback reads the Timeline into the engine; never during a recorded render.",
   "SELECT ALL": "SELECT ALL",
-  "SELECT TOOL": "SELECT TOOL",
+  "SELECT MODE": "SELECT MODE",
   "SENSE": "SENSE",
   "SET": "SET",
   "SHADOW": "SHADOW",
@@ -866,7 +903,7 @@
   "SINE": "SINE",
   "SKIN": "SKIN",
   "SLICE AT PLAYHEAD": "SLICE AT PLAYHEAD",
-  "SLICE TOOL": "SLICE TOOL",
+  "SLICE MODE": "SLICE MODE",
   "SLICE: click a clip to cut it; Insert cuts the selection at the playhead": "SLICE: click a clip to cut it; Insert cuts the selection at the playhead",
   "SMOOTH": "SMOOTH",
   "SNAP": "SNAP",
@@ -920,7 +957,6 @@
   "Scroll time (Shift + wheel too; with more lanes than fit, the wheel scrolls the lanes); Ctrl/Cmd + wheel zooms": "Scroll time (Shift + wheel too; with more lanes than fit, the wheel scrolls the lanes); Ctrl/Cmd + wheel zooms",
   "Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)": "Scroll time while you hold it there (the playhead, a range, a move, a trim, a stretch)",
   "Scrub the timeline playhead": "Scrub the timeline playhead",
-  "Scrub tool": "Scrub tool",
   "Scrub: the playhead follows the hand, free of Snap; the range stays": "Scrub: the playhead follows the hand, free of Snap; the range stays",
   "Seek about once every three moves. The hand always stays smooth.": "Seek about once every three moves. The hand always stays smooth.",
   "Seek the picture on every scrub move. Smoothest when a frame is fast; can lag at a deep place.": "Seek the picture on every scrub move. Smoothest when a frame is fast; can lag at a deep place.",
@@ -933,13 +969,13 @@
   "Select a time range; + Ctrl/Cmd extends it": "Select a time range; + Ctrl/Cmd extends it",
   "Select all clips": "Select all clips",
   "Select clips to slice them at the playhead.": "Select clips to slice them at the playhead.",
+  "Select mode": "Select mode",
   "Select the LFO waveform": "Select the LFO waveform",
   "Select the envelope trigger; Shift-click selects the {:AUDIO} {:HIT} output": "Select the envelope trigger; Shift-click selects the {:AUDIO} {:HIT} output",
   "Select the macro driven by this device": "Select the macro driven by this device",
-  "Select tool": "Select tool",
-  "Select tool: drag the ruler": "Select tool: drag the ruler",
   "Select {band} for {:ATTACK}, {:RELEASE} and {:peak hold::HOLD}": "Select {band} for {:ATTACK}, {:RELEASE} and {:peak hold::HOLD}",
   "Select {name} — tap again to open": "Select {name} — tap again to open",
+  "Select: drag the ruler": "Select: drag the ruler",
   "Selected audio band attack time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": "Selected audio band attack time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter",
   "Selected audio band peak hold; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": "Selected audio band peak hold; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter",
   "Selected audio band release time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": "Selected audio band release time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter",
@@ -972,9 +1008,9 @@
   "Show the main transport bar, floating or docked": "Show the main transport bar, floating or docked",
   "Show the menu bar when the pointer is over the logo": "Show the menu bar when the pointer is over the logo",
   "Slice every selected clip at the playhead (one undo)": "Slice every selected clip at the playhead (one undo)",
+  "Slice mode": "Slice mode",
   "Slice sphere and plane. Drag or use arrow keys to rotate; Home resets.": "Slice sphere and plane. Drag or use arrow keys to rotate; Home resets.",
-  "Slice tool": "Slice tool",
-  "Slice tool: click a clip": "Slice tool: click a clip",
+  "Slice: click a clip · drag down the lanes": "Slice: click a clip · drag down the lanes",
   "Slide the time range back by its own width": "Slide the time range back by its own width",
   "Slide the time range forward by its own width": "Slide the time range forward by its own width",
   "Smooth the LFO output": "Smooth the LFO output",
@@ -1012,7 +1048,6 @@
   "THEME": "THEME",
   "THIS VIEW": "THIS VIEW",
   "TIER": "TIER",
-  "TIGHT": "TIGHT",
   "TIME": "TIME",
   "TIME · BEATS FROM 0": "TIME · BEATS FROM 0",
   "TIMELINE": "TIMELINE",
@@ -1045,11 +1080,12 @@
   "That is not a project zip: {why}": "That is not a project zip: {why}",
   "The 1-px rings around knobs, buttons, switches and fields": "The 1-px rings around knobs, buttons, switches and fields",
   "The MIR logo is outlined from Butler Free Extra Bold by {who}.": "The MIR logo is outlined from Butler Free Extra Bold by {who}.",
+  "The air between rack windows and from the screen’s edge, and the padding inside windows, bars and menus; 0 is flush": "The air between rack windows and from the screen’s edge, and the padding inside windows, bars and menus; 0 is flush",
   "The bank holds {n}: STORE over one, or × one.": "The bank holds {n}: STORE over one, or × one.",
   "The browser has WebGPU but found no graphics adapter to use.": "The browser has WebGPU but found no graphics adapter to use.",
   "The browser keeps this key for itself: the page never sees it.": "The browser keeps this key for itself: the page never sees it.",
   "The controls take the panes’ light: one {:ANGLE} for everything": "The controls take the panes’ light: one {:ANGLE} for everything",
-  "The dot grip on window heads; off, they still drag": "The dot grip on window heads; off, they still drag",
+  "The dot grip on window heads": "The dot grip on window heads",
   "The dotted guide where a dragged window will land": "The dotted guide where a dragged window will land",
   "The envelope drives the target and the file plays with the transport": "The envelope drives the target and the file plays with the transport",
   "The envelope drives the target; the file stays silent": "The envelope drives the target; the file stays silent",
@@ -1073,6 +1109,8 @@
   "The view moved since the picture was made — tap CAPTURE IMAGE again.": "The view moved since the picture was made — tap CAPTURE IMAGE again.",
   "The wheel zooms a notch at a time": "The wheel zooms a notch at a time",
   "The wheel zooms continuously": "The wheel zooms continuously",
+  "The white light on the lit side of knobs, buttons and wells": "The white light on the lit side of knobs, buttons and wells",
+  "The window’s own icon where the grip was; it drags the same": "The window’s own icon where the grip was; it drags the same",
   "The {noun} list is full — {count} of {cap}": "The {noun} list is full — {count} of {cap}",
   "The {panel} panel could not be built: {why}": "The {panel} panel could not be built: {why}",
   "The ⓘ panels on windows": "The ⓘ panels on windows",
@@ -1084,6 +1122,7 @@
   "This pair is not here yet: its window has not been built.": "This pair is not here yet: its window has not been built.",
   "This time is before the source begins.": "This time is before the source begins.",
   "This time range is occupied in every lane. Add a lane or choose another range.": "This time range is occupied in every lane. Add a lane or choose another range.",
+  "Timeline modes": "Timeline modes",
   "Timeline shortcuts": "Timeline shortcuts",
   "Timeline snap": "Timeline snap",
   "Timeline tools": "Timeline tools",
@@ -1156,11 +1195,13 @@
   "ZOOM 3": "ZOOM 3",
   "ZOOM ALL": "ZOOM ALL",
   "ZOOM IN": "ZOOM IN",
+  "ZOOM MODE": "ZOOM MODE",
   "ZOOM OUT": "ZOOM OUT",
   "ZOOM TO SELECTION": "ZOOM TO SELECTION",
   "ZOOM — how near the view is; double-tap for home": "ZOOM — how near the view is; double-tap for home",
   "Zoom in": "Zoom in",
   "Zoom into the envelope graph": "Zoom into the envelope graph",
+  "Zoom mode: drag a range to zoom to it, click to zoom out": "Zoom mode: drag a range to zoom to it, click to zoom out",
   "Zoom out": "Zoom out",
   "Zoom out of the envelope graph": "Zoom out of the envelope graph",
   "Zoom time around the pointer’s beat (up = in)": "Zoom time around the pointer’s beat (up = in)",
@@ -1168,7 +1209,9 @@
   "Zoom to 20px per beat": "Zoom to 20px per beat",
   "Zoom to 40px per beat": "Zoom to 40px per beat",
   "Zoom to show the whole arrangement": "Zoom to show the whole arrangement",
+  "Zoom to the range dragged; a click zooms out to the whole arrangement": "Zoom to the range dragged; a click zooms out to the whole arrangement",
   "Zoom to the selection": "Zoom to the selection",
+  "Zoom: drag a range · click": "Zoom: drag a range · click",
   "a curve keeps at least two points": "a curve keeps at least two points",
   "a draft translation: no native reader has checked it yet": "a draft translation: no native reader has checked it yet",
   "a new project": "a new project",
@@ -1179,9 +1222,7 @@
   "adapted — FL selects by dragging the bar-ruler": "adapted — FL selects by dragging the bar-ruler",
   "adapted — FL’s Ctrl+click toggles": "adapted — FL’s Ctrl+click toggles",
   "adapted — FL’s Ctrl+drag; in MIR Shift selects": "adapted — FL’s Ctrl+drag; in MIR Shift selects",
-  "adapted — FL’s P is the Draw tool; BASINS has one modeless curve editor": "adapted — FL’s P is the Draw tool; BASINS has one modeless curve editor",
   "adapted — FL’s Shift-drag clones; MIR’s Ctrl alias stays": "adapted — FL’s Shift-drag clones; MIR’s Ctrl alias stays",
-  "adapted — FL’s Y is the Playback/Preview tool": "adapted — FL’s Y is the Playback/Preview tool",
   "adapted — FL’s manual names Right-Alt+click specifically": "adapted — FL’s manual names Right-Alt+click specifically",
   "add a page": "add a page",
   "add a page to the project": "add a page to the project",
@@ -1540,7 +1581,6 @@
   "{kind} — {message}": "{kind} — {message}",
   "{knob} of {band}": "{knob} of {band}",
   "{k} kHz · {hz} Hz feed": "{k} kHz · {hz} Hz feed",
-  "{lane} is empty — right-click a knob › {:CLIP} to make a clip": "{lane} is empty — right-click a knob › {:CLIP} to make a clip",
   "{macro} already reaches {target}": "{macro} already reaches {target}",
   "{macro} value": "{macro} value",
   "{macro} → {target}  ·  {lo} … {hi}": "{macro} → {target}  ·  {lo} … {hi}",
@@ -1846,15 +1886,6 @@
   "0% solid · 100% glass. The transition uses color burn in dark mode and color dodge in light mode.": [
    "mir/shell/gui.js"
   ],
-  "16 px between rack windows and from the edge": [
-   "mir/shell/gui.js"
-  ],
-  "3 px between rack windows and from the edge": [
-   "mir/shell/gui.js"
-  ],
-  "6 px between rack windows and from the edge": [
-   "mir/shell/gui.js"
-  ],
   "60 Hz": [
    "mir/shell/transport.js"
   ],
@@ -1902,9 +1933,6 @@
   ],
   "ADD MACRO": [
    "mir/modulation/modwindow/modwindow.js"
-  ],
-  "AIRY": [
-   "mir/shell/gui.js"
   ],
   "ALWAYS": [
    "mir/shell/gui.js"
@@ -2185,9 +2213,6 @@
   "CLEAR": [
    "mir/history/window.js"
   ],
-  "CLIP": [
-   "mir/timeline/view.js"
-  ],
   "CLOSED": [
    "mir/modulation/window.js"
   ],
@@ -2219,6 +2244,9 @@
   ],
   "CONTROL": [
    "mir/panels/camera-rig.js"
+  ],
+  "CONTROL HIGHLIGHT": [
+   "mir/shell/gui.js"
   ],
   "CONTROL SURFACE": [
    "mir/shell/transport.js"
@@ -2478,7 +2506,7 @@
   "Curve point limit reached. Use a wider Snap grid or remove points.": [
    "mir/timeline/editor.js"
   ],
-  "Cut it at the pointer’s beat (Snap applies, Alt bypasses)": [
+  "Cut the clip at the pointer’s beat (Snap applies, Alt bypasses); a drag cuts every clip its line crosses there (one undo)": [
    "mir/timeline/shortcuts.js"
   ],
   "Cut the selection": [
@@ -2494,6 +2522,9 @@
    "mir/shell/gui.js"
   ],
   "DELETE": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "DELETE MODE": [
    "mir/timeline/shortcuts.js"
   ],
   "DENIED": [
@@ -2569,6 +2600,9 @@
   "Dead-send inspector": [
    "mir/modulation/modwindow/modwindow.js"
   ],
+  "Delete every clip the pointer crosses (one undo): the right button’s sweep on the left button": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Delete every clip the pointer crosses, tab or body (one undo); down on a tab deletes it at once": [
    "mir/timeline/shortcuts.js"
   ],
@@ -2577,6 +2611,9 @@
   ],
   "Delete macro {i}": [
    "mir/modulation/modwindow/modwindow.js"
+  ],
+  "Delete mode: the left button deletes what it crosses": [
+   "mir/timeline/shortcuts.js"
   ],
   "Delete the selection": [
    "mir/timeline/shortcuts.js"
@@ -2589,6 +2626,9 @@
   ],
   "Delete {name}": [
    "mir/folders/gallery.js"
+  ],
+  "Delete: press or drag": [
+   "mir/timeline/shortcuts.js"
   ],
   "Deleted — {name}": [
    "mir/folders/gallery.js"
@@ -2710,9 +2750,6 @@
   "EDGE": [
    "mir/shell/gui.js"
   ],
-  "EDIT TOOL": [
-   "mir/timeline/shortcuts.js"
-  ],
   "ENGAGE": [
    "mir/panels/xy.js"
   ],
@@ -2774,12 +2811,6 @@
   ],
   "Edit or preview the notebook": [
    "mir/shell/notebook.js"
-  ],
-  "Edit tool": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "Edit tool: click empty lane space": [
-   "mir/timeline/shortcuts.js"
   ],
   "Enable or bypass modulation": [
    "mir/modulation/window.js",
@@ -2852,7 +2883,13 @@
   "FL — Cut selection": [
    "mir/timeline/shortcuts.js"
   ],
+  "FL — Delete tool (D); unbound in MIR": [
+   "mir/timeline/shortcuts.js"
+  ],
   "FL — Deselect selection": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — Draw tool (P)": [
    "mir/timeline/shortcuts.js"
   ],
   "FL — Horizontal Zoom level 1": [
@@ -2870,16 +2907,34 @@
   "FL — Invert selection": [
    "mir/timeline/shortcuts.js"
   ],
+  "FL — Middle-Mouse-Click + Right-Click opens the context tool-menu; the lone middle click and the chip are MIR’s": [
+   "mir/timeline/shortcuts.js"
+  ],
   "FL — Middle-Mouse-Click pans": [
    "mir/timeline/shortcuts.js"
   ],
   "FL — Move playback marker to start": [
    "mir/timeline/shortcuts.js"
   ],
+  "FL — Mute tool (T); unbound in MIR": [
+   "mir/timeline/shortcuts.js"
+  ],
   "FL — Next bar": [
    "mir/timeline/shortcuts.js"
   ],
+  "FL — Paint in drum-sequencer mode (N); unbound in MIR": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — Paint in drum-sequencer mode: one step a click, a click on a note mutes it": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — Paint tool (B); unbound in MIR": [
+   "mir/timeline/shortcuts.js"
+  ],
   "FL — Paste selection": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — Playback tool (Y)": [
    "mir/timeline/shortcuts.js"
   ],
   "FL — Previous bar": [
@@ -2915,6 +2970,9 @@
   "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it": [
    "mir/timeline/shortcuts.js"
   ],
+  "FL — Zoom tool (Z); unbound in MIR": [
+   "mir/timeline/shortcuts.js"
+  ],
   "FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves": [
    "mir/timeline/shortcuts.js"
   ],
@@ -2930,7 +2988,22 @@
   "FL — right-click deletes a clip; MIR sweeps while the button is held": [
    "mir/timeline/shortcuts.js"
   ],
-  "FL — the Slice tool cuts at the click": [
+  "FL — the Delete tool": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — the Mute tool": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — the Paint tool paints clips while dragging": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — the Playback tool: a click plays from there, a drag scrubs": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — the Slice tool: click and drag vertically to slice": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "FL — the Zoom tool: drag zooms to the selection, a click zooms out": [
    "mir/timeline/shortcuts.js"
   ],
   "FL — the pencil places the last clip; MAKE UNIQUE detaches it": [
@@ -3086,6 +3159,9 @@
   "GRAIN": [
    "mir/modulation/host.js"
   ],
+  "GRIP": [
+   "mir/shell/gui.js"
+  ],
   "Gallery — browse saved projects": [
    "mir/folders/folders.js"
   ],
@@ -3099,6 +3175,9 @@
   "HELP": [
    "mir/shell/gui.js"
   ],
+  "HIDDEN": [
+   "mir/shell/gui.js"
+  ],
   "HIDE / SHOW the rack": [
    "mir/app.js"
   ],
@@ -3108,6 +3187,9 @@
   "HIGH": [
    "mir/modulation/modwindow/modwindow.js",
    "mir/modulation/window.js"
+  ],
+  "HIGHLIGHT": [
+   "mir/shell/gui.js"
   ],
   "HINTS": [
    "mir/shell/gui.js"
@@ -3183,6 +3265,9 @@
    "mir/shell/gui.js"
   ],
   "How far the shadow falls from its pane (and the shine across from it)": [
+   "mir/shell/gui.js"
+  ],
+  "ICON": [
    "mir/shell/gui.js"
   ],
   "IDLE": [
@@ -3327,6 +3412,12 @@
   "LW Title": [
    "mir/shell/gui.js"
   ],
+  "Lay the clip last pressed end to end, a copy in every slot the pointer passes (one undo); on a clip it is the pencil": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Lay the clip last pressed one snap step long on the grid, its shape squeezed into the step; a press on a clip mutes or unmutes it": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Left empty, {:SAVE} names it after its folder": [
    "mir/folders/gallery.js"
   ],
@@ -3377,6 +3468,9 @@
   ],
   "MAX": [
    "mir/modulation/modwindow/modwindow.js"
+  ],
+  "MENU": [
+   "mir/timeline/editor.js"
   ],
   "MENU BAR": [
    "mir/shell/gui.js"
@@ -3429,6 +3523,9 @@
   "MOD on": [
    "mir/modulation/window.js"
   ],
+  "MODE": [
+   "mir/timeline/editor.js"
+  ],
   "MODULATION": [
    "mir/app.js",
    "mir/modulation/window.js"
@@ -3462,6 +3559,9 @@
    "mir/modulation/modwindow/modwindow.js",
    "mir/modulation/window.js"
   ],
+  "MUTE MODE": [
+   "mir/timeline/shortcuts.js"
+  ],
   "MY PRESETS": [
    "mir/modulation/window.js"
   ],
@@ -3493,6 +3593,9 @@
    "mir/modulation/window.js"
   ],
   "Middle button, hold + drag": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Middle click on the lanes · middle + right together · the bar’s MODE chip": [
    "mir/timeline/shortcuts.js"
   ],
   "Modulation ON replays the rack from its first Space edge. Timeline ON replays clips from beat zero. Both skip to “start at”. With both OFF, the current look is frozen. Escape cancels.": [
@@ -3561,6 +3664,15 @@
   ],
   "Moved {name} to {to}": [
    "mir/folders/gallery.js"
+  ],
+  "Mute mode: a press mutes or unmutes a clip": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Mute or unmute a clip; a drag gives every clip it crosses the state the first took (one undo). A muted clip is hollow and plays nothing": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Mute: press or drag": [
+   "mir/timeline/shortcuts.js"
   ],
   "NAME": [
    "mir/folders/gallery.js"
@@ -3636,6 +3748,9 @@
   ],
   "No envelopes on the rack — add one with +": [
    "mir/pattern/window.js"
+  ],
+  "No grip on window heads; they still drag": [
+   "mir/shell/gui.js"
   ],
   "No macros yet — add one in the modulation window.": [
    "mir/shell/transport.js"
@@ -3743,6 +3858,9 @@
   "One camera orbit per bar, with a vertical sweep.": [
    "mir/modulation/host.js"
   ],
+  "Open THE MODE MENU: the nine modes (the left button’s tool) and this window’s menus": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Open a project file (.mir) or a picture that carries one — or drop it on this window.": [
    "mir/folders/folders.js"
   ],
@@ -3803,6 +3921,12 @@
   "PAGE {page} / {of}": [
    "mir/folders/gallery.js"
   ],
+  "PAINT ADD MODE": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "PAINT MODE": [
+   "mir/timeline/shortcuts.js"
+  ],
   "PAIR": [
    "mir/panels/xy.js"
   ],
@@ -3848,6 +3972,9 @@
    "mir/app.js",
    "mir/pattern/window.js"
   ],
+  "PENCIL MODE": [
+   "mir/timeline/shortcuts.js"
+  ],
   "PHASE": [
    "mir/modulation/modwindow/modwindow.js"
   ],
@@ -3890,6 +4017,9 @@
   "PREVIEW FIRST 3 SECONDS": [
    "mir/render/panel.js"
   ],
+  "PREVIEW MODE": [
+   "mir/timeline/shortcuts.js"
+  ],
   "PREVIOUS BAR": [
    "mir/timeline/shortcuts.js"
   ],
@@ -3901,6 +4031,18 @@
   ],
   "PROJECTS": [
    "mir/folders/gallery.js"
+  ],
+  "Paint Add mode: lay the last clip a snap step long, step by step": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Paint Add: drag over empty lane space": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Paint mode: drag to lay the last clip end to end": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Paint: drag over empty lane space": [
+   "mir/timeline/shortcuts.js"
   ],
   "Pan time and tracks": [
    "mir/timeline/shortcuts.js"
@@ -3917,6 +4059,12 @@
   "Pattern: drive this envelope from its step row in the PATTERN window": [
    "mir/modulation/window.js"
   ],
+  "Pencil mode": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Pencil: click empty lane space": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Picture made — {w}×{h}. Tap DOWNLOAD IMAGE to keep it.": [
    "mir/render/panel.js"
   ],
@@ -3927,6 +4075,9 @@
    "mir/timeline/shortcuts.js"
   ],
   "Play / pause, exact resume": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Play from the press while it is held; a drag scrubs (the hand leads)": [
    "mir/timeline/shortcuts.js"
   ],
   "Play or pause": [
@@ -3944,11 +4095,17 @@
   "Preset name — type one, then tap {:SAVE}": [
    "mir/modulation/modwindow/modwindow.js"
   ],
+  "Preview mode: a press plays from there while held, a drag scrubs": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Preview ready": [
    "mir/render/panel.js"
   ],
   "Preview the first 3 seconds": [
    "mir/render/panel.js"
+  ],
+  "Preview: press · drag": [
+   "mir/timeline/shortcuts.js"
   ],
   "Previous page": [
    "mir/kit.js"
@@ -4133,9 +4290,6 @@
   ],
   "Rack presets, in folders: {factory} ships with the app, the rest are yours": [
    "mir/modulation/modwindow/modwindow.js"
-  ],
-  "Rack windows flush to each other and to the screen’s edge": [
-   "mir/shell/gui.js"
   ],
   "Raise {name}": [
    "mir/modulation/modwindow/modwindow.js"
@@ -4344,16 +4498,13 @@
   "SCRUB": [
    "mir/shell/gui.js"
   ],
-  "SCRUB TOOL": [
-   "mir/timeline/shortcuts.js"
-  ],
   "SCRUB is how the picture follows a ruler drag. AUTOMATION is how playback reads the Timeline into the engine; never during a recorded render.": [
    "mir/shell/gui.js"
   ],
   "SELECT ALL": [
    "mir/timeline/shortcuts.js"
   ],
-  "SELECT TOOL": [
+  "SELECT MODE": [
    "mir/timeline/shortcuts.js"
   ],
   "SENSE": [
@@ -4405,7 +4556,7 @@
   "SLICE AT PLAYHEAD": [
    "mir/timeline/shortcuts.js"
   ],
-  "SLICE TOOL": [
+  "SLICE MODE": [
    "mir/timeline/shortcuts.js"
   ],
   "SLICE: click a clip to cut it; Insert cuts the selection at the playhead": [
@@ -4566,9 +4717,6 @@
   "Scrub the timeline playhead": [
    "mir/timeline/view.js"
   ],
-  "Scrub tool": [
-   "mir/timeline/shortcuts.js"
-  ],
   "Scrub: the playhead follows the hand, free of Snap; the range stays": [
    "mir/timeline/shortcuts.js"
   ],
@@ -4606,6 +4754,9 @@
   "Select clips to slice them at the playhead.": [
    "mir/timeline/editor.js"
   ],
+  "Select mode": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Select the LFO waveform": [
    "mir/modulation/window.js"
   ],
@@ -4615,17 +4766,14 @@
   "Select the macro driven by this device": [
    "mir/modulation/window.js"
   ],
-  "Select tool": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "Select tool: drag the ruler": [
-   "mir/timeline/shortcuts.js"
-  ],
   "Select {band} for {:ATTACK}, {:RELEASE} and {:peak hold::HOLD}": [
    "mir/modulation/window.js"
   ],
   "Select {name} — tap again to open": [
    "mir/folders/gallery.js"
+  ],
+  "Select: drag the ruler": [
+   "mir/timeline/shortcuts.js"
   ],
   "Selected audio band attack time constant; choose {:LEVEL}, {:LOW}, {:MID} or {:HIGH} on its meter": [
    "mir/modulation/window.js"
@@ -4724,13 +4872,13 @@
   "Slice every selected clip at the playhead (one undo)": [
    "mir/timeline/shortcuts.js"
   ],
+  "Slice mode": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Slice sphere and plane. Drag or use arrow keys to rotate; Home resets.": [
    "mir/plane-model.js"
   ],
-  "Slice tool": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "Slice tool: click a clip": [
+  "Slice: click a clip · drag down the lanes": [
    "mir/timeline/shortcuts.js"
   ],
   "Slide the time range back by its own width": [
@@ -4846,9 +4994,6 @@
   "TIER": [
    "mir/shell/gui.js"
   ],
-  "TIGHT": [
-   "mir/shell/gui.js"
-  ],
   "TIME": [
    "mir/modulation/modwindow/modwindow.js"
   ],
@@ -4948,6 +5093,9 @@
   "The MIR logo is outlined from Butler Free Extra Bold by {who}.": [
    "mir/shell/gui.js"
   ],
+  "The air between rack windows and from the screen’s edge, and the padding inside windows, bars and menus; 0 is flush": [
+   "mir/shell/gui.js"
+  ],
   "The bank holds {n}: STORE over one, or × one.": [
    "mir/panels/xy.js"
   ],
@@ -4960,7 +5108,7 @@
   "The controls take the panes’ light: one {:ANGLE} for everything": [
    "mir/shell/gui.js"
   ],
-  "The dot grip on window heads; off, they still drag": [
+  "The dot grip on window heads": [
    "mir/shell/gui.js"
   ],
   "The dotted guide where a dragged window will land": [
@@ -5032,6 +5180,12 @@
   "The wheel zooms continuously": [
    "mir/panels/camera-rig.js"
   ],
+  "The white light on the lit side of knobs, buttons and wells": [
+   "mir/shell/gui.js"
+  ],
+  "The window’s own icon where the grip was; it drags the same": [
+   "mir/shell/gui.js"
+  ],
   "The {noun} list is full — {count} of {cap}": [
    "mir/controls/list.js"
   ],
@@ -5063,6 +5217,9 @@
    "mir/timeline/editor.js"
   ],
   "This time range is occupied in every lane. Add a lane or choose another range.": [
+   "mir/timeline/editor.js"
+  ],
+  "Timeline modes": [
    "mir/timeline/editor.js"
   ],
   "Timeline shortcuts": [
@@ -5289,6 +5446,9 @@
   "ZOOM IN": [
    "mir/timeline/shortcuts.js"
   ],
+  "ZOOM MODE": [
+   "mir/timeline/shortcuts.js"
+  ],
   "ZOOM OUT": [
    "mir/timeline/shortcuts.js"
   ],
@@ -5303,6 +5463,9 @@
   ],
   "Zoom into the envelope graph": [
    "mir/modulation/window.js"
+  ],
+  "Zoom mode: drag a range to zoom to it, click to zoom out": [
+   "mir/timeline/shortcuts.js"
   ],
   "Zoom out": [
    "mir/timeline/shortcuts.js"
@@ -5325,7 +5488,13 @@
   "Zoom to show the whole arrangement": [
    "mir/timeline/shortcuts.js"
   ],
+  "Zoom to the range dragged; a click zooms out to the whole arrangement": [
+   "mir/timeline/shortcuts.js"
+  ],
   "Zoom to the selection": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "Zoom: drag a range · click": [
    "mir/timeline/shortcuts.js"
   ],
   "a curve keeps at least two points": [
@@ -5358,13 +5527,7 @@
   "adapted — FL’s Ctrl+drag; in MIR Shift selects": [
    "mir/timeline/shortcuts.js"
   ],
-  "adapted — FL’s P is the Draw tool; BASINS has one modeless curve editor": [
-   "mir/timeline/shortcuts.js"
-  ],
   "adapted — FL’s Shift-drag clones; MIR’s Ctrl alias stays": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "adapted — FL’s Y is the Playback/Preview tool": [
    "mir/timeline/shortcuts.js"
   ],
   "adapted — FL’s manual names Right-Alt+click specifically": [
@@ -6489,9 +6652,6 @@
   ],
   "{k} kHz · {hz} Hz feed": [
    "mir/modulation/window.js"
-  ],
-  "{lane} is empty — right-click a knob › {:CLIP} to make a clip": [
-   "mir/timeline/view.js"
   ],
   "{macro} already reaches {target}": [
    "mir/modulation/window.js"

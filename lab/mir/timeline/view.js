@@ -8,9 +8,9 @@ import { createTimelinePlot } from './curve-view.js';
 import { clipKind } from './kinds.js';
 import { timelineSteps } from './source.js';
 import { timelineExtent } from './model.js';
-import { el, svgNode as svg, label, ariaLabel, hint } from '../kit.js';
+import { el, svgNode as svg, label, ariaLabel } from '../kit.js';
 import { glyphSvg } from '../glyph.js';
-import { t, phrase } from '../core/i18n.js';
+import { t } from '../core/i18n.js';
 const BAND_MIN=4;   // px: an event clip draws its band hairlines only while they stand at least this far apart
 const clamp=(n,lo,hi)=>Math.min(hi,Math.max(lo,n));
 // Beat ticks never hide: alpha ramps with zoom (full at 12px, half at 8px) instead of cutting off
@@ -31,10 +31,9 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
   const viewport=el('div','tl-viewport',shell),content=el('div','tl-content',viewport),rows=el('div','tl-rows',content);
   const head=el('div','tl-playhead',shell),tail=el('div','tl-playhead-tail',head),marquee=el('div','tl-marquee',content);
   const status=el('div','tl-status',surface);status.setAttribute('role','status');
-  // THE EMPTY LANE SAYS HOW (1.5.7-alpha.23, λWAVES 039 K8) in its hints alone — THE EMPTY LANE IS QUIET (1.5.7-alpha.44, λWAVES 040 T7; Josh:
-  // "There's a random text that says 'no clips yet...' remove it"): no line over the lanes; an empty lane's band and pane hint the road
-  // (HOW, ≤ 60 characters in English); a lane with a clip is hinted by its name, as before
-  const HOW=phrase('{lane} is empty — right-click a knob › {:CLIP} to make a clip');
+  // THE EMPTY LANE HAS NO HINT (1.5.7-alpha.51, λWAVES 041 T3; Josh: "lambdawaves is advertised with DAW features, and DAWs never have any hints"):
+  // an empty lane's band and pane wear no hint (alpha.23's "{lane} is empty — right-click a knob › CLIP to make a clip" is gone, as its line over
+  // the lanes went in alpha.44); a lane with a clip is hinted by its name on its band, as before
   const laneNodes=new Map(),clipNodes=new Map();let doc,revision=0,curves=new Map(),byLane=new Map(),rulerKey='',height=48,range=null,active=null;
   function setDocument(value){doc=value;revision++;curves=new Map(doc.curves.map(c=>[c.id,c]));byLane=new Map(doc.lanes.map(l=>[l.id,[]]));for(const c of doc.clips)byLane.get(c.laneId)?.push(c);}
   const getClip=id=>doc.clips.find(c=>c.id===id),getCurve=id=>curves.get(id);
@@ -56,7 +55,7 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
     const left=el('button','tl-trim tl-trim-left',title);left.type='button';left.dataset.trim='left';ariaLabel(left,'Pull the clip start');left.title='Pull curve start; keep right edge fixed';
     el('span','tl-clip-name',title,curve.name);const more=el('button','tl-clip-more',title,'⋯');more.type='button';ariaLabel(more,'Clip options');more.onclick=e=>{e.stopPropagation();const current=getClip(c.id);if(current)onClipMenu(e,current,getCurve(current.curveId));};
     const right=el('button','tl-trim tl-trim-right',title);right.type='button';right.dataset.trim='right';ariaLabel(right,'Trim the clip end');
-    const block=el('div','tl-clip',row.pane);block.dataset.clip=c.id;block.style.width=w+'px';block.style.setProperty('--tl-clip-tint',curve.color);block.classList.toggle('muted',!!c.mute);
+    const block=el('div','tl-clip',row.pane);block.dataset.clip=c.id;block.style.width=w+'px';block.style.setProperty('--tl-clip-tint',curve.color);block.classList.toggle('muted',!!c.mute);title.classList.toggle('muted',!!c.mute);
     // A registered kind paints itself into the plot svg and owns no points or handles; a curve keeps the MIR plot.
     const kind=clipKind(curve);let s;
     if(kind){const geometry=createClipCoordinates(c,curve.length,px,height);block.dataset.kind=curve.kind;
@@ -90,7 +89,7 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
     for(const [laneIndex,lane] of doc.lanes.entries()){
       let row=laneNodes.get(lane.id);if(!row){const root=el('div','tl-row',rows);root.dataset.lane=lane.id;row={root,title:el('div','tl-titleband',root),pane:el('div','tl-pane glass',root)};row.pane.dataset.lane=lane.id;laneNodes.set(lane.id,row);}if(rows.children[laneIndex]!==row.root)rows.insertBefore(row.root,rows.children[laneIndex]||null);
       const clips=byLane.get(lane.id)||[],said=(clips.length?'n:':'e:')+lane.name;   // the hints written only when they change (control-help hears every title)
-      if(row.said!==said){row.said=said;if(clips.length){row.title.title=lane.name;row.pane.title='';}else{hint(row.title,HOW,{lane:lane.name});hint(row.pane,HOW,{lane:lane.name});}}
+      if(row.said!==said){row.said=said;row.title.title=clips.length?lane.name:'';row.pane.title='';}
       row.pane.style.setProperty('--tl-measure',px*doc.meter+'px');row.pane.style.setProperty('--tl-four-measures',px*doc.meter*4+'px');
       row.pane.style.setProperty('--tl-beat-height',law.beatHeight+'px');row.pane.style.setProperty('--tl-beat-alpha',String(law.beatAlpha));   /* no sheet reads it: tests/timeline-ticks reads the ramp here */
       row.pane.style.setProperty('--tl-beat-tick',`color-mix(in srgb,currentColor ${(law.beatAlpha*100).toFixed(4)}%,transparent)`);

@@ -46,6 +46,7 @@ import { projectZip, readProjectZip, restoreAssets, rollbackAssets, zipProject }
 import { assets } from '../core/assets.js';
 import { fmtBytes } from '../render/plan.js';
 import { jsonStore } from '../core/prefs.js';
+import { cssZoom } from '../core/zoom.js';
 
 export const FOLDERS_COPY = {
   save: [phrase('SAVE'), phrase('this project'), phrase('Save — store what is on screen over the open project (a new one the first time).')],
@@ -227,8 +228,10 @@ export function createFolders(options = {}) {
     /* BASINS' SAVE window wears the modulation window's material (kwin adoptMaterial): the kit window's material hook
        ([data-mir-material], window.css) gives FOLDERS the same by default; `material: null` for the plain house glass */
     material: o.material === undefined ? 'modulation' : o.material, railGap: o.railGap,
-    /* BASINS seats the SAVE rail on the window's RIGHT; a saved chipSide wins */
-    persist: { read: () => ({ chipSide: o.chipSide || 'right', ...readPrefs() }), write: (shape) => writePrefs(shape) },
+    /* 1.5.7-alpha.55 THE CHIPS STAND ON THE LEFT: the rail's home is the window's LEFT, as TIMELINE's and MODULATION's (BASINS seated
+       SAVE's on the right: an app that wants that passes chipSide: 'right').  A chipSide saved since this door (rail: 2) wins; one
+       saved before it was the old default more often than a choice, so it is read once as the new home. */
+    persist: { read: () => { const pr = readPrefs(), home = o.chipSide || 'left'; return { chipSide: home, ...pr, ...(pr.rail === 2 ? {} : { chipSide: home }) }; }, write: (shape) => writePrefs({ ...shape, rail: 2 }) },
     onMoved: (r) => { if (typeof o.onMoved === 'function') o.onMoved(r); },
     /* every open, a persisted one included, tells the app (BASINS seeds its factory gallery and library here) */
     onOpen: () => { if (typeof o.onOpen === 'function') { try { o.onOpen(api); } catch (_) {} } if (gallery) gallery.paint(); if (active !== 'gallery') showTab(active); paintMark(); },
@@ -239,6 +242,7 @@ export function createFolders(options = {}) {
     } })),
   });
   win.root.classList.add('mir-folders');
+  if (win.rail.el) win.rail.el.classList.add('mir-folders-rail');   // 1.5.7-alpha.58: the rail takes UI SCALE with its window (base.css)
   /* the window's DOM id is its id, as kwin gave BASINS' (#savewin): an app's own rules and rigs that name it keep
      working.  Nothing in the kit hangs on it: the pointer is the class's (.mir-win), so a missed id is not a dead window */
   if (o.domId !== false) win.root.id = o.domId || id;
@@ -439,7 +443,8 @@ export function createFolders(options = {}) {
   const firstSeat = typeof o.firstSeat === 'function' ? o.firstSeat : () => {
     const st = win.state(), rack = typeof o.rack === 'function' ? o.rack() : o.rack;
     const right = st.chipSide === 'right', railW = right ? Math.round(((win.rail.sizes() || {}).vertical || {}).w || 62) : 0;
-    return freeSeat({ vw: view.innerWidth, vh: view.innerHeight, w: st.w || 380, h: st.h || 680, minH: (o.min || { h: 360 }).h,
+    const z = cssZoom(win.root);                                     // 1.5.7-alpha.58: the window's own px under UI SCALE
+    return freeSeat({ vw: view.innerWidth / z, vh: view.innerHeight / z, w: st.w || 380, h: st.h || 680, minH: (o.min || { h: 360 }).h,
       clear: rack && typeof rack.keepClear === 'function' ? rack.keepClear() : [], anchor: o.anchor || 'right', top: o.top ?? 162, gutter: railW });
   };
   /* the first seat: BASINS' — top right, clear of the right rack and of the rail on the window's right, 162 px down,

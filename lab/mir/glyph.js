@@ -508,7 +508,27 @@ const GLYPHS = {
   /* 1.5.6-alpha.24 (λWAVES 032 T15): the timeline's SLICE tool — a blade across the cut it makes (the cut's two ticks) */
   slice:
     '<path ' + STROKE + ' d="M12 3.4v3.4M12 17.2v3.4"/>' +
-    '<path ' + STROKE + ' d="M5.6 18.4 L16.6 7.4 Q18.7 5.3 19.2 8 L19.5 9.6 L8.4 20.7 Z"/>'
+    '<path ' + STROKE + ' d="M5.6 18.4 L16.6 7.4 Q18.7 5.3 19.2 8 L19.5 9.6 L8.4 20.7 Z"/>',
+
+  /* 1.5.7-alpha.49 (λWAVES 041 T1, THE MODE MENU): the timeline's other modes, FL Studio's tool column — a brush (PAINT), the
+     brush with a plus (PAINT ADD, FL's step brush), the barred ring (DELETE), a magnifier holding a plus (ZOOM: `search` is the
+     bare glass), a loudspeaker sounding (PREVIEW: `mute` is the same speaker struck out). */
+  paint:
+    '<path ' + STROKE + ' d="M20.4 3.6 L11.2 12.8"/>' +
+    '<path ' + STROKE + ' d="M9.4 11.6 L12.4 14.6 C13 17.8 10.4 20.4 3.8 20.2 C6.2 18.4 5.4 14.2 9.4 11.6 Z"/>',
+  paintAdd:
+    '<path ' + STROKE + ' d="M20.4 3.6 L11.2 12.8"/>' +
+    '<path ' + STROKE + ' d="M9.4 11.6 L12.4 14.6 C13 17.8 10.4 20.4 3.8 20.2 C6.2 18.4 5.4 14.2 9.4 11.6 Z"/>' +
+    '<path ' + STROKE + ' d="M6 3.2 V8.8 M3.2 6 H8.8"/>',
+  forbid:
+    '<circle cx="12" cy="12" r="8.6" ' + STROKE + '/>' +
+    '<path ' + STROKE + ' d="M5.9 5.9 L18.1 18.1"/>',
+  zoom:
+    '<circle cx="10.5" cy="10.5" r="6.5" ' + STROKE + '/>' +
+    '<path ' + STROKE + ' d="M15.2 15.2 L20 20 M10.5 7.9 V13.1 M7.9 10.5 H13.1"/>',
+  preview:
+    '<path ' + STROKE + ' d="M3.6 9.4 H7.4 L13.6 4.8 V19.2 L7.4 14.6 H3.6 Z"/>' +
+    '<path ' + STROKE + ' d="M17.2 8.8 V15.2 M20.6 6.2 V17.8"/>'
 };
 
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);

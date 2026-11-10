@@ -151,6 +151,7 @@ export const markForwarded = (e) => { forwarded.add(e); return e; };
 
 /** createRail({ id, title, chips, side, layer, seats, onChip, onSide, onNudge })
  *  chips: [{ name, kind: close|action|toggle|radio|cycle|grip, label, hint?, glyph? | text?, group?, states?, state? }]
+ *  close: false leaves the close chip out (a title-bar window's rail); gripAt: 'first' puts the drag chip before the others (default 'last')
  *  seats() → [{ id: side, rect }] — where the rail would land on each side (the window's own layout); onSide(side,
  *  phase) with phase 'preview' (keyboard, live), 'commit' or 'cancel' (back to where the keyboard started).
  *  → { el, grip, chip(name), setChip(name, state), state(name), measure(), sizes(), seat(seat, { animate }),
@@ -158,7 +159,7 @@ export const markForwarded = (e) => { forwarded.add(e); return e; };
  *  setDock('top' | 'bottom' | null) — the rail carries its window's dock (data-dock): docked at the top or bottom, the
  *  chips sit tighter along it (window.css, --rail-gap; BASINS 2026-10-01).  Its length changes, so the next sizes()
  *  measures again; its width across does not (the dock lane is measured from it). */
-export function createRail({ id, title, chips = [], layer, seats, onChip, onSide, onNudge } = {}) {
+export function createRail({ id, title, chips = [], layer, seats, onChip, onSide, onNudge, close = true, gripAt = 'last' } = {}) {
   const doc = (layer && layer.ownerDocument) || document;
   const el = doc.createElement('div');
   el.className = 'mir-rail';
@@ -167,8 +168,10 @@ export function createRail({ id, title, chips = [], layer, seats, onChip, onSide
   el.dataset.mirRail = id;
   el.hidden = true;
   const specs = new Map(), nodes = new Map(), tables = new Map(), states = new Map(), inked = new Map();   // inked: the ink drawn now
-  const list = chips.some((c) => c.kind === 'close') ? chips : [{ name: 'close', kind: 'close', glyph: 'close', label: 'Close window' }, ...chips];
-  const all = list.some((c) => c.kind === 'grip') ? list : [...list, { name: 'grip', kind: 'grip', label: 'Move window', hint: GRIP_HINT }];
+  /* 1.5.7-alpha.55: `close: false` — a rail beside a title bar, whose × closes; `gripAt: 'first'` — the drag chip leads (the top of a standing rail) */
+  const list = close === false || chips.some((c) => c.kind === 'close') ? chips : [{ name: 'close', kind: 'close', glyph: 'close', label: 'Close window' }, ...chips];
+  const gripChip = { name: 'grip', kind: 'grip', label: 'Move window', hint: GRIP_HINT };
+  const all = list.some((c) => c.kind === 'grip') ? list : gripAt === 'first' ? [gripChip, ...list] : [...list, gripChip];
   for (const spec of all) {
     const b = doc.createElement('button');
     b.type = 'button'; b.className = 'mir-chip';

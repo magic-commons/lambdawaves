@@ -12,7 +12,8 @@
 @layer mir.kit.house {
 
 /* the two halves of "slide, then stop painting": visibility turns on at the start of a show and off at the end of a hide */
-:is(.mir-rack, .mir-rack-transport) { --rack-step-show: step-start; --rack-step-hide: step-end; }
+:is(.mir-rack, .mir-rack-transport) { --rack-step-show: step-start; --rack-step-hide: step-end;
+  --rack-reveal: calc(var(--motion-micro) * 1.5); }   /* 1.5.7-alpha.63 THE REVEAL IS QUICK AND NEAR: a rack's and the bar's hide / show slide, 120 ms (it was --motion-structural, 320 ms) */
 .mir-rack { --rack-flush-radius: 0px; --rack-flush-shadow: 0 0 0 0 transparent; }   /* SPACING at 0: square, and no pane shadow inside the slab */
 /* THE RACK'S MOTION (BASINS rack-motion.js RACK_MOTION: 320 ms, cubic-bezier(.22, 1, .36, 1) = the core's structural
    duration and ease-out).  On every rack the kit runs, its own or an app's adopted one ([data-mir-rack]); read by
@@ -32,7 +33,7 @@ body.disconnected:not(.phone) [data-mir-rack] > .dev.rack-sizing { overflow: vis
   padding: var(--rack-inset, var(--card-gap, var(--sp-2))); display: flex; flex-direction: column; gap: var(--rack-gap, var(--card-gap, var(--sp-2)));
   background: transparent; border: 0; pointer-events: none; touch-action: pan-y;
   scrollbar-width: thin; scrollbar-color: var(--acc) transparent;
-  transition: transform var(--motion-structural) var(--ease-out), visibility var(--motion-structural) var(--rack-step-show);
+  transition: transform var(--rack-reveal) var(--ease-out), visibility var(--rack-reveal) var(--rack-step-show);
 }
 .mir-rack > * { pointer-events: auto; }
 /* A FINGER SCROLLS THE RACK (1.5.0 wave 19; .tmp/W19/IPAD-FINDINGS.md §1): Safari does not touch-scroll a scroller whose
@@ -70,7 +71,7 @@ body.phone .mir-rack { --rack-shadow-gutter: 0px; }
 /* ── HIDDEN: slide out, then stop painting (the visibility waits for the slide) ───────────────────────────── */
 body.rack-hidden:not(.rack-peek-right) .mir-rack[data-side="right"],
 body.rack-hidden:not(.rack-peek-left) .mir-rack[data-side="left"] {
-  visibility: hidden; transition: transform var(--motion-structural) var(--ease-out), visibility var(--motion-structural) var(--rack-step-hide);
+  visibility: hidden; transition: transform var(--rack-reveal) var(--ease-out), visibility var(--rack-reveal) var(--rack-step-hide);
 }
 body.rack-hidden:not(.rack-peek-right) .mir-rack[data-side="right"] { transform: translateX(calc(100% + 12px)); }
 body.rack-hidden:not(.rack-peek-left) .mir-rack[data-side="left"] { transform: translateX(calc(-100% - 12px)); }
@@ -114,8 +115,11 @@ body.ui-hidden .rack-scrollbar { display: none; }
    floats OUTSIDE the window over the stage, 8 px clear of the card (and its scrollbar), the name whole, revealed by a clip-path mask
    from the window's side and hidden the same way back, 180 ms; never a target, never a layout.  ONLY A PILL (1.5.0-alpha.28, λWAVES
    017 R1; Josh: "strange diamonds under the pills … it should only be a pill"): 015's tail (an 8-px square turned 45° under the pill)
-   is gone — the mask opened from it, so every reveal and every hide showed it alone, a diamond, for a frame or more */
-.rack-pills { position: absolute; left: 0; right: 0; overflow: hidden; pointer-events: none; z-index: calc(var(--z-chrome) + 1);
+   is gone — the mask opened from it, so every reveal and every hide showed it alone, a diamond, for a frame or more.
+   THE PILLS STAY ON TOP (1.5.7-alpha.50, λWAVES 041 T2; Josh: "timeline is drawn over the title pills when scrolling the rack. Let the pills stay on
+   top of everything"): the layer stood at chrome + 1, under the float layer (chrome + 2: a docked TIMELINE, every kit window, a work bar) and the
+   transport's seats (chrome + 3); it stands one under the veil now — above every window, bar and handle, under a dialog's veil and the menus */
+.rack-pills { position: absolute; left: 0; right: 0; overflow: hidden; pointer-events: none; z-index: calc(var(--z-veil) - 1);
   --rack-pill-r: 12px; --rack-pill-t: 180ms; --rack-pill-ease: cubic-bezier(.2, 0, 0, 1); }
 .rack-pills-in { position: absolute; inset: 0; }
 .rack-pill { position: absolute; transform: translateY(-50%); box-sizing: border-box; padding: 4px 10px; border-radius: var(--rack-pill-r); white-space: nowrap;
@@ -184,10 +188,10 @@ body.ui-hidden .mir-rack-handle[data-when="always"] { display: block; }
 }
 
 /* ── THE TRANSPORT: hidden with the rack (slid, then not painted), peeking around its own seat ─────────────── */
-.mir-rack-transport { transition: translate var(--motion-structural) var(--ease-out), visibility var(--motion-structural) var(--rack-step-show); }
+.mir-rack-transport { transition: translate var(--rack-reveal) var(--ease-out), visibility var(--rack-reveal) var(--rack-step-show); }
 body.rack-hidden:not(.transport-peek) .mir-rack-transport {
   translate: 0 140px; visibility: hidden;
-  transition: translate var(--motion-structural) var(--ease-out), visibility var(--motion-structural) var(--rack-step-hide);
+  transition: translate var(--rack-reveal) var(--ease-out), visibility var(--rack-reveal) var(--rack-step-hide);
 }
 body.rack-hidden:not(.transport-peek) .mir-rack-transport[data-seat="top"] { translate: 0 -140px; }
 

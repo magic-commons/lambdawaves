@@ -33,6 +33,7 @@
   color-scheme: dark;
   --ui-scale: 1; --touch: 44px;
   --ctl-stroke: 1;
+  --relief-lit: 1;                                                 /* 1.5.7-alpha.62 · HIGHLIGHT: the white light of a control's relief, 0 … 1 (MIR OPTIONS › LIGHT writes it on <html>) */
   --ui-zoom: 1;                                                    /* 1.5.7-alpha.2 · UI SCALE: the UI roots' CSS zoom (MIR OPTIONS writes it on <html>) */                                                 /* 1.5.7-alpha.1 · STROKE: every control ring's alpha times it (MIR OPTIONS writes it on <html>) */
   --font-ui: 'Roboto', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
@@ -254,9 +255,11 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
    the geometry that mixes viewport px (getBoundingClientRect, clientX, innerWidth) with an element's own px reads core/zoom.js. */
 :where(#rack, #rackL, #floats, #rackFav, #rackFavList, #rackToggle, #transport, #notebook, #menubar, .mir-ctx, .control-help, .mir-notices, .mir-dialog, .mir-window-picker, #graphTip) { zoom: var(--ui-zoom); --in-zoom: var(--ui-zoom); }
 :where(#rack, #rackL, #floats, #rackFav, #rackFavList, #rackToggle, #transport, #notebook, #menubar, .mir-ctx, .control-help, .mir-notices, .mir-dialog, .mir-window-picker, #graphTip) :where(#rack, #rackL, #floats, #rackFav, #rackFavList, #rackToggle, #transport, #notebook, .mir-ctx, .control-help, .mir-window-picker, .mir-dialog) { zoom: 1; }
-/* … but the modulation material's windows (MODULATION, TIMELINE, PATTERN, and their rails) keep 100 %: their editors map the pointer to beats
-   and values through a lane's px per beat and a curve's box, read both ways; in a zoomed root they take the inverse zoom (not yet zoom-aware) */
-:where(#rack, #rackL, #floats) > :where(.mir-modwindow, [data-mir-material="modulation"], [data-mir-rail="modulation"]) { zoom: calc(1 / var(--ui-zoom)); --in-zoom: 1; }
+/* … but the modulation material's EDITORS (MODULATION, TIMELINE, PATTERN, and their rails) keep 100 %: they map the pointer to beats
+   and values through a lane's px per beat and a curve's box, read both ways; in a zoomed root they take the inverse zoom (not yet zoom-aware).
+   1.5.7-alpha.58 THE SCALE REACHES FOLDERS (λWAVES 041 W4): FOLDERS wears the same material but has no such editor — its window is the kit's
+   zoom-aware createWindow and its gallery reads no px both ways — so it and its rail (.mir-folders, .mir-folders-rail) take the scale */
+:where(#rack, #rackL, #floats) > :where(.mir-modwindow, [data-mir-material="modulation"]:not(.mir-folders, .mir-folders-rail), [data-mir-rail="modulation"]) { zoom: calc(1 / var(--ui-zoom)); --in-zoom: 1; }
 
 /* 1.5.7-alpha.1 · THE STROKE (λWAVES 036): a control's hairline is the pane's hairline times STROKE (MIR OPTIONS › CONTROLS, --ctl-stroke
    on <html>, 0 … 1, home 1). Declared on the control, so it reads the hairline where the control sits (the modulation material's, LIGHT's) */

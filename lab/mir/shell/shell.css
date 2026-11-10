@@ -137,7 +137,7 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .mb-group { position: relative; }
 .mb-btn { height: 26px; padding: 0 10px; border: 0; border-radius: var(--mb-btn-r); background: transparent; color: var(--fg-soft); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); cursor: pointer; }
 .mb-btn:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
-.mb-list { position: absolute; inset-inline-start: 0; top: 30px; min-width: 240px; max-height: calc(60vh / var(--in-zoom, 1)); overflow: auto; padding: 4px; border-radius: var(--surface-radius, var(--mb-list-r)); box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); display: flex; flex-direction: column; }
+.mb-list { position: absolute; inset-inline-start: 0; top: 30px; min-width: 240px; max-height: calc(60vh / var(--in-zoom, 1)); overflow: auto; padding: calc(4px * var(--pad-k, 1)); border-radius: var(--surface-radius, var(--mb-list-r)); box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); display: flex; flex-direction: column; }
 .mb-item { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; text-align: start; border: 0; background: transparent; color: var(--fg-soft); padding: 6px 10px; border-radius: var(--mb-item-r); font: var(--fs-small) var(--font-ui); cursor: pointer; white-space: nowrap; }
 .mb-item:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
 .mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wide)); }

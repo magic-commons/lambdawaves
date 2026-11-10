@@ -223,6 +223,11 @@ export function turnBetween(a, b, k = 1) {
   const th = Math.atan2(s, dot3(a, b)) * k, n = [c[0] / s, c[1] / s, c[2] / s], co = Math.cos(th), si = Math.sin(th);
   return (v) => { const nv = dot3(n, v), x = cross3(n, v); return [0, 1, 2].map((i) => v[i] * co + x[i] * si + n[i] * nv * (1 - co)); };
 }
+/** turnAbout(axis, angle) → the rotation (a function of a vector) about the unit axis by angle (radians; Rodrigues) */
+export function turnAbout(n, th) {
+  const co = Math.cos(th), si = Math.sin(th);
+  return (v) => { const nv = dot3(n, v), x = cross3(n, v); return [0, 1, 2].map((i) => v[i] * co + x[i] * si + n[i] * nv * (1 - co)); };
+}
 /** arcballTurn(d, p0, p1, k) → the unit direction d carried by the ball's turn from p0 to p1 (k the gear) */
 export function arcballTurn(d, p0, p1, k = 1) { const r = turnBetween(p0, p1, k)(d), n = Math.hypot(r[0], r[1], r[2]) || 1; return [r[0] / n, r[1] / n, r[2] / n]; }
 /** sphereTurn(yaw, pitch, p0, p1, k) → [dyaw, dpitch] (radians): the ball's turn from p0 to p1, read on the yaw / pitch chart in

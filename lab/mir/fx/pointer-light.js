@@ -17,7 +17,9 @@
  *     themselves.
  *   · `<html data-pointer-light>` is present exactly while it is live, so the CSS draws nothing when it is not.
  *
- * createPointerLight({ doc, enabled }) → { refresh(), destroy(), get live() }
+ * createPointerLight({ doc, enabled, lift }) → { refresh(), destroy(), get live() }
+ *   lift      true (default, 1.5.7-alpha.60): the glow is THE LIFT — one disc over the whole page that brightens and saturates what is under
+ *             the pointer; false: the older per-surface accent light on `[data-light]` parts
  *   enabled   () => boolean — the app's switch (default: on)
  * Pure: fxAllowed({ coarse, motion, tier }) — the off rules, shared with fx/parallax.js. */
 import { frame } from '../core/frame.js';
@@ -42,8 +44,19 @@ export function watchFxMedia(doc, fn) {
   return () => { offMode(); for (const q of qs) q.removeEventListener && q.removeEventListener('change', fn); };
 }
 
-export function createPointerLight({ doc = document, enabled = () => true } = {}) {
+export function createPointerLight({ doc = document, enabled = () => true, lift = true } = {}) {
   const html = doc.documentElement, KEY = 'fx:light';
+  /* 1.5.7-alpha.60 THE POINTER GLOW REACHES THE UI AND LIFTS WHAT IS THERE: one fixed disc above everything (fx.css .mir-pointer-lift) that
+     raises the brightness and the saturation of whatever is under the pointer — the picture, a window, a rack, the bar — through a
+     backdrop filter; it lays no colour.  It exists only while the light is live, moves by `translate` in the light's one frame job, and
+     while it is used the per-surface accent paint ([data-light]) is not drawn (html[data-pointer-lift]) */
+  let disc = null, discOn = false;
+  const liftAt = () => {
+    if (!disc) return;
+    setVar(disc, 'translate', Math.round(x) + 'px ' + Math.round(y) + 'px');
+    if (!discOn) { discOn = true; setAttr(disc, 'data-lit', ''); }
+  };
+  const liftOff = () => { if (disc && discOn) { discOn = false; const d = disc; frame.write(() => { if (!discOn) setAttr(d, 'data-lit', null); }); } };
   let live = false, cur = null, box = null, reading = false, x = 0, y = 0, life = null;
 
   const paint = () => {
@@ -59,6 +72,7 @@ export function createPointerLight({ doc = document, enabled = () => true } = {}
   const forget = () => { box = null; };                                // the box moved: read it again on the next move
   const move = (e) => {
     if (e.pointerType === 'touch') return;
+    if (disc) { x = e.clientX; y = e.clientY; frame.coalesce(KEY + ':lift', liftAt); return; }
     const t = e.target && e.target.closest ? e.target.closest('[data-light]') : null;
     if (t !== cur) { leave(); cur = t; }
     if (!cur) return;
@@ -74,6 +88,11 @@ export function createPointerLight({ doc = document, enabled = () => true } = {}
     doc.addEventListener('pointermove', move, o);
     doc.addEventListener('pointerdown', forget, o);
     html.addEventListener('pointerleave', leave, o);
+    if (lift && doc.body) {
+      disc = doc.createElement('div'); disc.className = 'mir-pointer-lift'; disc.setAttribute('aria-hidden', 'true'); doc.body.appendChild(disc);
+      setAttr(html, 'data-pointer-lift', '');
+      html.addEventListener('pointerleave', liftOff, o); doc.defaultView.addEventListener('blur', liftOff, o);
+    }
     doc.defaultView.addEventListener('scroll', forget, { ...o, capture: true });
     doc.defaultView.addEventListener('resize', forget, o);
     doc.defaultView.addEventListener('blur', leave, o);
@@ -82,6 +101,7 @@ export function createPointerLight({ doc = document, enabled = () => true } = {}
   function off() {
     if (!live) return;
     live = false; life.abort(); life = null; leave();
+    if (disc) { frame.cancel(KEY + ':lift'); disc.remove(); disc = null; discOn = false; setAttr(html, 'data-pointer-lift', null); }
     setAttr(html, 'data-pointer-light', null);
   }
   /** refresh() — re-ask the switch, the pointer, the motion policy and the tier */

@@ -122,7 +122,7 @@ export function createOpener(o = {}) {
     const slots = [];                                                // { button, cover, video? }
     const previews = new Map();                                      // video → is it on screen
     let active = null, launching = false, done = null;
-    const light = o.light === false ? null : (o.light || createPointerLight({ doc }));
+    const light = o.light === false ? null : (o.light || createPointerLight({ doc, lift: false }));   // 1.5.7-alpha.60's lift is the page's glow; the opener's own light is BASINS' accent glow on its covers
 
     const reduced = () => motionPolicy() !== 'full';
     const playVisible = () => {

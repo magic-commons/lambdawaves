@@ -541,6 +541,8 @@ body[data-text] :is(.mir-modwindow, .kwin-chiprail, .m2ghost) {
 :where(body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"])) .mir-modwindow {
   --m2-dialink-b-wash: transparent;
   --m2-add-face: transparent; }   /* + MACRO, + DEVICE: clear, as BASINS' faces (1.5.0-alpha.12); the accent edge and label stay */
+/* 1.5.7-alpha.61 EVERY FACE CAN BE GLASS (λWAVES 041 W3): the one face of this window the walk found still filled at rest — the preset name field */
+:where(body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"])) :is(.mir-modwindow, #modwin.mir-modwindow) .m2prename:not(:focus) { background-color: transparent; background-image: none; }
 body[data-card="solid"] .mir-modwindow, body[data-card="solid"] #modwin.mir-modwindow {
   --m2-mat-chassis: hsl(var(--glass-tint) / 1); }
 

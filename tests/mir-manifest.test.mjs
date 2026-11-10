@@ -90,6 +90,8 @@ const ACCEPTED = {
   '1.5.7-alpha.26': '017a7bafc19f3111cee3daa49f2db703abe1ec73c3ce65415fb65a31c0595cfa',
   /* 040 T + C · MIR 1.5.7-alpha.48 (kit-040 @ a0e32f5: T alpha.38–45 THE TIMELINE'S HANDS, C alpha.46–48 THE CONTROLS; Focus's 27–37 live on the kit's `focus` branch, not here) */
   '1.5.7-alpha.48': '65b230cf3401a28d7efe405fa398c68669d601d6e41e2318feddea8b34fb0f9b',
+  /* 041 T + W · MIR 1.5.7-alpha.63 (kit-041: T alpha.49–51 THE TIMELINE'S MODES, W alpha.54–63 THE WINDOWS AND THE OPTIONS; 52 and 53 unused; Focus's 27–37 still on `focus`) */
+  '1.5.7-alpha.63': '43da45d0a176b2797fcdd7ac1e475e977b1d8e8735c06f91af91d6bff68619d5',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

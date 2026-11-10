@@ -97,6 +97,19 @@
   --tl-pop-trig-h: 32px;
   --tl-pop-trig-size: 10px;
   --tl-pop-row-gap: 8px;                                        /* a folded tool's row in ⋯'s list: icon, then word */
+  --tl-mode-h: 36px;                                           /* THE MODE MENU (1.5.7-alpha.49): a mode's row, as tall as a tool disc and as large as FL's */
+  --tl-mode-w: 72px;
+  --tl-mode-pad: 0 12px 0 10px;
+  --tl-mode-icon: 22px;
+  --tl-mode-dot: 8px;                                          /* its radio dot: a ring, filled for the mode in force */
+  --tl-mode-dot-fade: .55;
+  --tl-modes-gap: 10px;                                        /* between MODE and MENU, and MENU's inset from its rule */
+  --tl-modes-menu-min: 176px;
+  --tl-modes-row-h: 26px;                                      /* MENU's rows are a list's (FL's are 22): the column ends above MODE's foot, the rest empty */
+  --tl-sub-arrow: 12px;                                        /* a MENU row that opens a list: its chevron */
+  --tl-sub-arrow-fade: .7;
+  --tl-muted-fade: .5;                                         /* a muted clip: hollow (no fill, a dashed curve, an empty tab) and faded */
+  --tl-muted-dash: 3 3;
   --tl-field-size: 9px;
   --tl-field-gap: 6px;
   --tl-input-r: 6px;
@@ -201,7 +214,7 @@
 .mir-win.mir-timeline .tl-action.tl-icon svg { width: var(--tl-icon); height: var(--tl-icon); display: block; flex: none; }
 /* ONE SEAT LAW FOR THE BAR (1.5.6-alpha.24, T15): EDIT · SELECT · SCRUB · SLICE are round discs of one size; every button of the
    bar moves as the kit's chips do (THE CHIPS' MOTION, 1.5.6-alpha.9): hover 6 % larger, a press sinks to 92 % */
-.mir-win.mir-timeline button.tl-action.tl-tool { width: var(--tl-action-h); min-width: var(--tl-action-h); padding: 0; border-radius: 50%; }
+.mir-win.mir-timeline button.tl-action:is(.tl-tool, .tl-modes-chip) { width: var(--tl-action-h); min-width: var(--tl-action-h); padding: 0; border-radius: 50%; }
 .mir-win.mir-timeline .tl-toolbar button.tl-action { transition: transform var(--motion-micro) var(--ease-out); }
 @media (hover: hover) { .mir-win.mir-timeline .tl-toolbar button.tl-action:hover { transform: scale(var(--chip-hover-scale)); } }
 .mir-win.mir-timeline .tl-toolbar button.tl-action:active { transform: scale(var(--chip-press-scale)); }
@@ -266,7 +279,9 @@
 
 /* ── THE CLIPS: the curve alone (the body never highlights the track; all feedback is the curve and the tab) ── */
 .mir-timeline .tl-clip { position: absolute; height: 100%; top: 0; background: transparent; box-sizing: border-box; }
-.mir-timeline .tl-clip.muted { opacity: .35; }
+.mir-timeline .tl-clip.muted { opacity: var(--tl-muted-fade); }   /* A MUTED CLIP IS HOLLOW (1.5.7-alpha.49; was a .35 fade alone) */
+.mir-timeline .tl-clip.muted .tl-fill { fill: none; }
+.mir-timeline .tl-clip.muted .tl-curve { stroke-dasharray: var(--tl-muted-dash); }
 .mir-timeline .tl-clip.dormant { outline: 1px dashed currentColor; outline-offset: -2px; opacity: .5; }
 .mir-timeline .tl-clip svg { display: block; width: 100%; height: 100%; overflow: hidden; touch-action: none; }
 .mir-timeline .tl-step-mode .tl-clip svg, .mir-timeline .tl-step-mode :is(.tl-point, .tl-tension) { cursor: crosshair; }
@@ -299,6 +314,8 @@
 .mir-timeline .tl-tab-rim { fill: none; stroke-width: 1; transition: stroke var(--tl-tab-t) var(--tl-ease); }
 .mir-timeline .tl-clip-title.selected .tl-tab-rim { stroke: var(--tl-rim-selected); stroke-width: var(--tl-sel-w); }
 .mir-timeline .tl-clip-title:is(:hover, .held) .tl-tab-tint { opacity: 1; }
+.mir-timeline .tl-clip-title.muted .tl-tab-tint, .mir-timeline .tl-clip-title.muted:is(:hover, .held) .tl-tab-tint { opacity: 0; }
+.mir-timeline .tl-clip-title.muted .tl-clip-name { opacity: var(--tl-muted-fade); }
 .mir-timeline .tl-clip-title:is(:hover, .held) .tl-tab-rim { stroke: var(--tl-rim-held); }
 .mir-timeline .tl-clip-title.held { z-index: 2; cursor: grabbing; }
 .mir-timeline .tl-clip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; pointer-events: none; font-weight: var(--tl-tab-name-weight); letter-spacing: var(--tl-tab-name-track); text-transform: uppercase; }
@@ -355,9 +372,10 @@
 .mir-timeline .tl-playhead-tail { position: absolute; top: 0; right: 100%; bottom: 0; width: 0; background: linear-gradient(90deg, transparent, var(--tl-tail-ink)); }
 .mir-timeline .tl-playhead.scrubbing { box-shadow: var(--tl-playhead-glow-held); }
 .mir-timeline .tl-marquee { display: none; position: absolute; z-index: 4; pointer-events: none; border: 1px solid var(--tl-marquee-edge); background: var(--tl-marquee-fill); box-sizing: border-box; border-radius: var(--tl-marquee-r); }
-.mir-timeline .timeline-surface[data-tool="select"] .tl-viewport { cursor: crosshair; }
-.mir-timeline .timeline-surface[data-tool="scrub"] .tl-viewport { cursor: ew-resize; }
-.mir-timeline .timeline-surface[data-tool="slice"] :is(.tl-viewport, .tl-clip svg, .tl-clip-title, .tl-point, .tl-tension) { cursor: col-resize; }
+/* THE CURSOR WEARS THE MODE (1.5.7-alpha.49): the mode's glyph (--tl-mode-cursor, written by setTool) over empty lane space; a mode that is not a
+   pencil (data-cursor="all": DELETE · MUTE · SLICE · ZOOM · PREVIEW) wears it over the clips too.  Before: SELECT a crosshair, SCRUB ew-resize, SLICE col-resize. */
+.mir-timeline .timeline-surface .tl-viewport { cursor: var(--tl-mode-cursor, crosshair); }
+.mir-timeline .timeline-surface[data-cursor="all"] :is(.tl-clip svg, .tl-clip-title, .tl-point, .tl-tension, .tl-trim, .tl-edge, .tl-clip-more) { cursor: var(--tl-mode-cursor, crosshair); }
 
 /* ── THE EMPTY LANE SAYS HOW (1.5.7-alpha.23): with no clip, one line over the lanes on how a clip arrives (view.js); never in the way ── */
 
@@ -391,6 +409,18 @@
 /* a folded tool's row in ⋯'s list: its icon (when it has one), then its word */
 .tl-pop .trig.tl-row { display: flex; align-items: center; gap: var(--tl-pop-row-gap); }
 .tl-pop .trig.tl-row svg { width: var(--tl-icon); height: var(--tl-icon); display: block; flex: none; }
+/* THE MODE MENU (1.5.7-alpha.49, λWAVES 041 T1): FL's context tool-menu — MODE, nine large icon rows with a radio dot; MENU, the window's menus, the rest empty */
+.tl-pop.tl-modes { flex-direction: row; align-items: stretch; gap: var(--tl-modes-gap); }
+.tl-modes .tl-modes-col { display: flex; flex-direction: column; gap: var(--tl-pop-gap); }
+.tl-modes .tl-modes-menu { min-width: var(--tl-modes-menu-min); padding-left: var(--tl-modes-gap); border-left: 1px solid var(--glass-hairline); }
+.tl-pop .trig.tl-mode { display: flex; align-items: center; justify-content: space-between; width: var(--tl-mode-w); min-height: var(--tl-mode-h); height: var(--tl-mode-h); padding: var(--tl-mode-pad); box-sizing: border-box; }
+.tl-pop .trig.tl-mode svg { width: var(--tl-mode-icon); height: var(--tl-mode-icon); display: block; flex: none; }
+.tl-pop .tl-mode-dot { width: var(--tl-mode-dot); height: var(--tl-mode-dot); box-sizing: border-box; border: 1px solid currentColor; border-radius: 50%; opacity: var(--tl-mode-dot-fade); flex: none; }
+.tl-pop .tl-mode.on .tl-mode-dot { background: currentColor; opacity: 1; }
+.tl-pop.tl-modes .tl-modes-menu .trig { min-height: var(--tl-modes-row-h); display: flex; align-items: center; justify-content: flex-start; gap: var(--tl-pop-row-gap); text-align: start; }
+@media (pointer: coarse) { .tl-pop.tl-modes .tl-modes-menu .trig { min-height: var(--tl-pop-trig-h); } .tl-pop .trig.tl-mode { min-height: var(--touch); height: var(--touch); } }   /* a finger's rows */
+.tl-pop.tl-modes .tl-modes-menu .trig.tl-sub { justify-content: space-between; }
+.tl-pop .trig.tl-row svg.tl-sub-arrow { width: var(--tl-sub-arrow); height: var(--tl-sub-arrow); opacity: var(--tl-sub-arrow-fade); }
 .tl-confirm { position: fixed; z-index: calc(var(--z-veil) + 21); max-width: var(--tl-confirm-max); padding: var(--tl-confirm-pad); font-size: var(--tl-confirm-size); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
 .tl-confirm .trig { margin: 8px 4px 0 0; }
 .tl-pop .tl-value-input { width: 100%; box-sizing: border-box; color: inherit; background: var(--glass-well); border: 1px solid var(--glass-border-color); border-radius: var(--tl-input-r); padding: var(--tl-input-pad); font: inherit; }

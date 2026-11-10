@@ -13,7 +13,7 @@
  *     left).  A shadow falls away from it, the shine sits toward it.  The sheets draw both with CSS sin()/cos() from
  *     `--light-angle`; lightOffset() is the same arithmetic for a test or a script.
  *
- * Exports: THEME_GLASS, hslRgb, glassTint, glassVeil, paneShadow, lightOffset, lightIsHome, paneLightness, solidInk, SPACING, spacingPx,
+ * Exports: THEME_GLASS, hslRgb, glassTint, glassVeil, paneShadow, lightOffset, lightIsHome, paneLightness, solidInk, SPACING, SPACING_PX, SPACING_MAX, spacingPx,
  *          LIGHT_HOME, autoInk; the device (alpha.12): isMobile, isIPad, TOUCH_TABLET_MQ, BLUR_DESKTOP, BLUR_TOUCH,
  *          firstRunBlur, DEVICE_BLUR, TIER_LAW, classifyTier, qualityOfTier.  The device tests read `navigator` and
  *          `matchMedia` only when they are not handed them. */
@@ -87,10 +87,18 @@ export function solidInk(o, theme) { return paneLightness(o, theme) > 55 ? 'dark
  *  padding never goes under 6 px, so no control touches its edge.  0 is flush (square panes, no shadow inside the slab).
  *  AIRY is this kit's invention, after DEFAULT.  The kit before SPACING was 10 · 10 · 7–10. */
 export const SPACING = Object.freeze({ 0: [0, 0, 6, 0], tight: [3, 3, 6, 2], default: [6, 6, 8, 4], airy: [16, 16, 9, 6] });
-/** spacingPx(level) → { gap, inset, pad, rail } in px (an unknown level is DEFAULT) */
-export function spacingPx(level) {
-  const [gap, inset, pad, rail] = SPACING[level] || SPACING.default;
-  return { gap, inset, pad, rail };
+/** 1.5.7-alpha.57 SPACING IS A KNOB: the levels as px (the gap between rack windows) — what a stored level opens as */
+export const SPACING_PX = Object.freeze({ 0: 0, tight: 3, default: 6, airy: 16 });
+export const SPACING_MAX = 24;
+const SPACING_STOPS = [[0, SPACING[0]], [3, SPACING.tight], [6, SPACING.default], [16, SPACING.airy], [SPACING_MAX, [24, 24, 10, 8]]];
+/** spacingPx(v) → { gap, inset, pad, rail } in px.  v is px (0 … 24: the gap and the inset are v; the pane's padding and the chip rail's
+ *  gap run between the levels' numbers, whole px) or a level's name (0 · tight · default · airy); anything else is DEFAULT */
+export function spacingPx(v) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) v = Object.prototype.hasOwnProperty.call(SPACING_PX, String(v)) ? SPACING_PX[String(v)] : SPACING_PX.default;
+  v = Math.max(0, Math.min(SPACING_MAX, v));
+  let k = 1; while (k < SPACING_STOPS.length - 1 && v > SPACING_STOPS[k][0]) k++;
+  const [x0, a] = SPACING_STOPS[k - 1], [x1, b] = SPACING_STOPS[k], t = (v - x0) / (x1 - x0), at = (i) => Math.round(a[i] + (b[i] - a[i]) * t);
+  return { gap: Math.round(v), inset: Math.round(v), pad: at(2), rail: at(3) };
 }
 
 /** solidRelief(state, theme) → { lift, sink, gain } — the SOLID relief's mixes as functions of the pane's lightness L

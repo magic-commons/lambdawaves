@@ -56,8 +56,10 @@ export const SIDES = Object.freeze(['left', 'right']);
 export const RACK = Object.freeze({
   detach: 12,       // … and comes off the rack once it has cleared the column by 12 px (BASINS rack.js:501)
   slot: 4,          // the insertion slot's thickness
-  peekNear: 44,     // a hidden rack peeks when the pointer is this near its edge (BASINS rack.js:397) …
+  peekNear: 140,    // a hidden rack peeks when the pointer is this near its edge (BASINS rack.js:397: 44; 1.5.7-alpha.63 THE REVEAL IS QUICK AND NEAR: 140) …
   peekHold: 48,     // … and holds while the pointer stays within the rack plus this (the armed dismiss)
+  barNear: 160,     // the hidden transport peeks when the pointer is this near its seat (1.5.7-alpha.63) …
+  barHold: 220,     // … and holds while it stays within this of it
   longPress: 400,   // a finger holds a header this long to lift it
   slop: 3,          // the hand travels this far before a press becomes a drag
   nudge: 24,        // an arrow nudges a floating window this far (the window rail's Shift+arrow)
@@ -871,14 +873,30 @@ export function createRack({ host = globalThis.document && document.body, sides 
     setPeek(side);
     if (transport) {                                                  // λWAVES wave 108: the transport peeks around its own seat
       const b = trSeatRect(), x = e.clientX, y = e.clientY;
-      const near = x >= b.left - 80 && x <= b.right + 80 && y >= b.top - 60 && y <= b.bottom + 60;
-      const inside = x >= b.left - 120 && x <= b.right + 120 && y >= b.top - 120 && y <= b.bottom + 120;
+      const n = RACK.barNear, h = RACK.barHold;                      // alpha.63: 160 / 220 px round the bar's seat (were 80 × 60 / 120)
+      const near = x >= b.left - n && x <= b.right + n && y >= b.top - n && y <= b.bottom + n;
+      const inside = x >= b.left - h && x <= b.right + h && y >= b.top - h && y <= b.bottom + h;
       if (near && !trPeek) { trPeek = true; body.classList.add('transport-peek'); } else if (!inside && trPeek) { trPeek = false; body.classList.remove('transport-peek'); }
     }
   }, passive);
   view.addEventListener('blur', () => setPeek(''), on);
-  const refit = () => { for (const root of stack) { const st = floatState.get(root.dataset.id); if (st) placeFloat(root, st); } };
+  /* 1.5.7-alpha.59 A WINDOW COMES BACK TO THE EDGE: a float that stood whole on the screen before the page or UI SCALE changed is brought
+     back whole (its head and its buttons can be pressed), not left hanging by the drag clamp's 120 px; one parked partly off stays as the hand left it */
+  let fitView = null, fitZoom = 1;
+  const refit = () => {
+    const v = viewSize();
+    for (const root of stack) {
+      const st = floatState.get(root.dataset.id); if (!st) continue;
+      const z = cssZoom(root), h = root.offsetHeight;
+      if (fitView && !isTablet() && st.x >= 0 && st.y >= 0 && st.x + st.w * fitZoom <= fitView.width + 1 && st.y + h * fitZoom <= fitView.height + 1) {
+        st.x = Math.max(0, Math.min(st.x, v.width - st.w * z)); st.y = Math.max(0, Math.min(st.y, v.height - h * z));
+      }
+      placeFloat(root, st);
+    }
+    fitView = v; fitZoom = cssZoom(racks.right || racks.left) || 1;
+  };
   view.addEventListener('resize', () => { rackW = 0; trBox = null; refit(); syncPhone(); }, passive);
+  fitView = viewSize(); fitZoom = cssZoom(racks.right || racks.left) || 1;                 // what the floats were last fitted to
   if (tabletMq && view.visualViewport) view.visualViewport.addEventListener('resize', refit, passive);   // BASINS fitFloats: the keyboard and the pinch move the visual viewport
   view.addEventListener('orientationchange', () => syncPhone(), passive);
 
