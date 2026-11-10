@@ -31,7 +31,7 @@ body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-head { -webkit-backdr
 #field.drag { cursor: grabbing; }
 #rack, #rackL { position: absolute; top: var(--rack-top, 0px); right: 0; bottom: auto; max-height: min(100%, var(--rack-stop, 100%)); width: var(--rack-w); z-index: var(--z-chrome); min-height: 0; overflow: hidden auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   padding: var(--sp-2); display: flex; flex-direction: column; gap: var(--sp-2); background: transparent; border: 0; scrollbar-width: thin; pointer-events: auto; touch-action: pan-y;
-  transition: transform .28s ease, opacity .28s ease; }
+  transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease; }
 /* 039 V1 · THE RACKS STOP ABOVE THE BAR: --rack-stop (shell/modulation.js clearRack) is the room above the bar's top on a rack whose columns it shares;
    039 F3 · THE MENUS STAND ABOVE THE RACKS: --rack-top (fitHead) starts a rack below the menu row while the row shows and meets its cards */
 /* iteration 006 R: a column whose laid-out content fits has no bar to show, so the rack motion's FLIP transforms must not raise one
@@ -566,10 +566,14 @@ body.ui-hidden #notebook, body.ui-hidden #rackPeek, body.ui-hidden #rackPeekL, b
    backdrop-filter live; visibility: hidden takes it out of paint AND KEEPS ITS scrollTop, which display: none
    would throw away (the wave-24 law: a rack comes back where you left it).  The delay lets the slide finish
    first, so hiding is still animated; peeking cancels the delay so it comes back instantly. */
-body.rack-hidden #rack, body.rack-hidden #rackL { visibility: hidden; transition: transform .28s ease, opacity .28s ease, visibility 0s linear .28s; }
-body.rack-hidden.rack-peek-right #rack, body.rack-hidden.rack-peek-left #rackL { visibility: visible; transition: transform .28s ease, opacity .28s ease, visibility 0s linear 0s; }
-body.rack-hidden #transport.mini { visibility: hidden; transition: transform .28s ease, opacity .28s ease, visibility 0s linear .28s; }
-body.rack-hidden.transport-peek #transport.mini { visibility: visible; transition: transform .28s ease, opacity .28s ease, visibility 0s linear 0s; }
+/* 041 I8 · THE REVEAL IS QUICK (Josh 11-09: "Increase the speed of the reveal/hide animation to be much faster"): the racks' hide, peek and return and
+   the bar's hide and peek share one time, 120 ms (was 280; the bar's return on B is its own 240 ms, the dodge's).  These rules out-rank the kit's own (rack.css, --motion-structural), so the kit's W10 speed reaches λWAVES
+   through this one name (FOR-YAN in I-BUILD: point it at W10's token at the merge) */
+:root { --lw-reveal: .12s; }
+body.rack-hidden #rack, body.rack-hidden #rackL { visibility: hidden; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear var(--lw-reveal); }
+body.rack-hidden.rack-peek-right #rack, body.rack-hidden.rack-peek-left #rackL { visibility: visible; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear 0s; }
+body.rack-hidden #transport.mini { visibility: hidden; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear var(--lw-reveal); }
+body.rack-hidden.transport-peek #transport.mini { visibility: visible; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear 0s; }
 
 
 .nb-grip { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; z-index: 4; cursor: nwse-resize; touch-action: none; }
