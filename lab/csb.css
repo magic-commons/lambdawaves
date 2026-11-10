@@ -13,6 +13,13 @@
 #transport[data-layout="csb"] > .csb-right { grid-area: right; justify-self: end; }
 #transport[data-layout="csb"] > .csb-mid { grid-area: mid; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 220px; }
 #transport[data-layout="csb"] > .native-tempo { grid-area: panel; margin-top: 8px; }
+/* 041 P9 · THE BAR IN THREE (Josh 11-09: "Add dividers … a really subtle inset … try to make it so that the dividers evenly split the CSB into 3
+   parts"): on the stage the three tracks stand 12 px apart and a 2-px inset groove (the well's fill and relief, the BPM pill's) lies in the middle
+   of each gap — at the bar's thirds (13 + 212 + 6 of 694 px, and its mirror); the racked bar is three rows already and has none */
+#transport.mini[data-layout="csb"] { column-gap: 12px; }
+#transport.mini[data-layout="csb"] > .csb-mid { position: relative; }
+#transport.mini[data-layout="csb"] > .csb-mid::before, #transport.mini[data-layout="csb"] > .csb-mid::after { content: ''; position: absolute; top: 4px; bottom: 4px; width: 2px; border-radius: 1px; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); pointer-events: none; }
+#transport.mini[data-layout="csb"] > .csb-mid::before { left: -7px; } #transport.mini[data-layout="csb"] > .csb-mid::after { right: -7px; }
 /* iteration 016 W6 · THE EXPANDER'S DIRECTION (call 9): at the stage's foot the panel is the grid's first row and rises above the bar; at the top
    (.at-top) it hangs below.  A narrow screen seats the bar at the top whatever its class (skin.css), so wide only. */
 @media (min-width: 861px) {
