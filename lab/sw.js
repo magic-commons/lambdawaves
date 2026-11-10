@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '595fcca1e97a'],
-  ['./build-id.js',                                                 '806749350fac'],
+  ['./build-id.js',                                                 '5f4b4514b1bc'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '41922d244a06'],
@@ -412,7 +412,7 @@ const PRECACHE = [
   ['./separable.js',                                                'e99b6c67ebd5'],
   ['./settings-store.js',                                           'c176b8037eb5'],
   ['./shadowview.js',                                               'ad101af8b299'],
-  ['./shell/controller.js',                                         '5c655b280613'],
+  ['./shell/controller.js',                                         'dde0b981fe9b'],
   ['./shell/facade.js',                                             'ba409ed37b9a'],
   ['./shell/history.js',                                            'b166d1dd1c91'],
   ['./shell/ink.js',                                                '3622d2a07c98'],
@@ -473,7 +473,7 @@ const PRECACHE = [
   ['./windows/settings-card.js',                                    '047f60dce4c1'],
   ['./windows/spectrum.js',                                         '94f92699f720'],
   ['./windows/static-field.js',                                     '3c2a3cf1ac89'],
-  ['./windows/transition.js',                                       'fae1b23a47fc'],
+  ['./windows/transition.js',                                       '4cd91344f960'],
   ['./worker-pool.js',                                              '2a50d7f93218'],
 ];
 

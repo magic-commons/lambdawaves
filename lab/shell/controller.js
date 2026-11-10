@@ -295,11 +295,13 @@ export async function createController(app) {
     app.state.refSnapshot = { re: Float64Array.from(c.re), im: Float64Array.from(c.im), ids: reg.populated(), t: clock.t, digest: reg.digest() };
     app.state.pendingRef = refModes(); schedule(TIER.PRESENT);
   }
+  const handEdit = () => !!(app.hooks.ab && app.hooks.ab.handEdit());   // 041 H2 · A HAND'S EDIT ENDS THE TRANSITION (windows/transition.js)
   const api = {
     reg,
     select(a) { app.w.spectrum.select(a); schedule(TIER.PRESENT); },
     toggleMode(a) {
-      if (reg.populated().includes(a)) { reg.set(a, 0, 0, clock.t); }   // iteration 017 W3: the grid's own rule (populated(): |c|² > EPS_POP), not > 0 — a BOX packet leaves 1e-33 dust a press could never add to
+      const was = reg.populated().includes(a); handEdit();   // 041 H2: under TRANSITION the edit lands on the last stored labels (the chip's own state decides add or remove)
+      if (was) { reg.set(a, 0, 0, clock.t); }   // iteration 017 W3: the grid's own rule (populated(): |c|² > EPS_POP), not > 0 — a BOX packet leaves 1e-33 dust a press could never add to
       else { const pop = reg.populated(); let amp = 1; if (pop.length) { amp = 0; for (const b of pop) amp += Math.sqrt(reg.population(b)); amp /= pop.length; } reg.set(a, amp, 0, clock.t); }
       touchState();
     },
@@ -307,7 +309,7 @@ export async function createController(app) {
      *  joins at the mean |c| of those that were (toggleMode's rule, read ONCE before the stroke adds), phase 0; remove ⇒
      *  each populated one goes to c = 0.  One touchState() however many states it covers. */
     paintModes(list, add) {
-      let n = 0, amp = 1;
+      let n = 0, amp = 1; handEdit();
       if (add) { const pop = reg.populated(); if (pop.length) { amp = 0; for (const b of pop) amp += Math.sqrt(reg.population(b)); amp /= pop.length; } }
       const live = new Set(reg.populated());   // iteration 017 W3: the chip's 'on' (populated(), > EPS_POP) — `population > 0` took a BOX packet's 1e-33 dust for a state
       for (const a of list) {
@@ -322,13 +324,13 @@ export async function createController(app) {
       const n = reg.norm() || 1; const c = reg.coeffAt(a, clock.t); const ph = Math.atan2(c.im, c.re);
       reg.setPolar(a, Math.sqrt(Math.max(0, v)) * n, ph, clock.t); touchState();
     },
-    clear() { reg.clear(); app.state.refSnapshot = null; touchState(); },
+    clear() { handEdit(); reg.clear(); app.state.refSnapshot = null; touchState(); },
     normalize() { app.w.normalizeNow(); },
     /* iteration 008 S · SPECTRUM's head and grid (they left STATE): the preset list, a HAND's preset (the register only, 036 P1); FILL ALL (every label at
        clock.t, equal and in phase, normalised — the norm the metric in force reads); settle(), the quiet normalisation a hand stroke ends with */
     presets: PRESETS.map((p) => ({ id: p.id, label: p.label })),
     loadPreset(id) { return loadPreset(id, { hand: true }); },
-    fillAll() { for (let a = 0; a < BASIS.length; a++) reg.set(a, 1, 0, clock.t); reg.normalize(); touchState(); },
+    fillAll() { handEdit(); for (let a = 0; a < BASIS.length; a++) reg.set(a, 1, 0, clock.t); reg.normalize(); touchState(); },
     settle() { if (!reg.populated().length) return; reg.normalize(); touchState(); },
     rateOf(a) { return rates[a]; },
     setRate(a, r) {
@@ -341,7 +343,7 @@ export async function createController(app) {
     setPhase(a, ph) { const c = reg.coeffAt(a, clock.t); reg.setPolar(a, Math.hypot(c.re, c.im), ph, clock.t); touchState(); },
     toggleMute(a) { reg.setMute(a, !reg.muted[a]); touchState(); },
     toggleSolo(a) { reg.setSolo(a, !reg.solo[a]); touchState(); },
-    remove(a) { reg.set(a, 0, 0, clock.t); reg.setMute(a, false); reg.setSolo(a, false); touchState(); }
+    remove(a) { handEdit(); reg.set(a, 0, 0, clock.t); reg.setMute(a, false); reg.setSolo(a, false); touchState(); }
   };
   /* 0.5.2 (the integrator, after R1): the 56 controller names the MOVING modules read (R1-BUILD §8 candidate 1, r1-measure/ctlunion.txt) live on
      app.ctl — filled ONCE, here, so no pair row edits this file; a module created before this seat (§1 SETTINGS) reads app.ctl.x inside a callback,
