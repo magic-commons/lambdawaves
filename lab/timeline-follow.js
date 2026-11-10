@@ -7,7 +7,8 @@
  * or a rail chip), a wheel, or a scroll this module did not write (the kit's zoom, a new clip, LOCATE, Shift+0 included) turns it OFF; it
  * stands down under a film.
  * AUTO-COLOR: every clip's curve takes a colour of the active PALETTE — spread evenly round its wheel in lane-then-start order — or, with
- * PALETTE off, of the HSV wheel (s .85, v 1) in golden-angle order; AUDIO clips keep their tint.  One undo row. */
+ * PALETTE off, of the HSV wheel (s .85, v 1) in golden-angle order; AUDIO clips keep their tint.  One undo row.
+ * 041 N5 · A LANE LEAVES ITS LAST VALUE: `leaves()` below (no row; it rides the clock's advance). */
 import { toLUT, rgbToHex } from './mir/palette.js';
 
 /** a press here is a button's, never the lanes': the kit's own exclusion (timeline/editor.js) + the work bar and the rail */
@@ -59,11 +60,30 @@ export function timelineRows(app) {
     m.begin(); curves.forEach((c, i) => m.updateCurve(c.id, { color: colour(i) })); m.commit();
     return n;
   }
+  /* 041 N5 · A LANE LEAVES ITS LAST VALUE (Josh, call 8: "if the playhead goes past a clip, it must remember the last parameter value that it left
+     behind").  The kit's arrangement answers null off a clip and the knob fell back to its base; here, when a tick or a film's step carries the
+     playhead over a clip's end onto empty lane, the clip's end value is written as the target's BASE — the knob keeps it until another clip plays
+     or a hand moves it.  A seek (a locate, a loop's wrap) passes nothing */
+  function leaves() {
+    const host = app.state.modHost, m = tl.model; let ends = null, prev = beat();
+    m.subscribe(() => { ends = null; });
+    const read = () => { ends = new Map(); const d = m.state(), target = new Map(d.curves.map((c) => [c.id, c.targetId]));
+      for (const c of d.clips) { const id = target.get(c.curveId); if (id == null || c.mute) continue; if (!ends.has(id)) ends.set(id, []); ends.get(id).push(c.start + c.duration); } };
+    host.clock.onAdvance((kind) => {
+      const b = beat(), a = prev; prev = b;
+      if (kind === 'seek' || !(b > a)) return;
+      if (!ends) read();
+      for (const [id, E] of ends) {
+        const end = Math.max(...E.filter((e) => e > a && e <= b)); if (!(end > a) || !host.registry.has(id) || m.value(id, b) !== null) continue;
+        const v = m.value(id, end - 1e-6); if (Number.isFinite(v)) host.registry.writeNorm(id, v);
+      }
+    });
+  }
   return {
     /** the rows ⋯ shows (read at each open) */
     rows: () => [['FOLLOW PLAYHEAD', follow, 'follow-playhead', on], ['AUTO-COLOR', autoColor, 'auto-color']],
     /** bind(tl): the installed timeline; each present's paintHead also follows */
-    bind(t) { tl = t; const paint = t.paintHead; t.paintHead = (...a) => { tick(); return paint(...a); }; },   // the lanes move first: the head paints at its pin
+    bind(t) { tl = t; const paint = t.paintHead; t.paintHead = (...a) => { tick(); return paint(...a); }; leaves(); },   // the lanes move first: the head paints at its pin
     following: () => on, autoColor: () => autoColor(),
   };
 }
