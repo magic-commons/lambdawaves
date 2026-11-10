@@ -7,6 +7,9 @@ import { el, knob, readout, seg, stepper, themeInk } from './mir/kit.js'; import
 export let LAT = null;   // the one handle (persist, the verb): the app literal never gains a key
 const KN = { N: ['N', 3, 256, 1], L: ['n × n', 2, 16, 1], J1: ['J₁', 0, 2], J2: ['J₂', 0, 2], W: ['W', 0, 30], seed: ['SEED', 1, 99, 1], lam: ['λ', 0, 4], phi: ['φ', 0, 6.2832],
   Phi: ['Φ', 0, 6.2832], rings: ['RINGS', 2, 4, 1], V: ['BARRIER V', 0, 4], nb: ['SITES', 1, 2, 1], fp: ['FLUX p', 0, 8, 1], fq: ['FLUX q', 1, 8, 1], ns: ['SPINS', 2, 8, 1], d: ['d', 1, 3, 1], seeds: ['SEEDS', 1, 16, 1], x0: ['CENTRE', 0, 1], sig: ['WIDTH σ', 0.5, 16], k0: ['k₀', 0, 3.1416], idx: ['n · m', 0, 255, 1] };
+/* 041 H6: every dial of the room says what it turns */
+const HN = { N: 'Sites on the chain or ring', L: 'Side of the square lattice', J1: 'Hopping J₁', J2: 'Second hopping J₂', W: 'Disorder strength W', seed: 'Disorder seed', lam: 'Quasi-periodic strength λ', phi: 'Phase φ of the modulation',
+  Phi: 'Flux Φ through the ring', rings: 'Rings of hexagons', V: 'Barrier height V', nb: 'Barrier width in sites', fp: 'Flux numerator p', fq: 'Flux denominator q', ns: 'Number of spins', d: 'Dimension of the lattice', seeds: 'Seeds averaged', x0: 'Packet centre', sig: 'Packet width σ', k0: 'Packet momentum k₀', idx: 'Site n or eigenstate m' };
 const SK = { ground: [], packet: ['x0', 'sig', 'k0'], site: ['idx'], eigen: ['idx'] }, STK = ['state', 'idx', 'x0', 'sig', 'k0'], PRE = (id) => PRESETS.find((q) => q.id === id) || PRESETS[0];
 const ENTER = { tunnel: { N: 256, state: 'packet', x0: 0.25, sig: 4 }, hofstadter: { L: 12 }, walk: { N: 128 } };   // a preset's own start (TUNNEL's packet from the left), unless a load or the verb says otherwise
 const NOTE = { benzene: ' Hückel: the six π levels ±2β, ±β, ±β fall 1 + 2 + 2 + 1 (a₂u · e₁g · e₂u · b₂g); the degenerate e₁g pair is the HOMO that MOLECULES’ STO-3G benzene names in its stem.',
@@ -18,10 +21,10 @@ const NOTE = { benzene: ' Hückel: the six π levels ±2β, ±β, ±β fall 1 + 
   spin: ' SPIN CHAIN: the XX chain H = J Σ (σ⁺ᵢσ⁻ᵢ₊₁ + h.c.) of N ≤ 8 spins, diagonalised exactly on its 2^N states; SITE n is the product state whose set bits are the ↑ spins (|↑↓↑↓…⟩ to start; a click on a spin flips it). The bars are the N spins’ ⟨σ_z⟩, the hue its sign: 2^N basis bars would be the wrong picture. Page’s number is a random state’s mean, not a bound.' };
 export function createLattice(host, api) {
   const P = { ...DEFAULTS }, ui = {}; let H = null, S = null, ev = null, t0 = 0, hit = -1, got = null, lastTT = 0, dirty = true, busy = false, gen = 0, lastT = NaN, lut = null, lutOf = null, geo = null;
-  const pre = stepper({ aria: 'Lattice preset', items: PRESETS.map(({ id, label }) => ({ id, label })), value: P.preset, cls: 'mol-step', onChange: (id) => set({ preset: id }) });
-  const st = seg({ aria: 'Lattice state', value: P.state, options: Object.keys(SK).map((id) => ({ id, label: id === 'eigen' ? 'EIGEN m' : id === 'site' ? 'SITE n' : id.toUpperCase() })), onChange: (v) => set({ state: v }) });
+  const pre = stepper({ aria: 'Lattice preset', title: 'LATTICE · the model', items: PRESETS.map(({ id, label }) => ({ id, label })), value: P.preset, cls: 'mol-step', onChange: (id) => set({ preset: id }) });
+  const st = seg({ aria: 'Lattice state', value: P.state, options: Object.keys(SK).map((id) => ({ id, label: id === 'eigen' ? 'EIGEN m' : id === 'site' ? 'SITE n' : id.toUpperCase(), title: { ground: 'Start in the ground state', packet: 'Start as a moving packet', site: 'Start on one site', eigen: 'Start in one eigenstate' }[id] })), onChange: (v) => set({ state: v }) });
   host.append(pre.root, st.root); const r1 = el('div', 'row', host);
-  for (const [k, [label, min, max, step]] of Object.entries(KN)) r1.appendChild((ui[k] = knob({ label, min, max, value: P[k], step,
+  for (const [k, [label, min, max, step]] of Object.entries(KN)) r1.appendChild((ui[k] = knob({ label, title: HN[k], min, max, value: P[k], step,
     fmt: (v) => (k === 'L' && P.preset === 'anderson' && P.d > 1 ? `${(v = Math.min(P.d > 2 ? 6 : 16, Math.round(v)))}${P.d > 2 ? '³' : '²'} = ${v ** P.d} sites` : k === 'rings' ? `${6 * v * v} sites` : k === 'Phi' ? (v / 6.2832).toFixed(3) + ' Φ₀' : step ? String(Math.round(v)) : v.toFixed(2)), onInput: (v) => set({ [k]: step ? Math.round(v) : v }) })).root);
   const hold = el('div', 'ladder-c', host), cv = el('canvas', '', hold); hold.style.height = '180px';
   const ro = { ipr: readout({ label: 'IPR  Σ|ψ|⁴', value: '—' }), lev: readout({ label: 'LEVELS  in J', value: '—' }), law: readout({ label: 'CLOSED FORM · PREDICTION', value: '—', cls: 'wide' }), tr: readout({ label: 'T · R  once passed', value: '—', cls: 'wide' }) };

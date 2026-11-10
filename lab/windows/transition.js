@@ -16,17 +16,17 @@ export function createTransition(app) {
   function clearRegister() { reg.clear(); app.state.refSnapshot = null; clock.seek(0, { schedule: false }); touchState(); }   // 021 R3: THE ONE SEEK
   const gab = ui.abBox = group(null, ''); gab.classList.add('sp-ab'); gab.setAttribute('aria-label', 'A / B · TRANSITION (Rabi)');
   const rab = el('div', 'row tight native-ab', gab);   // 0.5.3 M11 (R7): ONE row STORE A · A · STORE B · B, a stored slot lit by `.stored` (lab.css ::after); 018 C1: + CLEAR
-  let abA = null, abB = null, abOmega = 0.05;
+  let abA = null, abB = null, abOmega = 0.05, abLast = null;   // 041 H2: abLast — the store written last ('A' | 'B'; a file's stores: B)
   const SUB = 'store two states, then TRANSITION plays A → B → A at Ω';
   const snap = () => ({ re: Float64Array.from(reg.re0), im: Float64Array.from(reg.im0) });
   const recall = (S) => { if (!S) return; if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } reg.re0.set(S.re); reg.im0.set(S.im); reg.version++; touchState(); abStatus(); };
   ui.abRo = readout({ label: '', value: '—  /  —', sub: SUB }); ui.abRo.root.querySelector('.ro-lbl').remove(); ui.abRo.root.setAttribute('aria-label', 'A / B');
-  rab.appendChild(trig({ label: 'STORE A', title: 'keep the register as it is now as state A', onFire: () => { abA = snap(); abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeA';   // 021 I1: the actions press them
+  rab.appendChild(trig({ label: 'STORE A', title: 'keep the register as it is now as state A', onFire: () => { abA = snap(); abLast = 'A'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeA';   // 021 I1: the actions press them
   const slotA = rab.appendChild(trig({ label: 'A', cls: 'ab-slot', title: 'recall state A', onFire: () => recall(abA) }).root);
-  rab.appendChild(trig({ label: 'STORE B', title: 'keep the register as it is now as state B', onFire: () => { abB = snap(); abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeB';
+  rab.appendChild(trig({ label: 'STORE B', title: 'keep the register as it is now as state B', onFire: () => { abB = snap(); abLast = 'B'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeB';
   const slotB = rab.appendChild(trig({ label: 'B', cls: 'ab-slot', title: 'recall state B', onFire: () => recall(abB) }).root);
   const clr = chip(el('button', 'sp-abclear', rab), 'trash'); clr.type = 'button'; clr.title = 'CLEAR · empty A and B'; clr.setAttribute('aria-label', 'CLEAR A and B');
-  clr.addEventListener('click', () => { if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } abA = abB = null; touchState(); abStatus(); });
+  clr.addEventListener('click', () => { if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } abA = abB = abLast = null; touchState(); abStatus(); });
   const rab2 = el('div', 'row tight', gab);
   ui.abSw = sw({ label: 'TRANSITION', value: false, title: 'play the Rabi mix cos(Ω(t−t₀)/2)·A(t) + sin(Ω(t−t₀)/2)·B(t)', onChange: (v) => {
     if (v && sturm.P) { ui.abSw.set(false); ui.abRo.set('off under STURMIAN', 'warn'); ui.abRo.setSub('A / B TRANSITION is a diagonal-phase feature (two exact diagonal evolutions mixed): switch SCALE back to HYDROGEN'); return; }
@@ -44,7 +44,7 @@ export function createTransition(app) {
   ui.ab = {
     get: () => ({ a: abA ? cut(abA) : null, b: abB ? cut(abB) : null, omega: abOmega, on: !!reg.transition }),
     set(o) { if (!o) return; const W = reg.re0.length, pad = (v) => Float64Array.from(widen(v, 0, W)), take = (S) => (S && Array.isArray(S.re) && (S.re.length === N6 || S.re.length === W) && Array.isArray(S.im)) ? { re: pad(S.re), im: pad(S.im) } : null;   // a 91-wide store (an older file) pads n = 7 with zeros
-      abA = take(o.a); abB = take(o.b); if (Number.isFinite(o.omega)) { abOmega = Math.max(0.005, Math.min(1, o.omega)); if (ui.abOmega) ui.abOmega.set(abOmega); }
+      abA = take(o.a); abB = take(o.b); abLast = null; if (Number.isFinite(o.omega)) { abOmega = Math.max(0.005, Math.min(1, o.omega)); if (ui.abOmega) ui.abOmega.set(abOmega); }
       if (reg.transition) reg.clearTransition(clock.t);
       if (o.on && abA && abB && !sturm.P) { reg.setTransition(abA, abB, abOmega, clock.t); ui.abSw.set(true); } else ui.abSw.set(false);
       abStatus(); }
@@ -58,8 +58,13 @@ export function createTransition(app) {
     ui.abRo.setSub(reg.transition ? (exact ? 'two-level Rabi drive · |⟨A|B⟩| = ' + ov.toFixed(3) : 'composite-state envelope · |⟨A|B⟩| = ' + ov.toFixed(3)) : SUB);
   }
   abStatus();
-  app.hooks.ab = { get A() { return abA; }, get B() { return abB; }, storeA() { abA = snap(); abStatus(); hNote(); }, storeB() { abB = snap(); abStatus(); hNote(); }, setStores(A, B) { abA = A ? { re: Float64Array.from(A.re), im: Float64Array.from(A.im) } : null; abB = B ? { re: Float64Array.from(B.re), im: Float64Array.from(B.im) } : null; abStatus(); }, recallA() { recall(abA); }, recallB() { recall(abB); }, set(v) { if (v && sturm.P) return false; ui.abSw.set(v); if (v) { if (!abA || !abB) return false; reg.setTransition(abA, abB, abOmega, clock.t); } else if (reg.transition) reg.clearTransition(clock.t); touchState(); abStatus(); return true; }, get on() { return !!reg.transition; }, get status() { return ui.abRo.root.textContent; },
+  app.hooks.ab = { get A() { return abA; }, get B() { return abB; }, storeA() { abA = snap(); abLast = 'A'; abStatus(); hNote(); }, storeB() { abB = snap(); abLast = 'B'; abStatus(); hNote(); }, setStores(A, B) { abLast = null; abA = A ? { re: Float64Array.from(A.re), im: Float64Array.from(A.im) } : null; abB = B ? { re: Float64Array.from(B.re), im: Float64Array.from(B.im) } : null; abStatus(); }, recallA() { recall(abA); }, recallB() { recall(abB); }, set(v) { if (v && sturm.P) return false; ui.abSw.set(v); if (v) { if (!abA || !abB) return false; reg.setTransition(abA, abB, abOmega, clock.t); } else if (reg.transition) reg.clearTransition(clock.t); touchState(); abStatus(); return true; }, get on() { return !!reg.transition; }, get status() { return ui.abRo.root.textContent; },
     /* WAVE 106 · Ω REACHES THE DEFS THROUGH HERE: one truth for the rate, t0 re-solved so the mix angle θ = Ω(t − t0)/2 is CONTINUOUS across a change */
+    /* 041 H2 · A HAND'S EDIT ENDS THE TRANSITION (Josh 11-09: "let it disable transition and open the last stored labels while added the recently
+       added label … If the user doesn't store it... too bad, it must always respect the stored states"): the grid's edit roads (controller.js api)
+       ask this first — a running transition stands down and the register becomes the store written LAST (B when a file brought both), never the
+       frozen mix; the edit then lands on it.  True when it stood one down. */
+    handEdit() { if (!reg.transition) return false; recall((abLast === 'A' ? abA : abB) || abA || abB); return true; },
     get omega() { return abOmega; },
     setOmega(v) { const w = Math.max(0.005, Math.min(1, +v || 0.05));
       if (reg.transition) { const th = reg.mixAngle(clock.t); reg.transition.omega = w; reg.transition.t0 = clock.t - 2 * th / w; }

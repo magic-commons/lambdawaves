@@ -56,10 +56,10 @@ export const CENTRAL = {
 /** THE CARD: the POTENTIAL stepper, the preset's knobs, the readout.  api = { solve({ preset, params }) → Promise, apply(id), current(), populated() } */
 export function createCentral(host, api) {
   const vals = JSON.parse(JSON.stringify(DEFAULTS)), kn = {}; let sel = cur.preset, busy = false, want = null;
-  const step = stepper({ aria: 'Central potential', items: Object.entries(POTENTIALS).map(([id, P]) => ({ id, label: P.label.split('  ')[0] })), value: sel, cls: 'mol-step', onChange: (id) => pick(id) });
-  const kind = seg({ label: 'QUARK', value: qqSystem().kind, options: [{ id: 'charm', label: 'CHARM' }, { id: 'bottom', label: 'BOTTOM' }], onChange: (v) => pick('cornell', { kind: v }) });
+  const step = stepper({ aria: 'Central potential', title: 'CENTRAL · the potential V(r)', items: Object.entries(POTENTIALS).map(([id, P]) => ({ id, label: P.label.split('  ')[0] })), value: sel, cls: 'mol-step', onChange: (id) => pick(id) });
+  const kind = seg({ label: 'QUARK', value: qqSystem().kind, options: [{ id: 'charm', label: 'CHARM', title: 'Charmonium · c c̄' }, { id: 'bottom', label: 'BOTTOM', title: 'Bottomonium · b b̄' }], onChange: (v) => pick('cornell', { kind: v }) });
   const r1 = el('div', 'row', host), ro = readout({ label: 'BOUND · ORACLE', value: '—', cls: 'wide' }); host.prepend(step.root);
-  for (const [id, P] of Object.entries(POTENTIALS)) for (const [k, [label, min, max, u]] of Object.entries(P.knobs)) r1.appendChild((kn[id + '.' + k] = knob({ label, min, max, log: max / min > 20,
+  for (const [id, P] of Object.entries(POTENTIALS)) for (const [k, [label, min, max, u]] of Object.entries(P.knobs)) r1.appendChild((kn[id + '.' + k] = knob({ label, title: P.label.split('  ')[0] + ' · ' + label + (u ? ' in ' + u : ''), min, max, log: max / min > 20,
     value: id === 'cornell' ? qqSystem().params[k] : vals[id][k], fmt: (v) => v.toPrecision(3) + (u ? ' ' + u : ''), onInput: (v) => pick(id, { [k]: v }) })).root);
   r1.append(kind.root, ro.root); el('div', 'note', host).innerHTML = '<b>Units.</b> Hydrogen units: lengths in a₀, energies in Eh; QUARKONIUM in GeV and GeV⁻¹. A level at E ≥ 0 is not a state of this Hamiltonian — the register holds no continuum — so its labels are drawn as nothing and read “unbound here”.';
   /** QUARKONIUM configures cornell.js and switches to its own entry; a generic preset re-solves in the worker (the latest ask wins), then switches */

@@ -49,15 +49,18 @@ export const SEPARABLE = {
   short: 'SEP', get unit() { return form === 'cube' ? 'hartree' : 'ħω'; }, lengthUnit: 'a₀',
   energy, radial: () => 0, tableFor, momentumTableFor: tableFor, psiAt, phiAt: psiAt, domainFor, domainForP: domainFor,   // radial 0: the spherical readers stand down (separable)
   kernelSpace: { x: 7, p: 7 }, stark: false, hydrogenTheorems: false, noMomentum: true, separable: true, labelOf,
+  /* 041 H4 · the picker's grid (hamiltonian.js `grid`): a row per N = n_x + n_y + n_z (the cube: per Σnᵢ), the chip the triple; a slot past NL is left out */
+  get grid() { const keys = [...new Set(LABELS.map(sum))].sort((p, q) => p - q);
+    return { rows: keys.map((k, i) => ({ key: k, label: (form === 'cube' ? 'Σ' : 'N') + k, tone: i % 6 + 1 })), rowOf: (s) => (s.index < NL ? sum(LABELS[s.index]) : null), chip: (s) => (s.index < NL ? LABELS[s.index].join('') : '') }; },
   get spectrum() { return { levels: GROUPS.map((g, k) => ({ key: k, E: g.E, label: levelName(g), rgb: RGB[(form === 'cube' ? k : sum(g.t)) % 6] })), levelKey: (a) => (a < NL ? KEY[a] : -1),
     Emin: 0, Etop: GROUPS[GROUPS.length - 1].E * 1.08, topLabel: '', nan: 'unused here', footer: `EIGENVALUE  E = ${form === 'cube' ? 'π²Σnᵢ²/(2L²)' : 'Σ ωᵢ(nᵢ + ½)'} · ${NL} of ${BASIS.length} labels · ${BASIS.length - NL} unused here` }; },
 };
 /** THE CARD: the FORM stepper, ω_x ω_y ω_z (the cube: L), the readout.  api = { apply(id) } — a change reconfigures and re-applies, so the register re-reads its energies */
 export function createSeparable(host, api) {
-  const step = stepper({ aria: 'Separable form', items: Object.entries(FORMS).map(([id, F]) => ({ id, label: F[0] })), value: form, cls: 'mol-step', onChange: (id) => pick(id, FORMS[id][1]) });
+  const step = stepper({ aria: 'Separable form', title: 'SEPARABLE · the form', items: Object.entries(FORMS).map(([id, F]) => ({ id, label: F[0] })), value: form, cls: 'mol-step', onChange: (id) => pick(id, FORMS[id][1]) });
   const r1 = el('div', 'row', host), ro = readout({ label: 'LEVELS · DEGENERACY', value: '—', cls: 'wide' }); host.prepend(step.root);
-  const kn = [...'xyz'].map((c, i) => knob({ label: 'ω_' + c, min: 0.5, max: 4, value: W[i], fmt: (v) => v.toFixed(2), onInput: (v) => pick(form, W.map((w, j) => (j === i ? v : w))) }));
-  const kL = knob({ label: 'L', min: 4, max: 30, value: L, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => pick(form, W, v) });
+  const kn = [...'xyz'].map((c, i) => knob({ label: 'ω_' + c, title: 'Frequency along ' + c, min: 0.5, max: 4, value: W[i], fmt: (v) => v.toFixed(2), onInput: (v) => pick(form, W.map((w, j) => (j === i ? v : w))) }));
+  const kL = knob({ label: 'L', title: 'Side of the cube', min: 4, max: 30, value: L, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => pick(form, W, v) });
   r1.append(...kn.map((k) => k.root), kL.root, ro.root);
   el('div', 'note', host).innerHTML = '<b>Separable.</b> V = ½(ω<sub>x</sub>²x² + ω<sub>y</sub>²y² + ω<sub>z</sub>²z²): each state is a product of three 1-D oscillators, labelled n<sub>x</sub> n<sub>y</sub> n<sub>z</sub>. The 56 triples with N ≤ 5 fill the register by energy; the other 35 labels are unused here. The slap and the radial tiles stand down: their integrals are spherical.'
     + ' <b>Cube.</b> A box of side L with hard walls: ψ ∝ ∏ sin(n<sub>i</sub>π(x<sub>i</sub>/L + ½)), n<sub>i</sub> ≥ 1, E = π²Σn<sub>i</sub>²/(2L²) — the whole levels to Σn<sub>i</sub>² = 29 (54 labels), the (1,1,2) threefold and the (1,2,3) sixfold among them. Its own gas is deferred: SPECTRUM\'s GAS launches into the spherical well.';

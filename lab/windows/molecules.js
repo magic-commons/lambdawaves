@@ -114,7 +114,7 @@ export function createMolecules(app) {
     viewed: (hand) => { if (ui.styleSync) ui.styleSync(); const R = app.state.register; if (!R) return; if (hand && app.state.chem.view === 'orbital') R.setMode('orbital'); R.follow(hand); },   // iteration 008 U: ON, VIEW or a file moved — the register follows the one state; R: a HAND's VIEW ORBITAL shows the ladder its cursor stands on
     cursor: () => { if (app.state.register) app.state.register.orbitals.paint(); },   // iteration 008 R: the ORBITAL dial's orbital, the VIEW or ON moved — the ladder redraws its cursor
     hand: (id) => headPick(id), wake,                                // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)   // 038 C1: and a powered-off card wakes for one
-    atomZ: () => HAMILTONIANS.atom.Z, atom(z) { setElement(z); if (getHamiltonian().id !== 'atom') switchHamiltonian('atom'); ui.hamSeg.set('atom'); app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); },   // 0.7.4 C2: ‹ ATOMS ›' tile, SPECTRUM's ATOM road
+    atomZ: () => HAMILTONIANS.atom.Z, atom(z) { setElement(z); if (getHamiltonian().id !== 'atom') switchHamiltonian('atom'); ui.hamSeg.set('atom'); app.sh.layout.reopen('atoms'); },   // 0.7.4 C2: ‹ ATOMS ›' tile, SPECTRUM's ATOM road
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
        model is playing and which observable the field shows.  See molecular-session.js. */
     session: app.state.molSession,

@@ -54,7 +54,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `lambdawaves.q0.csb` | PREFERENCE | v 1 | yes | csb-favs.js: the CONTROL SURFACE’s favourites, and its mini-viewer BY THE BAR { on, style } (038 S3) |
 | `lambdawaves.q0.picker` | PREFERENCE | v 1 | yes | picker.js: SHOW LABELS, THE HUE, MONOCHROME (037 M7), the decks’ looks, THE COLLAGE switch (037 M1) |
 | `lambdawaves.q0.loader` | PREFERENCE | v 1 | yes | loader.js: the build THE LOADING SCREEN last kept the set for { build } (036 G7) |
-| `lambdawaves.q0.stroke` | PREFERENCE | v 1 | yes | paint-stroke.js: BUTTONS · PAINT, the ladders’ stroke { mode } (036 P1) |
+| `lambdawaves.q0.stroke` | PREFERENCE | v 1 | yes | paint-stroke.js: BUTTONS · PAINT, the ladders’ stroke { mode, mol }: SPECTRUM’s and MOLECULES’ (036 P1, 041 H1) |
 | `lambdawaves.q0.keys` | PREFERENCE | v 1 | yes | key-table.js: the rebound chords (the kit’s difference) |
 | `lambdawaves.q0.midi` | PREFERENCE | v 1 | yes | mapping.js (kit shell/midi.js): the learned notes and CCs { v, map } |
 | `lambdawaves.q0.render.*` | PREFERENCE | — | yes | film-card.js: the RENDER card’s choices |

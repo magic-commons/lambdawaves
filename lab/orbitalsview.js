@@ -52,7 +52,7 @@ export function createOrbitals(host, api) {
 
   /* ── the ladder ───────────────────────────────────────────────────────────────────────────────── */
   const cv = el('canvas', 'mol-c', host), cfoot = footLine(cv), views = new Set();   // 016 R1: the law line, shown on a hover
-  watchStroke((m) => { cv.title = m === 'paint' ? 'Orbitals by energy: drag adds levels, right-drag removes' : 'Orbitals by energy: a click shows one, or mixes it in'; });   // 036 P1; 039 F2 (X-REVIEW #5): no Eh, no "toggles" (under VIEW ORBITAL a click shows it)
+  watchStroke((m) => { cv.title = m === 'paint' ? 'Orbitals by energy: drag adds levels, right-drag removes' : 'Orbitals by energy: a click shows one, or mixes it in'; }, 'mol');   // 036 P1; 039 F2 (X-REVIEW #5): no Eh, no "toggles" (under VIEW ORBITAL a click shows it)
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
   const head = el('div', 'row tight sp-head', host);
@@ -65,7 +65,7 @@ export function createOrbitals(host, api) {
   const painted = () => { if (api.stroked) api.stroked('orbital'); };
   const fillB = fillButton(head, { fill: 'every orbital on, equal and in phase', empty: 'every orbital off' },
     (empty) => { if (!empty) return clear(); const r = fill(); if (r) painted(); return r; });
-  head.appendChild(strokeButton().root);   // 036 P1 · 037 H6: BUTTONS · PAINT, one toggle button, the one preference SPECTRUM's head sets too
+  head.appendChild(strokeButton('mol').root);   // 036 P1 · 037 H6: BUTTONS · PAINT, one toggle button; 041 H1: MOLECULES' own mode (home PAINT), ORBITAL and STATES in step
   /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
@@ -592,13 +592,13 @@ export function createOrbitals(host, api) {
     const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
     return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi && carried(h.k)).map((h) => h.k);
   }
-  const stroke = paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(), mode: strokeMode, isOn: (k) => sel.has(k | 0),
+  const stroke = paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(), mode: () => strokeMode('mol'), isOn: (k) => sel.has(k | 0),
     at: (p) => { const h = nearestHit(p, 8); return h ? [h.core ? 'core' : h.k] : []; }, across: crossed,
     apply: (ks, add) => {                                                   // a TAP on the folded core opens it; a stroke paints past it
       if (ks.includes('core')) { if (!stroke.painting) setCoreOpen(true); ks = ks.filter((k) => k !== 'core'); }
       /* 039 X2 (WALK-A #7): a TAP on one level while VIEW is ORBITAL names that orbital — the dial's hand road — and the VIEW stays ORBITAL;
          a stroke still paints the register (MIX), and PAINT's right tap still takes a level out */
-      const c = C(); if (!stroke.painting && ks.length === 1 && c && c.view === 'orbital' && c.handOrbital && (add || strokeMode() === 'buttons')) { c.handOrbital(ks[0] + 1); return 0; }
+      const c = C(); if (!stroke.painting && ks.length === 1 && c && c.view === 'orbital' && c.handOrbital && (add || strokeMode('mol') === 'buttons')) { c.handOrbital(ks[0] + 1); return 0; }
       return ks.length ? paintLevels(ks, add) : 0;
     },
     /* iteration 008 U · THE STROKE'S END (still inside its pointerup, so the same undo row): the sum of |c|^2 goes to 1, and a hand that

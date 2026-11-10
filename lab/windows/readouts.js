@@ -15,7 +15,7 @@ export function createReadouts(app) {
      reads back the operator in force; `hidden` (moleculeMode) is neither.  When the stepper closes the window it opened on its way to another
      operator, the stepper switches (its value already names that operator), so the stand-down only reads back. */
   const standDown = (w, end) => { w.root.addEventListener('devclose', end); w.root.querySelector('.dev-power').addEventListener('click', () => { if (w.root.classList.contains('off')) end(); }); };
-  const toHydrogen = (ops, id) => () => { const H = getHamiltonian().id, v = ui.hamSeg.value; if (ops.includes(H) && (v === H || v === 'molecules' || v === 'lattice')) switchHamiltonian('hydrogen'); ui.hamSeg.readBack(id); };
+  const toHydrogen = (ops, id) => () => { const H = getHamiltonian().id, v = ui.hamSeg.value; if (ops.includes(H) && (v === H || v === 'lattice')) switchHamiltonian('hydrogen'); ui.hamSeg.readBack(id); };
   const wSh = device({ id: 'shadow', eyebrow: 'SHADOW', status: '' });
   rack.appendChild(wSh.root);
   const shCanvas = el('canvas', 'shadow-c', wSh.body);
@@ -161,27 +161,28 @@ export function createReadouts(app) {
      if later cards land below the rack clip; the single worker keeps those solves from competing with the field. */
   app.w.wChem.root.addEventListener('devopen', () => { app.state.chem.prepare(); app.state.orbitals.paint(); app.state.orbitals.refresh(); });   // the register (iteration 008 U: in this card) runs on CHEMISTRY's ladder: opening it asks for one
   wLad.root.addEventListener('devopen', () => ladder.prepare());
-  const wLat = device({ id: 'lattice', eyebrow: 'LATTICE', status: '' }); wLat.root.classList.add('closed'); rack.appendChild(wLat.root);   // 0.7.2 L1: a tight-binding lattice, its own register (lab/lattice.js); ships closed
-  const lattice = createLattice(wLat.body, { active: () => canPresent(wLat), t: () => clock.t, palette: () => app.state.palette, solve: (H) => solveCard({ op: 'lattice.solve', ...H }, () => solveLattice(H)) });
-  wLat.root.addEventListener('devopen', () => lattice.prepare());
+  /* 041 H4 · THE HAMILTONIAN'S OWN ROOMS: LATTICE (0.7.2 L1, its own register, lab/lattice.js), CENTRAL (0.8.0 G1, lab/central.js) and SEPARABLE
+     (0.9.4 S1, lab/separable.js) are no rack windows any more — each editor is built into its room in SPECTRUM's HAMILTONIAN group (`ui.hamRooms`,
+     windows/spectrum.js), shown by ‹ SYSTEM ›, and prepares when its room opens.  `wLat` is the room as the READER LAW and window activity read a
+     window (a root; no status line): LATTICE's ψ(t) is painted only while its room can present. */
+  const rooms = ui.hamRooms, wLat = { root: rooms.lattice, setStatus() {} };
+  const lattice = createLattice(rooms.lattice, { active: () => canPresent(wLat), t: () => clock.t, palette: () => app.state.palette, solve: (H) => solveCard({ op: 'lattice.solve', ...H }, () => solveLattice(H)) });
+  rooms.lattice.addEventListener('roomopen', () => lattice.prepare());
   const wBlo = device({ id: 'bloch', eyebrow: 'BLOCH', status: '' }); wBlo.root.classList.add('closed'); rack.appendChild(wBlo.root);   // 0.8.1 T1: one qubit, its own register (lab/bloch.js); ships closed, and opening it runs its preset from the start
   const bloch = createBloch(wBlo.body, { t: () => clock.t, obs }); wBlo.root.addEventListener('devopen', () => bloch.set({}));
-  const wCen = device({ id: 'central', eyebrow: 'CENTRAL', status: '' }); wCen.root.classList.add('closed'); rack.appendChild(wCen.root);   // 0.8.0 G1: the generic central H's editor (lab/central.js); ships closed
-  const central = createCentral(wCen.body, { solve: (w) => solveCard({ op: 'central.solve', ...w }, () => solveCentral(w.preset, w.params)), apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); }, current: () => getHamiltonian().id, populated: () => reg.populated() }); wCen.root.addEventListener('devopen', () => central.prepare());
-  const wSep = device({ id: 'separable', eyebrow: 'SEPARABLE', status: '' }); wSep.root.classList.add('closed'); rack.appendChild(wSep.root);   // 0.9.4 S1: the Cartesian oscillators' editor (lab/separable.js); ships closed
-  const sep = createSeparable(wSep.body, { apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); } }); wSep.root.addEventListener('devopen', () => sep.prepare());
-  standDown(wLat, () => ui.hamSeg.readBack('lattice')); standDown(wBlo, () => ui.hamSeg.readBack('bloch'));
-  standDown(wCen, toHydrogen(['central', 'cornell'], 'central')); standDown(wSep, toHydrogen(['separable'], 'separable'));
+  const central = createCentral(rooms.central, { solve: (w) => solveCard({ op: 'central.solve', ...w }, () => solveCentral(w.preset, w.params)), apply: (id) => { switchHamiltonian(id); if (ui.hamSeg.value !== 'lattice') ui.hamSeg.set(id); }, current: () => getHamiltonian().id, populated: () => reg.populated() }); rooms.central.addEventListener('roomopen', () => central.prepare());
+  const sep = createSeparable(rooms.separable, { apply: (id) => { switchHamiltonian(id); if (ui.hamSeg.value !== 'lattice') ui.hamSeg.set(id); } }); rooms.separable.addEventListener('roomopen', () => sep.prepare());
+  standDown(wBlo, () => ui.hamSeg.readBack('bloch'));
   /* the ⧉ digests (021 G3: out of boot()'s DIGESTS table) */
   const metersDigest = () => 'density period\t' + (() => { const P = app.hooks.period ? app.hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents;
   const calculusDigest = () => ({ md: calculus && calculus.last ? calculusMarkdown(calculus.last) : '' });   // 0.4.0 S3: ⧉ copies THE PROSE FIGURE (calculus.js), which pastes into the notebook and renders
-  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep, metersDigest, calculusDigest }; }
+  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, metersDigest, calculusDigest }; }
   function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION · EMISSION SPECTRA
   const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
   const atomsView = createAtoms(wAtoms.body, {
     Z: () => HAMILTONIANS.atom.Z,
-    select: (z) => setElement(z),
+    select: (z) => setElement(z, true),   // 041 H5: a cell is the preset — the element, ATOM, its ground configuration
     fill: () => fillValence(),
     active: () => getHamiltonian().id === 'atom',
     busy: cardLoading(wAtoms, 'relativity'),   // iteration 008 Z: RELATIVITY Δ's second solve wears the card's busy mark

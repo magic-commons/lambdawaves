@@ -132,7 +132,7 @@ export function createRackWiring(app) {
       /* iteration 008 A7 · SPECTRUM's folded shells (spectrum.js): `shells` is written only when it is not the default, so a record without it
          (an older one, or the default) folds n = 7 alone */
       if (c.id === 'spectrum') { const want = Array.isArray(c.shells) ? c.shells : SHELLS_FOLDED;
-        for (const g of d.querySelectorAll('.picker .pk-n')) if (g.classList.contains('folded') !== want.includes(+g.dataset.n)) g.querySelector('.pk-nl').click(); }
+        if (app.w.spectrum.folded.join() !== want.join()) app.w.spectrum.setFolded(want); }   // 041 H4: the n rows' folds are SPECTRUM's model (the grid's rows are the operator's)
     }
   }
   const layout = {
@@ -216,7 +216,7 @@ export function createRackWiring(app) {
           const st = rk.floatOf(d.dataset.id), mt = d.querySelector('.mol-more-toggle');   // 0.4.0 S0: MOLECULES' MORE fold is the card's own WORKSPACE key
           const ct = d.querySelector('.orb-core-toggle');                                      // 0.4.0 S1: MO-REGISTRY's CORE fold, the same kind of key
           const fs = [...d.querySelectorAll('.lw-fold[data-fold][aria-expanded="true"]')].map((b) => b.dataset.fold);   // iteration 011 Q2: the card's open inner folds
-          const sh = d.dataset.id === 'spectrum' ? [...d.querySelectorAll('.picker .pk-n.folded')].map((g) => +g.dataset.n) : null;   // iteration 008 A7: the folded shells
+          const sh = d.dataset.id === 'spectrum' ? app.w.spectrum.folded : null;   // iteration 008 A7: the folded shells
           return { id: d.dataset.id, side: st ? sideLR(st.home.side) : (d.dataset.phoneFrom === 'left' || d.parentElement === rackL ? 'L' : 'R'),
             folded: d.classList.contains('folded'), closed: d !== wTr.root && d.classList.contains('closed'), off: d.classList.contains('off'),
             float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: rk.floating().indexOf(d.dataset.id), index: st.home.index } : null,
@@ -233,6 +233,7 @@ export function createRackWiring(app) {
       if (!L || !Array.isArray(L.cards)) return false;
       if (typeof L.docked === 'boolean' && L.docked !== layout.docked) layout.dockTransport();
       rk.apply(L); layoutExtras(L);
+      if (L.cards.some((c) => c && c.id === 'lattice' && !c.closed && c.open !== false) && !(app.state.chem && app.state.chem.on)) ui.hamSeg.show('lattice');   // 041 H4: an older layout's open LATTICE window is SPECTRUM's LATTICE room, shown
       if (document.body.classList.contains('phone')) parkedIds = L.cards.filter((c) => c.float && !c.closed && c.open !== false).map((c) => (RETIRED_WINDOWS[c.id] && !L.cards.some((q) => q.id === RETIRED_WINDOWS[c.id]) ? RETIRED_WINDOWS[c.id] : c.id));
       saveSettings(); schedule(TIER.PRESENT);
       return true;

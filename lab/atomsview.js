@@ -30,7 +30,7 @@ const mix = (a, b, t) => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * 
 const rgba = (c, al) => `rgba(${c[0]},${c[1]},${c[2]},${al})`;
 
 /**
- * createAtoms(host, api) — api: Z() the element in force, select(Z) put an element in force (the ELEMENT knob's road), fill()
+ * createAtoms(host, api) — api: Z() the element in force, select(Z) a cell's press (041 H5: the element in force AND its ground configuration loaded), fill()
  * populate the valence, active() whether the ATOM Hamiltonian is the one the register refers to, busy(on) the card's busy mark.
  */
 export function createAtoms(host, api) {
@@ -63,7 +63,7 @@ export function createAtoms(host, api) {
   for (const [p, z0, z1] of [[1, 1, 2], [2, 3, 10], [3, 11, 18], [4, 19, 36], [5, 37, 54], [6, 55, 86], [7, 87, 118]]) {   // period 7: Fr … Og (iteration 008 A7)
     const g = el('div', 'pk-n', table); g.style.setProperty('--nc', N_COLOR[p]); el('div', 'pk-nl', g, String(p));
     const cs = el('div', 'pk-chips', g);
-    for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${z > 36 ? ATOMS[z - 1].core : ATOMS[z - 1].term}`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }
+    for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${z > 36 ? ATOMS[z - 1].core : ATOMS[z - 1].term} · press loads it`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }
   }
   const r2 = el('div', 'row tight', host);
   r2.appendChild(trig({ label: 'LOAD VALENCE', title: 'Load the valence subshells, equal and in phase', onFire: () => api.fill() }).root);

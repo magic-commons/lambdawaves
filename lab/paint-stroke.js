@@ -25,29 +25,32 @@
  * 036 P1 · BUTTONS · PAINT (Josh: "a 'Paint' vs 'Buttons' toggle … the original control of a left-click only feature"): the gesture above is
  * PAINT; BUTTONS (the default) is the left click alone — a press released on the item it began on TOGGLES it (apply([key], !isOn(key)), then
  * onEnd, in the same undo row), a drag sweeps nothing, the right button is the context menu's.  The mode is the PREFERENCE record
- * `lambdawaves.q0.stroke` { mode }; `strokeButton` (037 H6: one toggle button) is its seat on each ladder's head, every seat in step.
+ * `lambdawaves.q0.stroke` { mode, mol } (041 H1: SPECTRUM's and MOLECULES' own, homes BUTTONS and PAINT); `strokeButton` (037 H6: one toggle
+ * button) is its seat on each ladder's head, the seats of one family in step.
  */
 import { el } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
-const STROKE_KEY = 'lambdawaves.q0.stroke', MODES = ['buttons', 'paint'], watchers = new Set();
-let mode = null;
-/** the reader's stroke mode now: 'buttons' (the default) or 'paint' */
-export function strokeMode() {
-  if (mode === null) { let r = null; try { r = JSON.parse(localStorage.getItem(STROKE_KEY) || 'null'); } catch (_) {} mode = r && MODES.includes(r.mode) ? r.mode : 'buttons'; }
-  return mode;
+const STROKE_KEY = 'lambdawaves.q0.stroke', MODES = ['buttons', 'paint'];
+/* 041 H1 · PAINT IN MOLECULES, BUTTONS IN SPECTRUM (Josh 11-09: "Let paint be the default for molecules and 'buttons' for default for spectrum"):
+   the one record holds a mode per family — `mode` SPECTRUM's (its old field, so an older record is SPECTRUM's choice), `mol` the ORBITAL and
+   STATES ladders' — each with its own home; a seat names its family (`where`: 'spectrum' | 'mol') and the seats of one family move in step. */
+const HOME = { spectrum: 'buttons', mol: 'paint' }, FIELD = { spectrum: 'mode', mol: 'mol' }, watchers = { spectrum: new Set(), mol: new Set() };
+let rec = null;
+const read = () => { if (!rec) { let r = null; try { r = JSON.parse(localStorage.getItem(STROKE_KEY) || 'null'); } catch (_) {} rec = {}; for (const k in HOME) rec[k] = r && MODES.includes(r[FIELD[k]]) ? r[FIELD[k]] : HOME[k]; } return rec; };
+/** the reader's stroke mode now for a family: 'buttons' or 'paint' (home: SPECTRUM buttons, MOLECULES paint) */
+export function strokeMode(where = 'spectrum') { return read()[HOME[where] ? where : 'spectrum']; }
+export function setStrokeMode(m, where = 'spectrum') {
+  if (!MODES.includes(m) || !HOME[where] || m === strokeMode(where)) return; rec[where] = m;
+  try { localStorage.setItem(STROKE_KEY, JSON.stringify({ mode: rec.spectrum, mol: rec.mol })); } catch (_) { /* refused: the choice lasts the page */ }
+  for (const f of watchers[where]) f(m);
 }
-export function setStrokeMode(m) {
-  if (!MODES.includes(m) || m === strokeMode()) return; mode = m;
-  try { localStorage.setItem(STROKE_KEY, JSON.stringify({ mode })); } catch (_) { /* refused: the choice lasts the page */ }
-  for (const f of watchers) f(mode);
-}
-/** watchStroke(fn) — fn(mode) on every change (a surface's hint follows it) */
-export function watchStroke(fn) { watchers.add(fn); fn(strokeMode()); }
-/** strokeButton() — the BUTTONS · PAINT seat a ladder's head carries.  037 H6 · THE TOGGLE BUTTON (Josh: "The Paint vs Add thing should behave
+/** watchStroke(fn, where) — fn(mode) on every change of that family (a surface's hint follows it) */
+export function watchStroke(fn, where = 'spectrum') { watchers[HOME[where] ? where : 'spectrum'].add(fn); fn(strokeMode(where)); }
+/** strokeButton(where) — the BUTTONS · PAINT seat a ladder's head carries.  037 H6 · THE TOGGLE BUTTON (Josh: "The Paint vs Add thing should behave
  *  the same way [as FILL / EMPTY] instead of an extremely narrow switch"): ONE `.trig` whose glyph swaps — a pointing hand (BUTTONS: a click
- *  toggles one) ↔ a paintbrush (PAINT: drag adds, right-drag removes) — with its word as aria-label, its hint and `data-state`, every seat in
- *  step through watchStroke; a press flips the PREFERENCE `lambdawaves.q0.stroke`.  The face is the mode in force;
+ *  toggles one) ↔ a paintbrush (PAINT: drag adds, right-drag removes) — with its word as aria-label, its hint and `data-state`, every seat of its
+ *  family in step through watchStroke; a press flips the PREFERENCE `lambdawaves.q0.stroke`.  The face is the mode in force;
  *  it replaced 036 P1's two-cell segmented control (strokeSeg). */
-export function strokeButton() {
+export function strokeButton(where = 'spectrum') {
   const b = el('button', 'trig sp-stroke'); b.type = 'button';
   let shown = null;
   watchStroke((m) => {
@@ -55,8 +58,8 @@ export function strokeButton() {
     b.innerHTML = glyphSvg(paint ? 'brush' : 'hand', 'gly', 16); b.dataset.state = m;   // no aria-pressed: the face is not lit, the glyph alone swaps (FILL ALL ↔ EMPTY's law); the word says the mode
     b.setAttribute('aria-label', paint ? 'PAINT' : 'BUTTONS');
     b.title = paint ? 'PAINT · drag adds, right-drag removes · press: BUTTONS' : 'BUTTONS · a click toggles one · press: PAINT';
-  });
-  b.addEventListener('click', () => setStrokeMode(strokeMode() === 'paint' ? 'buttons' : 'paint'));
+  }, where);
+  b.addEventListener('click', () => setStrokeMode(strokeMode(where) === 'paint' ? 'buttons' : 'paint', where));
   return { root: b };
 }
 export function paintStroke(surface, o) {
