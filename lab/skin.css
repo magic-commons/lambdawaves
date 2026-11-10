@@ -1080,6 +1080,8 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-info-card .row.fit > .sw { grid-column: span 2; }
 .lw-info-card .row.fit > .sw:first-child:has(+ .k:last-child) { grid-column: 1 / 4; }   /* STAGE FORMULA · SIZE, ATOM LABELS · SIZE */
 .lw-info-card .info-name > .sw:first-child { grid-column: 1; } .lw-info-card .info-name > .sw + .sw { grid-column: 2 / 4; }   /* NAME · SUBTITLE · LIST CAP */
+/* 041 I9: NAME read "NA…" whenever the rack wore its scrollbar (its cell 1 px short); it takes 8 px of SUBTITLE's room */
+.lw-info-card .info-name > .sw:first-child { width: calc(100% + 8px); max-width: none; } .lw-info-card .info-name > .sw + .sw { width: auto; margin-inline-start: 8px; }
 /* 041 I1: FORMULA · POSITION · PAD · SIZE on one row — the knobs keep their columns (3 · 4), the switch and its 30 px toggle share the first two */
 .lw-info-card .info-formula > * { grid-row: 1; } .lw-info-card .info-formula > .sw:first-child { grid-column: 1 / 3; margin-inline-end: 34px; width: auto; }
 .lw-info-card .info-formula > .info-pos { grid-column: 2; justify-self: end; width: 30px; padding: 0; } .lw-info-card .info-formula > .k { grid-column: 3; }
