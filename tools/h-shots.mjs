@@ -7,7 +7,7 @@ import { open } from './gate/gatekit.mjs';
 import * as drv from './gate/drv.mjs';
 
 const [MODE = 'tips', TAG = 'shot'] = process.argv.slice(2), DIR = 'research/iteration-022/H-shots';
-const TIPS = [['observer', 'KNEE'], ['informational', 'STAGE FORMULA'], ['informational', 'LIST CAP'], ['camera', 'LOCK'], ['spectrum', 'DIALS']];   // 036 P1: VISUALS left SPECTRUM's head
+const TIPS = [['observer', 'KNEE'], ['informational', 'FORMULA'], ['informational', 'LIST CAP'], ['camera', 'LOCK'], ['spectrum', 'DIALS']];   // 036 P1: VISUALS left SPECTRUM's head
 const WINS = ['spectrum', 'wigner', 'staticfield', 'chem'];
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 mkdirSync(DIR, { recursive: true });
