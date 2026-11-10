@@ -1019,7 +1019,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       vdeck.set(list, (m, host) => { const t = molTile(host, m, true); t.dataset.iso = m.id; return t; });
       enterTiles(vdeck.tiles);   // iteration 012 L2: a tag or a search deals the page in (animate() stands down under reduced motion)
     }
-    return { wake() { if (!woke) { woke = true; paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); }, rest };
+    return { wake() { if (!woke) { woke = true; paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); }, rest,
+      async open(id) { if (cur && cur.id === id) return; if (!woke || !vols.length) { woke = true; await paintShelf(); } const v = vols.find((x) => x.id === id); if (v) enter(v); } };   // 041 P5: a volume's page by its id
   })();
 
   /* ── the tab under the reader's eye ── */
@@ -1128,7 +1129,14 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   };
   /* 037 M1: the sheet's COLLAGE row reads and sets the wall's switch here (settings-card.js never imports this module) */
   const collageOn = () => prefs.collage !== false, setCollage = (on) => { prefs.collage = !!on; writePrefs(prefs); collage.wake(); };
-  const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggest, suggestTile, collage: collageOn, setCollage };
+  /* 041 P5 · LIBRARY OPENS WHERE YOU ARE (Josh 11-09): the CSB's LIBRARY seat opens the decks on MOLECULAR in molecules mode — on the volume's
+     own page in EXPANSIONS when the molecule on the stage is a volume's — and on ATOMIC in hydrogen mode; a second press closes, as it did */
+  const openLibrary = () => {
+    if (!root.hidden) return close();
+    const C = app.state.chem, vol = C && C.on ? C.volume : null;
+    open({ decks: true }); showDecks(!C || !C.on ? 'atomic' : vol ? 'library' : 'molecular'); if (vol) library.open(vol.volume);
+  };
+  const api = { open, close, toggle, library: openLibrary, get shown() { return !root.hidden; }, root, show(id) { if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggest, suggestTile, collage: collageOn, setCollage };
   app.state.picker = api;
   if (openAtBoot) open();
   return api;
