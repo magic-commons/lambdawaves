@@ -26,7 +26,8 @@ export function timelineRows(app) {
     const v = vp(), surface = ed().surface || v;
     v.addEventListener('scroll', () => { if (guard) { guard = false; return; } off(); }, { passive: true });
     v.addEventListener('wheel', off, { passive: true });             // a wheel at an edge scrolls nothing and still ends it
-    surface.addEventListener('pointerdown', (e) => { if (!(e.target.closest && e.target.closest(PASS))) off(); }, { capture: true });
+    /* 041 N7: the middle button (and the right one pressed with it) opens THE MODE MENU (MIR 1.5.7-alpha.49) — choosing a tool is no press on the lanes */
+    surface.addEventListener('pointerdown', (e) => { if (e.button === 1 || (e.buttons & 4)) return; if (!(e.target.closest && e.target.closest(PASS))) off(); }, { capture: true });
   }
   function tick() {
     if (!on) return;
