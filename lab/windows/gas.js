@@ -1,6 +1,6 @@
 /* lab/windows/gas.js — the BOX rows of SPECTRUM's Hamiltonian group: WELL a · GAS σ · GAS |k| · BASIS · LAUNCH / BOUNCE · the GAS readout and the two notes
  * (021 G2, THE HINGE: moved verbatim out of lab/windows/spectrum.js, created right after it).  The rows go into SPECTRUM's own `.sp-ham-b` row and the
- * notes after its `.sp-ham-n`, where they stood; the gas, its launch and the bounce are kepler.js' (seated later), read through app.w inside callbacks.
+ * notes after the group's last row (041 H4: the rooms), where they stood; the gas, its launch and the bounce are kepler.js' (seated later), read through app.w inside callbacks.
  * The gas stands down when the operator leaves the BOX: once switchHamiltonian's line, now a listener on the one operator funnel (every
  * setHamiltonian in the app is followed by switchHamiltonian, so the moment is the same). */
 import { TIER } from '../tier.js';
@@ -9,7 +9,7 @@ import { BASIS, NMAX } from '../hydrogen.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, onHamiltonian } from '../hamiltonian.js';
 export function createGas(app) {
   const { ui, reg, hNote, energyOf } = app, { schedule } = app.loop, { wSpec, spectrum, switchHamiltonian } = app.w;   // backward: SPECTRUM is seated just before
-  const hamRows = { box: wSpec.body.querySelector('.sp-ham-b'), note: wSpec.body.querySelector('.sp-ham-n') };
+  const hamRows = { box: wSpec.body.querySelector('.sp-ham-b'), note: wSpec.body.querySelector('.sp-room[data-room="lattice"]') };
   const hamBody = document.createDocumentFragment();   // the two notes, placed after the rows' note below (their seat in the group)
   ui.wellKnob = knob({ label: 'WELL <m>a</m>', title: 'WELL RADIUS a — the box of BOX and of the gas packet', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); app.w.gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); }); schedule(TIER.REBUILD); } } });
   {

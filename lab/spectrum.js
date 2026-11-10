@@ -132,41 +132,60 @@ export function createSpectrum(host, api) {
      display:none, so THE PAINT GESTURE (elementFromPoint) crosses only the open rows; the ladder is not touched.  The folded set is WORKSPACE
      (rack-wiring.js captureLayout reads the presses' aria-expanded as the card's `shells`, written only when it is not the default): n = 7
      ships folded, on a first run and for a record older than this build. */
-  const FOLD_DEFAULT = [7], shellRows = new Map();
-  for (let n = 1; n <= NMAX; n++) {
-    const g = el('div', 'pk-n', picker); g.style.setProperty('--nc', N_COLOR[n]); g.dataset.n = String(n);
-    const nl = el('button', 'pk-nl', g, 'n' + n); nl.type = 'button';
-    const cs = el('div', 'pk-chips lw-fold-body', g); cs.id = 'pk-shell-' + n; nl.setAttribute('aria-controls', cs.id);
-    const cnt = el('div', 'pk-count', g); cnt.hidden = true;
-    shellRows.set(n, { g, nl, cs, cnt });
-    nl.addEventListener('pointerdown', (e) => e.stopPropagation());   // the handle is no paint stroke (paint-stroke.js would swallow its click)
-    nl.addEventListener('click', () => { setShellFold(n, !cs.hidden); });
-    for (const s of BASIS) if (s.n === n) {
-      const b = el('button', 'pk-c', cs, s.label); b.type = 'button';
-      b.dataset.a = String(s.index);
-      b.addEventListener('click', () => { api.toggleMode(s.index); if (api.settle) api.settle(); });       // the keyboard's road (a hand: normalised); a pointer is answered by the paint stroke below
-      chips.set(s.index, b);
-    }
+  const FOLD_DEFAULT = [7], shellRows = new Map(), foldN = new Set(FOLD_DEFAULT);
+  for (const s of BASIS) {
+    const b = el('button', 'pk-c', null, s.label); b.type = 'button';
+    b.dataset.a = String(s.index);
+    b.addEventListener('click', () => { api.toggleMode(s.index); if (api.settle) api.settle(); });       // the keyboard's road (a hand: normalised); a pointer is answered by the paint stroke below
+    chips.set(s.index, b);
   }
-  /** fold (true) or open shell n's row; the count on its line follows */
-  function setShellFold(n, v) {
-    const R = shellRows.get(n); if (!R) return;
-    R.cs.hidden = !!v; R.nl.setAttribute('aria-expanded', String(!v)); R.nl.title = (v ? 'unfold' : 'fold') + ' n = ' + n; R.g.classList.toggle('folded', !!v);
+  /** fold (true) or open a row; the count on its line follows */
+  function setShellFold(k, v) {
+    const R = shellRows.get(k); if (!R) return;
+    R.cs.hidden = !!v; R.nl.setAttribute('aria-expanded', String(!v)); R.nl.title = (v ? 'unfold ' : 'fold ') + R.label; R.g.classList.toggle('folded', !!v);
     paintCounts();
   }
-  /** a folded shell's populated labels, counted on its row (so a folded state is never out of sight) */
+  /** a folded row's populated labels, counted on its row (so a folded state is never out of sight) */
   function paintCounts() {
-    for (const [n, R] of shellRows) {
-      let k = 0; if (R.cs.hidden) for (const s of BASIS) if (s.n === n && chips.get(s.index).classList.contains('on')) k++;
+    for (const R of shellRows.values()) {
+      let k = 0; if (R.cs.hidden) for (const b of R.cs.children) if (b.classList.contains('on')) k++;
       const t = R.cs.hidden && k ? `${k} populated` : ''; if (R.cnt.textContent !== t) R.cnt.textContent = t; R.cnt.hidden = !t;
     }
   }
-  for (let n = 1; n <= NMAX; n++) setShellFold(n, FOLD_DEFAULT.includes(n));
   /* 039 X1 · THE CHIPS SAY ADD (WALK-A #6): a chip ADDS its state to the picture and a second press takes it out; its hint says which,
      by the stroke mode in force and whether the state is on (rewritten only when either changes) */
   const CHIP_HINT = { buttons: ['Add {s} to the picture · press again to remove', 'Take {s} out of the picture'],
     paint: ['Add {s} · drag adds more, right-click removes', 'Right-click takes {s} out of the picture'] };
-  const chipHint = (a, b) => hint(b, CHIP_HINT[strokeMode()][b.classList.contains('on') ? 1 : 0], { s: BASIS[a].label });
+  const chipHint = (a, b) => hint(b, CHIP_HINT[strokeMode()][b.classList.contains('on') ? 1 : 0], { s: b.textContent || BASIS[a].label });
+  /* 041 H4 · THE GRID SAYS THE SYSTEM'S OWN NUMBERS: the 140 chips are made once and LAID by the operator in force (hamiltonian.js `grid`, read
+     through api.grid) — its rows, which row a label sits in (null: not a state of this system, left out), the chip's name and a faint mark;
+     no grid is hydrogen's n1 … n7.  The shell folds (WORKSPACE `shells`, n = 7 folded at home) are the n rows' and are kept apart in `foldN`,
+     so a system with other rows opens them all and hands hydrogen's folds back untouched.  windows/spectrum.js asks on every operator change. */
+  let byN = true, gridChip = null;
+  function regrid() {
+    const G = (api.grid && api.grid()) || {}, rows = G.rows || Array.from({ length: NMAX }, (_, i) => ({ key: i + 1, label: 'n' + (i + 1), tone: i + 1 })), rowOf = G.rowOf || ((s) => s.n);
+    byN = !G.rows; gridChip = G.chip || null;
+    for (const R of shellRows.values()) R.g.remove(); shellRows.clear();
+    for (const r of rows) {
+      const g = el('div', 'pk-n', picker); g.style.setProperty('--nc', N_COLOR[(r.tone - 1) % (N_COLOR.length - 1) + 1]); if (byN) g.dataset.n = String(r.key);
+      const nl = el('button', 'pk-nl', g, r.label); nl.type = 'button';
+      const cs = el('div', 'pk-chips lw-fold-body', g); cs.id = 'pk-shell-' + r.key; nl.setAttribute('aria-controls', cs.id);
+      const cnt = el('div', 'pk-count', g); cnt.hidden = true;
+      shellRows.set(r.key, { g, nl, cs, cnt, label: byN ? 'n = ' + r.key : r.label });
+      nl.addEventListener('pointerdown', (e) => e.stopPropagation());   // the handle is no paint stroke (paint-stroke.js would swallow its click)
+      nl.addEventListener('click', () => { const v = !cs.hidden; setShellFold(r.key, v); if (byN) { if (v) foldN.add(r.key); else foldN.delete(r.key); } });
+    }
+    for (const s of BASIS) {
+      const b = chips.get(s.index), k = rowOf(s), R = k == null ? null : shellRows.get(k);
+      if (!R) { b.remove(); continue; }
+      const t = gridChip ? gridChip(s) : s.label; if (b.textContent !== t) b.textContent = t;
+      b.classList.toggle('pk-dim', !!(G.dim && G.dim(s))); R.cs.appendChild(b);
+    }
+    for (const [k, R] of [...shellRows]) if (!R.cs.firstChild) { R.g.remove(); shellRows.delete(k); }   // a row this system leaves empty
+    for (const k of shellRows.keys()) setShellFold(k, byN ? foldN.has(k) : !!(G.fold && G.fold(k)));
+    for (const [a, b] of chips) chipHint(a, b);
+    for (const [a, L] of lanes) refresh(L, a);
+  }
   watchStroke(() => { for (const [a, b] of chips) chipHint(a, b); });
   /* 2026-10 (Josh) · PAINT THE GRID (lab/paint-stroke.js): LEFT adds a state, RIGHT removes it; a drag takes every chip it
      crosses.  The chips are DOM, so the stroke is sampled every 6 px and asked of elementFromPoint.  036 P1: under BUTTONS a click toggles one. */
@@ -176,6 +195,7 @@ export function createSpectrum(host, api) {
     across: (a, b) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 6), out = []; for (let i = 1; i < n; i++) out.push(...chipAt({ x: a.x + (b.x - a.x) * i / n, y: a.y + (b.y - a.y) * i / n })); return out; } });
   const lanes = new Map();     // index → the lane that IS built and in the DOM
   let selected = -1, lastVersion = -1;
+  regrid();
   /* ── THE REBUILD IS INCREMENTAL, AND THE BOOKKEEPING IS NOT (wave 49) ────────────────────────────────
      A packet landing (SLAP, or the bow's release) takes the register from a handful of populated labels to
      ninety-one in ONE version bump, and rebuild() used to answer by CONSTRUCTING ninety-one lanes inside a
@@ -255,7 +275,7 @@ export function createSpectrum(host, api) {
   /* 036 P2 · THE DIAL'S NAME (Josh: "use the informational's working font for the orbital text"): the lane shows the operator's name TYPESET —
      its m a real subscript (`2p₋1` → `2p₋₁`, `2p₊1` → `2p₁`, the chips' form) in STIX Two Math (lab.css `.sp-nl`), the one bundled face with every
      subscript digit; display only — labelOf, the aria names and every other reader keep the plain form */
-  const SUBD = '₀₁₂₃₄₅₆₇₈₉', shownText = (a) => labelText(a).replace(/([₊₋])(\d+)/g, (_, sg, d) => (sg === '₋' ? '₋' : '') + d.replace(/\d/g, (c) => SUBD[+c]));
+  const SUBD = '₀₁₂₃₄₅₆₇₈₉', shownText = (a) => (gridChip && gridChip(BASIS[a])) || labelText(a).replace(/([₊₋])(\d+)/g, (_, sg, d) => (sg === '₋' ? '₋' : '') + d.replace(/\d/g, (c) => SUBD[+c]));
   const energyText = (a) => { const E = api.energyOf ? api.energyOf(a) : BASIS[a].E; return E === E ? `${E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` : ((api.hamiltonian && api.hamiltonian()) || {}).nan || 'unbound here'; };   // 0.8.0 G1: NaN = a level CENTRAL leaves unbound
   /** one lane's UPDATE: cheap reads, and only the DOM writes whose value moved since the last one */
   function refresh(L, a) {
@@ -311,7 +331,7 @@ export function createSpectrum(host, api) {
     for (const [a, b] of chips) if (b.classList.contains('on') !== keep.has(a)) { b.classList.toggle('on', keep.has(a)); chipHint(a, b); }
     paintCounts();
     const rs = reg.renderSet();
-    const levels = Object.keys(groupByN(want)).length;
+    const HK = api.hamiltonian ? api.hamiltonian() : null, levels = new Set(want.map((a) => (HK && HK.levelKey ? HK.levelKey(a) : BASIS[a].n))).size;   // 041 H4: the operator's own levels
     fillB.set(!want.length);
     info.textContent = `${want.length} populated · ${rs.rendered} rendered · ${levels} level${levels === 1 ? '' : 's'}`;
     { const HS = api.hamiltonian ? api.hamiltonian() : null, eig = !!(HS && HS.eigen);                          // W-STURMIAN: the caption and the ladder's affordance
@@ -320,7 +340,6 @@ export function createSpectrum(host, api) {
     lastVersion = reg.version;
     paintLadder();
   }
-  function groupByN(list) { const g = {}; for (const a of list) (g[BASIS[a].n] = g[BASIS[a].n] || []).push(a); return g; }
 
   /* WAVE 46: the ladder's objects are its level lines — one hover, one tip, and the value that used to float on the bar */
   const hover = graphHover(lcv, { repaint: () => paintLadder() });
@@ -367,7 +386,7 @@ export function createSpectrum(host, api) {
       levelLine(g, left, right, yy, c, true);
       names.push({ y: yy, txt: lv.label, col: `rgba(${c[0]},${c[1]},${c[2]},1)`, lit: true, n, pop: pops[n] });
       hovers.push({ kind: 'line', key: 'L' + n, points: [left, yy, right, yy], lw: 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
-        info: `${lv.label}  ·  ${(pops[n] * 100).toFixed(1)} %  ·  E = ${lv.E.toFixed(4)} Eh` });
+        info: `${lv.label}  ·  ${(pops[n] * 100).toFixed(1)} %  ·  E = ${lv.E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` });
     }
     /* THE GUTTER IS 44 px OF ONE COLUMN, AND E_n = −1/(2n²) BUNCHES (wave 46).  n3 … n6 fall inside 6 px of the
        E = 0 line on a 92 px card, so the names used to print straight over one another — "n3" and "n4" and
@@ -466,9 +485,9 @@ export function createSpectrum(host, api) {
   window.addEventListener('resize', () => paintLadder());
   /* the DIALS fold is project state (a demo opens with its lanes shown or folded as it was saved) */
   const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); };
-  return { update, rebuild, select, energyText, preset, views, redraw: paintLadder, get selected() { return selected; }, lanes, get building() { return pending.length; },
+  return { update, rebuild, select, energyText, preset, views, regrid, redraw: paintLadder, get selected() { return selected; }, lanes, get building() { return pending.length; },
     get dials() { return !rowsEl.hidden; }, setDials,
     openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; },
     /** iteration 008 A7: the folded shells (WORKSPACE, read and written by rack-wiring.js through the presses' aria-expanded) */
-    get folded() { return [...shellRows].filter(([, R]) => R.cs.hidden).map(([n]) => n); }, setFolded(list) { for (const n of shellRows.keys()) setShellFold(n, list.includes(n)); } };
+    get folded() { return [...foldN].sort((p, q) => p - q); }, setFolded(list) { foldN.clear(); for (const n of list) foldN.add(+n); if (byN) for (const n of shellRows.keys()) setShellFold(n, foldN.has(n)); } };
 }

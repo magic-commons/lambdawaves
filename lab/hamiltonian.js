@@ -22,6 +22,13 @@ import { CENTRAL } from './central.js';
 import { SEPARABLE } from './separable.js';
 
 const N_RGB = { 1: [255, 255, 255], 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150], 7: [246, 142, 159] };   // n = 7: the kit's seventh-shell rose (palette-app.js, hue 350; iteration 010 X2 — A7's yellow here disagreed with SPECTRUM's own n7 at Z = 1)
+/* 041 H4 · THE GRID SAYS THE SYSTEM'S OWN NUMBERS (Josh 11-09: "Spectrum's labels also needs a serious rework when in the other Hamiltonian like
+   box, atom, and oscillator"): an operator may carry `grid` — how SPECTRUM's 140 picker lays and names its chips under it (lab/spectrum.js
+   regrid): `rows` [{ key, label, tone }] and `rowOf(s)` (absent: hydrogen's n1 … n7; null: a label this system does not use, left out),
+   `chip(s)` the chip's and the lane's name, `dim(s)` a label drawn faint, `fold(key)` a row folded at home.  OSCILLATOR: a row per level N = 2n_r + l, the chip (n_r + 1) l m —
+   the shell model's 1s · 1p · 2s 1d; BOX: a row per radial number n_r + 1, the same chip (its ladder's own names); ATOM: hydrogen's rows,
+   a virtual shell's chips faint and marked °.  `labelOf` (the aria names, the digests, the copy) is unchanged. */
+const SUBD = '₀₁₂₃₄₅₆₇₈₉', mSub = (m) => (m < 0 ? '₋' : '') + String(Math.abs(m)).replace(/\d/g, (c) => SUBD[+c]), nrl = (s) => `${s.n - s.l}${L_LETTERS[s.l]}${mSub(s.m)}`;
 const QHO_RGB = (N) => [[255, 255, 255], [255, 190, 90], [120, 225, 240], [200, 140, 255], [140, 240, 160], [255, 120, 150]][N % 6];
 
 export const HAMILTONIANS = {
@@ -47,6 +54,7 @@ export const HAMILTONIANS = {
     kernelSpace: { x: 2, p: 2 },
     stark: false, hydrogenTheorems: false,
     labelOf: (s) => `N${qhoN(s.n, s.l)} n_r${s.n - s.l - 1} ${L_LETTERS[s.l]}${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
+    grid: { rows: Array.from({ length: 2 * NMAX - 1 }, (_, N) => ({ key: N, label: 'N' + N, tone: N % 6 + 1 })), rowOf: (s) => qhoN(s.n, s.l), chip: nrl, fold: (N) => N >= NMAX },   // 041 H4 (N ≥ 7: a level the 140 labels hold only part of, folded at home as n = 7 is)
     spectrum: {
       levels: Array.from({ length: 2 * NMAX - 1 }, (_, N) => ({ key: N, E: N + 1.5, label: `N${N}`, rgb: QHO_RGB(N) })),   // N = 0 … 12 since n = 7
       levelKey: (a) => qhoN(BASIS[a].n, BASIS[a].l),
@@ -64,6 +72,7 @@ HAMILTONIANS.well = {
   kernelSpace: { x: 3, p: 3 },
   stark: false, hydrogenTheorems: false, noMomentum: true,
   labelOf: (s) => `${s.n - s.l}${L_LETTERS[s.l]} well ${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
+  grid: { rows: Array.from({ length: NMAX }, (_, i) => ({ key: i + 1, label: String(i + 1), tone: i + 1 })), rowOf: (s) => s.n - s.l, chip: nrl },   // 041 H4: a row per n_r + 1
   get spectrum() {
     const a = wellRadius(), levels = [];
     for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) levels.push({ key: n + ':' + l, E: wellEnergyOf(n, l, a), label: `${n - l}${L_LETTERS[l]}`, rgb: QHO_RGB(n - 1) });
@@ -164,6 +173,7 @@ HAMILTONIANS.atom = {
   kernelSpace: { x: 6, p: 6 },
   stark: false, hydrogenTheorems: false, noMomentum: true,
   labelOf: (s) => atomForms(s).plain + (atomOcc(s.n, s.l) ? '' : '°'),
+  grid: { chip: (s) => atomForms(s).typeset + (atomOcc(s.n, s.l) ? '' : '°'), dim: (s) => !atomOcc(s.n, s.l) },   // 041 H4: hydrogen's rows; a virtual shell faint, marked °
   get spectrum() {
     if (atomSpec && atomSpec.Z === atomZ) return atomSpec;
     const levels = [];

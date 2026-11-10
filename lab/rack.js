@@ -771,7 +771,7 @@ export async function boot(dom) {
   const { stageTextTick, initStageText } = createStageWords(app);   // 0.5.2 R2d: lab/shell/stage-words.js
 
   // CALCULUS — the stats, derived live, with their laws and residuals
-  const { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep, metersDigest, calculusDigest } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat
+  const { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, metersDigest, calculusDigest } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat
 
   /* ── WAVE 52 · W-MODWINDOW: THE MODULATION RACK ────────────────────────────────────────────────
    * The model is lab/mir — vendored, headless, 53 gates green before a single pixel of this existed.
@@ -808,7 +808,7 @@ export async function boot(dom) {
     return skOn || dpOn || bdOn ? [skOn || dpOn ? app.state.chem.atomsNow() : null, dpOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, t, app.state.space === 'p'), { ell: elOn ? covariance(reg, t) : null }), ui.skeletonSize ? ui.skeletonSize.get() : 1.6, ui.skeletonOpacity ? ui.skeletonOpacity.get() : 1, skOn, ui.bondsOf ? ui.bondsOf() : null] : null;
   };
   Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb,
-    slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, emission: wEm, calculus: wCalc, skeleton: wChem, lattice: wLat, bloch: wBlo, central: wCen, separable: wSep });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
+    slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, emission: wEm, calculus: wCalc, skeleton: wChem, lattice: wLat, bloch: wBlo });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
   for (const w of [...Object.values(READERS), wVor, wMet, wLad]) windowActivity.track(w);
   /** the guard the two hydrogenic readers share: hydrogen at Z = 1, no Sturmian scale, no other model holding the
       field.  Both windows integrate the SHIPPED closed-form radials, so anything else would be two operators in one

@@ -12,8 +12,8 @@ const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (
    operators are HYDROGEN's (they read or replace the hydrogenic register the molecule does not drive); LATTICE and BLOCH keep their own
    registers and touch neither, so they stand in both (LATTICE's benzene Hückel preset is a molecule's picture) */
 export const MODE = Object.freeze({ spectrum: 'hydrogen', equalizer: 'hydrogen', staticfield: 'hydrogen', emission: 'hydrogen', shadow: 'hydrogen', orbit: 'hydrogen',
-  vortex: 'hydrogen', slice: 'hydrogen', ladder: 'hydrogen', calculus: 'hydrogen', central: 'hydrogen', separable: 'hydrogen', atoms: 'hydrogen',
-  wigner: 'hydrogen', radiation: 'hydrogen', chem: 'molecules', lattice: 'both', bloch: 'both' });
+  vortex: 'hydrogen', slice: 'hydrogen', ladder: 'hydrogen', calculus: 'hydrogen', atoms: 'hydrogen',
+  wigner: 'hydrogen', radiation: 'hydrogen', chem: 'molecules', bloch: 'both' });   // 041 H4: CENTRAL · SEPARABLE · LATTICE are rooms of SPECTRUM (hidden with it under MOLECULES)
 /* 022 E1 · AVAILABILITY IS ONE LAW: availability(control, app) → { on, why, hide } — whether a control stands, and why not, read in ONE place
    from the mode (a molecule holds the field), the operator in force (`noMomentum`), the scale (STURMIAN) and the molecule-only rows.  `on`
    false greys the control in its seat with `why` before its hint (016 V1: greyed, never moved); `hide` takes a molecule's row out under
@@ -137,7 +137,7 @@ export function createSettings(app) {
   }
 
 
-  const KIND = { staticfield: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', light: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', equalizer: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', lattice: 'info', bloch: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info', emission: 'info', stage: 'core', widgets: 'core' };   // 037 T1: STAGE opens unfolded, as the picture's other controls
+  const KIND = { staticfield: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', light: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', equalizer: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', bloch: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info', emission: 'info', stage: 'core', widgets: 'core' };   // 037 T1: STAGE opens unfolded, as the picture's other controls
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
      ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by
@@ -148,7 +148,8 @@ export function createSettings(app) {
      lines) and VORTEX (PARTICLES); a saved layout's DYNAMICS seat lands on SHADOW. */
   /* iteration 008 U: MO-REGISTRY is merged INTO MOLECULES (its panes under the ON row); a saved layout's `orbitals` seat lands on `chem` */
   /* 018 D3: the CURVES card is retired into NODES (lab/nodes.js); a saved layout's `curves` seat opens `nodes` */
-  const RETIRED_WINDOWS = { style: 'observer', dynamics: 'shadow', orbitals: 'chem', curves: 'nodes' };
+  /* 041 H4: CENTRAL, SEPARABLE and LATTICE are rooms under SPECTRUM's HAMILTONIAN; a saved layout's seat of one stands for `spectrum` */
+  const RETIRED_WINDOWS = { style: 'observer', dynamics: 'shadow', orbitals: 'chem', curves: 'nodes', central: 'spectrum', separable: 'spectrum', lattice: 'spectrum' };
   /* POWER is persistent device state. Presentation eligibility is a separate, transient visibility law below:
      leaving the viewport must save work without rewriting the user's project or switches. */
   const powered = (w) => !(w && w.root && w.root.classList.contains('off'));

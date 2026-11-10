@@ -879,9 +879,10 @@ body.menu-open #widgets { visibility: hidden; }
 .dev .sp-vseg .seg-b { min-height: 17px; min-width: 0; padding: 0 4px; font-size: var(--fs-micro); }
 /* 017 R4 (Josh's refs/hamiltonian-misaligned.png): HYDROGEN's two rows share ONE column rhythm — three 56-px columns, 6-px gaps, centred
    as a block, so Z · μ/mₑ · the mass seg and SCALE · λ SCALE stand in the same columns on the same dial line */
-/* the note row (017 W3): its words, then OPEN at the row's end on their centre line */
-.dev[data-id="spectrum"] .sp-ham-n:not([hidden]) { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-.dev[data-id="spectrum"] .sp-ham-n > .trig { flex: 0 0 auto; margin-left: auto; min-height: 26px; font-size: var(--fs-micro); }
+/* 041 H4 · THE HAMILTONIAN'S OWN ROOMS (windows/spectrum.js `.sp-room`): CENTRAL's, SEPARABLE's and LATTICE's editors under ‹ SYSTEM ›, laid as they
+   were in their own windows (the kit's rows); a rule above parts the room from the stepper.  `.pk-dim`: a chip the system marks faint (ATOM's virtual °) */
+.dev[data-id="spectrum"] .sp-room:not([hidden]) { display: block; margin: 6px 0 2px; padding-top: 6px; border-top: 1px solid var(--glass-hairline); }
+.picker .pk-c.pk-dim:not(.on) { opacity: .55; }
 .dev[data-id="spectrum"] .sp-ham-body > .sp-ham-b { gap: 4px; }   /* the widest row: three knobs, the seg and the trigs in a 280-px body */
 .dev[data-id="spectrum"] .sp-ham-trigs { display: flex; flex-direction: column; gap: 4px; flex: 1 1 64px; max-width: 84px; min-width: 0; padding-top: 4px; }
 .dev[data-id="spectrum"] .sp-ham-trigs > .trig { min-height: 26px; min-width: 0; padding: 0 6px; font-size: var(--fs-micro); }

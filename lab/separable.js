@@ -49,6 +49,9 @@ export const SEPARABLE = {
   short: 'SEP', get unit() { return form === 'cube' ? 'hartree' : 'ħω'; }, lengthUnit: 'a₀',
   energy, radial: () => 0, tableFor, momentumTableFor: tableFor, psiAt, phiAt: psiAt, domainFor, domainForP: domainFor,   // radial 0: the spherical readers stand down (separable)
   kernelSpace: { x: 7, p: 7 }, stark: false, hydrogenTheorems: false, noMomentum: true, separable: true, labelOf,
+  /* 041 H4 · the picker's grid (hamiltonian.js `grid`): a row per N = n_x + n_y + n_z (the cube: per Σnᵢ), the chip the triple; a slot past NL is left out */
+  get grid() { const keys = [...new Set(LABELS.map(sum))].sort((p, q) => p - q);
+    return { rows: keys.map((k, i) => ({ key: k, label: (form === 'cube' ? 'Σ' : 'N') + k, tone: i % 6 + 1 })), rowOf: (s) => (s.index < NL ? sum(LABELS[s.index]) : null), chip: (s) => (s.index < NL ? LABELS[s.index].join('') : '') }; },
   get spectrum() { return { levels: GROUPS.map((g, k) => ({ key: k, E: g.E, label: levelName(g), rgb: RGB[(form === 'cube' ? k : sum(g.t)) % 6] })), levelKey: (a) => (a < NL ? KEY[a] : -1),
     Emin: 0, Etop: GROUPS[GROUPS.length - 1].E * 1.08, topLabel: '', nan: 'unused here', footer: `EIGENVALUE  E = ${form === 'cube' ? 'π²Σnᵢ²/(2L²)' : 'Σ ωᵢ(nᵢ + ½)'} · ${NL} of ${BASIS.length} labels · ${BASIS.length - NL} unused here` }; },
 };

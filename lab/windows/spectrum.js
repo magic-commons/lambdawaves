@@ -36,54 +36,58 @@ export function createSpectrumCard(app) {
      every `ui.*` name, id and saved key is the one it was. */
   const hamGroup = group(wSpec.body, ''), hamHead = el('div', 'row tight lw-field-head', hamGroup), hamBody = el('div', 'sp-ham-body', hamGroup);
   hamGroup.classList.add('sp-ham'); label(el('div', 'grp-lbl', hamHead), 'HAMILTONIAN'); fold(hamHead, hamBody, { what: 'the Hamiltonian', key: 'ham' });
-  const hamRows = { hydrogen: el('div', 'row tight fit sp-ham-h', null), scale: el('div', 'row tight fit sp-ham-s', null), box: el('div', 'row tight fit sp-ham-b', null), atom: el('div', 'row tight fit sp-ham-a', null), note: el('div', 'sp-cap sp-ham-n', null) };
-  /** the rows the system in force shows (the stepper's id: an operator, or 'molecules') */
+  /* 041 H4 · THE HAMILTONIAN'S OWN ROOMS (Josh 11-09: "move the lattice, separable, and central windows to just appear below the Hamiltonian section
+     of spectrum and not need to bloat the amount of MIR rack windows"): three rooms (`.sp-room[data-room]`) in the group, shown by ‹ SYSTEM › as the
+     HYDROGEN, BOX and ATOM rows are; windows/readouts.js builds CENTRAL's, SEPARABLE's and LATTICE's editors into them (`ui.hamRooms`) and hears
+     `roomopen` when one is shown.  The three window ids are retired into `spectrum` (shell/settings.js RETIRED_WINDOWS). */
+  const room = (id) => { const r = el('div', 'sp-room', null); r.dataset.room = id; return r; };
+  const hamRows = { hydrogen: el('div', 'row tight fit sp-ham-h', null), scale: el('div', 'row tight fit sp-ham-s', null), box: el('div', 'row tight fit sp-ham-b', null), atom: el('div', 'row tight fit sp-ham-a', null),
+    central: room('central'), separable: room('separable'), lattice: room('lattice') };
+  ui.hamRooms = { central: hamRows.central, separable: hamRows.separable, lattice: hamRows.lattice };
+  /** the rows the system in force shows (the stepper's id: an operator, or 'lattice') */
   /* iteration 016 W7 (Josh, call 10: "make the section dynamic by mode as WAVE's knobs are"): a turn of ‹ SYSTEM › re-lays the group once — the rows
      written only when the set shown changes (the stepper and the operator's listener both ask), and the body's height glides old → new in 160 ms
      (the kit's ease; reduced motion, a folded group or a hidden card: at once), so the cards under it never jump */
   let hamKey = '';
-  const NOTE_WIN = { central: 'central', cornell: 'central', separable: 'separable', lattice: 'lattice' };
-  const noteOpen = trig({ label: 'OPEN', onFire: () => { const w = NOTE_WIN[ui.hamSeg ? ui.hamSeg.value : '']; if (w) app.sh.layout.reopen(w); } });
   const hamShow = (id) => {
-    /* iteration 017 W3: a system whose operator lives in its own window says so (the X walk found CENTRAL · SEPARABLE · LATTICE's rows empty) */
-    const note = { central: 'its potential is drawn in CENTRAL', cornell: 'its potential is drawn in CENTRAL', separable: 'its potential is set in SEPARABLE', lattice: 'LATTICE solves its own register in its window; this grid is the atom’s' }[id];
-    const want = { hydrogen: id === 'hydrogen', scale: id === 'hydrogen', box: id === 'well' || id === 'qho', atom: id === 'atom', note: !!note }, key = Object.values(want).join() + (note || '');
+    const want = { hydrogen: id === 'hydrogen', scale: id === 'hydrogen', box: id === 'well' || id === 'qho', atom: id === 'atom', central: id === 'central' || id === 'cornell', separable: id === 'separable', lattice: id === 'lattice' }, key = Object.values(want).join();
     if (key === hamKey) return;
-    if (note) { label(hamRows.note, note); hamRows.note.appendChild(noteOpen.root); noteOpen.root.title = 'OPEN ' + NOTE_WIN[id].toUpperCase() + ' — raise the window that holds this operator'; }   // 017 (call 10): the note and one OPEN, nothing else
     const live = !!hamKey && hamBody.getClientRects().length > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches, h0 = live ? hamBody.offsetHeight : 0;
-    hamKey = key; for (const k of Object.keys(want)) hamRows[k].hidden = !want[k];
+    hamKey = key; for (const k of Object.keys(want)) { const was = hamRows[k].hidden; hamRows[k].hidden = !want[k]; if (was && want[k] && ui.hamRooms[k]) hamRows[k].dispatchEvent(new Event('roomopen')); }
     if (!live) return; const h1 = hamBody.offsetHeight;
     if (h1 !== h0) hamBody.animate([{ height: h0 + 'px', overflow: 'clip' }, { height: h1 + 'px', overflow: 'clip' }], { duration: 160, easing: 'cubic-bezier(.23, 1, .32, 1)' });
   };
   {
     const rh = el('div', 'row tight sp-ham-sys', hamBody);
-    /* 0.7.4 C1 · THE PICKER: ‹ SYSTEM ›, the kit's stepper over lab/catalogue.js — the operators with HYDROGEN, MOLECULES and LATTICE, each row's hover its
-       word · oracle.  A window opens and leaves the Hamiltonian alone; the name reads back what owns the field; CENTRAL and CENTRAL › QUARKONIUM (0.8.0 G1)
-       set their operator and open CENTRAL, its editor (an older project restoring `cornell` still lands).  `ui.hamSeg` keeps its name and set(id): persist, the verbs and LAUNCH read it. */
-    const SYS = ['hydrogen', 'qho', 'well', 'atom', 'central', 'cornell', 'separable', 'molecules', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => r.name + ' · ' + r.word;
-    /* 013 H2 · THE WINDOWS THAT FOLLOW THE SYSTEM: the window a system opened closes when the stepper leaves it — only one this stepper
-       opened (a window already open by hand stays); MOLECULES' card is the mode and never closes here; BOX opens no window.  It closes by the card's own ✕ (the rack's close(id), no new hinge) */
-    const WIN = { central: 'central', cornell: 'central', separable: 'separable', lattice: 'lattice', atom: 'atoms' }, dev = (id) => document.querySelector('.dev[data-id="' + id + '"]'), isOpen = (id) => { const d = dev(id); return !!d && !d.hidden && !d.classList.contains('closed'); };
+    /* 0.7.4 C1 · THE PICKER: ‹ SYSTEM ›, the kit's stepper over lab/catalogue.js, each row's hover its word · oracle.  `ui.hamSeg` keeps its name and
+       set(id): persist, the verbs and LAUNCH read it.  041 H4 (Josh: "Remove the molecules options in Hamiltonian. Add a divider to separate Hydrogen,
+       Oscillator, Box, and Atom with Central, Seperable, and Lattice"): MOLECULES left the list (the mode switch is its road); the list is HYDROGEN ·
+       OSCILLATOR · BOX · ATOM, a rule, CENTRAL · CENTRAL › QUARKONIUM (an older project's `cornell` still lands) · SEPARABLE · LATTICE — the last four
+       show their room below.  LATTICE keeps its own register: choosing it leaves the operator alone. */
+    const SYS = ['hydrogen', 'qho', 'well', 'atom', 'central', 'cornell', 'separable', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => r.name + ' · ' + r.word;
+    /* 013 H2 · THE WINDOW THAT FOLLOWS THE SYSTEM: ATOMS, the one window a system still opens, closes when the stepper leaves ATOM — only if this
+       stepper opened it (a window already open by hand stays).  It opens and closes by the rack's own roads (041 H5: `layout.reopen`, the card's ✕) */
+    const WIN = { atom: 'atoms' }, dev = (id) => document.querySelector('.dev[data-id="' + id + '"]'), isOpen = (id) => { const d = dev(id); return !!d && !d.hidden && !d.classList.contains('closed'); };
     let opened = null;
-    /* 017 X3 (the walk): MOLECULES turns the molecule ON and any other system lets it go (the arrows could never pass it: it read back the
-       operator and stepped onto itself); LATTICE reads LATTICE while its window is open (its ✕ reads back, X1); a window the system needs that
-       stands powered off is powered on with it — an effect shows its window */
     const chem = () => app.state.chem;
     const onSys = (v) => {
-      if (v !== 'molecules' && chem() && chem().on) chem().setOn(false);
+      if (chem() && chem().on) chem().setOn(false);   // 017 X3: a system lets the molecule go
       const w = WIN[v]; if (opened && opened !== w) { if (isOpen(opened)) dev(opened).querySelector('.dev-close').click(); opened = null; } if (w && w !== opened) opened = isOpen(w) ? null : w;
-      if (v === 'molecules' || v === 'lattice') { app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); if (v === 'molecules' && chem() && !chem().on) chem().setOn(true); } else { switchHamiltonian(v); if (v === 'central' || v === 'cornell' || v === 'separable') app.sh.layout.reopen(v === 'separable' ? v : 'central'); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
-      if (w && dev(w) && dev(w).classList.contains('off')) dev(w).querySelector('.dev-power').click();
+      if (v !== 'lattice') { switchHamiltonian(v); if (v === 'well') app.w.enterBox(); if (w) app.sh.layout.reopen(w); }
+      if (w && dev(w) && dev(w).classList.contains('off')) dev(w).querySelector('.dev-power').click();   // 017 X3: a window the system needs that stands powered off is powered on with it
       ui.hamSeg.set(v === 'lattice' ? v : getHamiltonian().id); };
     const sys = stepper({ aria: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0] })), value: 'hydrogen', cls: 'mol-step', onChange: onSys });
-    sys.name.addEventListener('click', () => document.querySelectorAll('.mir-pick-i[data-id]').forEach((b) => { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }));
-    ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(app.state.chem && app.state.chem.on ? 'molecules' : id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); hamShow(sys.get()); },
+    sys.name.addEventListener('click', () => { for (const b of document.querySelectorAll('.mir-pick-i[data-id]')) { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }
+      const c = document.querySelector('.mir-pick-i[data-id="central"]'); if (c && !(c.previousElementSibling && c.previousElementSibling.classList.contains('mb-sep'))) { const sep = el('div', 'mb-sep', null); sep.setAttribute('role', 'separator'); c.before(sep); } });   // 041 H4: the rule
+    ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); hamShow(sys.get()); },
       /* 017 X1 · THE STAND-DOWN: a window of the table closed or powered off — the stepper forgets it opened it and reads back the operator in force */
       readBack(id) { if (opened === id) opened = null; this.set(getHamiltonian().id); },
       /** step(±1) — the next or previous SYSTEM, as the stepper's arrows take it (021 I1: the `preset.next` / `preset.prev` actions) */
-      step(d) { const i = SYS.findIndex((r) => r.id === sys.get()), v = SYS[(i + d + SYS.length) % SYS.length].id; sys.set(v); onSys(v); } };
+      step(d) { const i = SYS.findIndex((r) => r.id === sys.get()), v = SYS[(i + d + SYS.length) % SYS.length].id; sys.set(v); onSys(v); },
+      /** 041 H4 · show(id) — SPECTRUM up, its HAMILTONIAN open, ‹ SYSTEM › on `id` (the verb `lattice`'s road to the room, and an older layout's open LATTICE window; LATTICE moves no operator and lets no molecule go) */
+      show(id) { app.sh.layout.reopen('spectrum'); const f = hamHead.querySelector('.lw-fold'); if (f && f.getAttribute('aria-expanded') !== 'true') f.click(); if (id === 'lattice') this.set(id); else if (sys.get() !== id) { sys.set(id); onSys(id); } } };
     rh.appendChild(ui.hamSeg.root);
-    hamBody.append(hamRows.hydrogen, hamRows.scale, hamRows.box, hamRows.atom, hamRows.note); hamRows.note.hidden = true;
+    hamBody.append(hamRows.hydrogen, hamRows.scale, hamRows.box, hamRows.atom, hamRows.central, hamRows.separable, hamRows.lattice);
     ui.hamSeg.set('hydrogen');
     /* WAVE 68 · `step: 1`, and it is the only knob in the lab that lacked one.  Without it an arrow
        moved 1/100 of the travel = 0.05 = a TWENTIETH of an integer, so eleven real presses produced
@@ -132,6 +136,7 @@ export function createSpectrumCard(app) {
   api.selectEigen = (k) => selectEigen(k);
   api.unit = () => (getHamiltonian().unit === 'hartree' ? 'Eh' : getHamiltonian().unit);
   api.labelOf = (s) => getHamiltonian().labelOf(s);
+  api.grid = () => getHamiltonian().grid || null;   // 041 H4: how the 140 picker lays and names its chips under the operator in force
   const spectrum = createSpectrum(wSpec.body, api);
   ui.presetSel = spectrum.preset;   // iteration 008 S: the ‹ PRESET › stepper at the head (it left STATE); persist.js and the one road write its .value
   app.w.spectrum = spectrum; app.w.setSturmian = setSturmian; app.w.sturmEigen = sturmEigen; app.w.selectEigen = selectEigen;
@@ -178,7 +183,7 @@ export function createSpectrumCard(app) {
     for (const w of [app.w.wOrb, app.w.wVor, app.w.wSlice, app.w.wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
     wSpec.setStatus(hamLabel(), H.id === 'hydrogen' ? '' : 'live');
     wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); });   // wave 50: the API, so the RATE is in the number the card shows
-    wSpec.body.querySelectorAll('.sp-nm[data-a]').forEach((e) => { e.textContent = H.labelOf(BASIS[+e.dataset.a]); });
+    spectrum.regrid();   // 041 H4: the grid's rows, the chips' names and the lanes' follow the operator
     if (sturm.on) { applySturmian(); return; }                        // W-STURMIAN: re-arm (or stand down) the scale under the operator now in force
     app.state.refSnapshot = null; app.state.pendingRef = null;
     schedule(TIER.REBUILD);

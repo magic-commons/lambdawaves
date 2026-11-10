@@ -36,3 +36,24 @@ seat naming a retired id is skipped by `applyLayout` (no such card), and nothing
 The old records (`mo`, `pulse`, `instruments.molecule`, `instruments.helium`, `instruments.h2`, `field`) are read only to choose
 the shim; nothing writes them again. The fixtures `tests/fixtures/legacy-{h2plus,helium,qcd,h2,electrostatics}.lambdawaves.json`
 are REAL files written by the builds before D9 and D9b, and `tests/history.browser-test.mjs` opens each through the PROJECTS road.
+
+## The three windows that became rooms (041 H4)
+
+CENTRAL, SEPARABLE and LATTICE are no longer rack windows. Each editor is a ROOM inside SPECTRUM's HAMILTONIAN group, shown by ‹ SYSTEM ›
+(`lab/windows/spectrum.js` `.sp-room[data-room]`, built by `lab/windows/readouts.js`). Nothing a file stores was renamed.
+
+| id | title | where it is now | what still reads the old id |
+|---|---|---|---|
+| `central` | CENTRAL | SPECTRUM › HAMILTONIAN › ‹ SYSTEM › CENTRAL (and CENTRAL › QUARKONIUM) | `RETIRED_WINDOWS.central → spectrum`; the operator ids `central` / `cornell`; `instruments.central` { preset, params }; the worker op `central.solve` |
+| `separable` | SEPARABLE | SPECTRUM › HAMILTONIAN › ‹ SYSTEM › SEPARABLE | `RETIRED_WINDOWS.separable → spectrum`; the operator id `separable`; `instruments.separable` { form, wx, wy, wz, L } |
+| `lattice` | LATTICE | SPECTRUM › HAMILTONIAN › ‹ SYSTEM › LATTICE (its own register still; the operator in force is left alone) | `RETIRED_WINDOWS.lattice → spectrum`; `instruments.lattice`; the verb `lattice`; the LATTICE widget; the worker op `lattice.solve` |
+
+How an old file or layout opens:
+
+- **A layout seat** naming one of the three stands for SPECTRUM (`shell/settings.js` `RETIRED_WINDOWS`, the kit's `retired`): where the
+  layout names SPECTRUM itself the old seat is dropped, where it does not SPECTRUM takes that seat. Nothing throws.
+- **An operator in force** (`hamiltonian.id` `central`, `cornell` or `separable`) brings SPECTRUM back, powered, with ‹ SYSTEM › on it and
+  its room shown (`shell/persist.js`, AN EFFECT SHOWS ITS WINDOW).
+- **A LATTICE window that was open** in the layout opens SPECTRUM with its HAMILTONIAN unfolded and ‹ SYSTEM › on LATTICE, the room shown
+  (`shell/rack-wiring.js` `applyLayout`); under MOLECULES, where SPECTRUM is hidden, it is left as it is.
+- None of the three ever had a modulation target; no route, lane or macro names them.
