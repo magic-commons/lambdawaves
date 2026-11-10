@@ -82,7 +82,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     tabletBeforeAsk: src.indexOf('const isTablet = () =>') > 0 && src.indexOf('const isTablet = () =>') < src.indexOf('const FIRST_RUN = '),
     oneTabletPredicate: src.split('const isTablet = () =>').length === 2,
     /* 0.5.0 C2: the first-run material is the look store's `defaults` (lab/look.js, mir.gui); a stored choice is the store's */
-    lookDefaults: src.includes("const LOOK_DEFAULTS = { theme: 'light', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };"),
+    lookDefaults: src.includes("const LOOK_DEFAULTS = { theme: 'system', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };"),
     storeTakesThem: src.includes('createLook({ settings: settingsStore, defaults: LOOK_DEFAULTS,'),
     unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
     phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
