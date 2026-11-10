@@ -426,9 +426,11 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 /* 041 D0 · EVERY FACE CAN BE GLASS, THE APP'S FACES (Josh 11-09: "The 'faces' from glass to solid doesn't seem to work with all the faces"): the
    kit's GLASS rule (mir/css/skin.css, alpha.61) is layered, and the rules above and §9's are not, so λWAVES' own triggers, segments and cells
    kept their fill.  The same law here, unlayered: under FACES · GLASS on a glass card every neutral face is clear and wears the hairline; ON
-   keeps its own face.  The swatches, the power disc and PLAY's accent stay filled, as in the kit */
+   keeps its own face.  The swatches, the power disc and PLAY's accent stay filled, as in the kit.  041 X5 (F-REVIEW FIX 6): NODES' cards and the
+   Picker's arrows and tab pill are faces too */
 body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.dev:not(.mir-modwindow) :is(.trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]), .seg, .seg-b),
-  .sp-b:not(.on), .pk-c:not(.on), .sp-row:not(.sel), .orbit-row, .plane-model, .dev-copy, #transport[data-layout="csb"] .csb-play > .tbtn.play:not(:active, .press)) { background-color: transparent; background-image: none; }
+  .sp-b:not(.on), .pk-c:not(.on), .sp-row:not(.sel), .orbit-row, .plane-model, .dev-copy, #transport[data-layout="csb"] .csb-play > .tbtn.play:not(:active, .press),
+  .nodes-card, #lwMenu .mm-arrow, #lwMenu .mm-pill) { background-color: transparent; background-image: none; }
 body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.dev:not(.mir-modwindow) .trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]):not(.lw-fold), .sp-b:not(.on), .pk-c:not(.on)) { border-color: var(--ctl-hairline); }
 
 /* Explanatory pockets are optional; numerical interaction labels stay available. */
