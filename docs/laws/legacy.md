@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+CENTRAL, SEPARABLE AND LATTICE BECAME ROOMS (041 H4, Josh: "not need to bloat the amount of MIR rack windows"): the three rack windows are retired into SPECTRUM's HAMILTONIAN (register-and-systems.md § 041); their ids map to `spectrum` (`lab/shell/settings.js` `RETIRED_WINDOWS`, the kit's `retired`), and every stored key (`instruments.central` · `.separable` · `.lattice`), operator id, the verb `lattice`, the LATTICE widget and the worker ops are unchanged. An older layout's seat stands for SPECTRUM, an open LATTICE opens SPECTRUM on the LATTICE room, an operator in force brings SPECTRUM back on its room; none had a modulation target. The table and the roads: `docs/LEGACY-WINDOWS.md` § The three windows that became rooms.
+
 ## The standing paragraphs
 
 SETTINGS › DISPLAY's STAGE ROWS MOVED (037 T1): FRAME · AXES · AXIS COLOUR and the stage colour · FOLLOW THEME · STAGE · GAMMA live in the

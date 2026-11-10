@@ -2,6 +2,13 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+PAINT IN MOLECULES, BUTTONS IN SPECTRUM (041 H1): the stroke record `lambdawaves.q0.stroke` is `{ mode, mol }` — `mode` SPECTRUM's (home BUTTONS; an older record stays SPECTRUM's choice), `mol` the ORBITAL and STATES ladders' (home PAINT); each family's seats move together (`lab/paint-stroke.js`).
+A HAND'S EDIT ENDS THE TRANSITION (041 H2): under TRANSITION a hand's edit of the grid (a chip, a stroke, FILL ALL, EMPTY, a lane's remove) stands it down and lands on the store written LAST (B when a file brought both) with that edit; the unstored mix is not kept (`app.hooks.ab.handEdit()`, `lab/windows/transition.js`).
+THE HAMILTONIAN'S OWN ROOMS (041 H4, H6): CENTRAL, SEPARABLE and LATTICE are rooms (`.sp-room`) under SPECTRUM's HAMILTONIAN, shown by ‹ SYSTEM › (built by `lab/windows/readouts.js`), every control hinted; MOLECULES left ‹ SYSTEM ›, and a rule parts HYDROGEN · OSCILLATOR · BOX · ATOM from CENTRAL · QUARKONIUM · SEPARABLE · LATTICE; the retired windows: legacy.md. THE GRID SAYS THE SYSTEM'S OWN NUMBERS: the operator's grid lays and names the 140 picker's chips and the lanes (`spectrum.js` `regrid`) — OSCILLATOR a row per N, BOX a row per n_r + 1, ATOM's virtual shells faint with °, SEPARABLE the triple.
+ATOMS IS A PRESET PICKER (041 H5): a cell puts the element in force, makes ATOM the operator and loads its GROUND CONFIGURATION (`atoms.js` `groundConfig(Z)`: every occupied subshell at its electrons' weight, every m equal and in phase), the highest valence level (`valenceShells(Z)`'s last, Madelung order: Fe 3d, Na 3s, Au 5d) the lane selected; one undo row (`setElement(Z, load)`, `fillValence(all)`); ATOMS opens and closes by the rack's roads; LOAD VALENCE stays the valence alone.
+
 ## The laws of 037
 
 THE TOGGLE BUTTON (037 H6, Josh 11-05: "I said 'Toggle' but you've built what I call a 'Switch' … The icon just swaps between two different
@@ -10,7 +17,7 @@ a SEGMENTED CONTROL is the kit's `seg`, two to four named cells side by side, on
 TOGGLE BUTTON is one `.trig` whose glyph swaps between two drawings, never lit (FILL ALL ↔ EMPTY, BUTTONS ↔ PAINT). iOS calls its on/off
 switch a "toggle"; λWAVES does not. BUTTONS · PAINT is a toggle button since 037 (`lab/paint-stroke.js` `strokeButton`, it replaced 036's
 `strokeSeg`): the hand (BUTTONS) ↔ the brush (PAINT), the face the mode in force, its word the aria-label, its hint "… · press: …",
-`data-state`; one press flips the PREFERENCE `lambdawaves.q0.stroke`, every seat in step.
+`data-state`; one press flips the PREFERENCE `lambdawaves.q0.stroke`, every seat in step (041 H1: every seat of its family, above).
 
 THE LAW LINE (037 H7, Josh 11-05: "Mouseover reveal of text in spectrum should only happen inside that reader thingy. Tell me what you call
 that thing"): the box SPECTRUM draws its levels in is THE LADDER (SPECTRUM's register ladder; MOLECULES' ORBITAL and STATES ladders are the
@@ -25,7 +32,7 @@ BUTTONS · PAINT (036 P1, Josh 2026-11-03: "a 'Paint' vs 'Buttons' toggle … th
 switching between atoms and molecules; don't change the wave/palette windows"): the ladders' stroke has two modes, one PREFERENCE record
 `lambdawaves.q0.stroke` { mode } read at each press (`lab/paint-stroke.js` `strokeMode`, `paintStroke`'s `mode` and `isOn`), its seat
 `strokeSeg` (since 037 `strokeButton`, THE TOGGLE BUTTON above) — a pointing hand · a paintbrush — on SPECTRUM's head (in PRESET VISUALS' place, the four-column grid kept) and on the ORBITAL
-and STATES heads (SPECTRUM hides under MOLECULES), every seat in step. BUTTONS, the default: a left press released on the item it began on
+and STATES heads (SPECTRUM hides under MOLECULES), every seat in step. BUTTONS, the default (041 H1: SPECTRUM's; MOLECULES' is PAINT, above): a left press released on the item it began on
 TOGGLES it (normalised, VIEW MIX, one undo row, as a stroke), a drag sweeps nothing, the right button is the context menu's (the grid's
 CLEAR · NORMALIZE · NEXT PRESET · CREATE EVENT …). PAINT is THE PAINT GESTURE below. WAVE and PALETTE never read it.
 

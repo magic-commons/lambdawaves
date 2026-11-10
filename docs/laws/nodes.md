@@ -2,11 +2,17 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+NODES' CHIPS (041 N1, on alpha.55): the NODES window wears `chrome: 'both'`, its rail on the left, top to bottom: the drag chip (`gripAt: 'first'`), ADD NODE, FIT, FOLD ALL, BYPASS ALL; the four tools left the window's ground and the chips join the mask (`lab/nodes.js`, `lab/nodes-view.js`); the title bar keeps the presets, the dock door and ×; the rack card, which has no rail, keeps its three in its ground.
+A PRESET CARRIES THE GRADE (041 N2, Josh's call 11): a preset saved since 041 is `{ nodes (CURVES in its place in the chain), curves }` and a pick or the bar's step puts both back; one without `curves` (FILM, POSTER, PRINT, a 040 save) replaces every node but CURVES and leaves the grade. NODES' undo ring does not hold the grade. This amends 040 N4's "every node but CURVES" (below).
+ONE RAMP (041 N3, Josh's call 1): PERSPECTIVE draws one centred 128² ramp, once, and the focal point is an `feOffset` before each displacement map (`lab/node-prims.js`) — the same picture; a FOCUS write changes two numbers. The mode and its handle stay. This replaces 040 N1's ramp per focal point (below).
+
 ## The laws of 040
 
 THE FOCAL POINT (040 N1, Josh: "Chromatic abberation should have a blur blend knob. Perspective chromatic abberation also doesn't work; it's supposed to come with a movable focal point; show focal point when editing the node").
 - **BLUR BLEND** (0–8 px, home 0) softens the parted red and blue (one feGaussianBlur each) before they screen back over green, SHIFT and PERSPECTIVE alike; at 0 it adds nothing. It is px, so a film's × k holds.
-- **PERSPECTIVE** parts the colours from a FOCAL POINT, FOCUS X · FOCUS Y (stage fractions, home the centre, targets `nodes.<id>.fx` / `.fy`, greyed under SHIFT), and grows LINEARLY with the distance from it: AMOUNT px at the stage's corner from a centred point. 038's r² law hid the effect where the orbital sits. A 128² ramp per focal point (eight kept), read at ±4·AMOUNT.
+- **PERSPECTIVE** parts the colours from a FOCAL POINT, FOCUS X · FOCUS Y (stage fractions, home the centre, targets `nodes.<id>.fx` / `.fy`, greyed under SHIFT), and grows LINEARLY with the distance from it: AMOUNT px at the stage's corner from a centred point. 038's r² law hid the effect where the orbital sits. A 128² ramp per focal point (eight kept), read at ±4·AMOUNT (041 N3: one ramp, above).
 - **The handle** (`lab/node-focus.js`): a ring and cross-hair in `#stage` (z 19) while the node is EDITED — its card selected in the window, hovered or holding the focus (`nodes.js editing(id, why, on)`, a 600 ms grace), or the hand on the handle. A drag writes FOCUS X · Y through the node's hand (a routed knob moves its base); two presses bring it home. It stays under every window (a window over the stage's centre covers it at home), out of the occlusion mask, hidden by H and the menu; nothing is drawn while no node is edited, so THE LOCK never sees it.
 
 THE GRAIN KEEPS TIME (040 N2, Josh: "Film grain always plays desipite play/pause modes"). FILM GRAIN's jump is the clock's: ⌊6·t⌋ (24 a second at the home rate) hashed to the tile's offset, written as `--gx` · `--gy` by the layer host's `tick(t)` from the loop's CPU frame (rack.js, beside the widgets). A paused clock holds a still grain; PLAY and a seek move it; reduced motion keeps it where it is. 021 V3's keyframes and the `lw-playing` class are gone. A film hashes its frame index, as before.
@@ -14,7 +20,7 @@ THE GRAIN KEEPS TIME (040 N2, Josh: "Film grain always plays desipite play/pause
 THE HUE KNOB WRAPS (040 N3, Josh: "Hue knob should be 360 degree free spinning instead of left and right only"). A knob with `wrap` is the kit's free arc: `nodeBody` gives its dial the range [home, home + span), so home sits at the top, and folds the turn back into [min, max) on the way to the node. HUE and HUE/SATURATION's HUE wrap on the colour wheel (`WHEEL`: red at home, the thumb what red becomes); the saved value stays −180 … 180, and their targets map `'wrap'`.
 
 THE NODES' PRESETS (040 N4, Josh: "add the modulation window's preset saving thing into Nodes and put it into the window title bar"). MOD's bar sits in NODES' title bar after the title: the save glyph · PRESET NAME · ◀ ▶.
-- **A preset is the graph:** every node but CURVES, whose grade keeps its own presets. The list is the shipped FILM · POSTER · PRINT, then the reader's — the GRAPHS › list, `lambdawaves.q0.nodePresets` (PREFERENCE).
+- **A preset is the graph:** every node but CURVES, whose grade keeps its own presets (041 N2: a preset saved since carries the grade, above). The list is the shipped FILM · POSTER · PRINT, then the reader's — the GRAPHS › list, `lambdawaves.q0.nodePresets` (PREFERENCE).
 - **The hand:** ◀ ▶ step and load (one step of NODES' ring). SAVE or Enter keeps the typed name in CAPS; a shipped or taken name becomes `NAME 2` (016 W9). Escape puts the shown name back. The well rims while what is typed is not the shown preset.
 - A GRAPHS › pick names itself in the bar; an open (a project, NEW) clears the name. The rack card has no bar.
 

@@ -223,3 +223,33 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - OPEN · the themes browser suite was red from alpha.1 to alpha.47 unseen, because a door runs the node tests only: one whole browser run before the 1.5.7 cut.
 - OPEN · when Focus's line joins: its line-art `palette` meets λWAVES' own `palette` glyph (`registerGlyphs` refuses a kit name).
 
+## 041 (2026-11-10, THE SECOND HAND — the doors 1.5.7-alpha.49 … 67: T on `kit-041` and W on `kit-041w` from kit-040's a0e32f5, K on `kit-041-sos` @ 448e3ec; 52 and 53 unused; Focus's 27 … 37 stay on `focus`)
+- **BUILT 1.5.7-alpha.49 · THE MODE MENU** (T1)
+- **BUILT 1.5.7-alpha.50 · THE PILLS STAY ON TOP** (T2)
+- **BUILT 1.5.7-alpha.51 · THE EMPTY LANE HAS NO HINT** (T3)
+- **BUILT 1.5.7-alpha.54 · THE SPHERE IS THE STAGE'S DRAG** (W9)
+- **BUILT 1.5.7-alpha.55 · THE CHIPS STAND ON THE LEFT** (W8)
+- **BUILT 1.5.7-alpha.56 · THE HANDLE WEARS THE WINDOW'S ICON** (W1; the rail's drag chip keeps its dots since alpha.62)
+- **BUILT 1.5.7-alpha.57 · SPACING IS A KNOB** (W6)
+- **BUILT 1.5.7-alpha.58 · THE SCALE REACHES FOLDERS** (W4's first half)
+- **BUILT 1.5.7-alpha.59 · A WINDOW COMES BACK TO THE EDGE** (W5)
+- **BUILT 1.5.7-alpha.60 · THE POINTER GLOW REACHES THE UI AND LIFTS WHAT IS THERE** (W2)
+- **BUILT 1.5.7-alpha.61 · EVERY FACE CAN BE GLASS** (W3)
+- **BUILT 1.5.7-alpha.62 · THE SHINE HAS A KNOB** (W7)
+- **BUILT 1.5.7-alpha.63 · THE REVEAL IS QUICK AND NEAR** (W10)
+- **BUILT 1.5.7-alpha.64 · THE SCALE REACHES TIMELINE, MODULATION AND PATTERN** (K1)
+- **BUILT 1.5.7-alpha.65 · THE DOCK CHIP'S GLYPHS ARE THE APP'S TO NAME** (K2)
+- **BUILT 1.5.7-alpha.66 · A LEAVING BLOCK TAKES NO SEAT** (K3)
+- **BUILT 1.5.7-alpha.67 · THE FINDER HAS SECTIONS** (K4)
+- ANSWERED by these doors: 040's `createWindowPicker({ sections })` and 039 X (4)'s keywords (alpha.67 `sections`, `words`); 036's "modulation material under UI SCALE" (and 039 V (1)'s line on it: alpha.64; FOLDERS alpha.58); 036's "a saved rect is px" in part (alpha.59 brings a whole window back whole); 041 P13's `placeGlyphs` (alpha.65); 041 I2's leaving block (alpha.66); 041 I8's racks' near distance, asked at alpha.48's 44 px (alpha.63: the racks 140, the bar 160 / 220, which λWAVES' own bar peek reads).
+- OPEN · the sphere's delta mode (`panels/camera.js`): its tap watcher counts a press that became a drag, so two quick strokes from one spot read as a double-tap and send the view or the plane home; ask: a press past the tap slop is not a tap (041 N4).
+- OPEN · the sphere's delta mode has no release notice (`onEnd(velocity)`), so the ball cannot take the stage's fling (041 N4).
+- OPEN · `createWindow({ chrome: 'both' })`: a chip's menu on a rail chip (`contextMenu({ anchor })`) drops over the chips below it; ask an anchor side that opens beside the rail (041 N1).
+- OPEN · FACES · GLASS lives inside the kit's layer, so an adopting app's unlayered control rule beats it (λWAVES repeats it unlayered in lab/skin.css); ask a token (`--face-fill`) an app's rules can read (041 D0).
+- OPEN · DRAG HANDLE · ICON needs a `.dev-glyph` in the head; ask `createRack.register({ glyph })` to add it when the head has none (λWAVES does it in rack-wiring.js, 041 D4).
+- OPEN · MIR OPTIONS' ACCENT knobs A, B and VIVID carry no hover hint (041 D5's walk).
+- OPEN · at 150 % on a 1000-px page MODULATION's chip rail stands over its MACROS column and the timing bar runs to the edge; at 150 % on 1300 × 850 PATTERN sits under MODULATION, 30 px off the bottom, its rail over the LFO card (041 K5; a small page at 100 % does the same).
+- OPEN · CAMERA's panel always builds its CONTROLS and PAN words; λWAVES removes them app-side (041 S5, 012 R3's road); a build option would retire that.
+- OPEN · THE MODE MENU's words (PENCIL, PAINT, …) reach `label()` through a variable, so they are not in en.json, as the four tool words never were (041 T).
+- OPEN · three kit browser suites are red from before 041 (measured on alpha.56): parity5 "FROST: a fresh store is TEXT LIGHT", render "a motionUi.paint that throws leaves RENDER off…", widgets "fader: disabled does not reset on a double-click"; `npm run stylehash` was run for T's doors only (041 W11, K).
+

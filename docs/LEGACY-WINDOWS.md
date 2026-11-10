@@ -57,3 +57,5 @@ How an old file or layout opens:
 - **A LATTICE window that was open** in the layout opens SPECTRUM with its HAMILTONIAN unfolded and ‹ SYSTEM › on LATTICE, the room shown
   (`shell/rack-wiring.js` `applyLayout`); under MOLECULES, where SPECTRUM is hidden, it is left as it is.
 - None of the three ever had a modulation target; no route, lane or macro names them.
+- ‹ SYSTEM › on LATTICE is not stored (LATTICE is no operator): a reload shows the operator in force; under MOLECULES the LATTICE room
+  cannot be reached (SPECTRUM is hidden) and the LATTICE widget still draws it (041 H's open lines).

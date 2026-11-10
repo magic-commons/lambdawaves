@@ -2,9 +2,22 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+DOTS ARE DOTS (041 S1, Josh: "Can they just be floating circles?"): the FRAME's DOTS are round screen-facing discs, one 16-byte record a node (`lab/field.js` `vsDot` / `fsDot`), radius 0.014 half-widths by the perspective, never under 0.8 px (a smaller one fades by its area); the buffer 5.7 → 0.96 MiB.
+THE GRID LIES UNDER THE OBJECT (041 S2): LATTICE and DOTS are drawn first, alone, into a texture of the target's size (`gridFor`) that the present reads as the stage's ground (RENDER_WGSL binding 8; no grid is a 1 × 1 of zeros), so the wave, the atoms and the sticks stand over it; `encodeRender` is the one present (readPixels and throughput take it). The leaves THE LOCK moved: field-and-lock.md § 041.
+THE FRAME CAN STAY · THE FRAME'S BRIGHTNESS (041 S3, S4; `lab/stage-window.js`): STAGE › KEEP IN HIDE keeps BOX, LATTICE or DOTS drawn under H (the axes go; B is untouched); STAGE › BRIGHTNESS, 25 … 400 %, home 100 %, scales the alpha of the frame, axes, compass, lattice and dots (`mat.frameGain`) and past 100 % carries the grid's ink toward the theme's full ink. Both are PREFERENCES in FIELD_CHROME (`frameStay` written only when on, `frameGain` only away from home), no target; home is THE LOCK's look.
+THE CAMERA WINDOW (041 S5): the expanded CAMERA has no CONTROLS or PAN words (taken from the kit's DOM, `lab/windows/material.js`); a press on the PAN pad while the LOCK holds releases it and saves it.
+THE WHEEL NEVER PANS (041 S6, Josh's new-user list): the LOCK is OFF from the boot again (`lab/camera-law.js`) and the stage's wheel zooms with no anchor (`STAGE_BINDINGS.wheel.atCursor` false): the object keeps its place, only its size changes; the dials and the keys zoom about the centre, the pinch about its centroid. A blob before gen 17 wrote `camLock: true` as 037's default and it is not read; gen 17 keeps the reader's choice. This reverses 037 H3's LOCK ON (below).
+STROBE HAS NO CAP (041 S7, Josh's call 12): STROBE flashes at RATE's beats whatever the tempo (`lab/field.js` `strobeNow`); the page's photosensitivity notice stands, and the flash guard on a ROUTE to an INTENSITY target is the modulation's and stays. This removes 040 S2's THE STROBE NEVER PASSES THREE A SECOND (below).
+INFO (041 S10, call 9): SETTINGS › DISPLAY's INFORMATIONAL button reads INFO, and INFO · WIDGETS split the row evenly (`.lw-edit-more`).
+THE BALL TURNS AS THE STAGE DOES (041 N4, on alpha.54): CAMERA's sphere runs the kit's delta mode through the camera port's `drag(dx, dy)` — the stage's own `orbitBy` at the stage's rad per px (FLIP included) × the kit's 1.5 — with no ball point, no pole, no rim and no fling; CLIP's sphere takes `plane.delta: true`; `material.js`'s arcs wrapper is gone (`lab/camera-law.js`, `lab/windows/material.js`).
+THE SKIN A NEW USER MEETS (041 D1, D4): THEME is SYSTEM (`LOOK_DEFAULTS`, `lab/rack.js`: light or dark as the device says, and it follows the device until the reader picks); LOOK_HOME (`lab/look.js`) is SATURATION 150 %, CORNERS 20 px, VEIL 5 %, LIGHT's LINK on, DRAG HANDLE · ICON — each rack window's head carries its WINDOW_GLYPH as `.dev-glyph` (`lab/shell/rack-wiring.js`), shown only under ICON. A browser that holds `mir.gui` keeps its own values.
+SPACING IS λWAVES' PX (041 D0 a, c, d; on alpha.57 and 61): SPACING's home is 10 px here (`SPACING_HOME`, what DEFAULT drew; the kit's skins at 6 read 10), reaching both racks (`--rack-gap` / `--rack-inset`), the windows and the bar (`--pad-k`); a stored `'default'` opens as 10 and the skin keeps its name (A SAVED LOOK KEEPS ITS NAME), an old `grip` true / false opens through the kit's `legacy`. λWAVES' unlayered faces (`.trig`, `.seg`, `.pk-c`, `.sp-row`, PLAY …) follow FACES · GLASS by one unlayered rule in `lab/skin.css`.
+
 ## The laws of 040
 
-SETTINGS › DISPLAY OPENS INFORMATIONAL AND WIDGETS (040 M4): two buttons on a row under EDIT STAGE open them the way EDIT STAGE opens STAGE (THE SUMMONS).
+SETTINGS › DISPLAY OPENS INFORMATIONAL AND WIDGETS (040 M4): two buttons on a row under EDIT STAGE open them the way EDIT STAGE opens STAGE (THE SUMMONS). 041 S10: the first reads INFO (above).
 
 AN AUTOMATED KNOB BELONGS TO THE LANE (040 A1, Josh: "if exposure is now tied to the timeline, then it should completely ignore the style-parameter
 saving rule"): A STYLE REMEMBERS ITS KNOBS' tether reads the route list, every clip's curve AND the registry's `isModulated` — a knob a modulator is
@@ -65,7 +78,8 @@ log); both homes stand (3.3, 0.6 rad), so THE LOCK's poses are its own. The ZOOM
 THE REVERSED DIAL: the port's `ranges.zoom.reverse`); `obs.dist`, `observer.dist` and the ×dist readout are still the distance. A saved
 route or timeline curve on `observer.fov` / `observer.dist` is a share of its range, so the demos' FOV and ZOOM curves (STAR LOOP, WAVE
 DANCER) now swing over the wider ranges. AUTO-ROTATE (FRICTION read as 0: a fling never stops, no ambient spin) and the LOCK (the PAN pad
-resting) are ON from the boot; a project that says `camera.autoRotate: false` keeps it, a reader who unlocked keeps `camLock: false`.
+resting) are ON from the boot; a project that says `camera.autoRotate: false` keeps it, a reader who unlocked keeps `camLock: false`. 041 S6
+turned the LOCK off from the boot again (THE WHEEL NEVER PANS, above).
 
 THE CLIP'S FRAME (037 H4, Josh: "'Lock' or 'Unlock' the clip to be separate from the camera"): CLIP's segmented control CAMERA | OBJECT beside
 the plane. OBJECT (`mat.slice.frame` absent: every file before 037, NEW, a link) is the plane fixed to the object. CAMERA (`'camera'`, a hand's
@@ -76,7 +90,7 @@ frame in force. A `lw:` link does not carry the frame.
 
 THE SPHERE (037 H5): CLIP's plane is drawn on the camera's sphere (MIR 1.5.7-alpha.7 THE SPHERE TAKES A PLANE, `directionSphere({ plane })`)
 in place of the plane-model canvas — the normal as the tip, the plane as the film, the rings, no letters; the tip follows the finger in 3-D
-(no pole at z). Under OBJECT it is the object's picture (an orbit turns the cut, not the sphere); under CAMERA it draws the eye's normal as
+(no pole at z; since 041 N4 the raw step turns it, `plane.delta: true`). Under OBJECT it is the object's picture (an orbit turns the cut, not the sphere); under CAMERA it draws the eye's normal as
 the eye sees it (`view`), so neither the sphere nor the cut moves while the eye orbits. PLANE's own window keeps the plane-model canvas.
 
 THE STAGE WINDOW (037 T1, Josh: "New MIR rack window called 'Stage' where the stage can have different effects"): a rack card `stage`
@@ -110,7 +124,7 @@ three lights, each home-off (A NEW STAGE FX IS HOME-OFF: every INTENSITY 0 retur
 corners, the frame's aspect kept; the knob and the target wrap, so an LFO runs it round) · BAND WIDTH (`rate`: 0 a ring 5 % wide … 2 the whole
 stage, w = 1 − smoothstep(0, width, |r − radius|)). STROBE flashes the whole stage on the beat: INTENSITY · RATE (¼ · ½ · 1 · 2 · 4 beats of the
 transport, read only — ONE clock; paused, it stands) · DUTY; THE STROBE NEVER PASSES THREE A SECOND (the period is held at a third of a second
-whatever the tempo, WCAG 2.3.1). BEAM is a wedge of light from the centre: INTENSITY · ANGLE (0° up, clockwise, cyclic) · WIDTH. A LABEL
+whatever the tempo, WCAG 2.3.1; removed by 041 S7 STROBE HAS NO CAP). BEAM is a wedge of light from the centre: INTENSITY · ANGLE (0° up, clockwise, cyclic) · WIDTH. A LABEL
 MOVES, A KEY STAYS: AMOUNT is INTENSITY and RATE is BAND WIDTH over the same `pulse` and `rate`; a record without `position` is from before 040
 ({ pulse, shape, rate }) and opens as POSITION 0° (CENTRE) or 180° (EDGE) at the full BAND WIDTH — the standing wash it drew (its RATE in Hz, the
 breath, is the LFO's work now). Uniforms p16.w (PULSE), p17.x · y (the band's radius and width), p17.z (STROBE now, decided by `writeView`),
@@ -143,7 +157,7 @@ which opens the card directly below CAMERA (`summonLight`; from the FINDER it op
 
 ## The standing paragraphs
 
-The CAMERA card's LOCK (PREFERENCE `camLock`, on by default since 037) is the classic camera. It holds the pan only: the shift stays 0,
+The CAMERA card's LOCK (PREFERENCE `camLock`, on by default since 037, off again since 041 S6) is the classic camera. It holds the pan only: the shift stays 0,
 every zoom (the wheel, the pinch, the dials, the dolly zoom) is from the centre, the PAN pad rests, and a route on observer.panx/pany
 or a project's shift opens centred without its record being written. FOV, CONTROL and the turn stay live (`lab/camera-law.js`
 `setLock`). Alt(+Shift)+Drag is the 1:1 pan; Shift does not make it finer (0.5.3 M6, M7).
@@ -153,7 +167,7 @@ A held WASD key turns the camera every frame from 120 ms after its press (iterat
 THE LOOK IS THE KIT'S (0.5.0 C2): theme, card, frost, DISCONNECTED, glass blur, ACCENT A/B, VIVID, STATUS TAGS, CONTROL HINTS and HELP
 live in MIR's `mir.gui` (`lab/look.js`: `createPrefs` over the kit's own LOOK_SCHEMA rows, `createAccent`), never in the settings blob;
 SETTINGS keeps each control in its seat as a `look.set`, repainted from the store, and MIR OPTIONS (`createGui`) is not built. λWAVES'
-first run is the store's `defaults` (`LOOK_DEFAULTS`, `lab/rack.js`): light/refractive/ALWAYS frost, 22 px blur, 50% VIVID, DISCONNECTED,
+first run is the store's `defaults` (`LOOK_DEFAULTS`, `lab/rack.js`): light (SYSTEM since 041 D1)/refractive/ALWAYS frost, 22 px blur, 50% VIVID, DISCONNECTED,
 hints on, tags and Help off; on a phone or tablet (`lab/first-run.js`, rack.js' own `isPhone()`/`isTablet()`) frost OFF, tinted. Captions
 and window notes off, AUTO SCALE and governor on stay the blob's. A stored choice wins; an older blob's look (and `lw-window-info`) is
 lifted once by `liftLook`; the phone's frost override stays the app's. Never add a look key to `saveSettings`.
@@ -168,4 +182,4 @@ registers none (its `mod` has no `add`). The phase palette is MIR's
 `tools/camera-routes.mjs` proves the saved routes after a camera change.
 (0.5.0 C1)
 
-A SAVED LOOK KEEPS ITS NAME (027 D5): the look store runs the kit's one-time migration (version 2, `frostText`): a FROST saved before 023 with the old TEXT LIGHT reads FROST; a TEXT LIGHT chosen afterwards is kept; `mir.gui` carries `prefsV: 2` (fixture tests/fixtures/look-frost-022.mir.gui.json).
+A SAVED LOOK KEEPS ITS NAME (027 D5): the look store runs the kit's one-time migration (version 2, `frostText`): a FROST saved before 023 with the old TEXT LIGHT reads FROST; a TEXT LIGHT chosen afterwards is kept; `mir.gui` carries `prefsV: 2` (fixture tests/fixtures/look-frost-022.mir.gui.json). 041 D0: a stored SPACING `'default'` opens as 10 px and keeps the skin's name (SPACING IS λWAVES' PX, above).

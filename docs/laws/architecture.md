@@ -2,6 +2,11 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+THE STAGE COMES BACK (041 S8): a lost GPU device (out of memory, a driver reset, a reclaimed tab) takes ONE reload by itself (`lab/shell/controller.js` `stageLost`, after the banner; the session flushed on the way out and resumed on the way in; `lw.stage`, sessionStorage, is a RECORDS row); a second loss within a minute of that reload, or a device the page itself destroyed, puts RELOAD STAGE on the stage (`.lw-stage-lost`), never a loop. The reload road is unproven headless (only the button's is).
+FULL MEANS FULL (041 S9): a hand's press of SETTINGS › PERFORMANCE › FULL turns AUTO SCALE off, the scale back at 1, both saved (`lab/windows/settings-card.js` `tierSeg`); the switch stays the reader's, and leaving FULL or a saved FULL read at the boot changes nothing.
+
 ## The laws of 021
 
 NO MODULE IMPORTS FROM rack.js (021 G1, D1): `TIER` is `lab/tier.js` and `BUILD_LINE` is `lab/build-line.js`; only `lab/main.js` imports rack.js. The app's dependency graph has no cycle: `npx --no-install dependency-cruiser --no-config --include-only '^lab' --output-type json lab` counts 0 app-side circular edges at 021 D1 (the kit's 37 are its own) — the number to keep.

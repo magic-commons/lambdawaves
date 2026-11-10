@@ -2,11 +2,23 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+FORMULA (041 I1): INFORMATIONAL's STAGE FORMULA switch reads FORMULA (the key `molFormula` and the action's label stay); one row FORMULA · POSITION · PAD · SIZE, the knobs in their columns.
+NOTHING RESETS (041 I2): a row's change (NAME, SUBTITLE, LIST CAP) re-writes the formula's block in place (the kit's `renderNotebook`, measured and landed) and only the new line fades in (`.lw-fresh`, 160 ms); since alpha.66 A LEAVING BLOCK TAKES NO SEAT, so a molecule's or a preset's swap does not glide up either.
+TOP MEANS THE TOP (041 I3): the free stage starts at the stage's own top margin — 039 V6's menu band is removed, so at PAD 0 the formula, a pop and a TOP ESP bar stand at 14 px, under the menu row where they meet (`freeOf`). This reverses 039 V6 (below).
+ANNOUNCE ALL AND SIZE SHARE A ROW · THE BONDS ARE IN THE FOLD (041 I4, I7): the seat row is ANNOUNCE ALL · the fold's chevron · the announcements' SIZE, shown in the window's small form; ORDER · AROMATIC · IONIC · H-BOND are the fold's first group, under BONDS (`lab/informational.js`).
+AN ANNOUNCEMENT STAYS A SECOND LONGER (041 I5): THE FADE 3.4 s (was 2.4), a pop 2.6 s (1.6), a held dial's line lets go 2.2 s after the hand (1.2).
+THE ANNOUNCEMENT WEARS THE STAGE'S FACE (041 I6): a pop has no glow, shadow or tracking; it is set in the formula's and NAME's serif (`--font-info-body`, Spectral; a glyph it lacks falls to the math face) in their ink, the stage's under a coloured stage (`body[data-stage-ink]`); WAVE VIEW's line stays KaTeX's. This supersedes 040 I4's "every pop in STIX Two Math" (below).
+NO STATE WORDS UNDER OSCILLATOR AND BOX (041 H3): `stageStates` answers nothing while the operator is `qho` or `well` — the stage formula and a capture's caption alike.
+THE COUNT IS THE SYSTEM'S OWN (041 N8): past the list cap an operator with its own spectrum (ATOM, CENTRAL, SEPARABLE …) counts its states and its own distinct levels ("20 states · 9 levels"); hydrogen keeps levels · shells (`capLine(ids, H)`).
+THE STAGE'S FIRST WORDS (041 D2): a new user's INFORMATIONAL is FORMULA SIZE 200 %, NAME on, LIST CAP 8, ATOM LABELS' SIZE 200 %, BALL AND STICK 300 % at 80 % opacity (BALL AND STICK itself off), every announcement on (ANNOUNCE ALL) — `INFO_ROWS`. A project carries only the rows off their default (036 S4), so a file saved before 041 that never set them, the demos too, opens at these.
+
 ## The laws of 040
 
 INFORMATIONAL IGNORES A HIDDEN CSB (040 I1): with the bar docked, or hidden by B, the stage words, the pops and the ESP bar are laid as if it were absent; a FREE bar still counts (it is shown under B). This amends 020 S5 for the bar alone.
-THE INFORMATIONAL'S ROWS (040 I3): POSITION is one toggle between STAGE FORMULA and its SIZE; ANNOUNCE ALL (no stored key of its own) is always shown; the single announcement switches and the ESP BAR row live in the fold.
-THE MATH FACE (040 I4): the WAVE observable's pop is set by the page's KaTeX, every pop in STIX Two Math; the face's files are the kit's bytes, so no re-subset was made (a kit-side re-subset is a FOR-MIR line).
+THE INFORMATIONAL'S ROWS (040 I3): POSITION is one toggle between STAGE FORMULA and its SIZE; ANNOUNCE ALL (no stored key of its own) is always shown; the single announcement switches and the ESP BAR row live in the fold. 041 I1, I4 and I7 re-seat them (above).
+THE MATH FACE (040 I4): the WAVE observable's pop is set by the page's KaTeX, every pop in STIX Two Math; the face's files are the kit's bytes, so no re-subset was made (a kit-side re-subset is a FOR-MIR line). 041 I6 sets the pops in Spectral (above).
 
 THE LANE ANNOUNCES AS THE HAND DOES (040 A3, Josh: "it must work as if I myself am turning the knob ... If I disable announcements, then it shouldn't
 show announcements"): a lane's or a route's write (the registry's modulated set, their one road) of WAVE's STYLE and observable, the transport's RATE,
@@ -17,7 +29,7 @@ hold it). A let-go (a clip ends, PAUSE in BASE) is a lane's write too and speaks
 
 ## The laws of 039
 
-THE MENUBAR CLEARS THE STAGE CAPTION (039 V6, A #14 · C #18: at 1300 WINDOW and HELP sat on "1s₀ and 2p₀", at 1000 FILE, EDIT, VIEW and PLAY were crossed by the caption): the top of the free stage (`shell/stage-words.js` `freeOf`, the words' and the head's seat) is never above the menu row's band — the kit windows' 52 px times UI SCALE, read off <html> so H (which hides the logo) moves nothing; the caption sits below the menus whether they show or not (at 1000 and 1300: its first glyph at y 53, the row 8–34). FILE › EXPORT's list opens beside FILE's (the kit's menubar: right when it fits, else left — at 1000 × 700 right, 644–884 against 407–647; at UI SCALE 150 % left, 191–551 against 547–907): C #17's "over FILE" is not met at the tip.
+THE MENUBAR CLEARS THE STAGE CAPTION (039 V6, A #14 · C #18: at 1300 WINDOW and HELP sat on "1s₀ and 2p₀", at 1000 FILE, EDIT, VIEW and PLAY were crossed by the caption): the top of the free stage (`shell/stage-words.js` `freeOf`, the words' and the head's seat) is never above the menu row's band — the kit windows' 52 px times UI SCALE, read off <html> so H (which hides the logo) moves nothing; the caption sits below the menus whether they show or not (at 1000 and 1300: its first glyph at y 53, the row 8–34). FILE › EXPORT's list opens beside FILE's (the kit's menubar: right when it fits, else left — at 1000 × 700 right, 644–884 against 407–647; at UI SCALE 150 % left, 191–551 against 547–907): C #17's "over FILE" is not met at the tip. Reversed by 041 I3 TOP MEANS THE TOP: the menu band is gone from the free stage (above); FILE › EXPORT's sentence stands.
 
 ## The law of 036
 
@@ -83,8 +95,8 @@ it doesn't fight the screen and users don't have to keep toggling it on and off 
 `lambdawaves.q0.info`. STATUS (`status`) shows or hides INFORMATIONAL's STATUS readout — the only status block the stage words draw (the stage
 itself writes the formula, the atom labels and, opt-in, the pop-ups, THE FADE and THE HEAD; research/iteration-011/q1-shots/before-*.png) — OFF on a
 first run, ON for a record older than the key (it saw the readout); hidden, the line is still kept current; the export caption's STATE word is not
-its. THE LIST CAP (`listCap`, NAME's row, 4 … 140, LOG, 16 by default = the longest LOAD VALENCE): a SPECTRUM list (either side of A ↔ B) longer than
-the cap is written as its count — `stage-words.js` `capLine`, "140 levels · 7 shells" (labels · distinct n) — on the stage and in the caption, and
+its. THE LIST CAP (`listCap`, NAME's row, 4 … 140, LOG, 16 by default = the longest LOAD VALENCE; 8 since 041 D2): a SPECTRUM list (either side of A ↔ B) longer than
+the cap is written as its count — `stage-words.js` `capLine`, "140 levels · 7 shells" (labels · distinct n; 041 N8: an operator with its own spectrum says its states · levels) — on the stage and in the caption, and
 returns as the list once it fits; nobody toggles anything; a molecule's formula is untouched. SKELETON (`skeleton` · `skeletonSize`) is THE WORDS'
 third ON + SIZE row (BEAD and UNCERTAINTY stay in MARKS): FLAT disks, no outline (`lab/skeleton.js`), radius SIZE × 0.28 × r_cov — 100 % is the old
 disk (water's O 20.5 px at the first-run camera), the default 160 % (33.6 px), 50 … 400 %; the bonds and the dipole keep their 2 px. The frame reads

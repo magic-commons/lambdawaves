@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+THE LOCK MOVED BY NAME (041 S1, S2; both fixtures, from the --check run's DIFF lines): DOTS ARE DOTS re-captured the `line` and `rp` of `lines.dots`, `dots@occ`, `dots+corner`, `dots+corner@occ`, `dots+ink`, `dots+ink@occ` and the `darkest` of the four without `+ink` (16); THE GRID LIES UNDER THE OBJECT the `rp` of those six and of the six `lines.lattice*` rows (12). The lattice's `line` and `darkest`, every `off*` and `box*` row and every state and style leaf held; S4's BRIGHTNESS at home touches none: 843 · 0 and 987 · 0. The law text is in look-and-camera.md.
+
 ## The laws of 040
 
 THE LOCK MOVED BY NAME (040 S1, S3b): DOTS AND LATTICE re-captured the `line` and `rp` of the twelve `lines.dots*` / `lines.lattice*` rows and the `darkest` of the eight without `+ink`; DITHER REACHES THE STAGE re-captured the seven `styles.dither:*` rows (density/cloud, density/signed, diff/cloud, imag/additive, phase/cloud, phase/solid, real/cloud), which are read with DITHER on. Every `off*` and `box*` row and every other leaf held: 843 · 0 and 987 · 0. The law text of both rows is in look-and-camera.md.

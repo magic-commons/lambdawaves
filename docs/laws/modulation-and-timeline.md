@@ -2,6 +2,12 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+THE TIMELINE'S MODES IN THE APP (041 T, N7; the kit's alpha.49–51): THE MODE MENU opens on a middle click on the lanes, middle + right, or the bar's MODE chip; the chosen mode is the left button's tool, 040's right-drag delete and Shift gestures stand under every mode (the kit's docs/TIMELINE.md). FOLLOW PLAYHEAD no longer ends on the middle press that opens the menu (`lab/timeline-follow.js`); KEYBOARD lists nine … MODE rows, PAINT · PAINT ADD · DELETE · MUTE · ZOOM unbound; the rack's title pills stand over a docked TIMELINE, the CSB and `#floats` (alpha.50); an empty lane wears no hint (alpha.51, Josh's call 10: "DAWs never have any hints").
+A LANE LEAVES ITS LAST VALUE (041 N5, Josh's call 8): when a tick or a film's step carries the playhead over a clip's end onto empty lane, the clip's end value is written as the target's base (`lab/timeline-follow.js` `leaves()`): the knob keeps it until another clip plays or a hand moves it, after a film too; a seek (a locate, the loop's wrap) passes nothing. A modified clip becomes unique and keeps its colour (Josh 11-10; the kit's `makeUnique`, unchanged).
+THE SCALE REACHES THE WORK BARS (041 K1, alpha.64): TIMELINE, MODULATION and PATTERN take UI SCALE; MODULATION's `port.moved` / `onMoved` report the window's own px (a dodge comparing them with viewport px multiplies by `--ui-zoom`); `.tl-pop` is a scale root of its own. Not yet walked inside λWAVES at 150 %.
+
 ## The laws of 040
 
 EVENTS FOR THE BASIS AND THE VIEW (040 A4, Josh: "Currently I can't make event with basis sets and view mode (orbital, density, mix, etc.)"):
@@ -73,7 +79,7 @@ THE TIMELINE'S OWN ROWS (036 K4, MIR 1.5.7-alpha.4 `installTimeline({ moreRows }
 after a separator, with FOLLOW PLAYHEAD and AUTO-COLOR. FOLLOW PLAYHEAD (Josh 11-03: "the playhead appears to be fixed but the whole lanes move …
 disabled the moment a user clicks/scroll anywhere on the timeline (not clicking buttons)") is a choice row, OFF at every open, no stored key: while
 on, each present scrolls the lanes BEFORE the head paints, so the head stands where it stood when chosen (pinned inside the middle half of the
-view); a loop's wrap jumps the view; a press on the lanes or the ruler, a wheel, or any scroll it did not write (the kit's zoom, a new clip, LOCATE,
+view); a loop's wrap jumps the view; a press on the lanes or the ruler (not the middle press that opens THE MODE MENU, 041 N7), a wheel, or any scroll it did not write (the kit's zoom, a new clip, LOCATE,
 Shift+0) ends it, a button, a field, the work bar or a rail chip does not; under a film it stands still. AUTO-COLOR (Josh: "'Auto-Color' will
 instantly paint the clips to the current active palette (If nothing active, then use HSV)") paints every clip's curve from the active PALETTE,
 spread evenly round its wheel in lane-then-start order, or — PALETTE off — the HSV wheel (s .85, v 1) in golden-angle order; AUDIO clips keep their
