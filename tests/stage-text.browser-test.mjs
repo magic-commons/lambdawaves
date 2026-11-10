@@ -59,7 +59,7 @@ try {
     const href = __LW.link.mint().href; const link = __LW.link.open(href); await __w(300);
     const r = await fetch('./demos/wave-dancer.lambdawaves.json', { cache: 'no-cache' }); const path = P.importText(await r.text()); P.open(path); await __w(800);
     window.confirm = c0;
-    await __w(3200);   /* the ttl and the fade */
+    await __w(4200);   /* the ttl and the fade (041 I5: a second longer) */
     return { pressed, undid, link: link.opened && link.ok, n: S.stats.announced - a0, after: { banner: S.banner, md: S.md, title: getComputedStyle(__node()).fontSize, fades: S.layer.root.querySelectorAll('.mir-info-block[data-fade]').length }, errs: __e.slice() };`);
   assert.equal(t2.pressed.banner, '1s \\+ 2s  beat', 'the press did not announce its preset: ' + JSON.stringify(t2));
   assert.equal(t2.pressed.n, 1); assert.equal(t2.undid, true); assert.equal(t2.link, true);
@@ -81,7 +81,7 @@ try {
     const banners = {}; for (const p of ['HOMO', 'LUMO', 'FRONTIER FOUR', 'HOMO SET', 'LUMO SET', 'OCCUPIED']) { __field(sel(), p); await __w(80); banners[p] = S.banner; }   // 0.5.3 M10
     await __LW.chem.solve('NH3'); await __LW.settle(); await __w(600);
     __field(sel(), 'WINDING'); await __w(80); const winding = S.banner;
-    const n = S.stats.announced - a0; await __w(3200); const md = S.md; __LW.chem.setOn(false); await __LW.settle();
+    const n = S.stats.announced - a0; await __w(4200); const md = S.md; __LW.chem.setOn(false); await __LW.settle();
     return { homo, banners, winding, n, md, still, moved, labels: document.querySelectorAll('#atomLabels .atom-label').length, errs: __e.slice() };`);
   assert.equal(t3.homo, 'HOMO + LUMO · $1b_{1}$ + $4a_{1}$', 'HOMO + LUMO: ' + JSON.stringify(t3));
   assert.ok(/^WINDING · \$\d+e\$ \(a\) \+ \(b\)$/.test(t3.winding), 'WINDING: ' + JSON.stringify(t3));
@@ -96,7 +96,7 @@ try {
   /* ── 4 · THE CAPTION IN CAPTURE (T3): a picture's foot carries the stage text's plain line; with STAGE FORMULA off it is clean.
      0.5.3 M9: STAGE FORMULA and ATOM LABELS are two switches in their own window, INFORMATIONAL; DISPLAY holds neither ── */
   const t4 = await ev(`const C = __LW.capture, hash = async (r) => { const b = new Uint8Array(await r.blob.arrayBuffer()); let h = 2166136261; for (let i = 0; i < b.length; i++) h = Math.imul(h ^ b[i], 16777619) >>> 0; return h; };
-    const swOf = (t) => [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === t), sw = swOf('STAGE FORMULA'), lab = swOf('ATOM LABELS');
+    const swOf = (t) => [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === t), sw = swOf('FORMULA'), lab = swOf('ATOM LABELS');
     if (__LW.ab && __LW.ab.on) __LW.ab.set(false);   /* WAVE DANCER (section 2) left its A ↔ B transition playing */
     __LW.loadPreset('1s+2pz'); await __LW.settle(); await __w(300);
     const on = await C.picture({ scale: 1 }), off = await C.picture({ scale: 1, caption: false }), off2 = await C.picture({ scale: 1, caption: false });
@@ -107,7 +107,7 @@ try {
     lab.click(); sw.click(); await __w(200); const fOff = { labels: L(), formula: __LW.stageText.on }; sw.click(); await __w(200);
     __LW.chem.setOn(false); await __LW.settle();
     return { caption: on.caption, hOn: await hash(on), hOff: await hash(off), hOff2: await hash(off2), swCaption: swOff.caption, hSw: await hash(swOff), stageOff, hidden,
-      mol: mol.caption, split: { both, labOff, fOff }, rows: Object.fromEntries(['settings', 'informational'].map((id) => [id, [...document.querySelectorAll('.dev[data-id="' + id + '"] .sw-lbl')].map((e) => e.textContent).filter((t) => /STAGE (TEXT|FORMULA)|ATOM/.test(t))])),
+      mol: mol.caption, split: { both, labOff, fOff }, rows: Object.fromEntries(['settings', 'informational'].map((id) => [id, [...document.querySelectorAll('.dev[data-id="' + id + '"] .sw-lbl')].map((e) => e.textContent).filter((t) => /^FORMULA$|STAGE (TEXT|FORMULA)|ATOM/.test(t))])),
       info: (() => { const d = document.querySelector('.dev[data-id="informational"]'); return d && { k: d.querySelectorAll('.k').length, eyebrow: d.querySelector('.dev-eyebrow').textContent.trim() }; })(), errs: __e.slice() };`);
   /* 0.5.4 P4c re-aim (§J-3): the EXPORTED caption gains ` · <STATE word>` (hydrogen's statusOf, a molecule's chem.said); the stage's own words do not move */
   assert.equal(t4.caption, '1s₀, 2p₀ · EXACT', 'the caption: ' + JSON.stringify(t4));
@@ -115,7 +115,7 @@ try {
   assert.notEqual(t4.hOn, t4.hOff, 'the caption did not reach the picture\'s pixels: ' + JSON.stringify(t4));
   assert.ok(t4.stageOff && t4.hidden && t4.swCaption === '' && t4.hSw === t4.hOff, 'STAGE FORMULA off still captions: ' + JSON.stringify(t4));
   assert.equal(t4.mol, 'H₂O · 1b1 HOMO · STO-3G · NUMERICAL');
-  assert.deepEqual(t4.rows, { settings: [], informational: ['STAGE FORMULA', 'ATOM LABELS'] }, 'the two rows are not INFORMATIONAL\'s (and DISPLAY\'s none): ' + JSON.stringify(t4.rows));
+  assert.deepEqual(t4.rows, { settings: [], informational: ['FORMULA', 'ATOM LABELS'] }, 'the two rows are not INFORMATIONAL\'s (and DISPLAY\'s none): ' + JSON.stringify(t4.rows));
   assert.deepEqual(t4.info, { k: 8, eyebrow: 'INFORMATIONAL' }, 'INFORMATIONAL is not its eight dials (the formula\'s and the labels\' SIZE, PAD, the pop-ups\' SIZE; iteration 007 — and LIST CAP and SKELETON\'s SIZE, iteration 011 Q1 — and BALL AND STICK\'s OPACITY, iteration 012 R1 — and the ESP BAR\'s PAD, 018 B7): ' + JSON.stringify(t4.info));
   assert.deepEqual(t4.split, { both: { labels: true, formula: true }, labOff: { labels: false, formula: true, caption: t4.mol }, fOff: { labels: true, formula: false } }, 'the two switches are not independent: ' + JSON.stringify(t4.split));
   assert.deepEqual(t4.errs, []);

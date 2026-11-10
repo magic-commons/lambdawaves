@@ -61,7 +61,8 @@ export function createRackWiring(app) {
       if (t && layout.docked && !t.classList.contains('floating') && layout.dockHost().querySelector('.dev') !== t) { layout.seatTransport(); saveSettings(); } } });   // a kit-side act moved a window: the mask follows (what is remembered is saveSettings', on its own edges); 038 S1: the TRANSPORT's pop chip says where it is
   for (const [id, g] of [['rackToggle', 'rackToggle'], ['rackFav', 'heart']]) { const b = document.getElementById(id); if (b) setGlyph(b, g); }
   /* 040 I6 · THE GHOST: the ◧ wears the ghost before its window, behind it under B — rk.setHidden writes body.rack-hidden alone, so the class is watched */
-  { const t = document.getElementById('rackToggle'), ghost = () => { const g = rk.hidden ? 'rackHidden' : 'rackToggle'; if (t && t.dataset.gly !== g) setGlyph(t, g); };
+  let hidAt = -1e9, wasHid = false;   // 041 I8: when B last hid the racks (the bar's peek below arms off it)
+  { const t = document.getElementById('rackToggle'), ghost = () => { const h = rk.hidden, g = h ? 'rackHidden' : 'rackToggle'; if (h && !wasHid) hidAt = performance.now(); wasHid = h; if (t && t.dataset.gly !== g) setGlyph(t, g); };
     ghost(); new MutationObserver(ghost).observe(document.body, { attributes: true, attributeFilter: ['class'] }); }   // 021 V2: the kit wrote its text ◧ ☆ into λWAVES' own nodes; the table's glyphs (no kit seat needed)
   const devTitle = (d) => ((d.querySelector('.dev-eyebrow') || {}).textContent || d.dataset.id).trim();
   for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), glyph: WINDOW_GLYPH[d.dataset.id], hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
@@ -91,18 +92,18 @@ export function createRackWiring(app) {
   /* 015 H3 · THE BAR'S PEEK under B: the kit's wave-108 peek runs only for a `transport` handed to createRack, which λWAVES' own seat law (the
      pill's dodge) does not hand it — so since 014 A0 a hidden stage bar never came back, and its ◧ with it.  The same numbers as the kit's
      (near 80 × 60, held within 120), read off the bar's own rect less the hide's slide (lab.css: translate(-50%, 140px)) */
-  /* 020 S1: the ◧ on the bar hides the bar from under the pointer that pressed it — the peek is ARMED only once the pointer has left the bar's
-     reach since the hide, so the hide no longer fights its own peek (the bar used to slide back mid-slide on the next twitch) */
-  let hid = false, armed = true;
+  /* 041 I8 · THE REVEAL (Josh 11-09: "the reveal function for the cursor doesn't work for the CSB until I actually reveal the racks" · "much more
+     sensitive, if it's close to where the rack/CSB is, then it should appear"): 020 S1 armed the peek only once the pointer had LEFT the bar's reach
+     (120 px) since the hide, so a hide pressed on or near the bar left it deaf until the hand went away to a rack and came back.  The peek now arms
+     by the clock — 250 ms after the hide, the slide (lab.css --lw-reveal, 120 ms) landed, so the hide still never fights its own peek — and the
+     bar shows under a pointer that never left; near is 120 × 100 px round the bar's rest seat (was 80 × 60), held within 160 (was 120) */
   window.addEventListener('pointermove', (e) => {
     const b = document.body, tr = document.getElementById('transport'), on = b.classList.contains('transport-peek');
-    if (!b.classList.contains('rack-hidden') || b.classList.contains('ui-hidden') || !tr || !tr.classList.contains('mini')) { hid = false; if (on) b.classList.remove('transport-peek'); return; }
+    if (!b.classList.contains('rack-hidden') || b.classList.contains('ui-hidden') || !tr || !tr.classList.contains('mini')) { if (on) b.classList.remove('transport-peek'); return; }
     const r = tr.getBoundingClientRect(), dy = new DOMMatrixReadOnly(getComputedStyle(tr).transform).f, x = e.clientX, y = e.clientY + dy;
-    const near = x >= r.left - 80 && x <= r.right + 80 && y >= r.top - 60 && y <= r.bottom + 60;
-    const inside = x >= r.left - 120 && x <= r.right + 120 && y >= r.top - 120 && y <= r.bottom + 120;
-    if (!hid) { hid = true; armed = !inside; }
-    if (!inside) armed = true;
-    if (near && !on && armed) b.classList.add('transport-peek'); else if (!inside && on) b.classList.remove('transport-peek');
+    const near = x >= r.left - 120 && x <= r.right + 120 && y >= r.top - 100 && y <= r.bottom + 100;
+    const inside = x >= r.left - 160 && x <= r.right + 160 && y >= r.top - 160 && y <= r.bottom + 160;
+    if (near && !on && performance.now() - hidAt > 250) b.classList.add('transport-peek'); else if (!inside && on) b.classList.remove('transport-peek');
   }, { passive: true });
   if (rk.el.toggle) rk.el.toggle.addEventListener('click', () => saveSettings());   // wave 59 (B111): the kit's ◧ hides by setHidden alone; on a phone the press IS the browser saying which it wants, stored as the B key stores it
   /* the ☆ list's LOAD is the kit's apply; the extras follow from the same slot once its click is done (BRIEF R4) */

@@ -1,6 +1,6 @@
 /* lab/shell/stage-words.js — THE STAGE TEXT and its CAPTION (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the source, the caption a capture draws,
  * the tick and the INFORMATIONAL layer (initStageText, called by boot() at the go).  stageTextTick and stageCaption are registered on app.w at creation. */
-import { TIER } from '../tier.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { toScreen, cameraKey } from '../field.js';
+import { TIER } from '../tier.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { renderNotebook } from '../mir/shell/notebook-render.js'; import { toScreen, cameraKey } from '../field.js';
 import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { ELEMENT } from '../md.js';
 import { stateLatex, formulaLatex, BASIS_LABEL, mdText } from '../latex-state.js';
 import { createPrefs } from '../mir/core/prefs.js'; import { createSettingsStore } from '../settings-store.js';
@@ -26,7 +26,7 @@ const KIND = new Map(KINDS.map((k) => [k.id, k]));
 const pct = (v) => Math.round(v * 100) + '%';
 /** the rows: { key, type, default, … } is the kit's prefs schema; group · label · hint · options · fmt are the window's (informational.js) */
 export const INFO_ROWS = Object.freeze([
-  { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'STAGE FORMULA', hint: 'Write the playing state on stage' },
+  { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'FORMULA', hint: 'Write the playing state on stage' },
   { key: 'molName', type: 'bool', default: false, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
   /* iteration 018 B9 (Josh: "Since we have isomers, let a secondary subtitle text be optional for the name … the name is a heading type and the subtitle
      should be smaller like a 'body' text"): the line under the NAME that tells a molecule from its isomers — neither the catalogue nor a volume's index
@@ -208,10 +208,9 @@ export function createStageWords(app) {
         if (r.left <= 24) L = Math.max(L, x1 + m); else if (r.right >= vw - 24) R = Math.min(R, x0 - m);
         else if ((y0 + y1) / 2 > sb.height / 2) B = Math.min(B, y0 - m); else T = Math.max(T, y1 + m);
       }
-      /* 039 V6 · THE MENUBAR CLEARS THE STAGE CAPTION (A #14, C #18: at 1300 WINDOW and HELP sat on "1s₀ and 2p₀", at 1000 EDIT and VIEW were crossed by
-         "C₆H₆"): the top of the free stage is never above the menu row's band — the kit windows' 52 px, times UI SCALE — so the caption and the head
-         sit below the menus whether they show or not (read off <html>, so H, which hides the logo, moves nothing) */
-      T = Math.max(T, 52 * (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-zoom')) || 1) - sb.top);
+      /* 041 I3 · TOP MEANS THE TOP (Josh 11-09: "Let informational positioned at the top ignore the status/menu bar at the top"): the free stage starts
+         at the stage's own top margin — 039 V6's menu band (52 px × UI SCALE) is gone, so at PAD 0 the words, a pop and a TOP ESP bar stand level
+         with the menu row and pass under it where they meet (z 20 < the chrome) */
       return R - L < 120 ? { L: m, R: sb.width - m, T, B, m } : { L, R, T, B, m };
     }
     const at = (F, h, bottom) => (bottom ? F.B - seat.pad * (F.B - F.T) - h : F.T + seat.pad * (F.B - F.T));   // a body's top edge at its seat
@@ -224,13 +223,22 @@ export function createStageWords(app) {
     const pop = el('div', 'lw-pop', dom.stage); pop.setAttribute('aria-hidden', 'true');
     layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
     const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0, pops: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves, pop-ups (040 A3)
-    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0, popHold = 0;
+    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0, popHold = 0, amend = false;
     function show() {                                                // the markdown wanted now, as a new block if it changed and KaTeX's quarter second has passed
       if (!on) return;
       const md = banner !== null ? banner : formula;
-      if (md === shown) return;
+      if (md === shown) { amend = false; return; }
       const due = lastRender + KATEX_MS - performance.now();
       if (due > 0) { if (!wait) wait = setTimeout(() => { wait = 0; show(); }, due); return; }
+      /* 041 I2 · NOTHING RESETS (Josh 11-09: "When clicking a new setting for informational like name, subtitle … don't let it reset.  It resets by
+         doing a weird animation from going from the center to the top … it should simply, quickly fade in"): a ROW's change (NAME · SUBTITLE · LIST CAP)
+         re-writes the formula's block IN PLACE — the kit's own render, measured again (setPane) and landed — and only a line that was not there
+         fades in (.lw-fresh, lab.css).  A new block would stand under the leaving one and glide up (the kit's column; FOR-KIT in I-BUILD) */
+      const text = amend && block && md && banner === null && !block.el.hasAttribute('data-fade') ? block.el.querySelector('.mir-info-text') : null; amend = false;
+      if (text && text.childElementCount && globalThis.marked) {
+        const had = text.childElementCount; text.innerHTML = renderNotebook(md); for (const p of [...text.children].slice(had)) p.classList.add('lw-fresh');
+        shown = md; lastRender = performance.now(); stats.renders++; layer.setPane(false); place(false); return;
+      }
       if (block) block.remove();
       block = md ? layer.addBlock({ md }) : null; shown = md;
       if (block) { block.el.toggleAttribute('data-fade', banner !== null); lastRender = performance.now(); stats.renders++; }
@@ -303,7 +311,7 @@ export function createStageWords(app) {
       setFormula(md) { formula = md || ''; if (banner === null) show(); },
       /** THE FADE: `md` in the formula's seat for `ttl` (0: until dismiss(md) — the molecule's head, D2), then its exit and the
        *  formula's return.  Only a HAND calls it. */
-      announce(md, ttl = 2400) {
+      announce(md, ttl = 3400) {   // 041 I5 (Josh: "Let the announcements stick around for a second longer"): 3.4 s, was 2.4
         if (!on || !md) return false;
         stats.announced++; clearTimeout(fadeT); banner = md; show();
         if (ttl) fadeT = setTimeout(() => { banner = null; show(); }, ttl);
@@ -311,11 +319,11 @@ export function createStageWords(app) {
       },
       dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },
       /** a POP-UP: one short line on the side away from the formula that fades out; another press restarts it (iteration 001).
-       *  { hold: true } (a dial under the hand, iteration 007): the line stays lit and follows the number, and fades 1.2 s after the last held one */
+       *  { hold: true } (a dial under the hand, iteration 007): the line stays lit and follows the number, and fades 2.2 s after the last held one (041 I5; 1.2 s before) */
       pop(text, { hold = false, kind = '', tex = '' } = {}) {
         if (!on || !text) return false;
         stats.pops++; clearTimeout(popHold);
-        const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 1200); };   // the hand let go: the held line fades from where it is
+        const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 2200); };   // 041 I5: a second longer (was 1.2 s)   // the hand let go: the held line fades from where it is
         if (hold && pop.classList.contains('hold')) { if (pop.textContent !== text) pop.textContent = text; letGo(); return true; }
         const { rs, sb } = rest(), F = freeOf(rs, sb);
         pop.textContent = text; pop.dataset.kind = kind; pop.classList.remove('go', 'hold', 'out');   // 040 I4: the pop wears its kind (skin.css)
@@ -368,7 +376,7 @@ export function createStageWords(app) {
       if (ch('popSize')) api.setPopScale(st.popSize);
       if (!all && ch('cursorAway')) { layer.setFollow(st.cursorAway); layer.setParallax(st.cursorAway); }
       if (!all && ch('cursorDrift')) layer.setDrift(st.cursorDrift);
-      if (!all && (ch('molName') || ch('molSubtitle') || ch('listCap'))) { stageSrc.v = -1; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
+      if (!all && (ch('molName') || ch('molSubtitle') || ch('listCap'))) { stageSrc.v = -1; amend = true; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
       if (ch('molFormula') && st.molFormula) words();
       if (!all) { look.prefs.apply(); schedule(TIER.PRESENT); }   // the atom labels are the frame's
     };
