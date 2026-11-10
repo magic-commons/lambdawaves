@@ -29,8 +29,11 @@ export const LOOK_ROWS = Object.freeze(lookSchema().map((r) => r.key));
    the kit's DEFAULT (6) say 10 here (LW_THEMES), so no stored look moves and none loses its name */
 export const SPACING_HOME = 10;
 export const LW_THEMES = THEMES.map((t) => (t.values.spacing === 6 ? { ...t, values: { ...t.values, spacing: SPACING_HOME } } : t));
-const LOOK_HOME = Object.freeze({ veil: 10, saturation: 1, corners: 14, faces: 'solid', text: 'theme', edge: true, shadow: 1,
-  glow: false, parallax: false, quality: 'full', stroke: 0, spacing: SPACING_HOME });   // 036 K1: STROKE 0 — the controls' rings gone (Josh), the knob brings them back
+/* 041 D4 (Josh 11-09, "MIR Options: Default skin modifications"): the λWAVES skin a new user meets is SATURATION 150 %, CORNERS 20 px, VEIL 5 %,
+   LIGHT's LINK on and the DRAG HANDLE as the window's ICON (kit alpha.56: rack windows only); it was 100 % · 14 px · 10 % · off · GRIP.  A stored
+   look keeps its values and reads CUSTOM beside the new skin */
+const LOOK_HOME = Object.freeze({ veil: 5, saturation: 1.5, corners: 20, faces: 'solid', text: 'theme', edge: true, shadow: 1,
+  glow: false, parallax: false, quality: 'full', stroke: 0, spacing: SPACING_HOME, reliefLink: true, grip: 'icon' });   // 036 K1: STROKE 0 — the controls' rings gone (Josh), the knob brings them back
 /** the kit maps that write at λWAVES' home, homed: AUTO ink is the theme's own ladder (a SOLID pane keeps the kit's), SATURATION
  *  at 100 % is no filter at any blur, the CAST is drawn only off LIGHT_HOME (the kit sheet's own words), DEFAULT spacing is the
  *  sheets' own air */

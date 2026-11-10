@@ -43,6 +43,10 @@ const SCENES = {
       css: { r: getComputedStyle(document.querySelector('#rack .dev')).borderRadius, sat: getComputedStyle(document.querySelector('#rack .dev')).backdropFilter },
       wins: [...document.querySelectorAll('.dev')].filter((d) => !d.classList.contains('closed') && d.parentElement.id.startsWith('rack')).map((d) => d.dataset.id + (d.classList.contains('folded') ? '' : ' OPEN') + (getComputedStyle(d).display === 'none' ? ' (hidden by the mode)' : '')),
       folds: [...document.querySelectorAll('.dev .lw-fold[aria-expanded="true"]')].map((b) => b.closest('.dev').dataset.id + ' · ' + b.dataset.fold), mode: __LW.mode && __LW.mode.id, cam: __LW.camera.lock };`,
+  /* the first run as a new user meets it (no act): the theme the system gave, SPECTRUM open, the icons in the handles' seats */
+  'first': `await wait(600); return [__LW.themeChoice, document.body.dataset.theme];`,
+  /* the first run in MOLECULES: the mode switched, water picked — MOLECULES open with its presets and A ↔ B, the formula at 200 % with its NAME */
+  'first-mol': `__LW.actions.run('mode'); await wait(2500); return { mode: document.body.className.match(/mode-\\w+/g), words: __LW.stageText && __LW.stageText.text };`,
   'd0-spacing': `__LW.look.set({ spacing: 24 }); await wait(400); return __LW.look.get('spacing');`,
 };
 const [scene = 'probe-spacing', W = '1300', H = '850', light = '-', sys = ''] = process.argv.slice(2);

@@ -290,6 +290,8 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 }
 
 /* Native instruments, September 2026. Modulation retains its own vocabulary. */
+/* 041 D4: a head's own glyph (rack-wiring.js) shows only as the DRAG HANDLE's ICON (the kit's body.icon-grip) */
+body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 /* 041 D0 · SPACING REACHES THE RACKS, THE WINDOWS AND THE BAR: MIR OPTIONS' SPACING knob writes --rack-gap / --rack-inset (the racks, line 2) and --pad-k (a pane's padding over home's; csb.css the bar); at home, 10 px, it writes nothing */
 .native-clean .dev-body { padding: calc(10px * var(--pad-k, 1)) calc(12px * var(--pad-k, 1)); }
 .native-clean .grp { border: 0; outline: 0; box-shadow: none; background: none; padding: 0; margin: 0 0 12px; }
