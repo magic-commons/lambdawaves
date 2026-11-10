@@ -1,6 +1,6 @@
 /* lab/shell/stage-words.js — THE STAGE TEXT and its CAPTION (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the source, the caption a capture draws,
  * the tick and the INFORMATIONAL layer (initStageText, called by boot() at the go).  stageTextTick and stageCaption are registered on app.w at creation. */
-import { TIER } from '../tier.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { toScreen, cameraKey } from '../field.js';
+import { TIER } from '../tier.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { renderNotebook } from '../mir/shell/notebook-render.js'; import { toScreen, cameraKey } from '../field.js';
 import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { ELEMENT } from '../md.js';
 import { stateLatex, formulaLatex, BASIS_LABEL, mdText } from '../latex-state.js';
 import { createPrefs } from '../mir/core/prefs.js'; import { createSettingsStore } from '../settings-store.js';
@@ -224,13 +224,22 @@ export function createStageWords(app) {
     const pop = el('div', 'lw-pop', dom.stage); pop.setAttribute('aria-hidden', 'true');
     layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
     const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0, pops: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves, pop-ups (040 A3)
-    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0, popHold = 0;
+    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0, popHold = 0, amend = false;
     function show() {                                                // the markdown wanted now, as a new block if it changed and KaTeX's quarter second has passed
       if (!on) return;
       const md = banner !== null ? banner : formula;
-      if (md === shown) return;
+      if (md === shown) { amend = false; return; }
       const due = lastRender + KATEX_MS - performance.now();
       if (due > 0) { if (!wait) wait = setTimeout(() => { wait = 0; show(); }, due); return; }
+      /* 041 I2 · NOTHING RESETS (Josh 11-09: "When clicking a new setting for informational like name, subtitle … don't let it reset.  It resets by
+         doing a weird animation from going from the center to the top … it should simply, quickly fade in"): a ROW's change (NAME · SUBTITLE · LIST CAP)
+         re-writes the formula's block IN PLACE — the kit's own render, measured again (setPane) and landed — and only a line that was not there
+         fades in (.lw-fresh, lab.css).  A new block would stand under the leaving one and glide up (the kit's column; FOR-KIT in I-BUILD) */
+      const text = amend && block && md && banner === null && !block.el.hasAttribute('data-fade') ? block.el.querySelector('.mir-info-text') : null; amend = false;
+      if (text && text.childElementCount && globalThis.marked) {
+        const had = text.childElementCount; text.innerHTML = renderNotebook(md); for (const p of [...text.children].slice(had)) p.classList.add('lw-fresh');
+        shown = md; lastRender = performance.now(); stats.renders++; layer.setPane(false); place(false); return;
+      }
       if (block) block.remove();
       block = md ? layer.addBlock({ md }) : null; shown = md;
       if (block) { block.el.toggleAttribute('data-fade', banner !== null); lastRender = performance.now(); stats.renders++; }
@@ -368,7 +377,7 @@ export function createStageWords(app) {
       if (ch('popSize')) api.setPopScale(st.popSize);
       if (!all && ch('cursorAway')) { layer.setFollow(st.cursorAway); layer.setParallax(st.cursorAway); }
       if (!all && ch('cursorDrift')) layer.setDrift(st.cursorDrift);
-      if (!all && (ch('molName') || ch('molSubtitle') || ch('listCap'))) { stageSrc.v = -1; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
+      if (!all && (ch('molName') || ch('molSubtitle') || ch('listCap'))) { stageSrc.v = -1; amend = true; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
       if (ch('molFormula') && st.molFormula) words();
       if (!all) { look.prefs.apply(); schedule(TIER.PRESENT); }   // the atom labels are the frame's
     };

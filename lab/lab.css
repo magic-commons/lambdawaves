@@ -767,6 +767,9 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    leaves the formula on the same axis it holds alone.  THE FADE's and THE HEAD's blocks ([data-fade]) keep the kit's left edge. */
 .mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p { text-align: center; transform-origin: center; }
 .mir-info.lw-stage .katex { font-size: 1.08em; }
+/* 041 I2 · NOTHING RESETS: a line a row adds to the block in place (NAME, SUBTITLE; stage-words.js show) fades in quickly; nothing else moves */
+.mir-info.lw-stage .mir-info-text > .lw-fresh { animation: lw-fresh .16s ease-out; }
+@keyframes lw-fresh { from { opacity: 0; } }
 /* 037 W1 · THE WIDGETS (lab/widgets.js): their own layer beside the words, z 19 — over the atom labels (9), under INFORMATIONAL (20) and every window —
    in the words' ink; a widget is a box in stage fractions with no background, border or shadow, never a pointer target outside EDIT; H takes them out */
 #widgets { position: absolute; inset: 0; z-index: 19; pointer-events: none; user-select: none; -webkit-user-select: none; color: hsl(40 33% 96%); }
