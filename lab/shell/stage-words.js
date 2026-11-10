@@ -130,6 +130,7 @@ export function createStageWords(app) {
   /** the states that play, as stateLatex's prose with UNIT coefficients (md) or as their plain labels, comma-separated */
   function stageStates(md) {
     const H = getHamiltonian(), mix = reg.transition;
+    if (H.id === 'qho' || H.id === 'well') return '';   // 041 H3 (Josh 11-09: "Let Oscillator mode disable the spectrum informational … Maybe even box, as well"): a packet there is dozens of labels — no state words under OSCILLATOR or BOX (the formula and a capture's caption alike)
     const line = md ? (ids) => stateLatex({ H, states: ids.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: 1, im: 0 })) }).split('\n')[0]
       : (ids) => ids.map((a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]))).join(', ');
     const live = (re, im) => BASIS.filter((s) => re[s.index] * re[s.index] + im[s.index] * im[s.index] > 1e-12).map((s) => s.index);
@@ -154,7 +155,7 @@ export function createStageWords(app) {
   }
   function stageTextTick() {
     if (!app.state.stageText) return;
-    const id = app.state.chem && app.state.chem.on ? app.state.chem.preset() : '';
+    const id = app.state.chem && app.state.chem.on ? app.state.chem.preset() : '@' + getHamiltonian().id;   // 041 H3: the operator too — its words change (or leave) with it
     if (reg.version === stageSrc.v && id === stageSrc.id) return;
     stageSrc.v = reg.version; stageSrc.id = id;
     app.state.stageText.setFormula(stageMd());
