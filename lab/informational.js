@@ -49,13 +49,14 @@ export function createInformational(app) {
   /* the frame reads the BONDS as one object (rack.js → skeleton.draw) and the skeleton tells which road drew them in this card's status line */
   ui.bondsOf = () => { const c = app.state.chem; return { order: P.get('bondOrder'), aromatic: P.get('bondAromatic'), ionic: P.get('bondIonic'), hbond: P.get('bondHydrogen'), charges: c && c.chargesNow ? c.chargesNow() : null, rec: c && c.bondsNow ? c.bondsNow() : null }; };
   ui.bondSay = (line) => w.setStatus(line, 'live');
-  const seat = row(words, ['announceAll'], 'info-seat');   // 040 I3: ANNOUNCE ALL · the fold's chevron — always shown (041 I1: PAD is the FORMULA row's)
+  /* 041 I4 (Josh 11-09: "Let announce all and the announcement size knob be on the same row and not let it be hidden when window is in it's smaller form"):
+     ANNOUNCE ALL · the fold's chevron · the pop-ups' SIZE, always shown (PAD is the FORMULA row's since I1) */
+  const seat = row(words, ['announceAll'], 'info-seat');
   const announce = group(w.body, 'ANNOUNCE');
   /* 040 I3 (Josh: "move the ESP bar row into the hidden expanded section"): the fold's first row; its own `hidden` (a molecule's row) stays its own */
   ui.espBarRow = row(announce, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar'); announce.prepend(ui.espBarRow);   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it); 040 I3: above the ANNOUNCE heading
   ui.espBarRow.hidden = !(app.state.chem && app.state.chem.on);   // 018 B10: a molecule's row — hidden under hydrogen or an atom; WAVE's modeSync re-syncs it
-  /* iteration 012 R1: ORBITALS is one switch for the two orbital kinds, so the pop-ups' SIZE takes the grid's last cell (where STYLE · PALETTE stood) */
-  row(announce, [...INFO_ROWS.filter((r) => r.group === 'announce' && r.type === 'bool').map((r) => r.key), 'popSize'], 'info-grid');
+  row(announce, SAY, 'info-grid');   // iteration 012 R1: ORBITALS is one switch for the two orbital kinds; 041 I4: the pop-ups' SIZE left the grid for the seat row
   /* iteration 012 R1: CURSOR and MARKS are two columns of switches, side by side */
   const cols = el('div', 'info-cols', w.body), cursor = group(cols, 'CURSOR');
   row(cursor, ['cursorAway', 'cursorDrift'], 'info-col');
@@ -67,8 +68,9 @@ export function createInformational(app) {
   ui.skeletonSw = ctl.skeleton.widget; ui.skeletonSize = ctl.skeletonSize.widget; ui.skeletonOpacity = ctl.skeletonOpacity.widget; ui.dipoleSw = ctl.dipole.widget; ui.beadSw = ctl.bead.widget; ui.ellipsoidSw = ctl.ellipsoid.widget;
   /* THE FOLD (lab/fold.js): ANNOUNCE · CURSOR · MARKS behind one chevron — open on a desktop, folded on a phone (as MOLECULES' MORE); iteration 013
      N1 (Josh: "Shorten the buttons for position move pad knob to fit the expand window button so it's on the same row"): the chevron is the
-     seat row's last cell, after POSITION and PAD — one row less */
+     seat row's cell — one row less */
   fold(seat, [announce, cols], { what: 'the ESP bar, announcements, cursor and marks', key: 'announcements, cursor and marks', open: !isPhone() });   // 040 I3: the key is the WORKSPACE `folds` name, kept
+  seat.appendChild(ctl.popSize.root);   // 041 I4: SIZE in the knob column, the chevron in the button column
   /* 0.5.4 P4 · STATUS (PLAN R8, Q12): lab/status.js' line for what owns the field — MOLECULES' kept one (per VIEW; its molecule-level line beneath), else the
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
   /* iteration 011 Q1 (Josh 10-19: "a button that hides the extra status thingy"): the STATUS switch above it shows or hides the readout's row — the record's
