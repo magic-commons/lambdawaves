@@ -2,9 +2,14 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+THE FINDER WEARS THE GLASS; NOTEBOOK AND NODES ARE SPECIAL (041 P8, P8b, K4): the `windowPicker` action wears `search`, the CSB SEARCH's glyph (`windowPlus` left icons.js); SPECIAL is MODULATION · TIMELINE · CONTROL SURFACE · NOTEBOOK · NODES, NODES named there alone (`can('nodes')` null); since alpha.67 the rows are the kit's `sections` inside its filter and its ↑ ↓ Enter walk, and FIND_WORDS its `words` (`lab/shell/notebook.js`).
+THE REVEAL (041 I8, D0 b; the kit's alpha.63): under B the bar's peek arms by the clock, 250 ms after the hide (020 S1 waited for the pointer to leave the bar's reach), so a pointer that never left the bar brings it back; its nearness is the kit's `RACK.barNear` 160, held within `barHold` 220 (I8's 120 × 100 / 160 were the first numbers), the racks' the kit's `peekNear` 140; the racks' and the bar's hide and peek take `--lw-reveal` = the kit's 120 ms (`calc(var(--motion-micro) * 1.5)`, was 280 ms); the bar's return when B goes off keeps its 240 ms (`lab/shell/rack-wiring.js`, lab.css).
+
 ## The laws of 040
 
-THE FINDER MENU, FILE › FOLDERS, THE SPECIAL SECTION (040 M1–M3): the menubar's first entry is FINDER, a group with no list whose press opens the finder (app-side on the kit's bar — FOR-KIT: an acting entry); 039 W2's "Enter on the logo opens the bar at FILE" now lands on FINDER; FILE has a FOLDERS row; the finder ends in SPECIAL: MODULATION · TIMELINE · CONTROL SURFACE (typed search reaches them; the kit's ↑ ↓ walk its own rows only — FOR-KIT).
+THE FINDER MENU, FILE › FOLDERS, THE SPECIAL SECTION (040 M1–M3): the menubar's first entry is FINDER, a group with no list whose press opens the finder (app-side on the kit's bar — FOR-KIT: an acting entry); 039 W2's "Enter on the logo opens the bar at FILE" now lands on FINDER; FILE has a FOLDERS row; the finder ends in SPECIAL: MODULATION · TIMELINE · CONTROL SURFACE (typed search reaches them; the kit's ↑ ↓ walk its own rows only — FOR-KIT; 041 P8 and K4 answer it: five rows, the kit's sections, above).
 THE LOGO'S TWO ROADS (040 I2, F1): a cursor's click on the logo opens the FINDER while the interface shows and ends the reveal mode under B; a finger's tap and Enter keep the kit's toggle; H (no logo) is H's and the context menu's alone. The logo's hint turns with the mode (a class observer, not the hover).
 THE GHOST, THE MIR GLYPH AND THE PALETTE (040 I6, M5, M6; ICONS SAY WHAT THEY ARE): hide/reveal is a ghost before its window, behind it under B; MIR OPTIONS wears `mirOptions`, the gear with the MIR diamond inside; `palette` is a filled palette with three wells and a brush (when Focus's kit line joins, its line-art `palette` takes the name and the app's key moves).
 

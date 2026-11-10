@@ -2,6 +2,14 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 041
+
+THE BAR IN THREE (041 P9, Josh: "try to make it so that the dividers evenly split the CSB into 3 parts"): on the stage the three tracks stand 12 px apart with a 2-px inset groove (the well's fill and relief) in each gap, at the bar's thirds; the bar is 694 px (674 in T2 below); the racked bar has none (`lab/csb.css`).
+THE RACKED BAR KEEPS ITS SIZE (041 P10): in the rack card and the free window RATE's value is a tooltip under its dial, out of the flow, so the card stays 212 px under the pointer.
+THE FAVOURITES' GRIP AND THEIR LEAVE (041 P11): a floating favourite's grip stands centred in its own 14-px row above the knob's word; the pointer's leave plays the arrival backwards before the strip goes home (`lab/csb-favs.js` `leave()`); EXPAND, Escape and the bar hiding still hide at once; none under reduced motion.
+THE TIMELINE SEAT IS LIT WHEN IT HOLDS A CLIP (041 P12): the TIMELINE seat wears the accent (`live`) while the arrangement holds a clip, open or shut (`lab/shell/keys.js`), as MODULATION's door does.
+THE DOCK CHIP WEARS NODES' ARROW (041 P13, K2): the way into the rack wears `rackIn`, named by the kit's `placeGlyphs` (alpha.65; P13's observer is gone); the way back is the kit's.
+
 ## The laws of 040
 
 THE SURFACE'S ORDER (040 M5): the right group is SEARCH · FINDER · ♥ · ◧ · ⚙ / NODES · INFORMATIONAL · THEME · FOLDS — the ⚙ (wearing `mirOptions`) and FOLDS swapped seats; the line of T2 below is read with this order.
@@ -56,7 +64,7 @@ The cramped-space sheet (`tools/v-shots.mjs`, research/iteration-021/V-shots) is
 
 ## The standing paragraphs
 
-THE CONTROL SURFACE's right group is SEARCH · FINDER · ♥ · ◧ · FOLDS / NODES · INFORMATIONAL · THEME · ⚙ (T2; `--csb-cols: 5`, two rows of five, 674 px kept): FOLDS is UNFOLD ALL while any open rack window is folded, else FOLD ALL (039 X8: folding's one word family — FOLD · UNFOLD · FOLD ALL · UNFOLD ALL, the menus, NODES' head and the windows' fold hint alike; it read MINIMIZE ALL / EXPAND ALL) (never the docked bar); NODES opens and closes the NODES window and is lit while it is open. PLAY wears the `.trig` sequence — rest raise, hover lift and wash, press sink, ON face with rim and glow (T1). THE BAR IS ON TOP (T3): `#transport.mini` sits at chrome + 3 over `#floats` (the keyboard, MIR OPTIONS, every floating window); `modDodge` sets `body.transport-under` only while no seat clears TIMELINE or MODULATION, and the bar goes under them for that time; the ☆ list, the search pill and its tiles are + 4.
+THE CONTROL SURFACE's right group is SEARCH · FINDER · ♥ · ◧ · FOLDS / NODES · INFORMATIONAL · THEME · ⚙ (T2; `--csb-cols: 5`, two rows of five, 674 px kept — 694 since 041 P9 THE BAR IN THREE): FOLDS is UNFOLD ALL while any open rack window is folded, else FOLD ALL (039 X8: folding's one word family — FOLD · UNFOLD · FOLD ALL · UNFOLD ALL, the menus, NODES' head and the windows' fold hint alike; it read MINIMIZE ALL / EXPAND ALL) (never the docked bar); NODES opens and closes the NODES window and is lit while it is open. PLAY wears the `.trig` sequence — rest raise, hover lift and wash, press sink, ON face with rim and glow (T1). THE BAR IS ON TOP (T3): `#transport.mini` sits at chrome + 3 over `#floats` (the keyboard, MIR OPTIONS, every floating window); `modDodge` sets `body.transport-under` only while no seat clears TIMELINE or MODULATION, and the bar goes under them for that time; the ☆ list, the search pill and its tiles are + 4.
 
 THE BAR IS QUIET (023 B): UNFOLD ALL shows every docked window's name pill a moment (`rack.showPills()`, MIR 1.5.6-alpha.10); the expander has no T/t theorem; PLAY is the raised disc lit or not, moving as the kit's chips (hover 1.06, press .92) — no rim, no glow (supersedes T1's "ON face with rim and glow"); the bar's chooser sits at 34 px (`--touch`) so nothing clips; the rack card and the FREE bar are one 7-column grid (the row's thirds, the preset full width, the modes on 1·3·5·7, the tools 7 + 6). The tempo wheel is the kit's: 1 BPM a notch, Shift 0.1 (1.5.6-alpha.9).
 
