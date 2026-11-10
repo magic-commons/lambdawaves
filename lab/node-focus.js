@@ -15,8 +15,8 @@ export function createFocusHandles(stage, { list, types, hand, edited }) {
     const h = el('div', 'nodes-focus', host); h.dataset.node = q.id; hint(h, 'FOCAL POINT — drag it · two presses bring it home');
     let t0 = -1e9;
     h.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); h.setPointerCapture(e.pointerId); h.classList.add('drag');
-      if (e.timeStamp - t0 < 300) { t0 = -1e9; hand(q, F.x, 0.5); hand(q, F.y, 0.5); return; } t0 = e.timeStamp;
+      if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); h.setPointerCapture(e.pointerId);
+      if (e.timeStamp - t0 < 300) { t0 = -1e9; hand(q, F.x, 0.5); hand(q, F.y, 0.5); return; } t0 = e.timeStamp; h.classList.add('drag');   // 040 F3: the home press wears no drag look
       const at = (ev) => { const r = stage.getBoundingClientRect(); hand(q, F.x, +clamp01((ev.clientX - r.left) / r.width).toFixed(4)); hand(q, F.y, +clamp01((ev.clientY - r.top) / r.height).toFixed(4)); };
       const end = () => { for (const [t, f] of on) h.removeEventListener(t, f); h.classList.remove('drag'); };
       const on = [['pointermove', at], ['pointerup', end], ['pointercancel', end]]; for (const [t, f] of on) h.addEventListener(t, f);

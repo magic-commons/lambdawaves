@@ -156,7 +156,7 @@ export function createNotebook(app) {
       document.addEventListener('click', (e) => { if (!title.contains(e.target) || !(e.detail > 0) || !hoverable(e)) return;
         e.stopPropagation(); mb.close(); A.run(away() ? 'rack' : 'windowPicker'); }, true);
       const titleHint = () => hint(title, away() ? 'Click: bring the interface back · hover: the menus' : 'Click: the FINDER · hover: the menus · L: MAIN MENU');
-      titleHint(); title.addEventListener('pointerenter', titleHint); title.addEventListener('focus', titleHint);
+      titleHint(); { let was = away(); new MutationObserver(() => { if (away() !== was) { was = away(); titleHint(); } }).observe(document.body, { attributes: true, attributeFilter: ['class'] }); }   // 040 F1: the words turn with the mode, not a hover late
       /* 039 W2 · THE MENUS BY KEYBOARD (the kit's bar walks a list's rows ↑ ↓ and opens a submenu on →, but a group takes no arrow and a key's
          open leaves the focus on the group — FOR-KIT): on a group Enter or ↓ opens it at its first row (↑ its last), ← → Home End walk the
          groups (an open list follows the focus); in a list ← → step to the next group's list where no submenu takes the key; Escape closes
