@@ -478,8 +478,10 @@ export function createModSeam(app) {
          It shows up when the timeline and nodes is open"): the kit fits OPTIONS and ABOUT to their content (gui.js fitTo — too tall for the page, the
          body scrolls; at any other width OPTIONS re-packs its columns), and at 1300 × 850 with the TIMELINE docked the shortened and narrowed seats
          below found room before the full one did — 280 × 510 over NODES, the body scrolling 470 of 632.  The fitted windows are seated WHOLE: their
-         full size only, clear of the doors where the stage has the room, else where the kit put them, over the bar as 039 V1 lets a tall one */
-      const whole = !!kit && /^gui(-about)?$/.test(n.dataset.mirWindow || '');
+         full size only, clear of the doors where the stage has the room, else where the kit put them, over the bar as 039 V1 lets a tall one.
+         041 X4 (F-REVIEW FIX 4: Shift + ? over a docked TIMELINE seated KEYBOARD 300 px wide, its drawn board 0 px over the action list): KEYBOARD
+         is seated whole too — its board and list are laid side by side for its own size */
+      const whole = !!kit && /^(gui(-about)?|keyboard)$/.test(n.dataset.mirWindow || '');
       const sizes = (kit || n === nbEl) && !whole ? 12 * 4 : 1;
       const fit = (avoid, narrow = false) => { for (let i = 0; i < sizes; i++) { const k = i >> 2, j = i & 3, hh = Math.floor(ph * (1 - k * 0.06)), ww = narrow ? floor.w : Math.floor(pw * (1 - j * 0.04));
         if (narrow ? j || ww >= pw * 0.88 || hh < floor.h : i && (hh < floor.h || ww < floor.w)) continue;
