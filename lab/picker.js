@@ -315,16 +315,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const foldersEl = el('div', 'mm-folders', root); foldersEl.hidden = true; foldersEl.setAttribute('role', 'region'); foldersEl.setAttribute('aria-label', 'Folders');
   let foldersView = null;
   const tutEl = el('div', 'mm-tut', root); tutEl.hidden = true; tutEl.setAttribute('role', 'region'); tutEl.setAttribute('aria-label', 'Tutorial');
-  /* 036 G2 (Josh 11-03: "When scrolling between Atomic, Molecular, and Expansions, there needs to be a gradient blur or gradual something … Right
-     now, it's a sharp cuttoff"): WHILE a deck or the tutorial's wall scrolls (`mm-moving`, held 220 ms past the last scroll event), the scroller
-     fades over its first and last 72 px and two bands of PROGRESSIVE BLUR lie over its edges (under FROST; skin.css) — a section passes the
-     edges gradually; (040 I5: the fade now stands where more lies beyond an edge, below) */
-  for (const side of ['top', 'foot']) { const e = el('div', 'mm-edge ' + side, root); e.setAttribute('aria-hidden', 'true'); el('i', '', e); el('i', '', e); }
+  /* 041 P1: the decks' scroller fades its top and foot always, in the CSS alone (skin.css --vfade); 036 G2's blur bands and 040 I5's edge
+     classes are gone.  `mm-moving` (held 220 ms past the last scroll event) is the tutorial scroller's alone (037 U2) */
   let edgeT = 0; const edging = () => { root.classList.add('mm-moving'); clearTimeout(edgeT); edgeT = setTimeout(() => root.classList.remove('mm-moving'), 220); };
-  for (const sc of [scroller, tutEl]) sc.addEventListener('scroll', edging, { passive: true });
-  /* 040 I5 · THE LIBRARY'S EDGES FADE: the decks' mask stands on each edge with more beyond it (skin.css .mm-up · .mm-down), read on a scroll and a lay */
-  const edges = () => { const t = scroller.scrollTop, m = scroller.scrollHeight - scroller.clientHeight - t; scroller.classList.toggle('mm-up', t > 1); scroller.classList.toggle('mm-down', m > 1); };
-  scroller.addEventListener('scroll', edges, { passive: true });
   /* 034 M1 · THE VIEWS: the face (over the decks, which stay laid out under it), the decks, FOLDERS' gallery and the tutorial (each in the
      decks' seat); one at a time, one hero playing at most, and leaving a view puts its hero to rest */
   /* 039 W9 (WALK-D #11): a view that changes under a still pointer wakes no hint — a control that arrived under it is hovered once the pointer
@@ -386,6 +379,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     animate(foldersEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
   }
   caption.setAttribute('aria-live', 'polite');
+  const VPAD = () => { const cs = getComputedStyle(sections[0].sec); return Math.max(0, parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) - 22) || 0; };   // 041 P1: what the fade adds to a section's old 8 + 14 px (the scroller is that much taller)
   /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
   const opts = el('div', 'mm-opts', top);
   let labelBtns = [];
@@ -561,7 +555,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
          blurred racks too much" on a 16:9 screen); the ATOMIC table is not a deck and keeps its size */
       const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
       const side = narrow ? 60 : innerWidth >= 1100 ? Math.min(rackW + 20, (innerWidth - 900) / 2) : 75;   // 038 close (D-REVIEW 4): a phone's side holds the 44-px page arrow outside the deck, never on a tile
-      const H = Math.max(150, scroller.clientHeight - above - 70), W = Math.max(200, Math.min(scroller.clientWidth - 2 * side, 1900));
+      const H = Math.max(150, scroller.clientHeight - VPAD() - above - 74), W = Math.max(200, Math.min(scroller.clientWidth - 2 * side, 1900));   // 041 P2: 74, what the page's chrome is (22 + 22 of padding, the 12-px gap, the 18-px dots): at 70 a short page stood 3 px over its scroller
       /* 037 M6 THE DENSE GRID (Josh 11-05: "show as many rows and columns as you can for the molecules"): as many rows (≤ 7) and columns (≤ 16)
          as fit at the least tile — 120 px, 80 on a phone — then the tile as large as both leave, ≤ 200 (so a desktop page is eight across
          wherever eight fit at 120).  The catalogue and a volume share this deck */
@@ -639,16 +633,20 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const h = prefs.atomic === 'hydrogen'; table.hidden = h; hTable.hidden = !h;
     for (const b of amodeBtns) { const on = b.dataset.amode === prefs.atomic; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
     if (h && !hSet) { hSet = true; for (const b of BASIS) hTile(b, hTable); }
-    if (h) fitH();
+    fitH();
     if (keep && !root.hidden) enterTiles(h ? [...hTable.children] : [...table.children], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i % 14 + Math.floor(i / 14)));
   }
   /* 039 W9 (WALK-D #5): THE 140 FIT THEIR PAGE — the cell is also bounded by the room ATOMIC's page leaves under its row of words (`--fit`),
      so the tenth row clears the caption; below a 24-px cell the grid keeps 24 and scrolls in itself, before the wheel turns the page */
+  /* 041 P2: the periodic table is bounded the same way (its 9.35 rows), so ATOMIC's page is never taller than the scroller — a taller page
+     was where a scroll to ATOMIC came to rest short and then moved */
   function fitH() {
-    if (root.hidden || hTable.hidden || !hTable.getClientRects().length) return;
+    const tb = hTable.hidden ? table : hTable;
+    if (root.hidden || !tb.getClientRects().length) return;
     const sec = sections[0].sec, cs = getComputedStyle(sec), gap = parseFloat(cs.rowGap) || 0;
     let room = scroller.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0) - 4;
-    for (const c of sec.children) if (c !== hTable && c.getClientRects().length) room -= c.offsetHeight + gap;
+    for (const c of sec.children) if (c !== tb && c.getClientRects().length) room -= c.offsetHeight + gap;
+    if (tb === table) { table.style.setProperty('--fit', Math.max(12, Math.floor((room - 18) / 9.35 * 10) / 10) + 'px'); return; }
     const rows = Math.ceil(BASIS.length / 14), t = Math.floor((room - (rows - 1) * 2) / rows);
     hTable.style.setProperty('--fit', Math.max(24, t) + 'px'); hTable.classList.toggle('mm-hscroll', t < 24); hTable.style.maxHeight = t < 24 ? Math.floor(room) + 'px' : '';
   }
@@ -1024,7 +1022,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   let current = sections[0]; paintLooks();
   const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = amode.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
-  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); fitH(); movePill(current.b); edges(); } }); });   // observed only while the Picker is open
+  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); fitH(); movePill(current.b); } }); });   // observed only while the Picker is open
 
   /* ── going there ── */
   function goMolecule(id) { close(); const C = app.state.chem; if (!C) return; if (!C.on) C.setOn(true); C.pick(id); }
