@@ -33,6 +33,10 @@ const SCENES = {
     const L = []; const t0 = performance.now(); while (performance.now() - t0 < 2000) { L.push((await __LW.field.readPixels(__LW.obs, __LW.mat, 64, 48)).meanLum); await wait(12); }
     __LW.mod.stop(); const mid = (Math.min(...L) + Math.max(...L)) / 2; let rises = 0; for (let i = 1; i < L.length; i++) if (L[i - 1] < mid && L[i] >= mid) rises++;
     return { samples: L.length, rises, perSecond: rises / 2, bpm: __LW.mod.model.transport.bpm, lo: Math.min(...L).toFixed(1), hi: Math.max(...L).toFixed(1) };`,
+  /* S8: a device the page destroyed (the only loss a headless run can make) puts RELOAD STAGE on the stage; no reload is taken by itself */
+  's8-lost': `const href = location.href; __LW.field.device.destroy(); for (let i = 0; i < 60 && __LW.field.ok; i++) await wait(50); await wait(1500);
+    const b = document.querySelector('#stage > .lw-stage-lost button'), r = b && b.getBoundingClientRect(), hit = r && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return { ok: __LW.field.ok, button: b && b.textContent.trim(), onTop: !!(hit && b.contains(hit)), at: r && [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)], reloaded: location.href !== href, flag: sessionStorage.getItem('lw.stage') };`,
   's2-lattice': `__LW.mat.frameMode = 'lattice'; __LW.setFrame(true); await wait(600); return { msgs: __LW.field.shaderMessages };`,
 };
 const [scene = 's1-dots', W = '1300', H = '850', light = ''] = process.argv.slice(2);

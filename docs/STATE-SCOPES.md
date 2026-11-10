@@ -40,7 +40,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 
 | key | scope | version | FORGET | owner |
 |---|---|---|---|---|
-| `lambdawaves.q0.settings` | PREFERENCE + WORKSPACE | gen 16 | yes | shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above |
+| `lambdawaves.q0.settings` | PREFERENCE + WORKSPACE | gen 17 | yes | shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above |
 | `mir.gui` | PREFERENCE | kit prefs | yes | look.js createLook (kit createPrefs over LOOK_SCHEMA; MIR OPTIONS writes it) |
 | `lambdawaves.q0.info` | PROJECT | kit prefs | yes | shell/stage-words.js infoPrefs (INFORMATIONAL) — the live record; the project owns it (presentation.info, 036 S4) |
 | `lambdawaves.q0.widgets` | PROJECT | v 1 | yes | widgets.js createWidgets (WIDGETS) — the live record { items }; the project owns it (presentation.widgets, 037 W1) |
@@ -80,6 +80,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `lw.csb.side` | WORKSPACE | RETIRED | yes | shell/modulation.js: removed at boot (034 F3 — the bar’s home is the bottom; 032 T13 kept a dodge’s landing) |
 | `lw.repair` | PREFERENCE | flag | no | sw-client.js REPAIR (033): sessionStorage, not localStorage — 1 after the cache is cleared, 2 after the reinstall activated, removed at the verdict; one tab, one repair |
 | `lw.mixed` | PREFERENCE | flag | no | sw-client.js mixed() (033): sessionStorage — the page build a MIXED BUILD reloaded for once, so a reload loop is impossible |
+| `lw.stage` | PREFERENCE | flag | no | shell/controller.js stageLost (041 S8): sessionStorage — when a lost GPU device last reloaded the stage, so a second loss inside a minute shows RELOAD STAGE instead of a loop |
 
 <!-- state-scopes:end -->
 

@@ -1021,6 +1021,8 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .native-clean[data-id="settings"] .lw-gamut > .sw { grid-column: span 2; }
 .native-clean[data-id="settings"] .lw-gamut > .segw { grid-column: span 3; width: auto; }
 /* 037 T1 · STAGE (lab/stage-window.js): FRAME the whole line; AXES · AXIS COLOUR halves; the colour a swatch bar beside FOLLOW THEME; STAGE · GAMMA */
+/* 041 S8 · THE STAGE COMES BACK: RELOAD STAGE, in the middle of a stage whose GPU device was lost (shell/controller.js stageLost) */
+.lw-stage-lost { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: 30; zoom: var(--ui-zoom, 1); }
 .lw-stage-card .row { margin: 0 0 8px; }
 .lw-stage-card .stage-frame > .segw { flex: 1 1 100%; }
 .lw-stage-card .stage-axes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; }
