@@ -25,9 +25,21 @@ try {
       tier:(()=>{const r=[...document.querySelectorAll('[role=radiogroup]')].find(x=>x.getAttribute('aria-label')==='PERFORMANCE'),bs=r?[...r.querySelectorAll('.seg-b')]:[];
         return bs.map(x=>x.textContent+(x.getAttribute('aria-checked')==='true'?'*':'')).join('|');})(),errors:__e.slice()};`);
   assert.deepEqual(fresh, { tags:true,captions:true,hints:true,helpOff:true,lean:true,aaHidden:true,chemAaShown:true,
-    auto:true,domain:true,governor:true,theme:'light',card:'refractive',frost:'always',
+    auto:true,domain:true,governor:true,theme:'system',card:'refractive',frost:'always',
     blur:'22px',vivid:.5,tier:'FULL|SMOOTH*|BALANCED|LEAN',errors:[] });
-  console.log('PASS fresh desktop defaults: visibility, quality, light refractive frost, 22px blur, 50% vivid and PERFORMANCE SMOOTH');
+  console.log('PASS fresh desktop defaults: visibility, quality, THEME SYSTEM (041 D1), refractive frost, 22px blur, 50% vivid and PERFORMANCE SMOOTH');
+
+  // 041 D · THE FIRST RUN (Josh 11-09, "SETTING NEW USER DEFAULTS"), read in this clean profile: INFORMATIONAL's record, the skin, the rack
+  const first = await g.ev(`const I=JSON.parse(localStorage.getItem('lambdawaves.q0.info')||'{}'), L=__LW.look, open=[...document.querySelectorAll('#rackL > .dev, #rack > .dev')].filter(d=>!d.classList.contains('closed'));
+    return {info:[I.molFormulaSize,I.molName,I.listCap,I.atomLabelsSize,I.skeletonSize,I.skeletonOpacity,I.skeleton],
+      say:['sayPreset','sayHead','sayRegistry','sayView','sayBasis','sayRate','sayStyle'].every(k=>I[k]===true),
+      look:[L.get('saturation'),L.get('corners'),L.get('veil'),L.get('reliefLink'),L.get('grip'),L.get('spacing')],skin:L.preset(),
+      iconInSeat:open.filter(d=>d.offsetWidth).every(d=>{const g=d.querySelector('.dev-head .dev-glyph');return !!g&&g.getBoundingClientRect().width>0;}),
+      unfolded:open.filter(d=>!d.classList.contains('folded')).map(d=>d.dataset.id),
+      folds:[...document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]')].map(b=>b.closest('.dev').dataset.id)};`);
+  assert.deepEqual(first, { info:[2,true,8,2,3,.8,false], say:true, look:[1.5,20,5,true,'icon',10], skin:'lambdawaves', iconInSeat:true,
+    unfolded:['spectrum','chem'], folds:['chem','chem'] });
+  console.log('PASS the first run (041 D): FORMULA and ATOM LABELS at 200 %, NAME on, LIST CAP 8, BALL AND STICK 300 % at 80 % (off), every announcement on; the λWAVES skin at SATURATION 150 %, CORNERS 20 px, VEIL 5 %, LINK on, DRAG HANDLE · ICON (a glyph in every head), SPACING 10 px; only SPECTRUM and MOLECULES unfolded, MOLECULES\' presets and A ↔ B open');
 
   // 037 H3 (Josh: "Autorotate and lock should be on by default"): AUTO-ROTATE (FRICTION read as 0) and the LOCK, its switch lit and the PAN pad resting
   const cam = await g.ev(`const card = document.querySelector('.dev[data-id="camera"]'), lock = [...card.querySelectorAll('button.sw')].find((b) => b.textContent.trim() === 'LOCK');

@@ -569,7 +569,7 @@ body.ui-hidden #notebook, body.ui-hidden #rackPeek, body.ui-hidden #rackPeekL, b
 /* 041 I8 · THE REVEAL IS QUICK (Josh 11-09: "Increase the speed of the reveal/hide animation to be much faster"): the racks' hide, peek and return and
    the bar's hide and peek share one time, 120 ms (was 280; the bar's return on B is its own 240 ms, the dodge's).  These rules out-rank the kit's own (rack.css, --motion-structural), so the kit's W10 speed reaches λWAVES
    through this one name (FOR-YAN in I-BUILD: point it at W10's token at the merge) */
-:root { --lw-reveal: .12s; }
+:root { --lw-reveal: calc(var(--motion-micro) * 1.5); }   /* 041 D0: the kit's own reveal (rack.css --rack-reveal, alpha.63: 120 ms), so MOTION and a later door move both */
 body.rack-hidden #rack, body.rack-hidden #rackL { visibility: hidden; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear var(--lw-reveal); }
 body.rack-hidden.rack-peek-right #rack, body.rack-hidden.rack-peek-left #rackL { visibility: visible; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear 0s; }
 body.rack-hidden #transport.mini { visibility: hidden; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear var(--lw-reveal); }

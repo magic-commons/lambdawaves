@@ -111,7 +111,8 @@ export async function boot(dom) {
   /* 0.5.0 C2 · λWAVES' HOME LOOK, the look store's `defaults` (lab/look.js, `mir.gui`): light, the device's first-run card and
      frost (W125), 22 px blur, 50 % VIVID, disconnected cards.  A browser that has never chosen wears these; a stored choice wins.
      The phone crossing's FROST OFF is a later, separate law (enterPhone). */
-  const LOOK_DEFAULTS = { theme: 'light', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };
+  /* 041 D1 (Josh 11-09: "let the new user be greeted with either light or dark depending on screen system"): a first run's THEME is SYSTEM */
+  const LOOK_DEFAULTS = { theme: 'system', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };
   /* THE CONTEXT (0.5.2 R0 · research/release-0.5.2/PLAN.md §1, G-A): `app`, the one object a module is handed.  Fixed-shape namespaces,
      each ONE literal with every key, never extended, never Object.assign-ed into, never deleted (V8 makes a literal of 128 keys or more a
      dictionary, so none is that large).  The keys are every boot-level name the planned cut makes cross a module (`node tools/rack-deps.mjs
@@ -962,6 +963,7 @@ export async function boot(dom) {
     for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
     /* iteration 011 Q2 (Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside every window closed (first-run.js `inner`); a record that loads after (rack-wiring.js `folds`) wins */
     if(FIRST_RUN.inner===false)for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]'))b.click();
+    for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="false"]'))if(FIRST_RUN.innerOpen.includes(b.dataset.fold))b.click();   // 041 D2: but MOLECULES' presets and A ↔ B, open (first-run.js `innerOpen`)
   }
   dom.start.arrangement = () => JSON.stringify({ ...layout.captureLayout(), at: 0 });   // 039 F1: the session's signature reads the arrangement here (main.js), without its stamp
   layout.DEFAULT = layout.captureLayout();   // 036 S3 · THE DEFAULT LAYOUT: the first-run arrangement as it stands here, before this browser's settings — NEW puts the windows back to it (notebook.js)

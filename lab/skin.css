@@ -1,5 +1,5 @@
 /* ── 2. stage and rack: the field is the whole room, the rack is air ─────── */
-#rack, #rackL { background: transparent; border-left: 0; padding: var(--card-gap); gap: var(--card-gap); opacity: 1; box-shadow: none; }
+#rack, #rackL { background: transparent; border-left: 0; padding: var(--rack-inset, var(--card-gap)); gap: var(--rack-gap, var(--card-gap)); opacity: 1; box-shadow: none; }
 
 
 #rack > .dev, #rackL > .dev { box-shadow: var(--glass-shadow); }  /* no continuous rack slab, no veil: cards float alone */
@@ -200,7 +200,7 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
   /* ── 1. ONE RACK, ON THE LEFT — portrait and landscape both ─────────────────────────────────── */
   #rack { top: calc(env(safe-area-inset-top) + var(--top-bar)); bottom: 0; left: 0; right: auto;
     width: var(--rack-w); height: auto; max-height: none; direction: ltr;   /* ltr puts the 2-px scrollbar back on the rack's INNER edge */
-    padding: var(--card-gap) var(--card-gap) max(var(--card-gap), env(safe-area-inset-bottom)) max(var(--card-gap), env(safe-area-inset-left)); }
+    padding: var(--rack-inset, var(--card-gap)) var(--rack-inset, var(--card-gap)) max(var(--rack-inset, var(--card-gap)), env(safe-area-inset-bottom)) max(var(--rack-inset, var(--card-gap)), env(safe-area-inset-left)); }
   #rack > * { direction: ltr; }
   body.rack-hidden #rack { transform: translateX(calc(-100% - 12px)); }     /* it leaves to the LEFT now */
   #rackL, #rackPeek, #rackPeekL { display: none !important; }               /* the mirror rack and both hover-peek strips stand down */
@@ -290,7 +290,10 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 }
 
 /* Native instruments, September 2026. Modulation retains its own vocabulary. */
-.native-clean .dev-body { padding: 10px 12px; }
+/* 041 D4: a head's own glyph (rack-wiring.js) shows only as the DRAG HANDLE's ICON (the kit's body.icon-grip) */
+body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
+/* 041 D0 · SPACING REACHES THE RACKS, THE WINDOWS AND THE BAR: MIR OPTIONS' SPACING knob writes --rack-gap / --rack-inset (the racks, line 2) and --pad-k (a pane's padding over home's; csb.css the bar); at home, 10 px, it writes nothing */
+.native-clean .dev-body { padding: calc(10px * var(--pad-k, 1)) calc(12px * var(--pad-k, 1)); }
 .native-clean .grp { border: 0; outline: 0; box-shadow: none; background: none; padding: 0; margin: 0 0 12px; }
 .native-clean .grp-lbl { font-size: var(--fs-micro); color: var(--dim); letter-spacing: .12em; margin: 4px 0 8px; }
 .native-clean .row { gap: 8px; align-items: center; justify-content: center; margin: 6px 0; }
@@ -419,6 +422,14 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev[data-id="spectrum"] .sp-knobs > .k { flex:none;min-height:0; }
 .dev[data-id="spectrum"] .sp-b { background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise, var(--neu-raise)); }
 .dev[data-id="spectrum"] .sp-b.on { color:var(--acc);background:var(--acc-soft);border-color:color-mix(in srgb,var(--acc) calc(100% * var(--ctl-stroke)),transparent);box-shadow:var(--relief-well, var(--neu-inset)),0 0 5px color-mix(in srgb,var(--acc) 25%,transparent); }
+
+/* 041 D0 · EVERY FACE CAN BE GLASS, THE APP'S FACES (Josh 11-09: "The 'faces' from glass to solid doesn't seem to work with all the faces"): the
+   kit's GLASS rule (mir/css/skin.css, alpha.61) is layered, and the rules above and §9's are not, so λWAVES' own triggers, segments and cells
+   kept their fill.  The same law here, unlayered: under FACES · GLASS on a glass card every neutral face is clear and wears the hairline; ON
+   keeps its own face.  The swatches, the power disc and PLAY's accent stay filled, as in the kit */
+body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.dev:not(.mir-modwindow) :is(.trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]), .seg, .seg-b),
+  .sp-b:not(.on), .pk-c:not(.on), .sp-row:not(.sel), .orbit-row, .plane-model, .dev-copy, #transport[data-layout="csb"] .csb-play > .tbtn.play:not(:active, .press)) { background-color: transparent; background-image: none; }
+body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.dev:not(.mir-modwindow) .trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]):not(.lw-fold), .sp-b:not(.on), .pk-c:not(.on)) { border-color: var(--ctl-hairline); }
 
 /* Explanatory pockets are optional; numerical interaction labels stay available. */
 body.window-info-off .native-info,

@@ -24,8 +24,16 @@ const LOOK_KEY = 'mir.gui';
 export const LOOK_ROWS = Object.freeze(lookSchema().map((r) => r.key));
 /** λWAVES' home for the rows SETTINGS never had: the value at which each writes nothing, so the page looks as it did before
  *  MIR OPTIONS (FULL tier, no benchmark; the kit's own faces, shadows, corners, veil and ink; no pointer glow or parallax) */
-const LOOK_HOME = Object.freeze({ veil: 10, saturation: 1, corners: 14, faces: 'solid', text: 'theme', edge: true, shadow: 1,
-  glow: false, parallax: false, quality: 'full', stroke: 0 });   // 036 K1: STROKE 0 — the controls' rings gone (Josh), the knob brings them back
+/* 041 D0 · SPACING IS λWAVES' px: the kit's knob (alpha.57) reads px, and λWAVES' racks have always stood 10 px apart (skin.css --card-gap), so
+   its home is 10 — what the old clicker's DEFAULT drew here.  A stored 'default' opens as 10 (the row's `legacy`), and the kit's skins that say
+   the kit's DEFAULT (6) say 10 here (LW_THEMES), so no stored look moves and none loses its name */
+export const SPACING_HOME = 10;
+export const LW_THEMES = THEMES.map((t) => (t.values.spacing === 6 ? { ...t, values: { ...t.values, spacing: SPACING_HOME } } : t));
+/* 041 D4 (Josh 11-09, "MIR Options: Default skin modifications"): the λWAVES skin a new user meets is SATURATION 150 %, CORNERS 20 px, VEIL 5 %,
+   LIGHT's LINK on and the DRAG HANDLE as the window's ICON (kit alpha.56: rack windows only); it was 100 % · 14 px · 10 % · off · GRIP.  A stored
+   look keeps its values and reads CUSTOM beside the new skin */
+const LOOK_HOME = Object.freeze({ veil: 5, saturation: 1.5, corners: 20, faces: 'solid', text: 'theme', edge: true, shadow: 1,
+  glow: false, parallax: false, quality: 'full', stroke: 0, spacing: SPACING_HOME, reliefLink: true, grip: 'icon' });   // 036 K1: STROKE 0 — the controls' rings gone (Josh), the knob brings them back
 /** the kit maps that write at λWAVES' home, homed: AUTO ink is the theme's own ladder (a SOLID pane keeps the kit's), SATURATION
  *  at 100 % is no filter at any blur, the CAST is drawn only off LIGHT_HOME (the kit sheet's own words), DEFAULT spacing is the
  *  sheets' own air */
@@ -36,7 +44,7 @@ const HOME_MAPS = {
     ? null : sp.map(v, s, e)),
   saturation: (sp) => (v, s, e) => (v === 1 ? null : sp.map(v, s, e)),
   dropShadow: (sp) => (sp.attr === 'data-cast' ? (v, s, e) => (lightIsHome(s) ? null : sp.map(v, s, e)) : sp.map),
-  spacing: (sp) => (v, s, e) => (v === 'default' || v === 6 ? null : sp.map(v, s, e)),  // 041: the kit's SPACING is px (alpha.57); 6 is its home
+  spacing: (sp) => (v, s, e) => (v === SPACING_HOME ? null : sp.map(v, s, e)),  // 041 D0: at home the sheets' own air (10 px racks, the chip rail's 4)
 };
 /** what the look left the settings blob with; HELP had its own key */
 export const BLOB_LOOK = Object.freeze(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint']);
@@ -64,9 +72,9 @@ export function liftLook(s = {}, help = null) {
  *  The kit's migratePrefs runs it once (LOOK_VERSION), so a TEXT LIGHT chosen after it stays the reader's. */
 export const LOOK_VERSION = 2;
 export function frostText(b) {
-  const F = THEMES.find((x) => x.id === 'frost').values;
-  /* 041: the kit's SPACING is px since alpha.57, so the old record's 'default' is FROST's 6 */
-  const same = (k, v) => b[k] === v || (k === 'spacing' && b[k] === 'default' && v === 6);
+  const F = LW_THEMES.find((x) => x.id === 'frost').values;
+  /* 041: the kit's SPACING is px since alpha.57, so the old record's 'default' is FROST's home here */
+  const same = (k, v) => b[k] === v || (k === 'spacing' && b[k] === 'default' && v === SPACING_HOME);
   return b && b.text === 'light' && Object.entries(F).every(([k, v]) => k === 'text' || same(k, v)) ? { ...b, text: F.text, spacing: F.spacing } : b;
 }
 
@@ -79,7 +87,8 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
     onAccent: (A, B) => { const v = getModView(); if (v) v.setAccent(A, B); } });
   const ctx = { doc: document, accent, moving: false, hold: false, lastAccent: null };
   const home = { ...LOOK_HOME, ...defaults };
-  const schema = lookSchema().map((r) => ({ ...r, ...(r.key in home ? { default: home[r.key] } : {}),
+  const schema = lookSchema({ spacingHome: SPACING_HOME }).map((r) => ({ ...r, ...(r.key in home ? { default: home[r.key] } : {}),
+    ...(r.key === 'spacing' ? { legacy: { ...r.legacy, default: SPACING_HOME } } : {}),
     ...(HOME_MAPS[r.key] ? { apply: r.apply.map((sp) => (sp.map ? { ...sp, map: HOME_MAPS[r.key](sp) } : sp)) } : {}),
     ...(r.key === 'blur' ? { max: 30 } : r.key.startsWith('accent') ? { wrap: false } : {}),   // GLASS BLUR's travel (the kit's row stops at 24): no stored value moves; an ACCENT keeps END's 360° (wave 68: it renders as 0°, a fold left the eye at 0° and HOME dead)
     ...(r.key === 'theme' ? { apply: [...r.apply, { run: (v, s, e) => { if (seen !== v + e.theme) { seen = v + e.theme; onTheme(e.theme, v); } } }] } : {}),
@@ -90,7 +99,7 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
      one tone the COLOUR_KEYS; LIGHT · DARK · SYSTEM, the hints and HELP stay the reader's own (shell/themes.js). */
   const first = homeOf(schema), pick = (keys) => Object.fromEntries(keys.map((k) => [k, first[k]]));
   const LAMBDAWAVES = { id: 'lambdawaves', name: 'λWAVES', values: pick(THEME_KEYS), tones: [{ id: 'lambdawaves', name: 'λWAVES', values: pick(COLOUR_KEYS) }] };
-  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: [LAMBDAWAVES, ...THEMES], context: ctx, version: LOOK_VERSION, migrate: frostText });
+  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: [LAMBDAWAVES, ...LW_THEMES], context: ctx, version: LOOK_VERSION, migrate: frostText });
   const blob = settings.read(), held = BLOB_LOOK.filter((k) => k in blob);
   let help = null; try { help = localStorage.getItem(HELP_KEY); localStorage.removeItem(HELP_KEY); } catch (_) {}
   if (held.length || help) prefs.set(liftLook(blob, help));

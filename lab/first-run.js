@@ -38,11 +38,18 @@ export const FIRST_RUN_RACKS = Object.freeze({
  *  it at every compact boot and NEW's DEFAULT is captured from it, so NEW keeps the choice) */
 export const firstRunRacks = (nativeLayout) => (nativeLayout === 2 ? FIRST_RUN_RACKS.advanced : FIRST_RUN_RACKS.simple);
 const FOLD_ALL = Object.freeze([...FIRST_RUN_RACKS.advanced.left, ...FIRST_RUN_RACKS.advanced.right]);
+/* 041 D3 (Josh 11-09: "Spectrum or molecule be the only window open among the minimized rack windows"): a desktop's first run folds every window but
+   SPECTRUM and MOLECULES — the mode shows one of the two, so one window stands open at the head of the left rack.  A phone or tablet keeps them all
+   folded: its one rack is the screen's scarcest room (W129) */
+const FOLD_REST = Object.freeze(FOLD_ALL.filter((id) => id !== 'spectrum' && id !== 'chem'));
 /* iteration 016 W3 (Josh, call 6: "H on touch: Yan's choice (give it the kit's edge handle)") · `handle`: the kit rack's edge handle — the on-screen way
    back to a hidden rack — on a phone or tablet only (rack-wiring.js hands it createRack); a desktop keeps none, its keys and the edge peek */
+/* 041 D2 (Josh 11-09: "Molecules window's preset/morph section expanded by default") · `innerOpen`: the folds inside a window a first run leaves OPEN, by
+   their `data-fold` name — MOLECULES' presets and A ↔ B (ORBITALS' head and STATES' head: one card, two views); every other inner fold stays closed */
+const INNER_OPEN = Object.freeze(['presets, A ↔ B and flow', 'presets, A ↔ B, view, flow, drive and song']);
 export const FIRST_RUN_MATERIAL = Object.freeze({
-  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: FOLD_ALL, more: false, inner: false, handle: 'never' }),
-  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: FOLD_ALL, more: false, inner: false, handle: 'always' }),
+  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: FOLD_REST, more: false, inner: false, innerOpen: INNER_OPEN, handle: 'never' }),
+  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: FOLD_ALL, more: false, inner: false, innerOpen: INNER_OPEN, handle: 'always' }),
 });
 /** the material a browser that has never said anything gets on this device */
 export function firstRunMaterial(mobile) { return mobile ? FIRST_RUN_MATERIAL.mobile : FIRST_RUN_MATERIAL.desktop; }

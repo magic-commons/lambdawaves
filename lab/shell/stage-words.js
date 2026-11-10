@@ -25,9 +25,12 @@ const KINDS = Object.freeze([
 const KIND = new Map(KINDS.map((k) => [k.id, k]));
 const pct = (v) => Math.round(v * 100) + '%';
 /** the rows: { key, type, default, … } is the kit's prefs schema; group · label · hint · options · fmt are the window's (informational.js) */
+/* 041 D2 · THE NEW USER'S DEFAULTS (Josh 11-09, "SETTING NEW USER DEFAULTS"): FORMULA's SIZE 200 %, NAME on, LIST CAP 8, ATOM LABELS' SIZE 200 %, BALL AND
+   STICK 300 % at 80 % opacity (still off), every announcement on (ANNOUNCE ALL).  A record a browser already holds keeps its values; a project carries
+   only the rows off these defaults, so a file that never said a row opens at the new one */
 export const INFO_ROWS = Object.freeze([
   { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'FORMULA', hint: 'Write the playing state on stage' },
-  { key: 'molName', type: 'bool', default: false, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
+  { key: 'molName', type: 'bool', default: true, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
   /* iteration 018 B9 (Josh: "Since we have isomers, let a secondary subtitle text be optional for the name … the name is a heading type and the subtitle
      should be smaller like a 'body' text"): the line under the NAME that tells a molecule from its isomers — neither the catalogue nor a volume's index
      carries a second name, so it is a volume molecule's index `tags` and point group `pg` (amide · C2v), a catalogue molecule's shelf (`group`) */
@@ -36,10 +39,10 @@ export const INFO_ROWS = Object.freeze([
      have to keep toggling it on and off just because a certain mode uses an obscene amount of 140 levels"): SPECTRUM's populated list longer than the cap is
      written as its count — "140 levels · 7 shells" (capLine) — on the stage and in an export's caption; at or under the cap it is the list, as before.
      16 = the longest LOAD VALENCE (4f 5d 6s 6p, 5f 6d 7s 7p: 16 labels), so every atom's valence still reads as its subshells; a molecule's formula is untouched */
-  { key: 'listCap', type: 'number', min: 4, max: 140, step: 1, log: true, default: 16, group: 'words', label: 'LIST CAP', fmt: (v) => String(Math.round(v)), hint: 'Longest state list written in full' },
-  { key: 'molFormulaSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'words', label: 'SIZE', fmt: pct, hint: 'The formula\'s size (100% = 34 px)' },
+  { key: 'listCap', type: 'number', min: 4, max: 140, step: 1, log: true, default: 8, group: 'words', label: 'LIST CAP', fmt: (v) => String(Math.round(v)), hint: 'Longest state list written in full' },
+  { key: 'molFormulaSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 2, group: 'words', label: 'SIZE', fmt: pct, hint: 'The formula\'s size (100% = 34 px)' },
   { key: 'atomLabels', type: 'bool', default: true, group: 'labels', label: 'ATOM LABELS', hint: 'Each nucleus\'s element symbol' },
-  { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
+  { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 2, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
   { key: 'infoPos', type: 'enum', values: ['top', 'bottom'], default: 'top', group: 'seat', label: 'POSITION', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'Formula at the top or bottom' },
   { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'seat', label: 'PAD', fmt: pct, hint: 'Formula margin' },
   /* iteration 018 B7 (Josh: "Include ESP's bar with a padding setting and a toggle that just cycles between right (where it is now), left, top, and bottom.
@@ -47,7 +50,7 @@ export const INFO_ROWS = Object.freeze([
   { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'ESP key: + and − colours; its numbers in atomic units' },   // 039 F2 (X-REVIEW #7): the unit in words, no window name
   { key: 'espBarSide', type: 'enum', values: ['right', 'left', 'top', 'bottom'], default: 'right', group: 'bar', label: 'SIDE', options: [{ id: 'right', label: 'RIGHT' }, { id: 'left', label: 'LEFT' }, { id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'ESP bar side: RIGHT → LEFT → TOP → BOTTOM' },
   { key: 'espBarPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'bar', label: 'PAD', fmt: pct, hint: 'ESP bar margin' },
-  ...KINDS.filter((k) => k.hint).map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),
+  ...KINDS.filter((k) => k.hint).map((k) => ({ key: k.key, type: 'bool', default: true, group: 'announce', label: k.label, hint: k.hint })),
   { key: 'popSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'announce', label: 'SIZE', fmt: pct, hint: 'The pop-ups\' size: 100% is 15 px' },
   { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'PARALLAX', hint: 'Words lean away from the pointer' },
   { key: 'cursorDrift', type: 'bool', default: false, group: 'cursor', label: 'DRIFT', hint: 'Words bob slowly on the stage' },
@@ -58,8 +61,8 @@ export const INFO_ROWS = Object.freeze([
   /* iteration 012 R1 (Josh 10-20): SKELETON is BALL AND STICK (the label only: the key `skeleton` stays), with an OPACITY knob between its switch and SIZE;
      the dipole arrow it drew ("a weird arrow … can it be separated from Skeleton?") is MARKS' DIPOLE, its own switch, off by default */
   { key: 'skeleton', type: 'bool', default: false, group: 'skeleton', label: 'BALL AND STICK', hint: 'Nuclei as CPK disks, bonds as sticks' },   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
-  { key: 'skeletonOpacity', type: 'number', min: 0.1, max: 1, step: 0.01, default: 1, group: 'skeleton', label: 'OPACITY', fmt: pct, hint: 'BALL AND STICK\'s opacity' },
-  { key: 'skeletonSize', type: 'number', min: 0.5, max: 4, step: 0.01, default: 1.6, group: 'skeleton', label: 'SIZE', fmt: pct, hint: 'Ball size × covalent radius' },
+  { key: 'skeletonOpacity', type: 'number', min: 0.1, max: 1, step: 0.01, default: 0.8, group: 'skeleton', label: 'OPACITY', fmt: pct, hint: 'BALL AND STICK\'s opacity' },
+  { key: 'skeletonSize', type: 'number', min: 0.5, max: 4, step: 0.01, default: 3, group: 'skeleton', label: 'SIZE', fmt: pct, hint: 'Ball size × covalent radius' },
   /* iteration 014 D6 (Josh: "Let the Ball and stick model show double/triple bonds, whether a bond is sigma, or ionic, or different types of attraction,
      resonances (like benzene) … a customizable feature to be in the informational"): BALL AND STICK's BONDS, four switches (lab/skeleton.js bondsOf) */
   { key: 'bondOrder', type: 'bool', default: true, group: 'bonds', label: 'ORDER', hint: 'Double and triple bonds' },

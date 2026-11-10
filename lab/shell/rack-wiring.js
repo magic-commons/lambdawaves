@@ -1,8 +1,8 @@
 /* lab/shell/rack-wiring.js — §19a THE RACK IS THE KIT'S (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): createRack, the layout verbs (aliases over the
  * kit's rack; captureLayout's v3 the WORKSPACE record), the TRANSPORT card, the phone and tablet crossings, the stage gestures.  Two seats, as the code stood:
  * createRackWiring(app) at §19a's, wireStage() after the notebook's.  rk, layout, phone, tablet, winHint and devById are registered on app.sh at creation. */
-import { TIER } from '../tier.js'; import { chip, hint } from '../mir/kit.js'; import { transportDock } from '../mir/shell/transport.js'; import { createRack, readLayout, layoutLabel as rackLayoutLabel } from '../mir/shell/rack.js';
-import { WINDOW_GLYPH } from '../icons.js'; import { setGlyph } from '../mir/glyph.js'; import { uiSpace } from '../mir/shell/scene-guard.js'; import { bindStageGestures } from '../stage-gestures.js'; import { CAM } from '../camera-law.js'; import { paintedRect } from '../occlusion.js';
+import { TIER } from '../tier.js'; import { chip, hint } from '../mir/kit.js'; import { transportDock } from '../mir/shell/transport.js'; import { createRack, readLayout, layoutLabel as rackLayoutLabel, RACK } from '../mir/shell/rack.js';
+import { WINDOW_GLYPH } from '../icons.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { uiSpace } from '../mir/shell/scene-guard.js'; import { bindStageGestures } from '../stage-gestures.js'; import { CAM } from '../camera-law.js'; import { paintedRect } from '../occlusion.js';
 const SHELLS_FOLDED = [7];   // iteration 008 A7: SPECTRUM's shells folded by default (spectrum.js FOLD_DEFAULT)
 export function createRackWiring(app) {
   const { dom, ui, device, DEVICES, clock, obs, settingsStore, isPhone, isTablet, FIRST_RUN } = app, { schedule, windowActivity } = app.loop;
@@ -65,6 +65,11 @@ export function createRackWiring(app) {
   { const t = document.getElementById('rackToggle'), ghost = () => { const h = rk.hidden, g = h ? 'rackHidden' : 'rackToggle'; if (h && !wasHid) hidAt = performance.now(); wasHid = h; if (t && t.dataset.gly !== g) setGlyph(t, g); };
     ghost(); new MutationObserver(ghost).observe(document.body, { attributes: true, attributeFilter: ['class'] }); }   // 021 V2: the kit wrote its text ◧ ☆ into λWAVES' own nodes; the table's glyphs (no kit seat needed)
   const devTitle = (d) => ((d.querySelector('.dev-eyebrow') || {}).textContent || d.dataset.id).trim();
+  /* 041 D4 · THE HANDLE WEARS THE WINDOW'S ICON (kit alpha.56; Josh 11-09: "replace the drag handles with the icon of the window"): the kit's ICON
+     state stands a head's `.dev-glyph` in the dots' seat, and λWAVES' heads carried none — each rack window's one drawing (icons.js WINDOW_GLYPH)
+     joins its head here; skin.css shows it only under ICON, so GRIP and HIDDEN look as they did */
+  for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) { const g = WINDOW_GLYPH[d.dataset.id], idz = d.querySelector('.dev-head > .dev-id');
+    if (g && idz && !idz.querySelector('.dev-glyph')) idz.prepend(glyphEl(g, 'dev-glyph gly gly-' + g, 14)); }
   for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), glyph: WINDOW_GLYPH[d.dataset.id], hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
   /* ── iteration 006 R · A RACK'S SCROLLBAR ANSWERS ITS CONTENT, NEVER ITS MOTION ─────────────────────────────────────────────
    * Both racks are content-sized scrollers (lab.css: bottom auto, max-height 100%, overflow-y auto).  The kit's motion (mir/shell/
@@ -101,8 +106,9 @@ export function createRackWiring(app) {
     const b = document.body, tr = document.getElementById('transport'), on = b.classList.contains('transport-peek');
     if (!b.classList.contains('rack-hidden') || b.classList.contains('ui-hidden') || !tr || !tr.classList.contains('mini')) { if (on) b.classList.remove('transport-peek'); return; }
     const r = tr.getBoundingClientRect(), dy = new DOMMatrixReadOnly(getComputedStyle(tr).transform).f, x = e.clientX, y = e.clientY + dy;
-    const near = x >= r.left - 120 && x <= r.right + 120 && y >= r.top - 100 && y <= r.bottom + 100;
-    const inside = x >= r.left - 160 && x <= r.right + 160 && y >= r.top - 160 && y <= r.bottom + 160;
+    const N = RACK.barNear, H = RACK.barHold;   // 041 D0: the kit's own nearness (alpha.63: 160, held within 220) — the bar as near as the kit's
+    const near = x >= r.left - N && x <= r.right + N && y >= r.top - N && y <= r.bottom + N;
+    const inside = x >= r.left - H && x <= r.right + H && y >= r.top - H && y <= r.bottom + H;
     if (near && !on && performance.now() - hidAt > 250) b.classList.add('transport-peek'); else if (!inside && on) b.classList.remove('transport-peek');
   }, { passive: true });
   if (rk.el.toggle) rk.el.toggle.addEventListener('click', () => saveSettings());   // wave 59 (B111): the kit's ◧ hides by setHidden alone; on a phone the press IS the browser saying which it wants, stored as the B key stores it
