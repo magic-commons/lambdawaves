@@ -963,6 +963,7 @@ export async function boot(dom) {
     for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
     /* iteration 011 Q2 (Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside every window closed (first-run.js `inner`); a record that loads after (rack-wiring.js `folds`) wins */
     if(FIRST_RUN.inner===false)for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]'))b.click();
+    for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="false"]'))if(FIRST_RUN.innerOpen.includes(b.dataset.fold))b.click();   // 041 D2: but MOLECULES' presets and A ↔ B, open (first-run.js `innerOpen`)
   }
   dom.start.arrangement = () => JSON.stringify({ ...layout.captureLayout(), at: 0 });   // 039 F1: the session's signature reads the arrangement here (main.js), without its stamp
   layout.DEFAULT = layout.captureLayout();   // 036 S3 · THE DEFAULT LAYOUT: the first-run arrangement as it stands here, before this browser's settings — NEW puts the windows back to it (notebook.js)

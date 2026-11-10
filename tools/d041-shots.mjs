@@ -36,6 +36,13 @@ const SCENES = {
     return Object.entries(out).sort((a, b) => b[1].n - a[1].n).map(([k, v]) => v.n + ' ' + k + ' ' + v.bg + (v.img ? ' img ' + v.img : ''));`,
   'probe-body': `__LW.look.set({ faces: 'glass', card: 'refractive', frost: 'always' }); await wait(600); const b = document.body; return { ds: { ...b.dataset }, cls: b.className, look: __LW.look.get(), html: { ...document.documentElement.dataset } };`,
   'probe-folds': `return [...document.querySelectorAll('.dev .lw-fold')].map((b) => b.closest('.dev').dataset.id + ' · ' + (b.dataset.fold || b.className) + ' · ' + b.getAttribute('aria-expanded')).concat([...document.querySelectorAll('.dev')].filter((d) => !d.classList.contains('closed')).map((d) => d.dataset.id + (d.classList.contains('folded') ? ' folded' : ' OPEN') + ' in ' + (d.parentElement.id)));`,
+  /* D1–D4 · THE FIRST RUN, read: the theme and its choice, INFORMATIONAL's record, the look's rows, the rack's windows and the open inner folds */
+  'probe-first': `const I = JSON.parse(localStorage.getItem('lambdawaves.q0.info') || '{}'), L = __LW.look;
+    return { theme: [__LW.themeChoice, document.body.dataset.theme], info: Object.fromEntries(['molFormulaSize', 'molName', 'listCap', 'atomLabelsSize', 'skeleton', 'skeletonSize', 'skeletonOpacity', 'sayPreset', 'sayHead', 'sayRegistry', 'sayView', 'sayBasis', 'sayRate', 'sayStyle'].map((k) => [k, I[k]])),
+      look: Object.fromEntries(['saturation', 'corners', 'veil', 'reliefLink', 'grip', 'spacing'].map((k) => [k, L.get(k)])), skin: L.preset(), iconGrip: document.body.classList.contains('icon-grip'),
+      css: { r: getComputedStyle(document.querySelector('#rack .dev')).borderRadius, sat: getComputedStyle(document.querySelector('#rack .dev')).backdropFilter },
+      wins: [...document.querySelectorAll('.dev')].filter((d) => !d.classList.contains('closed') && d.parentElement.id.startsWith('rack')).map((d) => d.dataset.id + (d.classList.contains('folded') ? '' : ' OPEN') + (getComputedStyle(d).display === 'none' ? ' (hidden by the mode)' : '')),
+      folds: [...document.querySelectorAll('.dev .lw-fold[aria-expanded="true"]')].map((b) => b.closest('.dev').dataset.id + ' · ' + b.dataset.fold), mode: __LW.mode && __LW.mode.id, cam: __LW.camera.lock };`,
   'd0-spacing': `__LW.look.set({ spacing: 24 }); await wait(400); return __LW.look.get('spacing');`,
 };
 const [scene = 'probe-spacing', W = '1300', H = '850', light = '-', sys = ''] = process.argv.slice(2);
