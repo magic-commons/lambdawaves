@@ -11,6 +11,7 @@ import { timelineExtent } from './model.js';
 import { el, svgNode as svg, label, ariaLabel } from '../kit.js';
 import { glyphSvg } from '../glyph.js';
 import { t } from '../core/i18n.js';
+import { cssZoom } from '../core/zoom.js';
 const BAND_MIN=4;   // px: an event clip draws its band hairlines only while they stand at least this far apart
 const clamp=(n,lo,hi)=>Math.min(hi,Math.max(lo,n));
 // Beat ticks never hide: alpha ramps with zoom (full at 12px, half at 8px) instead of cutting off
@@ -77,7 +78,7 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
   }
   function paint(){
     if(!doc)return;
-    const px=pixels(),width=viewport.clientWidth,x=viewport.scrollLeft,dpr=globalThis.devicePixelRatio||1,law=tickLaw(px,dpr);
+    const px=pixels(),width=viewport.clientWidth,x=viewport.scrollLeft,dpr=(globalThis.devicePixelRatio||1)*cssZoom(viewport),law=tickLaw(px,dpr);
     const material=getComputedStyle(document.body),configuredRadius=parseFloat(material.getPropertyValue('--surface-radius'));
     const radius=Number.isFinite(configuredRadius)?configuredRadius:parseFloat(material.getPropertyValue('--r-md'))||12;
     const beatTicks=ticks(Array.from({length:doc.meter-1},(_,i)=>i+1),px,dpr),subTicks=ticks(Array.from({length:doc.meter},(_,i)=>i+.5),px,dpr);
@@ -121,5 +122,7 @@ export function createTimelineView(surface,{pixels,onClipMenu,stepsOf=()=>null})
   return {shell,ruler,viewport,content,rows,head,tail,marquee,status,setDocument,paint,paintSelection,getClip,getCurve,
     height:()=>height,plot:id=>clipNodes.get(id)?.svg,
     setRange(value){range=value;rulerKey='';},setActive(value){active=value;rulerKey='';},
-    world(e){const r=viewport.getBoundingClientRect();return{x:e.clientX-r.left+viewport.scrollLeft,y:e.clientY-r.top+viewport.scrollTop};}};
+    /* THE SCALE REACHES THE TIMELINE (1.5.7-alpha.64): the pointer and the viewport's rect are SEEN px, the scroll and every beat's px are the
+       lanes' OWN px, drawn × UI SCALE (core/zoom.js): the seen offset ÷ the zoom, then the scroll.  Every gesture reads its place here. */
+    world(e){const r=viewport.getBoundingClientRect(),z=cssZoom(viewport);return{x:(e.clientX-r.left)/z+viewport.scrollLeft,y:(e.clientY-r.top)/z+viewport.scrollTop};}};
 }

@@ -48,6 +48,7 @@ import { confirmDialog } from '../shell/dialog.js';
 import { glyphSvg } from '../glyph.js';
 import { frame } from '../core/frame.js';
 import { isField } from '../core/pointer.js';
+import { cssZoom } from '../core/zoom.js';
 import { t, tn } from '../core/i18n.js';
 import { coalesce } from './readout.js';
 import { TIMELINE_TAB_HEIGHT, TIMELINE_ROW_GAP, TIMELINE_CURVE_GRAB, TIMELINE_TENSION_TRAVEL, resizeTimelineClip, glueTimelineClips, createClipCoordinates, snapTimelineBeat, timelineResizeDelta, nearestTimelineLane, timelineEdgeAt } from './geometry.js';
@@ -138,7 +139,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   function fit(){
     if(!worklane.getClientRects().length)return;   // the lane is hidden or the window is closed: nothing to measure
     const bar=getComputedStyle(toolbar),lane=getComputedStyle(worklane),num=v=>parseFloat(v)||0,gap=num(bar.columnGap);
-    let room=worklane.clientWidth;if(lane.flexDirection!=='column')room-=transportHost.getBoundingClientRect().width+num(lane.columnGap);
+    let room=worklane.clientWidth;if(lane.flexDirection!=='column')room-=transportHost.getBoundingClientRect().width/cssZoom(worklane)+num(lane.columnGap);
     // layout widths (offsetWidth), never the painted box: a hovered or pressed button is scaled (THE CHIPS' MOTION) and must not fold the bar
     for(const f of fold)if(!f.node.classList.contains('tl-folded'))widths.set(f.node,f.node.offsetWidth);
     let need=num(bar.paddingLeft)+num(bar.paddingRight)+num(bar.borderLeftWidth)+num(bar.borderRightWidth)+moreButton.offsetWidth,k=0;
@@ -188,7 +189,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   function selectAll(){if(scope==='points'){const c=view.getClip(selected),curve=view.getCurve(c?.curveId);if(curve)pointSelection={clipId:c.id,curveId:curve.id,indices:new Set(curve.points.flatMap((p,i)=>p.t*curve.length>=c.offset&&p.t*curve.length<=c.offset+c.duration*c.scale?[i]:[]))};}else{selection=new Set(doc.clips.map(c=>c.id));selected||=doc.clips[0]?.id||null;}paintSelection();}
   function deselect(){selection.clear();pointSelection=null;selected=null;paintSelection();}
   function placeMenu(x,y) {
-    const r=menu.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(innerWidth-r.width-8,x))+'px';menu.style.top=Math.max(8,Math.min(innerHeight-r.height-8,y))+'px';
+    const r=menu.getBoundingClientRect(),z=cssZoom(menu);menu.style.left=Math.max(8,Math.min(innerWidth-r.width-8,x))/z+'px';menu.style.top=Math.max(8,Math.min(innerHeight-r.height-8,y))/z+'px';   // seen; written ÷ UI SCALE (a .tl-pop is a zoomed root)
   }
   /* a popup: the house's menu pane; `title` is a word (or { raw } for a clip's own name); each action [word, fn, id, chosen?]
      (a boolean `chosen` makes the row a choice that shows whether it is the one in force) */
@@ -337,7 +338,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       if(drag.axis==='y'){if(drag.kind==='scrub')controller.endScrub({cancel:true});range=drag.oldRange;view.setRange(range);drag.kind='zoom';surface.dataset.gesture='zoom';}}
     if(drag.kind==='zoom'){zoomAt(drag.px0*Math.exp((drag.y-e.y)*.01),drag.anchor,drag.anchorBeat);return;}
     const pos=view.world(e);
-    if(drag.kind==='pan'){viewport.scrollLeft=drag.scrollX-(e.x-drag.x);viewport.scrollTop=drag.scrollY-(e.y-drag.y);return;}
+    if(drag.kind==='pan'){const z=cssZoom(viewport);viewport.scrollLeft=drag.scrollX-(e.x-drag.x)/z;viewport.scrollTop=drag.scrollY-(e.y-drag.y)/z;return;}   // the hand's travel in the lanes' px
     // PREVIEW becomes a scrub once the hand moves (alpha.49): the play it started stops, the gate is taken, the hand leads
     if(drag.kind==='preview'){if(!drag.moved)return;if(drag.started){controller.play(false);drag.started=false;}if(!controller.beginScrub()){finish(null,true);return;}drag.kind='scrub';surface.dataset.gesture='scrub';}
     // a scrub's beat stays inside the lanes on view (1.5.7-alpha.14): past an edge the head waits at that edge while the pump scrolls, and where the content ends it stops there, never off the view
@@ -430,7 +431,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   /* THE EDGE IS THE EDGE (1.5.7-alpha.41): the clip edge under the pointer — on a title band the tabs', in a lane the bodies' — each zone as wide
      as that clip's own trim element (8 px, 12 px on a tab, 14 px on touch, half a narrow clip), centred on the edge (timelineEdgeAt) */
   function edgeUnder(e){const band=e.target.closest?.('.tl-titleband,.tl-pane');if(!band)return null;const body=band.classList.contains('tl-pane');
-    const rim=timelineEdgeAt([...band.querySelectorAll(body?':scope > .tl-clip':':scope > .tl-clip-title')].map(n=>{const r=n.getBoundingClientRect();return{id:n.dataset.clip,start:r.left,end:r.right,zone:n.querySelector('[data-trim]')?.offsetWidth||0};}),e.clientX);
+    const rim=timelineEdgeAt([...band.querySelectorAll(body?':scope > .tl-clip':':scope > .tl-clip-title')].map(n=>{const r=n.getBoundingClientRect();return{id:n.dataset.clip,start:r.left,end:r.right,zone:(n.querySelector('[data-trim]')?.offsetWidth||0)*cssZoom(n)};}),e.clientX);
     return rim&&{...rim,node:band.querySelector(`:scope > [data-clip="${rim.id}"] [data-trim="${rim.edge}"]`)};}
   function beginPointGroup(e,c,curve,index,additive=false){
     if(pointSelection?.curveId!==curve.id)pointSelection={clipId:c.id,curveId:curve.id,indices:new Set()};
@@ -455,7 +456,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       // the same spot can remove the selection"): no press on the strip clears the range — only the second press of a double-tap at one spot (the kit's
       // TAP law: 300 ms, 14 px); a scrub press and a SELECT tap seek and leave it; a Shift-drag draws a new one
       const now=performance.now();if(rulerTap&&now-rulerTap.time<TAP.ms&&Math.hypot(e.clientX-rulerTap.x,e.clientY-rulerTap.y)<TAP.px){rulerTap=null;if(range){range=null;view.setRange(null);paint();}}else rulerTap={time:now,x:e.clientX,y:e.clientY};
-      const anchor=e.clientX-viewport.getBoundingClientRect().left,pick=cmd&&!shift,strip={pick,px0:px,anchor,anchorBeat:(viewport.scrollLeft+anchor)/px,oldRange:range};
+      const anchor=(e.clientX-viewport.getBoundingClientRect().left)/cssZoom(viewport),pick=cmd&&!shift,strip={pick,px0:px,anchor,anchorBeat:(viewport.scrollLeft+anchor)/px,oldRange:range};
       if(!pick&&(shift||tool==='select')){begin(e,{kind:'range',startBeat:snapBeat(view.world(e).x/px,e),addRange:shift&&cmd?range:null,tap:!shift,...strip});}
       else if(controller.beginScrub()){begin(e,{kind:'scrub',...strip});controller.scrub(view.world(e).x/px,{snap,alt:!!e.altKey,snapped:cmd});paint();}else say(t('The renderer currently owns the clock.'));return;
     }
@@ -480,7 +481,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     // THE PENCIL remembers the clip last pressed (T6): an EDIT click on empty lane space stamps it (stamp(), below).
     if(clip&&curve)lastClip={curveId:curve.id,duration:clip.duration,offset:clip.offset,scale:clip.scale,followSourceEnd:!!clip.followSourceEnd,kind:curve.kind||'curve'};
     let hit=null,pos=null,geometry=null;
-    if(plot&&!kind){pos=svgPoint(plot,e);const{width,height}=plot.viewBox.baseVal,p=createTimelinePlot(clip,curve,px,height),r=plot.getBoundingClientRect();geometry=p.geometry;hit=curveHit({x:e.clientX,y:e.clientY},p.points.map(p=>({...p,x:r.left+p.x/width*r.width,y:r.top+p.y/height*r.height})),p.handles.map(p=>({...p,x:r.left+p.x/width*r.width,y:r.top+p.y/height*r.height})),TIMELINE_CURVE_GRAB);}
+    if(plot&&!kind){pos=svgPoint(plot,e);const{width,height}=plot.viewBox.baseVal,p=createTimelinePlot(clip,curve,px,height),r=plot.getBoundingClientRect();geometry=p.geometry;hit=curveHit({x:e.clientX,y:e.clientY},p.points.map(p=>({...p,x:r.left+p.x/width*r.width,y:r.top+p.y/height*r.height})),p.handles.map(p=>({...p,x:r.left+p.x/width*r.width,y:r.top+p.y/height*r.height})),TIMELINE_CURVE_GRAB*cssZoom(plot));}
     const rim=edgeUnder(e),rimClip=rim&&view.getClip(rim.id);
     // A kind without points has no curve gestures: its body handles like its tab (move, Ctrl-copy, right-delete).
     const grab=handle||(kind?plot||target.closest('.tl-clip'):null);
@@ -585,7 +586,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
      wheel had nothing to scroll), Shift + wheel always does (a trackpad's sideways swipe is the native scroll); with more lanes than
      fit, the plain wheel scrolls the lanes.  The wheel lands on the element under the pointer: no window registry. */
   listen(view.shell,'wheel',e=>{const unit=e.deltaMode===1?16:e.deltaMode===2?viewport.clientWidth:1;
-    if(e.ctrlKey||e.metaKey){if(!e.deltaY)return;e.preventDefault();e.stopPropagation();const anchor=bounded(e.clientX-viewport.getBoundingClientRect().left,0,viewport.clientWidth),delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?viewport.clientHeight:1);zoom(Math.exp(-bounded(delta,-120,120)*.003),anchor);return;}
+    if(e.ctrlKey||e.metaKey){if(!e.deltaY)return;e.preventDefault();e.stopPropagation();const anchor=bounded((e.clientX-viewport.getBoundingClientRect().left)/cssZoom(viewport),0,viewport.clientWidth),delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?viewport.clientHeight:1);zoom(Math.exp(-bounded(delta,-120,120)*.003),anchor);return;}
     const tall=viewport.scrollHeight>viewport.clientHeight+1,d=e.shiftKey?(e.deltaY||e.deltaX):tall||Math.abs(e.deltaX)>Math.abs(e.deltaY)?0:e.deltaY;
     if(!d)return;e.preventDefault();e.stopPropagation();viewport.scrollLeft=Math.max(0,viewport.scrollLeft+d*unit);},{passive:false});
   const viewportPaint=coalesce(()=>{paint();if(drag?.last&&['select','point','points','move','trim','stretch','scrub','range','paint'].includes(drag.kind))updates.post(drag.last);});

@@ -6,6 +6,7 @@
  * `.readout-layer` rules. */
 import { frame } from '../core/frame.js';
 import { setText as perfText } from '../core/perf.js';
+import { cssZoom } from '../core/zoom.js';
 
 const dpr = () => globalThis.devicePixelRatio || 1;
 const snap = n => Math.round(n * dpr()) / dpr();
@@ -58,6 +59,16 @@ function setCorner(node, clip, mountRect, key, bottom) {
   node.style.transform = `translate(${snap(x)}px,${snap(y)}px) translate(-100%,${bottom ? '-100%' : '0%'})`;
 }
 
+const rectOf = (r) => ({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height });
+const LENGTHS = new Set(['x', 'y', 'left', 'top', 'right', 'bottom', 'width', 'height']);
+/** ownAll(o, z) — a cursor tuple (or a rect) with every length ÷ z, its words and inks as they are; z = 1 hands o back */
+function ownAll(o, z) {
+  if (z === 1 || !o || typeof o !== 'object') return o;
+  const src = typeof DOMRect !== 'undefined' && o instanceof DOMRect ? rectOf(o) : o, out = {};
+  for (const [k, v] of Object.entries(src)) out[k] = typeof v === 'number' ? (LENGTHS.has(k) ? v / z : v) : ownAll(v, z);
+  return out;
+}
+
 /* createReadoutLayer({ mount, resolve }) → { refresh(), dispose() }
    mount: the element to paint into (position: relative/absolute ancestor; overflow decides the clip).
    resolve(ev): PointerEvent → cursor | null. The cursor shape:
@@ -77,7 +88,9 @@ export function createReadoutLayer({ mount, resolve }) {
     if (cursor && pointerType === 'touch' && cursor.state !== 'held' && !touchActive && performance.now() > touchGraceUntil) cursor = null;
     const state = cursor ? cursor.state : 'idle';
     if (nodes.root.dataset.state !== state) nodes.root.dataset.state = state;
-    const mountRect = cursor ? mount.getBoundingClientRect() : null;   // nothing to place, nothing to read (a layer mounted mid-build forced a layout)
+    /* 1.5.7-alpha.64: a cursor is SEEN px; the layer writes the mount's OWN px, so every length is ÷ UI SCALE (ownAll) */
+    if (cursor) cursor = ownAll(cursor, cssZoom(mount));
+    const mountRect = cursor ? ownAll(rectOf(mount.getBoundingClientRect()), cssZoom(mount)) : null;   // nothing to place, nothing to read (a layer mounted mid-build forced a layout)
     setLine(nodes.vline, cursor && cursor.vLine, mountRect, true);
     setLine(nodes.hline, cursor && cursor.hLine, mountRect, false);
     setTrack(nodes, cursor && cursor.track, mountRect);

@@ -92,6 +92,8 @@ const ACCEPTED = {
   '1.5.7-alpha.48': '65b230cf3401a28d7efe405fa398c68669d601d6e41e2318feddea8b34fb0f9b',
   /* 041 T + W · MIR 1.5.7-alpha.63 (kit-041: T alpha.49–51 THE TIMELINE'S MODES, W alpha.54–63 THE WINDOWS AND THE OPTIONS; 52 and 53 unused; Focus's 27–37 still on `focus`) */
   '1.5.7-alpha.63': '43da45d0a176b2797fcdd7ac1e475e977b1d8e8735c06f91af91d6bff68619d5',
+  /* 041 K · MIR 1.5.7-alpha.67 (kit-041-sos @ 448e3ec: 64 THE SCALE REACHES TIMELINE, MODULATION AND PATTERN, 65 THE DOCK CHIP'S GLYPHS ARE THE APP'S TO NAME, 66 A LEAVING BLOCK TAKES NO SEAT, 67 THE FINDER HAS SECTIONS) */
+  '1.5.7-alpha.67': '2d5030cfbda09940be3a5339f1f1546da02f6f48f6a2a895684172e655d2a4c7',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

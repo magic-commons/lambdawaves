@@ -83,7 +83,9 @@ export function nextPlace(list, current) {
 const PLACE_GLYPH = { rack: 'dock', stage: 'barsBottom', free: 'popOut' };
 /** placeGlyph(list, place) — the glyph the dock chip wears for `place` in a cycle: with no FREE in the list, leaving the
  *  rack for the stage IS the pop-out (↗; the rack's ↙), as a card's own pop chip draws it (1.5.6-alpha.28, λWAVES 032 C3) */
-export const placeGlyph = (list, place) => (place === 'stage' && Array.isArray(list) && !list.includes('free') ? 'popOut' : PLACE_GLYPH[place]);
+/** … and with `own` ({ rack, stage, free }: glyph names, any subset) the app's glyph for a place it names wins (1.5.7-alpha.65, `placeGlyphs`) */
+export const placeGlyph = (list, place, own = null) => (own && typeof own[place] === 'string' && own[place] ? own[place]
+  : place === 'stage' && Array.isArray(list) && !list.includes('free') ? 'popOut' : PLACE_GLYPH[place]);
 const PLACE_WORD = { rack: phrase('Dock the bar into the rack'), stage: phrase('Put the bar on the stage'), free: phrase('Float the bar in its own window') };
 /** tempoDirection(bar, panelHeight, viewHeight) — BASINS positionTempo: below while the room under the bar holds the
  *  panel and a 16 px margin, or while there is at least as much room below as above; else above */
@@ -713,12 +715,14 @@ export const transportDock = (R) => dockOf(R);
  *    macros      false leaves the macro rail out of the tempo panel (default true when there is a `mod`)
  *    seats       'thin' draws the app's own nodes small while the bar is not docked: the scrub a thin line, a 30-px knob, the
  *                readouts stacked without labels (transport.css THIN SEATS; λWAVES' bar; 1.5.5).  Default '': the nodes as the kit draws them
+ *    placeGlyphs { rack?, stage?, free? } — the glyph the dock chip wears for the place it leads TO (a glyph name, the kit's or one the app
+ *                registered with glyph.js); a place left out keeps the kit's (placeGlyph).  The chip's word stays the kit's.  1.5.7-alpha.65
  *    openers, rack, keys, store, key, opener, onRefused, onInterface, host, root, id — as in docs/TRANSPORT.md
  *  The api's mountIn(host | null) moves the one bar into a work lane and back (docs/TRANSPORT.md "The one bar that moves"). */
 export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = globalThis.document && document.body, root = null, id = 'transport',
   clock = null, mod = null, model = MOD, setBpm = null, persist = null, openers = [], rack = null, keys = null, store = null,
   key = 'mir.transport', opener = true, onRefused = null, onInterface = null, bar: barKind = 'float', door: doorMark = 'palette', doorIcon = null,
-  onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, onDock = null, freeWidth = null, freeHost = null, seats = '' } = {}) {
+  onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, placeGlyphs = null, onDock = null, freeWidth = null, freeHost = null, seats = '' } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView, body = doc.body;
   const life = new AbortController(), on = { signal: life.signal }, signal = life.signal;
   const S = store || localSeatStore(key);
@@ -827,7 +831,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   function faceChip() {
     if (!dockB || !placeList()) return;
     const n = nextPlace(placeList(), placement);
-    setGlyph(dockB, placeGlyph(placeList(), n), { label: PLACE_WORD[n] }); dockB.title = PLACE_WORD[n]; dockB.dataset.next = n;
+    setGlyph(dockB, placeGlyph(placeList(), n, placeGlyphs), { label: PLACE_WORD[n] }); dockB.title = PLACE_WORD[n]; dockB.dataset.next = n;
   }
   const barFace = (on) => { setAttr(bar, 'data-bar', on ? 'work' : 'float'); for (const b of bar.querySelectorAll(BAR_SEATS)) b.classList.toggle('trig', on); };
   barFace(placement === 'work');

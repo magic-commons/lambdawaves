@@ -21,6 +21,7 @@
  *   wireReorder(grip, node, { host, selector, axis, motion, commit, … }) → the drag — THE REORDER ENGINE, below */
 import { motionPolicy, motionToken, own } from '../core/motion.js';
 import { drag as pointerDrag } from '../core/pointer.js';
+import { cssZoom } from '../core/zoom.js';
 
 /** wireReorder(grip, node, o) — THE REORDER ENGINE (BASINS modwindow.js wireReorder + rack-motion.js; the modulation
  *  window's devices and macro rows since 1.5.0-alpha.9, the transport's macro tiles since wave 22 — Josh's call 21).
@@ -103,8 +104,8 @@ export function createLayoutMotion(nodes, { skipOwn = () => false } = {}) {
   const live = () => motionPolicy() === 'full' && timing().duration > 0;
   const list = () => [...nodes()].filter((n) => n && n.getClientRects().length);
   const point = (n) => {
-    const r = n.getBoundingClientRect(), p = n.parentElement.getBoundingClientRect();
-    return { x: r.left - p.left + n.parentElement.scrollLeft, y: r.top - p.top + n.parentElement.scrollTop, w: r.width, h: r.height };
+    const r = n.getBoundingClientRect(), p = n.parentElement.getBoundingClientRect(), z = cssZoom(n);   // 1.5.7-alpha.64: the node's own px (÷ UI SCALE): what a translate and a width are written in
+    return { x: (r.left - p.left) / z + n.parentElement.scrollLeft, y: (r.top - p.top) / z + n.parentElement.scrollTop, w: r.width / z, h: r.height / z };
   };
   const stop = (n) => { for (const a of animations.get(n) || []) a.cancel(); animations.delete(n); };
   const animate = (n, frames) => {
@@ -142,8 +143,8 @@ export function createLayoutMotion(nodes, { skipOwn = () => false } = {}) {
     /** follow(node, x, y) — the node's top-left SEEN at (x, y) */
     follow(node, x, y) {
       if (!held || held.node !== node) return;
-      const r = node.getBoundingClientRect();
-      held.x = x - (r.left - held.x); held.y = y - (r.top - held.y);
+      const r = node.getBoundingClientRect(), z = cssZoom(node);
+      held.x += (x - r.left) / z; held.y += (y - r.top) / z;
       node.style.translate = `${held.x}px ${held.y}px`;
     },
     /** layoutRect(node) — where it LAYS OUT, without the hand's or a travel's translate */
@@ -152,7 +153,8 @@ export function createLayoutMotion(nodes, { skipOwn = () => false } = {}) {
       let x = 0, y = 0;
       if (held && held.node === node) { x = held.x; y = held.y; }
       else if (animations.has(node)) { const t = getComputedStyle(node).translate.split(' '); x = parseFloat(t[0]) || 0; y = parseFloat(t[1]) || 0; }
-      return { left: r.left - x, top: r.top - y, width: r.width, height: r.height };
+      const z = cssZoom(node);
+      return { left: r.left - x * z, top: r.top - y * z, width: r.width, height: r.height };
     },
     /** release(node) — the hand lets go: it settles from where it is seen into its slot */
     release(node) {

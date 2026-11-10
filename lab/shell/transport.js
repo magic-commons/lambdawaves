@@ -81,7 +81,7 @@ export function createTransport(app) {
       /* iteration 014 A4 · THE SEATS; 032 C1 (Josh: "three forms → two"): the dock chip swaps RACK ↔ STAGE (↙ / ↗, the kit's placeGlyph), the STAGE at boot;
          FREE left the cycle — the card popped out of the rack is the one-card look (csb.css, the kit's `bare` pop).  The rack seat is λWAVES' TRANSPORT
          card at its remembered slot (rack-wiring.js), so the kit docks through it; a card already open (an open slot with no bar) takes the bar at once */
-      places: ['rack', 'stage'],
+      places: ['rack', 'stage'], placeGlyphs: { rack: 'rackIn' },   // 041 P13 · K2 (kit alpha.65): the way INTO the rack wears NODES' arrow (Josh 11-09)
       onDock: (v) => { const rk = app.sh.rk; if (!rk) return; if (v && rk.isOpen('transport')) transportDock(rk).open(rk.window('transport'));   // 038 S6: the open card read from the rack (app.sh carries no wTr: this road never ran, and a press on an open, empty card did nothing)
         else if (v) rk.open('transport', { index: app.sh.layout.dockIndex }); else rk.close('transport'); } });
     /* 039 W3 · THE BAR IS IN THE TAB ORDER as the kit made it: one Tab stop (Play), and ← → Home End walk every control.  Two lacks stopped
@@ -97,11 +97,6 @@ export function createTransport(app) {
       btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const z = cssZoom(list), r = btnEl.getBoundingClientRect(), h = list.offsetHeight * z, w = list.offsetWidth * z, up = r.top - h - 8 >= 8;   // 036 K2: seen, written ÷ UI SCALE
         list.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) / z) + 'px'; list.style.right = 'auto';
         list.style.top = Math.round((up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) / z) + 'px'; })); }
-    /* 041 P13 (Josh 11-09: "I like the dock to rack arrow icon from the nodes way better than the one on the transport bar. Can we replace it?"): the
-       dock chip's way INTO the rack wears NODES' arrow (lab/icons.js `rackIn`); the kit draws its own glyph at each change of place (FOR-KIT: a
-       `placeGlyphs` door), so the app redraws it after — the chip's word and its way back to the stage are the kit's */
-    { const d = bar.el.dock, draw = () => { if (d.dataset.next === 'rack' && d.dataset.gly !== 'rackIn') setGlyph(d, 'rackIn'); };
-      if (d) { new MutationObserver(draw).observe(d, { childList: true, attributes: true, attributeFilter: ['data-next'] }); draw(); } }
     ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
     /* A8 · the door wears the modulation window's own icon (Josh: "a sine wave icon instead of the MIR 3x3 square logo"; 021 V2: the table's
        `modulation`, an SVG); the turning mark is the kit's unplaced logoButton now */

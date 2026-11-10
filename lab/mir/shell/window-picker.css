@@ -15,6 +15,9 @@
   border: 0; border-radius: 9px; background: transparent; color: var(--fg); font: var(--w-bold, 700) 12px/1 var(--font-ui); letter-spacing: var(--tr-wide, .06em);
   text-align: left; cursor: pointer; }
 .mir-window-picker .wp-row[hidden] { display: none; }
+/* 1.5.7-alpha.67 · a section's head (createWindowPicker({ sections })): a hairline and a small word, in the list, scrolled with it */
+.mir-window-picker .wp-head { flex: 0 0 auto; margin-top: 4px; padding: 8px 10px 3px; border-top: 1px solid var(--glass-hairline, var(--ctl-hairline)); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--dim); }
+.mir-window-picker .wp-head[hidden] { display: none; }
 .mir-window-picker .wp-row.on { background: color-mix(in srgb, var(--acc) 16%, transparent); }
 .mir-window-picker .wp-row[data-open]::before { content: ""; position: absolute; left: 3px; top: 50%; width: 4px; height: 4px; margin-top: -2px; border-radius: 50%; background: var(--acc); }
 .mir-window-picker .wp-glyph { flex: 0 0 16px; width: 16px; height: 16px; color: var(--dim); }

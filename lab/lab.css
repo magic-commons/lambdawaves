@@ -907,10 +907,6 @@ body[data-theme="light"] { --n7: hsl(350 97% 47%); }
 /* 021 V2 · THE ICON TABLE: the menubar's rows wear their glyph through the kit's `opts.icon` (WINDOW's PICKER / ATOMS / MOLECULES, every window by
    its WINDOW_GLYPH) and the FINDER's rows their window's `spec.glyph` — the iteration 012 masks (and the retired + list's) are gone. */
 /* 040 M3 · THE FINDER'S SPECIAL SECTION (shell/notebook.js): under the list, never scrolled with it; its head a hairline and a small word */
-.mir-window-picker .wp-special { flex: 0 0 auto; display: flex; flex-direction: column; gap: 1px; }
-.mir-window-picker .wp-special[hidden] { display: none; }
-.mir-window-picker .wp-head { padding: 8px 10px 3px; border-top: 1px solid var(--glass-hairline, var(--ctl-hairline)); font: var(--w-bold, 700) var(--fs-tiny, 10px) var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--dim); }
-.mir-window-picker .wp-special .wp-row:hover { background: color-mix(in srgb, var(--acc) 10%, transparent); }
 
 /* iteration 012 M1 · FOLDERS, λWAVES' look over the kit's gallery (folders/gallery.js, untouched).  PROJECT — BASINS' "store with a picture" spot —
    wore the same floppy as λWAVES' SAVE beside it; it wears I1's save.svg (a page filed into the library).  The NAME and SAVE TO bars each carry

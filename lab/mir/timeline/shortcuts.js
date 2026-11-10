@@ -14,6 +14,7 @@
  *   renderShortcutsMarkdown(actions) → the markdown table docs/TIMELINE.md carries (tests/timeline-ticks.node.mjs)
  * Words are English keys, translated where they are shown; a key cap is never translated (keys.js displayChord). */
 import { el, label, ariaLabel } from '../kit.js';
+import { cssZoom } from '../core/zoom.js';
 import { displayChord, normalize, EDIT_KEYS } from '../shell/keys.js';
 
 const G = 'TIMELINE';   // tr: the key table's group for the timeline's keys
@@ -148,9 +149,9 @@ export function openTimelineShortcuts({ actions, keys = null, x = 16, y = 16, pl
   const onKey = (e) => { if (e.code === 'Escape') close(); };
   document.addEventListener('pointerdown', onDown, true);
   document.addEventListener('keydown', onKey, true);
-  const r = root.getBoundingClientRect();
-  root.style.left = Math.max(8, Math.min(innerWidth - r.width - 8, x)) + 'px';
-  root.style.top = Math.max(8, Math.min(innerHeight - r.height - 8, y)) + 'px';
+  const r = root.getBoundingClientRect(), z = cssZoom(root);   // seen; written ÷ UI SCALE
+  root.style.left = Math.max(8, Math.min(innerWidth - r.width - 8, x)) / z + 'px';
+  root.style.top = Math.max(8, Math.min(innerHeight - r.height - 8, y)) / z + 'px';
   root.close = close;
   return root;
 }

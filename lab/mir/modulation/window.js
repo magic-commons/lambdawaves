@@ -49,6 +49,7 @@ import { workspaceSwitch } from '../window/workspaces.js';
 import { bindTempoField } from '../shell/transport.js';
 import { tweenRect, presence, owns, settled } from '../core/motion.js';
 import { createProximity } from '../core/proximity.js';
+import { cssZoom } from '../core/zoom.js';
 import { rect as rectOf, setText, setAttr, setVar } from '../core/perf.js';
 import { t, tn, phrase, onLanguage } from '../core/i18n.js';
 import { clipKinds } from '../timeline/kinds.js';
@@ -356,14 +357,21 @@ export function createModulation(host, port) {
   }
   /* ═══ THE PLACE: one state, one layout — window/window.js windowLayout, the same function the guide asks ══════ */
   const dockOpt = port.dock === false ? null : (port.dock || {});
-  const view = () => ({ width: window.innerWidth, height: window.innerHeight });
+  /* 1.5.7-alpha.64 THE SCALE REACHES MODULATION: the window lays itself out in ITS OWN px, as the kit's createWindow does — the viewport, a
+     dock's span and every measured rect are SEEN px and are read ÷ UI SCALE (core/zoom.js); what it writes (left, top, width, the lane) is
+     own px.  seatBox() stays SEEN: the PATTERN window reads it as a DOM rect. */
+  const zoom = () => cssZoom(root);
+  const own = (r) => { const z = zoom(); return !r || z === 1 ? r : { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z, width: r.width / z, height: r.height / z }; };
+  const ownBox = (n) => own(n.getBoundingClientRect());
+  const view = () => { const z = zoom(); return { width: window.innerWidth / z, height: window.innerHeight / z }; };
   const viewSpan = (v) => ({ left: 8, right: v.width - 8, top: 8, bottom: v.height - 8 });
-  const env = () => { const v = view(); return { view: v, sizes: rail.sizes(), span: dockOpt ? (dockOpt.span ? dockOpt.span.read() : viewSpan(v)) : null }; };
+  const env = () => { const v = view(); return { view: v, sizes: rail.sizes(), span: dockOpt ? (dockOpt.span ? own(dockOpt.span.read()) : viewSpan(v)) : null }; };
   /* THE RAIL'S DEFAULT SEAT IS `auto` (BASINS modwindow.js positionChips): the macros' side — left, or right when the
      macro rail sits on the right.  A side the hand chose (Shift-drag, the keyboard, a long press) is kept as chosen. */
   const sideOf = (Q) => (Q.chipSide === 'auto' || !Q.chipSide ? (Q.macroSide === 'right' ? 'right' : 'left') : Q.chipSide);
   const stateFor = (Q) => { const b = lawBox(); return { x: Q.x, y: Q.y, w: b.w, h: b.h, dock: stackOn ? null : Q.dock, chipSide: sideOf(Q) }; };
   let box = null, moving = null, deferred = false, rackOff = null, gripping = () => false, kbBefore = null, stack = null, stackOn = false;
+  let lastView = null;                                // the view the window was last placed in (its own px)
   /* THE CONTENT BOX DOCKS (BASINS modwindow.js place(): "shift = dock top ? geometry.y - content.top : geometry.bottom
      - content.bottom"): the rack and the work bars that show meet the dock edge, not the window's own box, whose float
      room and a lane above the rack would leave a gap or overhang.  The offsets are measured once each layout (placeLane). */
@@ -413,6 +421,13 @@ export function createModulation(host, port) {
       P.x = Math.round((v.width - w) / 2); P.y = Math.round(Math.max(56, (v.height - lb.lawH) / 2));
       placed = true;
     }
+    /* 1.5.7-alpha.64 · IT COMES BACK TO THE EDGE (the kit window's rule, window/window.js alpha.59): when UI SCALE or the page changed since
+       it was last placed, a floating window that stood WHOLE on the screen is brought back whole; one the hand parked partly off stays */
+    if (lastView && box && !P.dock && (lastView.width !== v.width || lastView.height !== v.height)
+      && box.left >= 0 && box.top >= 0 && box.left + box.width <= lastView.width + 1 && box.top + box.height <= lastView.height + 1) {
+      P.x = Math.max(0, Math.min(box.left, v.width - box.width)); P.y = Math.max(0, Math.min(box.top, v.height - box.height));
+    }
+    lastView = v;
     /* ── WAVE 100 · A WINDOW THAT GREW IS PULLED BACK ONTO THE SCREEN ── on a change of WIDTH only, so a window the
        hand deliberately pushed half off the screen stays where the hand left it. */
     if (w !== lastW) {
@@ -488,7 +503,7 @@ export function createModulation(host, port) {
     let railX = 0;
     const footEl = foot.prebar.parentElement;
     if (footEl && rackEl.rail) {
-      const rr = rackEl.root.getBoundingClientRect(), fr = footEl.getBoundingClientRect();
+      const rr = ownBox(rackEl.root), fr = ownBox(footEl);
       if (rr.width > 0) railX = Math.round(rr.left - fr.left);
     }
     foot.prebar.style.left = railX + 'px';
@@ -500,18 +515,18 @@ export function createModulation(host, port) {
        written from the law.  The law's number is the fallback for the frame before layout exists.  WAVE 100 · the
        edge is capped at the RUN's own right edge: a scrolled run's last card can sit far off-screen. */
     foot.pre.style.width = '';
-    const tw = Math.round(foot.pre.getBoundingClientRect().width) || bars.width;
+    const tw = Math.round(ownBox(foot.pre).width) || bars.width;
     if (footEl && rackEl.run) {
       const cards = rackEl.run.querySelectorAll('.m2dev');
-      const runR = rackEl.run.getBoundingClientRect().right;
-      const edge = Math.min(cards.length ? cards[cards.length - 1].getBoundingClientRect().right : runR, runR);
-      const fr = footEl.getBoundingClientRect();
+      const runR = ownBox(rackEl.run).right;
+      const edge = Math.min(cards.length ? ownBox(cards[cards.length - 1]).right : runR, runR);
+      const fr = ownBox(footEl);
       if (edge > fr.left) preLeft = (edge - fr.left) - tw;
     }
     /* DOCKED AND NARROW, THE TWO WORK BARS TAKE TWO ROWS (BASINS place(): "two geometry rows only when the central span
        cannot fit both"): the timing bar drops to a second 52 px row, right-aligned, and scrolls under a finger when even
        that row is too short; the window's height grows by the row (lawBox), so a dock keeps its edge. */
-    const barRoom = Math.round(rackEl.root.getBoundingClientRect().width) || box.width - 22;
+    const barRoom = Math.round(ownBox(rackEl.root).width) || box.width - 22;
     const stacked = !!P.dock && P.lane !== 'hidden' && barRoom < bars.presetW + tw + GEOM.WORK_GAP_MIN;
     if (footEl) { footEl.style.height = stacked ? '104px' : ''; footEl.style.flexBasis = stacked ? '104px' : ''; }
     foot.pre.style.top = stacked ? '52px' : '';
@@ -521,11 +536,11 @@ export function createModulation(host, port) {
     foot.pre.style.left = Math.round(stacked ? Math.max(0, barRoom - tw) : Math.max(preLeft, minPre)) + 'px';
     if (stacked !== stackedLane) { stackedLane = stacked; queueMicrotask(() => { if (P.open) place(); }); }   // the height changed: one more place
 
-    const rootBox = rackEl.root ? rackEl.root.getBoundingClientRect() : null;
-    const winBox = root.getBoundingClientRect();
+    const rootBox = rackEl.root ? ownBox(rackEl.root) : null;
+    const winBox = ownBox(root);
     if (rootBox && rootBox.height > 0) rackOff = { top: rootBox.top - winBox.top, height: rootBox.height };
     if (rootBox && rootBox.height > 0 && !moving) {
-      const cb = contentBox(), next = { top: Math.round(cb.top - winBox.top), bottom: Math.round(winBox.bottom - cb.bottom) };
+      const cb = own(contentBox()), next = { top: Math.round(cb.top - winBox.top), bottom: Math.round(winBox.bottom - cb.bottom) };
       const was = contentOff; contentOff = next;
       /* the content's offset moved (the lane went up or down, the bars stacked): a docked or stacked window places again */
       if ((P.dock || stack) && (!was || was.top !== next.top || was.bottom !== next.bottom)) queueMicrotask(() => { if (P.open) place(); });
@@ -537,8 +552,8 @@ export function createModulation(host, port) {
     const cardEl = rackEl.run && rackEl.run.querySelector('.m2dev');
     const laneTop = panel.classList.contains('m2bars-top');
     if (rootBox && rootBox.height > 0 && cardEl && !laneTop) {
-      const cb = cardEl.getBoundingClientRect();
-      const bb = foot.prebar.getBoundingClientRect();
+      const cb = ownBox(cardEl);
+      const bb = ownBox(foot.prebar);
       const gap = Math.round(bb.top - cb.bottom);
       root.style.setProperty('--m2-lane-lift', Math.round(bb.top - (cb.top - gap - bb.height - (stackedLane ? 52 : 0))) + 'px');
     } else if (rootBox && rootBox.height > 0 && !root.style.getPropertyValue('--m2-lane-lift')) {
@@ -610,11 +625,11 @@ export function createModulation(host, port) {
   function still() {
     if (!moving) return;
     moving = null;
-    const r = rectOf(root);
+    const r = own(rectOf(root));
     tweenRect(root, r);
     box = { left: Math.round(r.left), top: Math.round(r.top), width: Math.round(r.width), height: Math.round(r.height) };
   }
-  const grip = gripGesture(rail, { P: () => P, box: () => box, moving: () => !!moving, still, layout: place, relocate, guide, save: () => persist(),
+  const grip = gripGesture(rail, { P: () => P, box: () => box, moving: () => !!moving, still, layout: place, relocate, guide, save: () => persist(), zoom,
     floatSize: () => { const v = view(), lb = lawBox(); return { w: Math.min(lb.w, v.width - 16), h: Math.min(lb.h, v.height - 16) }; },
     /* the guide is the landing: the CONTENT box lands at the edge (BASINS snapTarget(contentBox())), so the guide is drawn
        at the content's height and measured from the content */
@@ -1612,8 +1627,9 @@ export function createModulation(host, port) {
     if (x + w > window.innerWidth - 8) x = Math.max(8, r.left - 8 - w);   // no room to the right: the chip's other side
     let y = r.top;
     if (y + h > window.innerHeight - 8) y = Math.max(8, window.innerHeight - 8 - h);
-    pick.root.style.left = Math.round(x - o.left) + 'px';
-    pick.root.style.top = Math.round(y - o.top) + 'px';
+    const z = zoom();                                                // seen; written in the window's px
+    pick.root.style.left = Math.round((x - o.left) / z) + 'px';
+    pick.root.style.top = Math.round((y - o.top) / z) + 'px';
   }
   function setDevPick(on) {
     devPickOpen = !!on;
@@ -1762,7 +1778,7 @@ export function createModulation(host, port) {
   let sideDrag = null;
   sideGrip.addEventListener('click', (e) => e.stopPropagation());
   sideGrip.addEventListener('pointerdown', (e) => { e.stopPropagation(); sideDrag = e.clientX; sideGrip.setPointerCapture(e.pointerId); });
-  sideGrip.addEventListener('pointerup', (e) => { if (sideDrag === null) return; if (Math.abs(e.clientX - sideDrag) > 8) { setMacroSide(e.clientX > root.getBoundingClientRect().left + root.offsetWidth / 2 ? 'right' : 'left'); place(); persist(); } sideDrag = null; });
+  sideGrip.addEventListener('pointerup', (e) => { if (sideDrag === null) return; if (Math.abs(e.clientX - sideDrag) > 8) { setMacroSide(e.clientX > root.getBoundingClientRect().left + root.getBoundingClientRect().width / 2 ? 'right' : 'left'); place(); persist(); } sideDrag = null; });
   sideGrip.addEventListener('pointercancel', () => { sideDrag = null; });
   sideGrip.addEventListener('dblclick', (e) => { e.stopPropagation(); setMacroSide(P.macroSide === 'right' ? 'left' : 'right'); place(); persist(); });
   sideGrip.addEventListener('keydown', (e) => { e.stopPropagation(); if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return; e.preventDefault(); setMacroSide(e.key === 'ArrowLeft' ? 'left' : 'right'); place(); persist(); });

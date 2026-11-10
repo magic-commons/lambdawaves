@@ -364,7 +364,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
     let L = windowLayout(Q, on ? { ...env(), top: undefined } : env());
     if ((L.docked || null) !== (Q.dock && dock ? Q.dock : null)) { rail.setDock(L.docked); L = windowLayout(Q, env()); }
     /* an anchored window whose seat has gone, or is clipped away entirely, is not painted; otherwise it is cut to the clip */
-    const clipTo = L.docked === 'anchor' && L.box && dock.anchor.clip ? dock.anchor.clip() : null;
+    const clipTo = L.docked === 'anchor' && L.box && dock.anchor.clip ? ownOf(dock.anchor.clip()) : null;   // a clip is a seen rect, as a seat is (1.5.7-alpha.64)
     const out = L.away || (clipTo && (L.box.left >= clipTo.right || L.box.left + L.box.width <= clipTo.left || L.box.top >= clipTo.bottom || L.box.top + L.box.height <= clipTo.top));
     setVar(root, 'visibility', out ? 'hidden' : null); if (rail.el) setVar(rail.el, 'visibility', out ? 'hidden' : null);
     setAttr(root, 'data-anchor', L.docked === 'anchor' ? (out ? 'away' : 'seated') : null);

@@ -401,6 +401,9 @@
 .readout-layer .rl-corner { color: var(--tl-curve-ink, currentColor); }
 
 /* ── THE POPUPS: the house's menu pane (`.glass[data-mir-surface="menu"]`), BASINS' box ── */
+/* 1.5.7-alpha.64 THE SCALE REACHES THE TIMELINE: its popups (the mode menu, ⋯, a clip's menu, the fields, the shortcut sheet, the audio
+   question) hang on <body>, so each is a UI SCALE root of its own (css/base.css), placed in seen px ÷ the zoom (core/zoom.js) */
+.tl-pop, .tl-confirm { zoom: var(--ui-zoom); --in-zoom: var(--ui-zoom); }
 .tl-pop { position: fixed; z-index: calc(var(--z-veil) + 20); padding: var(--tl-pop-pad); min-width: var(--tl-pop-min); display: flex; flex-direction: column; gap: var(--tl-pop-gap);
   max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); overflow: auto; color: var(--fg); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
 .tl-pop-title { font-size: var(--tl-pop-title-size); padding: 4px; letter-spacing: var(--tl-pop-title-track); }

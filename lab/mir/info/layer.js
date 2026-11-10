@@ -110,7 +110,10 @@ export function createInfoLayer({ stage, host = stage.parentElement, subject = n
   const ready = loadRenderer().catch(() => false);
 
   /* ── the bodies ─────────────────────────────────────────────────────────────────────────────────────────── */
-  const bodies = () => items.filter((i) => i.measured && !(i.group && i.group.gone)).map((i) => i.body);
+  /* A LEAVING BLOCK TAKES NO SEAT (1.5.7-alpha.66, λWAVES 041 K3): from remove() on, a block fades where it stands — it is out of the
+     force and out of its column (placeBlocks), so a block added while it exits stands on the seat at once and never glides up from under it */
+  const seated = (i) => !(i.leaving && i.kind === 'block');
+  const bodies = () => items.filter((i) => i.measured && seated(i) && !(i.group && i.group.gone)).map((i) => i.body);
   const par = { x: 0, y: 0 };                                       // the pointer's place, −1…1 from the stage's middle, eased
   let envT = 0;
   const env = () => {
@@ -214,7 +217,7 @@ export function createInfoLayer({ stage, host = stage.parentElement, subject = n
       seatGroup(g, g.A, ls, obs);
     }
     const list = bodies();
-    resolveRests(list, new Set(items.filter((i) => i.kind === 'block').map((i) => i.body.id)));
+    resolveRests(list, new Set(items.filter((i) => i.kind === 'block' && seated(i)).map((i) => i.body.id)));
     for (const b of list) {                                          // and inside the stage
       if (b.held) continue;
       b.rx = Math.max(INFO.margin, Math.min(b.rx, W - INFO.margin - b.w));
@@ -313,7 +316,7 @@ export function createInfoLayer({ stage, host = stage.parentElement, subject = n
   }
   /* the blocks of a page (a `---` separates them) stand in one column per seat, in reading order */
   function placeBlocks() {
-    const list = items.filter((i) => i.kind === 'block' && i.measured), cols = new Map(), G = INFO.gap / 2;
+    const list = items.filter((i) => i.kind === 'block' && i.measured && !i.leaving), cols = new Map(), G = INFO.gap / 2;
     for (const it of list) { placeBlock(it); const k = it.seat; if (!cols.has(k)) cols.set(k, []); cols.get(k).push(it); }
     for (const [k, col] of cols) {
       if (col.length < 2 || col.some((i) => i.body.held)) continue;

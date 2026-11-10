@@ -22,6 +22,7 @@
 import { el, label, ariaLabel, hint } from '../kit.js';
 import { select } from '../controls/select.js';
 import { t, tn } from '../core/i18n.js';
+import { cssZoom } from '../core/zoom.js';
 import { assets } from '../core/assets.js';
 import { registerProjectPart } from '../core/project.js';
 import { audioBudget, readjustAudioTempo } from './audio-kind.js';
@@ -66,8 +67,8 @@ export function installAudioDrop(editor, { mod, controller, say = () => {}, busy
         if (tip) hint(b, tip);
         b.addEventListener('click', () => done(keep === null ? null : { keep, targetId: pickTarget.get() }), { signal: life.signal });
       }
-      const r = pop.getBoundingClientRect();
-      pop.style.left = Math.max(8, Math.min(innerWidth - r.width - 8, x)) + 'px'; pop.style.top = Math.max(8, Math.min(innerHeight - r.height - 8, y)) + 'px';
+      const r = pop.getBoundingClientRect(), z = cssZoom(pop);   // seen; written ÷ UI SCALE
+      pop.style.left = Math.max(8, Math.min(innerWidth - r.width - 8, x)) / z + 'px'; pop.style.top = Math.max(8, Math.min(innerHeight - r.height - 8, y)) / z + 'px';
       document.addEventListener('pointerdown', (e) => { if (!pop.contains(e.target) && !e.target.closest('.mir-pick')) done(null); }, { signal: life.signal, capture: true });
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pickTarget.isOpen) { e.stopPropagation(); done(null); } }, { signal: life.signal, capture: true });
       pop.querySelector('button[data-audio]')?.focus();   // the first answer, as before: the list is opened on purpose

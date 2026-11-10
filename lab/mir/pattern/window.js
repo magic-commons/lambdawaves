@@ -42,6 +42,7 @@ import { t, tn } from '../core/i18n.js';
 import { createWindow } from '../window/window.js';
 import { registerProjectPart } from '../core/project.js';
 import { frame } from '../core/frame.js';
+import { cssZoom } from '../core/zoom.js';
 import { localStore } from '../modulation/bind.js';
 import { createPatternModel, patternProjectPart, PATTERN_LENGTHS, VEL_MAX } from './model.js';
 import { createPatternSequencer } from './sequencer.js';
@@ -84,11 +85,13 @@ export function installPattern(o) {
     if (!run) return null;
     if (run !== runEl) { if (runEl) runEl.removeEventListener('scroll', onRunScroll); runEl = run; run.addEventListener('scroll', onRunScroll, { passive: true }); }
     const d = dev.getBoundingClientRect(); if (!(d.width > 0)) return null;
-    const railH = (win && win.rail.sizes ? win.rail.sizes().horizontal.h : 0) || RAIL_H;
-    const above = g.content.top - EDGE - h, flip = above - railH < EDGE;
+    /* 1.5.7-alpha.64 THE SCALE REACHES PATTERN: a seat is a SEEN rect (createWindow reads it ÷ UI SCALE); the device and the content box are
+       seen already, the window's own lengths (h, the gap, the rail) are × the zoom */
+    const z = cssZoom(dev), railH = ((win && win.rail.sizes ? win.rail.sizes().horizontal.h : 0) || RAIL_H) * z, gap = EDGE * z;
+    const above = g.content.top - gap - h * z, flip = above - railH < gap;
     /* outer: the edge facing away from the modulation window; avoid: its glass — the rail seats in a clear lane only
        (window/rail.js seatClear, BASINS snap-window.js seat) */
-    return { left: Math.round(d.left), width: Math.round(d.width), top: Math.round(flip ? g.content.bottom + EDGE : above), height: h,
+    return { left: Math.round(d.left), width: Math.round(d.width), top: Math.round(flip ? g.content.bottom + gap : above), height: h * z,
       outer: flip ? 'bottom' : 'top', avoid: g.content };
   }
   /* docked, the window is cut where the device run cuts the device (the window set clips the pane; the rail is cut here) */
@@ -126,7 +129,7 @@ export function installPattern(o) {
   function clipRail(r) {
     const box = r && docked() && runEl ? runEl.getBoundingClientRect() : null;
     if (!box) { railEl.style.clipPath = ''; return; }
-    const q = railEl.getBoundingClientRect(), l = Math.max(0, Math.round(box.left - q.left)), rt = Math.max(0, Math.round(q.right - box.right));
+    const z = cssZoom(railEl), q = railEl.getBoundingClientRect(), l = Math.max(0, Math.round((box.left - q.left) / z)), rt = Math.max(0, Math.round((q.right - box.right) / z));   // seen; the cut is the rail's own px
     railEl.style.clipPath = l || rt ? `inset(-40px ${rt}px -40px ${l}px)` : '';
   }
 
@@ -248,8 +251,8 @@ export function installPattern(o) {
 
   /* ── FL's step gestures on one strip ── */
   function stepAt(rec, clientX) {
-    const r = rec.track.getBoundingClientRect(), n = rec.length, x = clientX - r.left;
-    const sw = (r.width - (n - 1) * GAP - (n / 4 - 1) * (GROUP_GAP - GAP)) / n, pitch = 4 * sw + 3 * GAP + GROUP_GAP;
+    const z = cssZoom(rec.track), r = rec.track.getBoundingClientRect(), n = rec.length, x = (clientX - r.left) / z;   // the strip's own px (its gaps are own px)
+    const sw = (r.width / z - (n - 1) * GAP - (n / 4 - 1) * (GROUP_GAP - GAP)) / n, pitch = 4 * sw + 3 * GAP + GROUP_GAP;
     const g = Math.floor(x / pitch), j = Math.min(3, Math.max(0, Math.floor((x - g * pitch) / (sw + GAP))));
     return Math.max(0, Math.min(n - 1, g * 4 + j));
   }
