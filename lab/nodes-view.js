@@ -353,13 +353,13 @@ export function createView(parent, kind, M) {
   const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list, name); back(); }, false, hint, { id: 'graph:' + name, raw }];   // 040 N4: the bar names it
   const graphRows = () => { const U = M.graphs.list();
     return [...Object.entries(M.SHIPPED).map(([name, list]) => graph(name, list, 'a shipped graph: every node but CURVES replaced')),
-      ...(U.length ? [null, ...U.map((u) => graph(u.name, u.data && u.data.nodes, 'your graph (kept on this device)', true))] : []),
+      ...(U.length ? [null, ...U.map((u) => graph(u.name, u.data, 'your graph (kept on this device)', true))] : []),
       null, ['SAVE THIS GRAPH', saveGraph, false, 'the nodes as your own graph (kept on this device)', { icon: 'saveInto', id: 'save' }],
       ...(U.length ? [['REMOVE', () => U.map((u) => [u.name, () => M.graphs.remove(u.name), false, 'remove this graph', { raw: true, id: 'remove:' + u.name }]), null, '', { sub: true, icon: 'trash', id: 'remove' }]] : [])]; };
   const found = (s) => { const S = s.toUpperCase();
     return [...Object.entries(T).filter(([, t]) => t.menu !== false && t.label.includes(S)).map(([type, t]) => kindRow(type, t)),
       ...Object.entries(M.SHIPPED).filter(([n]) => n.includes(S)).map(([n, list]) => graph(n, list, 'a shipped graph')),
-      ...M.graphs.list().filter((u) => u.name.toUpperCase().includes(S)).map((u) => graph(u.name, u.data && u.data.nodes, 'your graph', true))].slice(0, 10); };
+      ...M.graphs.list().filter((u) => u.name.toUpperCase().includes(S)).map((u) => graph(u.name, u.data, 'your graph', true))].slice(0, 10); };
   let find = null;
   /** open the + menu, its caret on the search line; a typed search reopens it with the matches (the line kept, the caret where it was) */
   function openMenu(s = '') {
@@ -381,7 +381,7 @@ export function createView(parent, kind, M) {
     const d = openDialog({ title: 'SAVE THIS GRAPH', body: f, actions: [{ label: 'CANCEL', value: null }, { label: 'SAVE', kind: 'primary', run: () => f.value.trim() || null }] });
     f.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); d.close(f.value.trim() || null); } });
     requestAnimationFrame(() => { f.focus(); f.select(); });
-    d.result.then((n) => { if (n) M.graphs.add(n, { nodes: M.graphOf() }); back(); });
+    d.result.then((n) => { if (n) M.graphs.add(n, M.graphOf()); back(); });
   }
   const foot = el('div', 'nodes-passes', ground);
   if (!W) label(el('div', 'note', parent), NOTE);                   // the card's one line (window notes are a SETTINGS choice)
