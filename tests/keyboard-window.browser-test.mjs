@@ -134,7 +134,7 @@ try {
   const step3 = await ev(`await new Promise((r) => setTimeout(r, 400)); const c = document.querySelector('#field').getBoundingClientRect(), b = window.__kbRect;
     return { open: __LW.keymap.isOpen, masked: __masks.some((m) => Math.abs(m[0] - (b.left - c.left)) < 1 && Math.abs(m[1] - (b.top - c.top)) < 1), errors: __e.slice() };`);
   assert.deepEqual([step1.open, step1.recording], [true, false], 'Escape did not cancel the recording first'); assert.match(step1.status, /Cancelled/); assert.deepEqual(step1.zoom, ['ArrowUp', 'Shift+ArrowUp']);
-  assert.ok(step1.rows > 0 && step1.rows < 10, 'the search did not filter');
+  assert.ok(step1.rows > 0 && step1.rows < 12, 'the search did not filter');   // 041 N7: MIR 1.5.7-alpha.49's ZOOM MODE row is the tenth match of 'zoom'
   assert.equal(step2.open, true); assert.equal(step2.search, ''); assert.ok(step2.rows > step1.rows, 'Escape did not clear the search');
   assert.deepEqual(plat.mac, ['⌘', '⌥']); assert.deepEqual(plat.other, ['WIN', 'ALT']);
   assert.deepEqual(plat.reset, [['KeyR', 'Shift+KeyR'], ['KeyQ'], ['Shift+KeyQ']]); assert.equal(plat.stored, null); assert.match(plat.status, /default/);
