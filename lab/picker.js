@@ -1020,7 +1020,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
 
   /* ── the tab under the reader's eye ── */
   let current = sections[0]; paintLooks();
-  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = amode.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
+  /* 041 P3: SHOW LABELS only where there are labels — ATOMIC's, MOLECULAR's, and a volume's own twin in its head; never over the shelf of volumes */
+  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = amode.hidden = s.id !== 'atomic'; molOpt.hidden = s.id !== 'molecular'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
   let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); fitH(); movePill(current.b); } }); });   // observed only while the Picker is open
 
