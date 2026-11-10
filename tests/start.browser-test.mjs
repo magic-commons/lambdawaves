@@ -119,7 +119,7 @@ try {
     const ms = Date.now() - t0;
     const r1 = await g.ev('await __LW.settle(); return { ...__racks(), ...__face(), errors: __e.slice() };');
     assert.deepEqual({ left: r1.left, right: r1.right }, lay(kind), kind.toUpperCase() + ' laid other racks: ' + JSON.stringify(r1));
-    assert.deepEqual([r1.unfolded, r1.modeShows.length, r1.nativeLayout, r1.errors], [[], 1, kind === 'advanced' ? 2 : 1, []], kind.toUpperCase() + ': every window folded, the mode showing one, the answer saved: ' + JSON.stringify(r1));
+    assert.deepEqual([r1.unfolded, r1.modeShows.length, r1.nativeLayout, r1.errors], [['spectrum', 'chem'], 1, kind === 'advanced' ? 2 : 1, []], kind.toUpperCase() + ': every window folded but SPECTRUM and MOLECULES (041 D3), the mode showing one, the answer saved: ' + JSON.stringify(r1));
     let kept = '';
     if (kind === 'advanced') {   /* THE CHOICE KEEPS (038 M5): NEW is the project's, the layout the workspace's */
       const r2 = await g.ev('window.confirm = () => true; const ok = await __LW.layout.projects.requestFresh(); await __LW.settle(); return { ok, ...__racks() };');
