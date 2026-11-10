@@ -8,7 +8,7 @@
    20-px icon.  IN A RACK CARD (docked, or FREE one card wide): the same order wrapping — PLAY · RATE · BPM · MOD · EXPAND, the chooser, the modes
    + FOLDERS, then the thirteen icons, centred. ── */
 #transport[data-layout="csb"] { --csb-side: 212px; display: grid; grid-template-columns: minmax(var(--csb-side), 1fr) auto minmax(var(--csb-side), 1fr); grid-template-areas: "left mid right" "panel panel panel"; grid-template-rows: auto auto; align-items: center; column-gap: 14px; row-gap: 0; overflow: visible; }
-#transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 0; padding: 6px 12px; contain: layout; }   /* E2: no paint containment — PLAY floats outside the box */
+#transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 0; padding: calc(6px * var(--pad-k, 1)) calc(12px * var(--pad-k, 1)); contain: layout; }   /* E2: no paint containment — PLAY floats outside the box */
 #transport[data-layout="csb"] > .csb-left { grid-area: left; justify-self: start; }
 #transport[data-layout="csb"] > .csb-right { grid-area: right; justify-self: end; }
 #transport[data-layout="csb"] > .csb-mid { grid-area: mid; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 220px; }

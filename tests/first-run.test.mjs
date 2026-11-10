@@ -12,10 +12,9 @@
  * folds' count (FOLD_ALL is ADVANCED's lists: one fact asserted twice) and THE CHOICE KEEPS' source lines went.  The lists themselves stay here. */
 import { readFileSync, readdirSync } from 'node:fs';
 import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING, FIRST_RUN_RACKS, firstRunRacks } from '../lab/first-run.js';
-import { liftLook, LOOK_ROWS, BLOB_LOOK, LOOK_VERSION, frostText } from '../lab/look.js';
+import { liftLook, LOOK_ROWS, BLOB_LOOK, LOOK_VERSION, frostText, LW_THEMES, SPACING_HOME } from '../lab/look.js';
 import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
 import { repair, createPrefs } from '../lab/mir/core/prefs.js';
-import { THEMES } from '../lab/mir/shell/themes.js';
 import { lookSchema } from '../lab/mir/shell/gui.js';
 import { createSettingsStore, SETTINGS_KEY } from '../lab/settings-store.js';
 /** what a boot wears (0.5.0 C2): an older blob lifted (liftLook), repaired by the kit's own LOOK_SCHEMA rows, over the device's
@@ -180,9 +179,11 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
      FROST through the look store's road (createLook: the kit's createPrefs, version LOOK_VERSION, migrate frostText), not CUSTOM — once:
      a TEXT LIGHT chosen after the migration is the reader's and stays */
   const mem = (raw) => { const m = new Map([['mir.gui', raw]]); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
-  const open = (S) => createPrefs({ key: 'mir.gui', schema: lookSchema(), presets: THEMES.map((t) => ({ id: t.id, values: t.values })), storage: S, doc: null, version: LOOK_VERSION, migrate: frostText });
+  /* 041 D0: the store's own SPACING row (px, home 10, an old 'default' = 10) and its skins (LW_THEMES: the kit's with DEFAULT spacing as 10) */
+  const lwSchema = () => lookSchema({ spacingHome: SPACING_HOME }).map((r) => (r.key === 'spacing' ? { ...r, default: SPACING_HOME, legacy: { ...r.legacy, default: SPACING_HOME } } : r));
+  const open = (S) => createPrefs({ key: 'mir.gui', schema: lwSchema(), presets: LW_THEMES.map((t) => ({ id: t.id, values: t.values })), storage: S, doc: null, version: LOOK_VERSION, migrate: frostText });
   const old = readFileSync(new URL('./fixtures/look-frost-022.mir.gui.json', import.meta.url), 'utf8'), S = mem(old);
-  const before = createPrefs({ key: 'mir.gui', schema: lookSchema(), presets: THEMES.map((t) => ({ id: t.id, values: t.values })), storage: mem(old), doc: null }).preset();
+  const before = createPrefs({ key: 'mir.gui', schema: lwSchema(), presets: LW_THEMES.map((t) => ({ id: t.id, values: t.values })), storage: mem(old), doc: null }).preset();
   const P = open(S), after = { preset: P.preset(), text: P.get('text'), theme: P.get('theme'), v: JSON.parse(S.getItem('mir.gui')).prefsV };
   P.set('text', 'light'); const again = open(S), kept = { preset: again.preset(), text: again.get('text') };
   judge('A SAVED LOOK KEEPS ITS NAME (027 D5): FROST saved with its old TEXT LIGHT read CUSTOM; the look store migrates it once to FROST (TEXT AUTO), and a TEXT LIGHT chosen afterwards stays',
