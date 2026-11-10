@@ -1242,6 +1242,7 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
    scrolls but the scroller of tiles */
 #lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; padding: 6px 24px 28px; box-sizing: border-box; }
 #lwMenu .mm-tut[hidden] { display: none; }
+#lwMenu .mm-tut { position: relative; z-index: 2; }   /* 041 P7: over the still wall and its veil, which stand under the tutorial while the menu's animation is off */
 #lwMenu[data-sec="tutorial"] :is(.mm-tabs, .mm-opts, .mm-navb:not([data-nav="back"], .mm-themeb)) { display: none; }   /* 035 G1: the tutorial's way back is ← */
 /* 037 U1 THE DECKS: the head is TUTORIAL_DECKS' two tabs alone — kit seg cells dressed as the decks' tabs (LW Title, .45 → 1, the chosen one
    in the accent on the decks' pill), no well, no word */

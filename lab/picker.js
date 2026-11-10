@@ -331,7 +331,12 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   root.addEventListener('pointermove', (e) => { if (e.movementX || e.movementY) unmoved = false; }, true);
   let at = 'decks', firstDeal = false;   // firstDeal: a first run's LIBRARY deals MOLECULAR's first page in THE ENTRANCE (iteration 012 L3)
   function showView(name) {
-    collage[name === 'face' ? 'show' : 'hide']();   // 035: the collage under the face alone; the decks, folders and tutorial keep the plain ground
+    /* 035: the collage under the face alone; the decks and folders keep the plain ground.  041 P7 (Josh 11-09: "In the tutorial, show a random
+       still from either from the light and dark backgrounds for the animation disabled main menu"): with the menu's animation off (stillness,
+       or the sheet's COLLAGE off) the tutorial stands on a WALLS still too, picked afresh at each showing, in the theme in use */
+    if (name === 'face') { if (at === 'tutorial') collage.hide(); collage.show(); }
+    else if (name === 'tutorial' && (still() || prefs.collage === false)) { if (name !== at) { collage.hide(); collage.show(true); } }
+    else collage.hide();
     if (name === at) return false;
     const was = at; at = name; wayBack(); closeDrop(); closeSheet(); restHero();
     unmoved = true; document.dispatchEvent(new Event('controlhintschange'));   // 039 W9 (WALK-D #11): the standing hint goes with the view (the kit's close)

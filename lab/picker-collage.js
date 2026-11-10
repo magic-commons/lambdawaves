@@ -33,6 +33,7 @@ export function createCollage(root, { theme, still, off, walls = [] }) {
   const tilt = (Math.random() < 0.5 ? -1 : 1) * (1.5 + 2 * Math.random()) * (Math.PI / 180);
   let man = null, manP = null, th = null, shown = false, raf = 0, last = 0, vid = null, dead = false, tries = 0, retryT = 0, pick = null, fresh = false, lastAt = 0, frames = -1, vfc = 0, qAt = 0, qT = 0, sizeT = 0;
   let W = 0, H = 0, dpr = 1, P = 0, v = 0, T = 0, hx = 0, hy = 0, nc = 0, nr = 0, ox = 0, oy = 0, grid = null, mode = 0, tau = 0, px = 0, py = 0;
+  let only = false;   // 041 P7: this show is the still wall alone
   const g = [0, 0];   // the lattice's offsets along x and y (a turn on a half tile carries P/2)
   let seen = null, ban = null, fams = null, best = null; const nb = new Array(6);   // choose()'s scratch, reused: no allocation per frame
 
@@ -185,7 +186,7 @@ export function createCollage(root, { theme, still, off, walls = [] }) {
     retryT = setTimeout(() => { retryT = 0; if (vid && !dead) { vid.load(); start(); } }, 2000);
   }
   function start() {
-    if (!man || !shown || root.hidden || document.hidden) return;
+    if (!man || !shown || only || root.hidden || document.hidden) return;
     if (!th) th = theme();
     if (!grid) layout();
     if (dead || retryT) return;   // fail() left the still wall: a retry is on its way, or the atlas is gone for the page's life
@@ -206,8 +207,9 @@ export function createCollage(root, { theme, still, off, walls = [] }) {
   const offTheme = onThemeChange(() => api.setTheme(theme()));
 
   const api = {
-    show() {
-      if (shown) return; shown = true; cvs.hidden = veil.hidden = false;
+    /** `stillOnly` (041 P7, the tutorial's ground): the still wall and the veil alone, never the playing wall */
+    show(stillOnly = false) {
+      if (shown) return; shown = true; only = !!stillOnly; cvs.hidden = veil.hidden = false;
       pick = walls.length ? walls[Math.floor(Math.random() * walls.length)] : null; paintWall();   // a still wall at random per show
       if (!manP) manP = fetch(DIR + 'collage.json').then((r) => { if (!r.ok) return null; keepData(DIR + 'collage.json', r.clone()); return r.json(); })
         .then((j) => { man = j && j.themes ? j : null; if (!man) manP = null; }, () => { manP = null; });   // none: the still wall, and the next show asks again
