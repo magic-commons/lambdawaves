@@ -18,6 +18,10 @@ const PORT = process.env.LW_PORT || 8706;
 const g = await open(`https://127.0.0.1:${PORT}/lab/`, { width: 1500, height: 1150, script: 300000 });
 const HELP = `
   if (window.__LW && __LW.stageText) __LW.stageText.prefs.set({ sayPreset: true });   /* iteration 007 I: THE FADE is the preset kind, off on a first run */
+  /* 041 D2: a first run leaves MOLECULES' two presets folds OPEN.  This suite re-solves and switches views many times a second, and with the bars
+     shown Firefox then says "ResizeObserver loop completed with undelivered notifications" (the card measured twice in a frame; at a hand's pace
+     tools/d041-shots.mjs probe-ro and probe-preset say none), so it runs with the folds closed, as it was written */
+  for (const f of document.querySelectorAll('.dev[data-id="chem"] .lw-fold[data-fold^="presets"][aria-expanded="true"]')) f.click();
   const wait = (f, n = 400) => new Promise((res) => { let i = 0; const tick = () => { let v = null; try { v = f(); } catch (e) { v = null; } if (v || ++i > n) res(v); else setTimeout(tick, 50); }; tick(); });
   const frames = async (n = 8) => { for (let i = 0; i < n; i++) await new Promise((r) => requestAnimationFrame(r)); await new Promise((r) => setTimeout(r, 120)); };
   const ready = () => wait(() => __LW.states.ladder() && __LW.states.state().lanes.every((l) => l.ready) && __LW.states.state().pending === 0);

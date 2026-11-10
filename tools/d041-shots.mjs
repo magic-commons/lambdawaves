@@ -47,6 +47,18 @@ const SCENES = {
   'first': `await wait(600); return [__LW.themeChoice, document.body.dataset.theme];`,
   /* the first run in MOLECULES: the mode switched, water picked — MOLECULES open with its presets and A ↔ B, the formula at 200 % with its NAME */
   'first-mol': `__LW.actions.run('mode'); await wait(2500); return { mode: document.body.className.match(/mode-\\w+/g), words: __LW.stageText && __LW.stageText.text };`,
+  /* D2's open fold: MOLECULES on, a real tap on ORBITALS' PRESET select, a second tap closes it — does the page say a ResizeObserver loop? */
+  'probe-preset': [`__LW.actions.run('mode'); await wait(2500); __LW.register.setMode('orbital'); await wait(500); const b = document.querySelector('.dev[data-id="chem"] .reg-bar .mir-sel-b'); b.scrollIntoView({ block: 'center' }); await wait(300); return { shown: b.offsetWidth, e: (window.__e || []).slice() };`,
+    'tap:.dev[data-id="chem"] .reg-bar .mir-sel-b', `await wait(700); return { open: !!document.querySelector('.mir-pick'), e: (window.__e || []).slice() };`,
+    'tap:.dev[data-id="chem"] .reg-bar .mir-sel-b', `await wait(700); return { open: !!document.querySelector('.mir-pick'), e: (window.__e || []).slice() };`,
+    `const b = document.querySelector('.dev[data-id="chem"] .reg-bar .mir-sel-b'); b.click(); b.click(); await wait(700); const e1 = (window.__e || []).slice();
+      await __LW.chem.solve('H2O'); await wait(2500); const e2 = (window.__e || []).slice(); for (const p of ['HOMO', 'FRONTIER FOUR', 'WINDING', 'OCCUPIED']) { __LW.orbitals.preset(p); await wait(250); } const e3 = (window.__e || []).slice();
+      await __LW.chem.solve('C60'); await wait(4000); const e4 = (window.__e || []).slice(); for (const p of ['HOMO', 'FRONTIER FOUR', 'OCCUPIED']) { __LW.orbitals.preset(p); await wait(400); } const e5 = (window.__e || []).slice();
+      __LW.orbitals.setOn(true); await wait(600); return { sameTask: e1.length, water: e2.length, waterPresets: e3.length, c60: e4.length, c60Presets: e5.length, on: (window.__e || []).length };`],
+  'probe-ro': `__LW.actions.run('mode'); await wait(3000); const E = () => (window.__e || []).length, out = {};
+    __LW.register.setMode('states'); await wait(1500); out.states = E(); __LW.chem.setView('density'); await wait(800); out.density = E();
+    __LW.register.setMode('orbital'); await wait(800); out.orbital = E(); __LW.register.setMode('states'); await wait(800); out.states2 = E();
+    await __LW.chem.solve('NH3'); await wait(3000); out.nh3 = E(); __LW.chem.setView('density'); await wait(800); out.density2 = E(); out.e = (window.__e || []).slice(0, 2); return out;`,
   'd0-spacing': `__LW.look.set({ spacing: 24 }); await wait(400); return __LW.look.get('spacing');`,
 };
 const [scene = 'probe-spacing', W = '1300', H = '850', light = '-', sys = ''] = process.argv.slice(2);
