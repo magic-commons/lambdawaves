@@ -37,6 +37,12 @@ const SCENES = {
   's8-lost': `const href = location.href; __LW.field.device.destroy(); for (let i = 0; i < 60 && __LW.field.ok; i++) await wait(50); await wait(1500);
     const b = document.querySelector('#stage > .lw-stage-lost button'), r = b && b.getBoundingClientRect(), hit = r && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
     return { ok: __LW.field.ok, button: b && b.textContent.trim(), onTop: !!(hit && b.contains(hit)), at: r && [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)], reloaded: location.href !== href, flag: sessionStorage.getItem('lw.stage') };`,
+  /* S9: SETTINGS › PERFORMANCE › FULL pressed by hand turns AUTO SCALE off.  S10: DISPLAY's INFO · WIDGETS row, each a half */
+  's9-full': `__LW.layout.reopen('settings'); __LW.layout.popOut('settings', { x: 20, y: 60, w: 300 }); await wait(400); const d = document.querySelector('.dev[data-id="settings"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click(); await wait(300);
+    const auto0 = __LW.quality.auto, seg = [...d.querySelectorAll('.seg')].find((g) => /SMOOTH/.test(g.textContent)), full = [...seg.querySelectorAll('.seg-b')].find((b) => b.textContent.trim() === 'FULL'); full.scrollIntoView({ block: 'center' }); full.click(); await wait(200);
+    const sw = [...d.querySelectorAll('.sw')].find((b) => /AUTO SCALE/.test(b.textContent)), row = d.querySelector('.lw-edit-more');
+    if (row) row.scrollIntoView({ block: 'center' });
+    return { auto0, auto: __LW.quality.auto, pressed: sw && sw.getAttribute('aria-pressed'), saved: [__LW.settings.auto, __LW.settings.perfTier], row: row && [...row.children].map((c) => c.textContent.trim() + ':' + Math.round(c.getBoundingClientRect().width)) };`,
   's2-lattice': `__LW.mat.frameMode = 'lattice'; __LW.setFrame(true); await wait(600); return { msgs: __LW.field.shaderMessages };`,
 };
 const [scene = 's1-dots', W = '1300', H = '850', light = ''] = process.argv.slice(2);
