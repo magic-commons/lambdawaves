@@ -71,7 +71,7 @@ export function createStates(host, api) {
   /* ── the top: ladder + scope ──────────────────────────────────────────────────────────────────── */
   const top = el('div', 'row tight reg-top', host);
   const cv = el('canvas', 'mol-c reg-ladder', top), cfoot = footLine(cv), views = new Set();   // 016 R1: the law line, shown on a hover
-  watchStroke((m) => { cv.title = m === 'paint' ? 'Excited states: drag adds, right-drag removes' : 'Excited states: ω (Eh), f · a click toggles one'; });   // 036 P1
+  watchStroke((m) => { cv.title = m === 'paint' ? 'Excited states: drag adds, right-drag removes' : 'Excited states: ω (Eh), f · a click toggles one'; }, 'mol');   // 036 P1
   const scope = el('canvas', 'mol-c reg-scope', top);
   scope.title = 'Dipole scope δμ(t)';
 
@@ -85,7 +85,7 @@ export function createStates(host, api) {
   const painted = () => { if (api.stroked) api.stroked('states'); };
   const fillB = fillButton(head, { fill: 'S₀ and every state the ladder shows (up to ' + LANE_CAP + ' lanes) on, equal and in phase', empty: 'every state off but S₀' },
     (empty) => { if (!empty) return clear(); const r = fill(); if (r) painted(); return r; });
-  head.appendChild(strokeButton().root);   // 036 P1 · 037 H6: BUTTONS · PAINT, one toggle button, the one preference SPECTRUM's head sets too
+  head.appendChild(strokeButton('mol').root);   // 036 P1 · 037 H6: BUTTONS · PAINT, one toggle button; 041 H1: MOLECULES' own mode (home PAINT), ORBITAL and STATES in step
 
   const bar = el('div', 'row tight reg-bar', host);
   /* 022 P3: the kit's select (its list the menu pane); a pick runs the preset and the list goes back to PRESET… */
@@ -661,7 +661,7 @@ export function createStates(host, api) {
     return { x: (e.clientX - r.left) * sx - cv.clientLeft, y: (e.clientY - r.top) * sy - cv.clientTop };
   };
   const nearest = (p) => { let best = null, bd = Infinity; for (const h of hits) { const dy = Math.abs(h.y - p.y); if (dy > 8) continue; const dx = p.x < h.x0 ? h.x0 - p.x : p.x > h.x1 ? p.x - h.x1 : 0, d = dy * 1e4 + dx; if (d < bd) { bd = d; best = h; } } return best; };
-  paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(), mode: strokeMode, isOn: (k) => lanes.has(k | 0),
+  paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(), mode: () => strokeMode('mol'), isOn: (k) => lanes.has(k | 0),
     at: (p) => { const h = nearest(p); return h ? [h.key] : []; },
     across: (a, b) => { const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y); return hi - lo < 0.5 ? [] : hits.filter((h) => h.y > lo && h.y < hi).map((h) => h.key); },
     apply: (keys, add) => { if (keys.length === 1 && keys[0] === GROUND) { selected = GROUND; paint(); markSel(); return 0; } return paintStates(keys, add); },
