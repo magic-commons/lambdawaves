@@ -384,7 +384,10 @@ export function createModSeam(app) {
         const cards = Math.max(...hang.map(({ rk, r }) => r.top + contentBottom(rk) * (cssZoom(rk) || 1)));
         v = Math.max(0, Math.round((Math.min(cards + 10, foot - b.height - 10) - (t.offsetParent || document.body).getBoundingClientRect().top) / (cssZoom(t) || 1)));
       }
-      if (v !== clearPx) { clearPx = v; if (v) t.style.setProperty('--csb-clear', v + 'px'); else t.style.removeProperty('--csb-clear'); occlusion.dirty(); }   // the line masks follow the bar, paused or not
+      /* 041 X1 · THE TOP SEAT IS ASKED AGAIN WHEN ITS CLEAR MOVES (F-REVIEW FIX 1: a first run's TIMELINE docked at the foot, the dodge read the top
+         seat at the left rack's end, 602, before this frame clamped it above the timeline, 214 — no seat, the bar left UNDER the timeline): a bar the
+         dodge left blocked is seated again with the clear it now has */
+      if (v !== clearPx) { clearPx = v; if (v) t.style.setProperty('--csb-clear', v + 'px'); else t.style.removeProperty('--csb-clear'); occlusion.dirty(); if (blocked) modDodge(dodging.mod || null, 'mod'); }   // the line masks follow the bar, paused or not
       if (trMoving) return;   // the stop is measured on the bar where it landed (the settle asks again)
       for (const rk of racksEl) {
         const m = meet.find((x) => x.rk === rk), stop = m && m.r.top < s.top ? Math.max(0, Math.floor((s.top - 10 - m.r.top) / (cssZoom(rk) || 1))) : 0;
