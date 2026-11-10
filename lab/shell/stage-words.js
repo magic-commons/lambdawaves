@@ -119,10 +119,12 @@ export function infoOfProject() { const I = infoPrefs().all(), o = {}; for (cons
 export const loadInfo = (o) => infoPrefs().set({ ...Object.fromEntries(INFO_ROWS.map((r) => [r.key, r.default])), ...(o && typeof o === 'object' ? o : {}) });
 /** has this profile met INFORMATIONAL (a record, or a blob that held atomLabels)?  Read at infoPrefs()'s first call */
 export const infoKnown = () => (infoPrefs(), infoSeen);
-/** THE LIST CAP's count line (iteration 011 Q1): `140 levels · 7 shells` — the populated labels and the distinct n among them */
-function capLine(ids) {
-  const k = ids.length, s = new Set(ids.map((a) => BASIS[a].n)).size;
-  return `${k} level${k === 1 ? '' : 's'} · ${s} shell${s === 1 ? '' : 's'}`;
+/** THE LIST CAP's count line (iteration 011 Q1): `140 levels · 7 shells` — the populated labels and the distinct n among them.
+ *  041 N8 · THE COUNT IS THE SYSTEM'S OWN: n is hydrogen's shell; under another operator (ATOM, CENTRAL, SEPARABLE, LATTICE …) the line counts that
+ *  system's states and its own distinct levels — the keys of its `spectrum` (hamiltonian.js `levelKey`) — as `40 states · 12 levels` */
+function capLine(ids, H) {
+  const k = ids.length, S = H && H.id !== 'hydrogen' && H.spectrum, n = (c, w) => `${c} ${w}${c === 1 ? '' : 's'}`;
+  return S && S.levelKey ? `${n(k, 'state')} · ${n(new Set(ids.map((a) => S.levelKey(a))).size, 'level')}` : `${n(k, 'level')} · ${n(new Set(ids.map((a) => BASIS[a].n)).size, 'shell')}`;
 }
 export function createStageWords(app) {
   const { dom, reg } = app, { rack } = app.host, { wChem } = app.w, { paintMarks, look } = app.ctl, { schedule } = app.loop, P = infoPrefs();
@@ -134,7 +136,7 @@ export function createStageWords(app) {
     const line = md ? (ids) => stateLatex({ H, states: ids.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: 1, im: 0 })) }).split('\n')[0]
       : (ids) => ids.map((a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]))).join(', ');
     const live = (re, im) => BASIS.filter((s) => re[s.index] * re[s.index] + im[s.index] * im[s.index] > 1e-12).map((s) => s.index);
-    const say = (ids) => (ids.length > P.get('listCap') ? capLine(ids) : line(ids));   // iteration 011 Q1 · THE LIST CAP: a list longer than the cap is its count
+    const say = (ids) => (ids.length > P.get('listCap') ? capLine(ids, H) : line(ids));   // iteration 011 Q1 · THE LIST CAP: a list longer than the cap is its count
     if (mix) { const A = say(live(mix.reA, mix.imA)), B = say(live(mix.reB, mix.imB)); return A && B ? A + '  ↔  ' + B : A || B; }
     return say(reg.populated());
   }
