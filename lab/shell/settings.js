@@ -54,7 +54,7 @@ export function createSettings(app) {
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE (host-contract.md's sixth debt): where the window sits, the lanes, each device's
            F/C/M mode, the ribbon, open or not.  The RACK itself rides in the project file. */
         ...(app.state.modView ? { modwin: app.state.modView.presentation() } : {}),
-        frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode: mat.axisMode, cornerSide: mat.cornerSide, frameStay: mat.frameStay || undefined,   // 041 S3: written only when on
+        frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode: mat.axisMode, cornerSide: mat.cornerSide, frameStay: mat.frameStay || undefined, frameGain: mat.frameGain,   // 041 S3 · S4: written only away from home
         /* WAVE 106 · INVERT and AXIS COLOUR are this browser's, like FRAME and AXIS (0.3.1 S1, D1: the whole field chrome; serialize() strips it) */
         invert: !!mat.invert, axisInk: mat.axisInk || 'theme', dither: +mat.dither || 0,   // iteration 008 W: DITHER is this display's (SETTINGS › QUALITY), always written, so a profile older than it is known by its absence (the lift below)
         phoneTr: !!document.querySelector('.dev[data-id="transport"].folded'),
@@ -110,6 +110,7 @@ export function createSettings(app) {
     if (['box','corner'].includes(s.axisMode)) mat.axisMode=s.axisMode;
     mat.cornerSide=s.cornerSide==='left'?'left':'right';
     if (s.axis === false) { mat.axis = false; if (ui.axisSw) ui.axisSw.set(false); }
+    if (s.frameGain > 0 && s.frameGain !== 1) { mat.frameGain = Math.max(0.25, Math.min(4, +s.frameGain)); if (ui.frameGainK) app.ctl.setKnob(ui.frameGainK, mat.frameGain); }   // 041 S4: nothing said means 100 %
     if (s.frameStay === true) { mat.frameStay = true; if (ui.frameStaySw) ui.frameStaySw.set(true); }   // 041 S3: nothing said means the frame hides with the interface
     /* ⚠ and the two that left the WAVE window with them.  Both read the NON-DEFAULT ONLY, on exactly
        the law of the two lines above: NOTHING SAID MEANS THE SHIPPED VALUE, so a profile written

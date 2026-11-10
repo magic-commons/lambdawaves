@@ -59,7 +59,12 @@ export function createStageWindow(app) {
      a PREFERENCE (`frameStay`, FIELD_CHROME, absent = off) read by shell/keys.js toggleUI — under H the frame stays drawn, the axes go */
   ui.frameStaySw = sw({ label: 'KEEP IN HIDE', value: !!mat.frameStay, title: 'Keep the frame drawn while the interface is hidden (H)',
     onChange: (v) => { if (v) mat.frameStay = true; else delete mat.frameStay; app.sh.saveSettings(); } });
-  row('fit stage-frame-more', w.body, ui.frameStaySw);
+  /* 041 S4 · THE FRAME'S BRIGHTNESS: a PREFERENCE (`frameGain`, FIELD_CHROME, absent = 100 %, today's look — THE LOCK's), 25 % … 400 %, read by
+     field.js writeLines: the box, the axes, the compass, the lattice and the dots; within 2 % of home it IS home */
+  let gainSave = 0;
+  ui.frameGainK = knob({ label: 'BRIGHTNESS', title: 'How bright the frame, axes, dots and lattice draw', min: 0.25, max: 4, log: true, value: mat.frameGain || 1, fmt: pct,
+    onInput: (v) => { if (Math.abs(v - 1) < 0.02) delete mat.frameGain; else mat.frameGain = v; schedule(TIER.PRESENT); clearTimeout(gainSave); gainSave = setTimeout(app.sh.saveSettings, 250); } });
+  row('fit stage-frame-more', w.body, ui.frameGainK, ui.frameStaySw);
   row('stage-axes', w.body, ui.axisSw, ui.axisInkSeg);
   row('stage-ground', w.body, ui.stageSeat);
   row('fit stage-knobs', w.body, ui.stageK, ui.gammaK);

@@ -14,6 +14,10 @@ const SCENES = {
     __LW.mat.frameMode = 'lattice'; __LW.setFrame(true); const before = [__LW.mat.frame, __LW.mat.axis]; sw.click(); await wait(100);
     return { sw: !!sw, hint: sw && sw.title, before, saved: __LW.settings.frameStay };`, 'press:h',
     `await wait(400); return { hidden: [__LW.mat.frame, __LW.mat.axis, document.body.classList.contains('ui-hidden')] };`],
+  /* S4: BRIGHTNESS at 400 % on the dots (the knob's row beside KEEP IN HIDE in STAGE, popped out for the picture) */
+  's4-bright': `__LW.layout.reopen('stage'); __LW.layout.popOut('stage', { x: 20, y: 120, w: 300 }); await wait(400); const d = document.querySelector('.dev[data-id="stage"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
+    __LW.mat.frameMode = 'dots'; __LW.mat.frameGain = 4; __LW.setFrame(true); await wait(500);
+    const r = d.querySelector('.stage-frame-more'); return { row: r && [...r.children].map((c) => c.textContent.trim().slice(0, 24) + ':' + c.offsetWidth), w: r && r.clientWidth };`,
   's2-lattice': `__LW.mat.frameMode = 'lattice'; __LW.setFrame(true); await wait(600); return { msgs: __LW.field.shaderMessages };`,
 };
 const [scene = 's1-dots', W = '1300', H = '850', light = ''] = process.argv.slice(2);

@@ -2035,7 +2035,7 @@ export async function createField(canvas, opts = {}) {
   /* Chrome changes with the camera, domain, theme and its own controls, but the field can evolve for hundreds
      of frames without any of those changing. Keep the last geometry in the GPU instead of regenerating and
      uploading as much as a megabyte on every presentation. The fixed signature keeps this check allocation-free. */
-  const LINE_STATE = new Array(33).fill(NaN);
+  const LINE_STATE = new Array(34).fill(NaN);
   let lineStateReady = false, cachedHasSlice = false;
   function setLineState(index, value) {
     const changed = !Object.is(LINE_STATE[index], value);
@@ -2075,6 +2075,7 @@ export async function createField(canvas, opts = {}) {
     changed = setLineState(i++, normal ? normal[1] : undefined) || changed;
     changed = setLineState(i++, normal ? normal[2] : undefined) || changed;
     changed = setLineState(i++, eye ? 1 : 0) || changed;
+    changed = setLineState(i++, mat.frameGain) || changed;   // 041 S4
     const same = lineStateReady && !changed;
     lineStateReady = true;
     return same;
@@ -2088,13 +2089,17 @@ export async function createField(canvas, opts = {}) {
     const push = (a, b, c) => { v[k++] = a[0]; v[k++] = a[1]; v[k++] = a[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; v[k++] = b[0]; v[k++] = b[1]; v[k++] = b[2]; v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3]; };
     const INK = mat.lightUI ? FRAME_INK.light : FRAME_INK.dark;    // the BOX's ink, and the ALPHA of all three axes, in both cases the theme's
     const AX = AXIS_HUE[mat.axisInk] || INK;                       // ⚠ the AXES' hue is the user's — 'theme', and anything unreadable, fall back to the theme's own row
-    const boxC = INK.box;
+    /* 041 S4 · THE FRAME'S BRIGHTNESS (Josh: "a knob in stage that allows you to control how 'bright' the frame/axes are. Currently the dots and
+       lattice seems to dim or grey"): `mat.frameGain` (absent = 1, today's look: × 1 keeps every bit) scales the alpha of the box, the axes, the
+       corner compass, the lattice and the dots (held at 1), and past 1 carries the grid's ink toward the theme's full ink (white · black) */
+    const G = mat.frameGain > 0 ? mat.frameGain : 1, ga = (a) => Math.min(1, a * G);
+    const boxC = G === 1 ? INK.box : [INK.box[0], INK.box[1], INK.box[2], ga(INK.box[3])];
     const corners = [[-h, -h, -h], [h, -h, -h], [h, h, -h], [-h, h, -h], [-h, -h, h], [h, -h, h], [h, h, h], [-h, h, h]];
     const edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
     for (const [a, b] of edges) push(corners[a], corners[b], boxC);
-    push([0, 0, 0], [0.6 * h, 0, 0], axc(AX.x, INK.x[3]));   // x — the hue is the seat's, the alpha is the theme's
-    push([0, 0, 0], [0, 0.6 * h, 0], axc(AX.y, INK.y[3]));   // y
-    push([0, 0, 0], [0, 0, 0.6 * h], axc(AX.z, INK.z[3]));   // z (quantization axis)
+    push([0, 0, 0], [0.6 * h, 0, 0], axc(AX.x, ga(INK.x[3])));   // x — the hue is the seat's, the alpha is the theme's
+    push([0, 0, 0], [0, 0.6 * h, 0], axc(AX.y, ga(INK.y[3])));   // y
+    push([0, 0, 0], [0, 0, 0.6 * h], axc(AX.z, ga(INK.z[3])));   // z (quantization axis)
     let n = 15;
     if (mat.slice && mat.slice.mode) {
       const ax = mat.slice.axis | 0, s = mat.slice.pos * h, c = [1, 0.85, 0.4, 0.55];
@@ -2113,10 +2118,11 @@ export async function createField(canvas, opts = {}) {
       const dots = mat.frameMode === 'dots', radius = dots ? DOTS_RAD : LATTICE_RAD, spacing = dots ? h : h * 2;
       const camX = VIEW[0], camY = VIEW[1], camZ = VIEW[2];
       const invMaxDist = 1 / (spacing * radius);
-      const baseAlpha = mat.lightUI ? 0.22 : 0.16;
-      const inkR = mat.lightUI ? 0.18 : 0.75;
-      const inkG = mat.lightUI ? 0.22 : 0.80;
-      const inkB = mat.lightUI ? 0.28 : 0.88;
+      const baseAlpha = (mat.lightUI ? 0.22 : 0.16) * G;
+      const full = mat.lightUI ? 0 : 1, lift = Math.min(1, Math.max(0, (G - 1) / 3));   // 041 S4: + 0 at home
+      const inkR = (mat.lightUI ? 0.18 : 0.75) + (full - (mat.lightUI ? 0.18 : 0.75)) * lift;
+      const inkG = (mat.lightUI ? 0.22 : 0.80) + (full - (mat.lightUI ? 0.22 : 0.80)) * lift;
+      const inkB = (mat.lightUI ? 0.28 : 0.88) + (full - (mat.lightUI ? 0.28 : 0.88)) * lift;
       INK_V[0] = inkR; INK_V[1] = inkG; INK_V[2] = inkB; INK_V[3] = 1;
 
       if (mat.frameMode === 'lattice') {
@@ -2144,7 +2150,7 @@ export async function createField(canvas, opts = {}) {
           const distA = Math.hypot(ax, ay, az);
           const distB = Math.hypot(bx, by, bz);
           const dist = Math.max(distA, distB) * invMaxDist;
-          const alpha = baseAlpha * Math.max(0, 1 - dist * 0.7);
+          const alpha = Math.min(1, baseAlpha * Math.max(0, 1 - dist * 0.7));
 
           L[q++] = ax; L[q++] = ay; L[q++] = az; L[q++] = alpha;
           L[q++] = bx; L[q++] = by; L[q++] = bz; L[q++] = alpha;
@@ -2158,7 +2164,7 @@ export async function createField(canvas, opts = {}) {
               const da = px * camX + py * camY + pz * camZ;
               if (da > 0) continue;
               const dist = Math.hypot(px, py, pz) * invMaxDist;
-              const alpha = baseAlpha * (1 - dist * 0.7);
+              const alpha = Math.min(1, baseAlpha * (1 - dist * 0.7));
               if (!(alpha > 0) || q + 4 > L.length) continue;        // faded out (the corners), or an eye at the origin
               L[q++] = px; L[q++] = py; L[q++] = pz; L[q++] = alpha;   // 041 S1: one record a dot (vsDot draws the disc)
               latticeCount++;
@@ -2180,9 +2186,9 @@ export async function createField(canvas, opts = {}) {
         const ex = px + VIEW[4 + axis] * sx;
         const ey = py + VIEW[8 + axis] * sy;
         v[k++] = px; v[k++] = py; v[k++] = 0.5;
-        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3];
+        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = ga(c[3]);
         v[k++] = ex; v[k++] = ey; v[k++] = 0.5;
-        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = c[3];
+        v[k++] = c[0]; v[k++] = c[1]; v[k++] = c[2]; v[k++] = ga(c[3]);
       }
     }
     device.queue.writeBuffer(lineBuf, 0, v, 0, k); stats.chromeWrites++;
