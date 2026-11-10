@@ -21,6 +21,13 @@ const SCENES = {
   'probe-cam': `__LW.layout.reopen('camera'); await wait(300); const R = document.querySelector('.dev[data-id="camera"] .mir-camera');
     const tree = (n, d) => d > 3 ? '' : '<' + n.tagName.toLowerCase() + '.' + [...n.classList].join('.') + (n.children.length ? '' : ':' + n.textContent.trim().slice(0, 14)) + '>' + [...n.children].map((c) => tree(c, d + 1)).join('');
     return { pan: tree(R.querySelector('.cam-pan'), 0), hand: tree(R.querySelector('.cam-hand'), 2), padCls: R.querySelector('.cam-pan .mir-xy, .cam-pan [class*=pad]')?.className };`,
+  /* S5: the expanded CAMERA has no CONTROLS and no PAN word; LOCK set, a real press on the PAN pad releases it.  S6: the boot is unlocked */
+  's5-camera': [`__LW.layout.reopen('camera'); __LW.layout.popOut('camera', { x: 20, y: 60, w: 300 }); await wait(400); const d = document.querySelector('.dev[data-id="camera"]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
+    const f = d.querySelector('.mir-camera .lw-fold'); if (f && f.getAttribute('aria-expanded') !== 'true') f.click(); await wait(400);
+    const boot = __LW.camera.lock, words = [...d.querySelectorAll('.cam-more .cam-title, .cam-more .mir-xy > .k-lbl')].map((n) => n.textContent);
+    __LW.camera.setLock(true); await wait(100); d.querySelector('.xy-pad').scrollIntoView({ block: 'center' }); await wait(200);
+    return { boot, words, locked: __LW.camera.lock, padOff: d.querySelector('.mir-xy').classList.contains('disabled') };`, 'tap:.dev[data-id="camera"] .cam-pan',
+    `await wait(300); const d = document.querySelector('.dev[data-id="camera"]'); return { lockAfterPress: __LW.camera.lock, padOff: d.querySelector('.mir-xy').classList.contains('disabled'), saved: __LW.settings.camLock };`],
   's2-lattice': `__LW.mat.frameMode = 'lattice'; __LW.setFrame(true); await wait(600); return { msgs: __LW.field.shaderMessages };`,
 };
 const [scene = 's1-dots', W = '1300', H = '850', light = ''] = process.argv.slice(2);
@@ -32,7 +39,7 @@ try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify(await g.errors()).slice(0, 900) + JSON.stringify(await g.ev(`return [document.title, document.body.innerText.slice(0, 300), window.__LW && __LW.field && __LW.field.shaderMessages];`)));
   if (light) await g.ev(`__LW.look.set({ theme: 'light' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
   for (const step of [].concat(SCENES[scene])) {   // a step is a body run in the page, or `press:<key>` (the driver's own key)
-    if (step.startsWith('press:')) await g.press(step.slice(6)); else console.log(JSON.stringify(await g.ev(w8 + step)));
+    if (step.startsWith('press:')) await g.press(step.slice(6)); else if (step.startsWith('tap:')) console.log(JSON.stringify(await g.tap(step.slice(4)))); else console.log(JSON.stringify(await g.ev(w8 + step)));
   }
   await new Promise((r) => setTimeout(r, 700));
   if (!scene.startsWith('probe-')) {

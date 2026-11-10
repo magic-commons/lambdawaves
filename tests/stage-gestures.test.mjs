@@ -90,7 +90,7 @@ for (const lifted of [1, 2]) {
 {
   const s = stage(), wheel = Object.assign(new Event('wheel', { cancelable: true }), { deltaY: 100, deltaMode: 0, clientX: 750, clientY: 200 });
   s.canvas.dispatchEvent(wheel);
-  assert.ok(Math.abs(s.result.distance - 3.3) < 1e-12); assert.deepEqual(s.result.anchors, [[0.5, 0.5]]); assert.equal(wheel.defaultPrevented, true);
+  assert.ok(Math.abs(s.result.distance - 3.3) < 1e-12); assert.deepEqual(s.result.anchors, [null], '041 S6: the wheel passes no anchor — it never pans'); assert.equal(wheel.defaultPrevented, true);
 }
 {
   const s = stage(); s.send('pointerdown', 1, 100); s.send('pointerdown', 2, 200); s.send('pointermove', 2, 300);
@@ -121,7 +121,7 @@ console.log('PASS stage gestures: drag, fine gain, fling, interruption, special 
 // 0.5.0 A8 · THE BINDINGS ARE DATA: the table is today's (R5-C1), frozen, and an edited row is what the stage does.
 {
   assert.deepEqual(JSON.parse(JSON.stringify(STAGE_BINDINGS)), { pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' },
-    wheel: { line: 16, page: null, base: 1.1, per: 100, atCursor: true }, pinch: { slide: true, atCentroid: true }, tap: { ms: 300, px: 8 },
+    wheel: { line: 16, page: null, base: 1.1, per: 100, atCursor: false }, pinch: { slide: true, atCentroid: true }, tap: { ms: 300, px: 8 },
     doubleTap: { ms: null, px: 40 }, dblclick: true, nudge: 0.05 });
   assert.ok(Object.isFrozen(STAGE_BINDINGS) && Object.isFrozen(STAGE_BINDINGS.pointer.slide) && Object.isFrozen(STAGE_BINDINGS.wheel));
   const row = (o) => ({ ...STAGE_BINDINGS, ...o });
@@ -130,9 +130,9 @@ console.log('PASS stage gestures: drag, fine gain, fling, interruption, special 
   const shift = stage(row({ pointer: { button: 0, slide: { shiftKey: true }, fine: 'altKey' } })); shift.send('pointerdown', 1, 100, 100, { shiftKey: true, pointerType: 'mouse' });
   shift.send('pointermove', 1, 110, 100, { pointerType: 'mouse' }); shift.send('pointerup', 1, 110, 100, { pointerType: 'mouse' });
   assert.deepEqual(shift.result.pans.map(([u, v]) => [u, v + 0]), [[0.02, 0]], 'Shift-drag slides when the row says so'); assert.equal(shift.travel.yaw, 0);
-  const centre = stage(row({ wheel: { ...STAGE_BINDINGS.wheel, atCursor: false } }));
+  const centre = stage(row({ wheel: { ...STAGE_BINDINGS.wheel, atCursor: true } }));   // 041 S6: the edited row is the cursor's now
   centre.canvas.dispatchEvent(Object.assign(new Event('wheel', { cancelable: true }), { deltaY: 100, deltaMode: 1, clientX: 750, clientY: 200 }));
-  assert.deepEqual(centre.result.anchors, [[0, 0]]); assert.ok(Math.abs(centre.result.distance - 3 * Math.pow(1.1, 16)) < 1e-12, 'a line is 16 px');
+  assert.deepEqual(centre.result.anchors, [[0.5, 0.5]]); assert.ok(Math.abs(centre.result.distance - 3 * Math.pow(1.1, 16)) < 1e-12, 'a line is 16 px');
 }
 console.log('PASS the bindings are one data table: STAGE_BINDINGS is today\'s (pointer, wheel, pinch, tap, double tap, double-click, nudge), frozen, and an edited row (a quicker double tap, Shift to slide, the wheel at the centre) is what the stage does');
 // 0.5.0 C9 · THE SCENE GUARD: in UI space (a kit window's gap) a press, a touch tap, a double-click and a wheel start nothing on the
@@ -190,11 +190,12 @@ console.log('PASS the live stage (0.5.3 M4): a lost pointerup, a lost special an
 {
   const lawStage = (lock) => { const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'turntable', shift: [0, 0] };
     const L = createCameraLaw({ obs, present() {}, modHand: () => false, resetWall() {} }); L.camera.setLock(lock);
-    return { obs, s: stage(undefined, undefined, { getDistance: () => obs.dist, zoomAt: L.zoomAt, pan: L.panBy }) }; };
+    return { obs, L, s: stage(undefined, undefined, { getDistance: () => obs.dist, zoomAt: L.zoomAt, pan: L.panBy }) }; };
   const wheel = () => Object.assign(new Event('wheel', { cancelable: true }), { deltaY: -100, deltaMode: 0, clientX: 750, clientY: 200 });
-  const u = lawStage(false), k = lawStage(true); u.s.canvas.dispatchEvent(wheel()); k.s.canvas.dispatchEvent(wheel());
-  assert.ok(u.obs.shift[0] !== 0 && u.obs.shift[1] !== 0 && u.obs.dist < 3.3, 'unlocked: the wheel zooms at the cursor (atCursor)');
-  assert.deepEqual(k.obs.shift, [0, 0], 'locked: atCursor is answered from the centre'); assert.equal(k.obs.dist, u.obs.dist, 'and the zoom is the same zoom');
+  const u = lawStage(false), k = lawStage(true); u.L.setShift(0.3, -0.2); u.s.canvas.dispatchEvent(wheel()); k.s.canvas.dispatchEvent(wheel());
+  assert.deepEqual(u.obs.shift, [0.3, -0.2], '041 S6 · unlocked and panned: the wheel leaves the shift where it is'); assert.ok(u.obs.dist < 3.3, 'and zooms');
+  assert.deepEqual(k.obs.shift, [0, 0], 'locked: the wheel is answered from the centre'); assert.equal(k.obs.dist, u.obs.dist, 'and the zoom is the same zoom');
+  u.L.setShift(0, 0);
   for (const t of [u, k]) { t.s.send('pointerdown', 1, 100, 100); t.s.send('pointerdown', 2, 200, 100); t.s.send('pointermove', 2, 300, 140); t.s.send('pointerup', 1, 100, 100); t.s.send('pointerup', 2, 300, 140); }
   assert.notDeepEqual(u.obs.shift, k.obs.shift, 'unlocked, the pinch slid and zoomed at its centroid');
   assert.deepEqual(k.obs.shift, [0, 0], 'locked: the pinch neither slides nor anchors'); assert.equal(k.obs.dist, u.obs.dist, 'and zooms as far');

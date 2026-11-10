@@ -12,7 +12,7 @@ import { createSceneGuard } from './mir/shell/scene-guard.js';
 const frozen = (o) => Object.freeze(Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v && typeof v === 'object' ? frozen(v) : v])));
 export const STAGE_BINDINGS = frozen({
   pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' }, // one finger or the mouse: these modifiers slide; else the instrument's special; else orbit (`fine` × law.FINE)
-  wheel: { line: 16, page: null, base: 1.1, per: 100, atCursor: true }, // CSS px a line (a page: null = the canvas' height); distance × base^(px / per)
+  wheel: { line: 16, page: null, base: 1.1, per: 100, atCursor: false }, // CSS px a line (a page: null = the canvas' height); distance × base^(px / per); 041 S6: no anchor — the wheel never pans
   pinch: { slide: true, atCentroid: true }, // two fingers slide the picture and zoom at their centroid
   tap: { ms: 300, px: 8 }, // a touch tap is shorter and stiller than this
   doubleTap: { ms: null, px: 40 }, // a second tap this soon (null: the law's TAP_MS) and this near resets the view
@@ -149,7 +149,7 @@ export function bindStageGestures(canvas, {
     e.preventDefault();
     // WheelEvent deltaMode: pixels, lines (16 CSS px), or viewport pages.
     const W = B.wheel, unit = e.deltaMode === 1 ? W.line : e.deltaMode === 2 ? (W.page ?? canvas.clientHeight) : 1;
-    zoomAt(W.atCursor ? uv(e.clientX, e.clientY, canvas.getBoundingClientRect()) : [0, 0], getDistance() * Math.pow(W.base, e.deltaY * unit / W.per));
+    zoomAt(W.atCursor ? uv(e.clientX, e.clientY, canvas.getBoundingClientRect()) : null, getDistance() * Math.pow(W.base, e.deltaY * unit / W.per));   // 041 S6: null = the shift is left alone
   }, { passive: false });
   if (B.dblclick) canvas.addEventListener('dblclick', e => { if (!guard.hit(e)) resetView(); });
   win.addEventListener('blur', cancel);
