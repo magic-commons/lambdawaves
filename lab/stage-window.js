@@ -13,7 +13,7 @@
  * homes (the shader's old arithmetic), read by the field (lab/field.js stageWash, p16.w · p17.xyz · p18.xyz); PROJECT `presentation.stage` through
  * stageOfProject / loadStage (shell/persist.js); targets `stage.*` (shell/modulation.js).  A file from before 040 ({ pulse, shape, rate }: SHAPE
  * CENTRE | EDGE, RATE in Hz) opens as POSITION 0° or 180° at the full BAND WIDTH — the standing wash it drew. */
-import { el, knob, label } from './mir/kit.js'; import { fold } from './fold.js';
+import { el, knob, label, sw } from './mir/kit.js'; import { fold } from './fold.js';
 import { TIER } from './tier.js'; import { strobeBeats } from './field.js';
 const HOME = Object.freeze({ pulse: 0, position: 0, rate: 2, strobe: 0, strobeRate: 1, strobeDuty: 0.5, beam: 0, beamAngle: 0, beamWidth: 30 });
 const RANGE = { pulse: [0, 1], rate: [0, 2], strobe: [0, 1], strobeRate: [0.25, 4], strobeDuty: [0.05, 0.95], beam: [0, 1], beamWidth: [5, 180] }, KEYS = Object.keys(HOME);
@@ -55,6 +55,11 @@ export function createStageWindow(app) {
   w.root.classList.add('native-clean', 'closed', 'lw-stage-card'); app.host.rack.appendChild(w.root);
   const row = (cls, parent, ...cs) => { const r = el('div', 'row tight ' + cls, parent); for (const c of cs) r.appendChild(c.root); return r; };
   row('stage-frame', w.body, ui.frameSw);                  // native-ui.js turns FRAME and AXIS into their honest segs where they stand
+  /* 041 S3 · THE FRAME CAN STAY (Josh: "have an option in stage where the either box or frame remains in UI full Hide mode (not hide/mouse-reveal)"):
+     a PREFERENCE (`frameStay`, FIELD_CHROME, absent = off) read by shell/keys.js toggleUI — under H the frame stays drawn, the axes go */
+  ui.frameStaySw = sw({ label: 'KEEP IN HIDE', value: !!mat.frameStay, title: 'Keep the frame drawn while the interface is hidden (H)',
+    onChange: (v) => { if (v) mat.frameStay = true; else delete mat.frameStay; app.sh.saveSettings(); } });
+  row('fit stage-frame-more', w.body, ui.frameStaySw);
   row('stage-axes', w.body, ui.axisSw, ui.axisInkSeg);
   row('stage-ground', w.body, ui.stageSeat);
   row('fit stage-knobs', w.body, ui.stageK, ui.gammaK);

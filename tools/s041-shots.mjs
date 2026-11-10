@@ -9,6 +9,11 @@ const { open } = await import('./gate/gatekit.mjs');
 const w8 = `const wait = (ms) => new Promise((r) => setTimeout(r, ms));`;
 const SCENES = {
   's1-dots': `__LW.mat.frameMode = 'dots'; __LW.setFrame(true); await wait(600); return { msgs: __LW.field.shaderMessages };`,
+  /* S3: KEEP IN HIDE pressed in STAGE, then H: the frame stays, the axes go; H again brings both back; the blob holds frameStay */
+  's3-keep': [`__LW.layout.reopen('stage'); await wait(300); const sw = [...document.querySelectorAll('.dev[data-id="stage"] .sw')].find((b) => /KEEP IN HIDE/.test(b.textContent));
+    __LW.mat.frameMode = 'lattice'; __LW.setFrame(true); const before = [__LW.mat.frame, __LW.mat.axis]; sw.click(); await wait(100);
+    return { sw: !!sw, hint: sw && sw.title, before, saved: __LW.settings.frameStay };`, 'press:h',
+    `await wait(400); return { hidden: [__LW.mat.frame, __LW.mat.axis, document.body.classList.contains('ui-hidden')] };`],
   's2-lattice': `__LW.mat.frameMode = 'lattice'; __LW.setFrame(true); await wait(600); return { msgs: __LW.field.shaderMessages };`,
 };
 const [scene = 's1-dots', W = '1300', H = '850', light = ''] = process.argv.slice(2);
@@ -19,7 +24,9 @@ try {
   await g.armErrors();
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify(await g.errors()).slice(0, 900) + JSON.stringify(await g.ev(`return [document.title, document.body.innerText.slice(0, 300), window.__LW && __LW.field && __LW.field.shaderMessages];`)));
   if (light) await g.ev(`__LW.look.set({ theme: 'light' }); await new Promise((r) => setTimeout(r, 500)); return 1;`);
-  console.log(JSON.stringify(await g.ev(w8 + SCENES[scene])));
+  for (const step of [].concat(SCENES[scene])) {   // a step is a body run in the page, or `press:<key>` (the driver's own key)
+    if (step.startsWith('press:')) await g.press(step.slice(6)); else console.log(JSON.stringify(await g.ev(w8 + step)));
+  }
   await new Promise((r) => setTimeout(r, 700));
   if (!scene.startsWith('probe-')) {
     mkdirSync('.tmp/S-shots', { recursive: true });
