@@ -80,12 +80,13 @@ export function createView(parent, kind, M) {
   /** zoom to zz about the ground point p (px): the plane point under it stays */
   const zoomAt = (zz, p, base = pan, z0 = z) => { zz = clampZ(zz); setPan([p[0] - ((p[0] - base[0]) * zz) / z0, p[1] - ((p[1] - base[1]) * zz) / z0], zz); };
   const local = (e) => { const r = ground.getBoundingClientRect(), u = cssZoom(ground); return [(e.clientX - r.left) / u, (e.clientY - r.top) / u]; };   // 036 K2: own px
-  /** FIT: the cards' bounding box in the ground, a 24 px margin, the zoom clamped */
+  /** FIT: the cards' bounding box in the ground, a 24 px margin, the zoom clamped; 041 X3 (F-REVIEW FIX 3: four nodes at the 0.5 floor were
+      centred, STAGE IN's head 62 px above the ground): a box the floor leaves bigger than the ground starts at the margin, top and left */
   function fit() {
     const B = Object.values(cards).map(({ c }) => [c.offsetLeft, c.offsetTop, c.offsetLeft + c.offsetWidth, c.offsetTop + c.offsetHeight]);
     const x0 = Math.min(...B.map((b) => b[0])), y0 = Math.min(...B.map((b) => b[1])), x1 = Math.max(...B.map((b) => b[2])), y1 = Math.max(...B.map((b) => b[3]));
     const gw = ground.clientWidth, gh = ground.clientHeight, zz = clampZ(Math.min((gw - 48) / (x1 - x0), (gh - 48) / (y1 - y0)));
-    setPan([(gw - (x1 - x0) * zz) / 2 - x0 * zz, (gh - (y1 - y0) * zz) / 2 - y0 * zz], zz); keep();
+    setPan([Math.max(24, (gw - (x1 - x0) * zz) / 2) - x0 * zz, Math.max(24, (gh - (y1 - y0) * zz) / 2) - y0 * zz], zz); keep();
   }
   const paintSel = () => { for (const [id, n] of Object.entries(cards)) { n.c.classList.toggle('sel', sel.has(id)); if (W && id !== 'in' && id !== 'out') M.editing(id, 'sel', sel.has(id)); }   // 040 N1: a selected node is edited
     for (const [id, h] of H) h.classList.toggle('sel', id === wsel); for (const [id, p] of P) p.classList.toggle('sel', id === wsel); };
