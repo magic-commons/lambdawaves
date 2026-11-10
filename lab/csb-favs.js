@@ -121,7 +121,18 @@ export function createCsbFavs(app, { panel }) {
       layer.style.top = top ? (r.bottom + 6 - s.top) / z + 'px' : 'auto'; layer.style.bottom = top ? 'auto' : (s.bottom - r.top + 6) / z + 'px';
       layer.classList.toggle('below', top);
     }
+    /* 041 P11 (Josh 11-09: "disappears too abruptly vs when it's revealed, can we match it going out as it does coming in?"): the pointer's leave
+       plays the arrival backwards (the same rise, the same time) and then puts the strip home; EXPAND, Escape and the bar hiding still hide at once */
+    let going = null;
+    function leave() {
+      tOut = 0; if (layer.hidden || going) return;
+      const cs = getComputedStyle(layer), ms = cs.animationName === 'none' ? 0 : parseFloat(cs.animationDuration) * 1000;
+      if (!(ms > 0)) return hide();
+      going = layer.animate([{ opacity: 1, translate: '-50% 0' }, { opacity: 0, translate: layer.classList.contains('below') ? '-50% -6px' : '-50% 6px' }], { duration: ms, easing: 'ease-in', fill: 'forwards' });
+      going.onfinish = hide;
+    }
     function hide() {
+      if (going) { going.onfinish = null; going.cancel(); going = null; }
       clearTimeout(tIn); clearTimeout(tOut); tIn = tOut = 0; if (layer.hidden) return;
       layer.hidden = true; home.append(strip); if (mo) mo.disconnect(); mo = null;
     }
@@ -133,8 +144,8 @@ export function createCsbFavs(app, { panel }) {
       mo.observe(B, { attributes: true, attributeFilter: ['class'] }); mo.observe(bar, { attributes: true, attributeFilter: ['class', 'data-place'] });
     }
     const want = (on) => {
-      if (on) { clearTimeout(tOut); tOut = 0; if (layer.hidden && !tIn) tIn = setTimeout(show, 250); }
-      else { clearTimeout(tIn); tIn = 0; if (!layer.hidden && !tOut) tOut = setTimeout(hide, 400); }
+      if (on) { clearTimeout(tOut); tOut = 0; if (going) { going.onfinish = null; going.cancel(); going = null; } if (layer.hidden && !tIn) tIn = setTimeout(show, 250); }
+      else { clearTimeout(tIn); tIn = 0; if (!layer.hidden && !tOut && !going) tOut = setTimeout(leave, 400); }
     };
     for (const n of [bar, layer]) { n.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') want(true); }); n.addEventListener('pointerleave', () => want(false)); }
     addEventListener('pointermove', (e) => {

@@ -193,6 +193,10 @@ body.transport-under .csb-float { z-index: var(--z-chrome); }
 .csb-float :is(.k.csb-fav, .segw.csb-fav, .csb-fav-sw) { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; gap: 3px; }
 .csb-float :is(.k.csb-fav, .segw.csb-fav, .csb-fav-sw) > :not(.csb-fav-gly, .k-lbl) { grid-column: 1 / -1; justify-self: center; }
 .csb-float .pal-invert { width: 44px; height: 44px; }
+/* 041 P11 (Josh 11-09: "For the drag handle on the pop-up favorite knobs on the CSB, let it be above the knob title instead of beside it"): the
+   slot's grip stands centred in a 14-px row of its own over the word, never on it */
+.csb-float .mir-bank-slot.filled { height: auto; padding-top: 14px; }
+.csb-float .mir-bank-slot > .mir-bank-grip { top: 0; right: auto; left: 50%; translate: -50% 0; }
 .csb-float :is(.k-lbl, .k-val) { text-shadow: 0 1px 3px rgb(0 0 0 / .6); }
 body[data-theme="light"] .csb-float :is(.k-lbl, .k-val) { text-shadow: 0 1px 3px rgb(255 255 255 / .8); }
 /* METERS: LOW · MID · HIGH as LED bars and the beat equaliser's seven gains */
