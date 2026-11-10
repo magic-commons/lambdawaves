@@ -668,7 +668,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 /* 032 THE PORTRAIT SHELF (picker.js card): a volume is album art — 9:16 as tall as the page allows, its still for the theme in use (the hero
    over it on a hover, faded in once it plays), or the λWAVES palette (teal · lilac · violet, placed by the card's --k) until it has one; the
    numeral and its count on the theme's ground at the foot, the WIP cone at the head, the install under the card */
-#lwMenu .mm-vol { --vol-h: clamp(300px, calc(100dvh - 400px), 540px); display: grid; gap: 14px; justify-items: center; border-radius: 18px; }
+#lwMenu .mm-vol { --vol-h: clamp(190px, calc(100dvh - 432px), 540px);   /* 041 P14: 432 (was 400) and a 190-px floor (was 300), so the shelf and THIS DEVICE fit the page over the fixed caption */ display: grid; gap: 14px; justify-items: center; border-radius: 18px; }
 #lwMenu .mm-vol.drop { outline: 2px dashed var(--acc); outline-offset: 6px; }
 #lwMenu .mm-vol-open { position: relative; display: block; height: var(--vol-h); aspect-ratio: 9 / 16; border-radius: 18px; }
 #lwMenu .mm-lit { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; isolation: isolate; background: hsl(var(--glass-tint)); }
@@ -752,7 +752,7 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
   #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
   #lwMenu .mm-tabs { gap: 14px; } #lwMenu .mm-tab { font-size: 12px; letter-spacing: .08em; } #lwMenu .mm-tab .mm-ico { display: none; }
   #lwMenu .mm-caption { height: 92px; }   /* 038 close: the page arrows stay outside the deck (picker.js size() keeps 60 px a side for them) */
-  #lwMenu .mm-shelf { gap: 16px; } #lwMenu .mm-vol { --vol-h: min(clamp(300px, calc(100dvh - 400px), 540px), calc((100vw - 56px) * 8 / 9)); } }   /* 032: two portraits a row */
+  #lwMenu .mm-shelf { gap: 16px; } #lwMenu .mm-vol { --vol-h: min(clamp(190px, calc(100dvh - 432px), 540px), calc((100vw - 56px) * 8 / 9)); } }   /* 032: two portraits a row */
 @media (prefers-reduced-motion: reduce) {
   #lwMenu { clip-path: none; transition: none; } #lwMenu .mm-pic, #lwMenu .mm-pill, #lwMenu .mm-under, #lwMenu .mm-ring-ink, #lwMenu .mm-arrow, #lwMenu .mm-arrow .mm-ico { transition: none; }
   #lwMenu .mm-pic[data-tilt] { transform: none; } #lwMenu .mm-arrow { scale: 1 !important; } }
@@ -835,7 +835,7 @@ html.mono #lwMenu .mm-hue-ring::after { opacity: 1; background: conic-gradient(f
 #lwMenu .mm-tagrow { display: flex; gap: 4px; flex-wrap: nowrap; width: max-content; }
 #lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { display: none; }   /* inside a volume its head's twin is the one */
 /* iteration 014 D1: inside a volume the seat under the tabs is the search; the head's old seat holds NAME and MASS (3-state, as-is unpressed) */
-#lwMenu .mm-opts .mm-search { display: none; width: 240px; text-align: center; } #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
+#lwMenu .mm-opts .mm-search { display: none; width: 240px; text-align: center; padding-block: 3px; line-height: 16px; }   /* 041 P14: 22 px, the seat's own height — entering a volume no longer grows the head 8 px */ #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
 #lwMenu .mm-sort { flex: none; display: inline-flex; align-items: center; gap: 4px; min-width: 30px; height: 26px; padding: 0 8px; border-radius: 999px; font-size: 11px; letter-spacing: .08em; white-space: nowrap; opacity: .45; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-sort:hover, #lwMenu .mm-sort:focus-visible { opacity: .8; } #lwMenu .mm-sort.on { opacity: 1; color: var(--acc); }
 #lwMenu .mm-sort .mm-ico { width: 14px; height: 14px; } #lwMenu .mm-sort[data-sort="name"] span { min-width: 2.4em; text-align: center; }
