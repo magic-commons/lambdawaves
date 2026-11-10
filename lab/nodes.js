@@ -276,13 +276,21 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     onOpen: () => requestAnimationFrame(() => vCard.place()) });
   const wbody = el('div', 'nodes-host');
   const vWin = createView(wbody, 'win', M); views.push(vWin);
-  win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'close', resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
+  /* 041 N1 · NODES' CHIPS: the title bar keeps the presets, the dock door and ×; ADD · FIT · FOLD ALL · BYPASS ALL stand on the window's left rail
+     under the drag chip (the kit's chrome 'both', alpha.55), as TIMELINE's and FOLDERS' chips do */
+  const T = () => vWin.tools, chips = () => { const { off, folded } = T().state(); win.setChip('off', off); win.setChip('folds', folded); };   // a press flips the chip first: the model says what it reads
+  win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'both', gripAt: 'first', chips: [
+    { name: 'add', kind: 'action', glyph: 'plus', label: 'ADD NODE', hint: 'ADD NODE', press: () => T().add() },
+    { name: 'fit', kind: 'action', glyph: 'home', label: 'FIT', hint: 'FIT — every card in view (Home)', press: () => T().fit() },
+    { name: 'folds', kind: 'toggle', glyph: 'compact', label: 'FOLD ALL', hint: 'FOLD ALL', states: { true: { glyph: 'expand', label: 'UNFOLD ALL', hint: 'UNFOLD ALL', pressed: false } }, press: () => { T().fold(); chips(); } },
+    { name: 'off', kind: 'toggle', glyph: 'power', label: 'BYPASS ALL', hint: 'BYPASS ALL — the picture without the graph (\\)', press: () => { T().off(); chips(); } }], resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
     persist: { read: () => rec().win || null, write: (st) => put({ win: st }) },
     onOpen: () => { onWin(true); requestAnimationFrame(() => vWin.place()); }, onClose: () => onWin(false), onMoved: () => occlusion.dirty() });   // 021 I1: the bar's NODES seat lights on these
   /* 038 N3 · THE BAR (Josh: "Move the dock to rack button besides the 'x' button and make the icon slightly smaller and match the styling of the nodes
      icon and 'x' on the window bar"): the window's DOCK door beside × in its title bar (a head button, its glyph 16 px against the bar's 18), the
      card's OPEN AS A WINDOW door before × in its head (× 's own look) — the ground keeps no door */
   const door = (cls, glyph, word, run) => { const b = el('button', cls); b.type = 'button'; chip(b, glyph, word); b.addEventListener('click', run); return b; };
+  vWin.anchor(win.rail.chip('add')); vWin.onTools = chips; chips();
   win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'DOCK IN THE RACK', () => M.door('win')));
   /* 040 N4 · THE NODES' PRESETS (Josh: "I want to add the modulation window's preset saving thing into Nodes and put it into the window title bar"):
      MOD's bar — the save glyph · PRESET NAME · ◀ ▶ — on the left after the title.  A preset is the graph: every node but CURVES (whose grade keeps its
@@ -326,7 +334,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     new MutationObserver((recs) => { const c = card.root.classList; if (!c.contains('floating') || c.contains('dragging') || !recs.some((m) => / dragging( |$)/.test(' ' + m.oldValue))) return;
       const r = card.root.getBoundingClientRect(); rk.dock('nodes'); rk.close('nodes'); win.open(); win.place({ x: r.left, y: r.top }); }).observe(card.root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }); }
   const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'OPEN AS A WINDOW', () => M.door('card')), util.querySelector('.dev-close'));
-  occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
+  occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root), ...[...win.rail.el.querySelectorAll('.mir-chip')].map((c) => paintedRect(c))] : []));   // 041 N1: the rail's chips are painted glass too
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
   return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, setView: M.setView, setSolo: M.setSolo, setOff, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),

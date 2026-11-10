@@ -67,7 +67,7 @@ try {
       __LW.curves.preset('MASTER', 'S'); await new Promise((r) => setTimeout(r, 400)); return 1;`);
     await g.nav(`https://127.0.0.1:${process.env.LW_PORT || 8819}/lab/?warn=0`); await g.waitFor('window.__LW?.ready', 400, 100); await wait(1500);
     rects.graph = await g.ev(`__LW.nodes.open(); await new Promise((r) => setTimeout(r, 900)); return __LW.nodes.win.rect();`); await png('graph');
-    await g.ev(`document.querySelector('[data-mir-window="nodes"] .nodes-add').click(); return 1;`); await wait(300); await png('menu');
+    await g.ev(`document.querySelector('[data-mir-rail="nodes"] [data-mir-chip="add"]').click(); return 1;`); await wait(300); await png('menu');
     rects.menu = await g.ev(`const r = document.querySelector('[data-mir-window="nodes"] .nodes-menu').getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height };`);
     await g.ev(`__LW.nodes.close(); return 1;`); await wait(600); await png('stage');
     rects.card = await g.ev(`__LW.layout.reopen('nodes'); __LW.layout.raise('nodes'); await new Promise((r) => setTimeout(r, 1200)); const d = document.querySelector('.dev[data-id="nodes"]'); d.scrollIntoView(); await new Promise((r) => setTimeout(r, 400)); const r = d.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height };`);
@@ -80,9 +80,9 @@ try {
     await g.nav(`https://127.0.0.1:${process.env.LW_PORT || 8819}/lab/?warn=0`); await g.waitFor('window.__LW?.ready', 400, 100); await wait(800);
     const old = await g.ev(`return { nodes: __LW.nodes.nodes(), has: __LW.nodes.has() };`);
     const ui = await g.ev(`const w = (n) => new Promise((r) => setTimeout(r, n)), W = '[data-mir-window="nodes"] '; __LW.nodes.open(); await w(600);
-      document.querySelector(W + '.nodes-add').click(); document.querySelector(W + '[data-graph="POSTER"]').click(); await w(300);
+      document.querySelector('[data-mir-rail="nodes"] [data-mir-chip="add"]').click(); document.querySelector(W + '[data-graph="POSTER"]').click(); await w(300);
       const poster = __LW.nodes.nodes().map((q) => q.type);
-      document.querySelector(W + '.nodes-add').click(); document.querySelector(W + '.nodes-save').click(); const f = document.querySelector(W + '.sp-prename'); f.value = 'Mine';
+      document.querySelector('[data-mir-rail="nodes"] [data-mir-chip="add"]').click(); document.querySelector(W + '.nodes-save').click(); const f = document.querySelector(W + '.sp-prename'); f.value = 'Mine';
       f.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); await w(100);
       return { poster, saved: JSON.parse(localStorage.getItem('lambdawaves.q0.nodePresets')).items.map((x) => x.name + ':' + x.data.nodes.length), row: !!document.querySelector(W + '[data-graph="user:Mine"]'), passes: __LW.nodes.passes() };`);
     await g.nav(`https://127.0.0.1:${process.env.LW_PORT || 8819}/lab/?warn=0`); await g.waitFor('window.__LW?.ready', 400, 100); await wait(800);

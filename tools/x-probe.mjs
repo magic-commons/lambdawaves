@@ -22,7 +22,7 @@ const type = async (text) => { await drv.actions(g.s, [{ type: 'key', id: 'xk' +
 const SCENES = {
   x0: `__LW.layout.finder.open(); await w(300); document.querySelector('.mir-window-picker .wp-row[data-win="nodes"]').click(); await w(800);
     const finder = { win: N.win.isOpen(), card: !document.querySelector('.dev[data-id="nodes"]').classList.contains('closed') }; N.win.place({ x: 480, y: 70, w: 620, h: 720 }); await w(300); N.views[1].place(); await w(300); const empty = { list: N.nodes().length, line: $('.nodes-empty').textContent, shown: !$('.nodes-empty').hidden };
-    $('.nodes-add').click(); await w(200); const menu = { items: $$('.nodes-item[data-type]').length, seps: $$('.nodes-sep').length, icons: $$('.nodes-item .nodes-ico').length, focus: document.activeElement.className };
+    document.querySelector('[data-mir-rail="nodes"] [data-mir-chip="add"]').click(); await w(200); const menu = { items: $$('.nodes-item[data-type]').length, seps: $$('.nodes-sep').length, icons: $$('.nodes-item .nodes-ico').length, focus: document.activeElement.className };
     const f = $('.nodes-find'); f.value = 'blu'; f.dispatchEvent(new Event('input')); const found = $$('.nodes-item').filter((i) => !i.hidden).map((i) => i.dataset.type || i.dataset.graph);
     f.value = ''; f.dispatchEvent(new Event('input')); await w(200);
     return { finder, empty, menu, found };`,
@@ -47,7 +47,7 @@ const SCENES = {
     const named = await E(`await w(300); return { bar: $('[data-node="n1"] .nodes-name').textContent, label: __LW.mod.targets().find((t) => t.id === 'nodes.n1.gamma').label, ids: N.nodes().map((q) => q.id) };`);
     const folds = await E(`$('[data-node="n1"] .nodes-chev').click(); await w(200); const c = $('[data-node="n1"]');
       const one = { fold: c.classList.contains('fold'), h: c.offsetHeight, strips: $$('.nodes-strip').length, px: [...$('[data-node="n1"] .nodes-strip').getContext('2d').getImageData(64, 2, 1, 1).data].slice(0, 3) };
-      $('.nodes-folds').click(); await w(100); const all = $$('.nodes-card.fold').length; $('.nodes-folds').click(); await w(100); const none = $$('.nodes-card.fold').length;
+      document.querySelector('[data-mir-rail="nodes"] [data-mir-chip="folds"]').click(); await w(100); const all = $$('.nodes-card.fold').length; document.querySelector('[data-mir-rail="nodes"] [data-mir-chip="folds"]').click(); await w(100); const none = $$('.nodes-card.fold').length;
       $('[data-node="n1"] .nodes-chev').click(); await w(200); N.views[1].place(); await w(200);
       const b = $('[data-node="n2"] .nodes-name').getBoundingClientRect(); return { one, all, none, at: [Math.round(b.left + 30), Math.round(b.top + 6)] };`);
     await mouse(folds.at, 'right');
