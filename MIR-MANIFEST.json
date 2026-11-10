@@ -1,8 +1,8 @@
 {
   "kit": "MIR",
-  "version": "1.5.7-alpha.67",
+  "version": "1.5.7-alpha.68",
   "line": "1.5",
-  "commit": "448e3ec5ba8c",
+  "commit": "24cd0157b2ae",
   "files": {
     "lab/fonts/LWTitle-title.woff2": "8069abf19624158c",
     "lab/fonts/Roboto-OFL.txt": "061402327a96aadb",
@@ -155,7 +155,7 @@
     "lab/mir/pattern/model.js": "c3abd54fdd3735ba",
     "lab/mir/pattern/pattern.css": "df7f4962e01d8ff8",
     "lab/mir/pattern/sequencer.js": "fa438a588c0216c6",
-    "lab/mir/pattern/window.js": "f2d0a101af8f94f1",
+    "lab/mir/pattern/window.js": "37763210bab68457",
     "lab/mir/plane-model.js": "6cddd5451649fa45",
     "lab/mir/render/audio-mix.js": "f097e98f7b11a545",
     "lab/mir/render/clock.js": "523f12e590b127ce",
@@ -239,7 +239,7 @@
     "lab/mir/timeline/audio-drop.js": "378912799d75dd3d",
     "lab/mir/timeline/audio-kind.js": "71ea921972449ea1",
     "lab/mir/timeline/audio-playback.js": "81c9e930fe20286c",
-    "lab/mir/timeline/bind.js": "a13b235584185ebc",
+    "lab/mir/timeline/bind.js": "645b8d0930cd5cee",
     "lab/mir/timeline/controller.js": "7e57c530ef590efa",
     "lab/mir/timeline/cursor.js": "2c4a4bd2063bda28",
     "lab/mir/timeline/curve-view.js": "8432d7c7a10d0009",
@@ -262,14 +262,14 @@
     "lab/mir/timeline/time-format.js": "bace74d4a020942c",
     "lab/mir/timeline/timeline.css": "c91e7ade5eab3c12",
     "lab/mir/timeline/view.js": "a8b9bddcdec59f8b",
-    "lab/mir/timeline/window.js": "6fcbcc81f24b8ec5",
-    "lab/mir/tokens.json": "9f128cc8fc61ce3a",
-    "lab/mir/version.js": "9a0472afc1256ae9",
+    "lab/mir/timeline/window.js": "6d50f2cb9b857ed9",
+    "lab/mir/tokens.json": "03708ad74a788259",
+    "lab/mir/version.js": "8c952679eca1498b",
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
-    "lab/mir/window/rail.js": "49b5d6c86e45655f",
+    "lab/mir/window/rail.js": "a5d9caef1a69e856",
     "lab/mir/window/window.css": "2bae3c83ee4f68ba",
-    "lab/mir/window/window.js": "185a38ef6faf051c",
+    "lab/mir/window/window.js": "7c54c208de689bfd",
     "lab/mir/window/workspaces.js": "ccbc08107b9597af"
   }
 }

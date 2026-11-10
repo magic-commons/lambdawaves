@@ -213,10 +213,11 @@ export function createRail({ id, title, chips = [], layer, seats, onChip, onSide
     if (onChip) onChip(name, next, spec);
   }
 
-  /* the sizes: one read per layout, the other orientation is the same line turned */
+  /* the sizes: one read per layout, the other orientation is the same line turned.  1.5.7-alpha.68: in the rail's OWN px (the seen
+     rect ÷ UI SCALE), as every layout that reads them is; they were seen px, so a rail measured at 150 % was seated 1.5 × its size off */
   let size = null;
   function measure() {
-    const r = rect(el); if (!r.width || !r.height) return size;
+    const r = ownRect(el, rect(el)); if (!r.width || !r.height) return size;
     const v = vertical(el.dataset.side || 'left');
     const a = { w: Math.round(r.width), h: Math.round(r.height) }, b = { w: a.h, h: a.w };
     size = v ? { vertical: a, horizontal: b } : { vertical: b, horizontal: a };

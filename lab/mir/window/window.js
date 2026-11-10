@@ -58,9 +58,16 @@ export function readShape(raw, d, min = { w: 0, h: 0 }) {
     chipSide: CHIP_SIDES.includes(r.chipSide) ? r.chipSide : (d.chipSide || 'left'),
   };
 }
+/** scaledCap(env) — 1.5.7-alpha.68 A SCALED WINDOW KEEPS TO THE SCREEN: for a window made with `scaledRoom` (env.scale is its UI SCALE)
+ *  above 100 %, the most height it takes in its own px is the screen's room ÷ the scale — two thirds of the screen at 150 %, half at
+ *  200 % — so a window sized in its own px (the TIMELINE's 440, its least 400) does not cover the page; its `min` yields to it.  At 100 %
+ *  and below, and for every other window: no cap (Infinity). */
+export const scaledCap = (env) => (env.scale > 1 ? Math.floor((env.view.height - CLAMP.inset) / env.scale) : Infinity);
+/** roomH(env) — the most height a window takes: the view less the inset, and the scaled cap */
+const roomH = (env) => Math.min(env.view.height - CLAMP.inset, scaledCap(env));
 /** what the dock geometry is asked, the same for the guide and for the landing (so the guide IS the landing) */
 export function dockInput(P, env) {
-  return { span: env.span, side: P.chipSide === 'auto' ? 'left' : P.chipSide, height: Math.min(P.h, env.view.height - CLAMP.inset),
+  return { span: env.span, side: P.chipSide === 'auto' ? 'left' : P.chipSide, height: Math.min(P.h, roomH(env)),
     railSizes: env.sizes, viewport: env.view };
 }
 /** stackedAt(box, anchor, view, gap) — BASINS modwindow.js stackAbove: the left edge on the anchor's (kept 8 px inside
@@ -76,7 +83,8 @@ export const withReserve = (span, reserve, edge = 8) => (reserve > 0 && span ? {
 /** windowLayout(P, env) — the state to the pane's rect and the rail's seat.  env = { view: { width, height },
  *  sizes: the rail's { vertical, horizontal }, span: the dock span or null, gap?: the floating rail's gap (a number or
  *  per side; default 0 — createWindow passes kwin's RAIL.gap), anchor?: the seat rect when docked on an anchor, which may carry
- *  `avoid` (the glass of the window it is seated on) and `outer` (the edge facing away from it) for the rail's seat }.  Docked when it can be; a dock with no
+ *  `avoid` (the glass of the window it is seated on) and `outer` (the edge facing away from it) for the rail's seat, scale?: the
+ *  UI SCALE of a window that keeps to the screen (scaledCap) }.  Docked when it can be; a dock with no
  *  room floats for now and keeps the wish (P.dock is not touched).  → { box, seat, docked } */
 export function windowLayout(P, env) {
   const { view, sizes } = env;
@@ -86,8 +94,11 @@ export function windowLayout(P, env) {
     /* the rail under another window (BASINS snap-window.js seat): the anchor may say whose glass to keep off (`avoid`) and
        which edge faces away from it (`outer`); the racks' span is the lane a side seat must stay inside */
     if (env.anchor && env.anchor.width > 0) {
-      const box = anchorBox(env.anchor, Math.min(P.h, view.height - CLAMP.inset)), a = env.anchor;
-      return { box, seat: seatRail({ prefer: P.chipSide, box, sizes, view, gap: env.gap ?? 0, avoid: a.avoid || null, outer: a.outer || null, lane: a.avoid ? env.span || null : null }), docked: 'anchor' };
+      const box = anchorBox(env.anchor, Math.min(P.h, roomH(env))), a = env.anchor;
+      /* 1.5.7-alpha.68: the rail seats beside the part of the pane on the screen — a seat running past the edge (an ENV device half
+         scrolled out of the run at 150 %) centred it off the screen, where no side fit and it fell on the window it is seated on */
+      const l = Math.max(0, box.left), r = Math.min(view.width, box.left + box.width), on = r - l >= RAIL.pad * 2 ? { ...box, left: l, width: r - l } : box;
+      return { box, seat: seatRail({ prefer: P.chipSide, box: on, sizes, view, gap: env.gap ?? 0, avoid: a.avoid || null, outer: a.outer || null, lane: a.avoid ? env.span || null : null }), docked: 'anchor' };
     }
     if (env.anchor !== undefined) return { box: null, seat: null, docked: 'anchor', away: true };
   }
@@ -95,7 +106,7 @@ export function windowLayout(P, env) {
     const g = dockGeometry({ ...dockInput(P, env), dock: P.dock });
     if (g) { const box = { left: g.left, top: g.top, width: g.width, height: g.height }; return { box, seat: seatOn(g.side, box, sizes, view), docked: P.dock }; }
   }
-  const w = Math.min(P.w, view.width - CLAMP.inset), h = Math.min(P.h, view.height - CLAMP.inset);
+  const w = Math.min(P.w, view.width - CLAMP.inset), h = Math.min(P.h, roomH(env));
   /* env.top: a floating window stays below a reserved band (BASINS snap-window.js: P.y = max(P.y, bounds().top)) */
   const x = P.x ?? Math.round((view.width - w) / 2), y = Math.max(env.top ?? -Infinity, P.y ?? Math.round(Math.max(CLAMP.top, (view.height - h) / 2)));
   /* 1.5.6-alpha.3 (λWAVES 021 V1) · THE TALL WINDOW: one too tall to sit below the top band keeps its bottom (and its resize corner) on screen */
@@ -279,9 +290,12 @@ export function gripGesture(rail, w) {
  *               the app's `chips` with the drag chip and no close chip; the bar and the drag chip both move the window, Shift-drag,
  *               a long press and the arrows on the drag chip relocate the rail; it does not dock
  *    gripAt     'last' (default) or 'first': where the rail's drag chip stands among the chips
- *    glyph      a glyph name (1.5.6-alpha.3): the window's one drawing — before the title in a title bar, `data-glyph` on the root either way */
+ *    glyph      a glyph name (1.5.6-alpha.3): the window's one drawing — before the title in a title bar, `data-glyph` on the root either way
+ *    scaledRoom true (1.5.7-alpha.68 A SCALED WINDOW KEEPS TO THE SCREEN): under UI SCALE above 100 % the window, docked, floating or
+ *               stacked, is at most the screen's room ÷ the scale tall in its own px (scaledCap), and `min.h` yields to that; the
+ *               stored height is kept.  At 100 % and below nothing changes.  The TIMELINE passes it. */
 export function createWindow({ id, title = id, host, chips = [], body, panels, size = { w: 520, h: 360 }, min = { w: 240, h: 160 },
-  resizable = false, emptyDrag = false, dock = null, persist = null, material = null, railGap = RAIL.gap, railTier = 1, chrome = 'rail', gripAt = 'last', glyph = '', onMoved, onOpen, onClose } = {}) {
+  resizable = false, emptyDrag = false, dock = null, persist = null, material = null, railGap = RAIL.gap, railTier = 1, chrome = 'rail', gripAt = 'last', glyph = '', scaledRoom = false, onMoved, onOpen, onClose } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView;
   installOnce(doc);
   const mk = (tag, cls, parent) => { const n = doc.createElement(tag); if (cls) n.className = cls; if (parent) parent.appendChild(n); return n; };
@@ -315,9 +329,11 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
   let box = null, moving = null, deferred = false, gripping = () => false, kbBefore = null, active = panels && panels.length ? panels[0].name : null;
   let reserve = 0, stack = null;                                     // the lego stack: a band kept free above; the window this one sits on
   const seatOf = () => (dock && dock.anchor && typeof dock.anchor.rect === 'function' ? ownOf(dock.anchor.rect()) || null : undefined);   // a seat is a seen rect
-  const zoom = () => cssZoom(root), ownOf = (r) => { if (!r) return r; const z = zoom(); return z === 1 ? r : { ...r, left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z, width: r.width / z, height: r.height / z }; };
+  /* a seen rect in the window's px; a seat's `avoid` too (1.5.7-alpha.68: it stayed seen, so under UI SCALE the rail kept off the wrong box) */
+  const zoom = () => cssZoom(root), ownOf = (r) => { if (!r) return r; const z = zoom(); return z === 1 ? r : { ...r, left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z, width: r.width / z, height: r.height / z,
+    ...(r.avoid ? { avoid: { left: r.avoid.left / z, top: r.avoid.top / z, right: r.avoid.right / z, bottom: r.avoid.bottom / z } } : {}) }; };
   const env = () => ({ view: { width: view.innerWidth / zoom(), height: view.innerHeight / zoom() }, sizes: rail.sizes(), span: dock ? withReserve(ownOf(dock.span.read()), reserve) : null,
-    gap: railGap, anchor: P.dock === 'anchor' ? seatOf() : undefined, top: reserve > 0 ? 8 + reserve : undefined });
+    gap: railGap, anchor: P.dock === 'anchor' ? seatOf() : undefined, top: reserve > 0 ? 8 + reserve : undefined, scale: scaledRoom ? zoom() : undefined });
   const shape = () => ({ x: P.x, y: P.y, w: P.w, h: P.h, open: P.open, dock: P.dock, chipSide: P.chipSide });
   const save = () => { if (persist && persist.write) persist.write(shape()); };
 
@@ -356,7 +372,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
     const on = stack && !gripping() ? stack() : null;
     if (on) {
       rail.setDock(null);
-      const e = env(), w = Math.min(P.w, e.view.width - CLAMP.inset), h = Math.min(P.h, e.view.height - CLAMP.inset), at = stackedAt({ width: w, height: h }, on, e.view);
+      const e = env(), w = Math.min(P.w, e.view.width - CLAMP.inset), h = Math.min(P.h, roomH(e)), at = stackedAt({ width: w, height: h }, on, e.view);
       P.x = at.left; P.y = at.top;
     }
     rail.setDock(!on && P.dock && dock ? P.dock : null);           // the docked rail sits tighter (window.css --rail-gap)
@@ -401,7 +417,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
 
   /* ── THE DRAG: the grip (and empty glass, handed to it) ── */
   const grip = gripGesture(rail, { P: () => P, box: () => box, moving: () => !!moving, still, layout, relocate, guide, save, zoom,
-    floatSize: () => { const e = env(); return { w: Math.min(P.w, e.view.width - CLAMP.inset), h: Math.min(P.h, e.view.height - CLAMP.inset) }; },
+    floatSize: () => { const e = env(); return { w: Math.min(P.w, e.view.width - CLAMP.inset), h: Math.min(P.h, roomH(e)) }; },
     track: () => guide.track(box, dockInput(P, env()), seatOf() || null),
     begin: () => { const s = stack; stack = null; return s; },   // dragged away, a stacked window leaves its stack (BASINS)
     undo: (s) => { stack = s; } });
@@ -428,9 +444,9 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
     onMove(s) {
       if (!rz) return;
       const e = env();
-      const z = zoom();
+      const z = zoom(), cap = scaledCap(e);                          // alpha.68: a capped window resizes from the height it shows
       if (!P.dock) P.w = Math.round(clamp(rz.w + s.dx / z, min.w, e.view.width - CLAMP.inset));
-      P.h = Math.round(clamp(rz.h + (P.dock === 'bottom' ? -s.dy : s.dy) / z, min.h, e.view.height - CLAMP.inset));
+      P.h = Math.round(clamp(Math.min(rz.h, cap) + (P.dock === 'bottom' ? -s.dy : s.dy) / z, min.h, roomH(e)));
       layout();
     },
     onEnd() { root.classList.remove('resizing'); rz = null; save(); },
@@ -537,7 +553,7 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
     stackAbove(anchor) { stack = typeof anchor === 'function' ? anchor : null; if (P.open) layout(); },
     get isStacked() { return !!stack; },
     /** stackHeight() — the height the stack must leave free for this window */
-    stackHeight: () => (box ? box.height : Math.min(P.h, view.innerHeight / zoom() - CLAMP.inset)),
+    stackHeight: () => (box ? box.height : Math.min(P.h, roomH(env()))),
     /** stackAt(z) — the pane at z-index z and its rail just above it (an app's own stacking law; an app whose own windows
      *  are registered (registerWindow) needs none: raise() is one press order for all of them) */
     stackAt(z, { railOffset = railTier } = {}) { const n = Math.round(+z) || 0; setVar(root, 'z-index', String(n)); if (rail.el) setVar(rail.el, 'z-index', String(n + (Math.round(+railOffset) || 0))); },

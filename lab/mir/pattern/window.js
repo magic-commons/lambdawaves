@@ -87,11 +87,20 @@ export function installPattern(o) {
     const d = dev.getBoundingClientRect(); if (!(d.width > 0)) return null;
     /* 1.5.7-alpha.64 THE SCALE REACHES PATTERN: a seat is a SEEN rect (createWindow reads it ÷ UI SCALE); the device and the content box are
        seen already, the window's own lengths (h, the gap, the rail) are × the zoom */
-    const z = cssZoom(dev), railH = ((win && win.rail.sizes ? win.rail.sizes().horizontal.h : 0) || RAIL_H) * z, gap = EDGE * z;
-    const above = g.content.top - gap - h * z, flip = above - railH < gap;
+    const z = cssZoom(dev), railH = ((win && win.rail.sizes ? win.rail.sizes().horizontal.h : 0) || RAIL_H) * z, gap = EDGE * z, H = h * z;
+    /* 1.5.7-alpha.68 A SCALED WINDOW KEEPS TO THE SCREEN: under the content only when over it has no room for the pane and its rail
+       AND the pane fits under it on the screen (or not even the pane fits over it); then its top is held on the screen.  At 150 % on a
+       1300 × 850 page it sat under MODULATION 32 px off the bottom, its rail over the LFO device.  Across, the seat stays the device's
+       (Josh's law): the run cuts the pane where it cuts the device */
+    /* … and over MODULATION's chips when they stand over its content across the device (its top rail at 150 % on a wide page: the rail
+       sits flush on the content once its size is its own px, alpha.68, and the cap and the first steps were under it) */
+    const mr = view.rail && !view.rail.hidden ? view.rail.getBoundingClientRect() : null;
+    const roof = mr && mr.height > 0 && mr.bottom <= g.content.top + 1 && mr.right > d.left && mr.left < d.right ? Math.min(g.content.top, mr.top) : g.content.top;
+    const vh = win0.innerHeight, above = roof - gap - H, below = g.content.bottom + gap;
+    const flip = above - railH < gap && (below + H <= vh - gap || above < gap);
     /* outer: the edge facing away from the modulation window; avoid: its glass — the rail seats in a clear lane only
        (window/rail.js seatClear, BASINS snap-window.js seat) */
-    return { left: Math.round(d.left), width: Math.round(d.width), top: Math.round(flip ? g.content.bottom + gap : above), height: h * z,
+    return { left: Math.round(d.left), width: Math.round(d.width), top: Math.round(Math.max(gap, Math.min(flip ? below : above, vh - gap - H))), height: H,
       outer: flip ? 'bottom' : 'top', avoid: g.content };
   }
   /* docked, the window is cut where the device run cuts the device (the window set clips the pane; the rail is cut here) */

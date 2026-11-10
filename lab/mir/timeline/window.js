@@ -9,8 +9,9 @@
  *   createTimeline(host, port) → tl
  *     host    the element the window and its rail go in (the app's float layer)
  *     port    { model, mod, controller?, present?, say?, dock?, store?, size?, min?, keys?, transport?, audio?, id?, title?,
- *               remap?, loop? }  (docs/TIMELINE.md: the port; loop: false keeps the clock free-running, 1.5.6-alpha.25;
- *               otherwise an empty arrangement loops its first bar, 1.5.7-alpha.8)
+ *               remap?, loop?, scaledRoom? }  (docs/TIMELINE.md: the port; loop: false keeps the clock free-running, 1.5.6-alpha.25;
+ *               otherwise an empty arrangement loops its first bar, 1.5.7-alpha.8; scaledRoom: false lets the window take the whole
+ *               screen under UI SCALE, 1.5.7-alpha.68)
  *   tl: { win, root, rail, editor, model, controller, transport, open, close, toggle, isOpen, paintHead, presentation,
  *         restore, shortcuts(x, y), destroy }
  *
@@ -56,6 +57,7 @@ export function createTimeline(host, port) {
 
   const win = createWindow({
     id: port.id || 'timeline', title: port.title || 'TIMELINE', host, size, min, resizable: true, material: 'modulation',
+    scaledRoom: port.scaledRoom !== false,   // 1.5.7-alpha.68: under UI SCALE above 100 % at most the screen's room ÷ the scale tall; TIMELINE_MIN.h yields
     dock: port.dock || null, persist: { read: () => saved, write: writeShape }, onMoved: port.moved,
     chips: [
       { name: 'workbars', kind: 'cycle', state: workLane, states: [   // BASINS' cycle and its pressed: top → bottom → hidden

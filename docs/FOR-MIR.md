@@ -223,7 +223,7 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - OPEN · the themes browser suite was red from alpha.1 to alpha.47 unseen, because a door runs the node tests only: one whole browser run before the 1.5.7 cut.
 - OPEN · when Focus's line joins: its line-art `palette` meets λWAVES' own `palette` glyph (`registerGlyphs` refuses a kit name).
 
-## 041 (2026-11-10, THE SECOND HAND — the doors 1.5.7-alpha.49 … 67: T on `kit-041` and W on `kit-041w` from kit-040's a0e32f5, K on `kit-041-sos` @ 448e3ec; 52 and 53 unused; Focus's 27 … 37 stay on `focus`)
+## 041 (2026-11-10, THE SECOND HAND — the doors 1.5.7-alpha.49 … 68: T on `kit-041` and W on `kit-041w` from kit-040's a0e32f5, K and the fresh eyes' 68 on `kit-041-sos` @ 24cd015; 52 and 53 unused; Focus's 27 … 37 stay on `focus`)
 - **BUILT 1.5.7-alpha.49 · THE MODE MENU** (T1)
 - **BUILT 1.5.7-alpha.50 · THE PILLS STAY ON TOP** (T2)
 - **BUILT 1.5.7-alpha.51 · THE EMPTY LANE HAS NO HINT** (T3)
@@ -241,6 +241,7 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - **BUILT 1.5.7-alpha.65 · THE DOCK CHIP'S GLYPHS ARE THE APP'S TO NAME** (K2)
 - **BUILT 1.5.7-alpha.66 · A LEAVING BLOCK TAKES NO SEAT** (K3)
 - **BUILT 1.5.7-alpha.67 · THE FINDER HAS SECTIONS** (K4)
+- **BUILT 1.5.7-alpha.68 · A SCALED WINDOW KEEPS TO THE SCREEN** (the fresh eyes' FIX 5; kit-041-sos @ 24cd015): `createWindow({ scaledRoom })` caps a window at (screen − 16) ÷ scale above 100 % (TIMELINE passes it; `installTimeline({ scaledRoom: false })` is the old size); a rail measures itself in own px; PATTERN's seat stays on the screen. OPEN from it: MODULATION at 1000 × 700 @ 150 % is as tall as its content (its rail stands over MACROS); the timing bar's last button runs off a 1000-px page at 100 %.
 - ANSWERED by these doors: 040's `createWindowPicker({ sections })` and 039 X (4)'s keywords (alpha.67 `sections`, `words`); 036's "modulation material under UI SCALE" (and 039 V (1)'s line on it: alpha.64; FOLDERS alpha.58); 036's "a saved rect is px" in part (alpha.59 brings a whole window back whole); 041 P13's `placeGlyphs` (alpha.65); 041 I2's leaving block (alpha.66); 041 I8's racks' near distance, asked at alpha.48's 44 px (alpha.63: the racks 140, the bar 160 / 220, which λWAVES' own bar peek reads).
 - OPEN · the sphere's delta mode (`panels/camera.js`): its tap watcher counts a press that became a drag, so two quick strokes from one spot read as a double-tap and send the view or the plane home; ask: a press past the tap slop is not a tap (041 N4).
 - OPEN · the sphere's delta mode has no release notice (`onEnd(velocity)`), so the ball cannot take the stage's fling (041 N4).

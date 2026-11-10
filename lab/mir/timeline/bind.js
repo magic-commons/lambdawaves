@@ -58,7 +58,7 @@ export function installTimeline(o) {
   /* controller: the app's own one-play controller (timeline/controller.js shape) and its refusal sentences, as createTimeline
      takes it; absent, the timeline makes one from scrubLevel and busy */
   const tl = createTimeline(o.mount, { model, mod, controller: o.controller, present: o.present, say: o.say, dock: o.dock, store, initial: o.initial, keys: o.keys || null,
-    transport: o.transport, audio: o.audio === false ? null : { pick: (at) => au && au.pick(at) }, scrubLevel: o.scrubLevel, busy: o.busy, moved: o.moved, onWindow: o.onWindow, storageKey, loop: o.loop, moreRows: o.moreRows || null });
+    transport: o.transport, audio: o.audio === false ? null : { pick: (at) => au && au.pick(at) }, scrubLevel: o.scrubLevel, busy: o.busy, moved: o.moved, onWindow: o.onWindow, storageKey, loop: o.loop, moreRows: o.moreRows || null, scaledRoom: o.scaledRoom });
   /* THE AUDIO CLIP (docs/AUDIO.md): a file dropped on a lane, ADD AUDIO… in the ⋯ menu, the playback and the asset part, with no app line;
      `audio: false` leaves it out, an object is installAudioDrop's own options */
   if (o.audio !== false) au = tl.audio = installAudioDrop(tl.editor, { mod, controller: tl.controller, say: o.say, busy: o.busy, ...(o.audio && typeof o.audio === 'object' ? o.audio : {}) });

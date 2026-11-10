@@ -94,6 +94,8 @@ const ACCEPTED = {
   '1.5.7-alpha.63': '43da45d0a176b2797fcdd7ac1e475e977b1d8e8735c06f91af91d6bff68619d5',
   /* 041 K · MIR 1.5.7-alpha.67 (kit-041-sos @ 448e3ec: 64 THE SCALE REACHES TIMELINE, MODULATION AND PATTERN, 65 THE DOCK CHIP'S GLYPHS ARE THE APP'S TO NAME, 66 A LEAVING BLOCK TAKES NO SEAT, 67 THE FINDER HAS SECTIONS) */
   '1.5.7-alpha.67': '2d5030cfbda09940be3a5339f1f1546da02f6f48f6a2a895684172e655d2a4c7',
+  /* 041 the fresh eyes' row · MIR 1.5.7-alpha.68 A SCALED WINDOW KEEPS TO THE SCREEN (kit-041-sos @ 24cd015: scaledRoom caps TIMELINE's height above 100 pct UI SCALE, a rail measures in own px, PATTERN's seat stays on the screen) */
+  '1.5.7-alpha.68': '798a5a1490816a6a530df04b2a9e3bb27936b5dd1c7722eaeaea178fac84d678',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
