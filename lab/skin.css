@@ -497,12 +497,14 @@ body.window-info-off .settings-help { display:none; }
 .palette-enable > .mir-ramp-sel { flex: 0 0 auto; }
 .palette-enable > .mir-ramp-sel > .mir-ramp-remove { margin-left: 0; }
 .lw-pop { position: fixed; left: 50%; top: 0; z-index: 21; pointer-events: none; user-select: none; white-space: nowrap; opacity: 0;
-  transform: translateX(-50%); font-size: calc(15px * var(--lw-pop-size, 1)); letter-spacing: .08em; font-family: var(--font-math); font-weight: 400;
-  color: hsl(40 33% 96%); text-shadow: 0 0 8px hsl(228 40% 4% / .55), 0 0 2px hsl(228 40% 4% / .55); }
-/* 040 I4 · THE MATH FACE (Josh 11-09: "Re, Im, p … is supposed to be a math font, even the psi … the classical greek font they use in LaTeX"; "some of the
-   other announcements … a serif font"): every pop-up is set in STIX Two Math (its one weight; its Latin is the serif); WAVE VIEW's is KaTeX's (stage-words.js) */
-.lw-pop[data-kind="view"] { letter-spacing: 0; font-size: calc(17px * var(--lw-pop-size, 1)); }
-[data-theme="light"] .lw-pop { color: hsl(232 22% 10%); text-shadow: 0 0 8px hsl(42 45% 97% / .85), 0 0 2px hsl(42 45% 97% / .85); }
+  transform: translateX(-50%); font-size: calc(15px * var(--lw-pop-size, 1)); font-family: var(--font-info-body, "Spectral"), var(--font-math); font-weight: 400;   /* a glyph Spectral lacks (a subscript, a Greek letter) falls to the math face */
+  color: hsl(40 33% 96%); }
+/* 041 I6 · THE ANNOUNCEMENT WEARS THE STAGE'S FACE (Josh 11-09: "The styling of the new announcements … have a weird glow or shadow on it.  Let it match the
+   styling of the formula, name, subtitle, font, and font form"): no glow, no shadow, no tracking; the formula's and the NAME's serif (the kit's
+   --font-info-body) in their ink — the theme's here, the stage's own under a coloured stage (lab.css, body[data-stage-ink]).  040 I4's math stands where it
+   is maths: WAVE VIEW's line is KaTeX's, the formula's own face (stage-words.js) */
+.lw-pop[data-kind="view"] { font-size: calc(17px * var(--lw-pop-size, 1)); }
+[data-theme="light"] .lw-pop { color: hsl(232 22% 10%); }
 /* 041 I5 (Josh 11-09: "Let the announcements stick around for a second longer"): 2.6 s, was 1.6 — the same 0.19 s in and 0.56 s out, a second more lit */
 .lw-pop.go { animation: lw-pop 2.6s ease-out forwards; }
 @keyframes lw-pop { 0% { opacity: 0; transform: translate(-50%, 6px); } 7.4% { opacity: 1; transform: translate(-50%, 0); } 78.5% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -4px); } }

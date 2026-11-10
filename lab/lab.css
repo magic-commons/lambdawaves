@@ -779,6 +779,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 body[data-stage-ink="light"] .mir-info { --info-ink: hsl(40 33% 96%); --info-paper: hsl(228 40% 4% / .27); --info-paper-soft: hsl(228 40% 4% / .14); }
 body[data-stage-ink="dark"] .mir-info { --info-ink: hsl(232 22% 10%); --info-paper: hsl(42 45% 97% / .38); --info-paper-soft: hsl(42 45% 97% / .2); }
 body[data-stage-ink="light"] #widgets { color: hsl(40 33% 96%); } body[data-stage-ink="dark"] #widgets { color: hsl(232 22% 10%); }
+body[data-stage-ink="light"] .lw-pop { color: hsl(40 33% 96%); } body[data-stage-ink="dark"] .lw-pop { color: hsl(232 22% 10%); }   /* 041 I6: a pop wears the words' ink */
 body[data-stage-ink="light"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(0 0 0 / .5); } body[data-stage-ink="dark"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(255 255 255 / .75); }
 body[data-stage-ink="light"] .lw-espbar { color: hsl(40 33% 96%); text-shadow: 0 0 6px rgb(0 0 0 / .75); } body[data-stage-ink="dark"] .lw-espbar { color: hsl(232 22% 10%); text-shadow: 0 0 6px rgb(255 255 255 / .8); }
 html body[data-stage-ink="light"] #title .word { color: #fff; } html body[data-stage-ink="dark"] #title .word { color: #000; }   /* the wordmark and the menu's words stand on the stage too */
