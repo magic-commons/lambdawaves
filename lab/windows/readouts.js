@@ -182,7 +182,7 @@ export function createReadouts(app) {
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
   const atomsView = createAtoms(wAtoms.body, {
     Z: () => HAMILTONIANS.atom.Z,
-    select: (z) => setElement(z),
+    select: (z) => setElement(z, true),   // 041 H5: a cell is the preset — the element, ATOM, its ground configuration
     fill: () => fillValence(),
     active: () => getHamiltonian().id === 'atom',
     busy: cardLoading(wAtoms, 'relativity'),   // iteration 008 Z: RELATIVITY Δ's second solve wears the card's busy mark

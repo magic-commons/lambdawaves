@@ -6,7 +6,7 @@ import { TIER } from '../tier.js';
 import { el, knob, seg, trig, readout, group, label, mathPlain, stepper } from '../mir/kit.js'; import { fold } from '../fold.js';
 import { BASIS, NMAX, stateOf } from '../hydrogen.js'; import { L_LETTERS } from '../names.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu, MASSES, onHamiltonian } from '../hamiltonian.js';
-import { ATOMS, valenceShells, ZMAX } from '../atoms.js';
+import { ATOMS, valenceShells, groundConfig, ZMAX } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
 import { CATALOGUE } from '../catalogue.js';
 import { stateLatex, moleculeLatex } from '../latex-state.js';
@@ -278,28 +278,36 @@ export function createSpectrumCard(app) {
     return true;
   }
 
-  /** the ELEMENT knob: which atom the ATOM Hamiltonian solves (Z = 1 … 118, H … Og); the register is re-read in it */
-  function setElement(Z) {
+  /** the ELEMENT knob: which atom the ATOM Hamiltonian solves (Z = 1 … 118, H … Og); the register is re-read in it.
+   *  041 H5 · ATOMS IS A PRESET PICKER (Josh 11-09: "the atoms window is supposed to act as a spectrum label preset picker to load up it's highest
+   *  valence level while activating the relevant layers below"): `load` is ATOMS' cell — the element in force, ATOM the operator, and the GROUND
+   *  CONFIGURATION in the register (fillValence(true)), its highest valence level the lane selected; one undo row. */
+  function setElement(Z, load) {
     Z = Math.max(1, Math.min(ZMAX, Math.round(Z) || 1));
     busy.n++; busySync();                                              // wave 48: the atom is re-solved on a log mesh, twice, and Richardson-extrapolated — the mark says so
     let changed; try { changed = HAMILTONIANS.atom.configure(Z); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
     if (ui.elemKnob) ui.elemKnob.set(Z);
     if (changed) { if (app.w.atomsView) app.w.atomsView.invalidate(); hNote(); if (getHamiltonian().id === 'atom') switchHamiltonian('atom'); else schedule(TIER.PRESENT); }
+    if (load) { const top = fillValence(true), s = stateOf(top.n, top.l, 0); if (s) { spectrum.select(s.index); schedule(TIER.PRESENT); } hNote(); }
     return Z;
   }
   /** LOAD VALENCE (iteration 008; once FILL THE VALENCE — the verb keeps its name; 008 Q: every subshell outside the noble-gas core, Josh
    *  10-19 "load all the subshells, the thumbnail only shows the highest orbital"): each valence subshell (`valenceShells`: Fe 4s and 3d,
    *  Au 6s, 4f and 5d) at the weight of its electrons, every m of it equal and all in phase — the spherical average of the valence density.
-   *  A shell the basis does not hold (n = 7 before A7) is left out and said. */
-  function fillValence() {
+   *  A shell the basis does not hold (n = 7 before A7) is left out and said.
+   *  041 H5: `all` loads the whole ground configuration by the same law — atoms.js `groundConfig(Z)` (the Madelung filling and the NIST exceptions),
+   *  every occupied subshell at the weight of its electrons: the valence and the filled layers below it; the level it answers is still the highest
+   *  valence one, the last of `valenceShells(Z)` in Madelung order (Fe 3d, Na 3s, Au 5d). */
+  function fillValence(all) {
     if (getHamiltonian().id !== 'atom') { switchHamiltonian('atom'); if (ui.hamSeg) ui.hamSeg.set('atom'); }
-    const shells = valenceShells(HAMILTONIANS.atom.Z), held = shells.filter((c) => stateOf(c.n, c.l, 0)), gone = shells.filter((c) => !held.includes(c));
+    if (reg.transition) { reg.clearTransition(clock.t); if (ui.abSw) ui.abSw.set(false); }
+    const val = valenceShells(HAMILTONIANS.atom.Z), shells = all ? [...groundConfig(HAMILTONIANS.atom.Z).filter((c) => !val.some((v) => v.n === c.n && v.l === c.l)), ...val] : val, held = shells.filter((c) => stateOf(c.n, c.l, 0)), gone = shells.filter((c) => !held.includes(c));
     const N = held.reduce((a, c) => a + c.occ, 0), top = held[held.length - 1] || shells[shells.length - 1];
     reg.clear(); let labels = 0;
     for (const c of held) { const amp = Math.sqrt(c.occ / N / (2 * c.l + 1)); for (let m = -c.l; m <= c.l; m++) { reg.set(stateOf(c.n, c.l, m).index, amp, 0, clock.t); labels++; } }
     touchState(); schedule(TIER.REBUILD);
     const sup = (k) => String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]), name = (c) => `${c.n}${L_LETTERS[c.l]}${sup(c.occ)}`;
-    const msg = `${HAMILTONIANS.atom.short} · ${held.map(name).join(' ')} loaded · ${labels} label${labels === 1 ? '' : 's'}, in phase`
+    const msg = `${HAMILTONIANS.atom.short} · ${all ? HAMILTONIANS.atom.element.core + ' · top ' + top.n + L_LETTERS[top.l] : held.map(name).join(' ')} loaded · ${labels} label${labels === 1 ? '' : 's'}, in phase`
       + (gone.length ? ` · ${gone.map(name).join(' ')} past the basis (n ≤ ${NMAX}), not loaded` : '');
     wState.setStatus(msg, 'live'); if (app.w.wAtoms) app.w.wAtoms.setStatus(msg, 'live');
     return { n: top.n, l: top.l, labels, shells: held.map((c) => ({ n: c.n, l: c.l, occ: c.occ })), past: gone.map((c) => ({ n: c.n, l: c.l, occ: c.occ })) };
