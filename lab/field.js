@@ -1978,10 +1978,11 @@ export async function createField(canvas, opts = {}) {
     cardDirty = false; generation++; stats.generation = generation; stats.reconstructs++;
   }
   /* 040 S2 · STROBE's level now: lit for DUTY of every RATE beats of the transport (opts.transport: its beats and bpm, read only — ONE clock; paused,
-     it stands).  The period never falls under a third of a second, whatever the tempo: three flashes a second is the ceiling (WCAG 2.3.1) */
+     it stands).  041 S7 · STROBE HAS NO CAP (Josh, call 12: "no there shouldn't be a cap, there'a already a photo sensitivity warning in the page"):
+     the period is RATE's beats at the transport's tempo, whatever that is — 040 held it at a third of a second; the page's notice stands as it is */
   function strobeNow(ps) {
     const T = opts.transport && opts.transport(); if (!T || !(ps.strobe > 0)) return 0;
-    const x = T.beats / Math.max(strobeBeats(ps.strobeRate), T.bpm / 180);
+    const x = T.beats / strobeBeats(ps.strobeRate);
     return x - Math.floor(x) < ps.strobeDuty ? ps.strobe : 0;
   }
   function writeView(obs, mat, w, h) {

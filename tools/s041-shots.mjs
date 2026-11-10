@@ -28,6 +28,11 @@ const SCENES = {
     __LW.camera.setLock(true); await wait(100); d.querySelector('.xy-pad').scrollIntoView({ block: 'center' }); await wait(200);
     return { boot, words, locked: __LW.camera.lock, padOff: d.querySelector('.mir-xy').classList.contains('disabled') };`, 'tap:.dev[data-id="camera"] .cam-pan',
     `await wait(300); const d = document.querySelector('.dev[data-id="camera"]'); return { lockAfterPress: __LW.camera.lock, padOff: d.querySelector('.mir-xy').classList.contains('disabled'), saved: __LW.settings.camLock };`],
+  /* S7: STROBE at 1/4 beat and 120 BPM flashes 8 times a second (040's cap held it at 3): rising edges of the stage's mean light over 2 s */
+  'probe-s7-strobe': `__LW.mod.clock.setBpm(120); __LW.mat.stage = { pulse: 0, position: 0, rate: 2, strobe: 1, strobeRate: 0.25, strobeDuty: 0.5, beam: 0, beamAngle: 0, beamWidth: 30 }; __LW.mod.play(); await wait(300);
+    const L = []; const t0 = performance.now(); while (performance.now() - t0 < 2000) { L.push((await __LW.field.readPixels(__LW.obs, __LW.mat, 64, 48)).meanLum); await wait(12); }
+    __LW.mod.stop(); const mid = (Math.min(...L) + Math.max(...L)) / 2; let rises = 0; for (let i = 1; i < L.length; i++) if (L[i - 1] < mid && L[i] >= mid) rises++;
+    return { samples: L.length, rises, perSecond: rises / 2, bpm: __LW.mod.model.transport.bpm, lo: Math.min(...L).toFixed(1), hi: Math.max(...L).toFixed(1) };`,
   's2-lattice': `__LW.mat.frameMode = 'lattice'; __LW.setFrame(true); await wait(600); return { msgs: __LW.field.shaderMessages };`,
 };
 const [scene = 's1-dots', W = '1300', H = '850', light = ''] = process.argv.slice(2);

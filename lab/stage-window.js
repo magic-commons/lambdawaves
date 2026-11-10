@@ -38,7 +38,7 @@ const FX = [   // group · key · the knob's label · its hint · the knob's sha
   ['PULSE', 'position', 'POSITION', 'Where the band stands: 0° centre, 180° edge', { max: 360, wrap: true, fmt: deg }, 'PULSE POSITION'],
   ['PULSE', 'rate', 'BAND WIDTH', 'How wide the band is: a thin ring to the whole stage', { max: 2, fmt: (v) => pct(v / 2) }, 'PULSE BAND WIDTH'],
   ['STROBE', 'strobe', 'INTENSITY', 'How strongly the stage flashes on the beat', { fmt: pct }, 'STROBE'],
-  ['STROBE', 'strobeRate', 'RATE', 'Beats between flashes (never over 3 a second)', { min: 0.25, max: 4, log: true, fmt: (v) => { const b = strobeBeats(v); return (b < 1 ? '1/' + 1 / b : b) + ' BEAT'; } }, 'STROBE RATE'],
+  ['STROBE', 'strobeRate', 'RATE', 'Beats between flashes', { min: 0.25, max: 4, log: true, fmt: (v) => { const b = strobeBeats(v); return (b < 1 ? '1/' + 1 / b : b) + ' BEAT'; } }, 'STROBE RATE'],
   ['STROBE', 'strobeDuty', 'DUTY', 'How much of each flash the stage stays lit', { min: 0.05, max: 0.95, fmt: pct }, 'STROBE DUTY'],
   ['BEAM', 'beam', 'INTENSITY', 'How strongly the beam lights the stage', { fmt: pct }, 'BEAM'],
   ['BEAM', 'beamAngle', 'ANGLE', 'Where the beam points: 0° up, turning clockwise', { max: 360, wrap: true, fmt: deg }, 'BEAM ANGLE'],
