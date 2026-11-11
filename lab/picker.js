@@ -16,7 +16,6 @@
  * Under the logo (iteration 012 L2): RETURN HOME (the lab), FOLDERS (the projects and the demos) and THE HUE ring (a dial that turns the
  * molecules' pictures round the colour wheel), THEME (032) and LOOK.  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
-import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
 import { el, chip, mathPlain, stepper, seg, hint } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
 import { chordFromEvent } from './mir/shell/keys.js';   // 039 R5: the menu's own chord passes to the key table while the menu holds the keys
@@ -30,7 +29,7 @@ import { L_LETTERS } from './names.js';
 import { RM, still, animate, pointerFrame, tiltPictures, holoCards, enterTiles, develop, setPic, swapLine, installRing, clamp } from './picker-fx.js';
 import { createCollage } from './picker-collage.js';   // 035 THE COLLAGE: the face's wall of clips
 import * as V from './volumes.js';
-import { keepData, installed, safariTab } from './library.js';
+import { keepData, installed, safariTab, storageInfo } from './library.js';
 
 /* 030 THE TIP JAR: the donation link, written by tools/tip-qr.py together with img/menu/tip-qr.svg (its picture). Empty: no card, no sheet. */
 const TIP_URL = 'https://ko-fi.com/magiccommons';
@@ -74,10 +73,6 @@ export const TUTORIAL = [   // 036 G7: lab/loader.js keeps their files
   { id: 'tut-mod-hero-6', title: 'MOD HERO 6', caption: '', themes: 'dark', deck: 1 },
 ];
 
-const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
-  + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
-  + 'Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og').split(' ');
-const NAMES = 'Hydrogen Helium Lithium Beryllium Boron Carbon Nitrogen Oxygen Fluorine Neon Sodium Magnesium Aluminium Silicon Phosphorus Sulfur Chlorine Argon Potassium Calcium Scandium Titanium Vanadium Chromium Manganese Iron Cobalt Nickel Copper Zinc Gallium Germanium Arsenic Selenium Bromine Krypton Rubidium Strontium Yttrium Zirconium Niobium Molybdenum Technetium Ruthenium Rhodium Palladium Silver Cadmium Indium Tin Antimony Tellurium Iodine Xenon Caesium Barium Lanthanum Cerium Praseodymium Neodymium Promethium Samarium Europium Gadolinium Terbium Dysprosium Holmium Erbium Thulium Ytterbium Lutetium Hafnium Tantalum Tungsten Rhenium Osmium Iridium Platinum Gold Mercury Thallium Lead Bismuth Polonium Astatine Radon Francium Radium Actinium Thorium Protactinium Uranium Neptunium Plutonium Americium Curium Berkelium Californium Einsteinium Fermium Mendelevium Nobelium Lawrencium Rutherfordium Dubnium Seaborgium Bohrium Hassium Meitnerium Darmstadtium Roentgenium Copernicium Nihonium Flerovium Moscovium Livermorium Tennessine Oganesson'.split(' ');   /* the 118 names (ASE's table), the caption's word for an element */
 /** the 18-column seat: [row, column] (rows 1–7 the periods, 9–10 the f-block under them) */
 function seatOf(Z) {
   const P = [2, 10, 18, 36, 54, 86, 118], p = P.findIndex((e) => Z <= e) + 1, z0 = p > 1 ? P[p - 2] : 0, i = Z - z0;
@@ -88,11 +83,9 @@ function seatOf(Z) {
   if (i <= 17) return [p + 3, i];                                      // La–Lu, Ac–Lr: the f rows, columns 3–17
   return [p, i - 14];
 }
-
-
 const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 /** iteration 008 P (Josh: "atoms should not be in the molecules window"): Z when a formula is one bare element symbol (Fe, Kr: a one-atom entry), else 0 */
-const atomZ = (f) => SYM.indexOf(String(f || '').replace(/<\/?m>/g, '').trim()) + 1;
+const atomZ = (f) => { const s = String(f || '').replace(/<\/?m>/g, '').trim(); return ATOMS.findIndex((a) => a.symbol === s) + 1; };
 const volName = (v) => 'VOL. ' + v.numeral;
 const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB' : b >= 1e6 ? Math.round(b / 1e6) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' kB');
 
@@ -151,6 +144,7 @@ function volumeRows() {
   })();
   return volRowsP;
 }
+V.watch(() => { volRowsP = null; });
 const plain = (s) => String(s || '').replace(/<\/?m>/g, '').replace(/[_{}\\]/g, '').toLowerCase();
 /** suggest(query, n) → [{ id, name, formula, vol, pic }] — at most n molecules for a typed query: prefix matches (name, formula, id) first */
 async function suggest(query, n = 6) {
@@ -430,7 +424,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const SHAPES = { '●': 'balls', '⊸': 'sticks', '◣': 'wedge' };   // 021 V2: the table's `balls` and `sticks` (lab/icons.js) · 037 D2: `wedge`
   const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = glyphSvg(SHAPES[g], 'gly'); else host.textContent = g; return host; };
   const lookOf = () => { const l = lookFor(false); return l !== 'density' ? l : null; };   // a volume tile's style (V.picture), a molecule's look
-  const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu';   // 022 P3: a menu pane drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');
+  const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu'; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');   // 022 P3: a menu pane
   const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio'); b.style.setProperty('--i', String(i));
     b.style.gridRow = i < 3 ? '1' : '2'; b.style.gridColumn = (i < 3 ? 2 + 2 * i : 1 + 2 * (i - 3)) + ' / span 2';   // L1: the bricks, each row centred
     glyph(el('b', 'mm-lk-g', b), glyph_); b.addEventListener('click', () => { if (b.getAttribute('aria-disabled') === 'true') return; setLook(id); closeDrop(true); }); return b; });
@@ -443,7 +437,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   function setLook(id) {
     if (prefs.look === id) return; prefs.look = id; prefs.lookHand = true; writePrefs(prefs); paintLooks();   // P3: the first write is the reader's
-    for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) setPic(i, u); }, () => {});
+    for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) volPic(i, u); }, () => {});
     for (const i of root.querySelectorAll('img.mm-pic[data-menu]')) { const { src } = picOf(i.dataset.menu); if (i.getAttribute('src') !== src) setPic(i, src); }   // M2: every deck of ours
   }
   let dropT = 0;
@@ -524,6 +518,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     i.addEventListener('error', () => { const f = i.dataset.menu ? picOf(i.dataset.menu).fb : null; if (f && i.getAttribute('src') !== f) setPic(i, f); else hold(host, i); });
     i.addEventListener('load', () => unhold(host, i));
     if (src) { develop(i); i.addEventListener('load', () => { const u = i.getAttribute('src'); if (u && u.startsWith(MENU)) keepData(u); }); setPic(i, src); } return i; };
+  /* a volume's picture kept on this device comes as a blob: URL (volumes.js picture): it is let go once its <img> has it, or when another replaces it */
+  const volPic = (i, u) => { const was = i.getAttribute('src'); if (was && was.startsWith('blob:')) URL.revokeObjectURL(was);
+    if (u && u.startsWith('blob:')) for (const t of ['load', 'error']) i.addEventListener(t, () => URL.revokeObjectURL(u), { once: true }); setPic(i, u); };
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
     if (off) { b.classList.add('off'); b.setAttribute('aria-disabled', 'true'); }
@@ -616,9 +613,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
 
   /* ── ATOMIC: 118 squares on the 18-column table, the f rows under it ── */
   const table = el('div', 'mm-table', sections[0].sec);
-  for (let Z = 1; Z <= 118; Z++) {
-    const [r, c] = seatOf(Z), v = valenceOf(Z), a = ATOMS.find((x) => x.Z === Z), live = !!a, sym = SYM[Z - 1];
-    const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, under: false, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
+  for (const { Z, symbol: sym, name } of ATOMS) {
+    const [r, c] = seatOf(Z), v = valenceOf(Z);
+    const t = tile(table, 'mm-el', { name, sub: v.label, math: true, under: false }, () => goAtom(Z));
     t.style.gridRow = String(r); t.style.gridColumn = String(c);
     pic(t, null, 'el:' + sym + ':' + v.nl + '_' + v.m);   // the block's orbital (011 Q3b: the differentiating subshell — Fe 3d, Ce 4f; the pure orbital of its (n, l, m), cut to show its layers)
     el('b', 'mm-sym', t, sym);   // M3: the symbol alone (Z left the tile: "it shouldn't show the 'z' number")
@@ -692,7 +689,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const eye = (i, here) => setGlyph(i, here ? 'trash' : 'download');
   /* the store read each time the MOLECULAR deck or the LIBRARY comes into view (a press, MOLECULES or the browser may have changed it) */
   async function readStore() {
-    for (const S of secs.values()) for (const r of S.recs) have.set(r.hash, await installed(r.hash).catch(() => false));
+    await Promise.all([...secs.values()].flatMap((S) => S.recs).map(async (r) => have.set(r.hash, await installed(r.hash).catch(() => false))));
     for (const S of secs.values()) for (const m of S.rows) paintAway(m);
     library.paintDevice();
   }
@@ -866,7 +863,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        with ♥ TIP and NO THANKS; both continue. A file volume (OPEN FILE…) asks on every press: its file is the tip jar's thank-you (Josh
        10-31, B), so the words are THE FILE IS A THANK-YOU · ♥ TIP · I HAVE THE FILE, and its chooser opens on I HAVE THE FILE, Escape or a
        press outside (after ♥ TIP it waits for its own press: the new tab took the gesture). The Drive link is never in the app. */
-    let tipAsked = false;
+    let tipAsked = false, tipOff = null;
     const tipArt = (host) => { const f = el('span', 'mm-tip-art mm-holo', host); el('span', 'mm-halo', f); const lit = el('span', 'mm-lit', f), img = el('img', '', lit); el('span', 'mm-foil', lit); el('span', 'mm-rim', f);   // 032: the album art's light
       img.src = 'img/menu/tip-qr.svg'; img.alt = 'QR code: the tip jar'; img.width = img.height = 196; img.decoding = 'async'; img.draggable = false; return f; };
     const tipLink = (a) => { a.href = TIP_URL; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
@@ -878,10 +875,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const row = el('div', 'mm-tip-row', s), yes = tipLink(el('a', 'mm-tip-yes', row, '♥ TIP')), no = el('button', 'mm-tip-no', row, follow ? 'NO THANKS' : 'I HAVE THE FILE'); no.type = 'button';
       yes.title = follow ? 'Opens the tip jar in a new tab; the install goes on' : 'Opens the tip jar; its thank-you message has the file'; no.title = follow ? 'Go on without a tip' : 'Open the file you have';
       const key = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(true); } };
-      const done = (cont) => { window.removeEventListener('keydown', key, true); back.remove(); if (cont) go(); };
+      const done = (cont) => { tipOff = null; window.removeEventListener('keydown', key, true); back.remove(); if (cont) go(); };
       yes.addEventListener('click', () => done(follow)); no.addEventListener('click', () => done(true));
       back.addEventListener('click', (e) => { if (e.target === back) done(true); });
-      window.addEventListener('keydown', key, true); no.focus();
+      window.addEventListener('keydown', key, true); tipOff = () => done(false); no.focus();
     }
     /* 032 THE PORTRAIT SHELF (Josh 11-01: "portrait oriented cards with images … 9:16 … the 'Vol. X' text towards the center bottom … a hero
        animation for each one that activates during mouseover … light mode and dark mode versions"): the card is album art — a 9:16 `.mm-holo`
@@ -889,7 +886,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        its hero, fetched on the first hover and paused on leaving; a volume HEROES does not name wears the λWAVES palette (skin.css).  The
        numeral and its count sit at the art's foot, the WIP cone at its head, the install under the card (iteration 012 L1's words). */
     const HERO = './img/menu/vol/', heroArt = (art, id) => artOf(art, HERO, id, HEROES[id]);
-    const heroes = new Set(), rest = () => { for (const h of heroes) h.stop(); };   // a volume opened or the Picker closed: every hero rests
+    const heroes = new Set(), rest = () => { for (const h of heroes) h.stop(); if (tipOff) tipOff(); };   // a volume opened or the Picker closed: every hero rests
     function card(v, k) {
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
       o.style.setProperty('--k', String(k));   // 034 F1 (Josh: "Don't show a mouseover hint for the volume libraries … just let the hero videos play"): no title on the card
@@ -946,9 +943,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       sortBtn(vhead, 'name'); sortBtn(vhead, 'mass'); paintSort();
       labelToggle(vhead, 'molLabels');
       animate(view, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
-      try { mols = (await V.index(v.id)).molecules; } catch (err) { mols = []; countEl.textContent = String(err && err.message || err); }
-      byId = new Map(mols.map((m) => [m.id, m])); isoEl.hidden = isoTail.hidden = true;
+      const got = await V.index(v.id).then((x) => x.molecules).catch(() => []);
       if (cur !== v) return;
+      mols = got; byId = new Map(mols.map((m) => [m.id, m])); isoEl.hidden = isoTail.hidden = true;
       paintTags(); filter();
     }
     /* the tags: built once a volume and lit in place (the strip keeps where it was scrolled); two or more intersect, ALL clears them */
@@ -970,14 +967,14 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        014 C2): a molecule whose structural isomers (the index's `isomers`, same formula, another connectivity) are in this volume wears a corner
        mark with their count, and its press opens THE ISOMER DECK — the same tiles, the same hue and style — instead of loading at once */
     function molTile(host, m, deep) {
-      const z = atomZ(m.formula), atom = z && ATOMS.some((a) => a.Z === z) ? z : 0, isos = deep && !atom ? isomersIn(m) : [];
+      const vol = cur, atom = atomZ(m.formula), isos = deep && !atom ? isomersIn(m) : [];
       const t = tile(host, 'mm-mol', { formula: m.formulaM ? mathPlain(m.formulaM) : m.formula, name: cap(m.name), sub: atom ? volName(cur) + ' · one atom: it opens in ATOMS' : [volName(cur), ...(m.tags || []), isos.length ? (isos.length + 1) + ' isomers' : ''].filter(Boolean).join(' · ') },
-        () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos, t); else { isoEl.hidden = isoTail.hidden = true; goVolume(cur, m); } });
+        () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos, t); else { isoEl.hidden = isoTail.hidden = true; goVolume(vol, m); } });
       el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
-      if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + SYM[atom - 1] + ':' + v.nl + '_' + v.m); return t; }
+      if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + ATOMS[atom - 1].symbol + ':' + v.nl + '_' + v.m); return t; }
       const i = pic(t, null), ph = () => hold(t, i); i.dataset.vol = cur.id; i.dataset.mol = m.id;
-      V.picture(cur.id, m.id, lookOf()).then((u) => { develop(i); setPic(i, u); }, ph);
+      V.picture(cur.id, m.id, lookOf()).then((u) => { develop(i); volPic(i, u); }, ph);
       return t;
     }
     const wordsOf = (m) => (m.geo ? [...(m.tags || []), ...m.geo] : m.tags || []);   // C3: a molecule's chips, what it is and its shape
@@ -988,7 +985,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        a speech bubble over the tile it came from when the room between the pager's top and the tile holds it, else under it, its 12-px tail
        (a sibling, so the pane's scroll never clips it) on the tile's centre; the pane blurred under FROST (skin.css); the molecule whose
        picture is the volume's thumbnail sits on a soft plate */
-    const isoEl = el('div', 'mm-isos glass', view); isoEl.hidden = true; isoEl.dataset.mirSurface = 'menu';   // 022 P3: a menu pane isoEl.setAttribute('role', 'dialog');
+    const isoEl = el('div', 'mm-isos glass', view); isoEl.hidden = true; isoEl.dataset.mirSurface = 'menu'; isoEl.setAttribute('role', 'dialog');   // 022 P3: a menu pane
     const isoTail = el('i', 'mm-iso-tail', view); isoTail.hidden = true; isoTail.setAttribute('aria-hidden', 'true');
     const isoHead = el('div', 'mm-isohead', isoEl), isoGrid = el('div', 'mm-isogrid', isoEl);
     const closeIsomers = () => { if (isoEl.hidden) return; isoEl.hidden = isoTail.hidden = true; const f = vdeck.tiles.find((x) => x.dataset.iso === isoEl.dataset.of); if (f) f.focus({ preventScroll: true }); };
@@ -1129,7 +1126,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const info = { formula: mathPlain(r.formula), name: cap(r.name), sub: r.vol ? r.vol.toUpperCase() : '' };
     const t = tile(host, 'mm-mol', info, () => (r.vol ? goVolume(r.v, r.m) : goMolecule(r.id)));
     const i = pic(t, null, r.vol ? null : 'mol:' + r.id); el('b', 'mm-lbl', t, info.formula);
-    if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { setPic(i, u); }, () => hold(t, i)); }
+    if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { volPic(i, u); }, () => hold(t, i)); }
     return t;
   };
   /* 037 M1: the sheet's COLLAGE row reads and sets the wall's switch here (settings-card.js never imports this module) */

@@ -98,5 +98,4 @@ export function createInformational(app) {
     const s = ui.set.root, rk = s.parentElement, list = rk ? [...rk.children].filter((c) => c.classList.contains('dev') && c !== w.root && !c.hidden && !c.classList.contains('closed')) : [];
     if (app.sh.rk && /^rackL?$/.test(rk && rk.id) && !s.classList.contains('closed') && !w.root.classList.contains('floating')) app.sh.rk.move('informational', { side: rk.id === 'rackL' ? 'left' : 'right', index: list.indexOf(s) + 1 });
   }));
-  return w;
 }

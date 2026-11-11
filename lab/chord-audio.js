@@ -38,7 +38,6 @@ export function createChord({ reg, clock, motion, onPlay }) {
     retune(); gate();
   }
   if (onPlay) onPlay(gate);
-  return { set, retune, suspend(why = 'film') { holds.add(why); gate(); }, resume(why = 'film') { holds.delete(why); gate(); }, dispose() { if (ctx) ctx.close(); ctx = null; voices.length = 0; key = sig = ''; },
-    get playing() { return !!ctx && ctx.state === 'running' && live(); }, get voices() { return table.map((v) => ({ ...v })); },
+  return { set, retune, suspend(why) { holds.add(why); gate(); }, resume(why) { holds.delete(why); gate(); },
     get caption() { return err || (motion.reduced ? 'muted: reduced motion · ' : '') + (table.length ? `folded ×2^k · ${table.length} note${table.length > 1 ? 's' : ''} · ${table.map((v) => v.f.toFixed(1)).join(' · ')} Hz` : 'no populated level'); } };
 }

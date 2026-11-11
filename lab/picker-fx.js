@@ -11,7 +11,7 @@
 export const RM = matchMedia('(prefers-reduced-motion: reduce)');
 const FINE = matchMedia('(hover: hover) and (pointer: fine)');
 const EASE = 'cubic-bezier(.22,.7,.25,1)';
-const T = { response: 170, enter: 280, leave: 200, titleLeave: 220, titleSwap: 120, reorder: 340 };
+const T = { enter: 280, titleSwap: 120 };
 export const clamp = (v, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
 const calm = () => RM.matches || document.hidden;
 /** 032: the page asks for stillness — the media query, or the kit's motion policy on <html data-motion> (core/motion.js) */

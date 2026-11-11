@@ -20,8 +20,8 @@ export function createSettingsCard(app) {
     }
     createInformational(app);   // 0.5.3 M9: STAGE FORMULA and ATOM LABELS, each with its SIZE, left DISPLAY for their own window (lab/informational.js)
     /* 037 T1: FRAME · AXIS · AXIS COLOUR are made here as before (their keys FIELD_CHROME, their roads unchanged) and seated in STAGE (lab/stage-window.js) */
-    ui.frameSw = sw({ label: 'FRAME', value: true, title: 'Show the field boundary', onChange: () => { const modes=['box','lattice','dots','off']; const current=mat.frame===false?'off':mat.frameMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.frame=next!=='off'; mat.frameMode=next==='off'?'box':next; ui.frameSw.set(mat.frame); ui.frameSw.root.title='FRAME · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
-    ui.axisSw = sw({ label: 'AXIS', value: true, title: 'Show or hide the x, y, and z axes', onChange: () => { const modes=['box','corner','off']; const current=mat.axis===false?'off':mat.axisMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.axis=next!=='off'; mat.axisMode=next==='off'?'box':next; ui.axisSw.set(mat.axis); ui.axisSw.root.title='AXIS · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
+    ui.frameSw = sw({ label: 'FRAME', value: true, title: 'Show the field boundary', onChange: () => { const modes=['box','lattice','dots','off']; const current=mat.frame===false?'off':mat.frameMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.frame=next!=='off'; mat.frameMode=next==='off'?'box':next; ui.frameSw.set(mat.frame);  saveSettings(); schedule(TIER.PRESENT); } });
+    ui.axisSw = sw({ label: 'AXIS', value: true, title: 'Show or hide the x, y, and z axes', onChange: () => { const modes=['box','corner','off']; const current=mat.axis===false?'off':mat.axisMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.axis=next!=='off'; mat.axisMode=next==='off'?'box':next; ui.axisSw.set(mat.axis);  saveSettings(); schedule(TIER.PRESENT); } });
     ui.axisInkSeg = seg({ label: 'AXIS COLOUR', value: 'theme', options: [
       { id: 'theme', label: 'THEME', title: 'Choose axis colours from the current theme' },
       { id: 'cmy', label: 'CMY', title: 'Use cyan, magenta, and yellow axes' },
@@ -38,10 +38,8 @@ export function createSettingsCard(app) {
     app.hooks.theme = (theme) => {
       const tc = document.getElementById('themeColor');
       if (tc) tc.setAttribute('content', theme === 'light' ? '#eef1f6' : '#070a0f');
-      mat.bg = THEMES[theme].bg.slice();
-      if (app.hooks.restage) app.hooks.restage();
+      app.hooks.restage();
       mat.lightUI = theme === 'light';
-      schedule(TIER.PRESENT);
     };
     /* THE STAGE KNOB IS THE HEADER λ's GROUND (wave 59), which is why moving it repaints the mark: `#title`
        is `background: none` over `#field`, so `mat.bg` — this value — is the surface the λ is drawn on, and a
@@ -114,19 +112,14 @@ export function createSettingsCard(app) {
       document.body.dataset.gamut = on ? 'p3' : 'srgb';
       ui.gamutSeg.set(on ? 'p3' : 'srgb');
       applyAccent();                                   // the DOM's accents go through the SAME map the LUT went through
-      if (ui.gamutRo) ui.gamutRo.set(on ? (got === 'p3-vivid' ? 'DISPLAY-P3 · vivid' : 'DISPLAY-P3') : 'sRGB', on ? 'ok' : '');
-      if (ui.gamutRo) ui.gamutRo.setSub(gamutOK ? 'the interface and the field are both ' + (on ? 'DISPLAY-P3' : 'sRGB') : gamutSup.reason);
       saveSettings(); schedule(TIER.PRESENT);
       return got;
     }
     app.hooks.setGamut = setGamut;
-    ui.gamutRo = readout({ label: 'IN FORCE', value: 'sRGB', sub: '' });
-    rg.appendChild(ui.gamutRo.root);
     if (!gamutOK) {
-      for (const id of ['p3']) { const b = ui.gamutSeg.button(id); if (b) { b.disabled = true; b.classList.add('disabled'); } }
+      { const b = ui.gamutSeg.button('p3'); if (b) { b.disabled = true; b.classList.add('disabled'); } }
       for (const id of ['convert', 'vivid']) { const b = ui.p3Seg.button(id); if (b) { b.disabled = true; b.classList.add('disabled'); b.title = gamutSup.reason; } }
     }
-    ui.gamutRo.set('sRGB'); ui.gamutRo.setSub(gamutOK ? 'the interface and the field are both sRGB' : gamutSup.reason);
     el('div', 'note', gt).innerHTML = '<b>Gamut.</b> Display P3 is available only when both CSS and the WebGPU canvas support it. CONVERT preserves authored colours; VIVID increases chroma. DITHER reduces visible 8-bit banding.';
     el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Stage, gamma, hue, exposure, and invert affect presentation without changing ψ. The theme, the accents, the glass and the frost are the interface’s look: GUI › MIR OPTIONS.';
     app.hooks.setTheme = (t) => look.set({ theme: t });
@@ -141,7 +134,7 @@ export function createSettingsCard(app) {
     const capSeg = seg({ label: 'FIELD CLOCK cap', value: '0', options: [{ id: '0', label: 'MAX' }, { id: '33', label: '30 Hz' }, { id: '66', label: '15 Hz' }, { id: '200', label: '5 Hz' }],
       onChange: (v) => { fieldRate.capMs = +v; } });
     capSeg.root.title = 'Caps how often ψ is reconstructed; every frame presents';   // 029 M9: the cap skips the CPU reconstruct only (rack.js `due`), never the march or the present
-    r5.appendChild(capSeg.root); ui.capSeg = capSeg;   // 035 G3: the menu sheet's second face reads it
+    r5.appendChild(capSeg.root);
     const r5b = el('div', 'row tight', gq);
     ui.autoSw = swS({ label: 'AUTO SCALE', value: true, title: 'Adjust canvas resolution to the frame budget', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
     ui.govSw = swS({ label: 'GOVERNOR', value: true, title: 'Protect the frame rate automatically', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
