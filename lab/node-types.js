@@ -28,7 +28,8 @@ const lv = (k, label, home, what) => ({ k, label, min: 0, max: 1, step: 1 / 255,
 /** LEVELS' strip (038 P2): the input histogram's place, with no tap of the stage — the node's own curve (f, its transfer) as a silhouette, and
  *  Photoshop's three input marks under it: black at IN BLACK, grey where mid-grey lands (ib + (iw − ib)·½^γ), white at IN WHITE */
 function levelsStrip(g, v, f) {
-  const c = g.canvas, W = (c.width = Math.round(2 * (c.clientWidth || 220))), H = (c.height = 48), B = 34;
+  const c = g.canvas, W = Math.round(2 * (c.clientWidth || 220)), H = 48, B = 34;
+  if (c.width !== W || c.height !== H) { c.width = W; c.height = H; } else g.clearRect(0, 0, W, H);
   g.fillStyle = 'rgba(150,150,150,.75)'; g.beginPath(); g.moveTo(0, B);
   for (let i = 0; i <= 64; i++) g.lineTo((i / 64) * W, B - f([i / 64, i / 64, i / 64])[0] * (B - 2));
   g.lineTo(W, B); g.closePath(); g.fill();
