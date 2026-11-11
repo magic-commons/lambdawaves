@@ -43,10 +43,10 @@ export function createEmission(host, api) {
   let g = cv.getContext('2d');
   /* ── row 2: ‹ SERIES › · RANGE ── */
   const r2 = el('div', 'row tight em-row', host);
-  const seriesStep = stepper({ aria: 'series', items: [{ id: 'all', label: 'ALL' }], value: 'all', cls: 'em-step', onChange: (id) => { series = id; hover = -1; build(true); } });
+  const seriesStep = stepper({ aria: 'series', items: [{ id: 'all', label: 'ALL' }], value: 'all', cls: 'em-step', onChange: (id) => { series = id; hover = -1; build(true); update(); } });   // 043 P1: painted now, as the ResizeObserver below does (it waited for a frame nothing asked for)
   r2.appendChild(seriesStep.root);
   const rangeSeg = seg({ aria: 'range', value: 'all', cls: 'sp-vseg em-vseg', options: [{ id: 'visible', label: 'VISIBLE', title: '380–750 nm, linear' }, { id: 'all', label: 'ALL', title: '90 nm – 12.5 µm, logarithmic' }],
-    onChange: (v) => { range = v; hover = -1; build(true); } });
+    onChange: (v) => { range = v; hover = -1; build(true); update(); } });
   r2.appendChild(rangeSeg.root);
   /* ── row 3: ‹ PAIR › · DECAY · the fold ── */
   const r3 = el('div', 'row tight em-row', host);

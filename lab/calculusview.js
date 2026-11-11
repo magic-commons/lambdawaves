@@ -14,7 +14,7 @@ const fit = (c, g, W, H, d) => { const w = Math.round(W * d), h = Math.floor(H *
 export function createCalculus(host, opt = {}) {
   let on = true, last = null, key = '';
   const r0 = el('div', 'row tight', host);
-  r0.appendChild(sw({ label: 'LIVE', value: true, title: 'recompute every update (throttled while playing)', onChange: (v) => { on = v; } }).root);
+  r0.appendChild(sw({ label: 'LIVE', value: true, title: 'recompute every update (throttled while playing)', onChange: (v) => { on = v; if (opt.repaint) opt.repaint(); } }).root);   // 043 P1: LIVE on asks for the frame that catches up
   const grid = el('div', 'calc-grid', host), ray = readout({ label: 'RAY  Re ψ · Im ψ · |ψ|²  from the origin through the bead', value: '—', cls: 'wide calc-ray' }), foot = el('div', 'calc-foot', host);
   const cv = el('canvas', '', ray.root), g = cv.getContext('2d'); host.insertBefore(ray.root, foot);   // 0.8.2 P3: ψ ALONG A RAY, 128 closed-form samples, each curve over the ray's max |ψ|
   /* 0.8.3 B1 · THE BREATH: P(r, t) over [0, half] in the kit's ink, its scale the register version's running max, and its two integrals against stats' ⟨r⟩; REVIVAL (a hand press, never at boot) is

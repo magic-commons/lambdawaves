@@ -66,7 +66,7 @@ export function createShadowView(canvas, api) {
       const n = ids.length, left = 26, right = W - 10, top = 16, bot = H - 22, mid = (top + bot) / 2, amp = (bot - top) / 2 - 4;
       const dx = (right - left) / n;
       plot = { x0: left, y0: top, x1: right, y1: bot };
-      g.strokeStyle = T.ink(0.22); g.beginPath(); g.moveTo(left - 8, mid); g.lineTo(right, mid); g.stroke();
+      g.strokeStyle = T.ink(0.22); g.lineWidth = 1; g.beginPath(); g.moveTo(left - 8, mid); g.lineTo(right, mid); g.stroke();   // 043 P1: its own width (it drew PHASORS' last 1.5 px on the first paint after the switch)
       g.fillStyle = T.ink(0.6); g.textAlign = 'right'; g.fillText('q', left - 10, top); g.fillText('0', left - 10, mid);   // the two end values, in the gutter
       for (let i = 0; i < n; i++) {
         const a = ids[i], nn = BASIS[a].n, x = left + dx * (i + 0.5);
