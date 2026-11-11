@@ -13,7 +13,7 @@ const SQRT2 = Math.SQRT2;   // was shadow.js' one export here (0.6.5 X2: shadow.
 
 export function createShadowView(canvas, api) {
   const trail = [];            // Lissajous trace, in (q_a, q_b)
-  let trailKey = '';
+  let trailKey = '', trailT = NaN;
   let mode = 'phasors';
   const g = canvas.getContext('2d');
   function size() {
@@ -82,18 +82,18 @@ export function createShadowView(canvas, api) {
           info: `${label(a)}  ω = ${(-BASIS[a].E).toFixed(3)}  ·  q = ${q[i].toFixed(3)}  ·  amplitude ${r.toFixed(3)}` });
       }
     } else {   // lissajous
-      let ia = 0, ib = Math.min(1, ids.length - 1);
       /* populations from the register's anchor: constant in time, so equal weights cannot flicker the pair */
       const pops = ids.map((a) => api.reg.population(a));
       const order = ids.map((_, i) => i).sort((x, y) => (pops[y] - pops[x]) || (x - y));
-      ia = order[0]; ib = order.length > 1 ? order[1] : order[0];
+      const ia = order[0]; let ib = order.length > 1 ? order[1] : order[0];
       const si = ids.indexOf(selected);
       if (si >= 0 && si !== ia) ib = si;
       const key = ids[ia] + ':' + ids[ib];
       if (key !== trailKey) { trail.length = 0; trailKey = key; }
       const cx = W / 2, cy = H / 2, R = Math.min(W / 2, H / 2) - 18;
       const ra = Math.hypot(q[ia], p[ia]) || 1e-9, rb = Math.hypot(q[ib], p[ib]) || 1e-9;
-      trail.push([q[ia] / ra, q[ib] / rb]); if (trail.length > 900) trail.shift();
+      const pt = [q[ia] / ra, q[ib] / rb];
+      if (trail.length && t === trailT) trail[trail.length - 1] = pt; else { trailT = t; trail.push(pt); if (trail.length > 900) trail.shift(); }
       plot = { x0: cx - R, y0: cy - R, x1: cx + R, y1: cy + R };
       g.strokeStyle = T.ink(0.22); g.lineWidth = 1;
       g.beginPath(); g.moveTo(cx - R, cy); g.lineTo(cx + R, cy); g.moveTo(cx, cy - R); g.lineTo(cx, cy + R); g.stroke();
@@ -142,13 +142,13 @@ export function createShadowFoot(host) {
   function update(reg, c, t, ids) {
     const lg = lagrangian(c.re, c.im, ids), S = action(reg.re0, reg.im0, t, ids);
     ro.L.set(lg.L.toFixed(6)); ro.T.set(lg.T.toFixed(6)); ro.V.set(lg.V.toFixed(6)); ro.S.set(S.toFixed(6));
-    hist.push([t, lg.L, S]); if (hist.length > 600) hist.shift();
+    if (hist.length && hist[hist.length - 1][0] === t) hist[hist.length - 1] = [t, lg.L, S]; else { hist.push([t, lg.L, S]); if (hist.length > 600) hist.shift(); }
     paint();
   }
   function paint() {
     const W = plot.clientWidth, H = plot.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
     if (W < 32 || H < 32) return;
-    if (pcv.width !== W * dpr || pcv.height !== H * dpr) { pcv.width = W * dpr; pcv.height = H * dpr; }
+    const cw = Math.round(W * dpr), ch = Math.round(H * dpr); if (pcv.width !== cw || pcv.height !== ch) { pcv.width = cw; pcv.height = ch; }
     const g = pcv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     g.font = '8px ui-monospace, monospace'; g.textBaseline = 'middle';
     if (hist.length < 2) return;
@@ -165,7 +165,7 @@ export function createShadowFoot(host) {
     for (const [k, name, law] of [[1, 'L(t)', 'the Lagrangian T − V'], [2, 'S(t)', 'the action ∫₀ᵗ L dt′']]) {
       const c = nRGB(k), col = `rgba(${c[0]},${c[1]},${c[2]},0.95)`, pts = [];
       g.strokeStyle = col; g.lineWidth = 1.2; g.beginPath();
-      hist.forEach(([u, ...v], i) => { const x = X(u), y = Y(v[k - 1]); pts.push(x, y); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); });
+      hist.forEach((h, i) => { const x = X(h[0]), y = Y(h[k]); pts.push(x, y); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); });
       g.stroke();
       hovers.push({ kind: 'curve', key: name, points: pts, lw: 1.2, colour: col,
         info: `${name}  ·  ${law}  ·  now ${hist[hist.length - 1][k].toFixed(6)}  ·  over the window [${lo.toFixed(4)}, ${hi.toFixed(4)}]` });
