@@ -280,7 +280,7 @@ export function createModSeam(app) {
        re-asserts a routed target at once, and restamps the dial chemview rebuilt (its stamp was copied; the base road is the port's) */
     { const { knob: _k, id: _i, ...orbSpec } = defs.find((d) => d.id === 'chem.orbital'), H = app.state.modHost;
       app.state.chem.subscribe((sol) => { if (!sol) return;
-        const [lo, hi] = app.state.chem.span(), k = app.state.chem.orbital();
+        const [lo, hi] = app.state.chem.span(), k = app.state.chem.hand;   // 043 O2: the HAND's index, never the live one — a lane's write parked through the solve (old range) stepped it first, and BENZENE π saved orbital 36 for its 15
         H.targets.installOne('chem.orbital', { ...orbSpec, min: lo, max: Math.max(hi, lo + 1) });   // integer needs min < max: a one-column record keeps a dead top step
         if (Number.isFinite(k)) H.registry.setBase('chem.orbital', k);
         if (H.registry.isModulated('chem.orbital')) H.clock.applyAll(true);

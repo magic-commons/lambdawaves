@@ -1538,7 +1538,7 @@ export function createChem(host, api) {
     /* 040 A4 · the BASIS and VIEW segs (shell/modulation.js' chem.basis · chem.view EVENT targets) and the seg's own basis road, the say left to the caller */
     segs: { basis: () => bSeg, view: () => vSeg }, pressBasis,
     /* iteration 007 O · chem.orbital: the range a landing re-registers, the modulator's stepped road, and a file's clamp */
-    span() { return span(); }, stepOrbital, get clamped() { return clamped; },
+    span() { return span(); }, stepOrbital, get clamped() { return clamped; }, get hand() { return handK; },   // 043 O2: the hand's index, the base a landing hands the registry
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
     preset() { return preset; }, row,
