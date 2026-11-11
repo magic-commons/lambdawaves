@@ -17,7 +17,7 @@
  * The curve is the pattern of the INSTANTANEOUS dipole d(t) = 2Re(d e^{−iωt}): 1 − (n̂·û)², û its direction.  For
  * Δm = 0 that direction is fixed (ẑ) and the figure-eight is STATIC; for Δm = ±1 the dipole rotates in the xy-plane
  * at ω, so the cut through the screen plane breathes between the figure-eight (dipole in the plane) and a circle
- * (dipole pointing out of it) — the phase follows clock.t·ω, one cosine per frame and nothing else.
+ * (dipole pointing out of it) — d is built from c(t), so Re d is the dipole's direction at the clock's t.
  *
  * STATUS: EXACT ANALYTIC and KNOWN for the angular algebra and the A formula (Bethe–Salpeter §59), NUMERICAL for the
  * radial integral (dynamics.js's Simpson), all of it in lab/radiation.js and judged in tests/radiation.test.mjs.
@@ -46,7 +46,7 @@ const dominant = (S) => { let k = -1, best = 0; for (let a = 0; a < S.re.length;
  * The rack drives it with update(reg, t, playing, on).
  */
 export function createRadiation(host, api = {}) {
-  let cache = null, key = '', phase = 0;
+  let cache = null, key = '';
 
   const cv = el('canvas', 'rad-c', host);
   const g = cv.getContext('2d');
@@ -132,11 +132,10 @@ export function createRadiation(host, api = {}) {
       hover.set([], rect);
       return;
     }
-    /* û: the direction of d(t) = 2Re(d e^{−iωt}) — fixed for Δm = 0, turning at ω for Δm = ±1 */
-    const D = vec3c(cache.d), ph = phase, cw = Math.cos(ph), sw = Math.sin(ph);
-    let u = [D.re[0] * cw + D.im[0] * sw, D.re[1] * cw + D.im[1] * sw, D.re[2] * cw + D.im[2] * sw];
-    let L = Math.hypot(u[0], u[1], u[2]);
-    if (L < 1e-12) { u = [D.re[0], D.re[1], D.re[2]]; L = Math.hypot(u[0], u[1], u[2]) || 1; }   // the node of a linear dipole: its axis stands
+    /* û: the direction of ⟨r⟩(t) = 2Re d, d built from c(t) — fixed for Δm = 0, turning at ω for Δm = ±1 */
+    const D = vec3c(cache.d);
+    let u = D.re, L = Math.hypot(u[0], u[1], u[2]);
+    if (L < 1e-12) { u = D.im; L = Math.hypot(u[0], u[1], u[2]) || 1; }   // the node of a linear dipole: its axis stands
     u = [u[0] / L, u[1] / L, u[2] / L];
     /* the ring, the axes */
     g.strokeStyle = ink(dim, 0.20); g.lineWidth = 1;
@@ -212,7 +211,6 @@ export function createRadiation(host, api = {}) {
       paint(t); return;
     }
     stand.hidden = true; cap.hidden = false;
-    phase = cache.dm === 0 ? 0 : cache.omega * t;                          // the rotating dipole's phase, one cosine
     paint(t);
   }
 
