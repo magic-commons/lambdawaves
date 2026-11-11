@@ -39,15 +39,12 @@ import { planeModel } from './native-ui.js';
  *               completion the TRUE absMax is known and the whole image is repainted through `paintSlice` itself,
  *               so a settled slice is bit-identical to what the unchunked code drew.
  */
-import { sampleSlice, paintSlice, planeReport, ksMap, currentOf } from './slice.js';
+import { paintSlice, planeReport, ksMap, currentOf } from './slice.js';
 import { psiAndGrad } from './dynamics.js'; import { BASIS } from './hydrogen.js';
 import { IDENTITY, expPure, qmul, qnormalize, canonicaliseRotors, classifyManeuver, tourSegmentAt, projectToU2, isHolomorphic, visibleFrame, adjoint } from './rotor4.js';
 import { el, seg, sw, knob, trig, readout, themeInk, graphHover } from './mir/kit.js';
 
 const NAMED = [
-  { key: 'xy', label: 'x–y', qL: [1, 0, 0, 0], qR: [1, 0, 0, 0] },
-  { key: 'xz', label: 'x–z', qL: qnormalize([Math.SQRT1_2, Math.SQRT1_2, 0, 0]), qR: [1, 0, 0, 0] },
-  { key: 'yz', label: 'y–z', qL: qnormalize([Math.SQRT1_2, 0, 0, Math.SQRT1_2]), qR: [1, 0, 0, 0] },
   { key: 'iso', label: 'isoclinic', qL: qnormalize([1, 1, 1, 1]), qR: qnormalize([1, -1, 1, -1]) },
 ];
 const BUDGET_MS = 2.2;      // ms of sampling per update — the ONE number, and it is set by the READER LAW, not by taste:
@@ -100,7 +97,7 @@ export function createSliceView(host, api) {
     getNormal:()=>adjoint(rotor.qL,[0,0,1]),
     onTurn:n=>{if(mode!=='space')return;const axis=[-n[1],n[0],0], len=Math.hypot(...axis),angle=Math.acos(Math.max(-1,Math.min(1,n[2])));
       rotor={qL:len<1e-8?(n[2]<0?[0,1,0,0]:[1,0,0,0]):[Math.cos(angle/2),...axis.map(v=>v/len*Math.sin(angle/2))],qR:[1,0,0,0]};
-      tour=null;mode='space';modeSeg.set('space');dirty=true;api.repaint();}
+      tour=null;dirty=true;api.repaint();}
   });
   const r2 = el('div', 'row tight', host);
   for (const p of NAMED.filter(p=>p.key==='iso')) r2.appendChild(trig({ label: p.label, onFire: () => { startTour(p); api.repaint(); } }).root);
@@ -135,7 +132,7 @@ export function createSliceView(host, api) {
       mode, half, scale: mode === 'ks' ? Math.sqrt(half) : half,  // KS is quadratic: |x| = |u|², so sample √half
       start: nextStart % N, done: 0, mx: 0, norm: lastAbsMax };
     key = k; dirty = false; regain = false;
-    if (!mir || mir.N !== N) mir = { re: new Float64Array(N * N), im: new Float64Array(N * N), N };   // the F1 mirror: reset only by a res change
+    if (!mir || mir.N !== N) mir = { re: new Float64Array(N * N), im: new Float64Array(N * N), ja: new Float64Array(N * N), jb: new Float64Array(N * N), N };   // the F1 mirror: reset only by a res change
     Object.assign(mir, { half, mode, e1: job.e1, e2: job.e2 });
   }
   /** ONE row of the grid, exactly slice.js's inner loop for that j (a null sample — the origin — writes 0, not stale data) */
@@ -156,24 +153,6 @@ export function createSliceView(host, api) {
     }
     return mx;                                                  // this ROW's max: the job's max and the sweep's max are both fed from it
   }
-  /** colour rows [j0, j1) of the job into `img` — paintSlice's per-pixel maths, restricted to a band and to `mx` */
-  function colourRows(J, j0, j1, mx, lut) {
-    const { N, re, im } = J, d = img.data, knee = 0.6, m0 = mx || 1;
-    for (let k = j0 * N; k < j1 * N; k++) {
-      const x = re[k], y = im[k], m = Math.hypot(x, y) / m0;
-      const w = gain * m, v = w / (1 + knee * w);
-      let R, G, B;
-      const h = (Math.atan2(y, x) / (2 * Math.PI) + 0.5) % 1;
-      if (lut) { const u = h * 256, i0 = Math.floor(u) % 256, i1 = (i0 + 1) % 256, f = u - Math.floor(u);
-        R = lut[i0 * 4] * (1 - f) + lut[i1 * 4] * f; G = lut[i0 * 4 + 1] * (1 - f) + lut[i1 * 4 + 1] * f; B = lut[i0 * 4 + 2] * (1 - f) + lut[i1 * 4 + 2] * f;
-      } else { const q = h * 6, c1 = Math.abs((q % 6) - 3) - 1, c2 = Math.abs(((q + 4) % 6) - 3) - 1, c3 = Math.abs(((q + 2) % 6) - 3) - 1;
-        const cl = (u) => Math.min(1, Math.max(0, u)); R = 0.15 + 0.85 * cl(c1); G = 0.15 + 0.85 * cl(c2); B = 0.15 + 0.85 * cl(c3); }
-      let s = v / (1 / (1 + knee));
-      if (m > 1e-9) { const l = Math.log2(m * m0 + 1e-30); s *= 0.82 + 0.18 * Math.abs(2 * (l - Math.floor(l)) - 1); }
-      d[k * 4] = Math.round(255 * Math.min(1, R * s)); d[k * 4 + 1] = Math.round(255 * Math.min(1, G * s));
-      d[k * 4 + 2] = Math.round(255 * Math.min(1, B * s)); d[k * 4 + 3] = 255;
-    }
-  }
   /** spend the budget: rows until the clock runs out, always at least one, then paint the band that was just made */
   function stepJob() {
     const J = job, N = J.N, t0 = performance.now();
@@ -190,21 +169,21 @@ export function createSliceView(host, api) {
       return;
     }
     const norm = J.norm || J.mx;                                // the previous sweep's absMax; only the very first rows ever drawn fall back to the running one
-    const lut = api.lut();
-    for (let k = first; k < J.done; k++) { const j = (J.start + k) % N; colourRows(J, j, j + 1, norm, lut); mir.re.set(J.re.subarray(j * N, j * N + N), j * N); mir.im.set(J.im.subarray(j * N, j * N + N), j * N); }
+    const lut = api.lut(), S = { re: J.re, im: J.im, N, absMax: norm };
+    for (let k = first; k < J.done; k++) { const j = (J.start + k) % N; paintSlice(S, img, { lut, gain, j0: j, j1: j + 1 }); mir.re.set(J.re.subarray(j * N, j * N + N), j * N); mir.im.set(J.im.subarray(j * N, j * N + N), j * N); }
     nextStart = (J.start + J.done) % N;                         // dropped early → the next generation picks the scan up here
   }
   /* the crosshair answers for the frame: extent, sampling and the U(2) sheet */
   const hover = graphHover(cv, { repaint: () => paint() });
   /* 037 V3 THE SEAM: each PLANE widget's canvas takes the picture alone (a square, centred) with its black made clear — alpha the brightest channel,
      so it sits on the stage and not on a well — painted before the window's; a widget on the stage keeps the private pump alive with the window closed */
-  const views = new Set(), sized = (c) => c.clientWidth >= 32, wide = () => [...views].some(sized), clearC = document.createElement('canvas');
+  const views = new Set(), sized = (c) => c.clientWidth >= 32, wide = () => [...views].some(sized), clearC = document.createElement('canvas'); let clearL = null;
   function paint() {
     const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
     if (!img || (!sized(cv) && !wide())) return;
     if (off.width !== img.width || off.height !== img.height) { off.width = img.width; off.height = img.height; }
     off.getContext('2d').putImageData(img, 0, 0);
-    if (views.size) { const a = img.data, L = new ImageData(img.width, img.height), d = L.data; clearC.width = img.width; clearC.height = img.height;
+    if (views.size) { const a = img.data; if (!clearL || clearL.width !== img.width || clearL.height !== img.height) { clearL = new ImageData(img.width, img.height); clearC.width = img.width; clearC.height = img.height; } const L = clearL, d = L.data;
       for (let i = 0; i < a.length; i += 4) { const m = Math.max(a[i], a[i + 1], a[i + 2]), k = m ? 255 / m : 0; d[i] = a[i] * k; d[i + 1] = a[i + 1] * k; d[i + 2] = a[i + 2] * k; d[i + 3] = m; }
       clearC.getContext('2d').putImageData(L, 0, 0); }
     for (const c of views) { const q = c.getContext('2d'), w = Math.round(c.clientWidth * dpr), h = Math.round(c.clientHeight * dpr), s = Math.min(w, h);
@@ -235,7 +214,7 @@ export function createSliceView(host, api) {
   function drawCurrent(T, W, H) {
     const why = api.owner ? api.owner() : '';
     if (why || !mir) { jro.set('—'); jro.setSub(why); return; }
-    const { ja, jb, max, at, N } = currentOf(mir), cx = W / N, cy = H / N, X = (i) => (i + 0.5) * cx, Y = (j) => (j + 0.5) * cy;
+    const { ja, jb, max, at, N } = currentOf(mir, mir.ja, mir.jb), cx = W / N, cy = H / N, X = (i) => (i + 0.5) * cx, Y = (j) => (j + 0.5) * cy;
     g.strokeStyle = T.ink(0.8); g.lineWidth = 1; g.beginPath();
     if (max > 1e-12 && current === 'arrows') { const s = Math.max(1, Math.round(N / 20));
       for (let j = s >> 1; j < N; j += s) for (let i = s >> 1; i < N; i += s) {
@@ -278,7 +257,7 @@ export function createSliceView(host, api) {
      own buffers and draws on its own canvas.  So it keeps ITSELF alive on a PRIVATE requestAnimationFrame that steps,
      paints, and touches no part of the tier machinery — and it is the ONLY stepper, so the 2.2 ms budget is spent once
      per animation frame whether the transport is playing, paused, or not scheduling frames at all. */
-  let pumpId = 0, active = true;
+  let pumpId = 0, active = true, miniMode = '', holoShown = null;
   function armPump() { if ((active || wide()) && !pumpId && job) pumpId = requestAnimationFrame(pump); }
   function pump() {
     pumpId = 0;
@@ -289,8 +268,8 @@ export function createSliceView(host, api) {
   }
   function setActive(v) { active = !!v; if (active) armPump(); return active; }
   function update(reg, t, playing) {
-    mini.root.setAttribute('aria-disabled',String(mode!=='space'));mini.root.tabIndex=mode==='space'?0:-1;
-    mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere; drag turns KS ℝ⁴';
+    if (miniMode !== mode) { miniMode = mode; mini.root.setAttribute('aria-disabled',String(mode!=='space'));mini.root.tabIndex=mode==='space'?0:-1;
+      mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere; drag turns KS ℝ⁴'; }
     mini.paint();
     if (tour) {
       tour.t = Math.min(1, tour.t + 0.04);
@@ -309,7 +288,7 @@ export function createSliceView(host, api) {
       if (job) armPump();                                        // the private pump does the work; nothing here schedules a rack frame
     } else if (job) { job = null; key = ''; }
     const rep = planeReport(rotor);
-    ro.set(rep.text, rep.holomorphic ? 'ok' : '');
+    ro.set(rep.text, rep.holomorphic === holoShown ? undefined : (holoShown = rep.holomorphic) ? 'ok' : '');
     const nmz = Math.abs(rep.nM[2]), cone = Math.acos(Math.min(1, nmz)) * 180 / Math.PI;
     const shape = mode === 'ks' ? (nmz > 0.999 ? 'KS: COLLAPSED to a ray (n₋ at a pole)' : nmz < 0.02 ? 'KS: FLAT — a whole plane (n₋ on the equator)' : `KS: cone, half-angle ${cone.toFixed(1)}° = arccos|n₋z|`) : 'ℝ³ plane';
     ro.setSub(`${shape} · ${classifyManeuver(Math.acos(Math.min(1, Math.abs(rotor.qL[0]))) * 2, Math.acos(Math.min(1, Math.abs(rotor.qR[0]))) * 2)} · ${rep.holomorphic ? 'n₊ fixed (U(2) sheet)' : 'general SO(4)'}`);
@@ -330,11 +309,8 @@ export function createSliceView(host, api) {
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   }
   window.addEventListener('resize', () => { if (active) paint(); });
-  /* `sampleAt` is the one-shot route kept for anything that wants a slice OUTSIDE the frame loop (a proof, a test):
-     it is slice.js's own sampleSlice, unchunked, and it is what the chunked job reproduces row by row. */
-  return { update, setActive, views, redraw: () => paint(), get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); tour = null; dirty = true; },
-    get sample() { return sample; }, get mode() { return mode; }, setMode(m) { mode = m === 'ks' ? 'ks' : 'space'; modeSeg.set(mode); dirty = true; },
-    get half() { return half; }, get res() { return res; }, get gain() { return gain; },
+  return { update, setActive, views, redraw: () => paint(), get rotor() { return rotor; }, get mode() { return mode; },
+    get half() { return half; }, get res() { return res; },
     save() { return { mode, half, gain, rotor: { qL: rotor.qL.slice(), qR: rotor.qR.slice() }, ...(current !== 'off' && { current }) }; },   // F1: OFF writes no key
     load(o) {
       if (!o || typeof o !== 'object') return false;
@@ -347,7 +323,5 @@ export function createSliceView(host, api) {
           o.rotor.qL.every(Number.isFinite) && o.rotor.qR.every(Number.isFinite)) rotor = canonicaliseRotors(o.rotor.qL, o.rotor.qR);
       tour = null; res = 128; job = null; key = ''; dirty = true; regain = true; api.repaint();
       return true;
-    },
-    sampleAt(reg, t, N = res) { return sampleSlice(reg, t, rotor, { mode, half, N }); },
-    tourTo(name) { const p = NAMED.find((x) => x.key === name); if (p) startTour(p); } };
+    } };
 }
