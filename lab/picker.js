@@ -437,7 +437,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   function setLook(id) {
     if (prefs.look === id) return; prefs.look = id; prefs.lookHand = true; writePrefs(prefs); paintLooks();   // P3: the first write is the reader's
-    for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) setPic(i, u); }, () => {});
+    for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) volPic(i, u); }, () => {});
     for (const i of root.querySelectorAll('img.mm-pic[data-menu]')) { const { src } = picOf(i.dataset.menu); if (i.getAttribute('src') !== src) setPic(i, src); }   // M2: every deck of ours
   }
   let dropT = 0;
@@ -518,6 +518,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     i.addEventListener('error', () => { const f = i.dataset.menu ? picOf(i.dataset.menu).fb : null; if (f && i.getAttribute('src') !== f) setPic(i, f); else hold(host, i); });
     i.addEventListener('load', () => unhold(host, i));
     if (src) { develop(i); i.addEventListener('load', () => { const u = i.getAttribute('src'); if (u && u.startsWith(MENU)) keepData(u); }); setPic(i, src); } return i; };
+  /* a volume's picture kept on this device comes as a blob: URL (volumes.js picture): it is let go once its <img> has it, or when another replaces it */
+  const volPic = (i, u) => { const was = i.getAttribute('src'); if (was && was.startsWith('blob:')) URL.revokeObjectURL(was);
+    if (u && u.startsWith('blob:')) for (const t of ['load', 'error']) i.addEventListener(t, () => URL.revokeObjectURL(u), { once: true }); setPic(i, u); };
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
     if (off) { b.classList.add('off'); b.setAttribute('aria-disabled', 'true'); }
@@ -971,7 +974,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
       if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + ATOMS[atom - 1].symbol + ':' + v.nl + '_' + v.m); return t; }
       const i = pic(t, null), ph = () => hold(t, i); i.dataset.vol = cur.id; i.dataset.mol = m.id;
-      V.picture(cur.id, m.id, lookOf()).then((u) => { develop(i); setPic(i, u); }, ph);
+      V.picture(cur.id, m.id, lookOf()).then((u) => { develop(i); volPic(i, u); }, ph);
       return t;
     }
     const wordsOf = (m) => (m.geo ? [...(m.tags || []), ...m.geo] : m.tags || []);   // C3: a molecule's chips, what it is and its shape
@@ -1123,7 +1126,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const info = { formula: mathPlain(r.formula), name: cap(r.name), sub: r.vol ? r.vol.toUpperCase() : '' };
     const t = tile(host, 'mm-mol', info, () => (r.vol ? goVolume(r.v, r.m) : goMolecule(r.id)));
     const i = pic(t, null, r.vol ? null : 'mol:' + r.id); el('b', 'mm-lbl', t, info.formula);
-    if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { setPic(i, u); }, () => hold(t, i)); }
+    if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { volPic(i, u); }, () => hold(t, i)); }
     return t;
   };
   /* 037 M1: the sheet's COLLAGE row reads and sets the wall's switch here (settings-card.js never imports this module) */
