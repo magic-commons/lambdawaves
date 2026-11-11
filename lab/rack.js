@@ -50,7 +50,6 @@ import { tickWidgets } from './widgets.js'; import { createWidgetsWindow } from 
 /* THE BUILD STAMP is `lab/build-line.js` (021 D1): no module imports from rack.js */
 
 import { TIER, TIER_NAME } from './tier.js';   // 021 G1: the tiers live in lab/tier.js; no module imports them from rack.js
-export { TIER };
 
 export async function boot(dom) {
   registerIcons();

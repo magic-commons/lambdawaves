@@ -5,8 +5,7 @@
  * (backward); the loop's schedule and refModes (by value in app.loop); and, lazily inside callbacks, the names boot() makes after the
  * seat — app.loop.page / windowActivity / paceRate, app.w.wMet / wSpec / spectrum / shadowView / normalizeNow (boot fills each slot right
  * after its declaration).  Its 29 shared lets are app.state's, read and written live (R0).  saveMod stays a function declaration: the
- * mod port is handed it before its line (U1).  TIER is rack.js' own export; the cycle is safe — it is read only inside createController,
- * long after both modules have run. */
+ * mod port is handed it before its line (U1). */
 import { TIER } from '../tier.js';
 import { BASIS } from '../hydrogen.js';
 import { PRESET_BY_ID, PRESETS } from '../state.js';
