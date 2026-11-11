@@ -21,7 +21,7 @@ import { BASIS, radial, modeTable, orbitalFromTable } from './hydrogen.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { sphericalBessel } from './bessel.js';
 import { applyRotor } from './frontier.js';
-import { angularDipoleZ, radialDipole } from './dynamics.js';
+import { angularDipoleZ, radialDipole, radialKey } from './dynamics.js';
 import { qhoTableFor, qhoFromTable } from './qho.js';
 
 const N = BASIS.length, LMAX = 12;                              // 140 labels, l ≤ 6: L ≤ l_a + l_b = 12 (iteration 008 A7)
@@ -40,12 +40,12 @@ const NR = 3000, R0 = 1e-5, R1 = 300;
 const NT = 2000;
 let W = null;            // the warm-up in progress: { theta, wT, PL, Th, a (next row), pairsA (next pair row), ang, radId, radRows, rad }
 const nowMs = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
-export function tablesReady() { const H = getHamiltonian(); return !!(ANG && RAD && RAD.id === H.id); }
+export function tablesReady() { return !!(ANG && RAD && RAD.id === radialKey(getHamiltonian())); }
 function buildTables() { while (!warmStep(1e9)) { /* no budget: to the end */ } }
 /** one slice of the build, at most ~budgetMs of wall; true when the tables for the Hamiltonian in force are ready */
 export function warmStep(budgetMs = 8) {
-  const H = getHamiltonian(), t0 = nowMs();
-  if (ANG && RAD && RAD.id === H.id) return true;
+  const H = getHamiltonian(), id = radialKey(H), t0 = nowMs();   // the radials in force: the operator, Z · μ, the well's radius, a re-solved table
+  if (ANG && RAD && RAD.id === id) return true;
   if (!W) W = { theta: null, wT: null, PL: null, Th: [], a: 0, pairsA: 0, ang: null, radId: null, radRows: 0, rad: null, radNL: null };
   const over = () => nowMs() - t0 >= budgetMs;
   if (!ANG) {
@@ -78,12 +78,12 @@ export function warmStep(budgetMs = 8) {
     }
     ANG = W.ang; W.ang = null; W.Th = []; W.theta = null; W.wT = null; W.PL = null;
   }
-  if (!RAD || RAD.id !== H.id) {
-    if (W.radId !== H.id) {
+  if (!RAD || RAD.id !== id) {
+    if (W.radId !== id) {
       /* radial: R_a of the Hamiltonian IN FORCE on a log grid, Simpson weights in u = ln r with the Jacobian r folded in */
       const r = new Float64Array(NR + 1), w = new Float64Array(NR + 1), wr2 = new Float64Array(NR + 1), du = Math.log(R1 / R0) / NR;
       for (let j = 0; j <= NR; j++) { r[j] = R0 * Math.exp(j * du); w[j] = ((j === 0 || j === NR) ? 1 : (j % 2 ? 4 : 2)) * du / 3 * r[j]; wr2[j] = w[j] * r[j] * r[j]; }
-      W.rad = { id: H.id, r, w, wr2, tab: [] }; W.radId = H.id; W.radRows = 0; W.radNL = new Map();
+      W.rad = { id, r, w, wr2, tab: [] }; W.radId = id; W.radRows = 0; W.radNL = new Map();
     }
     while (W.radRows < N) {
       /* 2026-09-24 · ONE ROW PER (n, l) (optimization LB6): a row is H.radial(n, l, r_j) and does not depend on m, so
