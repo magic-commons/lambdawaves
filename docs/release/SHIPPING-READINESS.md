@@ -5,8 +5,8 @@
 - **What 1.0 means.** 1.0 is the tree in which the last confirmed critical or high finding of the 0.9.9 stability review is closed.
   The review's three high findings — the SHADER node's black stage after a film, a `null` settings blob, and an update press that
   swapped the build under other open tabs — are fixed, each with a test of the failure. What 1.0 ships with, and states as
-  unverified: the device matrix ([`ACCEPTANCE-MATRIX.md`](ACCEPTANCE-MATRIX.md): one RTX 3070 in Firefox and Electron on Linux; the
-  Windows package built, not run; the iPad and iPhone rows unverified; the Android upload key absent), the installed-PWA update on a
+  unverified: the device matrix ([`ACCEPTANCE-MATRIX.md`](ACCEPTANCE-MATRIX.md): one RTX 3070 in Firefox and Electron on Linux, the
+  Electron rows re-measured on 2026-11-11; the Windows package not rebuilt since 2026-10-16 and never run; the iPad and iPhone rows unverified; the Android upload key absent), the installed-PWA update on a
   real device, a real microphone for AUDIO, and a screen-reader pass — none of them done.
 - **The gate.** `./test.sh node` runs every node suite (`tests/*.test.mjs`, pwa last) plus `state-scopes --check` and `hints-census
   --check`; the browser gate runs every `tests/*.browser-test.mjs`. The release-day list with today's numbers is in
@@ -23,6 +23,10 @@
   unlimited, so no traffic can produce a bill. The build's §V7 holds the plan's 20,000-file / 25 MiB budget: 15,674 files ship today.
 - **The library.** VOL. I (6,927 molecules) and the filling VOL. III travel with the site as files, so INSTALL and the single-molecule
   fetch work; VOL. II is its 5.76 GB archive, handed out from the maintainer's Drive and opened in PICKER › LIBRARY (`docs/VOLUMES-HOSTING.md`).
+- **The desktop (042 S, 2026-11-11).** `tools/platform/electron/` builds the two folders Steam takes (`lambdawaves-linux-x64`,
+  `lambdawaves-win32-x64`); the host serves the app at `https://lambdawaves.localhost` from the package (never the network), with the edge's
+  CSP, and makes no request of its own. The Linux package passes its smoke (17/17); Windows, Steam's Linux runtime and the Deck are unrun.
+  What to upload and what only the maintainer can do: [`STEAM.md`](STEAM.md). Nothing is on Steam.
 - **Hardening (030).** Every response carries a Content-Security-Policy and HSTS (SECURITY.md); both workflows pin their actions by hash with
   read-only permissions; install scripts are off; `main` and `dev` are protected (required checks, no force-push); Dependabot and secret
   scanning are on; private vulnerability reporting is on. The outside-eye review (REVIEW-030, in the vault) found that Cloudflare's
@@ -39,6 +43,7 @@
 | P1 | Audio and capture need real-device testing. | Permission denial and revocation, disconnect and reconnect, no sound before consent, stopping capture, export cancellation and restoration, with a real microphone. |
 | P1 | Browser support is stated without a tested device matrix. | Record the tested OS/browser/GPU combinations; verify keyboard focus, touch targets, zoom, reduced motion and the photosensitivity notice on them. |
 | P1 | Deploy tooling must stay reproducible and patched. | `npm ci --ignore-scripts` from the committed lockfile; review upgrades together; rehearse routing, the dry run and a rollback after changes. |
+| P1 | The desktop build is measured on one Linux machine. | The Windows GPU run, the Linux sandbox under a real Steam install, the Deck and a 30-minute session ([`STEAM.md`](STEAM.md) §7), each a row in the acceptance matrix. |
 | P2 | `rack.js`, the layered CSS and the browser gate are expensive to maintain. | Split by behavioural ownership after reproducing defects; prefer focused behaviour tests over source-text assertions. No broad rewrite before a trustworthy baseline. |
 
 ## Shipping rules
