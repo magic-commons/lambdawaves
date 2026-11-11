@@ -417,10 +417,10 @@ export function uniqueFileName(name, taken) {
 /**
  * The bytes as they come off the GPU are padded to 256 and, on every desktop this runs on, BGRA (the preferred
  * canvas format is bgra8unorm).  This unpads, swizzles to RGBA, and — since the context is configured
- * `alphaMode: 'opaque'`, i.e. the alpha channel is not what is on screen — forces alpha to 255.
+ * `alphaMode: 'opaque'`, i.e. the alpha channel is not what is on screen — forces alpha to 255.  `out`: write there (a band of the
+ * frame) instead of a fresh array.
  */
-export function toRGBA(src, w, h, { bytesPerRow = w * 4, bgra = false, opaque = true } = {}) {
-  const out = new Uint8Array(w * h * 4);
+export function toRGBA(src, w, h, { bytesPerRow = w * 4, bgra = false, opaque = true, out = new Uint8Array(w * h * 4) } = {}) {
   for (let y = 0; y < h; y++) {
     let s = y * bytesPerRow, d = y * w * 4;
     for (let x = 0; x < w; x++, s += 4, d += 4) {
@@ -624,24 +624,24 @@ export async function readback(f, canvas, w, h, draw, wit = null, opaque = true)
   const tex = c.getCurrentTexture();                    // the SAME texture draw() just rendered into
   const bpr = alignedBytesPerRow(w);
   const bands = planBands(h, bpr, d.limits.maxBufferSize);
-  const enc = d.createCommandEncoder();
-  const bufs = bands.map((b) => {
-    const buf = d.createBuffer({ size: bpr * b.rows, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
-    enc.copyTextureToBuffer({ texture: tex, origin: [0, b.y0, 0] }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: b.rows }, [w, b.rows, 1]);
-    return { buf, y0: b.y0, rows: b.rows };
-  });
-  d.queue.submit([enc.finish()]);
-  await d.queue.onSubmittedWorkDone();                  // the texture must outlive the copy: only then may the canvas resize
-  if (wit) { wit.presents = f.stats.presents; wit.generation = f.stats.generation - gen0; wit.canvasW = canvas.width; wit.canvasH = canvas.height; }
-  const bgra = /^bgra/.test(f.format);
-  const rgba = new Uint8Array(w * h * 4);
-  for (const b of bufs) {
-    await b.buf.mapAsync(GPUMapMode.READ);
-    const src = new Uint8Array(b.buf.getMappedRange());
-    rgba.set(toRGBA(src, w, b.rows, { bytesPerRow: bpr, bgra, opaque }), b.y0 * w * 4);
-    b.buf.unmap(); b.buf.destroy();
-  }
-  return { rgba, w, h, ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0 };
+  const enc = d.createCommandEncoder(), bufs = [];
+  try {
+    for (const b of bands) {
+      const buf = d.createBuffer({ size: bpr * b.rows, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+      bufs.push(buf); enc.copyTextureToBuffer({ texture: tex, origin: [0, b.y0, 0] }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: b.rows }, [w, b.rows, 1]);
+    }
+    d.queue.submit([enc.finish()]);
+    await d.queue.onSubmittedWorkDone();                // the texture must outlive the copy: only then may the canvas resize
+    if (wit) { wit.presents = f.stats.presents; wit.generation = f.stats.generation - gen0; wit.canvasW = canvas.width; wit.canvasH = canvas.height; }
+    const bgra = /^bgra/.test(f.format), rgba = new Uint8Array(w * h * 4);
+    for (let i = 0; i < bands.length; i++) {
+      const b = bands[i], buf = bufs[i];
+      await buf.mapAsync(GPUMapMode.READ);
+      toRGBA(new Uint8Array(buf.getMappedRange()), w, b.rows, { bytesPerRow: bpr, bgra, opaque, out: rgba.subarray(b.y0 * w * 4) });
+      buf.unmap(); buf.destroy();
+    }
+    return { rgba, w, h, ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0 };
+  } finally { for (const buf of bufs) buf.destroy(); }
 }
 
 /** THE HAND-OVER, the one both roads reach (cap.save and render-exact's film.save).  The kit's saveBlob takes the share sheet
