@@ -267,7 +267,7 @@ export function createSliceView(host, api) {
     armPump();                                                   // stepJob() nulls `job` when it finishes, and the pump stops
   }
   function setActive(v) { active = !!v; if (active) armPump(); return active; }
-  function update(reg, t, playing) {
+  function update(reg, t) {
     if (miniMode !== mode) { miniMode = mode; mini.root.setAttribute('aria-disabled',String(mode!=='space'));mini.root.tabIndex=mode==='space'?0:-1;
       mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere; drag turns KS ℝ⁴'; }
     mini.paint();

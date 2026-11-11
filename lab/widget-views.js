@@ -28,7 +28,7 @@ view({ kind: 'orbit', label: 'ORBIT', hint: 'Each shell’s two rotors and its K
 view({ kind: 'wigner', label: 'WIGNER', hint: 'The (z, p_z) slice of W, signed in the two accents', size: { w: 0.16, h: 0.2 } }, 'wigner', of((app) => app.w.wignerView, (m, app) => {
   const G = app.host.hydroReader(); m.update(app.reg, app.clock.t, app.clock.playing, G.on, G.why, app.ctl.domain.half); }));   // its own 2 Hz while playing (wignerview.js)
 view({ kind: 'plane', label: 'PLANE', hint: 'ψ on PLANE’s cut: arg the hue, |ψ| the brightness', size: { w: 0.14, h: 0.22 } }, 'slice',
-  of((app) => app.w.slice, (m, app) => m.update(app.reg, app.clock.t, app.clock.playing)));   // its chunked job on its own pump (sliceview.js)
+  of((app) => app.w.slice, (m, app) => m.update(app.reg, app.clock.t)));   // its chunked job on its own pump (sliceview.js)
 view({ kind: 'emission', label: 'EMISSION', hint: 'EMISSION’s comb, the state’s own lines lit', size: { w: 0.26, h: 0.1 } }, 'emission', of((app) => app.w.emissionView, (m) => m.update()));
 view({ kind: 'equalizer', label: 'EQUALIZER', hint: 'The beat grid: each pair of shells, its beat’s third', size: { w: 0.11, h: 0.17 } }, 'equalizer', of((app) => app.state.eq, () => {}));   // pushed by syncEq; read-only
 view({ kind: 'spectrum', label: 'SPECTRUM', hint: 'The eigenvalue ladder, its populated levels lit', size: { w: 0.12, h: 0.2 } }, 'spectrum', (cv, app) => {
