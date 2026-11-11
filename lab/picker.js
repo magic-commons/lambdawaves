@@ -425,7 +425,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const SHAPES = { '●': 'balls', '⊸': 'sticks', '◣': 'wedge' };   // 021 V2: the table's `balls` and `sticks` (lab/icons.js) · 037 D2: `wedge`
   const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = glyphSvg(SHAPES[g], 'gly'); else host.textContent = g; return host; };
   const lookOf = () => { const l = lookFor(false); return l !== 'density' ? l : null; };   // a volume tile's style (V.picture), a molecule's look
-  const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu';   // 022 P3: a menu pane drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');
+  const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu'; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');   // 022 P3: a menu pane
   const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio'); b.style.setProperty('--i', String(i));
     b.style.gridRow = i < 3 ? '1' : '2'; b.style.gridColumn = (i < 3 ? 2 + 2 * i : 1 + 2 * (i - 3)) + ' / span 2';   // L1: the bricks, each row centred
     glyph(el('b', 'mm-lk-g', b), glyph_); b.addEventListener('click', () => { if (b.getAttribute('aria-disabled') === 'true') return; setLook(id); closeDrop(true); }); return b; });
@@ -983,7 +983,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        a speech bubble over the tile it came from when the room between the pager's top and the tile holds it, else under it, its 12-px tail
        (a sibling, so the pane's scroll never clips it) on the tile's centre; the pane blurred under FROST (skin.css); the molecule whose
        picture is the volume's thumbnail sits on a soft plate */
-    const isoEl = el('div', 'mm-isos glass', view); isoEl.hidden = true; isoEl.dataset.mirSurface = 'menu';   // 022 P3: a menu pane isoEl.setAttribute('role', 'dialog');
+    const isoEl = el('div', 'mm-isos glass', view); isoEl.hidden = true; isoEl.dataset.mirSurface = 'menu'; isoEl.setAttribute('role', 'dialog');   // 022 P3: a menu pane
     const isoTail = el('i', 'mm-iso-tail', view); isoTail.hidden = true; isoTail.setAttribute('aria-hidden', 'true');
     const isoHead = el('div', 'mm-isohead', isoEl), isoGrid = el('div', 'mm-isogrid', isoEl);
     const closeIsomers = () => { if (isoEl.hidden) return; isoEl.hidden = isoTail.hidden = true; const f = vdeck.tiles.find((x) => x.dataset.iso === isoEl.dataset.of); if (f) f.focus({ preventScroll: true }); };
