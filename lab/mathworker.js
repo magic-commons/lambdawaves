@@ -600,7 +600,8 @@ function chemEsp({ N = 64, half, shells, D, atoms }) {
     decodeVibrate): Q_j = amp·q0ₖ·cos 2πj/K, the nuclei at R₀ + Q·Lₖ, D(Q) = ONE McWEENY STEP on D₀ + Q·D₁ₖ against the exact S(Q) — D is the RHF density
     with Tr(DS) = N, so D/2 is the idempotent one and the step is 3/2·DSD − 1/2·DSDSD — and μ(Q) = Σ Z R − Tr(D M(Q)).  D₁ₖ is dD/dQ in the MOVING AO
     basis, so `shells` stays null: the frame thread moves its own shells' centres.  An unsolved key is a refusal. */
-export function chemVibFrames({ vib, k = 0, amp = 1, K = 32 }) {
+export function chemVibFrames({ vib, k = 0, amp = 1, K = 32, atoms, basis, charge }) {
+  if (atoms) ensureSolve({ atoms, basis, charge });   // the card's RHF molecule, again if a Δ LDA−RHF partner took the one solve slot
   const c = chemSol, at0 = vib.atoms, N = at0.length, n = c ? c.ground.nAO : 0, nn = n * n;
   if (c && c.ground.model === 'RKS LDA') throw new Refused("VIBRATE stands down under RKS LDA: its modes and dD/dQ are RHF's");
   if (!c || !c.sol.D || c.key !== keyOf(vib.basis, vib.charge, at0)) throw new Refused('VIBRATE plays the molecule this worker has solved: solve it first');
