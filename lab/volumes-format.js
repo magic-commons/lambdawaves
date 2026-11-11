@@ -19,7 +19,7 @@
  *   to 8 · the files, each at its 8-aligned offset from the file's start (index.json first, then m/*.lwm, then t/*.webp; paths relative to
  *   the volume's folder).  lwvIndexLength(first 8 bytes) → 8 + H; parseLwv(the first 8 + H bytes) → the index, checked. */
 export const MAGIC = 'LWM1', LWM_SCHEMA = 1, LWV_MAGIC = 'LWV1';
-const DTYPE = { f64: Float64Array, f32: Float32Array, i32: Int32Array, f16: Uint16Array };   // f16: IEEE binary16 bits (iteration 014 C1's potential grid)
+const DTYPE = { __proto__: null, f64: Float64Array, f32: Float32Array, i32: Int32Array, f16: Uint16Array };   // f16: IEEE binary16 bits (iteration 014 C1's potential grid); no prototype, so a header's dtype 'constructor' is no type
 const LE = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 const pad8 = (n) => Math.ceil(n / 8) * 8;   // plain arithmetic: a bitwise AND wraps at 2 GiB, and an archive is 5.95 GB (030)
 
