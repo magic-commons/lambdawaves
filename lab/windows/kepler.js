@@ -77,8 +77,9 @@ export function createKeplerSurface(app) {
     const S = toScreen(obs, domain.half, dom.canvas.clientWidth, dom.canvas.clientHeight);
     return { cam: S.eye, d: S.ray(px, py), B: S.basis, target: S.target };
   }
+  const moves = () => reg.field.Fz !== 0 || reg.field.Bz !== 0;      // under STARK or ZEEMAN the orbit is c(t)'s, not the anchor's (a rotor then acts at t)
   function orbitOfShell(n, re, im) {
-    const c = re ? { re, im } : (reg.field.Fz !== 0 ? reg.at(clock.t) : { re: reg.re0, im: reg.im0 });
+    const c = re ? { re, im } : (moves() ? reg.at(clock.t) : { re: reg.re0, im: reg.im0 });
     const o = keplerOrbits(c.re, c.im, 0.01).find((x) => x.orbit.n === n); return o ? o.orbit : null;
   }
   /** a rotor about an arbitrary axis: carry the axis to z with spatial rotors, turn about z, carry it back */
@@ -157,7 +158,7 @@ export function createKeplerSurface(app) {
     const eT = Math.max(0, Math.min(0.96, 1 - wl / o.a));
     const o2 = orbitOfShell(n); if (!o2 || o2.isotropic) { touchState(); return true; }
     const ax = [N[1] * o2.u[2] - N[2] * o2.u[1], N[2] * o2.u[0] - N[0] * o2.u[2], N[0] * o2.u[1] - N[1] * o2.u[0]];   // N × û: in the plane, ⟂ the perihelion
-    const c0 = reg.field.Fz !== 0 ? reg.at(clock.t) : { re: Float64Array.from(reg.re0), im: Float64Array.from(reg.im0) };
+    const c0 = moves() ? reg.at(clock.t) : { re: Float64Array.from(reg.re0), im: Float64Array.from(reg.im0) };
     const eAt = (th) => { const re = Float64Array.from(c0.re), im = Float64Array.from(c0.im); for (const s of rotorSeq('K', ax, th)) rotorOnCopy(re, im, s); const q = orbitOfShell(n, re, im); return q && !q.isotropic ? q.e : 0; };
     /* the angle: e(θ) is periodic and bounded (|L|² + |K|² is a shell invariant, so e ≤ √(L²+K²)/n) — scan the whole
        turn for the θ whose e is closest to the target, then refine; an out-of-reach target lands on the shell's maximum */
@@ -183,10 +184,11 @@ export function createKeplerSurface(app) {
   let kepRowVer = -1, kepRowTime = NaN;
   function keplerRowSync(force) {
     if (!ui.kepShell || !ui.kepRo) return;
-    const time = reg.field.Fz !== 0 ? clock.t : 0;
+    const time = moves() ? clock.t : 0;
     if (!force && reg.version === kepRowVer && time === kepRowTime) return;
     kepRowVer = reg.version; kepRowTime = time;
-    const lit = new Map(keplerOrbits(reg.field.Fz !== 0 ? reg.at(clock.t).re : reg.re0, reg.field.Fz !== 0 ? reg.at(clock.t).im : reg.im0, 0.01).map((x) => [x.orbit.n, x.orbit]));
+    const c = moves() ? reg.at(clock.t) : { re: reg.re0, im: reg.im0 };
+    const lit = new Map(keplerOrbits(c.re, c.im, 0.01).map((x) => [x.orbit.n, x.orbit]));
     for (const n of [2, 3, 4, 5, 6]) { const b = ui.kepShell.button(String(n)); if (b) b.disabled = !lit.has(n); }
     ui.kepShell.set(ui.kepShell.get());
     const n = kepShell(), o = lit.get(n);

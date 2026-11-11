@@ -22,10 +22,11 @@ export function createKepler(canvas) {
      LAW and the legend; each orbit's numbers are on its own perihelion handle, through the shared tip.  This
      canvas is pointer-events: none, so the rack's own hit()/setHover() route drives it — no rack.js change. */
   function recompute(reg, t) {
-    const key = `${reg.version}|${reg.field.Fz !== 0 ? t.toFixed(3) : 0}`;
+    const moves = reg.field.Fz !== 0 || reg.field.Bz !== 0;
+    const key = `${reg.version}|${moves ? t.toFixed(3) : 0}`;
     if (key === lastKey) return;
     lastKey = key;
-    const c = reg.field.Fz !== 0 ? reg.at(t) : { re: reg.re0, im: reg.im0 };
+    const c = moves ? reg.at(t) : { re: reg.re0, im: reg.im0 };
     orbits = keplerOrbits(c.re, c.im, 0.01);
   }
   function draw(obs, half) {
