@@ -97,11 +97,15 @@ import { gaussLegendre } from './wigner.js';
  *   for 1s–6p — and a 16-label state's first frame cost 1.4 s (dipoleZ 418 ms + radialObservables 1009 ms): the reviewer's
  *   finding.  qho: Gaussian × polynomial, the same rule on [0, 14].  well: 8 panels on [0, a] — the wall is a panel edge
  *   and the radial is zero beyond it.  atom: the shells are linear interpolants in ln r on a 10⁻⁶/Z … 60 mesh, so the
- *   rule is Simpson in ln r on 6000 points (three per mesh step).  Otherwise (quarkonium's uniform table): Simpson on
- *   [0, 14], 12000 panels, the rule this file always had.  Every rule is built once and cached. */
+ *   rule is Simpson in ln r on 6000 points (three per mesh step).  Otherwise (QUARKONIUM's and CENTRAL's Numerov tables): Simpson,
+ *   12000 panels, on [0, 14] or the operator's own box for shell n_max if wider (CENTRAL's CONFINED 3s lost 40 % of its norm at 14).
+ *   Every rule is built once and cached under `radialKey`: the operator, its scale and radius, and the radial table in force, which a
+ *   re-solve replaces (kick.js keys its tables on it too). */
+const TAB_ID = new WeakMap(); let tabs = 0;
+export const radialKey = (H) => { const t = H.radialTable && H.radialTable(); if (t && !TAB_ID.has(t)) TAB_ID.set(t, ++tabs); return `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}${t ? ':' + TAB_ID.get(t) : ''}`; };
 const RULE_CACHE = new Map();
 function radialRule(H, nlo, nhi) {
-  const Z = H.k || H.Z || 1, key = `${H.id}:${Z}:${H.radius || 0}:${nlo}:${nhi}`;
+  const Z = H.k || H.Z || 1, key = `${radialKey(H)}:${nlo}:${nhi}`;
   const hit = RULE_CACHE.get(key); if (hit) return hit;
   const r = [], w = [];
   const panels = (edges, q) => { const G = gaussLegendre(q); for (let p = 0; p + 1 < edges.length; p++) { const h = (edges[p + 1] - edges[p]) / 2, c = (edges[p] + edges[p + 1]) / 2; for (let i = 0; i < q; i++) { r.push(c + h * G.x[i]); w.push(h * G.w[i]); } } };
@@ -111,7 +115,7 @@ function radialRule(H, nlo, nhi) {
   else if (H.id === 'qho') panels([0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10, 14], 24);
   else if (H.id === 'well' && H.radius > 0) panels(Array.from({ length: 9 }, (_, i) => H.radius * i / 8), 24);
   else if (H.id === 'atom') { const N = 6000, r0 = 1e-6 / Z, du = Math.log(60 / r0) / N; simpson(Array.from({ length: N + 1 }, (_, i) => r0 * Math.exp(i * du)), (i) => du * r0 * Math.exp(i * du)); }
-  else { const N = 12000, h = 14 / N; simpson(Array.from({ length: N + 1 }, (_, i) => i * h), () => h); }
+  else { const N = 12000, h = Math.max(14, H.domainFor ? H.domainFor(nhi) : 0) / N; simpson(Array.from({ length: N + 1 }, (_, i) => i * h), () => h); }
   const rule = { r: Float64Array.from(r), w: Float64Array.from(w) };
   RULE_CACHE.set(key, rule); return rule;
 }
@@ -120,7 +124,7 @@ const RAD_CACHE = new Map();
  *  hydrogen: 1s–4p and 1s–6p to 1e-14 against mpmath), cached per Hamiltonian, Z (and the well's radius) and pair */
 export function radialDipole(np_, lp, n, l) {
   const H = getHamiltonian(), swap = np_ > n || (np_ === n && lp > l);                 // the integrand is symmetric: ONE key per pair
-  const key = swap ? `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}:${n}:${l}:${np_}:${lp}` : `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}:${np_}:${lp}:${n}:${l}`;   // Z in the key (Round 11 A2)
+  const key = swap ? `${radialKey(H)}:${n}:${l}:${np_}:${lp}` : `${radialKey(H)}:${np_}:${lp}:${n}:${l}`;   // Z in the key (Round 11 A2)
   if (RAD_CACHE.has(key)) return RAD_CACHE.get(key);
   const { r, w } = radialRule(H, Math.min(np_, n), Math.max(np_, n));
   let s = 0;
@@ -240,7 +244,7 @@ const MOM_CACHE = new Map();
 /** ∫₀^∞ R_{n′l}(r) r^k R_{nl}(r) r² dr — NUMERICAL on the same rule as radialDipole (cached); k = 1 gives ⟨r⟩, k = −1 gives ⟨1/r⟩ */
 export function radialMoment(k, np_, lp, n, l) {
   const H = getHamiltonian(), swap = np_ > n || (np_ === n && lp > l);
-  const key = swap ? `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}:${k}:${n}:${l}:${np_}:${lp}` : `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}:${k}:${np_}:${lp}:${n}:${l}`;   // the Hamiltonian in force, and Z (Round 11 A1)
+  const key = swap ? `${radialKey(H)}:${k}:${n}:${l}:${np_}:${lp}` : `${radialKey(H)}:${k}:${np_}:${lp}:${n}:${l}`;   // the Hamiltonian in force, and Z (Round 11 A1)
   if (MOM_CACHE.has(key)) return MOM_CACHE.get(key);
   const { r, w } = radialRule(H, Math.min(np_, n), Math.max(np_, n));
   let s = 0;
