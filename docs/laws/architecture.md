@@ -2,6 +2,12 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 042
+
+THE SEAT NAMES WHAT boot() READS (042 A3, X1): a seat destructure names only what `boot()` itself reads, and the module returns only those; every other name it makes is registered on `app.<ns>`, where its readers read it (`rack-deps --classes`' fwd + shared did not move, only the informational `backward`).
+THE STAGE'S RELOAD ASKS NOTHING (042 B8): the leave guard (`lab/shell/notebook.js` beforeunload) stands down for 5 s after `lw.stage` is written, as it does for REPAIR, so the lost device's reload and RELOAD STAGE never meet "Leave site?" or the desktop's unsaved-work question.
+THE DESKTOP (042 S1, S2): the Electron build serves the package at `https://lambdawaves.localhost` (`tools/platform/electron/main.cjs` `protocol.handle('https')`; other hosts go to the network) and opens `index.html?sw=0&warn=0`, so no service worker runs; app code knows it by `globalThis.lwavesDesktop` (the preload's): no UPDATE APP row, links minted at the web address (docs/release/STEAM.md).
+
 ## The laws of 041
 
 THE STAGE COMES BACK (041 S8): a lost GPU device (out of memory, a driver reset, a reclaimed tab) takes ONE reload by itself (`lab/shell/controller.js` `stageLost`, after the banner; the session flushed on the way out and resumed on the way in; `lw.stage`, sessionStorage, is a RECORDS row); a second loss within a minute of that reload, or a device the page itself destroyed, puts RELOAD STAGE on the stage (`.lw-stage-lost`), never a loop. The reload road is unproven headless (only the button's is).
@@ -32,17 +38,17 @@ cross-module writes, forward + shared ≤ 25 per moving module; the loop and the
 
 THE CONTROLLER (0.5.2 R1) is `lab/shell/controller.js` `createController(app)` — the governor and AUTO SCALE's one rule, the look, the
 busy marks, the mod port, the rotation drive, `createField` and its GPU recovery, the maths workers and the ONE ROAD of state mutations
-(`touchState`, `loadPreset`, `setReference`, `api`) — moved verbatim; `boot()` awaits it at §2's seat and destructures its 68 names there,
-so the frame loop (§5–§6), `schedule`, `filmHold` and §13–§14 stay in `boot()` and read closure slots. The 56 of those names a later
-module reads are filled on `app.ctl` once, at the end of `createController` (never by a window or shell row); the 12 only `boot()` or the
-loop read stay closure slots, and a module created BEFORE that seat (§1 SETTINGS) reads `app.ctl.x` inside a callback, never at creation
+(`touchState`, `loadPreset`, `setReference`, `api`) — moved verbatim; `boot()` awaits it at §2's seat and destructures the 40 names it reads there
+(68 until 042 A3), so the frame loop (§5–§6), `schedule`, `filmHold` and §13–§14 stay in `boot()` and read closure slots. The 56 names a later
+module reads are filled on `app.ctl` once, at the end of `createController` (never by a window or shell row; `boot()` destructures 28 of them
+too); the 12 only `boot()` or the loop read stay closure slots, and a module created BEFORE that seat (§1 SETTINGS) reads `app.ctl.x` inside a callback, never at creation
 (they are TDZ above the seat). The worker road is `new URL('../mathworker.js', import.meta.url)` in that module; `node tools/rack-deps.mjs
 --classes` measures a moved module from its own file (`lab/shell/*.js`, `lab/windows/*.js`), and an unplanned file there is refused.
 
 THE WINDOWS (0.5.2 R2a; 018 C1 retired `state.js` — A ↔ B · TRANSITION and the register's CLEAR are `lab/windows/transition.js` `createTransition(app)`, seated at `// TRANSITION — A ↔ B` before SPECTRUM, building `ui.abBox` that spectrum.js mounts between the 140 table and the presets; `app.w.clearRegister` is filled at that seat): STATE (with its CLEAR) WAS `lab/windows/state.js` `createStateCard(app)` and SPECTRUM `lab/windows/spectrum.js`
 `createSpectrumCard(app)`, moved verbatim and created at their seats under the kept `// STATE` / `// SPECTRUM` lines (the five appends
 stay in `boot()`). THE READ LAW for a moved module: a name that is a CONST by the time its seat runs — §0's consts, the loop's hoisted
-functions, the rack, the controller's 68 (`app.ctl` is filled before the controller's seat returns) — is destructured ONCE at creation
+functions, the rack, the controller's 56 on `app.ctl` (filled before the controller's seat returns) — is destructured ONCE at creation
 (`const { gov, look } = app.ctl`), which the tool counts as backward; a name `boot()` makes LATER is read through its slot inside a
 callback (`app.w.gas`, `app.sh.layout` …, registered by the module that makes it, or filled in `boot()` right after the declaration of a name `boot()` keeps (`app.host.camera`, `app.loop.page`) — a module created before the
 controller's seat, §1 SETTINGS, reads `app.ctl.x` that way too); a shared `let` is always `app.state.x`, live. Reading a const through
@@ -54,7 +60,7 @@ SETTINGS, PERSISTENCE, THE LINKS and THE TRUE HISTORY (0.5.2 R3a) are `lab/shell
 controller's seat, so it reads `app.ctl.x`, `app.host.camera`, `app.sh.setModArm` and `app.sh.quality` inside callbacks), `lab/shell/persist.js`
 `createPersist(app)` (`serialize` and `restore` whole), `lab/shell/links.js` `createLinks(app)` (§29's `openLink()` stays in `boot()`) and
 `lab/shell/history.js` `createHistory(app)` (the HISTORY card with it) — moved verbatim and called at their seats; `readSettings` stays one hoisted
-line in `boot()`'s head (§0 calls it first). `serialize` / `restore` / `save` / `copyJSON` / `esc` / `copyLink` / `lookSync` are registered on
+line in `boot()`'s head (§0 calls it first). `serialize` / `restore` / `save` / `copyJSON` / `esc` / `copyLink` are registered on
 `app.sh` by the module that makes them (STATE's SAVE / LOAD / COPY read them at use; `boot()` keeps no copy), and a slot a module reads that no
 moved module owns yet is filled in `boot()` right after its declaration (11 lines, 30 slots, each moving with its owner's row). `tools/rack-deps.mjs`'
 G-A: a module file's eager fills (`app.<ns>.x = …` at its root) run at its seat, so a later-seated file may destructure them; `Object.assign` into a
@@ -105,5 +111,5 @@ comments travelling (`Object.assign` would freeze a getter into a value) — des
 module), reading its 21 shared lets as `app.state.x` and `warning` as `app.hooks.warning`; `boot()` keeps the `/* ── the diagnostics surface` header (the
 tool's anchor), `const LW = createFacade(app); window.__LW = LW; app.sh.LW = LW;` and every member it adds later (`LW.curves`, `LW.bootView` …
 `LW.stageText`, `LW.ready`, `LW.report`) at its seat, so `tests/fixtures/lw-facade.json` holds without `--write`. Every slot the facade reads is
-filled exactly once by its owner (`research/release-0.5.2/integrator/doubles.mjs` reads 0), and `boot()`'s seat destructures keep naming what a module
-returns even where only a module reads it: `tools/rack-deps.mjs --classes` knows a crossing name by its boot-level declaration.
+filled exactly once by its owner (`research/release-0.5.2/integrator/doubles.mjs` reads 0); since 042 A3 a seat destructure names only what `boot()`
+reads (The laws of 042).

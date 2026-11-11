@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first. THE MAIN MENU (034) stands over them.
 
+## The laws of 042
+
+A VOLUME PICTURE IS LET GO (042 H9): `lab/volumes.js` `picture()` hands back a fresh `blob:` URL for an installed volume's thumbnail; its reader revokes it once the image has loaded or failed (`lab/picker.js` `volPic`, as chemview does), or every tile, page and look change keeps a Blob for the page's life.
+
 ## The laws of 041
 
 THE LIBRARY FADES LIKE THE SIDE SCROLL (041 P1, Josh: "I just want whatever horizontal is doing"): the decks' scroller fades its top and foot ALWAYS, as `.mm-pages` fades its sides (`--vfade` 32 px; a section is padded by the fade, so the rest state has not moved); 036 G2's blur bands (`.mm-edge`) and 040 I5's scroll-time growth are gone; `mm-moving` is the tutorial scroller's alone.

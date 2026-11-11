@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 042
+
+A FILM'S SHADER RECORDS END WITH THE TAKE (042 X4): the SHADER host keeps one film record per node id while a take runs (`bake`, stepped from black at frame 0) and frees them all at the take's end (`release()`, through `lab/film-bake.js` `end()` in render-exact's `after()`); a road that bakes outside the recorder ends with `bake.end()` too. `drop()` stays the stage's, never mid-film.
+
 ## The laws of 041
 
 NODES' CHIPS (041 N1, on alpha.55): the NODES window wears `chrome: 'both'`, its rail on the left, top to bottom: the drag chip (`gripAt: 'first'`), ADD NODE, FIT, FOLD ALL, BYPASS ALL; the four tools left the window's ground and the chips join the mask (`lab/nodes.js`, `lab/nodes-view.js`); the title bar keeps the presets, the dock door and ×; the rack card, which has no rail, keeps its three in its ground.
