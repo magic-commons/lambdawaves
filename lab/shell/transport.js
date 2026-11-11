@@ -1,6 +1,6 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
- * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
+ * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS, SETTINGS, the loop and the facade; boot() destructures transport. */
 import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp, label } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 import { cssZoom } from '../mir/core/zoom.js'; import { notice } from '../mir/shell/notice.js'; import { adopt } from '../widgets.js'; import { STYLES as MOL_STYLES, STYLE_GLYPH } from '../widget-mol.js';
@@ -358,5 +358,5 @@ export function createTransport(app) {
     return { ok: true, bpm: app.state.modHost.model.transport.bpm, wanted: r.wanted, clamped: r.clamped,
              laps: r.clamped ? r.lapsThatFit : 1, T: P.T, seconds: r.seconds, fits: r.fitsAtLaps };
   }
-  return { transport, togglePlay, setModArm, barLock };
+  return { transport };
 }

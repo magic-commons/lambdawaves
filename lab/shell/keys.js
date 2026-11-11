@@ -186,5 +186,4 @@ export function createKeys(app) {
     toggleUI, cycleWindow, table: kt.table,
   };
   app.sh.keyState = keyState; app.sh.kt = kt; app.sh.stageHasFocus = stageHasFocus;
-  return { stageHasFocus, keyState };
 }

@@ -371,5 +371,5 @@ export function createPersist(app) {
     finally { schedule(TIER.REBUILD); app.ctl.markBatchEnd(); }
   }
   app.sh.serialize = serialize; app.sh.restore = restore; app.sh.save = save; app.sh.copyJSON = copyJSON; app.sh.restoreModulation = restoreModulation;
-  return { modSeats, serialize, restoreModulation, save, copyJSON, restore };
+  return { modSeats };
 }

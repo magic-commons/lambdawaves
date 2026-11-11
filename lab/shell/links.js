@@ -87,5 +87,5 @@ export function createLinks(app) {
     return { ok, opened: true, code: null, message: null, warnings: got.warnings, unknownSections: got.unknownSections };
   }
   app.sh.esc = esc; app.sh.copyLink = copyLink; app.sh.notCarriedWords = notCarriedWords; app.sh.mintLink = mintLink; app.sh.openLink = openLink;
-  return { notCarriedWords, mintLink, copyLink, openLink };
+  return { openLink };
 }

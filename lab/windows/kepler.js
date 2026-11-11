@@ -304,6 +304,5 @@ export function createKeplerSurface(app) {
     touchState();
   }
   window.addEventListener('keyup', (e) => { if (e.key === 'Control' && app.state.bow) bowCancel(); });
-  return { bowStart, bowMove, bowRelease, orbitOfShell, kepShell, keplerTurn, keplerDragToPoint, keplerDragTo, keplerRowSync, gas, gasReadout, gasTableOn, launchPacket, enterBox, coherentBounce,
-    bowCancel, slapAlong };
+  return { keplerRowSync, gas, gasReadout, gasTableOn };
 }
