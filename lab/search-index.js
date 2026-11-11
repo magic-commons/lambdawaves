@@ -152,7 +152,8 @@ export function createIndex(docs, { frecency = null } = {}) {
     }
     for (const i of touched) { hit[i] = 0; maskP[i] = maskT[i] = maskA[i] = 0; score[i] = 0; }
     const most = out.some((r) => r.tier < 8) ? K + 1 : Math.max(0, ...out.map((r) => r.held));   // no doc holds every term: the docs holding the most
-    return out.filter((r) => r.tier < 8 || r.held === most).sort((a, b) => a.tier - b.tier || b.score - a.score || a.i - b.i);
+    const sure = out.some((r) => r.tier <= 5);   // a sure match silences the guesses: typos and loose letters show only when nothing better does
+    return out.filter((r) => (r.tier < 8 || r.held === most) && !(sure && (r.tier === 6 || r.tier === 7))).sort((a, b) => a.tier - b.tier || b.score - a.score || a.i - b.i);
   }
   return { search, byId: (id) => docs[byId.get(id)] || null };
 }
