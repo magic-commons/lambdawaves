@@ -31,7 +31,7 @@ const warned = { getItem: () => (blob.read().warned === true ? '1' : null), setI
   removeItem: () => blob.write({ ...blob.read(), warned: false }) };
 const warning = (() => {
   let open = false; const accepted = [];
-  const accept = () => { if (!open) return; open = false; warned.setItem(); while (accepted.length) { try { accepted.shift()(); } catch (_) {} }
+  const accept = () => { if (!open) return; open = false; warned.setItem(); while (accepted.length) { try { accepted.shift()(); } catch (e) { reportError(e); } }
     const m = document.getElementById('lwMenu'); if (!m || m.hidden) document.body.classList.remove('lw-notice'); };   // the Picker, when it opened, lifts the ground itself (picker.js)
   const press = (n) => { const b = document.querySelector('.mir-dialog[data-kind="notice"] .trig[data-kind="primary"]'); if (b) b.click(); else if (n) setTimeout(() => press(n - 1), 50); };
   return {

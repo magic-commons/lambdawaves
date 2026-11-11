@@ -1,7 +1,7 @@
 /* lab/shell/settings.js — §1 SETTINGS, what this browser remembers (0.5.2 R3a "Rack Dissolution"; moved verbatim out of lab/rack.js boot()).
  * createSettings(app) runs at §1's seat, BEFORE the controller's, so a controller name is read as app.ctl.x inside a callback, never at
  * creation — as are app.host.camera, app.sh.setModArm and app.sh.quality, which boot() fills later.  readSettings stays in rack.js' head
- * (§0 calls it first, U1) and comes by value; lookSync is registered for the controller; boot() destructures the rest. */
+ * (§0 calls it first, U1) and comes by value; boot() destructures the rest. */
 import { infoKnown } from './stage-words.js'; import { readSession } from '../mir/core/session.js';
 import { ASK_ENABLED } from '../ask.js';   // iteration 011 Q6: the one flag (ASK hidden: the stored askOk / askUrl carried, never written)
 import { RETIRED } from '../settings-store.js';   // 021 R4: the keys the blob drops (the carry list is gone)
@@ -69,15 +69,12 @@ export function createSettings(app) {
   }
 
 
-  /* 0.5.0 C2 · THE LOOK'S SETTERS are the store's (lab/look.js): one `set`, on the page in the same task, and SETTINGS repainted
-     from the store (lookSync).  An unnamed card is the device's and an unknown frost is OFF, as they always were. */
+  /* 0.5.0 C2 · THE LOOK'S SETTERS are the store's (lab/look.js): one `set`, on the page in the same task (every look control is MIR OPTIONS',
+     whose window follows the store itself).  An unnamed card is the device's and an unknown frost is OFF, as they always were. */
   function setCardStyle(id) { app.ctl.look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card }); return document.body.dataset.card; }
   function setFrost(mode) { app.ctl.look.set({ frost: mode === 'still' || mode === 'always' ? mode : 'off' }); return app.ctl.look.get('frost'); }
   function setDisconnected(v) { app.ctl.look.set({ disconnected: !!v }); return !!v; }
-  /** the SETTINGS controls the look store drives, repainted from it — none since iteration 003: every look control is MIR OPTIONS'
-   *  (lab/mir-gui.js), and the kit's window follows the store itself (createGui sync).  Kept as the controller's subscriber seat. */
-  function lookSync() {}
-  app.sh.lookSync = lookSync; app.sh.saveSettings = saveSettings; app.sh.setCardStyle = setCardStyle; app.sh.setFrost = setFrost; app.sh.setDisconnected = setDisconnected; app.sh.applySettings = applySettings;
+  app.sh.saveSettings = saveSettings; app.sh.setCardStyle = setCardStyle; app.sh.setFrost = setFrost; app.sh.setDisconnected = setDisconnected; app.sh.applySettings = applySettings;
   function applySettings() {
     const s = readSettings();
     app.ctl.look.rerun();   // 0.5.0 C2: the look again, now that the theme's engine hooks exist (MIR OPTIONS follows the store itself, iteration 003)
@@ -157,5 +154,5 @@ export function createSettings(app) {
   const powered = (w) => !(w && w.root && w.root.classList.contains('off'));
   const DIGESTS = {}; app.sh.KIND = KIND; app.sh.RETIRED_WINDOWS = RETIRED_WINDOWS; app.sh.DIGESTS = DIGESTS;
   app.state.space = 'x';                 // 'x' position ψ(x) · 'p' momentum φ(p): the same state, two exact pictures
-  return { saveSettings, setCardStyle, setFrost, setDisconnected, applySettings, KIND, RETIRED_WINDOWS, powered, DIGESTS };
+  return { saveSettings, applySettings, powered, DIGESTS };
 }

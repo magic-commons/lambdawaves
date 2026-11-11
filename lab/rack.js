@@ -50,7 +50,6 @@ import { tickWidgets } from './widgets.js'; import { createWidgetsWindow } from 
 /* THE BUILD STAMP is `lab/build-line.js` (021 D1): no module imports from rack.js */
 
 import { TIER, TIER_NAME } from './tier.js';   // 021 G1: the tiers live in lab/tier.js; no module imports them from rack.js
-export { TIER };
 
 export async function boot(dom) {
   registerIcons();
@@ -125,42 +124,41 @@ export async function boot(dom) {
     appleDevice, LOOK_DEFAULTS,
     hooks: { theme: null, restage: null, setStageColour: null, setStageFollow: null, setStage: null, setGamut: null, setTheme: null, menuSheet: null, ab: null, slap: null, period: null, keys: null, warning: null, sheet: null, status: null },   // sheet / status: 0.5.4 P4 (badges.js, informational.js)
     state: { history: null, palette: null, picker: null, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
-      applyVisuals: true, modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
+      modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
       occludeDirty: true, occludeAt: 0, stageMix: 0.04, stageFollow: true, refSnapshot: null, pendingRef: null, warmTimer: 0, warmIdle: 0, dragging: false, cornerLayoutDirty: true,
       exportLocked: false, lastNmax: 1, capApi: null, camKnobs: {}, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
       orbitals: null, states: null, stageText: null, bow: null, bowInFlight: 0, bowChain: null, kdrag: null, gasWidth: 1.8, gasAxial: false, lastLaunch: null, restoreNotice: '', linkLast: null, eq: null, eqNoNodes: false, chord: null },
     loop: { schedule, hold: filmHold, resetWall: () => { lastWall = performance.now() / 1000; }, page: null, loopRing: null, ringMedian: null, windowActivity: null, canPresent: null, modesAt, refModes,
       meterSnapshot, paceRate: null, MOTION: null },
     host: { camera: null, orbitBy: null, camTravel: null, queueKeyOrbit: null, camLevel: null, syncFreeAngles: null, setCamMode: null, cameraPort: null, resetView: null, zoomAt: null, panBy: null,
-      setDist: null, setFov: null, syncCamUI: null, rack: null, hydroReader, swClient: null, rackL: null, LAYOUT_SLOTS: null, floats: null, warning: null },
-    w: { wObs: null, wPal: null, wCam: null, wClip: null, clearRegister: null, wState: null, wSpec: null, spectrum: null, toggleFullscreen: null, normalizeNow: null, copyLatex: null,
-      switchHamiltonian: null, setSturmian: null, applySturmian: null, paintSturmRo: null, sturmEigen: null, occupiedEigen: null, periodEnergies: null, selectEigen: null, setElement: null,
+      setDist: null, setFov: null, syncCamUI: null, rack: null, hydroReader, swClient: null, rackL: null, LAYOUT_SLOTS: null, floats: null },
+    w: { clearRegister: null, wState: null, wSpec: null, spectrum: null, toggleFullscreen: null, normalizeNow: null, copyLatex: null,
+      switchHamiltonian: null, setSturmian: null, applySturmian: null, sturmEigen: null, occupiedEigen: null, periodEnergies: null, selectEigen: null, setElement: null,
       fillValence: null, wSh: null, shadowView: null, shadowFoot: null, wOrb: null, orbit: null, kepler: null, wVor: null, vortex: null, particles: null, flowTracers: null, wSlice: null, slice: null,
-      wChem: null, head: null, stageCaption: null, stageTextTick: null, initStageText: null, wCalc: null, calculus: null, wMet: null, meters: null, wLad: null, ladder: null, wAtoms: null,
-      atomsView: null, wWig: null, wignerView: null, wRad: null, radiationView: null, emissionView: null, WIG_OK: null, RAD_OK: null, bowStart: null, bowMove: null, bowRelease: null, orbitOfShell: null, kepShell: null,
-      keplerTurn: null, keplerDragToPoint: null, keplerDragTo: null, keplerRowSync: null, gas: null, gasReadout: null, gasTableOn: null, gasSigma: null, launchPacket: null, enterBox: null,
+      wChem: null, head: null, stageCaption: null, stageTextTick: null, wCalc: null, calculus: null, wMet: null, wLad: null, ladder: null, wAtoms: null,
+      atomsView: null, wignerView: null, radiationView: null, emissionView: null, bowStart: null, bowMove: null, bowRelease: null, orbitOfShell: null, kepShell: null,
+      keplerTurn: null, keplerDragToPoint: null, keplerDragTo: null, keplerRowSync: null, gas: null, gasTableOn: null, gasSigma: null, launchPacket: null, enterBox: null,
       coherentBounce: null, bowCancel: null, slapAlong: null },
-    ctl: { autoQ: null, controlStep: null, RES_LADDER: null, gov: null, effectiveRes: null, READER_LAW: null, keep: null, domain: null, fieldRate: null, perf: null, frameBudget: null,
-      perfBudgetMs: null, tick: null, READERS: null, may: null, unpark: null, setGovernor: null, setKeepFrames: null, setPerfMode: null, stats: null, cRe: null, cIm: null, mod: null, MOD: null,
-      modSyncBases: null, feedAudio: null, modHand: null, setKnob: null, modGets: null, modKnobs: null, modHeld: null, ROT_LIMIT: null, rotRate: null, rotDriving: null, setRotationRate: null,
+    ctl: { autoQ: null, gov: null, effectiveRes: null, READER_LAW: null, keep: null, domain: null, fieldRate: null, perf: null,
+      setGovernor: null, setKeepFrames: null, setPerfMode: null, stats: null, mod: null, MOD: null,
+      modSyncBases: null, modHand: null, setKnob: null, modGets: null, modKnobs: null, modHeld: null, ROT_LIMIT: null, rotRate: null, rotDriving: null, setRotationRate: null,
       rotStep: null, modStore: null, saveMod: null, curvesStore: null, occlusion: null, look: null, applyAccent: null, paintMarks: null, markBatchBegin: null, markBatchEnd: null, wheelColor: null,
       accent: null, inkCtx: null, markInk: null, stageGround: null, busyWrap: null, busyFlash: null, busy: null, busySync: null, cardLoading: null, busyHost: null, field: null, maths: null,
-      scan: null, cards: null, solveChem: null, solveCard: null, cancelWarm: null, warmArm: null, touchState: null, loadPreset: null, setReference: null, api: null },
-    sh: { readSettings, csb: null, ask: null, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, lookSync: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
-      DIGESTS: null, quality: null, transport: null, togglePlay: null, setModArm: null, barLock: null, refreshOcclusion: null, devById: null, rackCardWidth: null, popFace: null, rk: null,
-      layout: null, winHint: null, wTr: null, phone: null, tablet: null, syncPhone: null, keyState: null, keyHelp: null, stageHasFocus: null, ACTIONS: null, kt: null, modSeats: null, serialize: null,
+      scan: null, cards: null, solveChem: null, solveCard: null, warmArm: null, touchState: null, loadPreset: null, setReference: null, api: null },
+    sh: { readSettings, csb: null, ask: null, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
+      DIGESTS: null, quality: null, transport: null, togglePlay: null, setModArm: null, barLock: null, devById: null, rackCardWidth: null, rk: null,
+      layout: null, winHint: null, phone: null, tablet: null, keyState: null, stageHasFocus: null, ACTIONS: null, kt: null, modSeats: null, serialize: null,
       restoreModulation: null, save: null, copyJSON: null, restore: null, notCarriedWords: null, esc: null, mintLink: null, copyLink: null, openLink: null, historyApi: null, verbs: null, LW: null },
   };
   function readSettings() { return settingsStore.read(); }   // 0.5.2 R3a: §1's reader stays in the head — §0 calls it first (U1), app.sh holds it by value
   /* ── SETTINGS: what this browser remembers — lab/shell/settings.js (0.5.2 R3a), created here ── */
-  const { saveSettings, setCardStyle, setFrost, setDisconnected, applySettings, KIND, RETIRED_WINDOWS, powered, DIGESTS } = createSettings(app);
+  const { saveSettings, applySettings, powered, DIGESTS } = createSettings(app);
   app.sh.powered = powered;   // 038 C4: the ONE power predicate — the loop's RT pump and register below, and the quiet MOLECULES card (shell/modulation.js)
   const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 }; app.sh.quality = quality;   // PACE P2: 64³ × 160 × 1 on a desktop (and a phone, whose crossing has its own rule), the GRID pairing 64³ × 110 × 0.75 on a tablet
   /* ── ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD: lab/shell/controller.js (0.5.2 R1), created here; the loop stays below ── */
-  const { autoQ, controlStep, RES_LADDER, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, setGovernor, setKeepFrames,
-    setPerfMode, stats, cRe, cIm, mod, MOD, modSyncBases, feedAudio, modHand, setKnob, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, rotStep, modStore, saveMod,
-    curvesStore, occlusion, look, applyAccent, paintMarks, markBatchBegin, markBatchEnd, wheelColor, accent, inkCtx, markInk, stageGround, busyWrap, busyFlash, busy, busySync, cardLoading,
-    busyHost, field, maths, scan, cards, solveChem, solveCard, cancelWarm, warmArm, touchState, loadPreset, setReference, api } = await createController(app);
+  const { autoQ, controlStep, RES_LADDER, gov, effectiveRes, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, stats, cRe, cIm, mod, MOD, modSyncBases,
+    feedAudio, modHand, rotRate, rotDriving, rotStep, curvesStore, occlusion, look, markBatchEnd, accent, busyWrap, busyFlash, busyHost, field, maths, scan, cards, cancelWarm, warmArm,
+    loadPreset } = await createController(app);
 
   /* ── THE BACKGROUNDED TAB (wave 54, board #42) ──────────────────────────────────────────────────────────────
    * WHAT IS AND IS NOT A WIN, measured in this browser rather than assumed:
@@ -736,8 +734,7 @@ export async function boot(dom) {
   const { clearRegister } = createTransition(app); app.w.clearRegister = clearRegister;
 
   // SPECTRUM
-  const { wSpec, wState, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen,
-    periodEnergies, selectEigen, setElement, fillValence, spectrumDigest } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
+  const { wSpec, spectrum, paintSturmRo, spectrumDigest } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
 
   // GAS — the BOX rows of SPECTRUM's Hamiltonian group (021 G2: lab/windows/gas.js)
   createGas(app);
@@ -762,7 +759,7 @@ export async function boot(dom) {
 
   /* ── LEGACY WINDOWS (2026-10, Josh): all five are gone — QCD, H₂⁺ and HELIUM in 0.5.0 D9, H₂ and ELECTROSTATICS in D9b
      (R5-L1; ATOMS came back in 0.4.0 S3).  An older file that used one opens on its shim in restore and says so in one line. */
-  const { wChem, head } = createMolecules(app);   // 0.5.2 R2d: lab/windows/molecules.js (iteration 008 U: the register lives in the card; F5: one seat)
+  const { wChem } = createMolecules(app);   // 0.5.2 R2d: lab/windows/molecules.js (iteration 008 U: the register lives in the card; F5: one seat)
 
   /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2; 0.5.1 D1 below) — its SOURCE: what is playing, as markdown — the MOLECULES formula
      ($\mathrm{H_{2}O}$, latex-state.js formulaLatex) while MOLECULES is on, else SPECTRUM's populated states in stateLatex's
@@ -827,7 +824,7 @@ export async function boot(dom) {
 
   /* ── transport strip (§25): lab/shell/transport.js (0.5.2 R3b), created here — λWAVES' own bar ── */
   createActions(app);   // 021 I1: THE ACTION REGISTRY (lab/actions.js, app.sh.ACTIONS) — before the bar, whose seats read it
-  const { transport, togglePlay, setModArm, barLock } = createTransport(app);
+  const { transport } = createTransport(app);
 
   /* ── badges (§41) ─────────────────────────────────────────────────────── */
   const badges = createBadges({ dom, accept: () => swClient.accept(), field, reg, mat, clock, domain, quality,
@@ -862,8 +859,7 @@ export async function boot(dom) {
       'history ' + (app.state.history ? app.state.history.entries().map((r) => r.label).join(' › ') : '—') + (layout.projects && layout.projects.dirty ? ' · DIRTY' : '') ]; } });
 
   /* ── THE BOW: ctrl+drag draws it, release fires, releasing CTRL first cancels ── */
-  const { bowStart, bowMove, bowRelease, orbitOfShell, kepShell, keplerTurn, keplerDragToPoint, keplerDragTo, keplerRowSync, gas, gasReadout, gasTableOn, launchPacket, enterBox, coherentBounce,
-    bowCancel, slapAlong } = createKeplerSurface(app);   // 0.5.2 R2b: lab/windows/kepler.js
+  const { keplerRowSync, gas, gasReadout, gasTableOn } = createKeplerSurface(app);   // 0.5.2 R2b: lab/windows/kepler.js
 
   /* ── THE FLOATING RACK: hide button, hover-reveal, draggable cards, hint icons, the transport's dock ── */
   const rackL = document.getElementById('rackL');
@@ -890,12 +886,12 @@ export async function boot(dom) {
   createNotebook(app);
   wireStage();   // §19a's second seat (lab/shell/rack-wiring.js): the crossings' listeners and the stage gestures, after the notebook's, as they stood
   /* ── KEYS: a rebindable action table · THE KEYBOARD WINDOW · THE TIMELINE · THE TAB ORDER: lab/shell/keys.js (0.5.2 R3b), created here ── */
-  const { stageHasFocus, keyState } = createKeys(app);
+  createKeys(app);
 
   /* ── persistence (§46): lab/shell/persist.js (0.5.2 R3a), created here — serialize and restore whole ── */
-  const { modSeats, serialize, restoreModulation, save, copyJSON, restore } = createPersist(app); app.sh.modSeats = modSeats;
+  const { modSeats } = createPersist(app); app.sh.modSeats = modSeats;
   /* ── WAVE 56 · SHAREABLE LINKS: lab/shell/links.js (0.5.2 R3a), created here; the link opens at §29 ── */
-  const { notCarriedWords, mintLink, copyLink, openLink } = createLinks(app);
+  const { openLink } = createLinks(app);
   /* 0.3.1 · S3 THE TRUE HISTORY and its card: lab/shell/history.js (0.5.2 R3a), created here, so the card keeps its seat in the rack */
   const { historyApi } = createHistory(app); app.sh.historyApi = historyApi;
   installEnvelopeTrigger(app);   // 036 P6: THE ENVELOPE TRIGGER (lab/shell/modulation.js) — ENV + PATTERN, its rows a domain of the history just made

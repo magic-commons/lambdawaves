@@ -149,8 +149,8 @@ async function work({ sw = null }, release) {
     while (!P.app.done && !appSettled(sw)) {
       const reg = (sw && sw.registration) || await navigator.serviceWorker.getRegistration().catch(() => null);
       if (reg) {
-        if (reg.active && !reg.installing && !reg.waiting) break;   // installed and active (a first install: the page stays uncontrolled until its next load)
-        const w = reg.installing || reg.waiting || reg.active;
+        if (!reg.installing) break;   // nothing installing: the precache is as full as it gets (active — a first install's page stays uncontrolled until its next load —, waiting, or a first install that went redundant)
+        const w = reg.installing;
         if (!info && w && performance.now() - asked > 1000) { asked = performance.now(); info = await hello(w); }
         if (info) { P.app.of = info.files; P.app.n = (await (await caches.open(info.cache)).keys().catch(() => [])).length; }
       } else if (performance.now() - t0 > 30000) break;   // no worker came: nothing to wait for

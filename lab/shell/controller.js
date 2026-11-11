@@ -1,12 +1,11 @@
 /* lab/shell/controller.js — ONE CONTROLLER, FIELD, THE MATHS WORKERS and ONE ROAD (0.5.2 R1 "Rack Dissolution"; moved verbatim out of
  * lab/rack.js boot() §2–§4 and §7).  createController(app) runs at §2's seat — boot() awaits it, because it awaits createField — and
  * hands back every name another part of boot() reads; boot() destructures them there, so the frame loop (§5–§6, which STAYS in boot())
- * reads them as closure slots exactly as before.  What it reads of boot(): §0's consts and §1's lookSync / quality, handed over at the top
+ * reads them as closure slots exactly as before.  What it reads of boot(): §0's consts and §1's quality, handed over at the top
  * (backward); the loop's schedule and refModes (by value in app.loop); and, lazily inside callbacks, the names boot() makes after the
  * seat — app.loop.page / windowActivity / paceRate, app.w.wMet / wSpec / spectrum / shadowView / normalizeNow (boot fills each slot right
  * after its declaration).  Its 29 shared lets are app.state's, read and written live (R0).  saveMod stays a function declaration: the
- * mod port is handed it before its line (U1).  TIER is rack.js' own export; the cycle is safe — it is read only inside createController,
- * long after both modules have run. */
+ * mod port is handed it before its line (U1). */
 import { TIER } from '../tier.js';
 import { BASIS } from '../hydrogen.js';
 import { PRESET_BY_ID, PRESETS } from '../state.js';
@@ -27,7 +26,7 @@ import { createLook } from '../look.js';    // 0.5.0 C2: the look is the kit's �
 
 export async function createController(app) {
   const { dom, ui, reg, clock, appPlay, mat, rates, energyOf, settingsStore, PAL_DEF, LOOK_DEFAULTS } = app;   // §0, by value
-  const { lookSync, quality } = app.sh;   // §1's, filled at their declarations
+  const { quality } = app.sh;   // §1's, filled at its declaration
   const { schedule, refModes } = app.loop;   // the loop's hoisted functions, by value in the literal
   /* ── ONE CONTROLLER (wave 128; AUTO SCALE's one rule AS 2026-09-25 + the GOVERNOR of wave 45, merged) ─────────────────────
      ONE measurement: the MEDIAN of the presented-frame intervals in a window of one running loop (the loop is paced, so rAF
@@ -212,7 +211,6 @@ export async function createController(app) {
   const look = createLook({ settings: settingsStore, defaults: LOOK_DEFAULTS, mat, wheelStops: PALETTE_BY_ID.get(PAL_DEF).stops,
     getModView: () => app.state.modView, onTheme: (t, choice) => { if (app.hooks.theme) app.hooks.theme(t, choice); } });
   const { accent, applyAccent, paintMarks, markBatchBegin, markBatchEnd, stageGround, inkCtx } = look, { wheelColor, markInk } = accent;
-  look.prefs.subscribe(lookSync);
   const { busy, busyHost, busySync, busyFlash, busyWrap, cardLoading } = createBusyMark({ paintMarks, markBusy: accent.busy });   // N7 seam 2: lab/busy-mark.js
 
   /* ── FIELD ────────────────────────────────────────────────────────────── */
@@ -375,8 +373,7 @@ export async function createController(app) {
   app.ctl.cardLoading = cardLoading; app.ctl.busyHost = busyHost; app.ctl.field = field; app.ctl.maths = maths; app.ctl.scan = scan; app.ctl.cards = cards;
   app.ctl.solveChem = solveChem; app.ctl.solveCard = solveCard; app.ctl.warmArm = warmArm; app.ctl.touchState = touchState; app.ctl.loadPreset = loadPreset;
   app.ctl.setReference = setReference; app.ctl.api = api;
-  return { autoQ, controlStep, RES_LADDER, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, setGovernor, setKeepFrames,
-    setPerfMode, stats, cRe, cIm, mod, MOD, modSyncBases, feedAudio, modHand, setKnob, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, rotStep, modStore, saveMod,
-    curvesStore, occlusion, look, applyAccent, paintMarks, markBatchBegin, markBatchEnd, wheelColor, accent, inkCtx, markInk, stageGround, busyWrap, busyFlash, busy, busySync, cardLoading,
-    busyHost, field, maths, scan, cards, solveChem, solveCard, cancelWarm, warmArm, touchState, loadPreset, setReference, api };
+  return { autoQ, controlStep, RES_LADDER, gov, effectiveRes, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, stats, cRe, cIm, mod, MOD, modSyncBases,
+    feedAudio, modHand, rotRate, rotDriving, rotStep, curvesStore, occlusion, look, markBatchEnd, accent, busyWrap, busyFlash, busyHost, field, maths, scan, cards, cancelWarm, warmArm,
+    loadPreset };
 }
