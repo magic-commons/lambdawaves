@@ -38,12 +38,12 @@ import { BASIS, BASIS_INDEX, NMAX, AU_TIME_AS, stateOf, modeTable, radial, lague
 const PI = Math.PI, SQRT2 = Math.SQRT2;
 
 /* ── the Lagrangian, along the true motion ────────────────────────────────── */
-/** { T, V, L, H } from the coefficients at one instant: T = ½Σ E p², V = ½Σ E q², q = √2 Re c, p = √2 Im c */
+/** { T, V, L, H } from the coefficients at one instant: T = ½Σ E p², V = ½Σ E q², q = √2 Re c, p = √2 Im c, E the operator in force's */
 export function lagrangian(re, im, ids) {
   let T = 0, V = 0;
-  const list = ids || BASIS.map((s) => s.index);
+  const list = ids || BASIS.map((s) => s.index), H = getHamiltonian();
   for (const a of list) {
-    const E = BASIS[a].E, q = SQRT2 * re[a], p = SQRT2 * im[a];
+    const E = H.energy(a), q = SQRT2 * re[a], p = SQRT2 * im[a];
     T += 0.5 * E * p * p; V += 0.5 * E * q * q;
   }
   return { T, V, L: T - V, H: T + V };
@@ -54,11 +54,11 @@ export function lagrangian(re, im, ids) {
  */
 export function action(re0, im0, t, ids) {
   let S = 0;
-  const list = ids || BASIS.map((s) => s.index);
+  const list = ids || BASIS.map((s) => s.index), H = getHamiltonian();
   for (const a of list) {
     const p0 = re0[a] * re0[a] + im0[a] * im0[a];
     if (p0 === 0) continue;
-    const th0 = Math.atan2(im0[a], re0[a]), th = th0 - BASIS[a].E * t;
+    const th0 = Math.atan2(im0[a], re0[a]), th = th0 - H.energy(a) * t;
     S += 0.5 * p0 * (Math.sin(2 * th) - Math.sin(2 * th0));
   }
   return S;
@@ -97,11 +97,15 @@ import { gaussLegendre } from './wigner.js';
  *   for 1s–6p — and a 16-label state's first frame cost 1.4 s (dipoleZ 418 ms + radialObservables 1009 ms): the reviewer's
  *   finding.  qho: Gaussian × polynomial, the same rule on [0, 14].  well: 8 panels on [0, a] — the wall is a panel edge
  *   and the radial is zero beyond it.  atom: the shells are linear interpolants in ln r on a 10⁻⁶/Z … 60 mesh, so the
- *   rule is Simpson in ln r on 6000 points (three per mesh step).  Otherwise (quarkonium's uniform table): Simpson on
- *   [0, 14], 12000 panels, the rule this file always had.  Every rule is built once and cached. */
+ *   rule is Simpson in ln r on 6000 points (three per mesh step).  Otherwise (QUARKONIUM's and CENTRAL's Numerov tables): Simpson,
+ *   12000 panels, on [0, 14] or the operator's own box for shell n_max if wider (CENTRAL's CONFINED 3s lost 40 % of its norm at 14).
+ *   Every rule is built once and cached under `radialKey`: the operator, its scale and radius, and the radial table in force, which a
+ *   re-solve replaces (kick.js keys its tables on it too). */
+const TAB_ID = new WeakMap(); let tabs = 0;
+export const radialKey = (H) => { const t = H.radialTable && H.radialTable(); if (t && !TAB_ID.has(t)) TAB_ID.set(t, ++tabs); return `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}${t ? ':' + TAB_ID.get(t) : ''}`; };
 const RULE_CACHE = new Map();
 function radialRule(H, nlo, nhi) {
-  const Z = H.k || H.Z || 1, key = `${H.id}:${Z}:${H.radius || 0}:${nlo}:${nhi}`;
+  const Z = H.k || H.Z || 1, key = `${radialKey(H)}:${nlo}:${nhi}`;
   const hit = RULE_CACHE.get(key); if (hit) return hit;
   const r = [], w = [];
   const panels = (edges, q) => { const G = gaussLegendre(q); for (let p = 0; p + 1 < edges.length; p++) { const h = (edges[p + 1] - edges[p]) / 2, c = (edges[p] + edges[p + 1]) / 2; for (let i = 0; i < q; i++) { r.push(c + h * G.x[i]); w.push(h * G.w[i]); } } };
@@ -111,7 +115,7 @@ function radialRule(H, nlo, nhi) {
   else if (H.id === 'qho') panels([0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10, 14], 24);
   else if (H.id === 'well' && H.radius > 0) panels(Array.from({ length: 9 }, (_, i) => H.radius * i / 8), 24);
   else if (H.id === 'atom') { const N = 6000, r0 = 1e-6 / Z, du = Math.log(60 / r0) / N; simpson(Array.from({ length: N + 1 }, (_, i) => r0 * Math.exp(i * du)), (i) => du * r0 * Math.exp(i * du)); }
-  else { const N = 12000, h = 14 / N; simpson(Array.from({ length: N + 1 }, (_, i) => i * h), () => h); }
+  else { const N = 12000, h = Math.max(14, H.domainFor ? H.domainFor(nhi) : 0) / N; simpson(Array.from({ length: N + 1 }, (_, i) => i * h), () => h); }
   const rule = { r: Float64Array.from(r), w: Float64Array.from(w) };
   RULE_CACHE.set(key, rule); return rule;
 }
@@ -120,7 +124,7 @@ const RAD_CACHE = new Map();
  *  hydrogen: 1s–4p and 1s–6p to 1e-14 against mpmath), cached per Hamiltonian, Z (and the well's radius) and pair */
 export function radialDipole(np_, lp, n, l) {
   const H = getHamiltonian(), swap = np_ > n || (np_ === n && lp > l);                 // the integrand is symmetric: ONE key per pair
-  const key = swap ? `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}:${n}:${l}:${np_}:${lp}` : `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}:${np_}:${lp}:${n}:${l}`;   // Z in the key (Round 11 A2)
+  const key = swap ? `${radialKey(H)}:${n}:${l}:${np_}:${lp}` : `${radialKey(H)}:${np_}:${lp}:${n}:${l}`;   // Z in the key (Round 11 A2)
   if (RAD_CACHE.has(key)) return RAD_CACHE.get(key);
   const { r, w } = radialRule(H, Math.min(np_, n), Math.max(np_, n));
   let s = 0;
@@ -180,7 +184,8 @@ export function dipoleLines(re, im, ids) {
  * RADIATION law, radiation.js), which puts Hα at 656.47 nm in vacuum (656.11 at infinite mass; NIST 656.46).  The beat itself runs
  * at the register's own ω (Hα: T = 2π/ω = 90.48 a.u.).  No fine structure, no Lamb shift, no radiation reaction, no widths. */
 const ALPHA_FS = 7.2973525693e-3, AU_SECOND = AU_TIME_AS * 1e-18, MU_1H = 1 / (1 + 1 / 1836.15267343);   // CODATA 2018, as radiation.js
-export const C_LIGHT_AU = 1 / ALPHA_FS, BOHR_NM = 0.0529177210903, HARTREE_EV = 27.211386245988;
+const C_LIGHT_AU = 1 / ALPHA_FS, BOHR_NM = 0.0529177210903;
+export const HARTREE_EV = 27.211386245988;
 /** the reduced mass a line's λ and A carry: ¹H's under the register's own hydrogen at μ = mₑ; any other operator's energies are its own */
 export const lineMass = (H = getHamiltonian()) => (H.id === 'hydrogen' && (H.mu || 1) === 1 ? MU_1H : 1);
 /** the vacuum wavelength in nm of a gap ω (a.u.) */
@@ -240,7 +245,7 @@ const MOM_CACHE = new Map();
 /** ∫₀^∞ R_{n′l}(r) r^k R_{nl}(r) r² dr — NUMERICAL on the same rule as radialDipole (cached); k = 1 gives ⟨r⟩, k = −1 gives ⟨1/r⟩ */
 export function radialMoment(k, np_, lp, n, l) {
   const H = getHamiltonian(), swap = np_ > n || (np_ === n && lp > l);
-  const key = swap ? `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}:${k}:${n}:${l}:${np_}:${lp}` : `${H.id}:${H.k || H.Z || 1}:${H.radius || 0}:${k}:${np_}:${lp}:${n}:${l}`;   // the Hamiltonian in force, and Z (Round 11 A1)
+  const key = swap ? `${radialKey(H)}:${k}:${n}:${l}:${np_}:${lp}` : `${radialKey(H)}:${k}:${np_}:${lp}:${n}:${l}`;   // the Hamiltonian in force, and Z (Round 11 A1)
   if (MOM_CACHE.has(key)) return MOM_CACHE.get(key);
   const { r, w } = radialRule(H, Math.min(np_, n), Math.max(np_, n));
   let s = 0;

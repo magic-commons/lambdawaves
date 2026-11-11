@@ -162,11 +162,6 @@ export function revivalScan(pops, nbar, opts = {}) {
   return { Tcl, Trev, periods, landscape: land, fineT, fineA, tPeak, aPeak, aAtTrev: ladderAutocorr(pops, Trev).abs };
 }
 /**
- * Print Theorem A.4: at t = T_rev + x·T_cl the ladder sum is a Poisson sum of Airy envelopes,
- *   |A| = |Σ_j I(α_j, β₃)| / Σ_j e^{-2π²σ²j²},  α_j = -Lσ - 2πσj,  L = -(4πn̄/3) - 2πx  (mod 2π),
- * exact to cubic order in the level expansion (the quartic β₄ is the neglected term).  PREDICTION.
- */
-/**
  * The general envelope (1/√2π)∫e^{−u²/2 + iαu + iδu² + iβu³ + iγu⁴}du, complex, by Simpson with a step chosen from
  * the largest phase gradient on the Gaussian's support.  δ is the CHIRP: away from the revival the quadratic phase
  * does not vanish, and Round 6 measured that residue at 67× the quartic — so the term the fold prediction actually
@@ -200,6 +195,11 @@ export function poissonAiryChirped(nbar, sigma, x, J = 6) {
   }
   return Math.hypot(re, im) / nrm;
 }
+/**
+ * Print Theorem A.4: at t = T_rev + x·T_cl the ladder sum is a Poisson sum of Airy envelopes,
+ *   |A| = |Σ_j I(α_j, β₃)| / Σ_j e^{-2π²σ²j²},  α_j = -Lσ - 2πσj,  L = -(4πn̄/3) - 2πx  (mod 2π),
+ * exact to cubic order in the level expansion (the quartic β₄ is the neglected term).  PREDICTION.
+ */
 export function poissonAiry(nbar, sigma, x, J = 24) {
   const beta = revivalClocks(nbar, sigma).beta3;
   let L = -(4 * PI * nbar / 3) - TWO_PI * x; L -= TWO_PI * Math.round(L / TWO_PI);

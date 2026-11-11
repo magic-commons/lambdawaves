@@ -33,16 +33,14 @@ export const MEASURED = {
  */
 export function numerov(V, mu, l, level, opt = {}) {
   const rmax = opt.rmax || 12 / Math.sqrt(mu * 0.2), N = opt.N || 4000, h = rmax / N;
-  const r = new Float64Array(N + 1), u = new Float64Array(N + 1);
-  for (let i = 0; i <= N; i++) r[i] = (i + 1e-9) * h;
-  const kOf = (E) => { const k = new Float64Array(N + 1); for (let i = 0; i <= N; i++) k[i] = 2 * mu * (V(r[i]) - E) + l * (l + 1) / (r[i] * r[i]); return k; };
+  const r = new Float64Array(N + 1), u = new Float64Array(N + 1), Vr = new Float64Array(N + 1), cf = new Float64Array(N + 1), k = new Float64Array(N + 1), f = new Float64Array(N + 1);
+  for (let i = 0; i <= N; i++) { r[i] = (i + 1e-9) * h; Vr[i] = V(r[i]); cf[i] = l * (l + 1) / (r[i] * r[i]); }
   function shoot(E) {
-    const k = kOf(E);
+    for (let i = 0; i <= N; i++) { k[i] = 2 * mu * (Vr[i] - E) + cf[i]; f[i] = 1 - h * h * k[i] / 12; }
     u[0] = Math.pow(r[0], l + 1); u[1] = Math.pow(r[1], l + 1);
     let nodes = 0;
-    const f = (i) => 1 - h * h * k[i] / 12;
     for (let i = 1; i < N; i++) {
-      u[i + 1] = ((2 + 10 * h * h * k[i] / 12) * u[i] - f(i - 1) * u[i - 1]) / f(i + 1);
+      u[i + 1] = ((2 + 10 * h * h * k[i] / 12) * u[i] - f[i - 1] * u[i - 1]) / f[i + 1];
       if (u[i + 1] * u[i] < 0) nodes++;
       if (Math.abs(u[i + 1]) > 1e30) { for (let j = 0; j <= i + 1; j++) u[j] *= 1e-30; }
     }

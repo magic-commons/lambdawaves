@@ -162,7 +162,7 @@ export function createWigner(host, api = {}) {
       .sort((x, y) => (y.re * y.re + y.im * y.im) - (x.re * x.re + x.im * x.im));
     const H = getHamiltonian(), qho = H.id === 'qho', tm = all.slice(0, qho ? 21 : TERM_CAP);
     capped = all.length - tm.length; terms = tm.length; norm2 = n2;
-    if (!tm.length) { cache = null; return null; }
+    if (!tm.length) { cache = null; clear(); return null; }
     const slice = wignerSlice(tm, { z: [-zmax, zmax, NZ], p: [-pmax, pmax, NP], order: 'normal', qho });
     const t0 = performance.now();
     const peak = wignerAxial(tm, 0, 0, { qho });                          // an even grid has no point at the origin

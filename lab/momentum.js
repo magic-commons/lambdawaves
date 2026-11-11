@@ -47,12 +47,13 @@ export function momentumPoly(n, l) {
   }
   return out;
 }
-export function momentumNorm(n, l) {
+function momentumNorm(n, l) {
   return Math.sqrt(2 / Math.PI * factorial(n - l - 1) / factorial(n + l)) * n * n * Math.pow(2, 2 * l + 2) * factorial(l);
 }
+const POLY = new Map();
 /** F_nl(p): the radial momentum function, real, normalised as ∫ F² p² dp = 1 */
 export function momentumRadial(n, l, p) {
-  const t = n * n * p * p, P = momentumPoly(n, l);
+  const t = n * n * p * p, P = POLY.get(n * 8 + l) || POLY.set(n * 8 + l, momentumPoly(n, l)).get(n * 8 + l);
   let s = 0, tp = 1; for (let j = 0; j < P.length; j++) { s += P[j] * tp; tp *= t; }
   return momentumNorm(n, l) * Math.pow(t, l / 2) * s / Math.pow(1 + t, n + 1);
 }

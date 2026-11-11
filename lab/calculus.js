@@ -13,7 +13,7 @@
  *   the moments       d⟨L_z⟩/dt = 0, d⟨L²⟩/dt = 0 (a central H; the Stark field mixes l), and ⟨r⟩ (0.4.0 S3, from DYNAMICS)
  */
 import { BASIS } from './hydrogen.js';
-import { angularDipoleZ, radialDipole, dipoleZ, radialObservables, angularMoments, radialMoment } from './dynamics.js';
+import { angularDipoleZ, radialDipole, dipoleZ, radialObservables, angularMoments, radialMoment, radialKey } from './dynamics.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ } from './kick.js';
 import { applyRotor } from './frontier.js';
 import { getHamiltonian } from './hamiltonian.js';
@@ -48,7 +48,7 @@ export function radialBreath(reg, t, half, n = 256, p = false) { const H = getHa
 const FCACHE = new Map();
 /** ∫₀^∞ R_{n′l′} R_{nl} dr — the radial part of ⟨z/r³⟩ (z/r³ = cos θ / r²): NUMERICAL, cached per Hamiltonian */
 export function radialForce(np_, lp, n, l) {
-  const H = getHamiltonian(), key = `${H.id}:${H.k || H.Z || 1}:${np_}:${lp}:${n}:${l}`;
+  const H = getHamiltonian(), key = `${radialKey(H)}:${np_}:${lp}:${n}:${l}`;
   if (FCACHE.has(key)) return FCACHE.get(key);
   const R = H.id === 'hydrogen' ? 40 * Math.max(np_ * np_, n * n) / (H.k || H.Z || 1) : 14, N = 12000, h = R / N;
   let s = 0;

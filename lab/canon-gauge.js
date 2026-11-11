@@ -51,17 +51,6 @@ export function dipoleFamily(rMO, n, nocc, nvir, tol = 1e-3) {
   return { rows, count: 3, tol, label: 'dipole' };
 }
 
-/** max |V Vᵀ − 1|, the precondition of canonicalRotation. */
-function orthonormalityDefect(V, d, g) {
-  let e = 0;
-  for (let k = 0; k < g; k++) for (let l = 0; l < g; l++) {
-    let s = 0;
-    for (let p = 0; p < d; p++) s += V[k * d + p] * V[l * d + p];
-    e = Math.max(e, Math.abs(s - (k === l ? 1 : 0)));
-  }
-  return e;
-}
-
 /**
  * canonicalRotation(V, d, g, families) → { W, pivots }
  * V[k·d + p] = component p of cluster vector k, rows orthonormal.  W[j·g + k] is the orthogonal g×g matrix with
@@ -124,15 +113,6 @@ function applyRotation(W, V, d, g) {
 export function canonicaliseCluster(V, d, g, families) {
   const { W, pivots } = canonicalRotation(V, d, g, families);
   return { U: applyRotation(W, V, d, g), W, pivots };
-}
-
-/**
- * The sign rule for a single (non-degenerate) state or orbital: the g = 1 case of the same rule.  Returns +1 or −1,
- * the factor that makes the first functional value above its threshold positive.
- */
-function canonicalSign(v, d, families) {
-  const { W } = canonicalRotation(v, d, 1, families);
-  return W[0] >= 0 ? 1 : -1;
 }
 
 /**
