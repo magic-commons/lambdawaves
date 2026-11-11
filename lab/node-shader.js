@@ -25,7 +25,7 @@
  * texture and reads it back — premultiplied rgba.  The splat's jitter is a hash of the cell, the copy and PHASE only (nothing per present), so the
  * stage and the film draw the same points; PHASE is the value the record clock's modulation wrote for that frame.  027 N4: the film keeps its
  * own record per node id (`l.id`), stepped once per frame index `i`, from black at frame 0 — a film is a function of its frames alone.
- *   createShaderHost({ device, canvas, palette, tap, present }) → { make(l), paint(el, l), drop(el), restart(id), bake(values, i, l) → Promise<{ rgba, w, h } | null> }
+ *   createShaderHost({ device, canvas, palette, tap, present }) → { make(l), paint(el, l), drop(el), restart(id), bake(values, i, l) → Promise<{ rgba, w, h } | null>, release() (the take's end) }
  *     palette() → { lut: Float32Array(256·4) | null, span, n (a count of sets), on, invert, hue } · tap: field.tap · present: ask the field for one frame */
 const opt = (...a) => a.map((id) => ({ id, label: id.toUpperCase() }));
 export const SHADER_TYPES = {
@@ -348,12 +348,12 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
     device.queue.submit([enc.finish()]);
   }
   /* 025 B1 / 027 N4 · the film's own records, one per node id: its uniforms, its state, its target; stepped once per frame index, from black at 0 */
-  const films = new Map();
+  const films = new Map(), unfilm = (r) => { free(r); r.ub.destroy(); if (r.out) for (const k of ['out', 'st', 'buf']) r[k].destroy(); };
   async function bake(values, i = 0, l = null) {
     if (!last || !device) return null;
     const id = (l && l.id) || 'decohere', type = (l && l.type) || 'decohere', { w, h } = last;
     let r = films.get(id);
-    if (!r || r.type !== type) { if (r) { free(r); r.ub.destroy(); if (r.out) for (const k of ['out', 'st', 'buf']) r[k].destroy(); } r = { el: null, ub: ubuf(), type, at: -1 }; films.set(id, r); }
+    if (!r || r.type !== type) { if (r) unfilm(r); r = { el: null, ub: ubuf(), type, at: -1 }; films.set(id, r); }
     const bpr = Math.ceil(w * 4 / 256) * 256;
     if (!r.out || r.out.width !== w || r.out.height !== h) {        // 028 R-23: the target, its straight copy, the MAP_READ buffer and the bytes, once per size
       if (r.out) for (const k of ['out', 'st', 'buf']) r[k].destroy();
@@ -394,6 +394,8 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
     /** a hand moved a knob of node `id`: a STATEFUL node starts again from black at its next step */
     restart(id) { for (const r of recs.values()) if (r.id === id) r.fresh = true; },
     bake,
+    /** the take is over: every film record's textures and buffers go (about 200 MB at 4K for one DECOHERE); the next take makes its own from frame 0 */
+    release() { for (const r of films.values()) unfilm(r); films.clear(); },
     drop(el) {
       const r = recs.get(el); if (!r) return;
       recs.delete(el); free(r); r.ub.destroy(); r.ctx.unconfigure();
