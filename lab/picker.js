@@ -947,9 +947,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       sortBtn(vhead, 'name'); sortBtn(vhead, 'mass'); paintSort();
       labelToggle(vhead, 'molLabels');
       animate(view, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
-      try { mols = (await V.index(v.id)).molecules; } catch (err) { mols = []; countEl.textContent = String(err && err.message || err); }
-      byId = new Map(mols.map((m) => [m.id, m])); isoEl.hidden = isoTail.hidden = true;
+      const got = await V.index(v.id).then((x) => x.molecules).catch(() => []);
       if (cur !== v) return;
+      mols = got; byId = new Map(mols.map((m) => [m.id, m])); isoEl.hidden = isoTail.hidden = true;
       paintTags(); filter();
     }
     /* the tags: built once a volume and lit in place (the strip keeps where it was scrolled); two or more intersect, ALL clears them */
@@ -971,9 +971,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        014 C2): a molecule whose structural isomers (the index's `isomers`, same formula, another connectivity) are in this volume wears a corner
        mark with their count, and its press opens THE ISOMER DECK — the same tiles, the same hue and style — instead of loading at once */
     function molTile(host, m, deep) {
-      const z = atomZ(m.formula), atom = z && ATOMS.some((a) => a.Z === z) ? z : 0, isos = deep && !atom ? isomersIn(m) : [];
+      const vol = cur, atom = atomZ(m.formula), isos = deep && !atom ? isomersIn(m) : [];
       const t = tile(host, 'mm-mol', { formula: m.formulaM ? mathPlain(m.formulaM) : m.formula, name: cap(m.name), sub: atom ? volName(cur) + ' · one atom: it opens in ATOMS' : [volName(cur), ...(m.tags || []), isos.length ? (isos.length + 1) + ' isomers' : ''].filter(Boolean).join(' · ') },
-        () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos, t); else { isoEl.hidden = isoTail.hidden = true; goVolume(cur, m); } });
+        () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos, t); else { isoEl.hidden = isoTail.hidden = true; goVolume(vol, m); } });
       el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
       if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + SYM[atom - 1] + ':' + v.nl + '_' + v.m); return t; }
