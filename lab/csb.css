@@ -155,12 +155,8 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport[data-layout="csb"] .csb-surface .k { width: 100%; }
 #transport[data-layout="csb"] .csb-surface .k-val { display: block; position: static; opacity: 1; transform: none; font-size: var(--fs-micro); }
 #transport[data-layout="csb"] .csb-favs .segw .k-lbl { display: none; }
-/* TRANSPORT: ⏮ ‹ › ⟳ as glyph chips, REPEATS (it takes what is left) and BPM as readouts, the beat lamp on BPM, the kit's clock tiles one 44-px
+/* TRANSPORT: REPEATS (it takes what is left) and BPM as readouts, the beat lamp on BPM, the kit's clock tiles one 44-px
    strip (023 B2: the T / t theorem is gone); in a card REPEATS takes the first line */
-#transport[data-layout="csb"] .csb-steps { display: inline-flex; }
-#transport[data-layout="csb"] .csb-steps > .tbtn { display: inline-grid; place-items: center; width: 28px; min-width: 0; height: var(--xport-grid); padding: 0; border: 0; border-radius: var(--r-md); background: transparent; box-shadow: none; color: var(--ink-key); }
-#transport[data-layout="csb"] .csb-steps > .tbtn > svg { width: 18px; height: 18px; }
-#transport[data-layout="csb"] .csb-steps > .tbtn:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
 #transport[data-layout="csb"] .csb-sec-tr .ro { position: relative; order: 0; flex: 0 0 auto; width: auto; min-width: 0; min-height: var(--xport-grid); justify-content: center; align-items: flex-start; padding: 0 4px; box-sizing: border-box; text-align: left; background: transparent; border: 0; box-shadow: none; }
 #transport[data-layout="csb"] .csb-sec-tr .ro.period { flex: 1 1 0; }
 #transport[data-layout="csb"] .csb-sec-tr .ro-val { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--fs-small); }
