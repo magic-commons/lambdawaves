@@ -2,6 +2,12 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 042
+
+UNDER A FIELD A ROTOR ACTS AT t (042 D11, X2): with Fz or Bz ≠ 0 (or a propagator) `Register._op` turns c(t), not the anchor (`lab/state.js`), and KEPLER reads its orbits off c(t) under STARK or ZEEMAN (`lab/keplerview.js`, `lab/windows/kepler.js`); orbit.js's ORBIT drags pass no t and stay on the anchor.
+A RADIAL CACHE KEYS ON THE TABLE IN FORCE (042 E2, E3, E13): a cache of radial integrals (dynamics.js RAD · MOM · RULE, kick.js's slap table, calculus.js FCACHE) is keyed on `radialKey(H)` (`lab/dynamics.js`), never `id:Z`: CENTRAL and QUARKONIUM re-solve their radials under one id.
+THE ATOM CACHE IS CAPPED (042 D8): `lab/atoms.js` keeps the last 24 solves (FIFO, each with its radial rows); an evicted element re-solves bit-equal.
+
 ## The laws of 041
 
 PAINT IN MOLECULES, BUTTONS IN SPECTRUM (041 H1): the stroke record `lambdawaves.q0.stroke` is `{ mode, mol }` — `mode` SPECTRUM's (home BUTTONS; an older record stays SPECTRUM's choice), `mol` the ORBITAL and STATES ladders' (home PAINT); each family's seats move together (`lab/paint-stroke.js`).
@@ -34,7 +40,7 @@ switching between atoms and molecules; don't change the wave/palette windows"): 
 `strokeSeg` (since 037 `strokeButton`, THE TOGGLE BUTTON above) — a pointing hand · a paintbrush — on SPECTRUM's head (in PRESET VISUALS' place, the four-column grid kept) and on the ORBITAL
 and STATES heads (SPECTRUM hides under MOLECULES), every seat in step. BUTTONS, the default (041 H1: SPECTRUM's; MOLECULES' is PAINT, above): a left press released on the item it began on
 TOGGLES it (normalised, VIEW MIX, one undo row, as a stroke), a drag sweeps nothing, the right button is the context menu's (the grid's
-CLEAR · NORMALIZE · NEXT PRESET · CREATE EVENT …). PAINT is THE PAINT GESTURE below. WAVE and PALETTE never read it.
+CLEAR · NORMALIZE · NEXT SYSTEM · CREATE EVENT …). PAINT is THE PAINT GESTURE below. WAVE and PALETTE never read it.
 
 A HAND'S PRESET IS THE REGISTER (036 P1, Josh: "remove the feature 'Preset Visuals' … user's work hard on their wave and then it gets
 overridden"): SPECTRUM's ‹ PRESET ›, the verb `preset`, EMISSION's pair and the Picker's 140 tile load the labels alone (`loadPreset(…, { hand:

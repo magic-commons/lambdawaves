@@ -235,8 +235,6 @@ export function createMaterial(app) {
       onChange: (v) => { sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
     ui.sliceModeSeg = { root: clipSw.root, kind: kindSeg, get: () => (clipSw.get() ? sliceKind : 'off'), set: sliceShow };
     r3.appendChild(clipSw.root); r3.appendChild(kindSeg.root); sliceShow('off');
-    ui.sliceAxisSeg = seg({ aria: 'slice axis', value: 'z', options: [{ id: 'x', label: 'X' }, { id: 'y', label: 'Y' }, { id: 'z', label: 'Z' }], onChange: (v) => { mat.slice.axis = { x: 0, y: 1, z: 2 }[v]; delete mat.slice.normal; schedule(TIER.PRESENT); } });
-    r3.appendChild(ui.sliceAxisSeg.root);
     const sliceNormals = [[1,0,0],[0,1,0],[0,0,1]];
     /* 037 H4 · THE CLIP'S FRAME (Josh: "'Lock' or 'Unlock' the clip to be separate from the camera"): CAMERA — the plane rides with the eye (its
        normal read in the eye's right · up · toward, field.js eyeTurn) — or OBJECT — fixed to the object, as before.  `mat.slice.frame` is
@@ -273,7 +271,6 @@ export function createMaterial(app) {
         mute(C.balls, esp || !(atomSizeOf(mat) > 0), esp ? 'ESP draws no balls' : 'SIZE is 0: no balls drawn');
         mute(C.sticks, bare || !(stickROf(mat) > 0), bare ? 'MAP ONLY: no sticks drawn' : 'RADIUS is 0: no sticks drawn'); } };
     cutRow.append(ui.sliceCut.balls.root, ui.sliceCut.sticks.root); cutRow.hidden = availability('wave.esp', app).hide; ui.sliceCut.sync();
-    ui.sliceAxisSeg.root.hidden = true;
     /* WAVE 106 · THESE TWO KEEP THEIR HANDLES NOW, and that is what makes them modulatable.  Both
        were built inline — `knob({...}).root` appended straight into the row — so the objects went
        out of scope the instant they were made and nothing could ever read or move them again.  A MIR

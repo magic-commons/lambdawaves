@@ -127,5 +127,7 @@ export function createBake(app) {
       g.restore();
     }
   }
-  return { readings, apply };
+  /** the take's end (render-exact after): the SHADER host lets go of the film's records */
+  function end() { const N = LW().nodes; if (N && N.shaders) N.shaders.release(); }
+  return { readings, apply, end };
 }

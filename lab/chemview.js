@@ -1345,7 +1345,7 @@ export function createChem(host, api) {
   function vibAsk() {
     if (!vibOn || !vib) return; if (vibBusy) { vibAgain = true; return; }
     const k = vibK, seq = solveSeq; vibBusy = true;
-    call({ op: 'chem.vib.frames', basis, vib, k, amp: vibAmp, K: 32 }).then((r) => { vibBusy = false;
+    call({ op: 'chem.vib.frames', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), vib, k, amp: vibAmp, K: 32 }).then((r) => { vibBusy = false;
       if (r && r.refused) status(r.refused, 'warn'); else if (r && r.D && seq === solveSeq && vibOn) { vibFr = { D: r.D, dipole: r.dipole, q: r.q, k }; vibJ = -1; api.repaint(); }
       if (vibAgain) { vibAgain = false; vibAsk(); } }, () => { vibBusy = false; });
   }

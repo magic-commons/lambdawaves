@@ -580,7 +580,7 @@ export async function boot(dom) {
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
     ladder.setActive(canPresent(wLad));
     if (cpuTick) {
-      if (sliceVisible && may('slice', wSlice)) tick('slice', () => slice.update(reg, clock.t, clock.playing));
+      if (sliceVisible && may('slice', wSlice)) tick('slice', () => slice.update(reg, clock.t));
       if (may('atoms', wAtoms)) tick('atoms', () => atomsView.update());
       if (may('wigner', wWig)) tick('wigner', () => {          // the WIGNER slice: its own throttle (2 Hz while playing, wignerview.js), its own guard
         const G = hydroReader(); wWig.setStatus(G.status === null ? WIG_OK : G.status, G.status === null ? '' : 'warn');

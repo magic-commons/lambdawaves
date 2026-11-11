@@ -2,6 +2,12 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 042
+
+THE CHEM WORKER HAS ONE QUEUE (042 F3): every `chem` op runs in arrival order on one promise chain, its basis fetch inside it, and every job answers (a reply that cannot be posted answers with its error) (`lab/mathworker.js` onmessage).
+AN RT RUN BELONGS TO ITS MOLECULE (042 F4): another molecule's solve or open drops the RT state (its ERIs and trace with it); an LDA or UHF solve of the same atoms, Δ LDA−RHF's partner, keeps it.
+THE ASK RE-GROUNDS THE ONE SLOT (042 X3): the worker holds one solve, and Δ LDA−RHF's partner can take it, so an op that reads it carries the card's atoms, basis and charge and re-grounds them first (`ensureSolve`, cached when the slot holds them): chem.spectrum, chem.states, chem.rt.init, chem.vib.frames.
+
 ## The laws of 040
 
 THE EVENT IS A HAND (040 A4): an EVENT clip on `chem.view` moves MOLECULES' VIEW as the seg's press does (`toView(id, true)`: the words, the

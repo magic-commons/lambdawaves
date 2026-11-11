@@ -694,6 +694,7 @@ export function createFilm(LW, opts = {}) {
       if (LW.clock) { seekTo(LW, P.t); if (LW.clock.setRate) LW.clock.setRate(P.rate); }
       if (P.playing && LW.play) LW.play();
       if (canvas && P.cfg !== 'copy' && !opts.grab) configure(false);
+      if (bake) bake.end();   // the SHADER nodes' film records (their targets and state) go with the take
     } catch (_) { /* a restore must never be the thing that throws */ }
     if (opts.hold) { try { await opts.hold(false); } catch (_) { /* the host's own restore */ } }
     if (LW.schedule && LW.TIER) LW.schedule(LW.TIER.PRESENT);   // the screen goes back to showing the lab

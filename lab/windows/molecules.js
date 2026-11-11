@@ -162,5 +162,5 @@ export function createMolecules(app) {
     song: { reg, hydrogen: () => getHamiltonian().id === 'hydrogen', filming: () => app.state.exportLocked, land(re, im, t) { app.state.rotTicking = true; reg.anchorFrom(re, im, t); app.state.rotTicking = false; touchState(); } } });   // 0.6.4 S1: a landing notes no history row, as the rotation drive's ticks
   app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
   wChem.root.hidden = !C.on;                                         // iteration 002: ATOMS is the boot's mode; MOLECULES ON shows the card (moleculeMode)
-  app.w.wChem = wChem; app.w.head = head; return { wChem, head };
+  app.w.wChem = wChem; app.w.head = head; return { wChem };
 }
