@@ -104,10 +104,12 @@ export function atomicDensity(Z, record, { maxIter = 200, tol = 1e-10, mix = 0.4
   return { Z, n, D, basis, iterations, moved, electrons: (() => { let t = 0;
     for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) t += D[i * n + j] * I.S[j * n + i]; return t; })() };
 }
-/** SAD: the atomic densities dropped into their own AO blocks, nothing between atoms */
+/** SAD: the atomic densities dropped into their own AO blocks, nothing between atoms; an element's density is solved once a basis record */
+const SAD = new WeakMap();
 export function sadDensity(atoms, record, basis) {
-  const n = basis.n, D = new Float64Array(n * n), cache = new Map(), start = [];
-  let seen = -1;
+  const n = basis.n, D = new Float64Array(n * n), start = [];
+  let cache = SAD.get(record), seen = -1;
+  if (!cache) SAD.set(record, cache = new Map());
   basis.bfs.forEach((b, i) => { if (b.atom !== seen) { seen = b.atom; start[b.atom] = i; } });
   atoms.forEach((a, ia) => {
     if (!cache.has(a.Z)) cache.set(a.Z, atomicDensity(a.Z, record));
