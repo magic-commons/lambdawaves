@@ -96,8 +96,8 @@
 
 import {
   AU_FS, VIEW_NAMES, viewCarriesGlobalPhase, wavePeriod, seamError, planPeriodRecording,
-  maxPictureSize, fitPicture, slug, stamp, uniqueFileName, captureName,
-  readback, configureCopy, captionOver, handOver,
+  fitPicture, slug, stamp, uniqueFileName, captureName,
+  readback, configureCopy, captionOver, handOver, limitsOf, stateLabelOf, energiesOf,
 } from './capture.js';
 import { createRecorder } from './mir/render/recorder.js';
 import { RECORD_FPS, RECORD_SIZES, estimateFilm, ceilingWarning, fmtMs, fmtBytes } from './mir/render/plan.js';
@@ -598,23 +598,7 @@ export function createFilm(LW, opts = {}) {
   const road = opts.road || {};    // the rack's own: pending() → { caption, spin, yaw0 }, caption() (027 D2: the frame's words), step(dt) (the rotor rates), rotating(), plan(o)
   const bake = opts.bake || null;  // 025 B: lab/film-bake.js — the graph, the overlays and the words over the frame (none in the node proof)
 
-  function limits() { const f = field(); return maxPictureSize(f && f.ok ? f.device.limits : null, opts.canvasCap || 32767); }
-  function stateLabel() {
-    try {
-      if (opts.label) return opts.label;
-      const p = LW.reg && LW.reg.presetId; if (p) return p;
-      const pop = LW.reg && LW.reg.populated ? LW.reg.populated() : [];
-      return pop.length ? pop.length + 'modes' : 'state';
-    } catch (_) { return 'state'; }
-  }
-  /** the host's own energy expression, or none — never a guess under a propagator (capture.js' wave 58) */
-  function energiesNow() {
-    try {
-      if (opts.energies) { const E = opts.energies(); return E && E.length ? Array.from(E) : null; }
-      if (LW.reg && LW.reg.P) return null;
-      return LW.reg.populated().map((a) => LW.reg.Ediag(a));
-    } catch (_) { return null; }
-  }
+  const limits = () => limitsOf(LW, opts), stateLabel = () => stateLabelOf(LW, opts);
   /** the film's size, resolved — even sides of at least 16, as the kit's recorder takes them (H.264's 4:2:0) — and whether
    *  the machine decided it (H10: no width or height given, so it inherits the canvas at this device pixel ratio) */
   function sizeFor(o) {
@@ -627,7 +611,7 @@ export function createFilm(LW, opts = {}) {
   /** WHAT WILL HAPPEN, before anything does: the schedule, the refusal if there is one, the cost, every pin's live reading */
   function plan(o = {}) {
     const observable = o.observable || (LW.mat ? VIEW_NAMES[LW.mat.view | 0] : 'density') || 'density';
-    const energies = energiesNow();
+    const energies = energiesOf(LW, opts);
     let wave = null;
     if (energies && energies.length && (viewCarriesGlobalPhase(observable) || o.pixelExact)) { try { wave = wavePeriod(energies); } catch (_) { wave = null; } }
     const period = o.period !== undefined ? o.period : (LW.period || null);
