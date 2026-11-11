@@ -288,6 +288,7 @@ function ensureSolve(m = {}, live = false) {
   ground.names = namesOf(sol, atoms, m.symmetry); ground.timings.names = ground.names.ms;
   chemSol = { key, sol, I, ground, spectrum: from ? from.spectrum : null, R: null, states: from ? from.states : null, atoms, basis, charge, record: from ? from.record : null }; chemKey = key;
   driveState = null;                                                          // a drive belongs to the molecule it was built on
+  if (rtState && rtState.key !== base) rtState = null;                        // and an RT run to its molecule (an LDA or UHF solve of it keeps the run)
   return chemSol;
 }
 /** chem.open — THE RECORD ROAD (0.4.0 S4a · PLAN B2): a library record (lab/library.js) fills the one solve cache and the reply is
@@ -301,7 +302,7 @@ export function chemOpen(m = {}) {
   chemSol = { key: keyOf(R.basis, R.charge, atoms), sol: { C: R.C, D: R.D, orbitalEnergies: R.eps, nocc: R.ground.nocc, basis: b }, I: null,
     ground: { ...R.ground, timings: { integrals: null, scf: null, rpa: null, names: null, open: +(performance.now() - t).toFixed(2) } },
     spectrum: R.spectrum, R: null, states: R.states, atoms, basis: R.basis, charge: R.charge, record: { id: r.id, hash: m.hash || null, caps: r.caps } };
-  chemKey = chemSol.key; driveState = null;
+  chemKey = chemSol.key; driveState = null; if (rtState && rtState.key !== chemKey) rtState = null;
   if (!(r.caps && r.caps.tdhf)) recordOnlyIds.set(chemSol.key, r.id);     // S4a-VERIFY B1
   return { ...chemGround({ atoms, basis: R.basis, charge: R.charge }), record: chemSol.record, ...(r.caps.rpa ? {} : { roots: [], tda: [] }) };   // S4c: a frontier record answers whole — it has no spectrum to wait for
 }
@@ -627,7 +628,7 @@ export function chemRootVectors(k) {
 }
 /** chem.rt.init — runs (or reuses) the solve, builds the propagator, applies the δ-kick along the chosen axis */
 export function chemRtInit(m = {}) {
-  const { sol, I, ground } = ensureSolve(m, true), n = I.n;
+  const { sol, I, ground, key } = ensureSolve(m, true), n = I.n;
   standDown(ground, "RT stands down under RKS LDA: its operators (the TDHF Fock build) are RHF's");
   const kick = m.kick || {}, axis = kick.axis || 'z', kappa = kick.kappa === undefined ? 1e-3 : +kick.kappa;
   if (AXIS[axis] === undefined) throw new Error(`chem: kick axis must be 'x', 'y' or 'z', got '${axis}'`);
@@ -644,7 +645,7 @@ export function chemRtInit(m = {}) {
   if (!P) engine.kickAlong(axis, kappa);
   const trace = new Float64Array(4096); trace[0] = engine.dipoleAlong(axis);
   const ob = engine.observables();
-  rtState = { engine, axis, kappa, dt, integrator, restartEvery: engine.restartEvery, n, trace, nTrace: 1, steps: 0, capped: false,
+  rtState = { key, engine, axis, kappa, dt, integrator, restartEvery: engine.restartEvery, n, trace, nTrace: 1, steps: 0, capped: false,
     init: { atoms: m.atoms, basis: m.basis, charge: m.charge, dt, integrator, kick: { axis, kappa }, restartEvery, pulse: P },
     E0: ob.fieldFreeTotal };
   return { ok: true, t: 0, ...bothD(engine), ...(m.factors && factorsOf(engine)), electrons: ob.electrons, idempotency: ob.idempotency,
