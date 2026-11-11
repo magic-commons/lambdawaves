@@ -9,6 +9,8 @@ import { el, readout, sw, mathText, trig, label } from './mir/kit.js';
 import { covariance } from './calculus.js'; import { BASIS } from './hydrogen.js';   // 0.8.3 B3: THE ELLIPSOID's line
 import { traceOf, fmtPeriod } from './period.js';   // 0.8.3 B2: THE A(t) TRACE
 
+/** a strip canvas at W × H CSS px, cleared; its backing store is reallocated only when that size moves */
+const fit = (c, g, W, H, d) => { const w = Math.round(W * d), h = Math.floor(H * d); if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, W, H); };
 export function createCalculus(host, opt = {}) {
   let on = true, last = null, key = '';
   const r0 = el('div', 'row tight', host);
@@ -39,7 +41,7 @@ export function createCalculus(host, opt = {}) {
     if (k !== tk || S.T !== tG) { tk = k; tG = S.T; dk = ''; tr = traceOf(reg, P, S.g2); }
     const T = tr.T, N = tr.A.length, c = ((t % T) + T) % T, d2 = `${t.toFixed(4)}|${W}`; if (d2 === dk) return; dk = d2;
     const Hh = 56, d = Math.min(2, window.devicePixelRatio || 1), cs = getComputedStyle(document.body), ink = cs.getPropertyValue('--fg').trim() || cs.color, acc = cs.getPropertyValue('--acc').trim() || ink, x = (i) => i * W / (N - 1), y = (a) => Hh - 2 - a * (Hh - 4);
-    acv.width = Math.round(W * d); acv.height = Hh * d; ag.setTransform(d, 0, 0, d, 0, 0); ag.lineWidth = 1.25; ag.strokeStyle = ink; ag.beginPath(); tr.A.forEach((a, i) => ag[i ? 'lineTo' : 'moveTo'](x(i), y(a))); ag.stroke();
+    fit(acv, ag, W, Hh, d); ag.lineWidth = 1.25; ag.strokeStyle = ink; ag.beginPath(); tr.A.forEach((a, i) => ag[i ? 'lineTo' : 'moveTo'](x(i), y(a))); ag.stroke();
     ag.fillStyle = ag.strokeStyle = acc; for (const i of tr.peaks) { ag.beginPath(); ag.arc(x(i), y(tr.A[i]), 2.5, 0, 7); ag.fill(); } ag.beginPath(); ag.moveTo(c / T * W, 0); ag.lineTo(c / T * W, Hh); ag.stroke();
     at.set(fmtPeriod(T)); at.setSub(`${tr.src} · ${S.g2 ? 'coherences damped: the envelope is the model\'s · A(0) = PURITY ' + tr.A[0].toFixed(3) : S.signed ? 'a signed table is no state: the register\'s own trace' : 'exact |Σ p e^{−iEt}|²'} · now A = ${(S.g2 ? tr.A[Math.round(c / T * (N - 1))] : reg.autocorrelation(t).abs ** 2).toFixed(4)} · ${tr.peaks.length} revivals${tr.turns > 128 ? ` · the fastest beat turns ${tr.turns.toFixed(0)}×: 512 samples alias it` : ''}`);
   }
@@ -71,7 +73,7 @@ export function createCalculus(host, opt = {}) {
     if (sep) { last = null; for (const x of [...tiles, br, ell]) { x.set('—'); x.setSub(sep); } bv.width = 0; } else { if (!mol) { last = stats(reg, t); render(last); } breath(reg, t, half, p, mol); ellLine(reg, t, p, mol, H); } if (why) { ray.set('—'); cv.width = 0; return ray.setSub(why); }
     const c = reg.at(t), ids = reg.populated(), r = p ? expectR(c.re, c.im, ids, true) : last ? last.r : [0, 0, 0], n = Math.hypot(...r), u = n < 1e-3 ? [0, 0, 1] : r.map((v) => v / n), S = rayAt(c.re, c.im, ids, u, half, p), m = Math.max(1e-300, ...S.map((q) => Math.hypot(q.re, q.im)));
     const W = cv.clientWidth || 240, Hh = 56, d = Math.min(2, window.devicePixelRatio || 1), cs = getComputedStyle(document.body), ink = cs.getPropertyValue('--fg').trim() || cs.color, acc = cs.getPropertyValue('--acc').trim() || ink;
-    cv.width = Math.round(W * d); cv.height = Hh * d; g.setTransform(d, 0, 0, d, 0, 0); g.lineWidth = 1.25;
+    fit(cv, g, W, Hh, d); g.lineWidth = 1.25;
     for (const [f, col, a] of [[() => 0, ink, 0.15], [(q) => q.re / m, ink, 1], [(q) => q.im / m, ink, 0.4], [(q) => (q.re * q.re + q.im * q.im) / (m * m), acc, 1]]) { g.strokeStyle = col; g.globalAlpha = a; g.beginPath(); S.forEach((q, i) => g[i ? 'lineTo' : 'moveTo'](i * W / (S.length - 1), Hh / 2 - f(q) * (Hh / 2 - 2))); g.stroke(); }
     ray.set(`0 → ${half.toFixed(1)} ${p ? 'ħ/a₀' : H.lengthUnit}`); ray.setSub(`along (${u.map((v) => v.toFixed(2)).join(', ')}) · ${p ? '⟨p⟩' : '⟨r⟩'} = (${r.map((v) => v.toFixed(3)).join(', ')}) · max |ψ| ${m.toExponential(2)}`);
   }
@@ -82,7 +84,7 @@ export function createCalculus(host, opt = {}) {
     if (mol) { br.set('—'); bv.width = 0; return br.setSub('a molecule: the breath reads the atom register'); }
     const H = getHamiltonian(), q = p && (H.id === 'hydrogen' || H.id === 'qho'), B = radialBreath(reg, t, half, 256, q), W = bv.clientWidth || 240, Hh = 56, d = Math.min(2, window.devicePixelRatio || 1), cs = getComputedStyle(document.body);
     if (bLab !== q) label(br.root.firstChild, BL[+(bLab = q)]); if (reg.version + '|' + q !== bKey) { bKey = reg.version + '|' + q; bMax = 0; } for (let k = 0; B.r[k] <= half; k++) bMax = Math.max(bMax, B.P[k]);
-    bv.width = Math.round(W * d); bv.height = Hh * d; bg.setTransform(d, 0, 0, d, 0, 0); bg.lineWidth = 1.25; bg.strokeStyle = cs.getPropertyValue('--fg').trim() || cs.color; bg.beginPath();
+    fit(bv, bg, W, Hh, d); bg.lineWidth = 1.25; bg.strokeStyle = cs.getPropertyValue('--fg').trim() || cs.color; bg.beginPath();
     for (let k = 0; B.r[k] <= half; k++) bg[k ? 'lineTo' : 'moveTo'](B.r[k] / half * W, Hh - 2 - B.P[k] / (bMax || 1) * (Hh - 4)); bg.stroke();
     const ids = reg.populated(), s = q && H.id === 'hydrogen' && ids.length === 1 && BASIS[ids[0]], k = H.k || 1, r0 = !q && last.rows.find((x) => x.name === '⟨r⟩').value;
     br.set(`0 → ${half.toFixed(1)} ${q ? 'a.u.' : H.lengthUnit}`); br.setSub(q ? `∫P = ${B.norm.toFixed(9)} · ⟨p²⟩ = ${B.m2.toFixed(4)}` + (s ? ` (exact ${k === 1 ? '1/n²' : '(Zμ/n)²'} = ${+(k * k / s.n / s.n).toPrecision(6)})` : '')
