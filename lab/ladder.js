@@ -164,5 +164,5 @@ export function createLadder(host, api = {}) {
        closed.  load() lands the same params and the same knobs and the closed forms at once, and marks the scan
        dirty exactly as a knob does: an open card re-solves on the worker (`schedule` → `arm` → prepare), a closed one
        when it opens, and `last` still computes on demand.  set() above stays synchronous for every other caller. */
-    load(p) { Object.assign(P, p); for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (p[k] !== undefined) ui[k].set(p[k]); clockFx(); schedule(); } };
+    load(p) { for (const k of ['nbar', 'sigma', 'd', 'teeth']) if (Number.isFinite(p[k])) { const s = ui[k].spec, v = Math.min(s.max, Math.max(s.min, p[k])); P[k] = s.step === 1 ? Math.round(v) : v; ui[k].set(P[k]); } clockFx(); schedule(); } };   // 043 O6: a file's four numbers, each in its knob's range (n̄ 1e9 would scan for ever; a stray key rode every later save)
 }
