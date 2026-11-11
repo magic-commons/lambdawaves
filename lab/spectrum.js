@@ -115,7 +115,7 @@ export function createSpectrum(host, api) {
     ['<m>c(t) = e^{−iE t} c(0)   ·   </m>', { s: 'lab' }],
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
-  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); });
+  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); if (spunC) spin(spunC); });
   const rowsEl = el('div', 'sp-rows', host);
 
 
@@ -475,16 +475,16 @@ export function createSpectrum(host, api) {
     const reg = api.reg;
     if (reg.version !== lastVersion) rebuild();
     drain(t0);                                   // the queue rides the rack's frame — no rAF of our own
-    for (const [a, L] of lanes) {
-      const ph = Math.atan2(c.im[a], c.re[a]);
-      L.ph.set(ph < 0 ? ph + 2 * Math.PI : ph);
-    }
+    spin(c);
     paintPsi(c, t);
   }
+  /** the live phase needles — while the DIALS are shown; folded, the frame's c is kept and they are set as the row opens */
+  let spunC = null;
+  function spin(c) { spunC = c; if (rowsEl.hidden) return; for (const [a, L] of lanes) { const ph = Math.atan2(c.im[a], c.re[a]); L.ph.set(ph < 0 ? ph + 2 * Math.PI : ph); } }
   function select(a) { selected = a; fxWall = 0; for (const [i, L] of lanes) { const s = i === a; if (L.was.sel !== s) { L.was.sel = s; L.root.classList.toggle('sel', s); } } }
   window.addEventListener('resize', () => paintLadder());
   /* the DIALS fold is project state (a demo opens with its lanes shown or folded as it was saved) */
-  const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); };
+  const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); if (spunC) spin(spunC); };
   return { update, rebuild, select, energyText, preset, views, regrid, redraw: paintLadder, get selected() { return selected; }, lanes, get building() { return pending.length; },
     get dials() { return !rowsEl.hidden; }, setDials,
     openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; },
