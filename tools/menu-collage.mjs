@@ -18,7 +18,7 @@
  *   node tools/menu-collage.mjs atlas [--in .tmp/collage]   4 THE ATLAS: per theme lab/img/menu/collage/<theme>.mp4 — 12 × 7 SLOTS of 160 px
  *        (1920 × 1120), 24 s = 12 BEATS of 2 s, 30 fps (720 frames, a keyframe every 240 so the loop's seek to 0 lands on one), H.264 high
  *        veryslow, CRF 31 (32 while a file passes 14.5 MB; a soft psy-rd and the dark-biased aq-mode 3 — a background under a veil keeps no
- *        grain), faststart, no sound, a seamless loop — its poster <theme>.webp (the first frame, 960 × 560) and collage.json (the slots'
+ *        grain), faststart, no sound, a seamless loop — and collage.json (the slots'
  *        offsets and per family its source, look group and mean luma: the page's map)
  *   node tests/pwa.test.mjs --write                  5 img/menu/ is a DATA root (sw.js §1b): deployed, never precached
  *
@@ -32,7 +32,7 @@
  * THE STAGGER AND THE SEAM: slot k's offset is 0.5 × (k mod 4) s and clips[j] plays over [off + 2j, off + 2j + 2) modulo 24 — the strip
  * opens with clip 11's last `off` seconds and closes with its first 2 − off, so its cuts fall at off + 2m and the loop point runs on inside
  * clip 11 with no cut.  Each strip is a 24-s 160 × 160 intermediate (concat of trimmed pool clips, CRF 18), then one xstack of 84.
- * Needs ffmpeg (libx264, libwebp) at tool time only; the pool and the scout's work stay in .tmp/ (gitignored).
+ * Needs ffmpeg (libx264) at tool time only; the pool and the scout's work stay in .tmp/ (gitignored).
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -170,11 +170,10 @@ async function atlas() {
     while (statSync(mp4).size > BUDGET && crf < 32) { steps.push(`CRF ${crf} ${mb(mp4)}`); crf++; await stack(crf); }
     if (steps.length) console.log(`menu-collage: ${th} passed ${BUDGET / 1048576} MB at ${steps.join(', ')}`);
     const t2 = Date.now();
-    await ff(['-i', mp4, '-frames:v', '1', '-vf', `scale=${(COLS * TILE) / 2}:${(ROWS * TILE) / 2}:flags=lanczos`, '-c:v', 'libwebp', '-quality', '80', join(OUT, th + '.webp')]);
     for (let k = 0; k < SLOTS; k++) rmSync(join(work, `${th}-${k}.mp4`), { force: true });
     const lumOf = (f) => { const l = clips.filter((c) => c.src === f); return Math.round(l.reduce((a, c) => a + c.lum, 0) / l.length); };
     manifest.themes[th] = { slots: slots.map((S) => ({ off: S.off, clips: S.clips.map((c) => c.f) })), families: families.map((f) => ({ src: f, look: groupOf(f), lum: lumOf(f) })) };
-    console.log(`menu-collage: ${th} → lab/img/menu/collage/${th}.mp4 ${mb(mp4)} (CRF ${crf}) + ${th}.webp ${mb(join(OUT, th + '.webp'))} · strips ${((t1 - t0) / 1000).toFixed(1)} s · atlas ${((t2 - t1) / 1000).toFixed(1)} s`);
+    console.log(`menu-collage: ${th} → lab/img/menu/collage/${th}.mp4 ${mb(mp4)} (CRF ${crf}) · strips ${((t1 - t0) / 1000).toFixed(1)} s · atlas ${((t2 - t1) / 1000).toFixed(1)} s`);
   }
   rmSync(work, { recursive: true, force: true });
   writeFileSync(join(OUT, 'collage.json'), JSON.stringify(manifest) + '\n');

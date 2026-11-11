@@ -17,7 +17,7 @@
 .dev-stat.live { color: var(--acc); }
 
 /* ── 9. rails, rows, chips, canvases — the same two depths, nothing louder ── */
-.ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .qcd-c, .atm-c, .atm-r, .picker { border-color: transparent; box-shadow: var(--relief-well, var(--neu-inset)); }
+.ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .atm-c, .atm-r, .picker { border-color: transparent; box-shadow: var(--relief-well, var(--neu-inset)); }
 .sp-row, .orbit-row { border-color: transparent; background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
 .sp-row.sel { background: var(--acc-soft); box-shadow: var(--neu-flat), 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent); }
 .sp-b, .pk-c, .pal-color { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--ink-key); }
@@ -27,7 +27,6 @@
 #title .ms { display: none; }                                                 /* the subtitle is a hover-level fact … */
 
 
-#title:hover .ms { display: none; }
 #sheet { border-radius: var(--card-r); }               /* wave 53: the '?' bindings sheet wears the same glass as the EXACT/NUMERICAL one */
 
 /* ── 10b. THE SKIP LINKS, AND THE ONE VISUALLY-HIDDEN SEAT (wave 62) ────────────────────────────────
@@ -124,7 +123,6 @@ body #modwin.mir-modwindow .m2workbar :is(.tbtn, .tbtn > svg) { all: revert-laye
 #title .word { font-family: 'LW Title', var(--font-ui); color: #fff; letter-spacing: .06em; margin-right: -.06em; margin-left: .02em; }
 #title .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; letter-spacing: 0; margin-right: -.04em; }
 #title .mark { margin-left: .05em; }
-#title .ms { margin-left: 10px; }
 body[data-theme="light"] #title .word { color: #000; }
 /* the logo sits on the stage directly: no glass, no background, one word */
 #title { pointer-events: auto; align-items: baseline; background: none; border: none; box-shadow: none; padding: 6px 10px; gap: 0; opacity: 1; }
@@ -210,19 +208,6 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
   #title::after { content: ''; position: absolute; inset: -3px -8px; }      /* the 44-px finger on the menu opener, the same ink */
   #badges { left: max(env(safe-area-inset-left), 8px); right: max(env(safe-area-inset-right), 8px); top: env(safe-area-inset-top); height: var(--top-bar); align-items: center;
     padding-left: 116px; justify-content: flex-start; flex-wrap: nowrap; overflow: hidden; z-index: calc(var(--z-chrome) + 5); }
-  /* WAVE 59 · THE BAR IS A SUBSTITUTION HERE, NOT A SUPPRESSION.  `display: none` was right that a phone has
-     no keys and wrong that it should also take away the three GESTURES in the same line — and the clause
-     naming `space = play` was the only place in the whole app that told anyone the thing can be played, on
-     the one device where discovery is hardest.  So the keyboard legend stands down and the TOUCH one takes
-     its seat: same bar, same 9 s, same SETTINGS switch, same pointer-events: none.  It wraps rather than
-     running off a 390-px screen, which is why the pill becomes a card at this width. */
-  /* AND IT MUST NOT FOLLOW THE RACK HERE.  lab.css §174 fades the bar out with `body.rack-hidden` — right on
-     a desktop, where hiding the rack is a deliberate "get out of my way".  On a phone the rack starts hidden
-     BY DESIGN (rack.js enterPhone), so that rule would have switched off the touch legend at exactly the
-     moment it is the only thing on the screen telling anyone what to do.  Found by looking at the picture. */
-  /* an ABSOLUTE box with only `left` shrink-to-fits against the space to its RIGHT, so at left: 50% the bar
-     was 250 px on a 500-px screen and max-width could not widen it.  The width is stated instead. */
-
   /* ── 3. THE HIDE TOGGLE FOLLOWS THE RACK, and sits in the thumb zone (desktop's stays fixed) ──── */
   #rackToggle { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto;
     top: auto; bottom: calc(max(env(safe-area-inset-bottom), 0px) + 14px); transition: left var(--t-soft) ease; }
@@ -307,8 +292,6 @@ body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 .native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--r-lg); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
 .control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--r-md); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
 .control-help[hidden] { display: none; }
-/* 022 P3 · A POPUP WEARS THE SKIN: the hint tip and the ⓘ panel take the kit's popover material (card style's fill, the menu floor's tint,
-   --surface-shadow-menu); the hard .98 / .99 gradients and their eight important-flags are gone */
 .native-clean[data-id="observer"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="observer"] .row { margin: 4px 0; }
 .native-clean[data-id="settings"] .settings-section { margin-bottom: 18px; }
@@ -348,7 +331,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="observer"] .wave-row-1 > .segw > .seg { grid-template-columns:repeat(4,minmax(0,1fr)); }   /* iteration 008 W: the four observables on one line */
 .lw-dither > .segw { flex:1 1 150px;width:auto; }   /* iteration 008 W: wave-row-6's DITHER row, now under SETTINGS › QUALITY */
 .native-clean[data-id="observer"] .wave-row { margin: 0 0 10px; }
-.native-clean[data-id="observer"] .wave-row-2 { margin-bottom:14px; }
 .native-clean[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
 .native-clean .window-help-book > .note, .native-clean .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
 .native-clean .native-info-content .ro-sub { height:auto; }
@@ -438,11 +420,6 @@ body.window-info-off .native-info,
 body.window-info-off .native-info-content { display:none !important; }
 body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info))),
 body.window-info-off .settings-help { display:none; }
-.native-clean[data-id="camera"] .camera-control { display:flex;flex-wrap:nowrap;gap:6px;align-items:stretch; }
-.native-clean[data-id="camera"] .camera-control > .segw { flex:1 1 0;width:auto;min-width:0; }
-.native-clean[data-id="camera"] .camera-control .seg { display:flex;width:100%;height:100%;box-sizing:border-box; }
-.native-clean[data-id="camera"] .camera-control .seg-b { flex:1;min-width:0;padding:0 4px;letter-spacing:.04em; }
-.native-clean[data-id="camera"] .camera-control > .sw { flex:0 0 auto;min-width:0;padding:0 7px;letter-spacing:.04em; }
 
 .native-clean[data-id="settings"] .settings-status-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
 .native-clean[data-id="settings"] .settings-status-grid > .sw { width:100%;min-width:0;box-sizing:border-box; }
@@ -567,8 +544,6 @@ body.no-transport-bar #transport { display: none; }
   clip-path: circle(0% at var(--ox) var(--oy)); opacity: 0; transition: clip-path .55s var(--ease-settle), opacity .28s ease; }
 #lwMenu.in { clip-path: circle(150% at var(--ox) var(--oy)); opacity: 1; }
 #lwMenu[hidden] { display: none; }
-/* THE PICKER'S SURFACE is its class `.lw-menu`, so another pane can wear it (iteration 012 R4: the palette preset list, material.js); the
-   second selector out-ranks the refractive `.glass` veil and frost above (0,3,1) for a kit pane that carries .glass */
 /* 022 P3: the Picker is a PAGE, so its sheet stays its own; the popups that wore `.lw-menu` (the palette list, the FINDER, CSB search, the look
    drop) are menu panes and take the skin (the kit's surface law and --surface-menu-floor) */
 #lwMenu { background: hsl(var(--glass-tint) / .985); }
@@ -649,7 +624,7 @@ img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no
    under the tag strip's mask (wider); pages sit 2·--fade apart so a page's start is still k × clientWidth (picker.js) and no neighbour shows at rest */
 #lwMenu .mm-pager { position: relative; --fade: 40px; }
 @media (max-width: 699px) { #lwMenu .mm-pager { --fade: 12px; } }
-#lwMenu .mm-pages { --t: 160px; --gap: 10px; --cols: 6; box-sizing: content-box; width: calc(var(--t) * var(--cols) + var(--gap) * (var(--cols) - 1)); display: flex; column-gap: calc(var(--fade) * 2); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 0 var(--fade) 22px; scroll-padding-inline: var(--fade);
+#lwMenu .mm-pages { --t: 160px; --gap: 10px; --cols: 6; width: calc(var(--t) * var(--cols) + var(--gap) * (var(--cols) - 1)); display: flex; column-gap: calc(var(--fade) * 2); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 0 var(--fade) 22px; scroll-padding-inline: var(--fade);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent); mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent); }
 #lwMenu .mm-pages::-webkit-scrollbar { display: none; }
 #lwMenu .mm-page { flex: 0 0 100%; scroll-snap-align: start; display: grid; grid-template-columns: repeat(var(--cols), var(--t)); grid-auto-rows: var(--t); gap: var(--gap); align-content: start; }
@@ -726,7 +701,7 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 #lwMenu .mm-search { flex: none; font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); border-radius: 999px; padding: 6px 12px; width: 150px; }
 #lwMenu .mm-search::placeholder { color: var(--fg); opacity: .45; }
 #lwMenu .mm-vhead .mm-install { flex: none; white-space: nowrap; padding: 2px 10px 2px 2px; } #lwMenu .mm-vhead .mm-ring-host { width: 26px; height: 26px; }
-#lwMenu .mm-tags { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: nowrap; gap: 4px; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; overscroll-behavior-x: contain; padding: 2px 14px;
+#lwMenu .mm-tags { flex: 1 1 auto; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; overscroll-behavior-x: contain; padding: 2px 14px;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); }
 #lwMenu .mm-tags::-webkit-scrollbar { height: 4px; } #lwMenu .mm-tags::-webkit-scrollbar-thumb { background: var(--acc); border-radius: 2px; }   /* 029 Q: the rack's bar (lab.css), turned sideways */
 #lwMenu .mm-tag { flex: none; white-space: nowrap; font-size: 12px; letter-spacing: .06em; padding: 5px 10px; border-radius: 999px; opacity: .6; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 120ms, color 120ms, background-color 120ms; }
@@ -828,7 +803,6 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 @media (max-width: 700px) { #lwMenu .mm-backb { top: 8px; left: 6px; width: 48px; height: 48px; } #lwMenu .mm-backb .mm-ico { width: 40px; height: 40px; } }
 #lwMenu .mm-hue { opacity: .55; cursor: ns-resize; touch-action: none; }
 #lwMenu .mm-hue-ring { display: block; width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; transition: rotate 120ms var(--ease); }
-@media (prefers-reduced-motion: reduce) { #lwMenu .mm-hue-ring { transition: none; } }   /* 021 V3: the ring turns to the hue at once */
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-hue-ring { transition: none; }
 /* iteration 015 M6 · THE HUE BUTTON (Josh: "grey like the rest but then mouse over shows the colors avail"): the ring in the ink at rest, as its
    neighbours' icons are, and the wheel's colours fading in on a hover, a focus or a drag.  021 V2: the ring is the table's `hueRing` (an SVG); the
@@ -871,13 +845,6 @@ html.mono #lwMenu .mm-hue-ring::after { opacity: 1; background: conic-gradient(f
 @keyframes mm-up { from { opacity: 0; translate: 0 14px; } }
 @media (prefers-reduced-motion: reduce) { #lwMenu.first { transition: none; } #lwMenu.first.in .mm-logo, #lwMenu.first.in .mm-nav, #lwMenu.first.in .mm-tabs, #lwMenu.first.in .mm-opts { animation: none; } }
 
-/* the way back: the grid glyph left of ATOMS | MOLECULES */
-#lwHome { position: absolute; left: calc(var(--rack-w) + 24px); top: 46px; z-index: var(--z-chrome); width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
-  border: 0; border-radius: 8px; background: none; color: var(--fg); opacity: .7; cursor: pointer; }
-#lwHome:hover { opacity: 1; } #lwHome svg { width: 16px; height: 16px; }
-body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
-@media (hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px) {
-  #lwHome { left: max(env(safe-area-inset-left), 8px); top: calc(env(safe-area-inset-top) + 48px); } }
 #lwHome { display: none; }   /* 013 H4: the column's LIBRARY is the way back now (the element stays: picker.js builds it) */
 
 /* ═══ ITERATION 007 I (Josh, JOSH-PROMPT 8–10) · INFORMATIONAL, ONE LOOK ═══════════════════════════════════════════════════════════════
@@ -903,8 +870,7 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
                  FROST · STILL and CARD STYLE reach it as they reach the ruler and the tool strip.  (0,3,1) and later than the
                  refractive `.glass` frost above, so it wins that tie; the kit's are layered.
      THE MENUS   `#menubar .mb-list` blurred unconditionally (FROST off, a phone); it now frosts only under FROST, never on a
-                 phone, and stops under FROST · STILL's hold like every pane.
-   And the modulation window's ADD MACRO / ADD DEVICE sheets (`.m2pick`) wear the windows' tint, not the chassis' thin plate. */
+                 phone, and stops under FROST · STILL's hold like every pane. */
 body.frost .mir-win.mir-timeline { -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.frost:not(.phone):not(.frost-hold) #menubar .mb-list { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
 /* iteration 016 W1 · TINT UNDER THE WORDS: FROST off, a card over the stage words (ink.js `tint` sets `data-tint`) wears the menus' own tint — the
@@ -922,8 +888,8 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
    smaller … a font that doesn't adjust in length much"): Roboto upright, 13 px t over an 18 px value in tabular lining numerals, the value a fixed
    16 ch so a turning t never moves the bar's buttons; no box.  036 W2: t left the bar — TIME is the one reader, and a target for its hint (t and the lap) */
 .mir-timeline .tl-transport .ro.time { display: inline-flex; flex-direction: row; width: auto; min-width: 0; max-width: none; overflow: visible; align-items: baseline; gap: 5px; padding: 0 5px; flex: 0 0 auto; white-space: nowrap; cursor: default; }
-.mir-timeline .tl-transport .ro.time .ro-lbl { display: inline; font: 400 13px/1 var(--font-ui); letter-spacing: 0; text-transform: none; color: var(--fg-soft); }
-.mir-timeline .tl-transport .ro.time .ro-val { width: 16ch; max-width: none; text-align: left; overflow: visible; font: 400 18px/1 var(--font-ui); letter-spacing: 0; font-variant-numeric: lining-nums tabular-nums; white-space: pre; color: var(--fg); }
+.mir-timeline .tl-transport .ro.time .ro-lbl { display: inline; text-transform: none; }
+.mir-timeline .tl-transport .ro.time .ro-val { width: 16ch; max-width: none; text-align: left; overflow: visible; letter-spacing: 0; white-space: pre; }
 .mir-timeline .tl-transport .ro.time .ro-sub { display: none; }
 /* iteration 016 T1 · ONE TIME READER (Josh: "THE TIMELINE'S TIME READER takes the modulation window's tempo reader's CSS, font and sizing"): the value in
    the tempo number's face (modhost.css `.m2workbar .tempo-number`: bold 18 px, the numeral face, tabular, ACCENT B), `t` in its unit's (bold 8 px UI,
@@ -980,7 +946,7 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 /* WAVE: a row whose controls are all hidden goes with them — POSITION | MOMENTUM while MOLECULES owns the field (windows/molecules.js), the molecule
    rows under hydrogen or an atom (018 B1, material.js modeSync) */
 .native-clean[data-id="observer"] .wave-row:not(:has(> :not([hidden]))) { display: none; }
-/* iteration 012 R4 · THE PALETTE DROPDOWN: the Picker's surface (.lw-menu above), short rows, each palette's strip at the right edge */
+/* iteration 012 R4 · THE PALETTE DROPDOWN: short rows, each palette's strip at the right edge */
 .mir-pick.pal-pick { gap: 0; padding: 6px; scrollbar-gutter: stable; }   /* P1: the scrollbar beside the rows, never out of the names' width (Firefox) */
 .mir-pick.pal-pick .mir-pick-i { min-height: 24px; padding: 0 8px; gap: 14px; justify-content: space-between; text-align: left; }   /* iteration 014 D4: the name left, the strip right */
 /* iteration 015 P1 (Josh: "Align them"): the strip has a WIDTH, not only a flex basis — Firefox sized the pane from the names alone (an empty <i>'s
@@ -1027,7 +993,7 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-stage-card .stage-frame > .segw { flex: 1 1 100%; }
 .lw-stage-card .stage-axes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; }
 .lw-stage-card .stage-axes > .segw > .seg { display: flex; flex-wrap: nowrap; width: 100%; box-sizing: border-box; }
-.lw-stage-card .stage-axes .seg-b { flex: 1 1 auto; min-width: 0; padding: 0 2px; letter-spacing: .04em; }   /* the camera seg's road (skin.css .camera-control) */
+.lw-stage-card .stage-axes .seg-b { flex: 1 1 auto; min-width: 0; padding: 0 2px; letter-spacing: .04em; }
 .lw-stage-card .stage-seat { flex: 1 1 100%; flex-direction: row; align-items: center; align-self: center; gap: 8px; }
 .lw-stage-card .stage-colour { flex: 1 1 auto; width: auto; height: 22px; }
 .lw-stage-card .stage-knobs { margin-bottom: 2px; }
@@ -1171,7 +1137,7 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 #lwMenu .mm-face-logo { height: clamp(84px, 17vh, 184px); color: var(--fg); } #lwMenu .mm-face-logo svg { height: 100%; width: auto; display: block; }
 #lwMenu .mm-doors { display: flex; gap: clamp(16px, 3vw, 40px); }
 #lwMenu .mm-door { display: block; width: clamp(210px, 21vw, 330px); aspect-ratio: 16 / 10; border-radius: 18px; }
-#lwMenu .mm-door-word { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+#lwMenu .mm-door-word { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 #lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
 /* 037 M4 · THE DOORS' INK (Josh 11-05: "Don't use drop shadow for 'Tutorial' and 'Library' … let a copy underneath the text be inverted. So top
    layer is the text, next layer is … 4px right, 4px down, and then set to invert"): no shadow; the word's copy (the span's ::after, its
@@ -1310,8 +1276,7 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
    in its column, the control right, filling the row (THE ROW LAW: as much on a row as fits, even, aligned column to column, no added height),
    11 px labels, the kit's ink and accent; two switches, or a switch and its knob, share a row (.two).  Reduced motion: no slide. */
 #lwMenu .mm-sheet { --lab-w: 108px; position: absolute; top: 0; right: 0; bottom: 0; z-index: 8; width: min(360px, 100%); box-sizing: border-box; display: grid; grid-template-rows: auto minmax(0, 1fr);
-  background: hsl(var(--glass-tint));
-  box-shadow: -1px 0 0 var(--glass-hairline), -28px 0 60px -30px rgb(0 0 0 / .45); translate: 100% 0; transition: translate 300ms var(--ease); }
+  translate: 100% 0; transition: translate 300ms var(--ease); }
 #lwMenu .mm-sheet[hidden] { display: none; } #lwMenu .mm-sheet.in { translate: 0 0; } #lwMenu .mm-sheet.out { translate: 100% 0; transition-duration: 220ms; }
 /* 036 G5 · THE SHEET IS THE FIRST TASTE OF MIR FOCUS (Josh 11-03: "a gradient transparency/opacity of a blur mask … maximum blur from the edge
    and then becoming 0% blur at the edge … an asymptotic drop-off near the edge so that the background is mostly blurred"): no plate, no
