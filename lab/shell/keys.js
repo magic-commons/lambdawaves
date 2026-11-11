@@ -3,7 +3,7 @@
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../tier.js'; import { setGlyph } from '../mir/glyph.js';
 import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js'; import { timelineRows } from '../timeline-follow.js';
-import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout, el, hint } from '../mir/kit.js'; import { formatSeconds } from '../mir/timeline/time-format.js';
+import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { readout, el, hint } from '../mir/kit.js'; import { formatSeconds } from '../mir/timeline/time-format.js';
 export function createKeys(app) {
   const { dom, ui, clock, appPlay, mat, settingsStore } = app, { schedule } = app.loop, { floats, rack, rackL } = app.host;
   const { devById, layout, readSettings, rk, setModArm } = app.sh, { wState } = app.w, { occlusion } = app.ctl;
@@ -22,7 +22,7 @@ export function createKeys(app) {
   };
   const feed = (r) => ({ ...r, run: (f) => A.run(r.id, { fine: f, shift: f !== 1 }), up: r.up && (() => r.up()) });
   A.sync();
-  const kt = createKeyTable({ rows: A.list().filter((r) => r.bind !== false).map(feed), stageHasFocus, keep: ASK_ENABLED ? [] : ['ask'] });   // 0.5.0 C3: the one listener, the save, the binding law
+  const kt = createKeyTable({ rows: A.list().filter((r) => r.bind !== false).map(feed), stageHasFocus });   // 0.5.0 C3: the one listener, the save, the binding law
   A.setEdit(keyEdit);
   A.onAdd((rows) => kt.table.add(rows.filter((r) => r.bind !== false).map((r) => { const x = feed(r); return { id: x.id, label: x.label, group: x.group, short: x.short, keys: keysOf(x),
     repeat: true, when: x.when, run: (e) => x.run(e && e.shiftKey ? 0.25 : 1), up: x.up }; })));   // a row the registry learns later (a window registered after boot)

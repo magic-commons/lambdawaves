@@ -12,8 +12,6 @@ outside source it allows). After the page loads it makes these requests, all to 
 - **An imported notebook's images.** A note's `![](https://…)` is fetched from wherever it points, on every open of the
   project that carries it. That host learns your address and the time. The fix belongs to the interface kit and is filed
   there (`docs/FOR-MIR.md`); until it lands, treat a notebook from someone else as a page that can see you open it.
-- **The ASK assistant** is switched off in this build (`lab/ask.js` `ASK_ENABLED`). Switched on by a developer, it posts
-  your words to a broker on your own machine or network (`docs/GEMMA.md`).
 
 The microphone is opened only when you add an AUDIO device; its signal never leaves the page, and it is released when the
 last AUDIO device is removed. Web MIDI is asked for when you press CONNECT MIDI or LEARN; once a mapping is saved, the boot

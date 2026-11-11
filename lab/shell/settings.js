@@ -3,7 +3,6 @@
  * creation — as are app.host.camera, app.sh.setModArm and app.sh.quality, which boot() fills later.  readSettings stays in rack.js' head
  * (§0 calls it first, U1) and comes by value; boot() destructures the rest. */
 import { infoKnown } from './stage-words.js'; import { readSession } from '../mir/core/session.js';
-import { ASK_ENABLED } from '../ask.js';   // iteration 011 Q6: the one flag (ASK hidden: the stored askOk / askUrl carried, never written)
 import { RETIRED } from '../settings-store.js';   // 021 R4: the keys the blob drops (the carry list is gone)
 import { getHamiltonian } from '../hamiltonian.js';   // 022 E1: availability reads the operator in force
 const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (settings-store.js FAMILIES)
@@ -50,7 +49,6 @@ export function createSettings(app) {
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning
            by itself when you open it is a surprise, not a setting. */
         friction: app.host.camera.friction, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()),
-        ...(ASK_ENABLED ? { askOk: ui.askOk || undefined, askUrl: (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined } : {}),   // iteration 011 Q6: ASK hidden → the stored pair stays as it was
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE (host-contract.md's sixth debt): where the window sits, the lanes, each device's
            F/C/M mode, the ribbon, open or not.  The RACK itself rides in the project file. */
         ...(app.state.modView ? { modwin: app.state.modView.presentation() } : {}),
@@ -95,7 +93,6 @@ export function createSettings(app) {
     if (typeof s.camLock === 'boolean' && (s.gen >= 17 || !s.camLock)) app.host.camera.setLock(s.camLock);   // 0.5.3 M6: the classic camera (pan held at the centre); 041 S6: OFF when nothing was said — and a blob from before 041 (gen < 17) wrote `true` on every save while 037 H3's default was ON, so its `true` is that default, not a choice, and is not read
     if (s.audio === true && ui.audioSw) { ui.audioSw.set(true); ui.setAudio(true); }   // 0.6.4 S2: the AUDIO consent (SOUND itself is a hand press each session)
     /* SKELETON · BEAD · UNCERTAINTY left this blob for INFORMATIONAL's record in the fix round (C6: shell/stage-words.js lifts them once) */
-    if (s.askOk === true) ui.askOk = true; if (typeof s.askUrl === 'string' && ui.askUrlIn) ui.askUrlIn.value = s.askUrl;   // 0.6.6 G2: ASK's consent and Gemma's address (absent: this host at 9443)
     /* 0.5.0 C4 · THE POWER AND THE CADENCE are this browser's (PREFERENCE) and live in the kit's modulation record, the one
        MIR's installModulation reads; an older blob's pair is read ONCE into it, and the blob drops it on its next save. */
     const mr = { modArm: s.modArm, modCadence: s.modCadence, ...app.ctl.modStore.read() };

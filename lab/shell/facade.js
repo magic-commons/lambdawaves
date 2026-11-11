@@ -280,6 +280,6 @@ export function createFacade(app) {
     get timeline() { return app.state.tl; },   // 0.5.0 C7b: the kit's TIMELINE (installTimeline's result: model, editor, controller, open/close), for the timeline suite
     get render() { return app.state.filmCard; },   // 0.5.0 C7b: the RENDER card ({ card, view, recorder, plan, place }; view.state() is the kit's harness read)
     conduct: { apply: (score) => import('../../tools/conduct-score.js').then((m) => m.apply(app.sh.LW, score)) },   // 026 A2: THE CONDUCTOR — a SCORE through the live doors (on demand, never precached)
-    verbs,   // 0.6.6 G1: THE VERB TABLE + THE INVENTORY (lab/verbs.js): run(list, { who }), inventory(), table
+    verbs,   // 0.6.6 G1: THE VERB TABLE (lab/verbs.js): run(list, { who }), table, byId
   };
 }

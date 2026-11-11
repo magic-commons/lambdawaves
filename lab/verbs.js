@@ -1,10 +1,9 @@
-/* lab/verbs.js — THE VERB TABLE + THE INVENTORY (0.6.6 G1, "Ask Gemma"): ONE table of HAND verbs (each the road a hand takes), run in order by a model's
- * list or a notebook `lw:` link as ONE history row a list; `inventory()` is only what the app already prints.  DOM-free at its top (tools/gemma imports VERBS
- * in node).  An arg spec: 'string' | 'number' | 'bool' (a '|' union) or 'enum a|b|c', '?' first when optional.  A row's run(app, a) returns nothing,
- * { own } (it announced itself), { fade } (THE FADE, said when no row of the list announced itself) or a string: the sentence it was refused with. */
-import { PRESET_BY_ID } from './state.js'; import { MOLECULE_BY_ID } from './molecules.js'; import { VIEW_NAMES, waveView } from './field.js'; import { BASIS } from './hydrogen.js';
-import { orbitalName } from './names.js'; import { mdText, stateLatex, stemOf, BASIS_LABEL } from './latex-state.js'; import { statusOf } from './status.js';
-import { aliasOf, FLASH_HZ } from './flash-law.js'; import { EQ_PRESETS } from './equalizer.js'; import { getHamiltonian } from './hamiltonian.js';
+/* lab/verbs.js — THE VERB TABLE (0.6.6 G1): ONE table of HAND verbs (each the road a hand takes), run in order by a notebook `lw:` link, the conductor
+ * or REVIVAL as ONE history row a list.  An arg spec: 'string' | 'number' | 'bool' (a '|' union) or 'enum a|b|c', '?' first when optional.  A row's
+ * run(app, a) returns nothing, { own } (it announced itself), { fade } (THE FADE, said when no row of the list announced itself) or a string: the sentence it was refused with. */
+import { PRESET_BY_ID } from './state.js'; import { MOLECULE_BY_ID } from './molecules.js'; import { waveView } from './field.js';
+import { orbitalName } from './names.js'; import { mdText, BASIS_LABEL } from './latex-state.js';
+import { aliasOf, FLASH_HZ } from './flash-law.js'; import { EQ_PRESETS } from './equalizer.js';
 import { LAT } from './lattice.js'; import { BL } from './bloch.js'; import { PRESETS as LATTICES } from './lattice-model.js';
 /** an orbital by number (1…nAO) or by any of its names (HOMO, LUMO−1, 1b1) → its number; 0 for none (0.5.1 D8, from the notebook's link runner) */
 const orbitalOf = (s, w) => { if (!s) return 0; if (/^\d+$/.test(w)) return +w >= 1 && +w <= s.nAO ? +w : 0;
@@ -13,7 +12,7 @@ const orbitalOf = (s, w) => { if (!s) return 0; if (/^\d+$/.test(w)) return +w >
 const orb = (c, w) => { const s = c.solution(), k = orbitalOf(s, String(w)); if (!k) return `there is no orbital "${w}" in this molecule`;
   c.setView('orbital'); c.orbital(k); return { fade: 'ORBITAL · ' + orbitalName(s.names, k - 1, s.nocc, 'latex') }; };
 const flip = (s, on) => { if (s && s.get() !== on) s.root.click(); }; let sayBye = null;   // flip: a switch the hand's way, its click and its onChange; sayBye: the held `say`'s dismissal
-export const VERBS = [
+const VERBS = [
   { id: 'preset', args: { id: 'string' }, doc: "load one of STATE's PRESET hydrogen states by its id (1s+2pz, …), announced on the stage",
     run: (app, a) => (PRESET_BY_ID.has(a.id) ? { own: !!app.ctl.loadPreset(a.id, { hand: true }) } : `there is no preset "${a.id}"`) },
   { id: 'molecule', args: { id: 'string', basis: '?enum sto-3g|6-31+g-star', method: '?enum rhf|uhf|lda', view: '?enum density|orbital|diff|esp|spin|dlda', orbital: '?string|number' },
@@ -86,7 +85,7 @@ function check(row, args) {
 export function createVerbs(app) {
   /** run(list, { who, name }) → { ran, refused }: the accepted verbs in order, each awaited (a molecule's solve before what follows), the whole
    *  list ONE history row `${who} · <the first verb in three words>` (or `name`): held across the awaits, held again after NEW's clear */
-  async function run(list, { who = 'GEMMA', name } = {}) {
+  async function run(list, { who = 'VERBS', name } = {}) {
     const ran = [], refused = [], todo = [];
     for (const v of Array.isArray(list) ? list : []) { const why = check(BY_ID.get(v && v.verb), (v && v.args) || {}); if (why) refused.push({ verb: v && v.verb, why }); else todo.push(v); }
     if (!todo.length) return { ran, refused };
@@ -100,21 +99,5 @@ export function createVerbs(app) {
     if (fade && !own && app.state.stageText) app.state.stageText.say('preset', fade);   // iteration 007: THE FADE is the `preset` kind (INFORMATIONAL › PRESETS); `say` is its own ask, written while STAGE FORMULA is on
     return { ran, refused };
   }
-  /** what the app already prints, as compact JSON for a reader with no eyes: nothing here is computed for her */
-  function inventory() {
-    const { clock, reg, ui, mat } = app, c = app.state.chem, H = getHamiltonian(), P = app.host.cameraPort, mol = c && c.on ? c.row() : null;
-    const sol = mol && c.solution(), live = sol && sol.key.replace(/\|(uhf|lda)$/, '') === c.preset() + '|' + c.basis + '|' + mol.charge ? sol : null, s = live && (live.stem || stemOf(live)), cs = mol && c.state(), st = mol ? c.said : statusOf({ owner: reg.P && reg.P.stark ? 'stark' : H.id });
-    const ro = (r) => (r ? [...r.root.querySelectorAll('.ro-val, .ro-sub')].map((e) => e.textContent).filter(Boolean).join(' · ') : '');
-    const P0 = reg.populated(), lbl = (a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]));
-    return { owner: mol ? 'MOLECULES' : H.label.split(/\s{2,}/)[0], ...(!mol && H.mass ? { mu: H.mass } : {}),
-      molecule: mol && (live ? { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, basis: BASIS_LABEL[c.basis], E: +live.energy.toFixed(6), nocc: live.nocc, nAO: live.nAO, group: s.pointGroup, homo: s.homo,
-        gapEh: +s.gapEh.toFixed(4), gapEv: +s.gapEv.toFixed(2), orbital: cs.orbitalName, head: st && st.head, ...(live.model ? { model: live.model, ...(live.model === 'UHF' ? { s2: +live.s2.toFixed(4) } : { exc: +live.exc.toFixed(6), intRho: +live.intRho.toFixed(6) }) } : {}) } : { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, solving: true }),
-      status: st ? st.line : null, ...(mol && c.vibLine() ? { vibrating: 'vibrating ' + c.vibLine() } : {}),
-      states: mol ? null : { prose: stateLatex({ H, states: P0.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: reg.re0[a], im: reg.im0[a] })) }).split('\n')[0],
-        populations: Object.fromEntries(P0.map((a) => [lbl(a), +(reg.re0[a] ** 2 + reg.im0[a] ** 2).toFixed(4)])) },
-      repeats: ro(ui.periodRo), rate: clock.rate, t: +clock.t.toFixed(3), playing: !!clock.playing,
-      camera: Object.fromEntries(['yaw', 'pitch', 'zoom', 'fov', 'autoRotate'].map((k) => { const v = P.get(k); return [k, typeof v === 'number' ? +v.toFixed(3) : v]; })),
-      windows: app.sh.rk.windows().filter((w) => w.open).map((w) => w.id), view: cs ? cs.view : VIEW_NAMES[mat.view], ...(LAT && app.ui.hamSeg.value === 'lattice' ? { lattice: [LAT.label, ...LAT.ro.map(ro)].join(' · ') } : {}), ...(BL && app.sh.rk.windows().some((w) => w.id === 'bloch' && w.open) ? { bloch: [BL.label, ...BL.ro.map(ro)].join(' · ') } : {}), notebook: app.sh.layout.notebook.text.slice(-600) };
-  }
-  return { run, inventory, table: VERBS, byId: (id) => BY_ID.get(id) || null };
+  return { run, table: VERBS, byId: (id) => BY_ID.get(id) || null };
 }

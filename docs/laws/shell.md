@@ -140,15 +140,10 @@ an untouched session (ring origin boot/link/resume) takes a waiting build itself
 The banner is MIR's
 `installBanner`, the veil MIR's `bootVeil`, and the wake lock follows THE play.
 
-GEMMA IS HIDDEN (iteration 011 Q6). Josh 10-19: "Also Gemma doesn't seem to appear to work. Isn't she built into the app? Or if not can we
-just hide the feature for now until we find out our own lightweight AI assistant in the app?" She was never built in: ASK posts to a
-local broker (`tools/gemma`, Ollama's `gemma4:e4b`, `docs/GEMMA.md`). ONE flag, `ASK_ENABLED = false` in `lab/ask.js`, closes every
-door, and nothing is deleted. With the flag off, the transport's ASK button and THE TYPE BOX do not mount (`shell/transport.js`), and the
-/ row is not in ACTIONS (`shell/keys.js`), so the KEYBOARD window does not list it. A saved `ask` chord is carried, inert, through every
-save (`key-table.js` `keep`). SETTINGS does not build the GEMMA address (`windows/settings-card.js`, `native-ui.js`). A stored `askOk` or
-`askUrl` is carried by `saveSettings` as it was stored and never written. `createAsk` is never made, so no request can leave. THE VERB
-TABLE and the `lw:` links do not read the flag. To bring her back, flip the flag and run `pwa.test.mjs --write`. The proof is
-`research/iteration-011/q6-proof.mjs off|on`.
+042: GEMMA IS GONE (Josh 11-11: "Yea just remove Gemma"). The ASK door hidden since iteration 011 left the tree with its client, its broker
+and its page: no ASK button, no TYPE BOX, no / row, no SETTINGS address, no request. A settings blob's `askOk` and `askUrl` are RETIRED
+(`settings-store.js`: read by nothing, dropped by the next save); a saved `ask` chord is an action the table does not hold, dropped on read.
+THE VERB TABLE stays (`lab/verbs.js`, rows of ACTIONS): the `lw:` links, the conductor, REVIVAL and `__LW.verbs` run it.
 
 The stage's pointer road asks MIR's scene guard first (`createSceneGuard({
 install: false })` in `lab/stage-gestures.js`, UI space from `uiSpace` in
