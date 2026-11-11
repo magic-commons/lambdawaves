@@ -39,7 +39,7 @@ export function createMolecules(app) {
     const marks = [modeSeg.root.querySelector('[data-id="molecules"]'), wChem.root].filter(Boolean), t0 = performance.now(); switchingOn = true;
     for (const m of marks) m.setAttribute('aria-busy', 'true');
     app.ctl.busyWrap(new Promise((done) => { const look = () => { const C = app.state.chem, S = app.state.molSession;
-      if (!C || !C.on || (S && S.drawn) || performance.now() - t0 > 20000) { switchingOn = false; for (const m of marks) m.removeAttribute('aria-busy'); done(); } else requestAnimationFrame(look); };
+      if (!C || !C.on || (S && S.drawn) || (!C.loading && !C.solution()) || performance.now() - t0 > 20000) { switchingOn = false; for (const m of marks) m.removeAttribute('aria-busy'); done(); } else requestAnimationFrame(look); };   // a load that ended with no molecule (a refusal) ends it too
       requestAnimationFrame(look); }));
   }
   function moleculeMode(v) {
@@ -134,7 +134,7 @@ export function createMolecules(app) {
     if (!T || !T.wants('head')) { head.want = null; return; }
     if (!row || !sol) return;
     if (app.state.chem.preset() !== id) { head.want = null; return; }                      // the molecule changed first: nothing
-    if (sol.key.replace(/\|lda$/, '') !== id + '|' + app.state.chem.basis + '|' + row.charge) return;   // chemview's solve key: this molecule's landing (0.7.3: RKS LDA's too)
+    if (sol.key.replace(/\|(uhf|lda)$/, '') !== id + '|' + app.state.chem.basis + '|' + row.charge) return;   // chemview's solve key less its METHOD (its stem): this molecule's landing, RKS LDA's and H₂'s UHF too
     head.want = null;
     const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem, status: app.state.chem.said });   // 0.5.4 P4: tell() ran before notify()
     if (!md || !T.announce(md, 0)) return;
