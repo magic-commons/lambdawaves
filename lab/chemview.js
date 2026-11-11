@@ -957,7 +957,12 @@ export function createChem(host, api) {
   /* 0.6.5 X2 · ESP: the worker's Φ volume (`chem.esp`, X1's pump) OWNS the field as a CARD once it lands — signed, so READ as 'real'; while it computes
      the view drawn before stays (`was`).  The card goes when VIEW leaves ESP, another model publishes, or the molecule is re-uploaded or dropped. */
   let esp = null, was = 'density';                                       // esp: { card, N, min, max, ms, of: the solve it was computed from }
-  const espOn = () => view === 'esp' && !!esp && esp.of === sol, drawn = () => (delta && sol && sol.D ? 'diff' : view !== 'esp' ? view : espOn() ? 'density' : was);   // VIEW REGISTRY: the card's own product is the density (the register outranks it on the field)
+  const espOn = () => view === 'esp' && !!esp && esp.of === sol;
+  /* VIEW REGISTRY: the card's own product is the density (the register outranks it on the field).  A view this solve cannot draw yet — Δ LDA−RHF
+     while its partner solves, SPIN (or ESP's `was`) on a closed shell — draws the density: a landing always publishes (no frame bakes the new
+     shells with the last molecule's matrix), and never reads a matrix the solve does not have */
+  const drawn = () => { const d = delta && sol && sol.D ? 'diff' : view !== 'esp' ? view : espOn() ? 'density' : was;
+    return (d === 'dlda' && !pair()) || (d === 'spin' && !(sol && sol.Ds)) ? 'density' : d; };
   const molView = () => (espOn() || ['orbital', 'diff', 'spin', 'dlda'].includes(drawn()) ? 'real' : 'density');   // a signed Δρ (and SPIN's ρα − ρβ) is READ as 'real': two-colour lobes
   const sgn = (x) => (x < 0 ? '−' : '+') + Math.abs(x).toFixed(2);
   function onEsp(r) {                                                     // the pump's consumer: the reply { N, half, phi, min, max, ms } becomes the card
@@ -991,7 +996,7 @@ export function createChem(host, api) {
     if (v === 'orbital') { product.kind = 'orbital'; product.matrix = orbitalColumn(); }
     else if (v === 'diff') { product.kind = 'signed'; product.matrix = deltaD(); }
     else if (v === 'spin') { product.kind = 'signed'; product.matrix = sol.ds32 || (sol.ds32 = Float32Array.from(sol.Ds)); }   // 0.7.1 VIEW SPIN: Dα − Dβ, the Δρ road
-    else if (v === 'dlda') { const p = pair(); if (!p) return false; product.kind = 'signed'; product.matrix = p[0].dl32 && p[0].dlOf === p[1] ? p[0].dl32 : (p[0].dlOf = p[1], p[0].dl32 = Float32Array.from(p[0].D, (x, i) => x - p[1].D[i])); }   // 0.7.3 K2: D_LDA − D_RHF in f64, once per pair
+    else if (v === 'dlda') { const p = pair(); product.kind = 'signed'; product.matrix = p[0].dl32 && p[0].dlOf === p[1] ? p[0].dl32 : (p[0].dlOf = p[1], p[0].dl32 = Float32Array.from(p[0].D, (x, i) => x - p[1].D[i])); }   // 0.7.3 K2: D_LDA − D_RHF in f64, once per pair
     else if (!sol.D) { product.kind = 'factor'; product.matrix = factorCols(); }
     else { product.kind = 'density'; product.matrix = densityRe(); }
     const ok = s.publish(model(), product);
@@ -1333,7 +1338,7 @@ export function createChem(host, api) {
     vibOn = !!(v && row && sol && sol.D && basis === 'sto-3g' && !sol.model); vibSw.set(vibOn); if (v && !vibOn && sol && (sol.model || sol.volume)) { status(sol.volume ? VOL : uhf() ? OPEN : LDA_VIB, 'warn'); return false; }
     if (!vibOn) { vibFr = vibD = vibAt = null; vibJ = -1; if (was && S() && sol && S().pose(model(), sol.shells)) pushMatrix(); if (v) status(row ? 'VIBRATE plays the STO-3G record of a solved molecule' : 'no modes recorded for this molecule', 'warn'); vibSay(); tell(); return false; }
     setRun(false);
-    if (!vib || vib.id !== preset) { const got = await fetchRecord(row.hash, { network: true }); if (!vibOn) return false; if (!got.record) { status('VIBRATE: the mode record did not open — ' + got.why, 'warn'); return setVib(false); }
+    if (!vib || vib.id !== preset) { const at = preset, got = await fetchRecord(row.hash, { network: true }); if (!vibOn || preset !== at) return false;   // a molecule left while its modes were read: the later press reads its own if (!got.record) { status('VIBRATE: the mode record did not open — ' + got.why, 'warn'); return setVib(false); }
       vib = decodeVibrate(got.record); vibSh = null; modeStep.setItems(vib.name.map((nm, j) => ({ id: String(j), label: `${nm} ${Math.round(vib.omega[j])} cm⁻¹ · ${vib.irrep[j]}` }))); }
     vibK = Math.min(vibK, vib.K - 1); modeStep.set(String(vibK)); vibAsk(); vibSay(); tell(); return true;
   }
