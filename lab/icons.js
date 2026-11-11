@@ -80,8 +80,6 @@ const ICONS = {
   wave: p('M2.5 12h2c1 0 1.3-3 2.3-3s1.4 6 2.5 6 1.5-10 2.7-10 1.5 14 2.7 14 1.4-10 2.5-10 1.3 6 2.3 6 1.3-3 2.3-3h2'),   // a packet: the wave under its envelope
   clip: box(3.5, 3.5, 17, 17, 2.5) + fill(3.5, 9.5, 17, 5, 0),                                               // the box and the slab it keeps
   field: p('M3.5 3.5v17') + p('M7 7h11.5M7 12h11.5M7 17h11.5') + p('M16 4.5 18.5 7 16 9.5M16 9.5l2.5 2.5-2.5 2.5M16 14.5l2.5 2.5-2.5 2.5'),   // a plate and its field lines
-  separable: p('M4 8l8-4.5L20 8v8l-8 4.5L4 16Z') + p('M4 8l8 4.5L20 8M12 12.5v8'),                                // the box: x · y · z apart
-  central: p('M3 3.5C6 3.5 7 19.5 12 19.5S18 3.5 21 3.5') + p('M7.6 13h8.8'),                                    // a central well and a bound level
   lattice: dot(5, 5, 2) + dot(12, 5, 2) + dot(19, 5, 2) + dot(5, 12, 2) + dot(12, 12, 2) + dot(19, 12, 2) + dot(5, 19, 2) + dot(12, 19, 2) + dot(19, 19, 2),   // sites
   emission: c(6, 12, 3) + p('M10.5 12c.9-2.2 1.9-2.2 2.8 0s1.9 2.2 2.8 0H21') + p('M18.5 9.5 21 12l-2.5 2.5'),  // an atom and the photon it sends
   bloch: c(12, 12, 9) + p('M3 12a9 3 0 0 0 18 0') + p('M12 12l4.5-6') + dot(16.5, 6, 1.7),                       // the sphere and its state
@@ -121,7 +119,6 @@ const ICONS = {
     box(3.45, 14.45, 3.1, 3.1, .8) + fill(9.5, 13.5, 5, 5, 1.2) + box(17.45, 14.45, 3.1, 3.1, .8),                     // 036 P6: step pads, some lit (the PATTERN window)
   film: box(3, 5, 18, 14, 2.5) + solid('M10 9v6l5.2-3Z'),                                                        // RENDER: a frame with a play
   picker: box(3.5, 3.5, 7.5, 7.5, 1.5) + box(13, 3.5, 7.5, 7.5, 1.5) + box(3.5, 13, 7.5, 7.5, 1.5) + fill(13, 13, 7.5, 7.5, 1.5),   // a shelf of tiles, one picked
-  transition: p('M3.5 5.5h9M3.5 18.5h9') + p('M8 6.5v10') + p('M5.8 14.3 8 16.5l2.2-2.2') + p('M13 12c.8-1.8 1.6-1.8 2.4 0s1.6 1.8 2.4 0 1.6-1.8 2.4 0'),   // two levels, the jump, the photon
   /* ── the Picker's look tiles (picker.js SHAPES) and the ladders' FILL ALL / EMPTY (paint-stroke.js, Gemini's 008 U drawings) ── */
   balls: dot(12, 12, 6.5),
   sticks: p('M3 12h11.3') + c(17.5, 12, 3.2),                                   // was 1.6 wide
@@ -136,7 +133,6 @@ const ICONS = {
     p('M7.4 14.2a3.1 3.1 0 0 1 3.1 3.1c0 2.3-2 3.7-4.3 3.7H3c1-.8 1.4-1.8 1.4-3.2a3.6 3.6 0 0 1 3-3.6Z'),
   /* ── NODES' node types (lab/img/nodes-icons.svg until 021, 16 units), `node` + the type ── */
   nodeTable: n16('<path d="M2 14H14V3Z"/>'),
-  nodeMatrix: n16('<rect x="2" y="2" width="12" height="12" rx="1"/><path d="M6 2v12M10 2v12M2 6h12M2 10h12"/>'),
   nodePrim: n16('<path d="M8 2Q13 8 8 14Q3 8 8 2Z"/><path d="M1 8h14"/>'),
   nodeLayer: n16('<path d="M8 2L14 5L8 8L2 5Z"/><path d="M2 8.5L8 11.5L14 8.5M2 11.5L8 14.5L14 11.5"/>'),
   nodeIn: n16('<rect x="2" y="2" width="12" height="9" rx="1"/><path d="M8 11v4M5.5 12.5L8 15l2.5-2.5"/>'),
@@ -189,7 +185,7 @@ export const nodeGlyph = (type) => 'node' + type[0].toUpperCase() + type.slice(1
 export const WINDOW_GLYPH = {
   informational: 'informational', spectrum: 'spectrum', settings: 'settings', palette: 'palette', observer: 'wave', camera: 'lens', clip: 'clip',
   history: 'history', transport: 'controlSurface', chem: 'molecule', atoms: 'atom', equalizer: 'equalizer',
-  staticfield: 'field', separable: 'separable', central: 'central', lattice: 'lattice', emission: 'emission', bloch: 'bloch', slice: 'plane',
+  staticfield: 'field', lattice: 'lattice', emission: 'emission', bloch: 'bloch', slice: 'plane',
   calculus: 'calculus', ladder: 'ladder', wigner: 'wigner', shadow: 'shadow', orbit: 'orbit', vortex: 'vortex', meters: 'meters',
   radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film', stage: 'stage', widgets: 'widgets', light: 'sun',   // 037 L1: LIGHTING wears the sun (the KEY)
   /* the kit factories' windows (windowGlyphs) */
@@ -197,10 +193,8 @@ export const WINDOW_GLYPH = {
   'transport-free': 'controlSurface', folders: 'folders', pattern: 'pattern',
 };
 
-let done = false;
 /** registerIcons() — boot's first act, before any window is made: the table through the kit's door, and the kit factories' windows named by id.  Once. */
 export function registerIcons() {
-  if (done) return; done = true;
   registerGlyphs(ICONS);
   windowGlyphs(WINDOW_GLYPH);
 }

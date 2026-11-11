@@ -54,7 +54,6 @@ export const widgetsOfProject = () => (L ? L.serialize() : null);
 export const loadWidgets = (rec) => { if (L) L.restore(rec); };
 
 export function createWidgets(app) {
-  if (L) return L;
   const root = el('div', '', app.dom.stage.parentElement); root.id = 'widgets'; root.setAttribute('aria-hidden', 'true');
   const live = new Map(), fans = new Set();   // id → { it, box, body, bar, K, view, inst, force }
   let items = [], editOn = false, snapOn = true, raf = 0;

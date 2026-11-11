@@ -26,7 +26,6 @@ export function createOcclusion(dirty) {
   const into = (out, list, map) => { for (const r of list) { const c = r && map(r); if (c) out.push(c); } return out; };
   return {
     register(name, rects, { standIn = null } = {}) { providers.set(name, { rects, standIn }); },
-    unregister(name) { return providers.delete(name); },
     rects(map) {
       const out = [], all = [...providers.values()];
       for (const p of all) if (!p.standIn) into(out, p.rects(), map);

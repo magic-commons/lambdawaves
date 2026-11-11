@@ -409,7 +409,7 @@ export function createMaterial(app) {
       for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); fold(q('.cam-mode') || R, more, { what: 'pan and hand' });
       /* 037 L4 (Josh: "the button in Camera window can summon the Lighting window aside from the finder"): LIGHTING — the sun and its word — at the
          foot of the extended body opens the LIGHTING card directly below CAMERA (light-window.js summonLight; from the FINDER it opens as any card) */
-      el('div', 'cam-row cam-light row fit', more).appendChild(trig({ label: 'LIGHTING', glyph: 'sun', cls: 'cam-light-open', title: 'LIGHTING · open the light below CAMERA', onFire: () => summonLight(app, wCam.root) }).root);
+      el('div', 'cam-row cam-light row fit', more).appendChild(trig({ label: 'LIGHTING', glyph: 'sun', cls: 'cam-light-open', title: 'LIGHTING · open the light below CAMERA', onFire: () => summonLight(app) }).root);
       for (const r of R.querySelectorAll('.cam-verbs, .cam-handrow')) r.classList.add('row', 'fit'); }   // 022 F2: the two verb rows (020 S3) and the hand's dials are fit rows; the sphere's column and the PAN pad are not
     /* iteration 012 R3 (Josh 10-20: "Remove text that says 'control' and 'direction' in camera … Increase the size of the 3D thingy while moving Zoom
        and FOV under 'YAW' and 'PITCH' … Rename 'Hand' to 'Controls'"): the kit's two labels leave its DOM, ZOOM · FOV join the sphere's knob column

@@ -64,5 +64,4 @@ export function createMirGui(app) {
   for (const w of [gui.window, gui.about]) w.root.addEventListener('pointerdown', (e) => { scaleHold.on = true; scaleHold.k = e.target.closest && e.target.closest('.k'); }, true);
   for (const t of ['pointerup', 'pointercancel']) addEventListener(t, () => { scaleHold.on = false; if (scaleHold.v === undefined) return; const v = scaleHold.v, k = scaleHold.k; scaleHold.v = undefined;
     look.prefs.set('scale', v); requestAnimationFrame(() => requestAnimationFrame(() => { if (k && k.isConnected) k.scrollIntoView({ block: 'nearest' }); })); }, true);
-  return gui;
 }

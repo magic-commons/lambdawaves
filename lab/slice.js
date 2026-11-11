@@ -19,7 +19,6 @@
  *
  * The rotor is the 4D engine's (q_L, q_R); driving q_R alone is a HOLOMORPHIC (U(2)) motion — n₊ stands still.
  */
-import { BASIS } from './hydrogen.js';
 import { psiAndGrad } from './dynamics.js';
 import { visibleFrame, adjoint, spherePoint, isHolomorphic } from './rotor4.js';
 
