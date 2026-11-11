@@ -239,7 +239,7 @@ export function wavePeriod(energies, opts) {
 }
 
 /** the views whose picture carries the GLOBAL phase of psi, and so repeat at T_psi rather than T_rho */
-export const PHASE_VIEWS = ['phase', 'real', 'imag'];   // iteration 008 W: Re+Im left
+const PHASE_VIEWS = ['phase', 'real', 'imag'];   // iteration 008 W: Re+Im left
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff'];   // field.js' VIEW, by index
 export function viewCarriesGlobalPhase(view) {
   const name = typeof view === 'number' ? VIEW_NAMES[view] : String(view);
@@ -417,10 +417,10 @@ export function uniqueFileName(name, taken) {
 /**
  * The bytes as they come off the GPU are padded to 256 and, on every desktop this runs on, BGRA (the preferred
  * canvas format is bgra8unorm).  This unpads, swizzles to RGBA, and — since the context is configured
- * `alphaMode: 'opaque'`, i.e. the alpha channel is not what is on screen — forces alpha to 255.
+ * `alphaMode: 'opaque'`, i.e. the alpha channel is not what is on screen — forces alpha to 255.  `out`: write there (a band of the
+ * frame) instead of a fresh array.
  */
-export function toRGBA(src, w, h, { bytesPerRow = w * 4, bgra = false, opaque = true } = {}) {
-  const out = new Uint8Array(w * h * 4);
+export function toRGBA(src, w, h, { bytesPerRow = w * 4, bgra = false, opaque = true, out = new Uint8Array(w * h * 4) } = {}) {
   for (let y = 0; y < h; y++) {
     let s = y * bytesPerRow, d = y * w * 4;
     for (let x = 0; x < w; x++, s += 4, d += 4) {
@@ -551,7 +551,7 @@ export async function encodePNG(rgba, w, h, { deflate = null, filter = -1 } = {}
 }
 
 /** the browser's own deflate — CompressionStream('deflate') emits a ZLIB stream, which is exactly what IDAT wants */
-export async function deflateStream(bytes) {
+async function deflateStream(bytes) {
   const cs = new CompressionStream('deflate');
   const wr = cs.writable.getWriter(); wr.write(bytes); wr.close();
   const parts = []; let n = 0;
@@ -572,7 +572,7 @@ export async function deflateStream(bytes) {
  * teacher's slide needs it.  No KaTeX in a canvas: the plain form.  At the foot, left, sized to the frame, white over a soft
  * dark stroke so it reads on any ground.  KIT BRIEF 6 (`recorder.overlay(i, ctx)`) replaces it (0.5.x, D5).
  */
-export function drawCaption(g, W, H, text) {
+function drawCaption(g, W, H, text) {
   if (!text) return false;
   const px = Math.max(12, Math.round(H * 0.034)), pad = Math.round(px * 0.9);
   g.save(); g.font = `${px}px "STIX Two Math", "Latin Modern Math", serif`; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
@@ -624,24 +624,24 @@ export async function readback(f, canvas, w, h, draw, wit = null, opaque = true)
   const tex = c.getCurrentTexture();                    // the SAME texture draw() just rendered into
   const bpr = alignedBytesPerRow(w);
   const bands = planBands(h, bpr, d.limits.maxBufferSize);
-  const enc = d.createCommandEncoder();
-  const bufs = bands.map((b) => {
-    const buf = d.createBuffer({ size: bpr * b.rows, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
-    enc.copyTextureToBuffer({ texture: tex, origin: [0, b.y0, 0] }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: b.rows }, [w, b.rows, 1]);
-    return { buf, y0: b.y0, rows: b.rows };
-  });
-  d.queue.submit([enc.finish()]);
-  await d.queue.onSubmittedWorkDone();                  // the texture must outlive the copy: only then may the canvas resize
-  if (wit) { wit.presents = f.stats.presents; wit.generation = f.stats.generation - gen0; wit.canvasW = canvas.width; wit.canvasH = canvas.height; }
-  const bgra = /^bgra/.test(f.format);
-  const rgba = new Uint8Array(w * h * 4);
-  for (const b of bufs) {
-    await b.buf.mapAsync(GPUMapMode.READ);
-    const src = new Uint8Array(b.buf.getMappedRange());
-    rgba.set(toRGBA(src, w, b.rows, { bytesPerRow: bpr, bgra, opaque }), b.y0 * w * 4);
-    b.buf.unmap(); b.buf.destroy();
-  }
-  return { rgba, w, h, ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0 };
+  const enc = d.createCommandEncoder(), bufs = [];
+  try {
+    for (const b of bands) {
+      const buf = d.createBuffer({ size: bpr * b.rows, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+      bufs.push(buf); enc.copyTextureToBuffer({ texture: tex, origin: [0, b.y0, 0] }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: b.rows }, [w, b.rows, 1]);
+    }
+    d.queue.submit([enc.finish()]);
+    await d.queue.onSubmittedWorkDone();                // the texture must outlive the copy: only then may the canvas resize
+    if (wit) { wit.presents = f.stats.presents; wit.generation = f.stats.generation - gen0; wit.canvasW = canvas.width; wit.canvasH = canvas.height; }
+    const bgra = /^bgra/.test(f.format), rgba = new Uint8Array(w * h * 4);
+    for (let i = 0; i < bands.length; i++) {
+      const b = bands[i], buf = bufs[i];
+      await buf.mapAsync(GPUMapMode.READ);
+      toRGBA(new Uint8Array(buf.getMappedRange()), w, b.rows, { bytesPerRow: bpr, bgra, opaque, out: rgba.subarray(b.y0 * w * 4) });
+      buf.unmap(); buf.destroy();
+    }
+    return { rgba, w, h, ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0 };
+  } finally { for (const buf of bufs) buf.destroy(); }
 }
 
 /** THE HAND-OVER, the one both roads reach (cap.save and render-exact's film.save).  The kit's saveBlob takes the share sheet
@@ -663,6 +663,29 @@ export function handOver(blob, name) {
    timer but its URL's revoke (tests/film-handover) */
 const landed = (how, name) => { if (how === 'download') queueMicrotask(() => notice(t('Saved {name} to your downloads', { name }), { kind: 'ok', ms: 5000 })); return how; };
 
+/* what a picture and a film both read off the lab (createCapture here, render-exact.js createFilm) */
+/** the ceiling of THIS device (maxPictureSize over its limits) */
+export const limitsOf = (LW, opts) => { const f = LW.field; return maxPictureSize(f && f.ok ? f.device.limits : null, opts.canvasCap || 32767); };
+/** the state label a filename and a badge want: opts.label, the preset or the populated shells */
+export function stateLabelOf(LW, opts) {
+  try {
+    if (opts.label) return opts.label;
+    const p = LW.reg && LW.reg.presetId; if (p) return p;
+    const pop = LW.reg && LW.reg.populated ? LW.reg.populated() : [];
+    return pop.length ? pop.length + 'modes' : 'state';
+  } catch (_) { return 'state'; }
+}
+/** THE ENERGIES (WAVE 58, REVIEW-2 §1.2): the host's own expression (opts.energies, what rack.js' period reader uses), else the register's
+ *  ⟨a|H|a⟩ — but never under a PROPAGATOR (the STURMIAN switch), where those are the labels' and not eigenvalues: null there, so a plan falls
+ *  back to the density period and the phase view is WARNED instead of silently lied to */
+export function energiesOf(LW, opts) {
+  try {
+    if (opts.energies) { const E = opts.energies(); return E && E.length ? Array.from(E) : null; }
+    if (LW.reg && LW.reg.P) return null;
+    return LW.reg.populated().map((a) => LW.reg.Ediag(a));
+  } catch (_) { return null; }
+}
+
 /**
  * createCapture(LW, { canvas, caption, energies }) — the camera over a booted lab.
  * LW is window.__LW; the canvas is the FIELD's (dom.canvas), found by id if not given; `caption()` is the line a capture
@@ -680,21 +703,7 @@ export function createCapture(LW, opts = {}) {
   const gpuOk = () => { const f = field(); return !!(f && f.ok); };
   const configure = (withCopy) => { const ok = configureCopy(field(), canvas, withCopy); if (ok) cfgUsage = withCopy ? 'copy' : 'plain'; return ok; };
 
-  /** the state label a filename and a badge want: the preset or the populated shells */
-  function stateLabel() {
-    try {
-      if (opts.label) return opts.label;
-      const p = LW.reg && LW.reg.presetId;
-      if (p) return p;
-      const pop = LW.reg && LW.reg.populated ? LW.reg.populated() : [];
-      return pop.length ? pop.length + 'modes' : 'state';
-    } catch (_) { return 'state'; }
-  }
-
-  function limits() {
-    const f = field();
-    return maxPictureSize(f && f.ok ? f.device.limits : null, opts.canvasCap || 32767);
-  }
+  const limits = () => limitsOf(LW, opts);
 
   /** ONE FRAME OF THE STATE ON SCREEN.  THE RAY-MARCH JITTER (H1): the counter is pinned to the seed for the draw and the
    *  true one put back at once, so a picture is a function of the state alone. */
@@ -756,7 +765,7 @@ export function createCapture(LW, opts = {}) {
     const caption = captionOf(o);                          // last, and at the picture's own size
     captionOver(shot.rgba, fit.w, fit.h, caption);
     const png = await encodePNG(shot.rgba, fit.w, fit.h, { filter: o.filter === undefined ? -1 : o.filter });
-    const name = uniqueFileName(o.name || captureName({ kind: 'still', label: stateLabel(), w: fit.w, h: fit.h, ext: 'png' }), taken);
+    const name = uniqueFileName(o.name || captureName({ kind: 'still', label: stateLabelOf(LW, opts), w: fit.w, h: fit.h, ext: 'png' }), taken);
     return {
       ok: true, blob: new Blob([png], { type: 'image/png' }), bytes: png.length, name,
       w: fit.w, h: fit.h, scale: fit.scaleW, clipped: fit.clipped, aspectKept: fit.aspectKept,
@@ -774,21 +783,7 @@ export function createCapture(LW, opts = {}) {
    */
   function planLoop(o = {}) {
     const P = o.period || LW.period;   // a caller that already holds the density period (rack.js's CAPTURE hover) hands it in
-    /* ── WAVE 58 (REVIEW-2 §1.2): THE ENERGIES MUST BE THE ONES THE LAB'S OWN PERIOD READER USES ────────────
-     * `LW.period` is computed by rack.js from `sturm.P ? occupiedEigen() : reg.populated().map(reg.Ediag)`, and
-     * its comment says why: under a PROPAGATOR (the STURMIAN switch, which ships) `reg.Ediag(a)` is the LABEL's
-     * <a|H|a>/<a|S|a> and not an eigenvalue at all.  Computing `wave` from the labels while `D` came from the
-     * spectrum is how a state with no period at all came back EXACT LOOP with a half-turn seam.  So the host
-     * HANDS US its own expression (`opts.energies`); without one we refuse to guess under a propagator rather
-     * than guessing wrong - a null here means no `wave`, so the plan falls back to the density period and the
-     * phase view is WARNED instead of silently lied to. */
-    const energies = (() => {
-      try {
-        if (opts.energies) { const E = opts.energies(); return E && E.length ? Array.from(E) : null; }
-        if (LW.reg && LW.reg.P) return null;
-        return LW.reg.populated().map((a) => LW.reg.Ediag(a));
-      } catch (_) { return null; }
-    })();
+    const energies = energiesOf(LW, opts);   // WAVE 58: the energies the lab's own period reader uses, never the labels' under a propagator
     const observable = o.observable || VIEW_NAMES[LW.mat.view | 0] || 'density';
     let wave = null;
     if (o.wave === undefined && energies && energies.length && (viewCarriesGlobalPhase(observable) || o.pixelExact)) {   // …and the psi period, which then rides in through `o`

@@ -34,9 +34,6 @@ export function waveView(v) { const n = typeof v === 'number' ? (v === 5 ? 'reim
  *  than it reads a saved 8 as an unknown style, so drawStyle() opens it as CLOUD there. */
 export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7, glassSigned: 8, balls: 9, sticks: 10, esp: 11 };
 export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive', 'glassSigned', 'balls', 'sticks', 'esp'];
-/** iteration 014 B: THE THREE VIEWS (APPENDED: 9 BALLS, 10 STICKS, 11 ESP) draw the MOLECULE, not the volume — the atoms setAtoms gave (an older
- *  build opens a saved 9–11 as CLOUD; with no atoms set the shader draws them as CLOUD) */
-export const ATOM_STYLES = Object.freeze([9, 10, 11]);
 /** 032 O1 · THE ATOMS ARE KNOBS (Josh: "sticks by RADIUS > 0, balls by SIZE > 0 in every style"): BALLS (9) and STICKS (10) left the STYLE seg (the ids
  *  stay reserved, never renumbered).  liftAtomStyle(m) opens an older one as GLASS (SHELL) with SIZE (balls) or RADIUS (sticks) raised to the look it
  *  had (100 % CPK, STICK_R) when the file never set it — the format's open road (persist, a link, LW.setStyle); → true when it lifted */
@@ -57,13 +54,15 @@ export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] 
 export const KNEE_DEFAULT = 3;
 /** THE KNEE's q (iteration 008 G, field.js kneeT): ln(KNEE / 0.6) — the formula's pivot 0.6 is the plain exponential (q = 0, the old
  *  arithmetic drawn bit for bit); an absent knee is the default's q */
-export function kneeQ(k) { return Math.log((Number.isFinite(k) && k > 0 ? k : KNEE_DEFAULT) / 0.6); }
+function kneeQ(k) { return Math.log((Number.isFinite(k) && k > 0 ? k : KNEE_DEFAULT) / 0.6); }
 export const SLICE = { off: 0, clip: 1, slab: 2 };
 /** iteration 014 B: THE THREE VIEWS' defaults — STICKS' radius (bohr, 0.2 Å), the probe (bohr, water's 1.4 Å), the map's RANGE (±φ, a.u.) and its surfaces */
 /** iteration 016 S1: ESP's soft edge from WAVE's SOFT (γ 0.3 … 2.2, `reverse`, so right is softer): 0 at γ 2.2 — the knob's left end, the hard ISO
  *  surface exactly — up to 1 at γ 0.3; the default γ 0.7 reads e ≈ 0.79 */
-export const espSoftOf = (g) => Math.min(1, Math.max(0, (2.2 - (Number.isFinite(g) ? g : 0.7)) / 1.9));
-export const STICK_R = 0.38, PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.1, ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
+const espSoftOf = (g) => Math.min(1, Math.max(0, (2.2 - (Number.isFinite(g) ? g : 0.7)) / 1.9));
+const STICK_R = 0.38;
+export const PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.1;
+const ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
 /** 037 L · THE LIGHTING WINDOW's homes (lab/light-window.js): `mat.light` holds only the values a hand moved off these (absent = the old light, THE
  *  LEGACY GATE shut).  KEY az/el in degrees in the FRAME (CAMERA: right · up · toward the eye; WORLD: the box's axes), its home the atoms' old
  *  upper-right light; AMBIENT and SPECULAR at the atoms' old 0.32, SHINE their Phong 40; FILL off, CONE 180° (no spot) */
@@ -298,7 +297,7 @@ ${screen}      let nc = select(select(1u, 3u, l == 1u), 6u, l == 2u);
         let wb = sh.wOff + p * nc;
         for (var c = 0u; c < nc; c++) { acc[c] += wts[wb + c] * e; }
       }`;
-export const molWgsl = (cap, wg = 64) => /* wgsl */`
+const molWgsl = (cap, wg = 64) => /* wgsl */`
 const WG: u32 = ${wg}u;                                          // 4 × 4 × 4, the eigenmode kernel's dispatch shape${MOL_HEAD}
 /* χ LIVES IN WORKGROUP MEMORY, TRANSPOSED: invocation lid owns the column chiW[ao * WG + lid], so the 64 threads
    of a workgroup read ${cap} consecutive addresses at every step of the contraction — bank-conflict-free, and off
@@ -390,7 +389,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
  * φ_k = Σ_μ C_μk χ_μ — O(nAO·K) a voxel and no χ tile, so a record past MAX_MOL_AO draws its density (C₆₀: 300 AO × 180).
  * K-BLOCKED: 32 φ's in registers (8 vec4, `mat` read as vec4), the screened shell loop re-run once a block (χ is cheap beside the MACs).  `mat` is row-major
  * n × K (K = P.r0, padded to 32 with zero columns), so a block reads 32 contiguous floats, the same for every lane.  Texel (√ρ, 0),
- * the density convention: the presenter is untouched.  Kind 4; compiled on the first factor matrix (`facReady`).  MEASURED (RTX 3070,
+ * the density convention: the presenter is untouched.  Kind 4; compiled on its first dispatch (`molReady`).  MEASURED (RTX 3070,
  * headless Firefox): C₆₀ 12.5 ms at 64³, 40 ms at 96³ — at 96³ B = 16 took 72 ms (twice the passes) and B = 64 223 ms (it spills). */
 const FACTOR_WGSL = (() => {
   let c = once(ORB_WGSL, 'var<storage, read> mat: array<f32>;', 'var<storage, read> mat: array<vec4<f32>>;');
@@ -455,11 +454,11 @@ fn freeAtom(Z: f32, r: f32) -> vec2<f32> {
       for (var k = 0u; k < 8u; k++) {
         let ps = p + (vec3<f32>(f32(k & 1u), f32((k >> 1u) & 1u), f32(k >> 2u)) - vec3<f32>(0.5)) * (0.5 * E.h);
         let g = (ps + vec3<f32>(E.fhalf)) / tv - vec3<f32>(0.5); let i0 = floor(g); let f = g - i0;
-        var sa = 0.0; var sb = 0.0;
+        var sa = 0.0;
         for (var c = 0u; c < 8u; c++) {
           let o = vec3<f32>(f32(c & 1u), f32((c >> 1u) & 1u), f32(c >> 2u)); let wv = select(vec3<f32>(1.0) - f, f, o == vec3<f32>(1.0));
           let vi = clamp(i0 + o, vec3<f32>(0.0), vec3<f32>(res - 1.0)); let d = length((vi + vec3<f32>(0.5)) * tv - vec3<f32>(E.fhalf) - A.xyz);
-          let rv = freeAtom(Z, d); let ww = wv.x * wv.y * wv.z; sa += ww * sqrt(rv.x + rv.y); sb += ww * sqrt(rv.y);
+          let rv = freeAtom(Z, d); let ww = wv.x * wv.y * wv.z; sa += ww * sqrt(rv.x + rv.y);
         }
         acc += sa * sa;
       }
@@ -1231,11 +1230,11 @@ const RENDER_GLASS_FINISH = `    if (V.p6.w > .5 && V.p6.w < 1.5 && style != 6u)
       wEff *= .22;
       if (wEff > 0.0) { if (V.p17.w == 1.0) { c = rigShade(c, uvw, .45, .65); } else { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); } }
     }`;
-export const SPEC_STYLES = Object.freeze([STYLE.cloud, STYLE.grain, STYLE.bands, STYLE.dust]);
+const SPEC_STYLES = Object.freeze([STYLE.cloud, STYLE.grain, STYLE.bands, STYLE.dust]);
 /** one anchored substitution: `from` must occur exactly once, or the derived text throws (a moved anchor never derives silently) */
 function once(src, from, to) { const i = src.indexOf(from); if (i < 0 || src.indexOf(from, i + 1) >= 0) throw new Error('field: a derived shader lost its anchor: ' + from.slice(0, 48)); return src.slice(0, i) + to + src.slice(i + from.length); }
 /** RENDER_WGSL for one (view, style) of the key; throws when an anchor has moved (the key then fails: generic forever) */
-export function specRenderWGSL(view, style) {
+function specRenderWGSL(view, style) {
   let code = once(RENDER_WGSL, 'let mode = u32(V.p0.x);', `let mode = ${view | 0}u;`);
   code = once(code, 'let style = u32(V.p3.x);', `let style = ${style | 0}u;`);
   const cut = (src, from) => { const e = src.indexOf('\n', src.indexOf(from) + from.length - 1); return once(src, src.slice(src.indexOf(from), e + 1), ''); };   // the anchor through the end of its line (the bow line carries a comment)
@@ -1340,7 +1339,7 @@ function mul4(a, b, out) {
  * Back the other way: b = R(q)ẑ is the camera's own back vector, so θ = asin b_z and ψ = atan2(b_y, b_x) — the
  * study's Y-up θ = asin b_y, ψ = atan2(b_x, b_z) reads the WRONG TWO COMPONENTS in this world and would have
  * produced a camera that was very nearly right, which is the worst kind. */
-export const CAM_HOME_Q = [0.5, 0.5, 0.5, 0.5];          // q₀: the cyclic permutation x → y → z → x
+const CAM_HOME_Q = [0.5, 0.5, 0.5, 0.5];          // q₀: the cyclic permutation x → y → z → x
 /** TURNTABLE (ψ, θ) → the FREE rotor.  Exact: the two bases agree to floating point. */
 export function quatFromYawPitch(yaw, pitch) {
   return qnormalize(qmul(qmul([Math.cos(yaw / 2), 0, 0, Math.sin(yaw / 2)], CAM_HOME_Q),
@@ -1365,7 +1364,6 @@ export function setParity(on) { PARITY = on ? -1 : 1; }
    never saved, like PARITY; the box, the data and every solve keep their frame (THE LOCK's chem leaf is H₂O by the API road: the pivot stays home) */
 let PIVOT = [0, 0, 0];
 export function setPivot(p) { PIVOT = Array.isArray(p) && p.length === 3 && p.every(Number.isFinite) ? [+p[0], +p[1], +p[2]] : [0, 0, 0]; return PIVOT; }
-export const cameraPivot = () => PIVOT.slice();
 export function cameraBasis(obs) {
   const B = cameraBasis0(obs);
   if (PARITY < 0) B.right = [-B.right[0], -B.right[1], -B.right[2]];
@@ -1482,9 +1480,9 @@ export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: 768, pr
    fits sets how many workgroups an SM holds: water, benzene, lysine, then tryptophan (87) to C₂₀H₂₀ (120) in 32 KiB, which
    lab/gpu-boot.js asks for and, where it is not granted, is built with 32 lanes (16 KiB).  An ORBITAL past 64 AOs takes
    ORB_WGSL, no tile (faster at every size, MEASURE.md §3); at ≤ 64 it keeps its tile — what the digest lock recorded. */
-export const MOL_CAPS = [16, 40, 64, MAX_MOL_AO];
-export const MOL_ORB_FROM = 64;
-export const molTierFor = (nAO) => { const t = MOL_CAPS.findIndex((c) => nAO <= c);
+const MOL_CAPS = [16, 40, 64, MAX_MOL_AO];
+const MOL_ORB_FROM = 64;
+const molTierFor = (nAO) => { const t = MOL_CAPS.findIndex((c) => nAO <= c);
   if (t < 0) throw new Error(`field: nAO ${nAO} is beyond the kernel's ${MAX_MOL_AO}`); return t; };
 const MOL_SHELL_U = new Uint32Array(MOL_LIMITS.shells * 8), MOL_SHELL_F = new Float32Array(MOL_SHELL_U.buffer);
 const MOL_ALPHA = new Float32Array(MOL_LIMITS.prims), MOL_W = new Float32Array(MOL_LIMITS.weights), MOL_CUT = new Float32Array(MOL_LIMITS.shells);
@@ -1607,13 +1605,14 @@ export async function createField(canvas, opts = {}) {
   const renderModule = device.createShaderModule({ code: RENDER_WGSL });
   const lineModule = device.createShaderModule({ code: LINE_WGSL });
   /* the molecular volume (CHEMISTRY): one pipeline per AO tier, each tier's lanes set by the workgroup memory this device
-     GRANTED (0.4.0 S4c: the cap-128 tile is 32 KiB at 64 lanes, 16 KiB at 32) — then the orbital-only kernel, index ORB */
-  const molWg = MOL_CAPS.map((cap) => (cap * 64 * 4 <= device.limits.maxComputeWorkgroupStorageSize ? 64 : 32)), ORB = MOL_CAPS.length, FAC = ORB + 1;
-  const molModules = [...MOL_CAPS.map((cap, i) => device.createShaderModule({ code: molWgsl(cap, molWg[i]) })), device.createShaderModule({ code: ORB_WGSL })];
+     GRANTED (0.4.0 S4c: the cap-128 tile is 32 KiB at 64 lanes, 16 KiB at 32) — then the orbital-only kernel, index ORB, and the
+     factor's, FAC; each compiled on its first dispatch (molReady), so a boot compiles the three hydrogen draws with */
+  const molWg = MOL_CAPS.map((cap) => (cap * 64 * 4 <= device.limits.maxComputeWorkgroupStorageSize ? 64 : 32)), ORB = MOL_CAPS.length, FAC = ORB + 1, molPipelines = [];
   /* compile messages are kept, never swallowed: a broken shader must say where */
   out.shaderMessages = [];
-  for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule], ...molModules.map((m2, i) => ['molecule' + (MOL_CAPS[i] || 'Orbital'), m2])]) {
-    try { const info = await m.getCompilationInfo(); for (const msg of info.messages) out.shaderMessages.push({ shader: name, type: msg.type, line: msg.lineNum, col: msg.linePos, text: msg.message }); } catch (_) {}
+  const said = (shader) => (info) => { for (const m of info.messages) out.shaderMessages.push({ shader, type: m.type, line: m.lineNum, col: m.linePos, text: m.message }); };
+  for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule]]) {
+    try { said(name)(await m.getCompilationInfo()); } catch (_) {}
   }
   /* M1 · …AND ONE LOST DURING THE COMPILE STRETCH ABOVE.  Before this line, Firefox took the WGSL branch below (a dead
      device reports compile errors), overwrote `device lost` with "WGSL compile error" and returned the method-less
@@ -1621,7 +1620,6 @@ export async function createField(canvas, opts = {}) {
   if (b.lost) return out;
   if (out.shaderMessages.some((m) => m.type === 'error')) { out.error = 'WGSL compile error: ' + JSON.stringify(out.shaderMessages.filter((m) => m.type === 'error')); return out; }
   const computePipeline = device.createComputePipeline({ layout: 'auto', compute: { module: computeModule, entryPoint: 'main' } });
-  const molPipelines = molModules.map((m) => device.createComputePipeline({ layout: 'auto', compute: { module: m, entryPoint: 'main' } }));
   /* EXPLICIT layouts: an 'auto' layout belongs to one pipeline, and the readback path
      renders the same scene through a second pipeline (rgba8unorm) with the same bind groups. */
   const renderBGL = device.createBindGroupLayout({ entries: [
@@ -1794,7 +1792,7 @@ export async function createField(canvas, opts = {}) {
   /* K7: binding 5 is the gas table once uploaded, a 16-byte stand-in until then (the 'auto' layout needs the binding; no
      record reads it while every lag[3] is 0) */
   let gasTab = null, gasTabStandIn = null;
-  /* THE BEAT EQUALIZER (0.6.0 B1): its table, and EQ_WGSL's pipeline, compiled on the first frame that needs it (boot stays at 8) */
+  /* THE BEAT EQUALIZER (0.6.0 B1): its table, and EQ_WGSL's pipeline, compiled on the first frame that needs it */
   let eqTable = null, eqWritten = null, eqPipeline = null, eqBuf = null, eqBind = null; const EQ_F = new Float32Array(EQ_G + 4);   // 009 N7: Γ 7 × 7 (98, padded to EQ_G = 100), then κ, mode, floor
   function bindCompute() {
     const tab = gasTab || gasTabStandIn || (gasTabStandIn = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE }));
@@ -1808,7 +1806,7 @@ export async function createField(canvas, opts = {}) {
   function eqReady() {
     if (!eqPipeline) {
       const module = device.createShaderModule({ code: EQ_WGSL });
-      module.getCompilationInfo().then((info) => { for (const m of info.messages) out.shaderMessages.push({ shader: 'equalizer', type: m.type, line: m.lineNum, col: m.linePos, text: m.message }); }, () => {});
+      module.getCompilationInfo().then(said('equalizer'), () => {});
       eqPipeline = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } });
       eqBuf = device.createBuffer({ size: EQ_F.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }); bindCompute();
     }
@@ -1923,11 +1921,11 @@ export async function createField(canvas, opts = {}) {
       { binding: 2, resource: { buffer: molAlphaBuf } }, { binding: 3, resource: { buffer: molWBuf } },
       { binding: 4, resource: { buffer: molMatBuf } }, { binding: 5, resource: tex.createView({ dimension: '3d' }) },
       { binding: 6, resource: { buffer: statsBuf } }, ...(p >= ORB ? [{ binding: 7, resource: { buffer: molCutBuf } }] : [])] }));
-  function facReady() {                                        // the ninth module, compiled on the first factor matrix (boot stays at 8, as eqReady)
-    if (molPipelines[FAC]) return;
-    const module = device.createShaderModule({ code: FACTOR_WGSL });
-    module.getCompilationInfo().then((info) => { for (const m of info.messages) out.shaderMessages.push({ shader: 'factor', type: m.type, line: m.lineNum, col: m.linePos, text: m.message }); }, () => {});
-    molPipelines[FAC] = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } }); molBind[FAC] = molBindFor(molPipelines[FAC], FAC);
+  function molReady(r) {                                       // a molecular road's module and pipeline, on its first dispatch (as eqReady)
+    if (molPipelines[r]) return;
+    const module = device.createShaderModule({ code: r === FAC ? FACTOR_WGSL : r === ORB ? ORB_WGSL : molWgsl(MOL_CAPS[r], molWg[r]) });
+    module.getCompilationInfo().then(said(r === FAC ? 'factor' : 'molecule' + (MOL_CAPS[r] || 'Orbital')), () => {});
+    molPipelines[r] = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } }); molBind[r] = molBindFor(molPipelines[r], r);
   }
   setResolution(opts.resolution || 96);
 
@@ -1958,7 +1956,7 @@ export async function createField(canvas, opts = {}) {
   const molRoad = () => (molKind === 4 ? FAC : (molKind === 1 || molKind === 2) && molPack.nAO > MOL_ORB_FROM ? ORB : molTier);
   function dispatchMol(pass, slot, k = 1) {
     const r = molRoad(), g = Math.ceil(res / 4), z = r >= ORB ? g : Math.ceil(res / (molWg[r] / 16));   // a 32-lane tier is 4 × 4 × 2
-    pass.setPipeline(molPipelines[r]); pass.setBindGroup(0, molBind[r][slot]);
+    molReady(r); pass.setPipeline(molPipelines[r]); pass.setBindGroup(0, molBind[r][slot]);
     for (let i = 0; i < k; i++) pass.dispatchWorkgroups(g, g, z);
   }
   function encodeMolecule(enc, slot, tw) {
@@ -2562,7 +2560,7 @@ export async function createField(canvas, opts = {}) {
       if (!(K > 0) || n * Kp > MOL_LIMITS.ao * MOL_LIMITS.cols || !M.C || M.C.length !== n * K) throw new Error(`field: a factor needs { C: n·K, n·K padded to 32 ≤ ${MOL_LIMITS.ao * MOL_LIMITS.cols} } at n = ${n}, K = ${K}`);
       const src = new Float32Array(n * Kp);                    // padded to the kernel's block of 32: the extra columns are zero
       for (let i = 0; i < n; i++) for (let k = 0; k < K; k++) src[i * Kp + k] = M.C[i * K + k];
-      facReady(); device.queue.writeBuffer(molMatBuf, 0, src);
+      device.queue.writeBuffer(molMatBuf, 0, src);
       molMat = src; molKind = 4; molK = Kp; molKindName = kind; molDirty = true;
       if (ref) molRefDirty = true;
       return { kind, nAO: n, length: n * K, K, complex: false, ref: !!ref };
@@ -2708,8 +2706,8 @@ export async function createField(canvas, opts = {}) {
        buffers and the context released in order with the device left alone ticked every time. */
     dispose() {
       if (out.disposed) return; out.disposed = true; out.ok = false;
-      try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); } catch (_) {}
-      try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); cardBuf?.destroy(); palBuf.destroy(); } catch (_) {}
+      try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); for (const g of grids.values()) g.tex.destroy(); tapTex?.destroy(); } catch (_) {}
+      try { for (const b of [...paramsBuf, ...modesBuf, radialBuf, statsBuf, viewBuf, vpBuf, cardBuf, palBuf, lineBuf, latticeBuf, atomBuf, phiBuf, espE, espPart, gasTab]) b?.destroy(); } catch (_) {}
       try { for (const b of molParamsBuf) b.destroy(); molShellBuf.destroy(); molAlphaBuf.destroy(); molWBuf.destroy(); molMatBuf.destroy(); molCutBuf.destroy(); } catch (_) {}
       try { ctx.unconfigure(); } catch (_) {}
     },
