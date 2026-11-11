@@ -239,7 +239,7 @@ export function createModSeam(app) {
       { id: 'state.index', label: 'STATE', map: 'integer', min: 0, max: BASIS.length - 1, step: 1, group: 'state', knob: () => null, options: BASIS.map((_, i) => i),
         seg: () => document.querySelector('.dev[data-id="spectrum"] .picker'),
         hint: 'the register as one of the 140 states',
-        get: () => { const p = reg.populated(); return p.length === 1 ? p[0] : NaN; },
+        get: () => { let k = -1; for (let a = 0; a < BASIS.length; a++) if (reg.re0[a] ** 2 + reg.im0[a] ** 2 > EPS_POP) { if (k >= 0) return NaN; k = a; } return k >= 0 ? k : NaN; },   // the one populated state (no populated() array: syncBases reads it every modulation tick)
         set: (v) => { const k = v | 0, p = reg.populated(), H = app.state.modHost, tl = app.state.tl; if ((app.state.chem && app.state.chem.on) || !(k >= 0 && k < BASIS.length) || (p.length === 1 && p[0] === k) || !H || !tl) return;
           const u = tl.model.value('state.index', H.model.transport.beats); if (!Number.isFinite(u) || H.registry.fromNorm('state.index', u) !== k) return;   // a clip says k here, or nothing moves
           reg.drive(() => { api.clear(); api.toggleMode(k); api.settle(); }); } },   // 039 F1: a clip's state is a DRIVE's
