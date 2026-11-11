@@ -331,13 +331,14 @@ export class Register {
   /** the DRAG toy: γ ≥ 0; NON-UNITARY, not physics — excited amplitudes decay as e^{−γ(E_a−E_0)t}, forward in time only, under no electric field */
   setDamping(g) { this.damping = Math.max(0, g || 0); this.version++; }
   /**
-   * Apply a unitary to the state AT the current logical time.  With no electric field every operator here commutes
-   * with H (L_z, K_z and L² all do), so acting on the anchor is the same thing and we take the fast path; with a
-   * Stark field L² does NOT commute, so the operator is applied at time t and the state re-anchored — which is the
-   * register's documented policy ("edits happen at the current logical time") made to hold in general.
+   * Apply a unitary to the state AT the current logical time.  With no field every operator here commutes with H
+   * (H₀'s shells are SO(4)-invariant, L² commutes), so acting on the anchor is the same thing and we take the fast path;
+   * a Stark field breaks L², a Zeeman field breaks every rotor not about z (the anchor's turn would land about R_z(Bt/2)·axis),
+   * so then the operator is applied at time t and the state re-anchored — the register's documented policy ("edits happen
+   * at the current logical time") made to hold in general.
    */
   _op(fn, t = 0, commutes = true) {
-    if ((commutes && this.field.Fz === 0 && !this.P) || !t) { fn(this.re0, this.im0); this.version++; return; }   // a slap does NOT commute with H: it must act at time t
+    if ((commutes && this.field.Fz === 0 && this.field.Bz === 0 && !this.P) || !t) { fn(this.re0, this.im0); this.version++; return; }   // a slap does NOT commute with H: it must act at time t
     const c = this.at(t); fn(c.re, c.im); this.anchorFrom(c.re, c.im, t);
   }
   /** load a preset: coefficients at t = 0, normalized as stored */
