@@ -180,6 +180,7 @@ export function createPersist(app) {
     if (!hist) app.state.restoreNotice = '';
     app.ctl.markBatchBegin();                                                // M7: released in the finally below · 040 A3: the batch is the lanes' hush (look.landing)
     try {
+      if (!hist && app.state.tl) app.state.tl.model.restore(null);   // 043 O3 · the outgoing ARRANGEMENT goes first: its lanes played on during this restore (the rack's applyAll below), so a project, a link or a quick load opened after one with a camera or a STYLE lane took that lane's pose and wrote its style memory
       if (opt && opt.project && app.state.modHost) { app.state.modHost.clock.pause(); app.state.modHost.registry.restoreAll(); }   // S2 · a project open puts the running modulation down FIRST (wave 127's law): a route still holding the stage wrote its old base back over the file's mix
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       let pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
