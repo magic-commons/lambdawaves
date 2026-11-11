@@ -693,10 +693,6 @@ body.mod-arming .mir-select, body.mod-arming .k:not([data-param]) { opacity: .45
 .mol-view { flex: 1 1 100%; align-items: stretch; }
 .mol-view .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; box-sizing: border-box; }
 .mol-view .seg-b { min-width: 0; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* iteration 012 R2 (Josh: "the Orbital knob seems too high"): METHOD's seg and the ORBITAL dial share one seat (0.4.0 S4c) on a flex-end row,
-   where the dial's box (label · 34 px dial · value line) stood 5 px taller than the seg's and lifted the dial 11 px above the RHF | LDA cells.
-   The dial is OFFSET onto the cells' centre and its label back onto METHOD's label line — relative offsets, so no box in the card changes
-   size (a margin that did set the register's ResizeObservers looping in tests/register.browser-test.mjs) */
 /* 0.7.4 C2 · THE SHELF (chemview.js): the page as tiles under the picker, as many as fit (two a row on a phone); a tile wears ATOMS' cell (.pk-c), the current one lit */
 .mol-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 4px; margin: 2px 0 6px; --nc: var(--acc); }
 .mol-shelf[hidden] { display: none; }
@@ -852,8 +848,6 @@ body.menu-open #widgets { visibility: hidden; }
 .dev .sp-vseg:not(:has(> .k-lbl))::before { content: ''; display: block; height: var(--vseg-lbl, 12px); }
 .dev .sp-vseg > .seg { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 1px; padding: 2px; width: 100%; box-sizing: border-box; }
 .dev .sp-vseg .seg-b { min-height: 17px; min-width: 0; padding: 0 4px; font-size: var(--fs-micro); }
-/* 017 R4 (Josh's refs/hamiltonian-misaligned.png): HYDROGEN's two rows share ONE column rhythm — three 56-px columns, 6-px gaps, centred
-   as a block, so Z · μ/mₑ · the mass seg and SCALE · λ SCALE stand in the same columns on the same dial line */
 /* 041 H4 · THE HAMILTONIAN'S OWN ROOMS (windows/spectrum.js `.sp-room`): CENTRAL's, SEPARABLE's and LATTICE's editors under ‹ SYSTEM ›, laid as they
    were in their own windows (the kit's rows); a rule above parts the room from the stepper.  `.pk-dim`: a chip the system marks faint (ATOM's virtual °) */
 .dev[data-id="spectrum"] .sp-room:not([hidden]) { display: block; margin: 6px 0 2px; padding-top: 6px; border-top: 1px solid var(--glass-hairline); }
@@ -870,10 +864,6 @@ body[data-theme="light"] { --n7: hsl(350 97% 47%); }
 .picker .pk-n > button.pk-nl:hover, .picker .pk-n > button.pk-nl:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
 .picker .pk-n.folded > button.pk-nl { padding-top: 2px; opacity: .78; }
 .picker .pk-count { font-size: var(--fs-tiny); color: var(--dim); padding-top: 2px; }
-
-/* 021 V2 · THE ICON TABLE: the menubar's rows wear their glyph through the kit's `opts.icon` (WINDOW's PICKER / ATOMS / MOLECULES, every window by
-   its WINDOW_GLYPH) and the FINDER's rows their window's `spec.glyph` — the iteration 012 masks (and the retired + list's) are gone. */
-/* 040 M3 · THE FINDER'S SPECIAL SECTION (shell/notebook.js): under the list, never scrolled with it; its head a hairline and a small word */
 
 /* iteration 012 M1 · FOLDERS, λWAVES' look over the kit's gallery (folders/gallery.js, untouched).  PROJECT — BASINS' "store with a picture" spot —
    wore the same floppy as λWAVES' SAVE beside it; it wears I1's save.svg (a page filed into the library).  The NAME and SAVE TO bars each carry
