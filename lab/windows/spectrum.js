@@ -99,7 +99,7 @@ export function createSpectrumCard(app) {
     const MASS = { 1: 1, ps: MASSES.positronium, muh: MASSES['muonic hydrogen'] }, setMass = (v) => { if (getHamiltonian().id === 'hydrogen') { setMu(v); hNote(); switchHamiltonian('hydrogen'); } else { ui.muKnob.set(getMu()); wSpec.setStatus('μ/mₑ scales hydrogen alone: the operator in force is ' + hamLabel(), 'warn'); } };
     ui.muKnob = knob({ label: 'μ/mₑ', min: 0.5, max: 200, log: true, value: 1, fmt: (v) => 'μ = ' + +v.toPrecision(5), title: 'μ/mₑ · reduced mass: E → μE, r → r/μ', onInput: setMass });
     const muSeg = seg({ aria: 'reduced mass', cls: 'sp-vseg', value: '1', options: [['1', '1', 'ELECTRON'], ['ps', 'Ps', 'POSITRONIUM'], ['muh', 'μH', 'MUONIC H']].map(([id, label, word]) => ({ id, label, title: `${word} · μ = ${+MASS[id].toPrecision(5)} mₑ` })), onChange: (id) => setMass(MASS[id]) });
-    hamRows.hydrogen.append(ui.muKnob.root, muSeg.root); onHamiltonian(() => { ui.muKnob.set(getMu()); muSeg.set(Object.keys(MASS).find((id) => MASS[id] === getMu()) || ''); if (!(app.state.chem && app.state.chem.on)) hamShow(getHamiltonian().id); });
+    hamRows.hydrogen.append(ui.muKnob.root, muSeg.root); onHamiltonian(() => { ui.muKnob.set(getMu()); muSeg.set(Object.keys(MASS).find((id) => MASS[id] === getMu()) || ''); if (!(app.state.chem && app.state.chem.on)) hamShow(sys.get() === 'lattice' ? 'lattice' : getHamiltonian().id); });
     ui.elemKnob = knob({ label: 'ELEMENT', title: 'ELEMENT · its atomic number Z', min: 1, max: ZMAX, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(ZMAX - 1, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
     hamRows.atom.appendChild(ui.elemKnob.root);
     {
@@ -182,8 +182,7 @@ export function createSpectrumCard(app) {
     if (ui.availSync) ui.availSync();   // 022 E1 · AVAILABILITY IS ONE LAW: SPACE's MOMENTUM under a `noMomentum` operator (greyed, and x if it was p)
     for (const w of [app.w.wOrb, app.w.wVor, app.w.wSlice, app.w.wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
     wSpec.setStatus(hamLabel(), H.id === 'hydrogen' ? '' : 'live');
-    wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); });   // wave 50: the API, so the RATE is in the number the card shows
-    spectrum.regrid();   // 041 H4: the grid's rows, the chips' names and the lanes' follow the operator
+    spectrum.regrid();   // 041 H4: the grid's rows, the chips' names and the lanes' (their energies by the API: wave 50) follow the operator
     if (sturm.on) { applySturmian(); return; }                        // W-STURMIAN: re-arm (or stand down) the scale under the operator now in force
     app.state.refSnapshot = null; app.state.pendingRef = null;
     schedule(TIER.REBUILD);
@@ -313,9 +312,8 @@ export function createSpectrumCard(app) {
     return { n: top.n, l: top.l, labels, shells: held.map((c) => ({ n: c.n, l: c.l, occ: c.occ })), past: gone.map((c) => ({ n: c.n, l: c.l, occ: c.occ })) };
   }
   /* the ⧉ digest (021 G3: out of boot()'s DIGESTS table) */
-  const spectrumDigest = () => { const c = reg.at(clock.t), H = getHamiltonian(); return 'label\tE\t|c|²\targ c\n' + reg.populated().map((a) => H.labelOf(BASIS[a]) + '\t' + H.energy(a).toFixed(6) + '\t' + (c.re[a] ** 2 + c.im[a] ** 2).toFixed(6) + '\t' + Math.atan2(c.im[a], c.re[a]).toFixed(5)).join('\n')
+  const spectrumDigest = () => { const c = reg.at(clock.t), H = getHamiltonian(); return 'label\tE\t|c|²\targ c\n' + reg.populated().map((a) => H.labelOf(BASIS[a]) + '\t' + api.energyOf(a).toFixed(6) + '\t' + (c.re[a] ** 2 + c.im[a] ** 2).toFixed(6) + '\t' + Math.atan2(c.im[a], c.re[a]).toFixed(5)).join('\n')
     + (sturm.P ? (() => { const e = sturmEigen(); return '\n\nSTURMIAN λ = ' + sturm.lambda.toFixed(4) + ' · Z = ' + getZ() + ' · ⟨c|S|c⟩ = ' + e.norm.toFixed(6) + ' · ⟨H⟩ = ' + e.energy.toFixed(6) + '\neigenvalue\tpopulation\t(l, m)\n' + e.E.map((E, k) => E.toFixed(6) + '\t' + e.pop[k].toFixed(6) + '\t' + L_LETTERS[e.l[k]] + (e.m[k] >= 0 ? '+' : '-') + Math.abs(e.m[k])).join('\n'); })() : ''); };
   app.w.switchHamiltonian = switchHamiltonian; app.w.applySturmian = applySturmian; app.w.setElement = setElement; app.w.fillValence = fillValence; app.w.occupiedEigen = occupiedEigen;   // persist reads them (occupiedEigen: the transport)
-  return { wSpec, wState, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen, periodEnergies,
-    selectEigen, setElement, fillValence, spectrumDigest };
+  return { wSpec, spectrum, paintSturmRo, spectrumDigest };
 }

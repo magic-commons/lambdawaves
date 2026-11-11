@@ -115,7 +115,7 @@ export function createSpectrum(host, api) {
     ['<m>c(t) = e^{−iE t} c(0)   ·   </m>', { s: 'lab' }],
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
-  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); });
+  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); if (spunC) spin(spunC); });
   const rowsEl = el('div', 'sp-rows', host);
 
 
@@ -352,7 +352,7 @@ export function createSpectrum(host, api) {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const W = c.clientWidth, H = c.clientHeight;
     if (W < 32 || H < 32) return;                       // folded: no size, nothing to paint
-    if (c.width !== W * dpr || c.height !== H * dpr) { c.width = W * dpr; c.height = H * dpr; }
+    if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
     const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const INK = readRGB(g, '--dim', '#b8b8b8'), FG = readRGB(g, '--fg', '#ffffff');   // the theme's own ink: this canvas used to be white-only
     const ink = (a) => `rgba(${INK[0]},${INK[1]},${INK[2]},${a})`, fg = (a) => `rgba(${FG[0]},${FG[1]},${FG[2]},${a})`;
@@ -364,7 +364,7 @@ export function createSpectrum(host, api) {
        ("50%  −0.1250"), one more coloured number in the middle of the picture.  The line, the bar and the
        shell colour say WHICH level and HOW MUCH; the number itself is one hover away, in the single tip.
        The gutter keeps the level's name and the footer keeps the law: both are outside the plot rectangle. */
-    const pad = 10, left = bare ? 6 : 44, right = W - (bare ? 6 : 12), top = 10, bot = H - (bare ? 10 : 14);
+    const left = bare ? 6 : 44, right = W - (bare ? 6 : 12), top = 10, bot = H - (bare ? 10 : 14);
     const plot = { x0: left, y0: top, x1: right, y1: bot };
     hovers = [];
     const HS = api.hamiltonian ? api.hamiltonian() : null;                    // null = the built-in hydrogen ladder
@@ -475,16 +475,16 @@ export function createSpectrum(host, api) {
     const reg = api.reg;
     if (reg.version !== lastVersion) rebuild();
     drain(t0);                                   // the queue rides the rack's frame — no rAF of our own
-    for (const [a, L] of lanes) {
-      const ph = Math.atan2(c.im[a], c.re[a]);
-      L.ph.set(ph < 0 ? ph + 2 * Math.PI : ph);
-    }
+    spin(c);
     paintPsi(c, t);
   }
+  /** the live phase needles — while the DIALS are shown; folded, the frame's c is kept and they are set as the row opens */
+  let spunC = null;
+  function spin(c) { spunC = c; if (rowsEl.hidden) return; for (const [a, L] of lanes) { const ph = Math.atan2(c.im[a], c.re[a]); L.ph.set(ph < 0 ? ph + 2 * Math.PI : ph); } }
   function select(a) { selected = a; fxWall = 0; for (const [i, L] of lanes) { const s = i === a; if (L.was.sel !== s) { L.was.sel = s; L.root.classList.toggle('sel', s); } } }
   window.addEventListener('resize', () => paintLadder());
   /* the DIALS fold is project state (a demo opens with its lanes shown or folded as it was saved) */
-  const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); };
+  const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); if (spunC) spin(spunC); };
   return { update, rebuild, select, energyText, preset, views, regrid, redraw: paintLadder, get selected() { return selected; }, lanes, get building() { return pending.length; },
     get dials() { return !rowsEl.hidden; }, setDials,
     openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; },

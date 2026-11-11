@@ -500,7 +500,7 @@ export function createStates(host, api) {
   function refreshDrive() {
     const k = selected !== GROUND && lanes.has(selected) ? selected : keys().find((q) => q !== GROUND);
     /* the coupling the last ω → LANE measured (an excited-to-excited one comes from the worker); else the lane's own stick */
-    const mu = Number.isFinite(drive.coupling) && drive.coupling !== null ? drive.coupling : (k !== undefined && ladder ? Math.hypot(ladder.mu[3 * k], ladder.mu[3 * k + 1], ladder.mu[3 * k + 2]) : 0), Om = drive.e0 * mu;
+    const mu = k === undefined ? 0 : Number.isFinite(drive.coupling) ? drive.coupling : ladder ? Math.hypot(ladder.mu[3 * k], ladder.mu[3 * k + 1], ladder.mu[3 * k + 2]) : 0, Om = drive.e0 * mu;
     const rabi = mu > 1e-6 ? `Ω = E₀μ = ${Om.toExponential(2)} · π/Ω = ${(Math.PI / Om).toFixed(0)} a.u. on ${label(k)}` + ((() => { const gp = Math.abs(energyOf(k) - energyOf(drive.ref === undefined || !lanes.has(drive.ref) ? GROUND : drive.ref)); return Math.abs(drive.omega - gp) > 5e-4 ? ` · detuned ${(drive.omega - gp).toFixed(4)}` : ' · on resonance'; })()) : 'the selected lane is dark: a dipole field cannot move it directly';
     if (!drive.on) { roDrive.set('off', ''); roDrive.setSub(rabi); return; }
     const r = drive.last;

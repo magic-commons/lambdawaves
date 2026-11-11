@@ -126,8 +126,8 @@ export function createStaticField(app) {
   /** the keyboard's impulse (the K key: app.hooks.slap(0.2 · fine, axis)) — STATE's RELEASE along ALONG, said in METERS' IMPULSE line */
   function slap(k, axis) {
     if (getHamiltonian().separable) { ui.kickRo.set('—', 'warn'); ui.kickRo.setSub(SLAP_REFUSAL); return; }   // 0.9.4 S1
-    const n0 = reg.norm2(), p0 = pAlong(axis);
     if (!reg.populated().length && getHamiltonian().id !== 'well') reg.set(0, 1, 0, clock.t);
+    const n0 = reg.norm2(), p0 = pAlong(axis);
     reg.kick(k, axis, clock.t);
     const n1 = reg.norm2(), p1 = pAlong(axis);
     const esc = n0 > 0 ? 1 - n1 / n0 : 0;

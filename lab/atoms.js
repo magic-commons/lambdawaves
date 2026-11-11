@@ -551,6 +551,7 @@ export function solveAtom(Z, opts = {}) {
     model: modelName(o.alpha, o.latter, o.sic, o.zora), zora: o.zora, Kpot: out.Kpot, config: o.config, r: gf.r, mesh: gf, q: out.q, rho: out.rho, V: out.V,
     T: out.T, Ene: out.Ene, EH: out.EH, Ex: out.Ex, electrons: out.electrons, residual: out.dV, Nel: out.Nel,
     Vorb: out.Vorb, coarse: out.coarse && { V: out.coarse.V, mesh: out.coarse.g, Kpot: out.coarse.Kpot } };
+  if (CACHE.size >= 24) { const [k0, S0] = CACHE.entries().next().value; CACHE.delete(k0); for (const [k, r] of RADIAL_REC) if (r.g === S0.mesh) RADIAL_REC.delete(k); }   // ≈ 0.8 MB a solve with its rows: the oldest goes (asked again, it re-solves to the bit)
   CACHE.set(kk, res);
   return res;
 }
@@ -560,8 +561,6 @@ export function atomEnergyOf(Z, n, l, opts) {
   if (!s) throw new Error(`Z = ${Z} has no ${n}${SPD[l]} shell in its ground configuration`);
   return s.eps;
 }
-/** the total energy of atom Z (hartree) */
-const atomTotalEnergy = (Z, opts) => solveAtom(Z, opts).E;
 /** every shell of one l in the FROZEN converged field, fine mesh + the coarse one's Richardson partner — one
  *  solveL per channel (the matrix gives them all at once), cached on the solved atom.  n ≤ 7 comes for free. */
 function frozenChannel(S, l, k) {
@@ -622,7 +621,6 @@ export function quantumDefect(Z, n, l, opts = {}) {
   if (eps >= 0) return NaN;
   return n - 1 / Math.sqrt(-2 * eps);
 }
-const effectiveN = (Z, n, l, opts) => 1 / Math.sqrt(-2 * atomEnergyOf(Z, n, l, opts));
 
 /* ══ the radial table the GPU consumes (space 6) ════════════════════════════════════════════════════════════ */
 /** the (mesh, orbital) pair atomRadial reads: found once per (Z, n, l) for the default options — solveAtom's cache key is a

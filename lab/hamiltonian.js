@@ -242,4 +242,3 @@ export function setHamiltonian(id) {
   return H;
 }
 export function onHamiltonian(fn) { listeners.add(fn); return () => listeners.delete(fn); }
-const hydrogenRGB = N_RGB;
