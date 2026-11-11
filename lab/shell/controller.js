@@ -374,8 +374,7 @@ export async function createController(app) {
   app.ctl.cardLoading = cardLoading; app.ctl.busyHost = busyHost; app.ctl.field = field; app.ctl.maths = maths; app.ctl.scan = scan; app.ctl.cards = cards;
   app.ctl.solveChem = solveChem; app.ctl.solveCard = solveCard; app.ctl.warmArm = warmArm; app.ctl.touchState = touchState; app.ctl.loadPreset = loadPreset;
   app.ctl.setReference = setReference; app.ctl.api = api;
-  return { autoQ, controlStep, RES_LADDER, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, setGovernor, setKeepFrames,
-    setPerfMode, stats, cRe, cIm, mod, MOD, modSyncBases, feedAudio, modHand, setKnob, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, rotStep, modStore, saveMod,
-    curvesStore, occlusion, look, applyAccent, paintMarks, markBatchBegin, markBatchEnd, wheelColor, accent, inkCtx, markInk, stageGround, busyWrap, busyFlash, busy, busySync, cardLoading,
-    busyHost, field, maths, scan, cards, solveChem, solveCard, cancelWarm, warmArm, touchState, loadPreset, setReference, api };
+  return { autoQ, controlStep, RES_LADDER, gov, effectiveRes, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, stats, cRe, cIm, mod, MOD, modSyncBases,
+    feedAudio, modHand, rotRate, rotDriving, rotStep, curvesStore, occlusion, look, markBatchEnd, accent, busyWrap, busyFlash, busyHost, field, maths, scan, cards, cancelWarm, warmArm,
+    loadPreset };
 }

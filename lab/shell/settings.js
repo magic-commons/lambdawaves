@@ -154,5 +154,5 @@ export function createSettings(app) {
   const powered = (w) => !(w && w.root && w.root.classList.contains('off'));
   const DIGESTS = {}; app.sh.KIND = KIND; app.sh.RETIRED_WINDOWS = RETIRED_WINDOWS; app.sh.DIGESTS = DIGESTS;
   app.state.space = 'x';                 // 'x' position ψ(x) · 'p' momentum φ(p): the same state, two exact pictures
-  return { saveSettings, setCardStyle, setFrost, setDisconnected, applySettings, KIND, RETIRED_WINDOWS, powered, DIGESTS };
+  return { saveSettings, applySettings, powered, DIGESTS };
 }

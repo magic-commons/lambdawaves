@@ -153,14 +153,13 @@ export async function boot(dom) {
   };
   function readSettings() { return settingsStore.read(); }   // 0.5.2 R3a: §1's reader stays in the head — §0 calls it first (U1), app.sh holds it by value
   /* ── SETTINGS: what this browser remembers — lab/shell/settings.js (0.5.2 R3a), created here ── */
-  const { saveSettings, setCardStyle, setFrost, setDisconnected, applySettings, KIND, RETIRED_WINDOWS, powered, DIGESTS } = createSettings(app);
+  const { saveSettings, applySettings, powered, DIGESTS } = createSettings(app);
   app.sh.powered = powered;   // 038 C4: the ONE power predicate — the loop's RT pump and register below, and the quiet MOLECULES card (shell/modulation.js)
   const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 }; app.sh.quality = quality;   // PACE P2: 64³ × 160 × 1 on a desktop (and a phone, whose crossing has its own rule), the GRID pairing 64³ × 110 × 0.75 on a tablet
   /* ── ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD: lab/shell/controller.js (0.5.2 R1), created here; the loop stays below ── */
-  const { autoQ, controlStep, RES_LADDER, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, setGovernor, setKeepFrames,
-    setPerfMode, stats, cRe, cIm, mod, MOD, modSyncBases, feedAudio, modHand, setKnob, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, rotStep, modStore, saveMod,
-    curvesStore, occlusion, look, applyAccent, paintMarks, markBatchBegin, markBatchEnd, wheelColor, accent, inkCtx, markInk, stageGround, busyWrap, busyFlash, busy, busySync, cardLoading,
-    busyHost, field, maths, scan, cards, solveChem, solveCard, cancelWarm, warmArm, touchState, loadPreset, setReference, api } = await createController(app);
+  const { autoQ, controlStep, RES_LADDER, gov, effectiveRes, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, stats, cRe, cIm, mod, MOD, modSyncBases,
+    feedAudio, modHand, rotRate, rotDriving, rotStep, curvesStore, occlusion, look, markBatchEnd, accent, busyWrap, busyFlash, busyHost, field, maths, scan, cards, cancelWarm, warmArm,
+    loadPreset } = await createController(app);
 
   /* ── THE BACKGROUNDED TAB (wave 54, board #42) ──────────────────────────────────────────────────────────────
    * WHAT IS AND IS NOT A WIN, measured in this browser rather than assumed:
@@ -736,8 +735,7 @@ export async function boot(dom) {
   const { clearRegister } = createTransition(app); app.w.clearRegister = clearRegister;
 
   // SPECTRUM
-  const { wSpec, wState, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen,
-    periodEnergies, selectEigen, setElement, fillValence, spectrumDigest } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
+  const { wSpec, spectrum, paintSturmRo, spectrumDigest } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
 
   // GAS — the BOX rows of SPECTRUM's Hamiltonian group (021 G2: lab/windows/gas.js)
   createGas(app);
@@ -762,7 +760,7 @@ export async function boot(dom) {
 
   /* ── LEGACY WINDOWS (2026-10, Josh): all five are gone — QCD, H₂⁺ and HELIUM in 0.5.0 D9, H₂ and ELECTROSTATICS in D9b
      (R5-L1; ATOMS came back in 0.4.0 S3).  An older file that used one opens on its shim in restore and says so in one line. */
-  const { wChem, head } = createMolecules(app);   // 0.5.2 R2d: lab/windows/molecules.js (iteration 008 U: the register lives in the card; F5: one seat)
+  const { wChem } = createMolecules(app);   // 0.5.2 R2d: lab/windows/molecules.js (iteration 008 U: the register lives in the card; F5: one seat)
 
   /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2; 0.5.1 D1 below) — its SOURCE: what is playing, as markdown — the MOLECULES formula
      ($\mathrm{H_{2}O}$, latex-state.js formulaLatex) while MOLECULES is on, else SPECTRUM's populated states in stateLatex's
@@ -827,7 +825,7 @@ export async function boot(dom) {
 
   /* ── transport strip (§25): lab/shell/transport.js (0.5.2 R3b), created here — λWAVES' own bar ── */
   createActions(app);   // 021 I1: THE ACTION REGISTRY (lab/actions.js, app.sh.ACTIONS) — before the bar, whose seats read it
-  const { transport, togglePlay, setModArm, barLock } = createTransport(app);
+  const { transport } = createTransport(app);
 
   /* ── badges (§41) ─────────────────────────────────────────────────────── */
   const badges = createBadges({ dom, accept: () => swClient.accept(), field, reg, mat, clock, domain, quality,
@@ -862,8 +860,7 @@ export async function boot(dom) {
       'history ' + (app.state.history ? app.state.history.entries().map((r) => r.label).join(' › ') : '—') + (layout.projects && layout.projects.dirty ? ' · DIRTY' : '') ]; } });
 
   /* ── THE BOW: ctrl+drag draws it, release fires, releasing CTRL first cancels ── */
-  const { bowStart, bowMove, bowRelease, orbitOfShell, kepShell, keplerTurn, keplerDragToPoint, keplerDragTo, keplerRowSync, gas, gasReadout, gasTableOn, launchPacket, enterBox, coherentBounce,
-    bowCancel, slapAlong } = createKeplerSurface(app);   // 0.5.2 R2b: lab/windows/kepler.js
+  const { keplerRowSync, gas, gasReadout, gasTableOn } = createKeplerSurface(app);   // 0.5.2 R2b: lab/windows/kepler.js
 
   /* ── THE FLOATING RACK: hide button, hover-reveal, draggable cards, hint icons, the transport's dock ── */
   const rackL = document.getElementById('rackL');
@@ -890,12 +887,12 @@ export async function boot(dom) {
   createNotebook(app);
   wireStage();   // §19a's second seat (lab/shell/rack-wiring.js): the crossings' listeners and the stage gestures, after the notebook's, as they stood
   /* ── KEYS: a rebindable action table · THE KEYBOARD WINDOW · THE TIMELINE · THE TAB ORDER: lab/shell/keys.js (0.5.2 R3b), created here ── */
-  const { stageHasFocus, keyState } = createKeys(app);
+  createKeys(app);
 
   /* ── persistence (§46): lab/shell/persist.js (0.5.2 R3a), created here — serialize and restore whole ── */
-  const { modSeats, serialize, restoreModulation, save, copyJSON, restore } = createPersist(app); app.sh.modSeats = modSeats;
+  const { modSeats } = createPersist(app); app.sh.modSeats = modSeats;
   /* ── WAVE 56 · SHAREABLE LINKS: lab/shell/links.js (0.5.2 R3a), created here; the link opens at §29 ── */
-  const { notCarriedWords, mintLink, copyLink, openLink } = createLinks(app);
+  const { openLink } = createLinks(app);
   /* 0.3.1 · S3 THE TRUE HISTORY and its card: lab/shell/history.js (0.5.2 R3a), created here, so the card keeps its seat in the rack */
   const { historyApi } = createHistory(app); app.sh.historyApi = historyApi;
   installEnvelopeTrigger(app);   // 036 P6: THE ENVELOPE TRIGGER (lab/shell/modulation.js) — ENV + PATTERN, its rows a domain of the history just made
