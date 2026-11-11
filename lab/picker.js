@@ -151,6 +151,7 @@ function volumeRows() {
   })();
   return volRowsP;
 }
+V.watch(() => { volRowsP = null; });
 const plain = (s) => String(s || '').replace(/<\/?m>/g, '').replace(/[_{}\\]/g, '').toLowerCase();
 /** suggest(query, n) → [{ id, name, formula, vol, pic }] — at most n molecules for a typed query: prefix matches (name, formula, id) first */
 async function suggest(query, n = 6) {
