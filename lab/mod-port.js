@@ -51,21 +51,22 @@ export function guardRoutes(defs, opts) {
  *  and every runtime target that declares a `flash` step (LW.mod.register, NODES' knobs) are guarded by the same instance, so a strobe
  *  is held whichever door registered its target.  `step` is the change, in the map's own space, that moves the picture 10 %. */
 function routeGuard({ driven, now, say, read, onAdvance }) {
-  const ranges = {}, lastWrite = new Map();   // a HELD def → the modulation-second its last write came
+  const ranges = {}, lastWrite = new Map(), held = new Set();   // a HELD def → the modulation-second its last write came; the routes held now
   const guard = createFlashGuard({ now, ranges,
-    onTrip: (t) => say(`FLASH GUARD · ${t.route} ${t.hz.toFixed(1)} Hz held to ${WCAG.maxHz}/s`), onRelease: () => say('') });
+    onTrip: (t) => { held.add(t.route); say(`FLASH GUARD · ${t.route} ${t.hz.toFixed(1)} Hz held to ${WCAG.maxHz}/s`); }, onRelease: (r) => { held.delete(r.route); say(''); } });
+  const reset = (route) => { held.delete(route); guard.reset(route); };
   /* THE QUIET SECOND (D-V S1).  The kit lets go only inside guard(), and the registry never calls a set whose value did not change, so a
      modulator gone constant mid-hold would leave the picture off the registry's number and the line up for good.  The modulation's own
      seconds do the waiting (`onAdvance` fires after every tick and every film step, so a film lets go on the same frame): a held route
      with no write for WCAG.releaseS is let go of and handed the registry's current value. */
-  onAdvance(() => { for (const [d, t] of lastWrite) if (now() - t >= WCAG.releaseS) { lastWrite.delete(d); guard.reset(d.route); say(''); d.set(read(d.id)); } });
+  onAdvance(() => { if (!lastWrite.size) return; const s = now(); for (const [d, t] of lastWrite) if (s - t >= WCAG.releaseS) { lastWrite.delete(d); reset(d.route); say(''); d.set(read(d.id)); } });
   return { wrap(d, step, route = d.label) {
     ranges[route] = [0, step / WCAG.delta];
     const R = { id: d.id, route, set: d.set };
     return { ...d, set: (v) => {
-      if (!driven(d.id)) { lastWrite.delete(R); if (guard.state(route)?.held) say(''); guard.reset(route); return d.set(v); }
-      const log = d.map === 'log', x = log ? Math.log(v) : v, g = guard(x, route);
-      if (guard.state(route)?.held) lastWrite.set(R, now()); else lastWrite.delete(R);
+      if (!driven(d.id)) { lastWrite.delete(R); if (held.has(route)) say(''); reset(route); return d.set(v); }
+      const log = d.map === 'log', x = log ? Math.log(v) : v, t = now(), g = guard(x, route, t);   // one read of the clock's seconds (stats() is a copy) a write
+      if (held.has(route)) lastWrite.set(R, t); else lastWrite.delete(R);
       return d.set(g === x ? v : log ? Math.exp(g) : g);          // a pass hands over the number it was given, never exp(ln v)
     } };
   } };
@@ -83,7 +84,7 @@ export function createModPort({ available, present, view, onCapture, save, say }
   const win = () => view() || null;
   const routed = (id) => !!host && host.registry.has(id) && host.registry.isModulated(id);
   const knobId = (k) => {
-    if (!idOf) { idOf = new Map(); for (const a of adapters) { try { const kk = a.knob && a.knob(); if (kk) idOf.set(kk, a.id); } catch (_) {} } }
+    if (!idOf || !idOf.has(k)) { idOf = new Map(); for (const a of adapters) { try { const kk = a.knob && a.knob(); if (kk) idOf.set(kk, a.id); } catch (_) {} } }   // a miss: a dial rebuilt since (a STATES lane)
     return idOf.get(k);
   };
   const capture = () => {

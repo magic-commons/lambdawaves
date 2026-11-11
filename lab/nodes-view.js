@@ -27,7 +27,7 @@
 import { el, label, ariaLabel, chip, onContext, placeholder } from './mir/kit.js'; import { contextMenu } from './mir/shell/menubar.js'; import { openDialog } from './mir/shell/dialog.js';
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun, over } from './nodes-compile.js';
-import { frame } from './mir/core/frame.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
+import { frame } from './mir/core/frame.js'; import { setText } from './mir/core/perf.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
 import { cssZoom } from './mir/core/zoom.js';
 /** keysAt(el) — the acts of the graph whose ground `el` is (the `nodes.*` rows run them while it has the focus), or null */
 const GROUNDS = new WeakMap(); export const keysAt = (n) => (n && GROUNDS.get(n)) || null;
@@ -101,7 +101,7 @@ export function createView(parent, kind, M) {
   const moved = (nudge, plug) => M.moved(at(), { in: xy(cards.in.c), out: xy(cards.out.c) }, nudge, plug);   // plug: a node plugged in by the move (038 N4)
   const node = (id, title, ins, outs, glyph, mark) => {
     const c = el('div', 'nodes-card', plane); c.dataset.node = id;
-    const bar = el('div', 'nodes-title', c); icon(bar, glyph); const name = label(el('span', 'nodes-name', bar), title); if (mark) el('i', 'nodes-mark', bar, mark);
+    const bar = el('div', 'nodes-title', c); icon(bar, glyph); const name = label(el('span', 'nodes-name', bar), title), mk = mark ? el('i', 'nodes-mark', bar, mark) : null;
     for (const [has, side] of [[ins, 'in'], [outs, 'out']]) if (has) { const pt = el('i', 'nodes-port ' + side, c);
       if (W && id !== 'in' && id !== 'out') { pt.classList.add('live'); pt.title = side === 'in' ? 'drag onto a wire: the node goes there · off: unplugs' : 'drag onto a wire: the node goes there';
         pt.addEventListener('pointerdown', (e) => portDrag(e, id, side)); } }
@@ -116,7 +116,7 @@ export function createView(parent, kind, M) {
       return { g: [...sel].map((i) => [cards[i].c, xy(cards[i].c)]) };
     }, (b, dx, dy) => { b.on = true; for (const [n, p] of b.g) { n.style.left = p[0] + dx / z + 'px'; n.style.top = p[1] + dy / z + 'px'; } wires(); }, (b) => { if (b.on) moved(); });
     ro.observe(c);
-    return cards[id] = { c, bar, name, body: el('div', 'nodes-body', c) };
+    return cards[id] = { c, bar, name, mk, body: el('div', 'nodes-body', c) };
   };
   label(node('in', 'STAGE IN', false, true, 'in').body, 'the stage picture');
   label(node('out', 'STAGE OUT', true, false, 'out').body, 'the screen');
@@ -393,7 +393,7 @@ export function createView(parent, kind, M) {
     widget: (id, k) => { const n = cards[id], c = n && ((n.ctl && n.ctl.ctls[k]) || (n.fctl && n.fctl.ctls[k])); return c ? c.targets[0] || null : null; },
     paint(q, k, v, shown) { const n = cards[q.id]; if (!n) return; for (const c of [n.ctl, n.fctl]) if (c) c.paint(k, v, shown); if (k === mixOf(T[q.type])) paintHand(q, v); api.mark(q); },
     /** the cost mark (a masked node is a pass) and the foot fold's light (FADE or MASK off home) */
-    mark(q) { const n = cards[q.id]; if (!n) return; n.bar.querySelector('.nodes-mark').textContent = markOf(q, T[q.type]);
+    mark(q) { const n = cards[q.id]; if (!n) return; setText(n.mk, markOf(q, T[q.type]));   // a modulator's write, every frame: no childList record for the racks' observer
       if (n.foot) n.foot.classList.toggle('on', q.values.fade < 1 || (q.values.mask || 'none') !== 'none' || (q.values.target || 'both') !== 'both'); },
     /** the PREVIEW strip: a grey ramp over a hue ramp, each of the 128 columns through the node's own transfer (coalesced on the frame) */
     strip(q) { const n = cards[q.id]; if (!n || !n.strip) return; frame.coalesce('nodes.strip.' + kind + '.' + q.id, () => {

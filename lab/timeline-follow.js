@@ -75,7 +75,8 @@ export function timelineRows(app) {
       if (kind === 'seek' || !(b > a)) return;
       if (!ends) read();
       for (const [id, E] of ends) {
-        const end = Math.max(...E.filter((e) => e > a && e <= b)); if (!(end > a) || !host.registry.has(id) || m.value(id, b) !== null) continue;
+        let end = -Infinity; for (const e of E) if (e > a && e <= b && e > end) end = e;
+        if (!(end > a) || !host.registry.has(id) || m.value(id, b) !== null) continue;
         const v = m.value(id, end - 1e-6); if (Number.isFinite(v)) host.registry.writeNorm(id, v);
       }
     });
@@ -85,6 +86,5 @@ export function timelineRows(app) {
     rows: () => [['FOLLOW PLAYHEAD', follow, 'follow-playhead', on], ['AUTO-COLOR', autoColor, 'auto-color']],
     /** bind(tl): the installed timeline; each present's paintHead also follows */
     bind(t) { tl = t; const paint = t.paintHead; t.paintHead = (...a) => { tick(); return paint(...a); }; leaves(); },   // the lanes move first: the head paints at its pin
-    following: () => on, autoColor: () => autoColor(),
   };
 }

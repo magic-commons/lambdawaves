@@ -60,7 +60,9 @@ export function createBake(app) {
     const want = (id) => B.reads.some((r) => r.id === id && r.state === 'IN');
     const over = ['particles', 'vortex', 'kepler', 'skeleton'].filter(want), words = J.chrome !== 'off' && (want('atomLabels') || want('espBar'));
     if (!c.runs.length && !c.layers.length && !over.length && !words) return rgba;
-    const out = canvas(w, h), g = out.getContext('2d', { willReadFrequently: true }), src = canvas(w, h);
+    const kept = (k) => (B[k] && B[k].width === w && B[k].height === h ? B[k] : (B[k] = canvas(w, h)));   // the take's two scratch canvases, not two a frame
+    const out = kept('out'), g = out.getContext('2d', { willReadFrequently: true }), src = kept('src');
+    g.clearRect(0, 0, w, h);
     src.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.length), w, h), 0, 0);
     let url = 'none';
     if (c.runs.length) { if (!pf) pf = pictureFilter(document.createElement('div')); pf.setChain(c.runs).flush(); url = 'url(#' + pf.id + ')'; }
@@ -87,7 +89,7 @@ export function createBake(app) {
       if (!l.gpu) { paintLayer(g, l, w, h, k, i); continue; }
       const s = N.shaders && await N.shaders.bake(l.values, i, l);   // 027 N4: a STATEFUL node steps once a frame, from black at frame 0
       if (!s || s.w !== w || s.h !== h) continue;
-      const tmp = B.tmp && B.tmp.width === w && B.tmp.height === h ? B.tmp : (B.tmp = canvas(w, h));   // straight bytes from the bake (028 R-23)
+      const tmp = kept('tmp');   // straight bytes from the bake (028 R-23)
       tmp.getContext('2d').putImageData(new ImageData(s.rgba, w, h), 0, 0);
       g.filter = url; g.drawImage(tmp, 0, 0); g.filter = 'none';        // the chain's filter, mirrored onto the SHADER canvas as on the stage
     }
