@@ -411,7 +411,7 @@ export function createNotebook(app) {
         if (!projects.dirty) return;
         /* 034 F8 (Josh: "'Repair - Installed - Reloading' seems to be stuck … the firefox warning"): REPAIR asked already (its own dialog,
            sw-client.js refresh) — its reloads never meet the browser's leave-page prompt */
-        let repair = null; try { repair = sessionStorage.getItem('lw.repair'); } catch (_) {}
+        let repair = null; try { repair = sessionStorage.getItem('lw.repair') || (Date.now() - (+sessionStorage.getItem('lw.stage') || 0) < 5000 ? 'stage' : null); } catch (_) {}   // …nor the stage's own reload after a lost device (controller.js stageLost writes lw.stage in the reload's task; the session resumes)
         if (repair) return;
         e.preventDefault(); e.returnValue = '';
       });
