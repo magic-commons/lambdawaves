@@ -7,7 +7,7 @@
  *     set takes args (a VERB's argument form, lab/verbs.js: the verb and the key are ONE action — `view` cycles bare and sets with { id }).
  *   · surface: the MAPPING tab lists it (lab/mapping.js: KEY · MIDI · MOD); gesture: the browser wants a real press (full screen, a clipboard, a file
  *     picker), so only a KEY may fire it.  undo: 'row' (one history row named `label · key`, whatever surface fired it), 'travel', 'none'.
- * createActions(app) → { list(), get(id), run(id, args), toggle(id), add(rows), sync(), notify(id), onState(fn), onAdd(fn), escape: { push(close), pop() }, keyState }
+ * createActions(app) → { list(), get(id), run(id, args), add(rows), sync(), notify(id), onState(fn), onAdd(fn), escape: { push(close) }, keyState }
  * Seated in rack.js before the transport (the bar's seats read it); every row reads `app` at run time, so a module made later is found then. */
 import { TIER } from './tier.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from './field.js'; import { CAM } from './camera-law.js'; import { STAGE_BINDINGS } from './stage-gestures.js';
 import { infoActions } from './mir/info/layer.js'; import { mirGui } from './mir-gui.js'; import { ASK_ENABLED } from './ask.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
@@ -250,17 +250,16 @@ export function createActions(app) {
   let edit = (a, run) => run();   // keys.js hands in THE ONE WRAPPER that names a history row (keyEdit), once the key table that spells the name exists
   /* THE ESCAPE STACK: the topmost layer closes first; a layer that has gone (`alive` false) is passed over; nothing open → the stage gives the keyboard back */
   const layers = [];
-  const escape = { push(close, { fields = false, alive = null } = {}) { const L0 = { close, fields, alive }; layers.push(L0); return () => { const i = layers.indexOf(L0); if (i >= 0) layers.splice(i, 1); }; },
-    pop() { while (layers.length) { const L0 = layers.pop(); if (L0.alive && !L0.alive()) continue; L0.close(); return true; } return false; }, get depth() { return layers.length; } };
+  const escape = { push(close, { fields = false, alive = null } = {}) { const L0 = { close, fields, alive }; layers.push(L0); return () => { const i = layers.indexOf(L0); if (i >= 0) layers.splice(i, 1); }; } };
   addEventListener('keydown', (e) => { if (e.code !== 'Escape' || e.defaultPrevented || e.isComposing) return; const inField = isField(e.target, true);
     for (let i = layers.length - 1; i >= 0; i--) { const L0 = layers[i]; if (L0.alive && !L0.alive()) { layers.splice(i, 1); continue; } if (inField && !L0.fields) return; layers.splice(i, 1); e.preventDefault(); L0.close(); return; } });
   const api = {
-    keyState, keyHelp, reveal, escape,
+    keyState, reveal, escape,
     list: () => { sync(); return rows.slice(); }, get: (id) => byId.get(id) || null, add, sync,
     /** run(id, args) — the row's act under THE ONE WRAPPER (a history row named for the action, whatever fired it); refused (false) when its `when` says no */
     run(id, args) { const a = byId.get(id); if (!a) return false; if (a.when) { try { if (!a.when()) return false; } catch (_) { return false; } }
       let out; edit(a, () => { out = a.run(args); }); return out; },
-    toggle: (id) => api.run(id), up(id) { const a = byId.get(id); if (a && a.up) a.up(); },
+    up(id) { const a = byId.get(id); if (a && a.up) a.up(); },
     /** fire(id, on) — a toggle's level from MIDI or a route: runs only when the state differs (a fire row runs on every rising edge) */
     fire(id, on) { const a = byId.get(id); if (!a) return false; if (a.get && on !== undefined && !!a.get() === !!on) return false; return api.run(id) !== false; },
     setEdit(fn) { edit = fn; }, notify(id) { for (const f of subs) f(id); }, onState(fn) { subs.add(fn); return () => subs.delete(fn); }, onAdd(fn) { added.add(fn); return () => added.delete(fn); },

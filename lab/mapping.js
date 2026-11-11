@@ -27,7 +27,8 @@ export async function resumeMidi(midi, say = () => {}) {
 
 export function createMapping(app, { kt }) {
   const A = app.sh.ACTIONS, T = kt.table, support = midiSupport();
-  const midi = createMidi({ storage: jsonStore(MIDI_KEY), run: (id) => { if (!A.get(id) || A.get(id).gesture) return; A.run(id); }, up: (id) => A.up(id), onState: () => paint() });
+  const midi = createMidi({ storage: jsonStore(MIDI_KEY), run: (id) => { if (!A.get(id) || A.get(id).gesture) return; A.run(id); }, up: (id) => A.up(id),
+    onState: () => { for (const e of Object.values(midi.map())) if (e.mode === 'hold') A.up(e.id); if (root.isConnected) paint(); } });   // a port come or gone lets every HELD row go (an unplugged device sends no note-off)
   const root = el('div', 'mp'), head = el('div', 'mp-head', root);
   const find = el('input', 'mp-find', head); find.type = 'search'; find.placeholder = t('Find an action…'); find.setAttribute('aria-label', t('Find an action'));
   const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'ask the browser for MIDI and list the inputs', onFire: () => midi.start() });
@@ -101,5 +102,5 @@ export function createMapping(app, { kt }) {
     resumeMidi(midi, (m) => { say(m, 'warn'); if (app.w.wMet) app.w.wMet.setStatus(m, 'warn'); });   // 027 D4: METERS says a refusal once
     return n;
   }
-  return { root, midi, paint, install, learn, stop, targetOf };
+  return { root, paint, install, learn };
 }

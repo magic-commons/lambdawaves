@@ -302,7 +302,7 @@ export function createProjects(port) {
     remove(path) {
       sync();
       const e = entryAt(String(path || '')); if (!e) return false;
-      const r = files.remove(e.id); if (!r.ok) { pjStatus('save failed — ' + (r.why || 'unknown'), true); return false; }
+      const r = files.remove(e.id); if (!r.ok) { pjStatus('remove failed — ' + (r.why || 'unknown'), true); return false; }
       if (currentId === e.id) currentId = null;
       return true;
     },

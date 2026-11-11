@@ -77,7 +77,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 {
   const src = appSource();
   const wires = {
-    imported: /import \{ firstRunMaterial, firstRunQuality, FIRST_RUN_RACKS, firstRunRacks \} from '\.\/first-run\.js'/.test(src) && /import \{ deviceQuality \} from '\.\.\/first-run\.js'/.test(src),   // 0.5.2 R3a: restore()'s deviceQuality left with it (lab/shell/persist.js)
+    imported: /import \{ firstRunMaterial, firstRunQuality, FIRST_RUN_RACKS, firstRunRacks \} from '\.\/first-run\.js'/.test(src) && /import \{ deviceQuality, GRID_PAIRING \} from '\.\.\/first-run\.js'/.test(src),   // 0.5.2 R3a: restore()'s deviceQuality left with it (lab/shell/persist.js)
     asksCrossings: /const FIRST_RUN = firstRunMaterial\(isPhone\(\) \|\| isTablet\(\)\);/.test(src),
     tabletBeforeAsk: src.indexOf('const isTablet = () =>') > 0 && src.indexOf('const isTablet = () =>') < src.indexOf('const FIRST_RUN = '),
     oneTabletPredicate: src.split('const isTablet = () =>').length === 2,
@@ -150,7 +150,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const demos = readdirSync(demoDir).filter((f) => f.endsWith('.lambdawaves.json')).map((f) => JSON.parse(readFileSync(new URL(f, demoDir), 'utf8')));
   const wires = {
     seed: src.includes("const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 };"),
-    restore: src.includes("Object.assign(quality, finiteOver(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop')));") && !src.includes('Object.assign(quality, pr.quality'),
+    restore: src.includes("const dq = deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'); if (!GRID_PAIRING[dq.res]) delete dq.res; if (dq.steps > GRID_PAIRING[128].steps) dq.steps = GRID_PAIRING[128].steps; Object.assign(quality, finiteOver(quality, dq));") && !src.includes('Object.assign(quality, pr.quality'),
     serializeStillWrites: src.includes('quality: { ...quality }'),
     gridPairingAgrees: src.includes('quality.steps = { 64: 110, 96: 160, 128: 240 }[+v]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[+v];')
       && eq(GRID_PAIRING, { 64: { steps: 110, scale: 0.75 }, 96: { steps: 160, scale: 1 }, 128: { steps: 240, scale: 1 } }),

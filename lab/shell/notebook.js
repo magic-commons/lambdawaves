@@ -81,43 +81,42 @@ export function createNotebook(app) {
       const sub = (text, entries, icon) => [text, entries, null, '', { sub: true, ...(icon ? { icon } : {}) }];
       const radio = (id, group, choices, cur) => choices.map(([v, w]) => item(id, w, { args: { id: v }, radio: group, on: () => cur() === v }));
       const reveal = A.reveal, H = () => app.sh.historyApi, wins = () => [...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')], TOOL_SEAT = new Set(['modulation', 'timeline', 'pattern', 'nodes', 'notebook', 'folders', 'history']);
-      const tool = (id, w, win, icon) => item(id, w, { on: () => !!A.get(id).get && !!A.get(id).get(), icon });
       const MENUS = {
         /* iteration 004 · FILE GOES THROUGH FOLDERS (BASINS shell.js FILE): NEW, OPEN and a recent project open FOLDERS first and let it ask
            "Save this first?" (SAVE & OPEN · OPEN WITHOUT SAVING, SAVE & NEW · NEW WITHOUT SAVING) — no window.confirm on these rows */
         FILE: () => [item('new', 'NEW', { icon: 'plus' }), item('open', 'OPEN…', { icon: 'folder' }),
           sub('OPEN RECENT', () => { const r = layout.projects.recent().slice(0, 8); return r.length ? r.map((p) => [p, () => { const P = layout.projects, e = P.entryOf(p); P.show(e ? { folder: e.folder } : {}); if (e) P.folders.openEntry(e.id); }, null, '', { raw: true }]) : [['nothing yet', null, true]]; }),
-          opener('folders', 'FOLDERS…', { icon: 'folders', hint: 'Open FOLDERS — the projects, the demos, the saves' }),   // 040 M1 · FILE › FOLDERS (Josh 11-09: "Have an option in 'File' to open the 'Folders' window"): the `folders` action (O), an opener row
+          opener('folders', 'FOLDERS…', { hint: 'Open FOLDERS — the projects, the demos, the saves' }),   // 040 M1 · FILE › FOLDERS (Josh 11-09: "Have an option in 'File' to open the 'Folders' window"): the `folders` action (O), an opener row
           item('save', 'SAVE' + (layout.projects.current ? '  ' + layout.projects.current : '…'), { icon: 'save' }), item('saveAs', 'SAVE AS…'), null,
           item('import', 'IMPORT…', { icon: 'upload' }),
           sub('EXPORT', () => [sub('PROJECT', () => [item('export.json', '.json'), item('export.mir', '.mir'), item('export.png', '.png — the picture carrying the project')]),
             item('export.picture', 'PICTURE'),
             sub('SHAPE', () => SHAPE_EXPORTS.filter((s) => s.kind === 'shape').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip }))),
             sub('GRID', () => SHAPE_EXPORTS.filter((s) => s.kind === 'grid').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip })))], 'download'),
-          item('render.open', 'RENDER…', { icon: 'film' }), item('render.frames', 'EXPORT FRAMES…'),   // 025 C1: the film's rows after EXPORT (the card's FILM… row moved here)
+          item('render.open', 'RENDER…'), item('render.frames', 'EXPORT FRAMES…'),   // 025 C1: the film's rows after EXPORT (the card's FILM… row moved here)
           null, sub('QUICK', () => [item('quick.save', 'SAVE the experiment'), item('quick.load', 'LOAD the last quick save')]),
           null, item('menu', 'MAIN MENU', { on: () => undefined })],   // 038 M2 (Josh 11-06; CALLS 4): FILE's foot — it was WINDOW › TOOLS; the id `menu` and L stay
-        EDIT: () => [item('undo', 'UNDO', { dis: () => !H().canUndo, icon: 'undo' }), item('redo', 'REDO', { dis: () => !H().canRedo, icon: 'redo' }),
+        EDIT: () => [item('undo', 'UNDO', { dis: () => !H().canUndo }), item('redo', 'REDO', { dis: () => !H().canRedo }),
           item('historyUndo', 'HISTORY UNDO', { dis: () => !H().canHistoryUndo, hint: 'back to the timeline before the last jump' }), item('history', 'UNDO HISTORY…'), null,
           sub('COPY', () => [item('copy.latex', 'LaTeX', { hint: 'the populated states in chemistry order, as LaTeX' }), item('copy.json', 'JSON', { hint: 'the experiment and its presentation as JSON' }),
             item('copy.link', 'LINK', { hint: 'a URL that reopens this exact state' })], 'duplicate'),
           sub('STATE', () => [item('state.normalize', 'NORMALIZE'), item('state.clear', 'CLEAR the register'), item('reseed', 'RESEED the particles')]), null,
-          item('mapping', 'KEYBOARD & MAPPING…'), item('settings', 'SETTINGS…', { icon: 'settings' })],
+          item('mapping', 'KEYBOARD & MAPPING…'), item('settings', 'SETTINGS…')],
         VIEW: () => [sub('MODE', () => radio('mode', 'mode', [['hydrogen', 'HYDROGEN'], ['molecules', 'MOLECULES']], () => (A.get('mode').get() ? 'molecules' : 'hydrogen')), 'atom'),
           sub('OBSERVABLE', () => radio('view', 'view', [['density', 'ρ = |ψ|²  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']], () => VIEW_NAMES[mat.view])),
           sub('STYLE', () => radio('style', 'style', ui.styleList(), () => drawStyle(mat.style))),   // 032 O1: WAVE's visible styles, its words
           item('invert', 'INVERT the cloud — ink, not light'),
           sub('STAGE', () => [item('view.captions', 'CAPTIONS'), item('view.formula', 'FORMULA'), item('view.labels', 'ATOM LABELS'), item('ballStick', 'BALL AND STICK')]),
           sub('INTERFACE', () => [item('view.badges', 'STATUS TAGS'), item('view.hints', 'CONTROL HINTS'), item('notes', 'WINDOW HELP'), null, item('hide', 'HIDE the interface')]),
-          sub('CAMERA', () => [item('camReset', 'HOME', { icon: 'home' }), item('camera.panHome', 'PAN HOME'), null, item('camera.lock', 'LOCK', { icon: 'lock' }), item('camera.flip', 'FLIP'), item('camera.autoRotate', 'AUTO-ROTATE')], 'lens'),
+          sub('CAMERA', () => [item('camReset', 'HOME'), item('camera.panHome', 'PAN HOME'), null, item('camera.lock', 'LOCK'), item('camera.flip', 'FLIP'), item('camera.autoRotate', 'AUTO-ROTATE')], 'lens'),
           sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get()), 'moon'),
-          item('fullscreen', 'FULL SCREEN', { icon: 'expand' })],
-        PLAY: () => [item('transport.play', 'PLAY / PAUSE', { icon: 'play' }), item('home', 't → 0', { icon: 'rewind' }), item('stepBack', 'STEP ◂'), item('stepFwd', 'STEP ▸'), null,
+          item('fullscreen', 'FULL SCREEN')],
+        PLAY: () => [item('transport.play', 'PLAY / PAUSE'), item('home', 't → 0'), item('stepBack', 'STEP ◂'), item('stepFwd', 'STEP ▸'), null,
           item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK', { on: A.get('modBar').get }), item('settings.playLock', 'PLAYBACK LOCK'), null,
           sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
         WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'search' }), item('gui', 'MIR OPTIONS…'), null,   // 038 M3 (Josh 11-06): the kit's OPTIONS window, a WINDOW row
           sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'FOLD ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
-          sub('TOOLS', () => [tool('modulation', 'MODULATION', null, 'modulation'), tool('timeline', 'TIMELINE', null, 'timeline'), tool('pattern', 'PATTERN', null, 'pattern'), tool('nodes', 'NODES', null, 'nodes'), tool('notebook', 'NOTEBOOK', null, 'notebook'), tool('folders', 'FOLDERS', null, 'folders'), item('history', 'HISTORY', { icon: 'history' }), tool('help', 'KEYBOARD', null, 'keyboard')]), null,
+          sub('TOOLS', () => [item('modulation', 'MODULATION'), item('timeline', 'TIMELINE'), item('pattern', 'PATTERN'), item('nodes', 'NODES'), item('notebook', 'NOTEBOOK'), item('folders', 'FOLDERS'), item('history', 'HISTORY'), item('help', 'KEYBOARD')]), null,
           /* 018 E6 · one submenu per KIND (window-chrome.js data-kind), each window ✓ while open: a press opens a closed one by the FINDER's road
              (kit rk.reveal) and closes an open one */
           ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k && !TOOL_SEAT.has(d.dataset.id));   // 039 X8: a window TOOLS seats is listed there alone
@@ -412,7 +411,7 @@ export function createNotebook(app) {
         if (!projects.dirty) return;
         /* 034 F8 (Josh: "'Repair - Installed - Reloading' seems to be stuck … the firefox warning"): REPAIR asked already (its own dialog,
            sw-client.js refresh) — its reloads never meet the browser's leave-page prompt */
-        let repair = null; try { repair = sessionStorage.getItem('lw.repair'); } catch (_) {}
+        let repair = null; try { repair = sessionStorage.getItem('lw.repair') || (Date.now() - (+sessionStorage.getItem('lw.stage') || 0) < 5000 ? 'stage' : null); } catch (_) {}   // …nor the stage's own reload after a lost device (controller.js stageLost writes lw.stage in the reload's task; the session resumes)
         if (repair) return;
         e.preventDefault(); e.returnValue = '';
       });
