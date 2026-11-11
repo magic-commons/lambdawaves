@@ -34,9 +34,6 @@ export function waveView(v) { const n = typeof v === 'number' ? (v === 5 ? 'reim
  *  than it reads a saved 8 as an unknown style, so drawStyle() opens it as CLOUD there. */
 export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7, glassSigned: 8, balls: 9, sticks: 10, esp: 11 };
 export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive', 'glassSigned', 'balls', 'sticks', 'esp'];
-/** iteration 014 B: THE THREE VIEWS (APPENDED: 9 BALLS, 10 STICKS, 11 ESP) draw the MOLECULE, not the volume — the atoms setAtoms gave (an older
- *  build opens a saved 9–11 as CLOUD; with no atoms set the shader draws them as CLOUD) */
-export const ATOM_STYLES = Object.freeze([9, 10, 11]);
 /** 032 O1 · THE ATOMS ARE KNOBS (Josh: "sticks by RADIUS > 0, balls by SIZE > 0 in every style"): BALLS (9) and STICKS (10) left the STYLE seg (the ids
  *  stay reserved, never renumbered).  liftAtomStyle(m) opens an older one as GLASS (SHELL) with SIZE (balls) or RADIUS (sticks) raised to the look it
  *  had (100 % CPK, STICK_R) when the file never set it — the format's open road (persist, a link, LW.setStyle); → true when it lifted */
@@ -57,13 +54,15 @@ export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] 
 export const KNEE_DEFAULT = 3;
 /** THE KNEE's q (iteration 008 G, field.js kneeT): ln(KNEE / 0.6) — the formula's pivot 0.6 is the plain exponential (q = 0, the old
  *  arithmetic drawn bit for bit); an absent knee is the default's q */
-export function kneeQ(k) { return Math.log((Number.isFinite(k) && k > 0 ? k : KNEE_DEFAULT) / 0.6); }
+function kneeQ(k) { return Math.log((Number.isFinite(k) && k > 0 ? k : KNEE_DEFAULT) / 0.6); }
 export const SLICE = { off: 0, clip: 1, slab: 2 };
 /** iteration 014 B: THE THREE VIEWS' defaults — STICKS' radius (bohr, 0.2 Å), the probe (bohr, water's 1.4 Å), the map's RANGE (±φ, a.u.) and its surfaces */
 /** iteration 016 S1: ESP's soft edge from WAVE's SOFT (γ 0.3 … 2.2, `reverse`, so right is softer): 0 at γ 2.2 — the knob's left end, the hard ISO
  *  surface exactly — up to 1 at γ 0.3; the default γ 0.7 reads e ≈ 0.79 */
-export const espSoftOf = (g) => Math.min(1, Math.max(0, (2.2 - (Number.isFinite(g) ? g : 0.7)) / 1.9));
-export const STICK_R = 0.38, PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.1, ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
+const espSoftOf = (g) => Math.min(1, Math.max(0, (2.2 - (Number.isFinite(g) ? g : 0.7)) / 1.9));
+const STICK_R = 0.38;
+export const PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.1;
+const ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
 /** 037 L · THE LIGHTING WINDOW's homes (lab/light-window.js): `mat.light` holds only the values a hand moved off these (absent = the old light, THE
  *  LEGACY GATE shut).  KEY az/el in degrees in the FRAME (CAMERA: right · up · toward the eye; WORLD: the box's axes), its home the atoms' old
  *  upper-right light; AMBIENT and SPECULAR at the atoms' old 0.32, SHINE their Phong 40; FILL off, CONE 180° (no spot) */
@@ -298,7 +297,7 @@ ${screen}      let nc = select(select(1u, 3u, l == 1u), 6u, l == 2u);
         let wb = sh.wOff + p * nc;
         for (var c = 0u; c < nc; c++) { acc[c] += wts[wb + c] * e; }
       }`;
-export const molWgsl = (cap, wg = 64) => /* wgsl */`
+const molWgsl = (cap, wg = 64) => /* wgsl */`
 const WG: u32 = ${wg}u;                                          // 4 × 4 × 4, the eigenmode kernel's dispatch shape${MOL_HEAD}
 /* χ LIVES IN WORKGROUP MEMORY, TRANSPOSED: invocation lid owns the column chiW[ao * WG + lid], so the 64 threads
    of a workgroup read ${cap} consecutive addresses at every step of the contraction — bank-conflict-free, and off
@@ -1231,11 +1230,11 @@ const RENDER_GLASS_FINISH = `    if (V.p6.w > .5 && V.p6.w < 1.5 && style != 6u)
       wEff *= .22;
       if (wEff > 0.0) { if (V.p17.w == 1.0) { c = rigShade(c, uvw, .45, .65); } else { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); } }
     }`;
-export const SPEC_STYLES = Object.freeze([STYLE.cloud, STYLE.grain, STYLE.bands, STYLE.dust]);
+const SPEC_STYLES = Object.freeze([STYLE.cloud, STYLE.grain, STYLE.bands, STYLE.dust]);
 /** one anchored substitution: `from` must occur exactly once, or the derived text throws (a moved anchor never derives silently) */
 function once(src, from, to) { const i = src.indexOf(from); if (i < 0 || src.indexOf(from, i + 1) >= 0) throw new Error('field: a derived shader lost its anchor: ' + from.slice(0, 48)); return src.slice(0, i) + to + src.slice(i + from.length); }
 /** RENDER_WGSL for one (view, style) of the key; throws when an anchor has moved (the key then fails: generic forever) */
-export function specRenderWGSL(view, style) {
+function specRenderWGSL(view, style) {
   let code = once(RENDER_WGSL, 'let mode = u32(V.p0.x);', `let mode = ${view | 0}u;`);
   code = once(code, 'let style = u32(V.p3.x);', `let style = ${style | 0}u;`);
   const cut = (src, from) => { const e = src.indexOf('\n', src.indexOf(from) + from.length - 1); return once(src, src.slice(src.indexOf(from), e + 1), ''); };   // the anchor through the end of its line (the bow line carries a comment)
@@ -1340,7 +1339,7 @@ function mul4(a, b, out) {
  * Back the other way: b = R(q)ẑ is the camera's own back vector, so θ = asin b_z and ψ = atan2(b_y, b_x) — the
  * study's Y-up θ = asin b_y, ψ = atan2(b_x, b_z) reads the WRONG TWO COMPONENTS in this world and would have
  * produced a camera that was very nearly right, which is the worst kind. */
-export const CAM_HOME_Q = [0.5, 0.5, 0.5, 0.5];          // q₀: the cyclic permutation x → y → z → x
+const CAM_HOME_Q = [0.5, 0.5, 0.5, 0.5];          // q₀: the cyclic permutation x → y → z → x
 /** TURNTABLE (ψ, θ) → the FREE rotor.  Exact: the two bases agree to floating point. */
 export function quatFromYawPitch(yaw, pitch) {
   return qnormalize(qmul(qmul([Math.cos(yaw / 2), 0, 0, Math.sin(yaw / 2)], CAM_HOME_Q),
@@ -1365,7 +1364,6 @@ export function setParity(on) { PARITY = on ? -1 : 1; }
    never saved, like PARITY; the box, the data and every solve keep their frame (THE LOCK's chem leaf is H₂O by the API road: the pivot stays home) */
 let PIVOT = [0, 0, 0];
 export function setPivot(p) { PIVOT = Array.isArray(p) && p.length === 3 && p.every(Number.isFinite) ? [+p[0], +p[1], +p[2]] : [0, 0, 0]; return PIVOT; }
-export const cameraPivot = () => PIVOT.slice();
 export function cameraBasis(obs) {
   const B = cameraBasis0(obs);
   if (PARITY < 0) B.right = [-B.right[0], -B.right[1], -B.right[2]];
@@ -1482,9 +1480,9 @@ export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: 768, pr
    fits sets how many workgroups an SM holds: water, benzene, lysine, then tryptophan (87) to C₂₀H₂₀ (120) in 32 KiB, which
    lab/gpu-boot.js asks for and, where it is not granted, is built with 32 lanes (16 KiB).  An ORBITAL past 64 AOs takes
    ORB_WGSL, no tile (faster at every size, MEASURE.md §3); at ≤ 64 it keeps its tile — what the digest lock recorded. */
-export const MOL_CAPS = [16, 40, 64, MAX_MOL_AO];
-export const MOL_ORB_FROM = 64;
-export const molTierFor = (nAO) => { const t = MOL_CAPS.findIndex((c) => nAO <= c);
+const MOL_CAPS = [16, 40, 64, MAX_MOL_AO];
+const MOL_ORB_FROM = 64;
+const molTierFor = (nAO) => { const t = MOL_CAPS.findIndex((c) => nAO <= c);
   if (t < 0) throw new Error(`field: nAO ${nAO} is beyond the kernel's ${MAX_MOL_AO}`); return t; };
 const MOL_SHELL_U = new Uint32Array(MOL_LIMITS.shells * 8), MOL_SHELL_F = new Float32Array(MOL_SHELL_U.buffer);
 const MOL_ALPHA = new Float32Array(MOL_LIMITS.prims), MOL_W = new Float32Array(MOL_LIMITS.weights), MOL_CUT = new Float32Array(MOL_LIMITS.shells);

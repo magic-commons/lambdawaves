@@ -239,7 +239,7 @@ export function wavePeriod(energies, opts) {
 }
 
 /** the views whose picture carries the GLOBAL phase of psi, and so repeat at T_psi rather than T_rho */
-export const PHASE_VIEWS = ['phase', 'real', 'imag'];   // iteration 008 W: Re+Im left
+const PHASE_VIEWS = ['phase', 'real', 'imag'];   // iteration 008 W: Re+Im left
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff'];   // field.js' VIEW, by index
 export function viewCarriesGlobalPhase(view) {
   const name = typeof view === 'number' ? VIEW_NAMES[view] : String(view);
@@ -551,7 +551,7 @@ export async function encodePNG(rgba, w, h, { deflate = null, filter = -1 } = {}
 }
 
 /** the browser's own deflate — CompressionStream('deflate') emits a ZLIB stream, which is exactly what IDAT wants */
-export async function deflateStream(bytes) {
+async function deflateStream(bytes) {
   const cs = new CompressionStream('deflate');
   const wr = cs.writable.getWriter(); wr.write(bytes); wr.close();
   const parts = []; let n = 0;
@@ -572,7 +572,7 @@ export async function deflateStream(bytes) {
  * teacher's slide needs it.  No KaTeX in a canvas: the plain form.  At the foot, left, sized to the frame, white over a soft
  * dark stroke so it reads on any ground.  KIT BRIEF 6 (`recorder.overlay(i, ctx)`) replaces it (0.5.x, D5).
  */
-export function drawCaption(g, W, H, text) {
+function drawCaption(g, W, H, text) {
   if (!text) return false;
   const px = Math.max(12, Math.round(H * 0.034)), pad = Math.round(px * 0.9);
   g.save(); g.font = `${px}px "STIX Two Math", "Latin Modern Math", serif`; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
