@@ -349,7 +349,8 @@ export function createPersist(app) {
         { const sp = pr.space === 'r' ? 'x' : pr.space;   // iteration 007 (MIR check, files B1): projects saved after an old link carry 'r' for position space
           if (sp && sp !== app.state.space && (sp !== 'p' || availability('wave.space.p', app).on)) {   /* 022 E1: availability, the one law */ app.state.space = sp; if (ui.spaceSeg) ui.spaceSeg.set(app.state.space); } }
         if (pr.palette && app.state.palette) {
-          if (Array.isArray(pr.palette.stops)) app.state.palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) app.state.palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
+          const stops = Array.isArray(pr.palette.stops) ? pr.palette.stops.filter((s) => s && Number.isFinite(s.at) && Array.isArray(s.rgb) && s.rgb.length >= 3 && s.rgb.slice(0, 3).every(Number.isFinite)) : [];   // 043 O5: a stop that is not one (null, a string) threw in the ramp and refused the whole file
+          if (stops.length) app.state.palette.load(stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) app.state.palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
           app.state.palette.setOn(!!pr.palette.on, true); if (mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);   // iteration 016 P6: the file's VIEW stands under PALETTE ON too (setOn's keepView)
         }
         /* Restore modulation last. Its base setters now see the final camera, Stage, transport,

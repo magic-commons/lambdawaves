@@ -1444,7 +1444,7 @@ export function createChem(host, api) {
     if (nR !== h2R || nM !== method) { resolve = true; h2R = nR; method = nM; } h2K.set(h2R || R0); mthS.set(method);
     const L = o.library;                                                          // 0.4.0 S4a: the record this file names, fetched on open if absent
     wantRef = L && L.id === preset && /^[0-9a-f]{64}$/.test(L.hash) ? { id: L.id, hash: L.hash, nameKey: L.nameKey || null } : null;
-    if (typeof o.view === 'string') { view = o.view === 'diff' ? 'density' : o.view; vSeg.set(view); }   // iteration 008 U: a file saved on VIEW Δρ opens on DENSITY with the Δρ switch on
+    if (typeof o.view === 'string' && (o.view === 'diff' || vSeg.button(o.view))) { view = o.view === 'diff' ? 'density' : o.view; vSeg.set(view); }   // 043 O5: a view the card has not (a stray name) is refused, never thrown on (status.js read VIEW[view])   // iteration 008 U: a file saved on VIEW Δρ opens on DENSITY with the Δρ switch on
     delta = o.view === 'diff' || o.delta === true; deltaSw.set(delta);
     pendingKey = o.orbitalKey || null;                                            // 0.4.0 S2: a link's orbital by its S1 name, resolved when the solve lands
     if (Number.isFinite(o.orbital)) { orbital = handK = Math.round(o.orbital); pendingOrbital = orbital; }
