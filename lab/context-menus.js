@@ -48,7 +48,7 @@ export function createContextMenus(app) {
     row('copy.name', 'COPY NAME'), row('copy.formula', 'COPY FORMULA')];
   const looks = () => [...document.querySelectorAll('#lwMenu .mm-lk')].map((b) => [b.dataset.look, (b.getAttribute('aria-label') || b.title || b.dataset.look).split(' · ')[0]]);
   const pickerPage = () => [sub('LOOK', () => radio('picker.look', 'look', looks(), () => A.get('picker.look').get())), row('csb.search', 'SEARCH'), row('folders', 'FOLDERS'), row('open', 'OPEN…')];
-  const lanes = (el) => [row('state.clear', 'CLEAR'), row('state.normalize', 'NORMALIZE'), row('preset.next', 'NEXT PRESET'), ...events(el), null, row('copy.latex', 'COPY LaTeX'), row('spectrum.solo', 'SOLO SPECTRUM')];   // 032 W3: the 140 grid's EVENT (state.index); PREVIOUS PRESET left (≤ 8 rows), the stepper keeps it
+  const lanes = (el) => [row('state.clear', 'CLEAR'), row('state.normalize', 'NORMALIZE'), row('preset.next', 'NEXT SYSTEM'), ...events(el), null, row('copy.latex', 'COPY LaTeX'), row('spectrum.solo', 'SOLO SPECTRUM')];   // 032 W3: the 140 grid's EVENT (state.index); PREVIOUS SYSTEM left (≤ 8 rows), the stepper keeps it
   const notebook = () => [row('notebook', 'NOTEBOOK'), row('notebook.copy', 'COPY TEXT'), row('copy.link', 'COPY LINK'), row('copy.latex', 'COPY LaTeX'), row('export.json', 'EXPORT .json')];
   const finder = (el) => { const id = el.dataset.win, w = win(id); return [w.open ? row(`window.${id}.close`, 'CLOSE') : row(`window.${id}.open`, 'OPEN'), row(`window.${id}.fold`, 'FOLD', { off: !w.open }),
     row(`window.${id}.float`, 'FLOAT', { off: !w.open }), row('notes', 'WINDOW HELP')]; };
