@@ -34,7 +34,7 @@ setTimeout(() => { mark('hard timeout 120 s', false); finish(1); }, 120000);
 
 async function launch(extra) {
   const port = await freePort();
-  const p = spawn(BIN, [...(PACKAGED ? [] : [HERE]), `--remote-debugging-port=${port}`, ...extra], { env: { ...process.env, LW_SMOKE_DIR: DIR }, stdio: ['ignore', 'ignore', 'pipe'] });
+  const p = spawn(BIN, [...(PACKAGED ? [] : [HERE]), `--remote-debugging-port=${port}`, '--smoke', ...extra], { env: { ...process.env, LW_SMOKE_DIR: DIR }, stdio: ['ignore', 'ignore', 'pipe'] });
   let err = ''; p.stderr.on('data', (d) => { err += d; });
   for (let i = 0; i < 120 && p.exitCode === null; i++) {
     try { const t = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find((x) => x.type === 'page' && x.url.startsWith(ORIGIN)); if (t) return { p, t }; } catch {}

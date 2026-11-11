@@ -9,7 +9,7 @@ const { Readable } = require('node:stream');
 
 const HOST = 'lambdawaves.localhost', ORIGIN = 'https://' + HOST;
 const START = ORIGIN + '/index.html?sw=0&warn=0';   // no service worker: the package is the cache; warn=0 counts under automation alone (main.js)
-const SMOKE = process.env.LW_SMOKE_DIR || '';
+const SMOKE = (process.argv.includes('--smoke') && process.env.LW_SMOKE_DIR) || '';   // the test mode needs the flag too: an environment variable alone never turns it on
 const GROUND = '#070a0f';   // lab.css's ground and index.html's theme-color: the window before its first paint
 
 const SWITCHES = [['disable-blink-features', 'WebShare']];   // Electron has no share sheet: saveBlob takes the download road
@@ -40,7 +40,7 @@ async function serve(req) {
   const back = path.relative(root, file);
   if (!back || back.startsWith('..') || path.isAbsolute(back)) return fail(403);
   if (['_headers', '_redirects'].includes(path.basename(file))) return fail(404);
-  if (/(^|[\\/])(con|prn|aux|nul|com\d|lpt\d|conin\$|conout\$)([ .][^\\/]*)?$/i.test(back)) return fail(404);   // Windows opens a device by that name, never a file of dist/
+  if (/(^|[\\/])(con|prn|aux|nul|com[\d¹²³]|lpt[\d¹²³]|conin\$|conout\$)([ .][^\\/]*)?$/i.test(back)) return fail(404);   // Windows opens a device by that name, never a file of dist/
   const type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
   const headers = { 'Content-Type': TEXT.test(type) ? type + '; charset=utf-8' : type, 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache',
     'Accept-Ranges': 'bytes', ...(CSP ? { 'Content-Security-Policy': CSP } : {}) };
@@ -60,8 +60,8 @@ async function serve(req) {
 }
 
 // The roads lab/ takes through a permission, each answered on purpose: full screen (FULL, F11), the clipboard's write (COPY, LINK), Web MIDI
-// without sysex (MAPPING: a mapped controller is live at launch), the microphone alone (AUDIO), the screen kept awake (a film, the transport),
-// persistent storage (an install: library.js persistOnce). Refused, because nothing in lab/ asks: the camera, the clipboard's read, sysex,
+// (MAPPING: a mapped controller is live at launch), the microphone alone (AUDIO), the screen kept awake (a film, the transport),
+// persistent storage (an install: library.js persistOnce). Refused, because nothing in lab/ asks: the camera, the clipboard's read,
 // notifications, location, pointer and keyboard lock, the File System Access pickers, HID, serial, USB.
 const GRANT = new Set(['fullscreen', 'clipboard-sanitized-write', 'midi', 'midiSysex', 'screen-wake-lock', 'persistent-storage']);
 const allowPermission = (permission, mediaTypes, origin) => inApp(origin || '') &&
@@ -94,7 +94,8 @@ app.on('web-contents-created', (_e, wc) => {
 const STATE = () => path.join(app.getPath('userData'), 'window.json');
 function lastWindow() {
   let s; try { s = JSON.parse(fs.readFileSync(STATE(), 'utf8')); } catch { return {}; }
-  const b = s && s.bounds;
+  if (!s || typeof s !== 'object') return {};
+  const b = s.bounds;
   const seen = b && [b.x, b.y, b.width, b.height].every(Number.isFinite) && screen.getAllDisplays()
     .some(({ workArea: a }) => b.x < a.x + a.width && b.x + b.width > a.x && b.y < a.y + a.height && b.y + b.height > a.y);
   return { bounds: seen ? b : null, maximized: s.maximized === true, fullscreen: s.fullscreen === true };
