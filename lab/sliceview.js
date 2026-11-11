@@ -126,7 +126,6 @@ export function createSliceView(host, api) {
   function startJob(reg, t, k) {
     const N = res;
     gen++;
-    slot ^= 1;
     if (!bufRe[slot] || bufRe[slot].length !== N * N) { bufRe[slot] = new Float64Array(N * N); bufIm[slot] = new Float64Array(N * N); }
     if (!img || img.width !== N) reseed(N);
     const c = reg.at(t, cRe[slot], cIm[slot]);                  // the coefficients are frozen for the life of the job
@@ -185,7 +184,7 @@ export function createSliceView(host, api) {
     if (sweepRows >= N) { lastAbsMax = sweepMax; sweepMax = 0; sweepRows = 0; }   // a whole plane's worth of rows: adopt their max
     if (J.done >= N) {                                          // FINISHED: the true global max is known, so repaint the WHOLE
       sample = { re: J.re, im: J.im, N, absMax: J.mx, mode: J.mode, half: J.half };   // image through paintSlice itself — a settled
-      lastAbsMax = J.mx; sweepMax = 0; sweepRows = 0; nextStart = 0; job = null;      // slice is then bit-identical to the unchunked one
+      lastAbsMax = J.mx; sweepMax = 0; sweepRows = 0; nextStart = 0; job = null; slot ^= 1;   // slice is then bit-identical to the unchunked one
       paintSlice(sample, img, { lut: api.lut(), gain, knee: 0.6 });                    // (and the last band is not coloured twice)
       mir.re.set(J.re); mir.im.set(J.im);
       return;
@@ -284,7 +283,7 @@ export function createSliceView(host, api) {
   function pump() {
     pumpId = 0;
     if (!job || !(active || wide())) return;
-    if (!sized(cv) && !wide()) { job = null; return; }           // folded mid-job (and no widget shows it): drop it, exactly as update() would
+    if (!sized(cv) && !wide()) { job = null; key = ''; return; }           // folded mid-job (and no widget shows it): drop it, exactly as update() would
     stepJob(); paint();
     armPump();                                                   // stepJob() nulls `job` when it finishes, and the pump stops
   }
@@ -308,7 +307,7 @@ export function createSliceView(host, api) {
       if (!job && (dirty || k !== key)) startJob(reg, t, k);
       else if (!job && regain) { regain = false; if (sample) { paintSlice(sample, img, { lut: api.lut(), gain, knee: 0.6 }); paint(); } }   // GAIN is a colouring, not a sampling
       if (job) armPump();                                        // the private pump does the work; nothing here schedules a rack frame
-    } else if (job) job = null;
+    } else if (job) { job = null; key = ''; }
     const rep = planeReport(rotor);
     ro.set(rep.text, rep.holomorphic ? 'ok' : '');
     const nmz = Math.abs(rep.nM[2]), cone = Math.acos(Math.min(1, nmz)) * 180 / Math.PI;
