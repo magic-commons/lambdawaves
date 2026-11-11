@@ -77,8 +77,8 @@ export function createLinks(app) {
     const P = app.sh.layout && app.sh.layout.projects;
     const ok = P ? P.openWith(take, 'link not opened') : take();
     const d = +(got.state.experiment && got.state.experiment.damping);
-    if (Number.isFinite(d) && d !== reg.damping) { reg.setDamping(d); if (ui.dragKnob) ui.dragKnob.set(d); }
-    if (app.state.history) app.state.history.clear('link');                 // a link is the BOTTOM of the stack, exactly as ?preset= is
+    if (ok && Number.isFinite(d) && d !== reg.damping) { reg.setDamping(d); if (ui.dragKnob) ui.dragKnob.set(d); }   // a roll-back leaves the lab as it was: neither its DRAG nor its ring moves
+    if (ok && app.state.history) app.state.history.clear('link');                 // a link is the BOTTOM of the stack, exactly as ?preset= is
     const say = [];
     for (const w of got.warnings || []) say.push('<b>NOTE.</b> ' + esc(w) + '.');
     if ((got.unknownSections || []).length) say.push('<b>' + got.unknownSections.length + ' part' + (got.unknownSections.length === 1 ? '' : 's')
