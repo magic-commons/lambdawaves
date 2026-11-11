@@ -551,6 +551,7 @@ export function solveAtom(Z, opts = {}) {
     model: modelName(o.alpha, o.latter, o.sic, o.zora), zora: o.zora, Kpot: out.Kpot, config: o.config, r: gf.r, mesh: gf, q: out.q, rho: out.rho, V: out.V,
     T: out.T, Ene: out.Ene, EH: out.EH, Ex: out.Ex, electrons: out.electrons, residual: out.dV, Nel: out.Nel,
     Vorb: out.Vorb, coarse: out.coarse && { V: out.coarse.V, mesh: out.coarse.g, Kpot: out.coarse.Kpot } };
+  if (CACHE.size >= 24) { const [k0, S0] = CACHE.entries().next().value; CACHE.delete(k0); for (const [k, r] of RADIAL_REC) if (r.g === S0.mesh) RADIAL_REC.delete(k); }   // ≈ 0.8 MB a solve with its rows: the oldest goes (asked again, it re-solves to the bit)
   CACHE.set(kk, res);
   return res;
 }
