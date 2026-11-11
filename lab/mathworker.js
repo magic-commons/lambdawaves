@@ -3,7 +3,6 @@
  * STATUS: DETERMINISTIC — every op here is the same pure function the rack calls on the main thread, imported from
  * the same modules, so an answer from the worker is bit-identical to the synchronous road (kick.js, well.js,
  * period.js); the worker only moves WHEN the work happens. Each op is a request/reply keyed by id:
- *   config  { id, ham, Z, radius }                 → the Hamiltonian selector mirrored (hydrogen with its Z, the oscillator, the BOX with its radius)
  *   warm    {}                                     → the SLAP tables built here, once, so the first bow pays nothing anywhere
  *   kick    { re, im, k, d, ham, Z, radius }       → the bow's slap e^{ik·x} on a snapshot of c(t): the kicked vector, ⟨p⟩ along d before and after
  *   packet  { x0, k, sigma, radius }               → the BOX bow: the Gaussian projected on the well's 140 eigenstates of n ≤ 7 (well.js wellPacket; iteration 009 N7)
@@ -80,8 +79,8 @@ function run(m) {
   busyMs += performance.now() - t0; jobs++;
   return r;
 }
-/* THE SAME MODULE ON BOTH ROADS.  Every op above and below is an exported function, so rack.js can run it on the
-   frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
+/* THE SAME MODULE ON BOTH ROADS.  The ops a frame-thread road runs are exported (chemview's localSolve: chemGround, chemSpectrum);
+   the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
@@ -123,7 +122,6 @@ if (IN_WORKER) self.onmessage = (e) => {
 const T = (out) => ({ out, transfer: chemTransfer(out) });    // a chemistry reply: its typed arrays transferred
 const O = (out, transfer = []) => ({ out, transfer });
 const OPS = {
-  config: { run: (m) => { configure(m); return O({ ok: true }); } },
   warm: { speculative: true, run: (m) => { configure(m); while (!warmStep(1e9)) { /* to the end */ } const one = new Float64Array(BASIS.length).fill(0.1), zero = new Float64Array(BASIS.length); pAlong(one, zero, [0, 0, 1]); return O({ ok: true }); } },   // the tables AND the dipole quadratures momentumZ caches (the first bow's other 100 ms)
   kick: { run: (m) => {
     configure(m);
@@ -191,8 +189,8 @@ export function gasStats(m = {}) {
 /* ── CHEMISTRY (wave: the CHEMISTRY window) ──────────────────────────────────────────────────────────────────────
  * The molecule ops keep STATE INSIDE THE WORKER: one cached ground state and one live real-time propagator with its
  * own dipole trace, so `chem.rt.run` is a bounded request ("take 200 steps") and no message ever carries a whole
- * trajectory.  Every op is ALSO an exported synchronous function, because rack.js's makeWorker hands the call back
- * to the main-thread road whenever the worker fails to load, errors or times out.
+ * trajectory.  Every op is a synchronous function, exported where a frame-thread road (chemview's localSolve: the ground and the
+ * spectrum, while the worker has never answered) or a test reads it.
  *   chem.solve        { atoms (bohr), basis, charge, record? }           → the RHF ground state + the RPA roots + the field spec
  *   chem.ground       { atoms, basis, charge, record? }                  → STAGE ONE: the ground state alone, about a second earlier
  *   chem.open         { lib, hash, basis }                               → THE RECORD ROAD (0.4.0 S4a): chem.ground's reply from a library record, no solver call
@@ -485,8 +483,8 @@ export function chemDriveRun(m = {}) {
  * (trapezoid, 20 000 points to r = 400) × √(((l+1)² − m²)/((2l+1)(2l+3))), eigensolved once.  The track (t_atom = RATE × t_audio) is low-passed at the stepper's Nyquist and
  * decimated ONCE by a polyphase (64-phase) Blackman-windowed sinc to the steps' MIDPOINTS t0 + (j + ½)dt, peak-normalised; whole steps only (the rest is `lag`), 0 past the end. */
 let song = null, songTrack = null;
-import { hydrogenZ } from './stark.js'; export { hydrogenZ };   // 0.8.0 G3: z moved to lab/stark.js — ONE build for this worker and the frame thread's INTER-SHELL STARK
-export function songResample(x, sr, rate) {   // → { dt, track, hash (FNV-1a of the decoded samples), omega (the zero-crossing rate, Eh) }
+import { hydrogenZ } from './stark.js';   // 0.8.0 G3: z lives in lab/stark.js — ONE build for this worker and the frame thread's INTER-SHELL STARK
+function songResample(x, sr, rate) {   // → { dt, track, hash (FNV-1a of the decoded samples), omega (the zero-crossing rate, Eh) }
   const dt = rate / sr > 0.5 ? 0.25 : 0.5, q = dt * sr / rate, fc = 0.5 / Math.max(1, q), K = Math.ceil(4 / fc), P = 64, g = new Float64Array(2 * K * P + 1), n = x.length, T = new Float32Array(Math.max(1, Math.floor((n - 1) / q - 0.5) + 1));
   for (let k = 0; k < g.length; k++) { const d = k / P - K, u = Math.PI * d / K; g[k] = (d ? Math.sin(2 * Math.PI * fc * d) / (Math.PI * d) : 2 * fc) * (0.42 + 0.5 * Math.cos(u) + 0.08 * Math.cos(2 * u)); }
   let peak = 0, zc = 0, h = 0x811c9dc5;
@@ -495,7 +493,7 @@ export function songResample(x, sr, rate) {   // → { dt, track, hash (FNV-1a o
   return { dt, track: T, hash: h.toString(16).padStart(8, '0') + ':' + n, omega: Math.PI * zc / (T.length * dt) };
 }
 const songReply = (D, taken) => { let n2 = 0; for (let k = 0; k < D.N; k++) n2 += D.br[k] ** 2 + D.bi[k] ** 2; return { t: D.t, re: Float64Array.from(D.br), im: Float64Array.from(D.bi), norm: n2, taken, steps: D.steps }; };
-export const SONG = {   // h.drive.init { e0, t0, re, im, samples?, sampleRate, rate } · h.drive.run { to, maxSteps } · h.drive.set { e0 }
+const SONG = {   // h.drive.init { e0, t0, re, im, samples?, sampleRate, rate } · h.drive.run { to, maxSteps } · h.drive.set { e0 }
   init(m) {
     if (m.samples) songTrack = songResample(m.samples, m.sampleRate, m.rate); if (!songTrack) throw new Error('song: no track in this worker — drop it again');
     const N = BASIS.length, T = songTrack.track, D = song = { N, ops: [hydrogenZ()], w: Float64Array.from(BASIS, (s) => s.E), e0: +m.e0 || 0, dt: songTrack.dt, t0: +m.t0 || 0, t: +m.t0 || 0, steps: 0, br: Float64Array.from(m.re), bi: Float64Array.from(m.im), cr: new Float64Array(N), ci: new Float64Array(N) };
@@ -568,7 +566,7 @@ function fft3(re, im, M, sign) {                                                
     for (let k = 0; k < M; k++) { re[c + k * s] = lr[k]; im[c + k * s] = li[k]; } }
 }
 let espG = null;                                                                 // Ĝ (real: G is even), kept per (N, h)
-export function chemEsp({ N = 64, half, shells, D, atoms }) {
+function chemEsp({ N = 64, half, shells, D, atoms }) {
   const t0 = performance.now(), M = 2 * N, M3 = M * M * M, h = 2 * half / N, F = createFlow(shells), x = (u) => -half + (u + 0.5) * h;
   F.set(D, new Float64Array(D.length));
   const re = new Float64Array(M3), im = new Float64Array(M3), phi = new Float32Array(N * N * N); let charge = 0, min = Infinity, max = -Infinity;
@@ -680,12 +678,12 @@ export function chemRtRun(m = {}) {
     restartEvery: rtState.restartEvery, restartPolicy: ob.restartPolicy, sinceRestart: ob.sinceRestart };
 }
 /** chem.rt.reset — the kicked t = 0 state again, trace cleared */
-export function chemRtReset() {
+function chemRtReset() {
   if (!rtState) throw new Error('chem: chem.rt.reset before chem.rt.init');
   return chemRtInit(rtState.init);
 }
 /** chem.rt.spectrum — absorb.js's damped sine transform of the ACCUMULATED trace, plus its peaks */
-export function chemRtSpectrum(m = {}) {
+function chemRtSpectrum(m = {}) {
   if (!rtState || rtState.nTrace < 8) throw new Error('chem: chem.rt.spectrum needs an accumulated trace — run some steps first');
   const dt = m.dt === undefined ? rtState.dt : +m.dt, kappa = m.kappa === undefined ? rtState.kappa : +m.kappa;
   const tau = m.tau === undefined ? 500 : m.tau;
