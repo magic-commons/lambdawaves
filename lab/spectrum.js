@@ -352,7 +352,7 @@ export function createSpectrum(host, api) {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const W = c.clientWidth, H = c.clientHeight;
     if (W < 32 || H < 32) return;                       // folded: no size, nothing to paint
-    if (c.width !== W * dpr || c.height !== H * dpr) { c.width = W * dpr; c.height = H * dpr; }
+    if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
     const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const INK = readRGB(g, '--dim', '#b8b8b8'), FG = readRGB(g, '--fg', '#ffffff');   // the theme's own ink: this canvas used to be white-only
     const ink = (a) => `rgba(${INK[0]},${INK[1]},${INK[2]},${a})`, fg = (a) => `rgba(${FG[0]},${FG[1]},${FG[2]},${a})`;
