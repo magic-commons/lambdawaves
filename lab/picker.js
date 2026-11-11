@@ -145,20 +145,11 @@ function volumeRows() {
   return volRowsP;
 }
 V.watch(() => { volRowsP = null; });
-const plain = (s) => String(s || '').replace(/<\/?m>/g, '').replace(/[_{}\\]/g, '').toLowerCase();
-/** suggest(query, n) → [{ id, name, formula, vol, pic }] — at most n molecules for a typed query: prefix matches (name, formula, id) first */
-async function suggest(query, n = 6) {
-  const q = plain(query).trim(); if (!q) return [];
-  const cat = CHEM_PRESETS.filter((p) => !p.disabled && !atomZ(p.formula)).map((p) => ({ id: p.id, name: p.name, formula: p.formula, vol: null, pic: './img/menu/' + p.id + '.webp' }));
-  const rows = cat.concat((await volumeRows()).map((r) => ({ id: r.id, name: r.name, formula: r.formula, vol: r.vol, m: r.m, v: r.v })));
-  const seen = new Set(), first = [], then = [];
-  for (const r of rows) {
-    const keys = [plain(r.name), plain(r.formula), plain(r.id)], key = (r.vol || '') + '|' + r.id;
-    if (seen.has(key)) continue;
-    if (keys.some((k) => k.startsWith(q))) { seen.add(key); first.push(r); } else if (keys.some((k) => k.includes(q))) { seen.add(key); then.push(r); }
-    if (first.length >= n) break;
-  }
-  return first.concat(then).slice(0, n);
+/** molRows() → [{ id, name, formula, vol, … }] — every molecule the search finds (042 Q: the CSB's search ranks them, lab/search-index.js): the
+ *  catalogue and every installed volume's, each (vol, id) once */
+async function molRows() {
+  const cat = CHEM_PRESETS.filter((p) => !p.disabled && !atomZ(p.formula)).map((p) => ({ id: p.id, name: p.name, formula: p.formula, vol: null }));
+  const seen = new Set(); return cat.concat(await volumeRows()).filter((r) => { const k = (r.vol || '') + '|' + r.id; return !seen.has(k) && seen.add(k); });
 }
 
 export function createPicker(app, { open: openAtBoot = true } = {}) {
@@ -1138,7 +1129,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const C = app.state.chem, vol = C && C.on ? C.volume : null;
     open({ decks: true }); showDecks(!C || !C.on ? 'atomic' : vol ? 'library' : 'molecular'); if (vol) library.open(vol.volume);
   };
-  const api = { open, close, toggle, library: openLibrary, get shown() { return !root.hidden; }, root, show(id) { if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggest, suggestTile, collage: collageOn, setCollage };
+  /* 042 Q: the search's roads — `rows` its molecules, `show('tutorial')` the TUTORIAL page, `hydrogen(b)` the 140 tile's press for a BASIS label */
+  const api = { open, close, toggle, library: openLibrary, get shown() { return !root.hidden; }, root, rows: molRows, hydrogen: goHydrogen,
+    show(id) { if (id === 'tutorial') { open({ decks: true }); showTutorial(); } else if (sections.some((x) => x.id === id)) { open({ decks: true }); showDecks(id); } }, suggestTile, collage: collageOn, setCollage };
   app.state.picker = api;
   if (openAtBoot) open();
   return api;

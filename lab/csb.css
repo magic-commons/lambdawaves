@@ -127,15 +127,34 @@ body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-
 /* the FREE window (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack */
 html body #transport[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
 html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }
-/* THE SEARCH PILL (A8) above the bar and its ≤ 6 tiles above the pill (lab/csb-search.js; the Picker's tile, the hue in use) */
+/* THE SEARCH (A8; 042 Q THE SEARCH KNOWS THE WHOLE APP): the pill above the bar, the results on its roomier side — the kit's menu rows
+   (.mb-item · .mb-icon · .mb-lbl · .mb-key), TOP HIT larger, a head a kind, the MOLECULES the Picker's own tiles (lab/csb-search.js) */
 .csb-pill { position: fixed; z-index: calc(var(--z-chrome) + 4); padding: 4px; border-radius: var(--r-pill); }
 .csb-pill[hidden] { display: none; }
 .csb-pill .csb-search-in { display: block; width: 280px; height: 34px; padding: 0 14px; border: 0; border-radius: var(--r-pill); background: transparent; color: var(--fg); font: 14px var(--font-ui); }
 .csb-pill .csb-search-in::placeholder { color: var(--ink-faint); }
 .csb-pill .csb-search-in:focus { outline: 0; }
-.csb-suggest { position: fixed; z-index: calc(var(--z-chrome) + 4); display: flex; gap: 6px; padding: 6px; border-radius: 14px; }
+.csb-pill .csb-count { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.csb-suggest { position: fixed; z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; gap: 1px; width: 380px; max-width: calc(100vw / var(--ui-zoom, 1) - 16px); padding: 6px; border-radius: 14px; overflow: auto; overscroll-behavior: contain; }
 .csb-suggest[hidden] { display: none; }
-.csb-suggest .mm-tile { position: relative; width: 76px; height: 76px; padding: 0; border: 1px solid transparent; border-radius: 10px; background: transparent; cursor: pointer; overflow: hidden; }
+.csb-suggest .csb-row { align-items: center; gap: 10px; min-height: 30px; cursor: pointer; }
+.csb-suggest .csb-row .mb-icon { margin: 0; color: var(--dim); }
+.csb-suggest .csb-row .mb-lbl { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.csb-suggest .csb-row .csb-m { color: var(--acc); font-weight: var(--w-bold); }
+.csb-suggest .csb-row.on { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.csb-suggest .csb-row.off { opacity: var(--state-disabled, .38); cursor: default; }
+.csb-suggest .csb-top { min-height: 44px; font-size: calc(var(--fs-small) * 1.2); color: var(--fg); }
+.csb-suggest .csb-top .mb-icon { width: 22px; height: 22px; }
+.csb-suggest .csb-kind { flex: none; color: var(--dim); font-size: var(--fs-tiny); letter-spacing: var(--label-tracking, var(--tr-wide)); }
+.csb-suggest .mb-key { display: flex; gap: 2px; flex: none; }
+.csb-suggest .mb-key kbd { min-width: 16px; padding: 1px 4px; border-radius: 4px; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); font: inherit; text-align: center; }
+.csb-suggest .csb-head { padding: 8px 10px 2px; color: var(--dim); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wide)); }
+.csb-suggest :is(.csb-hint, .csb-none) { padding: 6px 10px; font-size: var(--fs-small); color: var(--ink-faint); white-space: pre; }
+.csb-suggest .csb-tiles { display: flex; gap: 6px; padding: 2px 4px; }
+.csb-suggest .mm-tile { position: relative; flex: none; width: 76px; height: 76px; padding: 0; border: 1px solid transparent; border-radius: 10px; background: transparent; cursor: pointer; overflow: hidden; }
+.csb-suggest .csb-row .mm-tile { width: 30px; height: 30px; border-radius: 6px; pointer-events: none; }   /* a molecule's row: its picture as the glyph, the press the row's */
+.csb-suggest .csb-top .mm-tile { width: 36px; height: 36px; }
+.csb-suggest .csb-row .mm-tile .mm-lbl { display: none; }
 /* 018 A9 (Josh: "don't show a colored outline for the thumbnails, just either highlight/outset/inset"): relief only — hover raised, the chosen one sunk */
 .csb-suggest .mm-tile:hover { background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); }
 .csb-suggest .mm-tile.on { background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
@@ -143,7 +162,6 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 .csb-suggest .mm-under { display: none; }
 .csb-suggest .mm-ph { position: absolute; inset: 0 0 12px; display: grid; place-items: center; font: 400 15px/1 var(--font-math, serif); color: var(--fg); opacity: .75; pointer-events: none; }   /* 018 A3: no picture — the formula holds the square */
 .csb-suggest .mm-lbl { position: absolute; left: 0; right: 0; bottom: 3px; font: var(--w-bold) 10px/1 var(--font-math, serif); color: var(--fg); text-align: center; pointer-events: none; }
-.csb-suggest .csb-none { padding: 6px 10px; font-size: var(--fs-small); color: var(--ink-faint); }
 /* 022 C2 · THE SURFACE IS A SURFACE (lab/shell/transport.js): the expander is ONE WELL (the kit's `data-mir-surface="well"`, its fill `--xport-well`)
    holding four kit sections on the 44-px grid (`--xport-grid`).  On the STAGE: TRANSPORT across the top, MACROS over FAVOURITES on the left and
    METERS standing beside them; in a rack card (docked, FREE) the four stack.  Nothing scrolls inside it (017 R2).  The bar's own rules hide a

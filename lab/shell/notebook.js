@@ -3,7 +3,7 @@
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
 import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, hint, label, ariaLabel } from '../mir/kit.js'; import { hoverable } from '../mir/core/kbm.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle, quatFromYawPitch } from '../field.js'; import { getZ } from '../hamiltonian.js';
-import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
+import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js'; import { WINDOW_WORDS } from '../search-index.js';   // 042 Q: the FINDER's words are the search's
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
 import { createWindow, windowOf } from '../mir/window/window.js'; import { glyphEl, glyphSvg } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
@@ -184,12 +184,6 @@ export function createNotebook(app) {
       /* iteration 014 A7 · 018 E5 · THE FINDER (the kit's createWindowPicker; WINDOW's first row, the CSB's window-plus and the key row `windowPicker`):
          every window by name with its one glyph (021 V2: its register's, lab/icons.js WINDOW_GLYPH), a window the mode hides greyed with the mode that shows it;
          a pick of an open window scrolls the rack to it (kit rk.reveal: no reorder), a closed one opens at the top and the rack scrolls up */
-      const FIND_WORDS = { nodes: 'effects fx grain film vignette curves look blur glow bloom',   // 039 F2 (X-REVIEW #8): "colour" marks PALETTE first
-        render: 'film video movie mp4 export record',
-        light: 'lighting sun shadow lamp', stage: 'background colour color gamma axes frame', palette: 'colours colors gradient hue', observer: 'style look cloud',
-        camera: 'view zoom rotate orbit fov', clip: 'cut plane slice section', chem: 'molecule chemistry benzene water orbitals', spectrum: 'states hydrogen orbitals levels',
-        projects: 'save open files projects', history: 'undo redo', widgets: 'clock text', equalizer: 'audio sound music', informational: 'labels words captions text',
-        settings: 'quality performance theme' };   // the FINDER lists rack windows alone: TIMELINE, MODULATION and the CONTROL SURFACE are its SPECIAL rows (040 M3)
       /* 040 M3 · 041 P8 · K4 · THE SPECIAL SECTION (Josh 11-09: MODULATION, TIMELINE, the CONTROL SURFACE, then NOTEBOOK and NODES): the kit's
          `sections` (alpha.67) — its filter, its ↑ ↓ and Enter walk them; a closed one opens, an open one rises; the CONTROL SURFACE is switched
          back on where MIR OPTIONS turned it off, scrolled to in its rack, else its play button takes the focus.  NODES is named once, here */
@@ -202,7 +196,7 @@ export function createNotebook(app) {
         ['nodes', 'NODES', 'nodes', 'Open NODES, or raise it', () => !!A.get('nodes').get() || !!document.querySelector('.dev[data-id="nodes"]:not(.closed)'), () => { reveal('nodes'); rise(document.querySelector('[data-mir-window="nodes"]')); }, () => reveal('nodes')]]
         .map(([id, title, glyph, hint, open, up, run]) => ({ id, title, glyph, hint, open, run: () => (open() ? up : run)() }));
       layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu',
-        open: reveal, words: (id) => FIND_WORDS[id] || '', sections: [{ id: 'special', title: 'SPECIAL', rows: special }],
+        open: reveal, words: (id) => WINDOW_WORDS[id] || '', sections: [{ id: 'special', title: 'SPECIAL', rows: special }],
         can: (id) => { if (id === 'nodes') return null; const d = document.querySelector('.dev[data-id="' + id + '"]'); return !d || !d.hidden ? true : MODE[id] === 'molecules' ? 'MOLECULES ONLY' : 'HYDROGEN ONLY'; } });   // 021 R5: the MODE table's word
     }
     /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
