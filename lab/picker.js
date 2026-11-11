@@ -687,7 +687,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const eye = (i, here) => setGlyph(i, here ? 'trash' : 'download');
   /* the store read each time the MOLECULAR deck or the LIBRARY comes into view (a press, MOLECULES or the browser may have changed it) */
   async function readStore() {
-    for (const S of secs.values()) for (const r of S.recs) have.set(r.hash, await installed(r.hash).catch(() => false));
+    await Promise.all([...secs.values()].flatMap((S) => S.recs).map(async (r) => have.set(r.hash, await installed(r.hash).catch(() => false))));
     for (const S of secs.values()) for (const m of S.rows) paintAway(m);
     library.paintDevice();
   }
