@@ -2706,8 +2706,8 @@ export async function createField(canvas, opts = {}) {
        buffers and the context released in order with the device left alone ticked every time. */
     dispose() {
       if (out.disposed) return; out.disposed = true; out.ok = false;
-      try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); } catch (_) {}
-      try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); cardBuf?.destroy(); palBuf.destroy(); } catch (_) {}
+      try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); for (const g of grids.values()) g.tex.destroy(); tapTex?.destroy(); } catch (_) {}
+      try { for (const b of [...paramsBuf, ...modesBuf, radialBuf, statsBuf, viewBuf, vpBuf, cardBuf, palBuf, lineBuf, latticeBuf, atomBuf, phiBuf, espE, espPart, gasTab]) b?.destroy(); } catch (_) {}
       try { for (const b of molParamsBuf) b.destroy(); molShellBuf.destroy(); molAlphaBuf.destroy(); molWBuf.destroy(); molMatBuf.destroy(); molCutBuf.destroy(); } catch (_) {}
       try { ctx.unconfigure(); } catch (_) {}
     },
