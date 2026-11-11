@@ -74,10 +74,6 @@ export const TUTORIAL = [   // 036 G7: lab/loader.js keeps their files
   { id: 'tut-mod-hero-6', title: 'MOD HERO 6', caption: '', themes: 'dark', deck: 1 },
 ];
 
-const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
-  + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
-  + 'Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og').split(' ');
-const NAMES = 'Hydrogen Helium Lithium Beryllium Boron Carbon Nitrogen Oxygen Fluorine Neon Sodium Magnesium Aluminium Silicon Phosphorus Sulfur Chlorine Argon Potassium Calcium Scandium Titanium Vanadium Chromium Manganese Iron Cobalt Nickel Copper Zinc Gallium Germanium Arsenic Selenium Bromine Krypton Rubidium Strontium Yttrium Zirconium Niobium Molybdenum Technetium Ruthenium Rhodium Palladium Silver Cadmium Indium Tin Antimony Tellurium Iodine Xenon Caesium Barium Lanthanum Cerium Praseodymium Neodymium Promethium Samarium Europium Gadolinium Terbium Dysprosium Holmium Erbium Thulium Ytterbium Lutetium Hafnium Tantalum Tungsten Rhenium Osmium Iridium Platinum Gold Mercury Thallium Lead Bismuth Polonium Astatine Radon Francium Radium Actinium Thorium Protactinium Uranium Neptunium Plutonium Americium Curium Berkelium Californium Einsteinium Fermium Mendelevium Nobelium Lawrencium Rutherfordium Dubnium Seaborgium Bohrium Hassium Meitnerium Darmstadtium Roentgenium Copernicium Nihonium Flerovium Moscovium Livermorium Tennessine Oganesson'.split(' ');   /* the 118 names (ASE's table), the caption's word for an element */
 /** the 18-column seat: [row, column] (rows 1–7 the periods, 9–10 the f-block under them) */
 function seatOf(Z) {
   const P = [2, 10, 18, 36, 54, 86, 118], p = P.findIndex((e) => Z <= e) + 1, z0 = p > 1 ? P[p - 2] : 0, i = Z - z0;
@@ -88,11 +84,9 @@ function seatOf(Z) {
   if (i <= 17) return [p + 3, i];                                      // La–Lu, Ac–Lr: the f rows, columns 3–17
   return [p, i - 14];
 }
-
-
 const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 /** iteration 008 P (Josh: "atoms should not be in the molecules window"): Z when a formula is one bare element symbol (Fe, Kr: a one-atom entry), else 0 */
-const atomZ = (f) => SYM.indexOf(String(f || '').replace(/<\/?m>/g, '').trim()) + 1;
+const atomZ = (f) => { const s = String(f || '').replace(/<\/?m>/g, '').trim(); return ATOMS.findIndex((a) => a.symbol === s) + 1; };
 const volName = (v) => 'VOL. ' + v.numeral;
 const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB' : b >= 1e6 ? Math.round(b / 1e6) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' kB');
 
@@ -617,9 +611,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
 
   /* ── ATOMIC: 118 squares on the 18-column table, the f rows under it ── */
   const table = el('div', 'mm-table', sections[0].sec);
-  for (let Z = 1; Z <= 118; Z++) {
-    const [r, c] = seatOf(Z), v = valenceOf(Z), a = ATOMS.find((x) => x.Z === Z), live = !!a, sym = SYM[Z - 1];
-    const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, under: false, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
+  for (const { Z, symbol: sym, name } of ATOMS) {
+    const [r, c] = seatOf(Z), v = valenceOf(Z);
+    const t = tile(table, 'mm-el', { name, sub: v.label, math: true, under: false }, () => goAtom(Z));
     t.style.gridRow = String(r); t.style.gridColumn = String(c);
     pic(t, null, 'el:' + sym + ':' + v.nl + '_' + v.m);   // the block's orbital (011 Q3b: the differentiating subshell — Fe 3d, Ce 4f; the pure orbital of its (n, l, m), cut to show its layers)
     el('b', 'mm-sym', t, sym);   // M3: the symbol alone (Z left the tile: "it shouldn't show the 'z' number")
@@ -976,7 +970,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos, t); else { isoEl.hidden = isoTail.hidden = true; goVolume(vol, m); } });
       el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
-      if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + SYM[atom - 1] + ':' + v.nl + '_' + v.m); return t; }
+      if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + ATOMS[atom - 1].symbol + ':' + v.nl + '_' + v.m); return t; }
       const i = pic(t, null), ph = () => hold(t, i); i.dataset.vol = cur.id; i.dataset.mol = m.id;
       V.picture(cur.id, m.id, lookOf()).then((u) => { develop(i); setPic(i, u); }, ph);
       return t;
