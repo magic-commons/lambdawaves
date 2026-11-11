@@ -26,7 +26,7 @@
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
-import { createFlow } from './molecular-flow.js';
+import { createFlow } from './molecular-flow.js'; import { softCapLevels } from './molecular-register.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
 
 const DEG = 1e-6;                       // |Δε| below this is one degenerate row, drawn side by side
@@ -388,8 +388,9 @@ export function createOrbitals(host, api) {
     for (const [k, L] of lanes) if (!keep.has(k)) { L.root.remove(); lanes.delete(k); }
     let prev = null;
     for (const k of want) {
-      let L = lanes.get(k);
+      let L = lanes.get(k), c = sel.get(k);
       if (!L) { L = lane(k); lanes.set(k, L); }
+      else { if (L.amp.get() !== c.amp) L.amp.set(c.amp); if (L.ph.get() !== c.phase) L.ph.set(c.phase); }   // a kept lane shows what a preset, FILL ALL, a stroke's norm, a strike or a file wrote
       if (prev ? prev.nextSibling !== L.root : rowsEl.firstChild !== L.root) rowsEl.insertBefore(L.root, prev ? prev.nextSibling : rowsEl.firstChild);
       prev = L.root;
     }
@@ -491,16 +492,7 @@ export function createOrbitals(host, api) {
       hover.set([], plot); return;
     }
     /* the soft-capped y map, by ROW index: to scale up to 3 × the median gap, clamped beyond it */
-    const m = rows.length;
-    const gaps = [];
-    for (let i = 0; i < m - 1; i++) gaps.push(rows[i + 1].eps - rows[i].eps);
-    const pos = gaps.filter((d) => d > 0).sort((a, b) => a - b);
-    const med = pos.length ? pos[pos.length >> 1] : 0;
-    const cap = med > 0 ? 3 * med : Infinity;
-    let tot = 0; const w = gaps.map((d) => { const x = Math.min(d, cap); tot += x; return x; });
-    const ys = [bot];
-    for (let i = 0; i < m - 1; i++) ys.push(ys[i] - (tot > 0 ? w[i] / tot : 1 / Math.max(1, m - 1)) * (bot - top));
-    const yOf = (i) => (m === 1 ? (top + bot) / 2 : ys[i]);
+    const m = rows.length, up = softCapLevels(rows.map((r) => r.eps)), yOf = (i) => bot - up[i] * (bot - top);   // the STATES ladder's own map (molecular-register.js)
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
     /* iteration 008 R · TWO MARKS ON ONE LADDER (Josh: "it should show on the register each orbital lighting up one of the horizontal lines"):
        the register's lit levels, and the ORBITAL dial's CURSOR — chem.orbital, 1-based over these same MOs, so it is always a real line.
@@ -537,7 +529,7 @@ export function createOrbitals(host, api) {
         levelLine(g, x0, x1, yy, lv.occ ? A : B, cur || lit, 1, cur ? 1 : lit ? (lead ? 0.5 : 1) : dim ? 0.25 : 1);
         hits.push({ y: yy, x0, x1, k: lv.k });
         hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: cur || lit ? 2 : 1, colour: ink(1),
-          info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
+          info: () => `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
             + (sol.names ? '  ·  ' + about(lv.k) : '')
             + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : dim ? '  ·  not carried by this record' : lead ? '  ·  click to show it' : '  ·  click to add')   // 039 X2: under VIEW ORBITAL a click names it
             + (lv.k === kc ? '  ·  the ORBITAL dial’s orbital' + (lead ? ' — VIEW ORBITAL draws it' : ' — turn the dial for VIEW ORBITAL')
@@ -611,7 +603,7 @@ export function createOrbitals(host, api) {
     sol = s || null; coreBtn.hidden = !nCore();
     re = im = null; pushedT = NaN; pushedV = -1; selected = -1;
     flow = null; flowOn = false; flowSw.set(false);
-    sel.clear(); M.reset();
+    sel.clear(); M.reset(); for (const L of lanes.values()) L.root.remove(); lanes.clear();   // a new ladder: no lane keeps the last molecule's name and ε
     if (sol) {
       if (wanted) { applyRecord(wanted); wanted = null; }
       else { sel.set(sol.nocc - 1, { amp: 1, phase: 0 }); selected = sol.nocc - 1; }   // a new solve resets the register to HOMO alone

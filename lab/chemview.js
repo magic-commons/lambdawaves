@@ -36,14 +36,10 @@ import { foldFace } from './fold.js';   // 039 F3: MOLECULES' MORE wears the fol
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
- * the first eight of their groups and their arrays are frozen there.  These three exports keep their old shapes so
- * nothing that read them has to change: `label` is the entry's formula markup, `ang` its ångström array. */
+ * the first eight of their groups and their arrays are frozen there.  CHEM_PRESETS keeps its old shape so nothing
+ * that read it has to change: `label` is the entry's formula markup, `ang` its ångström array. */
 export const CHEM_PRESETS = [...MOLECULES, ...RECORD_ONLY].map((m) => ({ ...m, label: m.formula }));
 const PRESET_BY_ID = new Map(CHEM_PRESETS.map((p) => [p.id, p]));
-/** the preset's atoms in bohr, as the worker and lab/rhf-molecule.js want them */
-const chemAtoms = moleculeAtoms;
-/** the preset's formal charge — 0 for every neutral, ±1 for the four ions */
-const chemCharge = moleculeCharge;
 
 const AXES = ['x', 'y', 'z'], AXIS_N = { x: 2, y: 5, z: 6 };
 const W_MAX = 1.6, CORE_LO = 19, CORE_HI = 21;              // answer 11: the valence plot, and the core inset's own window
@@ -213,9 +209,8 @@ export function createChem(host, api) {
      left (loaded lazily, only when the list opens), a group's name a row that is never chosen; no native <select>.  `mSel` keeps the old
      reads: value (set: chosen only when it is on this page) · options (the rows) · selectedIndex = −1 (nothing chosen) */
   let mRows = [];
-  const mList = listSelect({ aria: 'molecule', items: [], value: preset, cls: 'mol-sel', repick: true, onChange: (id) => { mStep.set(id); dlShow(); handPick(id); } });   // a hand press: a DOWNLOAD row installs (and asks persist once)
+  const mList = listSelect({ aria: 'molecule', items: [], value: preset, cls: 'mol-sel', repick: true, onChange: (id) => { mStep.set(id); rowPic(); handPick(id); } });   // a hand press: a DOWNLOAD row installs (and asks persist once)
   const mSel = { get value() { return mList.get() || ''; }, set value(id) { mList.set(mRows.some((r) => r.id === id && !r.coming) ? id : null); }, set selectedIndex(_) { mList.set(null); }, get options() { return mRows; } };
-  mStep.name.replaceChildren(mList.root);
   /* iteration 008 U · THE DOWNLOAD GLYPH: the molecule chosen is a record not yet on this device — the kit's `download` beside its name, a press fetches
      it (checked against its sha-256 name, persist asked once) and opens it: the same road a DOWNLOAD row's pick takes */
   const dlB = el('button', 'trig mol-dl'); dlB.type = 'button'; chip(dlB, 'download', 'Download this molecule’s record'); dlB.hidden = true;
@@ -256,7 +251,6 @@ export function createChem(host, api) {
     if (src !== 'vol') { setPic(pic, src); return; }
     V.picture(k.volume, k.id, 'labels').then((u) => { if (picFor !== id) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) picUrl = u; setPic(pic, u); }, () => {});
   }
-  const dlShow = rowPic;
   /** the dropdown holds the page's section, in the table's groups; the molecule on screen stays chosen when it is on this page */
   function fillSel() {
     const rows = [], head = (w) => rows.push({ id: '#' + w, label: w, coming: true }), VP = vByPage.get(page);
@@ -286,7 +280,8 @@ export function createChem(host, api) {
   const have = new Map(), optOf = (id) => mRows.find((o) => o.id === id);
   const sectionRecs = () => CHEM_PRESETS.filter((p) => p.section === page).flatMap((p) => Object.values(p.records || {}));
   async function lamps() {
-    for (const p of CHEM_PRESETS) for (const r of Object.values(p.records || {})) have.set(r.hash, await installed(r.hash));
+    const recs = CHEM_PRESETS.flatMap((p) => Object.values(p.records || {})), got = await Promise.all(recs.map((r) => installed(r.hash)));   // every record asked at once (the boot's and each focus's read)
+    recs.forEach((r, i) => have.set(r.hash, got[i]));
     for (const p of CHEM_PRESETS) if (p.recordOnly) { const o = optOf(p.id); if (o) o.label = optionLabel(p, have.get(p.records['sto-3g'].hash)); }
     mList.setItems(mRows);
     header(); return have;
@@ -363,7 +358,7 @@ export function createChem(host, api) {
     if (e.what === 'remove' && (was || mine)) done.then(() => { const v = vShelf.get(e.volume) || { id: e.volume, numeral: mine ? volRef.numeral : null }, paged = vPages.some((p) => p.vol.id === e.volume);
       status(`${volLabelOf(v)} was removed from this device — ` + (paged ? 'its molecules wear the download glyph and open from the network' : 'its pages have left ‹ SECTION ›') + (mine ? `; ${capName(volRef.name)} stays on the stage until the next pick` : ''), 'warn'); });
   });
-  const mSeg = { root: mStep.root, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section || vMolPage.get(v); if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; mStep.set(v); shelfFill(); dlShow(); }, get() { return mSel.value; }, el: mSel };
+  const mSeg = { root: mStep.root, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section || vMolPage.get(v); if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; mStep.set(v); shelfFill(); rowPic(); }, get() { return mSel.value; }, el: mSel };
   /* V2 · THE BASIS SEG IS THE LADDER: a catalogue molecule keeps the live law (STO-3G; 6-31+G* under the cap), its other rungs from an INSTALLED volume
      holding its id; a volume molecule's every rung is its record, a rung its file lacks disabled with the header's reason */
   const B_TITLE = { 'sto-3g': 'Minimal Cartesian basis, the oracle for all eight',
@@ -545,7 +540,9 @@ export function createChem(host, api) {
      (h2R null = the row's own geometry, byte for byte); METHOD UHF (the card's seg since 0.7.3) asks moleculeRHF for model 'uhf' (U1's arg); PROJECT `h2 { R, method }`, absent by default */
   let h2R = null, h2T = null; const R0 = moleculeAtoms('H2')[1].z, h2Box = el('div', 'mol-h2', more), h2Cv = el('canvas', 'mol-c mol-curve', h2Box), h2Row = el('div', 'row tight', h2Box);
   const h2Key = () => (preset === 'H2' && basis === 'sto-3g' && h2R ? '|' + h2R : '') + (method !== 'rhf' ? '|' + method : ''), eh = (x) => x.toFixed(2).replace('-', '−');   // and the METHOD (methods() keeps UHF to H₂)
-  function chemAtoms(id) { return volRef && id === volRef.key ? volRef.atoms : moleculeAtoms(id, id === 'H2' && basis === 'sto-3g' ? h2R : null); }   // the card's own: shadows the module's export with the STRETCH's pose (and V2's volume molecule)
+  let atId = null, atR = null, atMemo = null;   // one array a molecule and stretch: the frame's readers (field.setAtoms, the skeleton, the widget) meet the same object
+  function chemAtoms(id) { if (volRef && id === volRef.key) return volRef.atoms; const R = id === 'H2' && basis === 'sto-3g' ? h2R : null;   // the STRETCH's pose (and V2's volume molecule)
+    if (id !== atId || R !== atR) { atId = id; atR = R; atMemo = moleculeAtoms(id, R); } return atMemo; }
   const h2K = knob({ label: 'STRETCH', min: 0.8, max: 6, value: R0, title: 'R(H–H) in bohr, re-solved (0.741 Å first)', fmt: (v) => v.toFixed(2) + ' bohr',
     onInput: (v) => { h2Read(v); }, onChange: (v) => { h2R = Math.abs(v - R0) < 5e-3 ? null : v; solve(preset); } });
   const roH2 = readout({ label: 'THE H₂ CURVE · STO-3G', cls: 'wide', value: '—', sub: '' }); h2Row.append(h2K.root, roH2.root);
@@ -577,8 +574,8 @@ export function createChem(host, api) {
 
   /* ── solve ────────────────────────────────────────────────────────────────────────────────────── */
   function solve(id = preset, { force = false, press = false } = {}) {
-    if (volRef && id !== volRef.key) { volRef = null; volSeq++; fillSel(); }   // V2: a catalogue pick puts the volume molecule away (its option goes)
-    if (id !== preset) { volWant = null; preset = id; mSeg.set(id); }
+    if (id !== preset) {   // another molecule: a volume file still being read is left behind (openVolume's seq law); V2: a catalogue pick puts the volume molecule away (its option goes)
+      volSeq++; volWant = null; if (volRef) { volRef = null; fillSel(); } preset = id; mSeg.set(id); }
     if (volRef) return volSolve({ force, press });
     if (volWant) { const w = volWant; volWant = null; return openVolume(w.volume, w.id, w.basis, { hand: false, network: false, on: false, sha: w.sha256 }); }   // a project's volume molecule, on its first solve
     catPreset = preset;
@@ -651,7 +648,7 @@ export function createChem(host, api) {
       /* 0.5.3 M2 · a failed open (C₆₀'s record offline) gives the dropdown BACK before the solution goes: the last solved molecule
          is chosen again (or, with none, nothing), so a hand re-pick of the one that failed is a change and is answered */
       if (!r || r.error || !Number.isFinite(r.energy)) { if (sol) { preset = sol.key.split('|')[0]; mSeg.set(preset); } else mSel.selectedIndex = -1;
-        sol = null; status(why || 'solve failed: ' + ((r && (r.refused || r.error)) || 'no answer'), 'warn'); refresh(); tell(); notify(); return null; }
+        return failed(why || 'solve failed: ' + ((r && (r.refused || r.error)) || 'no answer')); }
       /* 0.3.1 · S4: the defaults this landing fills (the orbital, and through notify() the register's selection and the STATES
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {
@@ -668,16 +665,19 @@ export function createChem(host, api) {
         sol.roots = s.roots; sol.tda = s.tda; sol.timings = s.timings || sol.timings;
         refresh(); return r;
       });
-    }).catch((e) => { if (seq === solveSeq) { sol = null; status('solve failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
+    }).catch((e) => (seq === solveSeq ? failed('solve failed: ' + String(e && e.message || e)) : null))
       .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq) loading(false); });
     pending = { key, p: task };
     return task;
   }
+  /** a solve or an open that did not land: the solution goes, said, and every reader told (the readouts, the status, the register) */
+  function failed(why) { sol = null; status(why, 'warn'); refresh(); tell(); notify(); return null; }
   /* ── V2 · A VOLUME'S MOLECULE: the .lwm (lab/volumes.js, sha-256 checked) parsed once, each rung opened by THE RECORD ROAD's chem.open with its
      ground.hash under the same `seq` law.  `network: false` is a project's road (installed only, else the sentence, no solve) ── */
   async function openVolume(volId, molId, want = null, { hand = true, network = true, on: turnOn = true, sha = null } = {}) {
     if (hand) { pivotHand = true; if (api.wake) api.wake(); }   // 034 F2b · 038 C1
     const seq0 = ++volSeq, same = (v) => v && v.volume === volId && v.id === molId;
+    const left = () => { if (!pending && loadingNow === String(molId)) loading(false); return null; };   // a later pick or a restore moved on while the file was read: its busy mark goes unless a later road holds it
     let v = same(volRef) ? volRef : same(volKeep) ? volKeep : null;
     if (!v) {
       status(`opening ${molId} from ${volId}…`, 'warn'); loading(true, molId);
@@ -692,11 +692,11 @@ export function createChem(host, api) {
           atoms: H.geometry.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z })), geometry: H.geometry.source || '', rungs: Object.keys(H.rungs),
           why: { ...(H.skipped || {}), ...(H.failed || {}) }, sub: [...(m.tags || []), m.pg].filter(Boolean).join(' · '), sha256: m.sha256 || null, bytes: buf.byteLength, from, bonds: H.geometry.bonds || H.meta.bonds || m.bonds || null };
       } catch (e) {
-        if (seq0 === volSeq) { loading(false);
-          status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the MAIN MENU's EXPANSIONS`, 'warn'); }
+        if (seq0 !== volSeq) return left();
+        loading(false); status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the MAIN MENU's EXPANSIONS`, 'warn');
         return null;
       }
-      if (seq0 !== volSeq) return null;                                      // a later pick has moved on while the file was read
+      if (seq0 !== volSeq) return left();
     }
     v.note = sha && v.sha256 && sha !== v.sha256 ? 'the project named an older file of this molecule; this is the current one' : null;
     const b = want && v.rungs.includes(want) ? want : v.rungs[0];
@@ -723,7 +723,7 @@ export function createChem(host, api) {
     loading(true, volName(v));
     const task = Promise.all([call(m, () => here(basis).then((W) => { try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } })), loadMS()]).then(([r]) => {
       if (seq !== solveSeq) return null;
-      if (!r || r.refused || r.error || !Number.isFinite(r.energy)) { sol = null; status(`${volName(v)} at ${BASIS_LABEL[basis]} did not open: ` + ((r && (r.refused || r.error)) || 'no answer'), 'warn'); refresh(); tell(); notify(); return null; }
+      if (!r || r.refused || r.error || !Number.isFinite(r.energy)) return failed(`${volName(v)} at ${BASIS_LABEL[basis]} did not open: ` + ((r && (r.refused || r.error)) || 'no answer'));
       r.opened = { bytes: v.bytes, from: v.from }; r.stem = lib.stem || null; r.volume = { volume: v.volume, id: v.id, numeral: v.numeral };
       try { r.mulliken = Array.from(v.lwm.blob(basis, 'mulliken')); } catch (_) { r.mulliken = null; }   // iteration 014 D6: the rung's Mulliken charges, for BALL AND STICK's IONIC
       if (v.esp === undefined) v.esp = espOf(v.lwm);   // iteration 014 C1: the file's potential grid ({ n, box, f16, basis … }) or null — the live Poisson is the fallback
@@ -734,7 +734,7 @@ export function createChem(host, api) {
         r.identity = MS ? MS.identityOf({ atoms: v.atoms, basisHash: r.hash, charge: v.charge, multiplicity: 1, model: 'RHF' }) : null; land(r); };
       if (api.derived) api.derived(fill); else fill();
       return r;
-    }).catch((e) => { if (seq === solveSeq) { sol = null; status('open failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
+    }).catch((e) => (seq === solveSeq ? failed('open failed: ' + String(e && e.message || e)) : null))
       .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq) loading(false); });
     pending = { key, p: task };
     return task;
@@ -852,7 +852,7 @@ export function createChem(host, api) {
     return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY, factors: flowOn,
       pulse: pulse === 'none' ? null : { shape: pulse, omega: (bright().find((k) => k.f > 1e-3) || {}).omega || 0 } }).then((r) => {   // 0.7.0 V1 PULSES
       if (seq !== solveSeq) return null;
-      if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && (r.refused || r.error)) || 'no real-time engine'), 'warn'); if (r && r.refused) setRun(false); return null; }
+      if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && (r.refused || r.error)) || 'no real-time engine'), 'warn'); setRun(false); return null; }   // a kick that did not land leaves no run: RUN goes down and hands the field back
       rt = { t: r.t || 0, D_re: r.D_re || null, D_im: r.D_im || null, F: factorsOf(r), electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
         restartEvery: r.restartEvery, restartPolicy: r.restartPolicy, sinceRestart: r.sinceRestart || 0 };
       spec = null; fit = null; fitErr = null;
@@ -878,18 +878,22 @@ export function createChem(host, api) {
   /** one outstanding propagation request at a time — the frame loop asks, the worker answers when it can */
   function pump() {
     if (!running || inflight || !rt || !sol) return;
-    inflight = true; const seq = solveSeq;
+    inflight = true; const seq = solveSeq, run = rt;
     call({ op: 'chem.rt.run', steps: speed, factors: flowOn }).then((r) => {
       inflight = false;
-      if (seq !== solveSeq || !rt) return;
+      if (seq !== solveSeq || rt !== run) return;
       if (!r || r.error) { status('real time stopped: ' + ((r && r.error) || 'no answer'), 'warn'); setRun(false); return; }
-      rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
-      rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep;   // `steps` is the worker's CUMULATIVE count
-      if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
-      if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im; rt.F = factorsOf(r);
-      rt.samples = r.samples || rt.samples; append(r.trace);
-      pushMatrix(); requestSpectrum(); refresh(); if (r.D_re && symDue()) symmetryLine(rt.D_re, 'RUN');
+      landRun(r); requestSpectrum(); refresh();
     }).catch(() => { inflight = false; });
+  }
+  /** a chem.rt.run reply onto the run: the live pump's and the scripted run's (run(n)) one landing */
+  function landRun(r) {
+    rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
+    rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep;   // `steps` is the worker's CUMULATIVE count
+    if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
+    if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im; rt.F = factorsOf(r);
+    rt.samples = r.samples || rt.samples; append(r.trace);
+    pushMatrix(); if (r.D_re && symDue()) symmetryLine(rt.D_re, 'RUN');
   }
   /** the fit's own copy of the trace, capped at its window; the worker keeps the authoritative one */
   function append(tr) { if (!tr || !rt) return; for (let i = 0; i < tr.length && rt.trace.length < FIT_CAP; i++) rt.trace.push(tr[i]); }
@@ -903,14 +907,14 @@ export function createChem(host, api) {
   let specBusy = 0, specRtt = 0;
   function requestSpectrum(force) {
     if (!sol || !rt || (rt.samples || 0) < 16) return;
-    const nowMs = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const nowMs = performance.now();
     if (!force && (specBusy || nowMs - lastSpec < Math.max(500, 4 * specRtt))) return;
     lastSpec = nowMs;
-    const seq = ++specTask, tau = Math.max(10, (rt.samples || rt.trace.length) * dt / 12);
+    const seq = ++specTask, run = rt, tau = Math.max(10, (rt.samples || rt.trace.length) * dt / 12);
     specBusy = seq;
     call({ op: 'chem.rt.spectrum', dt, kappa, tau, wMin: 5e-4, wMax: W_MAX }).then((r) => {
-      if (specBusy === seq) { specBusy = 0; specRtt = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - nowMs; }
-      if (seq !== specTask || !r || r.error || !r.omega) return;
+      if (specBusy === seq) { specBusy = 0; specRtt = performance.now() - nowMs; }
+      if (seq !== specTask || rt !== run || !r || r.error || !r.omega) return;   // a run the card has left (a new molecule, a reset, a new kick): its transform is not this plot's
       spec = { omega: r.omega, S: r.S, ImAlpha: r.ImAlpha, peaks: r.peaks || [], tau };
       refit(); paint();
     }).catch(() => { if (specBusy === seq) specBusy = 0; });
@@ -925,7 +929,7 @@ export function createChem(host, api) {
   const fitWire = (F) => ({ poles: F.poles, certified: !!F.certified(CERT), bound: F.bound, epsilon: F.epsilon, sigma: F.sigma,
     refusal: F.refusal ? F.refusal(CERT) : null, raw: F.raw });
   function refit() {
-    const nowMs = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const nowMs = performance.now();
     if (fitBusy || !spec || !rt || rt.trace.length < 400 || nowMs - lastFit < 2000) return;
     lastFit = nowMs;
     const init = bright().filter((k) => k.omega > 0.05 && k.omega < W_MAX).slice(0, 6).map((k) => k.omega).sort((a, b) => a - b);
@@ -953,7 +957,12 @@ export function createChem(host, api) {
   /* 0.6.5 X2 · ESP: the worker's Φ volume (`chem.esp`, X1's pump) OWNS the field as a CARD once it lands — signed, so READ as 'real'; while it computes
      the view drawn before stays (`was`).  The card goes when VIEW leaves ESP, another model publishes, or the molecule is re-uploaded or dropped. */
   let esp = null, was = 'density';                                       // esp: { card, N, min, max, ms, of: the solve it was computed from }
-  const espOn = () => view === 'esp' && !!esp && esp.of === sol, drawn = () => (delta && sol && sol.D ? 'diff' : view !== 'esp' ? view : espOn() ? 'density' : was);   // VIEW REGISTRY: the card's own product is the density (the register outranks it on the field)
+  const espOn = () => view === 'esp' && !!esp && esp.of === sol;
+  /* VIEW REGISTRY: the card's own product is the density (the register outranks it on the field).  A view this solve cannot draw yet — Δ LDA−RHF
+     while its partner solves, SPIN (or ESP's `was`) on a closed shell — draws the density: a landing always publishes (no frame bakes the new
+     shells with the last molecule's matrix), and never reads a matrix the solve does not have */
+  const drawn = () => { const d = delta && sol && sol.D ? 'diff' : view !== 'esp' ? view : espOn() ? 'density' : was;
+    return (d === 'dlda' && !pair()) || (d === 'spin' && !(sol && sol.Ds)) ? 'density' : d; };
   const molView = () => (espOn() || ['orbital', 'diff', 'spin', 'dlda'].includes(drawn()) ? 'real' : 'density');   // a signed Δρ (and SPIN's ρα − ρβ) is READ as 'real': two-colour lobes
   const sgn = (x) => (x < 0 ? '−' : '+') + Math.abs(x).toFixed(2);
   function onEsp(r) {                                                     // the pump's consumer: the reply { N, half, phi, min, max, ms } becomes the card
@@ -987,11 +996,11 @@ export function createChem(host, api) {
     if (v === 'orbital') { product.kind = 'orbital'; product.matrix = orbitalColumn(); }
     else if (v === 'diff') { product.kind = 'signed'; product.matrix = deltaD(); }
     else if (v === 'spin') { product.kind = 'signed'; product.matrix = sol.ds32 || (sol.ds32 = Float32Array.from(sol.Ds)); }   // 0.7.1 VIEW SPIN: Dα − Dβ, the Δρ road
-    else if (v === 'dlda') { const p = pair(); if (!p) return false; product.kind = 'signed'; product.matrix = p[0].dl32 && p[0].dlOf === p[1] ? p[0].dl32 : (p[0].dlOf = p[1], p[0].dl32 = Float32Array.from(p[0].D, (x, i) => x - p[1].D[i])); }   // 0.7.3 K2: D_LDA − D_RHF in f64, once per pair
+    else if (v === 'dlda') { const p = pair(); product.kind = 'signed'; product.matrix = p[0].dl32 && p[0].dlOf === p[1] ? p[0].dl32 : (p[0].dlOf = p[1], p[0].dl32 = Float32Array.from(p[0].D, (x, i) => x - p[1].D[i])); }   // 0.7.3 K2: D_LDA − D_RHF in f64, once per pair
     else if (!sol.D) { product.kind = 'factor'; product.matrix = factorCols(); }
     else { product.kind = 'density'; product.matrix = densityRe(); }
     const ok = s.publish(model(), product);
-    if (espOn()) s.card(esp.card); else if (view === 'esp') { if (typeof espPump === 'function') espPump(); } else if (esp) { s.card(null); esp = null; }   // espPump: X1's (0.6.5), its reply lands in onEsp
+    if (espOn()) s.card(esp.card); else if (view === 'esp') espPump(); else if (esp) { s.card(null); esp = null; }   // espPump: X1's (0.6.5), its reply lands in onEsp
     if (ok && flowOn) feedFlow();
     return ok;
   }
@@ -1049,9 +1058,10 @@ export function createChem(host, api) {
   function espPump() {
     const D = (rt && rt.D_re) || (sol && sol.D);
     if (!D || espBusy || D === espD || !sol.probe) return;
-    espBusy = true; espD = D;
+    espBusy = true; espD = D; const of = sol;
     Promise.resolve(api.balance({ op: 'chem.esp', N: 64, half: Number.isFinite(sol.half) ? sol.half : 10.3, shells: sol.shells, D, atoms: sol.probe })).then((r) => {
-      espBusy = false; if (!r || r.error || !r.phi) return; espLast = r; onEsp(r);   // 0.6.5: the reply becomes the card (X2's consumer)
+      espBusy = false; if (of !== sol) { espD = null; return; }   // a molecule since left: its potential is dropped, and the next pump asks for this one's
+      if (!r || r.error || !r.phi) return; espLast = r; onEsp(r);   // 0.6.5: the reply becomes the card (X2's consumer)
     }, () => { espBusy = false; });
   }
   function setFlow(v) {
@@ -1267,7 +1277,7 @@ export function createChem(host, api) {
       g.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${mine ? 0.95 : 0.5})`; g.lineWidth = mine ? 2 : 1;
       g.beginPath(); g.moveTo(px, Bt); g.lineTo(px, Bt - hgt); g.stroke();
       const hit = { kind: 'line', key: 'stick-' + wOf(k).toFixed(6) + pol, points: [px, Bt - hgt, px, Bt], lw: mine ? 3 : 2,
-        colour: `rgb(${rgb.join(',')})`, info: infoOf(k, i), root: k, index: i };
+        colour: `rgb(${rgb.join(',')})`, info: () => infoOf(k, i), root: k, index: i };
       hovers.push(hit);
       if (tda && popOf) { const p = popOf(i); if (p > 1e-6) { g.fillStyle = T.fg(0.92); g.beginPath(); g.arc(px, Bt - hgt, 2 + 5 * Math.sqrt(p), 0, 2 * Math.PI); g.fill(); } }   // the register's population on this state
       if (selected && selected === k) { g.fillStyle = T.fg(0.95); g.beginPath(); g.arc(px, Bt - hgt, 2.6, 0, 2 * Math.PI); g.fill(); }
@@ -1307,7 +1317,7 @@ export function createChem(host, api) {
       const hgt = fMax > 0 ? Math.max(2, k.f / fMax * (Bt - Tp) * 0.8) : 2;
       gc.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.9)`; gc.lineWidth = 1.6;
       gc.beginPath(); gc.moveTo(px, Bt); gc.lineTo(px, Bt - hgt); gc.stroke();
-      hovers.push({ kind: 'line', key: 'core-' + wOf(k).toFixed(6), points: [px, Bt - hgt, px, Bt], lw: 3, colour: `rgb(${rgb.join(',')})`, info: infoOf(k, i), root: k, index: i });
+      hovers.push({ kind: 'line', key: 'core-' + wOf(k).toFixed(6), points: [px, Bt - hgt, px, Bt], lw: 3, colour: `rgb(${rgb.join(',')})`, info: () => infoOf(k, i), root: k, index: i });
     }
     gc.fillStyle = T.ink(0.85); gc.textBaseline = 'top';
     fitText(gc, 'core 19–21 Eh · Δt diagnostic', 6, Tp, { x0: 2, y0: 0, x1: W - 2, y1: H }, 'left', true);
@@ -1328,7 +1338,7 @@ export function createChem(host, api) {
     vibOn = !!(v && row && sol && sol.D && basis === 'sto-3g' && !sol.model); vibSw.set(vibOn); if (v && !vibOn && sol && (sol.model || sol.volume)) { status(sol.volume ? VOL : uhf() ? OPEN : LDA_VIB, 'warn'); return false; }
     if (!vibOn) { vibFr = vibD = vibAt = null; vibJ = -1; if (was && S() && sol && S().pose(model(), sol.shells)) pushMatrix(); if (v) status(row ? 'VIBRATE plays the STO-3G record of a solved molecule' : 'no modes recorded for this molecule', 'warn'); vibSay(); tell(); return false; }
     setRun(false);
-    if (!vib || vib.id !== preset) { const got = await fetchRecord(row.hash, { network: true }); if (!vibOn) return false; if (!got.record) { status('VIBRATE: the mode record did not open — ' + got.why, 'warn'); return setVib(false); }
+    if (!vib || vib.id !== preset) { const at = preset, got = await fetchRecord(row.hash, { network: true }); if (!vibOn || preset !== at) return false;   // a molecule left while its modes were read: the later press reads its own if (!got.record) { status('VIBRATE: the mode record did not open — ' + got.why, 'warn'); return setVib(false); }
       vib = decodeVibrate(got.record); vibSh = null; modeStep.setItems(vib.name.map((nm, j) => ({ id: String(j), label: `${nm} ${Math.round(vib.omega[j])} cm⁻¹ · ${vib.irrep[j]}` }))); }
     vibK = Math.min(vibK, vib.K - 1); modeStep.set(String(vibK)); vibAsk(); vibSay(); tell(); return true;
   }
@@ -1422,7 +1432,8 @@ export function createChem(host, api) {
     /* V2 · `volume`: the one on screen keeps its file; another opens on the next solve, from this device only (`preset` is what a missing one leaves) */
     const W = o.volume, vw = W && typeof W.volume === 'string' && typeof W.id === 'string' && BASIS_LABEL[W.basis] ? { volume: W.volume, id: W.id, basis: W.basis, sha256: typeof W.sha256 === 'string' ? W.sha256 : null } : null;
     const same = !!(vw && volRef && vw.volume === volRef.volume && vw.id === volRef.id);
-    if (volRef && !same) { volRef = null; volSeq++; preset = catPreset; resolve = true; fillSel(); }
+    volSeq++;   // a volume file still being read is the hand's last pick, not this record's: it is left behind
+    if (volRef && !same) { volRef = null; preset = catPreset; resolve = true; fillSel(); }
     if (same) { volWant = null; if (vw.basis !== basis) { basis = vw.basis; bSeg.set(basis); resolve = true; } }
     else {
       if ((volWant = vw)) resolve = true;
@@ -1480,8 +1491,8 @@ export function createChem(host, api) {
     },
     /** the chosen orbital as its S1 name { group, irrep, count, member } — what a link carries (0.4.0 S2); null when none is chosen or named */
     orbitalKey,
-    /** 0.6.5 X2 · ESP: the pump's consumer (a `chem.esp` reply), and the caption a capture carries while its card is on the field */
-    onEsp, espCaption: () => [espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : '', vibLine(' · STO-3G RHF harmonic, as computed'), drawn() === 'dlda' && pair() ? 'Δ LDA−RHF · where LDA puts more density' : '', said && said.lda, drawn() === 'spin' && sol && sol.Ds ? 'SPIN · UHF' : ''].filter(Boolean).join(' · '),   // 0.7.0 V1: and the mode while VIBRATE plays
+    /** 0.6.5 X2 · ESP: the caption a capture carries while its card is on the field */
+    espCaption: () => [espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : '', vibLine(' · STO-3G RHF harmonic, as computed'), drawn() === 'dlda' && pair() ? 'Δ LDA−RHF · where LDA puts more density' : '', said && said.lda, drawn() === 'spin' && sol && sol.Ds ? 'SPIN · UHF' : ''].filter(Boolean).join(' · '),   // 0.7.0 V1: and the mode while VIBRATE plays
     /** 0.7.0 · the nuclei and the dipole AS DRAWN this frame (bohr, a.u.): the preset's atoms and the solve's dipole until VIBRATE poses them (V1); the skeleton and the atom labels read these, never moleculeAtoms */
     atomsNow: () => (vibFr && vibAt) || chemAtoms(preset), /** iteration 014 D6: the open rung's Mulliken charges and a record's bonds, or null */ /** iteration 014 B3: a volume rung's φ grid, or null (field.js's Poisson pass) */ espGrid: () => (sol && sol.espGrid) || null, chargesNow: () => (sol && sol.mulliken) || null, bondsNow: () => (sol && sol.bonds) || null, dipoleNow: () => (vibFr && vibJ >= 0 ? Array.from(vibFr.dipole.subarray(3 * vibJ, 3 * vibJ + 3)) : (sol && sol.dipole) || null),
     /** 0.7.0 V1 · VIBRATE from outside (the verb, __LW.chem): the row's own controls; `breathe` presses BREATHE; → the line while it plays, or null */
@@ -1557,24 +1568,20 @@ export function createChem(host, api) {
     async run(n) {
       if (!sol) return null;
       if (!rt) { const k = await kick(); if (!k) return null; }
-      const want = (rt ? rt.steps : 0) + Math.max(1, Math.round(n || speed));
-      const t0 = Date.now();
+      const run0 = rt; if (!run0) return null;
+      const want = run0.steps + Math.max(1, Math.round(n || speed)), t0 = Date.now();
       /* THE SCRIPTED ROAD CLAIMS THE FIELD TOO.  `running` is the RUN switch; this road never set it, so a scripted
          propagation was the `ground` model and the register out-ranked a run in progress.  The claim is the tdhf
          model's, whichever road is propagating, and it is handed back in `finally` unless the switch holds it. */
       const mine = !running; if (mine) { scripted = true; if (S()) S().claim('tdhf', true, 'a scripted RT run is propagating the density'); }
       try {
-      while (rt && rt.steps < want && Date.now() - t0 < 120000) {
+      while (rt === run0 && rt.steps < want && Date.now() - t0 < 120000) {
         if (!inflight) { const left = want - rt.steps; inflight = true;
           /* eslint-disable no-await-in-loop */
           const r = await call({ op: 'chem.rt.run', steps: Math.min(left, Math.max(1, speed)), factors: flowOn });
           inflight = false;
-          if (!r || r.error) return null;
-          rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
-          rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep; if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im; rt.F = factorsOf(r);
-          if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
-          rt.samples = r.samples || rt.samples; append(r.trace);
-          pushMatrix(); if (r.D_re && symDue()) symmetryLine(rt.D_re, 'RUN');
+          if (!r || r.error || rt !== run0) return null;   // a new molecule, a reset or a kick has left this run
+          landRun(r);
         } else await new Promise((res) => setTimeout(res, 8));
       }
       } finally { if (mine) { scripted = false; if (!running && S()) S().claim('tdhf', false, 'the scripted RT run has finished'); pushMatrix(); } }   // and the card's own model repaints the last density
