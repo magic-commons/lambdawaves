@@ -75,7 +75,7 @@ export function createKepler(canvas) {
   }
   /* ── THE IMPULSE VECTOR (wave 53; `bow` is still its name in the code), redrawn at iteration 008 K (Josh: "remove the verbosity
      and obvious controls and instead show k = and λ = in a math font, improve the dotted line and arrow look").
-     It is NOT drawn on this canvas any more: a picture composites #kepler (capture.js `overlays`), and a held gesture must never
+     It is NOT drawn on this canvas any more: a film bakes #kepler (lab/film-bake.js), and a held gesture must never
      reach a picture or a film.  It is its own DOM layer beside the canvas, built at the first hold and written only while one is
      held: the GUIDE (the pull, origin → pointer) an even dash in the ink's weight, fitted to its own length so it starts and ends
      on a dash; the HUB at the origin; both in the ink, white under `mix-blend-mode: difference` as the ATOM LABELS are, so they

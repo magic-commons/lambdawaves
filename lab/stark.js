@@ -4,7 +4,7 @@
  * and a shell past it would ionise — this basis holds it.  The basis's polarizability is its own sum over states (≈ 81 % of the exact 9/2). */
 import { BASIS, radial } from './hydrogen.js';
 import { eigSymQL } from './linalg.js';
-/* THE SONG's z (0.6.4 S1, moved here from mathworker.js, which re-exports it: ONE build for the frame thread and the worker).  z = δ_mm' ∫R_nl R_n'l' r³ dr
+/* THE SONG's z (0.6.4 S1, moved here from mathworker.js, which imports it: ONE build for the frame thread and the worker).  z = δ_mm' ∫R_nl R_n'l' r³ dr
  * (trapezoid, 20 000 points to r = 400) × √(((l+1)² − m²)/((2l+1)(2l+3))), eigensolved once (eigSymQL — what the tree's eigSym runs at n = 140). */
 let hzOp = null;
 export function hydrogenZ() {
