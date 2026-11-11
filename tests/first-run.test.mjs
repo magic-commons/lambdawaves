@@ -150,7 +150,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const demos = readdirSync(demoDir).filter((f) => f.endsWith('.lambdawaves.json')).map((f) => JSON.parse(readFileSync(new URL(f, demoDir), 'utf8')));
   const wires = {
     seed: src.includes("const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 };"),
-    restore: src.includes("const dq = deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'); if (!GRID_PAIRING[dq.res]) delete dq.res; if (dq.steps > GRID_PAIRING[128].steps) dq.steps = GRID_PAIRING[128].steps; Object.assign(quality, finiteOver(quality, dq));") && !src.includes('Object.assign(quality, pr.quality'),
+    restore: src.includes("const dq = deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'); if (!GRID_PAIRING[dq.res]) delete dq.res; if (dq.steps > GRID_PAIRING[128].steps) dq.steps = GRID_PAIRING[128].steps; for (const k of ['scale', 'autoScale', 'minScale']) if (Number.isFinite(dq[k])) dq[k] = Math.min(1, Math.max(0.35, dq[k])); Object.assign(quality, finiteOver(quality, dq));") && !src.includes('Object.assign(quality, pr.quality'),
     serializeStillWrites: src.includes('quality: { ...quality }'),
     gridPairingAgrees: src.includes('quality.steps = { 64: 110, 96: 160, 128: 240 }[+v]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[+v];')
       && eq(GRID_PAIRING, { 64: { steps: 110, scale: 0.75 }, 96: { steps: 160, scale: 1 }, 128: { steps: 240, scale: 1 } }),

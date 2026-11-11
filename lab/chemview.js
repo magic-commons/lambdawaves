@@ -1338,7 +1338,7 @@ export function createChem(host, api) {
     vibOn = !!(v && row && sol && sol.D && basis === 'sto-3g' && !sol.model); vibSw.set(vibOn); if (v && !vibOn && sol && (sol.model || sol.volume)) { status(sol.volume ? VOL : uhf() ? OPEN : LDA_VIB, 'warn'); return false; }
     if (!vibOn) { vibFr = vibD = vibAt = null; vibJ = -1; if (was && S() && sol && S().pose(model(), sol.shells)) pushMatrix(); if (v) status(row ? 'VIBRATE plays the STO-3G record of a solved molecule' : 'no modes recorded for this molecule', 'warn'); vibSay(); tell(); return false; }
     setRun(false);
-    if (!vib || vib.id !== preset) { const at = preset, got = await fetchRecord(row.hash, { network: true }); if (!vibOn || preset !== at) return false;   // a molecule left while its modes were read: the later press reads its own if (!got.record) { status('VIBRATE: the mode record did not open — ' + got.why, 'warn'); return setVib(false); }
+    if (!vib || vib.id !== preset) { const at = preset, got = await fetchRecord(row.hash, { network: true }); if (!vibOn || preset !== at) return false;   /* a molecule left while its modes were read: the later press reads its own */ if (!got.record) { status('VIBRATE: the mode record did not open — ' + got.why, 'warn'); return setVib(false); }
       vib = decodeVibrate(got.record); vibSh = null; modeStep.setItems(vib.name.map((nm, j) => ({ id: String(j), label: `${nm} ${Math.round(vib.omega[j])} cm⁻¹ · ${vib.irrep[j]}` }))); }
     vibK = Math.min(vibK, vib.K - 1); modeStep.set(String(vibK)); vibAsk(); vibSay(); tell(); return true;
   }

@@ -89,7 +89,7 @@ async function chemReady(m) {
   if (m.record) { chemRegister(basis, m.record); return; }
   if (chemRecords.has(basis)) return;
   if (!BASIS_FILES[basis]) throw new Error(`chem: unknown basis '${basis}'`);
-  const r = await fetch(new URL('./vendor/bse/' + BASIS_FILES[basis], import.meta.url));
+  const r = await fetch(new URL('./vendor/bse/' + BASIS_FILES[basis], import.meta.url), { signal: AbortSignal.timeout(20000) });   // a stalled fetch ends with its error, so the one queue moves on
   if (!r.ok) throw new Error(`chem: cannot load ${BASIS_FILES[basis]} (${r.status})`);
   chemRegister(basis, await r.json());
 }
