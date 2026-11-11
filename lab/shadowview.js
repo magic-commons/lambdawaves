@@ -60,7 +60,7 @@ export function createShadowView(canvas, api) {
         g.beginPath(); g.moveTo(cx, cy); g.lineTo(x, y); g.stroke();
         g.fillStyle = rgba(n, 1); g.beginPath(); g.arc(x, y, a === selected ? 4.5 : 3.5, 0, 2 * Math.PI); g.fill();
         hovers.push({ kind: 'line', key: 'ph' + a, points: [cx, cy, x, y], lw: a === selected ? 2.5 : 1.5, colour: rgba(n, 1),
-          info: `${label(a)}  ω = ${(-BASIS[a].E).toFixed(4)}  ·  (q, p) = (${q[i].toFixed(2)}, ${p[i].toFixed(2)})` });
+          info: `${label(a)}  ω = ${(-api.reg.Ediag(a)).toFixed(4)}  ·  (q, p) = (${q[i].toFixed(2)}, ${p[i].toFixed(2)})` });
       }
     } else if (mode === 'oscillators') {
       const n = ids.length, left = 26, right = W - 10, top = 16, bot = H - 22, mid = (top + bot) / 2, amp = (bot - top) / 2 - 4;
@@ -79,7 +79,7 @@ export function createShadowView(canvas, api) {
            hold it: at eight modes the names used to run into one another (measured now, dropped if they would) */
         if (g.measureText(label(a)).width <= dx - 3) { g.fillStyle = rgba(nn, 1); g.textAlign = 'center'; g.fillText(label(a), x, bot + 12); }
         hovers.push({ kind: 'dot', key: 'os' + a, x, y, r: a === selected ? 7 : 5.5, colour: rgba(nn, 1),
-          info: `${label(a)}  ω = ${(-BASIS[a].E).toFixed(3)}  ·  q = ${q[i].toFixed(3)}  ·  amplitude ${r.toFixed(3)}` });
+          info: `${label(a)}  ω = ${(-api.reg.Ediag(a)).toFixed(3)}  ·  q = ${q[i].toFixed(3)}  ·  amplitude ${r.toFixed(3)}` });
       }
     } else {   // lissajous
       /* populations from the register's anchor: constant in time, so equal weights cannot flicker the pair */
@@ -107,7 +107,7 @@ export function createShadowView(canvas, api) {
       }
       const x = cx + trail[trail.length - 1][0] * R, y = cy - trail[trail.length - 1][1] * R;
       g.fillStyle = T.fg(1); g.beginPath(); g.arc(x, y, 4, 0, 2 * Math.PI); g.fill();
-      const ratio = BASIS[ids[ia]].E / BASIS[ids[ib]].E;
+      const ratio = api.reg.Ediag(ids[ia]) / api.reg.Ediag(ids[ib]);
       /* the two axis names stay OUTSIDE the frame (they are the axes, not a label on the curve) and are
          measured into the margin they have; the ω ratio the corner used to carry is on the trace's hover. */
       g.fillStyle = rgba(BASIS[ids[ia]].n, 1);
