@@ -38,12 +38,12 @@ import { BASIS, BASIS_INDEX, NMAX, AU_TIME_AS, stateOf, modeTable, radial, lague
 const PI = Math.PI, SQRT2 = Math.SQRT2;
 
 /* ── the Lagrangian, along the true motion ────────────────────────────────── */
-/** { T, V, L, H } from the coefficients at one instant: T = ½Σ E p², V = ½Σ E q², q = √2 Re c, p = √2 Im c */
+/** { T, V, L, H } from the coefficients at one instant: T = ½Σ E p², V = ½Σ E q², q = √2 Re c, p = √2 Im c, E the operator in force's */
 export function lagrangian(re, im, ids) {
   let T = 0, V = 0;
-  const list = ids || BASIS.map((s) => s.index);
+  const list = ids || BASIS.map((s) => s.index), H = getHamiltonian();
   for (const a of list) {
-    const E = BASIS[a].E, q = SQRT2 * re[a], p = SQRT2 * im[a];
+    const E = H.energy(a), q = SQRT2 * re[a], p = SQRT2 * im[a];
     T += 0.5 * E * p * p; V += 0.5 * E * q * q;
   }
   return { T, V, L: T - V, H: T + V };
@@ -54,11 +54,11 @@ export function lagrangian(re, im, ids) {
  */
 export function action(re0, im0, t, ids) {
   let S = 0;
-  const list = ids || BASIS.map((s) => s.index);
+  const list = ids || BASIS.map((s) => s.index), H = getHamiltonian();
   for (const a of list) {
     const p0 = re0[a] * re0[a] + im0[a] * im0[a];
     if (p0 === 0) continue;
-    const th0 = Math.atan2(im0[a], re0[a]), th = th0 - BASIS[a].E * t;
+    const th0 = Math.atan2(im0[a], re0[a]), th = th0 - H.energy(a) * t;
     S += 0.5 * p0 * (Math.sin(2 * th) - Math.sin(2 * th0));
   }
   return S;
