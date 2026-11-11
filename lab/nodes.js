@@ -65,7 +65,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const filter = pictureFilter(canvas), cache = new Map(), layers = createLayerHost(canvas.parentElement, gpu);
   let passes = 0, nodes = [];
   const flags = { view: null, solo: null };                          // 020 X3 · A FLAG IS NOT A RECORD: VIEW HERE and SOLO die with the session
-  const how = () => ({ upTo: flags.view, solo: flags.solo, off: !!rec().off });
+  let off = !!rec().off;                                             // BYPASS ALL (the record's), read by every compile
+  const how = () => ({ upTo: flags.view, solo: flags.solo, off });
   /* 038 N6 · A NODE HAS A TARGET: the field writes its object codes into the canvas's alpha (setObjectMask: premultiplied) only while a compiled run
      reads them — off, the canvas is opaque as ever and costs nothing; a flip reconfigures the canvas, so a present follows at once */
   const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache, how()); filter.setChain(c.runs).flush(); layers.set(c.layers);
@@ -150,9 +151,9 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const hand = (q, k, v) => { undo.touch(); if (routed(ID(q, k))) mod.registry.write(ID(q, k), v); else setValue(q, k, v, 'hand'); };
 
   /* 020 X1 · NODES' OWN UNDO (lab/nodes-undo.js): a snapshot of the list and the graph's places; every verb marks the state before it */
-  const snap = () => JSON.stringify({ list: rows(), at: rec().at || null });
+  const snap = () => JSON.stringify({ list: rows(), at: rec().at || null, off });
   const undo = createUndo(snap, (s) => { const o = JSON.parse(s); batch(() => { for (const q of nodes) unenroll(q); nodes = o.list.map((q) => fresh(q.id, q.type, q)); for (const q of nodes) enroll(q); });
-    put({ at: o.at }); changed(true); });
+    off = !!o.off; put({ at: o.at, off }); changed(true); });
   const many = (x) => (Array.isArray(x) ? x : [x]);
 
   /* THE VERBS: add · remove · bypass · a graph · reorder (by the graph's top → bottom) */
@@ -203,7 +204,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   /* 020 X3 · THE FLAGS: VIEW HERE (the chain up to this node; again = STAGE OUT) and SOLO (this node alone) are the view's; BYPASS ALL
      (the graph off, `off: true`) is the record's, so a reload shows what the reader saw */
   const flag = (f, id) => { flags[f] = id && flags[f] !== id && byId(id) ? id : null; changed(); };
-  function setOff(on) { if (!!rec().off === !!on) return; undo.mark(); put({ off: !!on }); changed(); }
+  function setOff(on) { if (off === !!on) return; undo.mark(); off = !!on; put({ off }); changed(); }
   function tidy() { undo.mark(); for (const q of nodes) q.at = null; put({ at: {} }); changed(); }
   const graphOf = () => { const { channel, ...grade } = model.serialize();
     return { nodes: nodes.map(({ type, values, bypass, plug }) => (type === 'curves' ? { type, bypass } : { type, values: { ...values }, bypass, ...(plug === false && { plug }) })), curves: curvesNode() ? JSON.parse(JSON.stringify(grade)) : null }; };
@@ -270,7 +271,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   /* the views' one door to the model */
   let win = null;
   const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, setPlug, duplicate, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
-    setFold, rename, reset, move, tidy, flags, setView: (id) => flag('view', id), setSolo: (id) => flag('solo', id), setOff, off: () => !!rec().off,
+    setFold, rename, reset, move, tidy, flags, setView: (id) => flag('view', id), setSolo: (id) => flag('solo', id), setOff, off: () => off,
     undo: () => undo.undo(), redo: () => undo.redo(), editing,
     door: (kind) => { if (kind === 'win') { win.close(); raise('nodes'); } else { rk.close('nodes'); win.open(); } } };
 
