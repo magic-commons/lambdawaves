@@ -172,7 +172,6 @@ export function createReadouts(app) {
   const bloch = createBloch(wBlo.body, { t: () => clock.t, obs }); wBlo.root.addEventListener('devopen', () => bloch.set({}));
   const central = createCentral(rooms.central, { solve: (w) => solveCard({ op: 'central.solve', ...w }, () => solveCentral(w.preset, w.params)), apply: (id) => { switchHamiltonian(id); if (ui.hamSeg.value !== 'lattice') ui.hamSeg.set(id); }, current: () => getHamiltonian().id, populated: () => reg.populated() }); rooms.central.addEventListener('roomopen', () => central.prepare());
   const sep = createSeparable(rooms.separable, { apply: (id) => { switchHamiltonian(id); if (ui.hamSeg.value !== 'lattice') ui.hamSeg.set(id); } }); rooms.separable.addEventListener('roomopen', () => sep.prepare());
-  standDown(wBlo, () => ui.hamSeg.readBack('bloch'));
   /* the ⧉ digests (021 G3: out of boot()'s DIGESTS table) */
   const metersDigest = () => 'density period\t' + (() => { const P = app.hooks.period ? app.hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents;
   const calculusDigest = () => ({ md: calculus && calculus.last ? calculusMarkdown(calculus.last) : '' });   // 0.4.0 S3: ⧉ copies THE PROSE FIGURE (calculus.js), which pastes into the notebook and renders
