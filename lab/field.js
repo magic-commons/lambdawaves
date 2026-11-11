@@ -454,11 +454,11 @@ fn freeAtom(Z: f32, r: f32) -> vec2<f32> {
       for (var k = 0u; k < 8u; k++) {
         let ps = p + (vec3<f32>(f32(k & 1u), f32((k >> 1u) & 1u), f32(k >> 2u)) - vec3<f32>(0.5)) * (0.5 * E.h);
         let g = (ps + vec3<f32>(E.fhalf)) / tv - vec3<f32>(0.5); let i0 = floor(g); let f = g - i0;
-        var sa = 0.0; var sb = 0.0;
+        var sa = 0.0;
         for (var c = 0u; c < 8u; c++) {
           let o = vec3<f32>(f32(c & 1u), f32((c >> 1u) & 1u), f32(c >> 2u)); let wv = select(vec3<f32>(1.0) - f, f, o == vec3<f32>(1.0));
           let vi = clamp(i0 + o, vec3<f32>(0.0), vec3<f32>(res - 1.0)); let d = length((vi + vec3<f32>(0.5)) * tv - vec3<f32>(E.fhalf) - A.xyz);
-          let rv = freeAtom(Z, d); let ww = wv.x * wv.y * wv.z; sa += ww * sqrt(rv.x + rv.y); sb += ww * sqrt(rv.y);
+          let rv = freeAtom(Z, d); let ww = wv.x * wv.y * wv.z; sa += ww * sqrt(rv.x + rv.y);
         }
         acc += sa * sa;
       }
