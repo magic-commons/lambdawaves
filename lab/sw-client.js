@@ -96,6 +96,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
         : swClient.state === 'mixed' ? 'MIXED BUILD — reload'
         : ctl && w && w !== BUILD_ID ? 'MIXED BUILD — reload'
         : ctl ? 'offline ready' + (swClient.files ? ' · ' + swClient.files + ' files' : '')
+        : globalThis.lwavesDesktop ? 'desktop app'
         : swClient.mode === 'automation' || swClient.mode === 'declined' ? 'worker off (' + swClient.mode + ')'
         : swClient.mode === 'unsupported' ? 'no service worker in this browser'
         : 'first launch — offline from the next launch';
