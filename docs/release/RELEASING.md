@@ -37,6 +37,7 @@ npm audit                                          # 0 vulnerabilities
 (cd tools/platform/electron && npm audit)          # 5 moderate (glob, minimatch under @electron/packager 20.3.0); 0 high
 (cd tools/platform/electron && node package.mjs --platform linux && node smoke-run.mjs --packaged)   # 17/17 GREEN on 2026-11-11 (042 S); the Steam folders: STEAM.md
 node tools/build-deploy.mjs --quiet --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-3   # rc 0: dist/ 15,674 files, 5.85 GB (1,739 files, 28.9 MiB without --ship); §V7 the free plan's budget
+                                                   # 042: the deploy strips our JS, CSS and index.html of comments (§1b; proved §V8; precache 8.41 → 5.84 MiB); --no-strip ships lab/'s bytes
 node tools/changelog.mjs --check                   # rc 0: CHANGELOG, CITATION.cff and BUILD_LINE (0.9.9-beta) in step
 # THE LOCK on a served tree (python3 tools/gate/server.py . <p> &), both fixtures: 0 readback differences
 nice -n 10 env LW_PORT=<p> GD_PORT=<gd> node tools/perf/digest-lock.mjs --check --query gastab=0                                            # 843 · 0

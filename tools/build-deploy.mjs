@@ -4,6 +4,7 @@
  *   node tools/build-deploy.mjs            assemble dist/, verify it, print the payload
  *   node tools/build-deploy.mjs --no-test  skip the tests/pwa.test.mjs subprocess (faster while iterating)
  *   node tools/build-deploy.mjs --quiet    the verdicts and the payload only, no per-file listing
+ *   node tools/build-deploy.mjs --no-strip ship lab/'s bytes with their comments (for debugging a stripped build: §1b, §V8)
  *   node tools/build-deploy.mjs --shelf F  also ship THE SHELF F (a packer's volumes.json) as dist/volumes/volumes.json — each entry an
  *                                          archive the reader opens from disk (iteration 005 S); no volume's bytes ever ship here
  *
@@ -45,13 +46,19 @@
  * relative to the manifest (see MANIFEST IDENTITY in §V2).  Nothing in lab/ is rewritten, tools/serve.sh and
  * ./test.sh keep working, and the dossier's "preserve a rational existing structure, avoid unnecessary
  * migration churn" (§7) and "preserving working behavior" (§35) are honoured by construction.
+ * 042 Z · THE DEPLOY STRIPS COMMENTS: the copy of our JS, CSS and index.html loses its comments (tools/strip-comments.mjs, §1b; the
+ * vendor folders and the fonts are copied as they are), sw.js §1 and build-id.js are re-made from the shipped bytes, and §V8 proves
+ * every file token for token against lab/, which keeps every comment.
  */
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, copyFileSync, statSync, existsSync, lstatSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
+import { cpus } from 'node:os';
 import path from 'node:path';
+import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { assertPublicTree } from './release-inputs.mjs';
+import { stripFile, selfTest } from './strip-comments.mjs';
 
 /* ══ THE THREE CONSTANTS ════════════════════════════════════════════════════════════════════════════════
  *
@@ -95,6 +102,7 @@ const DIST = path.join(ROOT, 'dist');
 const ARGS = new Set(process.argv.slice(2));
 const RUN_TEST = !ARGS.has('--no-test');
 const QUIET    = ARGS.has('--quiet');
+const STRIP    = !ARGS.has('--no-strip');
 const SHELF    = ARGS.has('--shelf') ? process.argv[process.argv.indexOf('--shelf') + 1] : null;
 const SHIP     = new Set(ARGS.has('--ship') ? process.argv[process.argv.indexOf('--ship') + 1].split(',').filter(Boolean) : []);   // 030: the volumes that travel as files
 
@@ -272,6 +280,50 @@ if (SHELF) {
 console.log(`lab/ → dist/${SITE} : ${labFiles.length - dropped.size} files`);
 for (const [f, why] of DROP)       console.log(`  dropped  ${f.padEnd(16)} ${QUIET ? '' : why}`);
 for (const [f, why] of SHIP_EXTRA) console.log(`  added    ${f.padEnd(16)} ${QUIET ? '' : why}`);
+
+/* ══ 1b.  THE STRIP (042 Z · Josh 11-11: "Deploy should strip comments. Keep it super clean.") ════════════════════════════════════
+ * Our JS, our CSS and index.html lose their comments in dist/ (tools/strip-comments.mjs: a lexer; no string, template chunk or regex
+ * changes by a byte, a licence comment stays); vendor/, the kit's shell/vendor/ and fonts/ are third-party or binary and go as they are.
+ * sw.js is the one classic script (main.js registers it); every other file is a module (index.html's module tags, the two module workers).
+ * sw.js §3 rejects an install whose body does not hash to its entry, so dist/sw.js's §1 is re-hashed from the shipped bytes and
+ * dist/build-id.js carries the digest of that list without itself — pwa.test's rule for lab/, applied to dist/; §V1 re-proves both. */
+rule('1b · STRIP COMMENTS');
+const STRIPPED = new Map(), STRIP_BAD = [];                      // dist path → { before, after, ms, kept, removed, str, tpl, re, url }
+const OWN = (rel) => (/\.(js|css)$/.test(rel) && !/^(vendor|mir\/shell\/vendor)\//.test(rel)) || rel === 'index.html';
+const CLASSIC = new Set([at('sw.js')]);
+if (!STRIP) console.log('SKIP  --no-strip: dist/ carries lab/\'s bytes, comments and all.');
+else {
+  const t0 = performance.now();
+  for (const rel of labFiles.filter((r) => !dropped.has(r) && OWN(r))) {
+    const src = readFileSync(path.join(LAB, rel), 'utf8'), t = performance.now();
+    let r; try { r = stripFile(rel, src, { classic: CLASSIC.has(at(rel)) }); } catch (e) { r = { why: e.message }; }
+    if (r.why) { STRIP_BAD.push([at(rel), r.why]); continue; }   // the copy keeps lab/'s bytes, and §V8 fails the build
+    writeFileSync(path.join(DIST, at(rel)), r.out);
+    STRIPPED.set(at(rel), { before: Buffer.byteLength(src), after: Buffer.byteLength(r.out), ms: performance.now() - t, kept: r.kept, removed: r.removed, ...r.n });
+  }
+  const swFile = path.join(DIST, at('sw.js')), bidFile = path.join(DIST, at('build-id.js'));
+  let sw = readFileSync(swFile, 'utf8');
+  const list = (sw.match(/\nconst PRECACHE = \[\n([\s\S]*?)\n\];/) || [])[1], fn = (sw.match(/\nfunction digest\(s\) \{[\s\S]*?\n\}/) || [])[0];
+  const rows = list ? [...list.matchAll(/\['([^']+)',\s*'([0-9a-f]{12})'\]/g)].map((m) => [m[1], m[2]]) : [];
+  if (!rows.length || !fn) STRIP_BAD.push([at('sw.js'), 'its PRECACHE array or digest() moved, so §1 cannot be re-hashed']);
+  else {
+    const digest = vm.runInNewContext(fn + '\ndigest');
+    const hash = (u, old) => { const f = path.join(DIST, at(u.replace(/^\.\//, ''))); return existsSync(f) ? rev(readFileSync(f)) : old; };   // a missing file is §V1's
+    const page = digest(rows.filter(([u]) => u !== './build-id.js').map(([u, h]) => u + '@' + hash(u, h)).join('\n'));
+    writeFileSync(bidFile, readFileSync(bidFile, 'utf8').replace(/(BUILD_ID = ')[0-9a-z]+'/, `$1${page}'`));   // first: its own hash is an entry
+    sw = sw.replace(list, () => list.replace(/(\['([^']+)',\s*')([0-9a-f]{12})('\])/g, (_, a, u, h, b) => a + hash(u, h) + b));
+    writeFileSync(swFile, sw);
+  }
+  const files = [...STRIPPED], sum = (re, k) => files.filter(([r]) => re.test(r)).reduce((n, [, s]) => n + s[k], 0);
+  for (const [name, re] of [['JS', /\.js$/], ['CSS', /\.css$/], ['index.html', /\.html$/]]) {
+    const b = sum(re, 'before'), a = sum(re, 'after');
+    console.log(`  ${name.padEnd(10)} ${String(files.filter(([r]) => re.test(r)).length).padStart(4)} files  ${kb(b).padStart(10)} → ${kb(a).padStart(10)}  (−${(100 * (1 - a / b)).toFixed(1)} %)`);
+  }
+  const size = (dir, u) => { const f = path.join(dir, dir === DIST ? at(u.replace(/^\.\//, '')) : u.replace(/^\.\//, '')); return existsSync(f) ? statSync(f).size : 0; };
+  const slow = files.reduce((m, f) => (f[1].ms > m[1].ms ? f : m), ['', { ms: 0 }]);
+  console.log(`  the precache ${kb(rows.reduce((n, [u]) => n + size(LAB, u), 0))} → ${kb(rows.reduce((n, [u]) => n + size(DIST, u), 0))}, ${rows.length} entries re-hashed and build-id.js re-made from the shipped bytes; ` +
+    `${sum(/./, 'removed')} comments removed, ${sum(/./, 'kept')} kept as licences; the slowest ${slow[0]} (${slow[1].ms.toFixed(0)} ms); ${((performance.now() - t0) / 1000).toFixed(2)} s with the proof.`);
+}
 
 /* ══ 2a.  ROBOTS ════════════════════════════════════════════════════════════════════════════════════════ */
 rule('2a · ROBOTS  (dist/robots.txt)');
@@ -467,6 +519,17 @@ if (!missing.length && !wrong.length && !unexplained.length) {
   console.log(`PASS  ${PRECACHE.length} precache entries: every one present in dist/ and every content hash re-verified against the shipped bytes (${kb(bytes)}).`);
   const skipped = distFiles.filter((r) => !pcNames.has(r));
   console.log(`      ${skipped.length} shipped-but-not-precached, each by rule: ${skipped.join(', ')}`);
+}
+/* 042 Z: the page's build and the kept parsers, of the SHIPPED bytes (pwa.test proves them for lab/; §1b re-made them for a stripped dist/) */
+{
+  const fn = (swSrc.match(/\nfunction digest\(s\) \{[\s\S]*?\n\}/) || [])[0];
+  const page = fn && vm.runInNewContext(fn + '\ndigest')(PRECACHE.filter(([u]) => u !== 'build-id.js').map(([u, h]) => './' + u + '@' + h).join('\n'));
+  const kept = JSON.parse(((swSrc.match(/\nconst KEPT = (\[.*\]);/) || [])[1] || '[]').replace(/'/g, '"'));
+  const was = problems.length;
+  if (!page || !inDist.has(at('build-id.js')) || !textD(at('build-id.js')).includes(`BUILD_ID = '${page}'`))
+    fail('V1', `dist/${at('build-id.js')} does not carry ${page}, the digest of dist/${at('sw.js')}'s list without itself — every page would call its own worker a mixed build`);
+  for (const [f, h] of kept) if (!inDist.has(at(f)) || rev(readD(at(f))) !== h) fail('V1', `KEPT records dist/${at(f)} at ${h}, which is not its shipped bytes — every activate would sweep a good copy`);
+  if (problems.length === was) console.log(`PASS  dist/build-id.js carries ${page}, the list's digest without itself; KEPT's ${kept.length} parsers are their shipped bytes.`);
 }
 
 /* ══ V2.  EVERY REFERENCE IN THE ASSEMBLED TREE RESOLVES ════════════════════════════════════════════════
@@ -764,6 +827,35 @@ const over = distFiles.filter((r) => statSync(path.join(DIST, r)).size > FREE_FI
 if (distFiles.length > FREE_FILES) fail('V7', `dist/ holds ${distFiles.length} files; the free plan deploys at most ${FREE_FILES} — ship one volume less (--ship)`);
 for (const r of over) fail('V7', `dist/${r} is ${kb(statSync(path.join(DIST, r)).size)}; the free plan serves files up to 25 MiB`);
 if (distFiles.length <= FREE_FILES && !over.length) console.log(`PASS  ${distFiles.length} of ${FREE_FILES} files (${FREE_FILES - distFiles.length} left for the volumes), every file under 25 MiB.`);
+
+/* ══ V8.  THE STRIP, PROVED (042 Z) ═════════════════════════════════════════════════════════════════════════════════════════════════
+ * §1b proved each file as it stripped it: the tokens of lab/'s file and of dist/'s are one list — every string, template chunk and regex
+ * byte for byte, each JS token with whether a line break precedes it (ASI), every CSS whitespace run a token — and the comments left are
+ * exactly the licence comments.  Here every shipped JS file it wrote is parsed as what it is: a module by `node --check`, sw.js by vm.Script. */
+rule('V8 · THE STRIP, PROVED');
+if (!STRIP) console.log('SKIP  --no-strip');
+else {
+  for (const [rel, why] of STRIP_BAD) fail('V8', `dist/${rel} is not stripped (lab/'s bytes ship): ${why}`);
+  const lexBad = selfTest({ quiet: true });   // the lexer's own hard cases (node tools/strip-comments.mjs --self-test says each)
+  if (lexBad) fail('V8', `${lexBad} of the stripper's own hard cases fail — its lexer is wrong, whatever the proof below says`);
+  const t0 = performance.now(), js = [...STRIPPED.keys()].filter((r) => r.endsWith('.js')), queue = [...js], bad = [];
+  const check = (src) => new Promise((done) => {
+    const p = spawn(process.execPath, ['--input-type=module', '--check'], { stdio: ['pipe', 'ignore', 'pipe'] });
+    let e = ''; p.stderr.on('data', (d) => (e += d)); p.on('close', (c) => done(c ? e.trim().split('\n').slice(0, 4).join(' | ') : null)); p.stdin.end(src);
+  });
+  await Promise.all(Array.from({ length: Math.max(2, cpus().length >> 1) }, async () => {
+    for (let rel; (rel = queue.shift());) {
+      let e = null;
+      if (CLASSIC.has(rel)) { try { new vm.Script(textD(rel), { filename: rel }); } catch (x) { e = x.message; } } else e = await check(textD(rel));
+      if (e) bad.push(`dist/${rel} does not parse: ${e}`);
+    }
+  }));
+  for (const b of bad) fail('V8', b);
+  const n = (k) => [...STRIPPED.values()].reduce((s, v) => s + (v[k] || 0), 0);
+  if (!STRIP_BAD.length && !bad.length && !lexBad)
+    console.log(`PASS  ${STRIPPED.size} files stripped, each proved token for token against lab/: ${n('str')} strings, ${n('tpl')} template chunks and ${n('re')} regexes${n('url') ? `, ${n('url')} url( )s` : ''} byte for byte, ${n('kept')} licence comments kept; the lexer's own hard cases pass. ` +
+      `${js.length} JS files parse (${js.length - [...CLASSIC].filter((r) => STRIPPED.has(r)).length} modules by node --check, sw.js as a classic script) in ${((performance.now() - t0) / 1000).toFixed(2)} s.`);
+}
 
 rule('3 · PAYLOAD');
 const sizes = distFiles.map((r) => [r, statSync(path.join(DIST, r)).size]).sort((a, b) => b[1] - a[1]);

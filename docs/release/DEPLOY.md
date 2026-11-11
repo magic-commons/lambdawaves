@@ -82,9 +82,18 @@ every resource from the worker, none from the network, navigation included).
 photosensitivity gate**. `tests/smoke.mjs` opens it from the dev server, never from `dist/`.
 Not shipped: `research/`, `tests/`, `tools/`, `docs/`, `serve*.sh`, `.tmp/`, `.git/`.
 
-Nothing in `lab/` is rewritten. Every path in it is relative, so the build is a pure move and `tools/serve.sh`
+Nothing in `lab/` is rewritten. Every path in it is relative, so the build is a move (less the comments, below) and `tools/serve.sh`
 and `./test.sh` keep working unchanged — the build re-proves that by walking every `src` / `href` /
 `import` / `url(` / `new URL(` / `Worker(` reference in the assembled tree.
+
+**042 · THE DEPLOY STRIPS COMMENTS** (Josh, 2026-11-11: "Keep it super clean"). The source keeps them; `dist/` does not. §1b runs
+`tools/strip-comments.mjs`, a lexer and not a regex, over our JS, our CSS and `index.html`: no string, template literal (the WGSL shaders)
+or regular expression changes by a byte, `vendor/`, `mir/shell/vendor/` and `fonts/` go as they are, and a licence comment (`@license`,
+`@preserve`, Copyright, SPDX, ©, `/*!`) stays. Token equivalence is the proof: §V8 fails the build unless each file's tokens, `lab/`
+against `dist/`, are one list, every JS file passes `node --check` and the lexer's own hard cases pass (`--self-test`); `sw.js` §1 and
+`build-id.js` are re-made from the shipped bytes and §V1 re-proves them. `--no-strip` ships `lab/`'s bytes, for debugging. A browser check
+of the shipped bytes serves a tree whose `lab` is `dist/` (`mkdir -p .tmp/dist-tree && ln -s ../../dist .tmp/dist-tree/lab &&
+ln -s ../../tools .tmp/dist-tree/tools`, then the gate server or the upgrade rig on `.tmp/dist-tree`).
 
 ---
 
