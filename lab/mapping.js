@@ -27,7 +27,8 @@ export async function resumeMidi(midi, say = () => {}) {
 
 export function createMapping(app, { kt }) {
   const A = app.sh.ACTIONS, T = kt.table, support = midiSupport();
-  const midi = createMidi({ storage: jsonStore(MIDI_KEY), run: (id) => { if (!A.get(id) || A.get(id).gesture) return; A.run(id); }, up: (id) => A.up(id), onState: () => paint() });
+  const midi = createMidi({ storage: jsonStore(MIDI_KEY), run: (id) => { if (!A.get(id) || A.get(id).gesture) return; A.run(id); }, up: (id) => A.up(id),
+    onState: () => { for (const e of Object.values(midi.map())) if (e.mode === 'hold') A.up(e.id); if (root.isConnected) paint(); } });   // a port come or gone lets every HELD row go (an unplugged device sends no note-off)
   const root = el('div', 'mp'), head = el('div', 'mp-head', root);
   const find = el('input', 'mp-find', head); find.type = 'search'; find.placeholder = t('Find an action…'); find.setAttribute('aria-label', t('Find an action'));
   const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'ask the browser for MIDI and list the inputs', onFire: () => midi.start() });
