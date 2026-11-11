@@ -867,7 +867,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        with ♥ TIP and NO THANKS; both continue. A file volume (OPEN FILE…) asks on every press: its file is the tip jar's thank-you (Josh
        10-31, B), so the words are THE FILE IS A THANK-YOU · ♥ TIP · I HAVE THE FILE, and its chooser opens on I HAVE THE FILE, Escape or a
        press outside (after ♥ TIP it waits for its own press: the new tab took the gesture). The Drive link is never in the app. */
-    let tipAsked = false;
+    let tipAsked = false, tipOff = null;
     const tipArt = (host) => { const f = el('span', 'mm-tip-art mm-holo', host); el('span', 'mm-halo', f); const lit = el('span', 'mm-lit', f), img = el('img', '', lit); el('span', 'mm-foil', lit); el('span', 'mm-rim', f);   // 032: the album art's light
       img.src = 'img/menu/tip-qr.svg'; img.alt = 'QR code: the tip jar'; img.width = img.height = 196; img.decoding = 'async'; img.draggable = false; return f; };
     const tipLink = (a) => { a.href = TIP_URL; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
@@ -879,10 +879,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const row = el('div', 'mm-tip-row', s), yes = tipLink(el('a', 'mm-tip-yes', row, '♥ TIP')), no = el('button', 'mm-tip-no', row, follow ? 'NO THANKS' : 'I HAVE THE FILE'); no.type = 'button';
       yes.title = follow ? 'Opens the tip jar in a new tab; the install goes on' : 'Opens the tip jar; its thank-you message has the file'; no.title = follow ? 'Go on without a tip' : 'Open the file you have';
       const key = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done(true); } };
-      const done = (cont) => { window.removeEventListener('keydown', key, true); back.remove(); if (cont) go(); };
+      const done = (cont) => { tipOff = null; window.removeEventListener('keydown', key, true); back.remove(); if (cont) go(); };
       yes.addEventListener('click', () => done(follow)); no.addEventListener('click', () => done(true));
       back.addEventListener('click', (e) => { if (e.target === back) done(true); });
-      window.addEventListener('keydown', key, true); no.focus();
+      window.addEventListener('keydown', key, true); tipOff = () => done(false); no.focus();
     }
     /* 032 THE PORTRAIT SHELF (Josh 11-01: "portrait oriented cards with images … 9:16 … the 'Vol. X' text towards the center bottom … a hero
        animation for each one that activates during mouseover … light mode and dark mode versions"): the card is album art — a 9:16 `.mm-holo`
@@ -890,7 +890,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        its hero, fetched on the first hover and paused on leaving; a volume HEROES does not name wears the λWAVES palette (skin.css).  The
        numeral and its count sit at the art's foot, the WIP cone at its head, the install under the card (iteration 012 L1's words). */
     const HERO = './img/menu/vol/', heroArt = (art, id) => artOf(art, HERO, id, HEROES[id]);
-    const heroes = new Set(), rest = () => { for (const h of heroes) h.stop(); };   // a volume opened or the Picker closed: every hero rests
+    const heroes = new Set(), rest = () => { for (const h of heroes) h.stop(); if (tipOff) tipOff(); };   // a volume opened or the Picker closed: every hero rests
     function card(v, k) {
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
       o.style.setProperty('--k', String(k));   // 034 F1 (Josh: "Don't show a mouseover hint for the volume libraries … just let the hero videos play"): no title on the card
