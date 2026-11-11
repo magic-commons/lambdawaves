@@ -70,16 +70,15 @@ export function createBadges({ dom, accept, field, reg, mat, clock, domain, qual
   function update() {
     const S = reg.P && reg.P.stark, f = S ? `INTER-SHELL STARK F = ${reg.field.Fz.toExponential(1)} · NUMERICAL · eigensolve in the n ≤ ${NMAX} basis` : reg.field.Fz !== 0 ? `STARK F = ${reg.field.Fz.toExponential(1)} · shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}`
       : reg.field.Bz !== 0 ? `ZEEMAN B = ${reg.field.Bz.toFixed(4)}` : '';
-    if (f !== lastF) { lastF = f; b4.hidden = !f; b4.lastChild.textContent = f; b4.className = 'badge ' + (reg.field.Fz !== 0 ? 'warn' : 'exact'); }
-    b1.lastChild.textContent = reg.field.Fz !== 0 ? 'STATE · SHADOW · SHELL EVOLUTION' : 'STATE · EVOLUTION · SHADOW';
+    if (f !== lastF) { lastF = f; b4.hidden = !f; b4.lastChild.textContent = f; b4.className = 'badge ' + (reg.field.Fz !== 0 ? 'warn' : 'exact');
+      b1.lastChild.textContent = reg.field.Fz !== 0 ? 'STATE · SHADOW · SHELL EVOLUTION' : 'STATE · EVOLUTION · SHADOW'; }   // f moves whenever Fz ≠ 0 does
     if (ui.fieldRo) {
       ui.fieldRo.set(reg.field.Fz !== 0 ? 'H₀ + F z' : reg.field.Bz !== 0 ? 'H₀ + (B/2)L_z' : 'H₀ (bare Coulomb)', reg.field.Fz !== 0 ? 'warn' : reg.field.Bz !== 0 ? 'live' : '');
       ui.fieldRo.setSub(S ? `across shells · all ${BASIS.length} labels` : reg.field.Fz !== 0 ? `within-shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}` : reg.field.Bz !== 0 ? 'diagonal in this basis' : 'current Hamiltonian');
     }
     const rs = stateReaders().rendered;
     const t2 = field.ok ? `FIELD ${field.resolution}³ · ±${Number.isInteger(domain.half) ? domain.half : domain.half.toFixed(2)} ${getHamiltonian().lengthUnit}${getSpace() === 'p' ? '⁻¹ · MOMENTUM' : ''} · f16` : 'NO FIELD · WebGPU unavailable';
-    if (b2.lastChild.textContent !== t2) b2.lastChild.textContent = t2;
-    b2.className = 'badge ' + (field.ok ? 'numerical' : 'bad');
+    if (b2.lastChild.textContent !== t2) { b2.lastChild.textContent = t2; b2.className = 'badge ' + (field.ok ? 'numerical' : 'bad'); }   // t2 moves whenever field.ok does
     const warn = rs.masked ? `RENDERED ${rs.rendered}/${rs.populated} · ${(rs.coveredFraction * 100).toFixed(0)}% OF NORM · ${rs.masked} MUTED` : rs.truncated ? `TRUNCATED ${rs.rendered}/${rs.populated} · ${(rs.coveredFraction * 100).toFixed(0)}% OF NORM` : '';
     if (warn !== last) { last = warn; b3.hidden = !warn; b3.lastChild.textContent = warn; }
     const say = canvasSentence(rs);
