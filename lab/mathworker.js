@@ -560,10 +560,15 @@ function fft(re, im, sign) {                                                    
       re[b] = re[a] - xr; im[b] = im[a] - xi; re[a] += xr; im[a] += xi; } }
 }
 function fft3(re, im, M, sign) {                                                 // an M³ volume, x fastest, line by line along each axis
-  const lr = new Float64Array(M), li = new Float64Array(M);
-  for (const s of [1, M, M * M]) for (let c = 0; c < M * M * M; c++) { if (((c / s) | 0) % M) continue;
-    for (let k = 0; k < M; k++) { lr[k] = re[c + k * s]; li[k] = im[c + k * s]; } fft(lr, li, sign);
-    for (let k = 0; k < M; k++) { re[c + k * s] = lr[k]; im[c + k * s] = li[k]; } }
+  const M2 = M * M, B = Math.min(8, M), lr = new Float64Array(B * M), li = new Float64Array(B * M), L = [];
+  for (let b = 0; b < B; b++) L.push([lr.subarray(b * M, b * M + M), li.subarray(b * M, b * M + M)]);
+  for (let k = 0; k < M2; k++) { const c = k * M; fft(re.subarray(c, c + M), im.subarray(c, c + M), sign); }   // x: each line is contiguous
+  for (const s of [M, M2]) for (let a = 0; a < M2; a += B) {                     // y, z: B neighbouring lines (x … x + B − 1) gathered at once
+    const c = s === M ? a % M + (a - a % M) * M : a;
+    for (let k = 0; k < M; k++) for (let b = 0; b < B; b++) { lr[b * M + k] = re[c + b + k * s]; li[b * M + k] = im[c + b + k * s]; }
+    for (const [r, i] of L) fft(r, i, sign);
+    for (let k = 0; k < M; k++) for (let b = 0; b < B; b++) { re[c + b + k * s] = lr[b * M + k]; im[c + b + k * s] = li[b * M + k]; }
+  }
 }
 let espG = null;                                                                 // Ĝ (real: G is even), kept per (N, h)
 function chemEsp({ N = 64, half, shells, D, atoms }) {
@@ -585,7 +590,8 @@ function chemEsp({ N = 64, half, shells, D, atoms }) {
   fft3(re, im, M, -1); for (let c = 0; c < M3; c++) { re[c] *= espG.g[c]; im[c] *= espG.g[c]; } fft3(re, im, M, 1);
   for (let k = 0; k < N; k++) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
     let v = -re[(k * M + j) * M + i] / M3;
-    atoms.forEach((a, A) => { const d = [x(i) - a.c[0], x(j) - a.c[1], x(k) - a.c[2]], r = Math.max(Math.hypot(...d), 0.5 * h); v += a.Z / r - (dip[A][0] * d[0] + dip[A][1] * d[1] + dip[A][2] * d[2]) / Math.max(r, 3 * h) ** 3; });
+    for (let A = 0; A < atoms.length; A++) { const a = atoms[A], p = dip[A], dx = x(i) - a.c[0], dy = x(j) - a.c[1], dz = x(k) - a.c[2], r = Math.max(Math.hypot(dx, dy, dz), 0.5 * h);
+      v += a.Z / r - (p[0] * dx + p[1] * dy + p[2] * dz) / Math.max(r, 3 * h) ** 3; }
     phi[(k * N + j) * N + i] = v; if (v < min) min = v; if (v > max) max = v;
   }
   return { N, half, phi, min, max, charge, atNuclei: atoms, ms: performance.now() - t0 };
