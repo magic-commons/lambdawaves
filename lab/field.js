@@ -389,7 +389,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
  * φ_k = Σ_μ C_μk χ_μ — O(nAO·K) a voxel and no χ tile, so a record past MAX_MOL_AO draws its density (C₆₀: 300 AO × 180).
  * K-BLOCKED: 32 φ's in registers (8 vec4, `mat` read as vec4), the screened shell loop re-run once a block (χ is cheap beside the MACs).  `mat` is row-major
  * n × K (K = P.r0, padded to 32 with zero columns), so a block reads 32 contiguous floats, the same for every lane.  Texel (√ρ, 0),
- * the density convention: the presenter is untouched.  Kind 4; compiled on the first factor matrix (`facReady`).  MEASURED (RTX 3070,
+ * the density convention: the presenter is untouched.  Kind 4; compiled on its first dispatch (`molReady`).  MEASURED (RTX 3070,
  * headless Firefox): C₆₀ 12.5 ms at 64³, 40 ms at 96³ — at 96³ B = 16 took 72 ms (twice the passes) and B = 64 223 ms (it spills). */
 const FACTOR_WGSL = (() => {
   let c = once(ORB_WGSL, 'var<storage, read> mat: array<f32>;', 'var<storage, read> mat: array<vec4<f32>>;');
@@ -1605,13 +1605,14 @@ export async function createField(canvas, opts = {}) {
   const renderModule = device.createShaderModule({ code: RENDER_WGSL });
   const lineModule = device.createShaderModule({ code: LINE_WGSL });
   /* the molecular volume (CHEMISTRY): one pipeline per AO tier, each tier's lanes set by the workgroup memory this device
-     GRANTED (0.4.0 S4c: the cap-128 tile is 32 KiB at 64 lanes, 16 KiB at 32) — then the orbital-only kernel, index ORB */
-  const molWg = MOL_CAPS.map((cap) => (cap * 64 * 4 <= device.limits.maxComputeWorkgroupStorageSize ? 64 : 32)), ORB = MOL_CAPS.length, FAC = ORB + 1;
-  const molModules = [...MOL_CAPS.map((cap, i) => device.createShaderModule({ code: molWgsl(cap, molWg[i]) })), device.createShaderModule({ code: ORB_WGSL })];
+     GRANTED (0.4.0 S4c: the cap-128 tile is 32 KiB at 64 lanes, 16 KiB at 32) — then the orbital-only kernel, index ORB, and the
+     factor's, FAC; each compiled on its first dispatch (molReady), so a boot compiles the three hydrogen draws with */
+  const molWg = MOL_CAPS.map((cap) => (cap * 64 * 4 <= device.limits.maxComputeWorkgroupStorageSize ? 64 : 32)), ORB = MOL_CAPS.length, FAC = ORB + 1, molPipelines = [];
   /* compile messages are kept, never swallowed: a broken shader must say where */
   out.shaderMessages = [];
-  for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule], ...molModules.map((m2, i) => ['molecule' + (MOL_CAPS[i] || 'Orbital'), m2])]) {
-    try { const info = await m.getCompilationInfo(); for (const msg of info.messages) out.shaderMessages.push({ shader: name, type: msg.type, line: msg.lineNum, col: msg.linePos, text: msg.message }); } catch (_) {}
+  const said = (shader) => (info) => { for (const m of info.messages) out.shaderMessages.push({ shader, type: m.type, line: m.lineNum, col: m.linePos, text: m.message }); };
+  for (const [name, m] of [['compute', computeModule], ['render', renderModule], ['line', lineModule]]) {
+    try { said(name)(await m.getCompilationInfo()); } catch (_) {}
   }
   /* M1 · …AND ONE LOST DURING THE COMPILE STRETCH ABOVE.  Before this line, Firefox took the WGSL branch below (a dead
      device reports compile errors), overwrote `device lost` with "WGSL compile error" and returned the method-less
@@ -1619,7 +1620,6 @@ export async function createField(canvas, opts = {}) {
   if (b.lost) return out;
   if (out.shaderMessages.some((m) => m.type === 'error')) { out.error = 'WGSL compile error: ' + JSON.stringify(out.shaderMessages.filter((m) => m.type === 'error')); return out; }
   const computePipeline = device.createComputePipeline({ layout: 'auto', compute: { module: computeModule, entryPoint: 'main' } });
-  const molPipelines = molModules.map((m) => device.createComputePipeline({ layout: 'auto', compute: { module: m, entryPoint: 'main' } }));
   /* EXPLICIT layouts: an 'auto' layout belongs to one pipeline, and the readback path
      renders the same scene through a second pipeline (rgba8unorm) with the same bind groups. */
   const renderBGL = device.createBindGroupLayout({ entries: [
@@ -1792,7 +1792,7 @@ export async function createField(canvas, opts = {}) {
   /* K7: binding 5 is the gas table once uploaded, a 16-byte stand-in until then (the 'auto' layout needs the binding; no
      record reads it while every lag[3] is 0) */
   let gasTab = null, gasTabStandIn = null;
-  /* THE BEAT EQUALIZER (0.6.0 B1): its table, and EQ_WGSL's pipeline, compiled on the first frame that needs it (boot stays at 8) */
+  /* THE BEAT EQUALIZER (0.6.0 B1): its table, and EQ_WGSL's pipeline, compiled on the first frame that needs it */
   let eqTable = null, eqWritten = null, eqPipeline = null, eqBuf = null, eqBind = null; const EQ_F = new Float32Array(EQ_G + 4);   // 009 N7: Γ 7 × 7 (98, padded to EQ_G = 100), then κ, mode, floor
   function bindCompute() {
     const tab = gasTab || gasTabStandIn || (gasTabStandIn = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE }));
@@ -1806,7 +1806,7 @@ export async function createField(canvas, opts = {}) {
   function eqReady() {
     if (!eqPipeline) {
       const module = device.createShaderModule({ code: EQ_WGSL });
-      module.getCompilationInfo().then((info) => { for (const m of info.messages) out.shaderMessages.push({ shader: 'equalizer', type: m.type, line: m.lineNum, col: m.linePos, text: m.message }); }, () => {});
+      module.getCompilationInfo().then(said('equalizer'), () => {});
       eqPipeline = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } });
       eqBuf = device.createBuffer({ size: EQ_F.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }); bindCompute();
     }
@@ -1921,11 +1921,11 @@ export async function createField(canvas, opts = {}) {
       { binding: 2, resource: { buffer: molAlphaBuf } }, { binding: 3, resource: { buffer: molWBuf } },
       { binding: 4, resource: { buffer: molMatBuf } }, { binding: 5, resource: tex.createView({ dimension: '3d' }) },
       { binding: 6, resource: { buffer: statsBuf } }, ...(p >= ORB ? [{ binding: 7, resource: { buffer: molCutBuf } }] : [])] }));
-  function facReady() {                                        // the ninth module, compiled on the first factor matrix (boot stays at 8, as eqReady)
-    if (molPipelines[FAC]) return;
-    const module = device.createShaderModule({ code: FACTOR_WGSL });
-    module.getCompilationInfo().then((info) => { for (const m of info.messages) out.shaderMessages.push({ shader: 'factor', type: m.type, line: m.lineNum, col: m.linePos, text: m.message }); }, () => {});
-    molPipelines[FAC] = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } }); molBind[FAC] = molBindFor(molPipelines[FAC], FAC);
+  function molReady(r) {                                       // a molecular road's module and pipeline, on its first dispatch (as eqReady)
+    if (molPipelines[r]) return;
+    const module = device.createShaderModule({ code: r === FAC ? FACTOR_WGSL : r === ORB ? ORB_WGSL : molWgsl(MOL_CAPS[r], molWg[r]) });
+    module.getCompilationInfo().then(said(r === FAC ? 'factor' : 'molecule' + (MOL_CAPS[r] || 'Orbital')), () => {});
+    molPipelines[r] = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } }); molBind[r] = molBindFor(molPipelines[r], r);
   }
   setResolution(opts.resolution || 96);
 
@@ -1956,7 +1956,7 @@ export async function createField(canvas, opts = {}) {
   const molRoad = () => (molKind === 4 ? FAC : (molKind === 1 || molKind === 2) && molPack.nAO > MOL_ORB_FROM ? ORB : molTier);
   function dispatchMol(pass, slot, k = 1) {
     const r = molRoad(), g = Math.ceil(res / 4), z = r >= ORB ? g : Math.ceil(res / (molWg[r] / 16));   // a 32-lane tier is 4 × 4 × 2
-    pass.setPipeline(molPipelines[r]); pass.setBindGroup(0, molBind[r][slot]);
+    molReady(r); pass.setPipeline(molPipelines[r]); pass.setBindGroup(0, molBind[r][slot]);
     for (let i = 0; i < k; i++) pass.dispatchWorkgroups(g, g, z);
   }
   function encodeMolecule(enc, slot, tw) {
@@ -2560,7 +2560,7 @@ export async function createField(canvas, opts = {}) {
       if (!(K > 0) || n * Kp > MOL_LIMITS.ao * MOL_LIMITS.cols || !M.C || M.C.length !== n * K) throw new Error(`field: a factor needs { C: n·K, n·K padded to 32 ≤ ${MOL_LIMITS.ao * MOL_LIMITS.cols} } at n = ${n}, K = ${K}`);
       const src = new Float32Array(n * Kp);                    // padded to the kernel's block of 32: the extra columns are zero
       for (let i = 0; i < n; i++) for (let k = 0; k < K; k++) src[i * Kp + k] = M.C[i * K + k];
-      facReady(); device.queue.writeBuffer(molMatBuf, 0, src);
+      device.queue.writeBuffer(molMatBuf, 0, src);
       molMat = src; molKind = 4; molK = Kp; molKindName = kind; molDirty = true;
       if (ref) molRefDirty = true;
       return { kind, nAO: n, length: n * K, K, complex: false, ref: !!ref };
