@@ -46,10 +46,6 @@ export function wedge(a, b) { return BIVECTOR_PLANES.map(([i, j]) => a[i] * b[j]
 export function visibleFrame(qL, qR) {
   return { f1: qmul(qmul(qconj(qL), E2), qR), f2: qmul(qmul(qconj(qL), E3), qR) };
 }
-/** the two INVISIBLE rows — the depth frame; g₁ gives every sample a signed distance from the visible plane */
-function depthFrame(qL, qR) {
-  return { g1: qmul(qmul(qconj(qL), E0), qR), g2: qmul(qmul(qconj(qL), E1), qR) };
-}
 /** the point of Gr⁺(2,4) ≅ S²×S² the rotor pair is looking at (unit vectors; the Grassmann point is these /√2) */
 export function spherePoint(qL, qR) {
   return { nP: adjoint(qconj(qL), [1, 0, 0]), nM: adjoint(qconj(qR), [1, 0, 0]).map((v) => -v) };
@@ -74,8 +70,7 @@ export function slerp(a, b, t) {
   const w1 = Math.sin((1 - t) * th) / s, w2 = Math.sin(t * th) / s;
   return a.map((x, i) => x * w1 + bb[i] * w2);
 }
-/** the geodesic between two rotor pairs: two slerps, one per sphere */
-function tourSegment(from, to) { return { from, to }; }
+/** the geodesic between two rotor pairs { from, to }: two slerps, one per sphere */
 export function tourSegmentAt(seg, t) {
   return canonicaliseRotors(slerp(seg.from.qL, seg.to.qL, t), slerp(seg.from.qR, seg.to.qR, t));
 }

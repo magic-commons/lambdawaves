@@ -184,7 +184,8 @@ export function dipoleLines(re, im, ids) {
  * RADIATION law, radiation.js), which puts Hα at 656.47 nm in vacuum (656.11 at infinite mass; NIST 656.46).  The beat itself runs
  * at the register's own ω (Hα: T = 2π/ω = 90.48 a.u.).  No fine structure, no Lamb shift, no radiation reaction, no widths. */
 const ALPHA_FS = 7.2973525693e-3, AU_SECOND = AU_TIME_AS * 1e-18, MU_1H = 1 / (1 + 1 / 1836.15267343);   // CODATA 2018, as radiation.js
-export const C_LIGHT_AU = 1 / ALPHA_FS, BOHR_NM = 0.0529177210903, HARTREE_EV = 27.211386245988;
+const C_LIGHT_AU = 1 / ALPHA_FS, BOHR_NM = 0.0529177210903;
+export const HARTREE_EV = 27.211386245988;
 /** the reduced mass a line's λ and A carry: ¹H's under the register's own hydrogen at μ = mₑ; any other operator's energies are its own */
 export const lineMass = (H = getHamiltonian()) => (H.id === 'hydrogen' && (H.mu || 1) === 1 ? MU_1H : 1);
 /** the vacuum wavelength in nm of a gap ω (a.u.) */

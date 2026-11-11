@@ -159,13 +159,6 @@ export function idempotencyDefect(P, f = 2) {
   for (let k = 0; k < n * n; k++) d = Math.max(d, Math.hypot(Q2.re[k] - Q.re[k], Q2.im[k] - Q.im[k]));
   return d;
 }
-/** McWeeny purification f(3Q² − 2Q³), Q = P/f — an explicitly labelled REPAIR; the caller must say it was used */
-function purify(P, f = 2) {
-  const n = P.n, Q = cmat(n); for (let k = 0; k < n * n; k++) { Q.re[k] = P.re[k] / f; Q.im[k] = P.im[k] / f; }
-  const Q2 = cmul(Q, Q), Q3 = cmul(Q2, Q), R = cmat(n);
-  for (let k = 0; k < n * n; k++) { R.re[k] = f * (3 * Q2.re[k] - 2 * Q3.re[k]); R.im[k] = f * (3 * Q2.im[k] - 2 * Q3.im[k]); }
-  return R;
-}
 
 /* ── the field shapes ChronusQ documents (RT wiki): κ·f(t) between t_on and t_off ─────────────────────────────── */
 export function fieldOf({ shape = 'step', kappa = 0, omega = 0, tOn = 0, tOff = Infinity, alpha = 1, phase = 0 } = {}) {
@@ -194,7 +187,7 @@ export function createRTHF({ n, S, h, eri = null, Z = null, mu = null, Enuc = 0,
   const policy = restart === Infinity ? 'unrestarted' : `restart every ${restart}`;
   const twoElectron = nElectrons > 1 && !!eri, f = nElectrons === 1 ? 1 : 2;
   const { X, W } = loewdin(S, n);
-  let P = sandwich(W, D0c), t = 0, steps = 0, Pprev = null, sinceRestart = 0, lastMagnus = null;
+  let P = sandwich(W, D0c), t = 0, steps = 0, Pprev = null, sinceRestart = 0;
   const Zt = Z ? sandwich(X, creal(Z, n)) : null;
   /** the δ-kick exp(−iκ ẑ) applied to the density: P ← U P U†, U = exp(−iκ Z̃) — exact, idempotency-preserving */
   function kick(kappa) {
@@ -245,7 +238,7 @@ export function createRTHF({ n, S, h, eri = null, Z = null, mu = null, Enuc = 0,
       Pprev = P; P = Pnext; sinceRestart++;
     } else {
       const r = magnus2({ P, t, dt: h_, fock: fockL });
-      Pprev = P; P = r.P; lastMagnus = r; sinceRestart = 0;
+      Pprev = P; P = r.P; sinceRestart = 0;
     }
     t += h_; steps++; return self;
   }

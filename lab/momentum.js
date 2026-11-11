@@ -47,7 +47,7 @@ export function momentumPoly(n, l) {
   }
   return out;
 }
-export function momentumNorm(n, l) {
+function momentumNorm(n, l) {
   return Math.sqrt(2 / Math.PI * factorial(n - l - 1) / factorial(n + l)) * n * n * Math.pow(2, 2 * l + 2) * factorial(l);
 }
 /** F_nl(p): the radial momentum function, real, normalised as ∫ F² p² dp = 1 */
