@@ -482,7 +482,7 @@ export class Register {
   /** the reconstruction mask, separately */
   maskDigest() { let h = 0; for (let a = 0; a < N; a++) h = (h * 3 + this.muted[a] * 2 + this.solo[a]) >>> 0; return h.toString(16); }
   /* ── persistence ───────────────────────────────────────────────────────── */
-  serialize(t = 0, _f) {
+  serialize(t = 0) {
     const modes = [];
     for (let a = 0; a < N; a++) if (this.re0[a] || this.im0[a] || this.muted[a] || this.solo[a]) {
       const s = BASIS[a];

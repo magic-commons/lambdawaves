@@ -26,7 +26,7 @@ export const NMAX = 7;                       // iteration 008 A7: n = 7 (140 lab
 /** the n ≤ 6 register every older file, link and project names: indices 0 … 90 keep their place for ever */
 export const N6 = 91;
 /** the coefficient slots of a mode table (lag, leg): n = 7 needs seven (L^1_6 for 7s, d⁰P_6 for 7i); the kernel's lag1.z / leg1.z */
-export const NCOEF = 7;
+const NCOEF = 7;
 export const HARTREE_EV = 27.211386245988;
 export const AU_TIME_AS = 24.188843265857;
 
@@ -125,7 +125,7 @@ export function laguerreCoeffs(k, alpha) {
   return a;
 }
 /** coefficients of the Legendre polynomial P_l(x) */
-export function legendreCoeffs(l) {
+function legendreCoeffs(l) {
   const c = new Array(l + 1).fill(0);
   for (let k = 0; k <= Math.floor(l / 2); k++)
     c[l - 2 * k] = ((k % 2) ? -1 : 1) * FACT[2 * l - 2 * k] / (Math.pow(2, l) * FACT[k] * FACT[l - k] * FACT[l - 2 * k]);

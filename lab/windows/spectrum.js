@@ -182,8 +182,7 @@ export function createSpectrumCard(app) {
     if (ui.availSync) ui.availSync();   // 022 E1 · AVAILABILITY IS ONE LAW: SPACE's MOMENTUM under a `noMomentum` operator (greyed, and x if it was p)
     for (const w of [app.w.wOrb, app.w.wVor, app.w.wSlice, app.w.wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
     wSpec.setStatus(hamLabel(), H.id === 'hydrogen' ? '' : 'live');
-    wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); });   // wave 50: the API, so the RATE is in the number the card shows
-    spectrum.regrid();   // 041 H4: the grid's rows, the chips' names and the lanes' follow the operator
+    spectrum.regrid();   // 041 H4: the grid's rows, the chips' names and the lanes' (their energies by the API: wave 50) follow the operator
     if (sturm.on) { applySturmian(); return; }                        // W-STURMIAN: re-arm (or stand down) the scale under the operator now in force
     app.state.refSnapshot = null; app.state.pendingRef = null;
     schedule(TIER.REBUILD);

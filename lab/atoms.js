@@ -561,8 +561,6 @@ export function atomEnergyOf(Z, n, l, opts) {
   if (!s) throw new Error(`Z = ${Z} has no ${n}${SPD[l]} shell in its ground configuration`);
   return s.eps;
 }
-/** the total energy of atom Z (hartree) */
-const atomTotalEnergy = (Z, opts) => solveAtom(Z, opts).E;
 /** every shell of one l in the FROZEN converged field, fine mesh + the coarse one's Richardson partner — one
  *  solveL per channel (the matrix gives them all at once), cached on the solved atom.  n ≤ 7 comes for free. */
 function frozenChannel(S, l, k) {
@@ -623,7 +621,6 @@ export function quantumDefect(Z, n, l, opts = {}) {
   if (eps >= 0) return NaN;
   return n - 1 / Math.sqrt(-2 * eps);
 }
-const effectiveN = (Z, n, l, opts) => 1 / Math.sqrt(-2 * atomEnergyOf(Z, n, l, opts));
 
 /* ══ the radial table the GPU consumes (space 6) ════════════════════════════════════════════════════════════ */
 /** the (mesh, orbital) pair atomRadial reads: found once per (Z, n, l) for the default options — solveAtom's cache key is a

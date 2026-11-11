@@ -52,8 +52,6 @@ export const C_AU = 1 / ALPHA;                     // the speed of light in atom
 export const AU_S = AU_TIME_AS * 1e-18;            // the atomic unit of time in seconds (hydrogen.js's constant)
 const M_P_OVER_M_E = 1836.15267343;         // CODATA 2018
 export const MU_H = 1 / (1 + 1 / M_P_OVER_M_E);    // μ/m_e for ¹H = 0.999455679…
-const FIELD_AU_VM = 5.14220675e11;          // 1 a.u. of E (and, Gaussian, of B) in V/m
-const FIELD_AU_T = 1715.2553;               // the same unit read as a magnetic field, in tesla
 
 /* ── resolving a BASIS label ────────────────────────────────────────────────────────────────────────────── */
 const BY_NAME = new Map();

@@ -364,7 +364,7 @@ export function createSpectrum(host, api) {
        ("50%  −0.1250"), one more coloured number in the middle of the picture.  The line, the bar and the
        shell colour say WHICH level and HOW MUCH; the number itself is one hover away, in the single tip.
        The gutter keeps the level's name and the footer keeps the law: both are outside the plot rectangle. */
-    const pad = 10, left = bare ? 6 : 44, right = W - (bare ? 6 : 12), top = 10, bot = H - (bare ? 10 : 14);
+    const left = bare ? 6 : 44, right = W - (bare ? 6 : 12), top = 10, bot = H - (bare ? 10 : 14);
     const plot = { x0: left, y0: top, x1: right, y1: bot };
     hovers = [];
     const HS = api.hamiltonian ? api.hamiltonian() : null;                    // null = the built-in hydrogen ladder

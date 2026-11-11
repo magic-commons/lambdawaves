@@ -462,7 +462,7 @@ export function characters(input, names) {
       wAtom[A] += w; wShell[shellOf(i)] = (wShell[shellOf(i)] || 0) + w;
       for (let j = 0; j < n; j++) if (basis.bfs[j].atom !== A) ov += C[i * n + k] * S[i * n + j] * C[j * n + k];
     }
-    const shell = Object.entries(wShell).sort((a, b) => b[1] - a[1])[0][0].replace(/(\d)([spd])/, '$1$2');
+    const shell = Object.entries(wShell).sort((a, b) => b[1] - a[1])[0][0];
     const lam = mo.irrep[0], one = Math.max(...wAtom) > 0.8;
     const anti = ov < -1e-3, el = ELEMENTS[atoms[wAtom[0] > wAtom[1] ? 0 : 1].Z] || '?';
     const kind = one && Math.abs(ov) < 0.1 ? 'lone pair' : lam;
