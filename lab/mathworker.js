@@ -70,7 +70,7 @@ function pAlong(re, im, d) {
   return momentumZ(r, i);
 }
 /* PARKED, and the speculative queue behind it.  busyMs counts only the maths, never the bookkeeping. */
-let parked = false, busyMs = 0, jobs = 0, parks = 0, resumes = 0, parkedAt = 0, parkedMs = 0;
+let parked = false, busyMs = 0, jobs = 0, parks = 0, resumes = 0, parkedAt = 0, parkedMs = 0, chemQ = Promise.resolve();
 const held = [];                                   // speculative jobs that arrived while parked, in order
 const stat = () => ({ parked, busyMs: +busyMs.toFixed(3), jobs, parks, resumes, held: held.length,
   parkedMs: +(parkedMs + (parked ? Date.now() - parkedAt : 0)).toFixed(0), solverCalls });
@@ -103,12 +103,13 @@ if (IN_WORKER) self.onmessage = (e) => {
     while (held.length) { const h = held.shift(); const r = run(h); self.postMessage(Object.assign({ id: h.id, op: h.op }, r.out), r.transfer); }
     self.postMessage(Object.assign({ id: m.id, op: m.op, ok: true }, stat())); return;
   }
-  /* CHEMISTRY is work a hand asked for: it finishes parked or not, and it waits for the basis record first. */
+  /* CHEMISTRY is work a hand asked for: it finishes parked or not, and it waits for the basis record first — in ONE queue, so a job behind a
+     basis fetch is never overtaken (the pool counts on FIFO), and a reply that cannot be posted still answers, with its error. */
   const op = opOf(m.op);
   if (op && op.chem) {
-    (op.basis ? chemReady(m) : Promise.resolve()).then(
-      () => { const r = run(m); self.postMessage(Object.assign({ id: m.id, op: m.op }, r.out), r.transfer); },
-      (err) => self.postMessage({ id: m.id, op: m.op, error: String(err && err.message || err) }));
+    chemQ = chemQ.then(() => op.basis && chemReady(m))
+      .then(() => { const r = run(m); self.postMessage(Object.assign({ id: m.id, op: m.op }, r.out), r.transfer); })
+      .catch((err) => self.postMessage({ id: m.id, op: m.op, error: String(err && err.message || err) }));
     return;
   }
   if (parked && op && op.speculative) { held.push(m); return; }     // it waits; the answer comes on resume, once
