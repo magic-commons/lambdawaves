@@ -19,7 +19,7 @@ and the code disagree, the code is right; please say so in an issue.
 - Check these three before blaming the code. The device report (section 5) measures the display's cadence with
   nothing playing, which shows the cap directly.
 - Measured on an M5 iPad Pro (Safari 26): every scene plays at the display's cap, 120 fps with the flag off and
-  60 with it on. Source: `docs/OPTIMIZATION-2026-09-24.md` §3, "The iPad afternoon".
+  60 with it on. Source: `docs/OPTIMIZATION-2026-09-24.md` (archived: the tag `research-archive-2026-10-30`) §3, "The iPad afternoon".
 - Safari 26 stalls rendering for 220–270 ms the first time a render pipeline is used (a new view or draw style),
   even after the async compile has resolved. WebKit bug 324043, fixed upstream after 26 shipped. Source:
   WEBKIT-FPS-RESEARCH.md §1.4 and the device reports under `research/device-reports/`.
@@ -122,7 +122,7 @@ and the code disagree, the code is right; please say so in an issue.
 - `node tools/changelog.mjs --check` fails when CHANGELOG.md is out of date with the tags. Source: that file.
 - The standing law: the same state draws the same pixels, a saved project keeps the same bytes and the controls
   stay the same, unless the change is a proven bug fix or the owner ruled it. Source:
-  `docs/OPTIMIZATION-2026-09-24.md` §1.
+  `docs/OPTIMIZATION-2026-09-24.md` §1 (archived: the tag `research-archive-2026-10-30`).
 
 ## 7. Where things live
 

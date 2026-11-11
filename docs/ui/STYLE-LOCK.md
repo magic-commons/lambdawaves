@@ -67,7 +67,7 @@ idle = neutral glass · hover/focus = frostier, brighter · press/latched = dark
 `--neu-inset`) · signal = restrained ACCENT A · relationship/modulation = ACCENT B. Moving AWAY from large
 saturated rectangles used as generic selection furniture: if a state can be said with material, do not spend colour.
 
-## The widget vocabulary — `lab/kit.js`
+## The widget vocabulary — `lab/mir/kit.js`
 `knob` · `sw` · `seg` · `trig` · `fader` · `readout` · `device` (a window) · `group` (a labelled block inside one)
 · `chip` (a header button's drawing). **A new widget is a design decision, not a convenience.** Compose from these
 first; if you genuinely need a new one, name it in the REPORT with the reason. `graphHover` + `#graphTip` is the
@@ -76,7 +76,7 @@ one hover-information mechanism — do not build a second tooltip.
 **Header marks are DRAWN, not typed** (wave 55). `chip(btn, name, label)` is the single call site; it sets the
 SVG, the `data-gly` name a gate can read, and the accessible name together, because a button whose only content
 is an aria-hidden drawing has no name. The drawings come from `lab/mir/glyph.js` — **Josh's own library, vendored
-from MANDELBROT by sha256 and maintained by diff, not rewritten** (`lab/mir/PORT-NOTES.md`, alongside `mod.js`
+from MANDELBROT by sha256 and maintained by diff, not rewritten** (`lab/mir/modulation/PORT-NOTES.md`, alongside `mod.js`
 and `curve.js`). Sizing is ours and lives in `lab.css §55b`; no call site passes a pixel count. Which marks became
 drawings and which did not is listed in REPORT.md's wave-55 block — ⏻ POWER, ⧉ COPY, ◧, ☆ and the notebook's
 ◐ ▤ are still not drawings, because the library offers no equivalent. Do not invent one to close the gap.
@@ -333,7 +333,7 @@ live address. Three laws follow from what the codec IS:
   long to survive a paste says so (`fits: false`), and a `LinkError` gets its own sentence in the interface. But
   `notCarried` is a hand-kept whitelist and not a diff of what `serialize()` emits: **add a presentation key and
   add it there in the same edit**, or it is dropped *and* unreported.
-- **`lab/palette.js` IS FROZEN.** An unedited catalogue palette travels by NAME — the reader rebuilds the stops
+- **`lab/mir/palette.js` IS FROZEN.** An unedited catalogue palette travels by NAME — the reader rebuilds the stops
   from its own build — so moving one stop of a shipped palette re-colours every link ever minted against it, in
   silence, for ever. Add palettes; do not edit one. (Edited stops travel in full, which is the escape hatch, and
   a name this build does not have keeps the link's own stops and says so.)

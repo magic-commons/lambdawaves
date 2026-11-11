@@ -5,7 +5,7 @@ in the background."*
 
 **Referenced ≠ vendored.** Three MANDELBROT files are literally in this tree, under `lab/mir/`: `mod.js`,
 `curve.js` and `glyph.js`. They are taken by sha256, carry a provenance header, and are **maintained by diff
-against their source, never rewritten** — read `lab/mir/PORT-NOTES.md` before touching one. (`registry.js` and
+against their source, never rewritten** — read `lab/mir/modulation/PORT-NOTES.md` before touching one. (`registry.js` and
 `host.js` beside them are **ours**; do not route around a defect in one of those because it "looks vendored" —
 ANTI-PATTERNS 13.) Everything else below is a reference: mined, then built here.
 

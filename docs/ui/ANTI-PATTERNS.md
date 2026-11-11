@@ -77,7 +77,7 @@ the smell: `rack.js` had already routed around it** with a local `modSyncBases()
 than fixing the module, on the stated grounds that "`registry.js` is MIR's file and 53 gates pin its behaviour".
 Both halves of that were wrong: `PORT-NOTES.md` lists `registry.js` as **ours** (only `mod.js`, `curve.js` and
 `glyph.js` are vendored), and a gate that pins a defect is the defect, not a reason to keep it. A local workaround
-for a module defect is a smell: **fix the module.** It has since been fixed in `lab/mir/registry.js`
+for a module defect is a smell: **fix the module.** It has since been fixed in `lab/mir/modulation/registry.js`
 (the law is stated in its own comment: *the base of a modulated parameter is never read out of its Card*), and
 `mir.test.mjs §18` now proves all six orderings, both halves of resync's job, and the quiet.
 
