@@ -16,7 +16,6 @@
  * Under the logo (iteration 012 L2): RETURN HOME (the lab), FOLDERS (the projects and the demos) and THE HUE ring (a dial that turns the
  * molecules' pictures round the colour wheel), THEME (032) and LOOK.  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
-import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
 import { el, chip, mathPlain, stepper, seg, hint } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
 import { chordFromEvent } from './mir/shell/keys.js';   // 039 R5: the menu's own chord passes to the key table while the menu holds the keys
@@ -30,7 +29,7 @@ import { L_LETTERS } from './names.js';
 import { RM, still, animate, pointerFrame, tiltPictures, holoCards, enterTiles, develop, setPic, swapLine, installRing, clamp } from './picker-fx.js';
 import { createCollage } from './picker-collage.js';   // 035 THE COLLAGE: the face's wall of clips
 import * as V from './volumes.js';
-import { keepData, installed, safariTab } from './library.js';
+import { keepData, installed, safariTab, storageInfo } from './library.js';
 
 /* 030 THE TIP JAR: the donation link, written by tools/tip-qr.py together with img/menu/tip-qr.svg (its picture). Empty: no card, no sheet. */
 const TIP_URL = 'https://ko-fi.com/magiccommons';

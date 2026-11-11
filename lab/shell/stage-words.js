@@ -349,7 +349,7 @@ export function createStageWords(app) {
       prefs: P,
       /** POSITION (bottom: true) and PAD (0–0.4 of the free height) */
       setSeat(bottom, pad) { if (bottom !== undefined) seat.bottom = !!bottom; if (Number.isFinite(pad)) seat.pad = Math.max(0, Math.min(0.4, pad)); place(); },
-      get seat() { return { ...seat }; },   // a later announcement has already taken the seat: nothing
+      get seat() { return { ...seat }; },
       /** STAGE FORMULA (the formula, the fade, the caption) and ATOM LABELS are two switches since 0.5.3 M9 (INFORMATIONAL) */
       /* 020 S1 · ONE PRESS, ONE PLACE: OFF lets the block go inside the hidden root (its exit is never seen), so ON is ONE entrance of the string
          wanted then — not the stale block's exit, a stale string's entrance and the right one's 250 ms later */

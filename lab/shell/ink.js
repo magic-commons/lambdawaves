@@ -89,8 +89,8 @@ export function createInk(app) {
     window.addEventListener('resize', dirty, { passive: true });
     /* 0.5.0 C3 · the kit's rack moves a floating card by `translate` and left/top and animates a folding card's height: a card's OWN
        style or class (never a knob's inside it) dirties the block, so a paused field's mask follows the hand and the fold */
-    const own = new MutationObserver((rs) => { if (rs.some((r) => [floats, rack, rackL].includes(r.target.parentElement))) dirty(); });
-    for (const el of [floats, rack, rackL]) if (el) own.observe(el, { attributes: true, subtree: true, attributeFilter: ['style', 'class'] });
+    const hosts = [floats, rack, rackL], own = new MutationObserver((rs) => { if (rs.some((r) => hosts.includes(r.target.parentElement))) dirty(); });
+    for (const el of hosts) if (el) own.observe(el, { attributes: true, subtree: true, attributeFilter: ['style', 'class'] });
   }
   return { refreshOcclusion };
 }

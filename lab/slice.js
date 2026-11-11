@@ -60,11 +60,11 @@ export function planePoints(rotor, { mode = 'space', half = 8, N = 96 }) {
 /**
  * Domain-colour a sample into an ImageData: hue from arg ψ through the palette LUT (or the built-in wheel),
  * brightness from |ψ| through the same bounded knee the field uses, so turning the gain up deepens the picture
- * instead of flooding it.  `contours` adds the modulus contour lines that make a domain colouring readable.
+ * instead of flooding it; the modulus contour lines make a domain colouring readable.  Rows [j0, j1) alone when asked (the chunked job's band).
  */
-export function paintSlice(sample, img, { lut = null, gain = 1, knee = 0.6, contours = true, invert = false }) {
+export function paintSlice(sample, img, { lut = null, gain = 1, knee = 0.6, j0 = 0, j1 = sample.N }) {
   const { re, im, N, absMax } = sample, d = img.data, mx = absMax || 1;
-  for (let k = 0; k < N * N; k++) {
+  for (let k = j0 * N; k < j1 * N; k++) {
     const x = re[k], y = im[k], m = Math.hypot(x, y) / mx;
     const w = gain * m, v = w / (1 + knee * w);               // the bounded transfer
     let R, G, B;
@@ -74,18 +74,16 @@ export function paintSlice(sample, img, { lut = null, gain = 1, knee = 0.6, cont
     } else { const q = h * 6, c1 = Math.abs((q % 6) - 3) - 1, c2 = Math.abs(((q + 4) % 6) - 3) - 1, c3 = Math.abs(((q + 2) % 6) - 3) - 1;
       const cl = (u) => Math.min(1, Math.max(0, u)); R = 0.15 + 0.85 * cl(c1); G = 0.15 + 0.85 * cl(c2); B = 0.15 + 0.85 * cl(c3); }
     let s = v / (1 / (1 + knee));                             // normalise the ceiling to 1
-    if (contours && m > 1e-9) { const l = Math.log2(m * mx + 1e-30); s *= 0.82 + 0.18 * Math.abs(2 * (l - Math.floor(l)) - 1); }
-    let rr = R * s, gg = G * s, bb = B * s;
-    if (invert) { rr = 1 - rr; gg = 1 - gg; bb = 1 - bb; }
-    d[k * 4] = Math.round(255 * Math.min(1, rr)); d[k * 4 + 1] = Math.round(255 * Math.min(1, gg));
-    d[k * 4 + 2] = Math.round(255 * Math.min(1, bb)); d[k * 4 + 3] = 255;
+    if (m > 1e-9) { const l = Math.log2(m * mx + 1e-30); s *= 0.82 + 0.18 * Math.abs(2 * (l - Math.floor(l)) - 1); }
+    d[k * 4] = Math.round(255 * Math.min(1, R * s)); d[k * 4 + 1] = Math.round(255 * Math.min(1, G * s));
+    d[k * 4 + 2] = Math.round(255 * Math.min(1, B * s)); d[k * 4 + 3] = 255;
   }
   return img;
 }
 /** F1 · the current IN the plane, j_∥ = Im(ψ̄ ∇_∥ψ), by centred differences of a sample's re/im — no second evaluation of ψ.  The grid is
  *  cell-centred (a_i = (2(i + ½)/N − 1)·scale), so h = 2·scale/N; i runs along e₁ (a), j along e₂ (b); the edge ring is dropped (0). */
-export function currentOf({ re, im, N, half, mode }) {
-  const h2 = 4 * (mode === 'ks' ? Math.sqrt(half) : half) / N, ja = new Float64Array(N * N), jb = new Float64Array(N * N); let max = 0, at = -1;
+export function currentOf({ re, im, N, half, mode }, ja = new Float64Array(N * N), jb = new Float64Array(N * N)) {
+  const h2 = 4 * (mode === 'ks' ? Math.sqrt(half) : half) / N; let max = 0, at = -1;
   for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) {
     const k = j * N + i, a = (re[k] * (im[k + 1] - im[k - 1]) - im[k] * (re[k + 1] - re[k - 1])) / h2;
     const b = (re[k] * (im[k + N] - im[k - N]) - im[k] * (re[k + N] - re[k - N])) / h2, m = Math.hypot(a, b);
