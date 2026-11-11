@@ -275,8 +275,14 @@ export async function boot(dom) {
   document.addEventListener('transitionrun',e=>{if(!['rack','rackL'].includes(e.target.id)||mat.axisMode!=='corner')return;const end=performance.now()+500;const tick=()=>{app.state.cornerLayoutDirty=true;schedule(TIER.PRESENT);if(performance.now()<end)requestAnimationFrame(tick);};tick();});
   document.addEventListener('transitionend',e=>{if(e.target.id==='rack'||e.target.id==='rackL'){app.state.cornerLayoutDirty=true;schedule(TIER.PRESENT);}});
   app.state.exportLocked = false;
-  function schedule(tier) {
+  /* 043 P1 · A STILL FRAME RUNS NO REGISTER READER.  `asks` counts every ask for a frame but the CAMERA's (its two edges, camera-law's
+     present and the stage gestures', pass `camera` true): a turn moves only obs, and no register reader reads obs.  `seen` holds the count
+     at the last paused frame's ENTRY (an ask made inside a frame — a REBUILD the pause edge asks for — lands on the next one) and that
+     frame's reg.version and t; a frame that threw clears it. */
+  let asks = 0; const seen = { asks: -1, version: -1, t: NaN };
+  function schedule(tier, camera) {
     if (mod.syncing) return;                   // wave 52: a re-base writes what is already there (modSyncBases)
+    if (camera !== true) asks++;
     if (tier > pending) pending = tier;
     /* LA8 · AN EXPORT RECORDS THE ASK, IT ARMS NOTHING.  This return used to come first, so a REBUILD asked for
        during an export (GRID, DOMAIN, SPACE, OPERATOR) was dropped: the export's finally raises only RECONSTRUCT, and
@@ -348,6 +354,7 @@ export async function boot(dom) {
     rafId = 0;
     if (page.hidden || app.state.exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
     inLoop = true;
+    const asked = asks;                                               // 043 P1: the asks this frame enters with
     const tLoop0 = performance.now();                                 // LA1: the whole loop, timed from entry
     let fault = '';
     try {   /* LA4 · the body is deliberately NOT re-indented (one exception anywhere used to end the loop for the session: AUDIT-B FB7) */
@@ -516,6 +523,12 @@ export async function boot(dom) {
     app.state.playedLast = clock.playing;
     perf.counts.frames++;
     const cpuTick = !clock.playing || (perf.counts.frames % perf.cpuEvery) === 0;   // the CPU windows' cadence
+    /* 043 P1: paused, a frame nothing but the camera asked for, at the same register and t, is STILL — the register readers (SPECTRUM, SHADOW,
+       PLANE, ATOMS, WIGNER, RADIATION, EMISSION, CALCULUS, METERS) keep what they drew; the camera's readers run as ever.  Measured on a paused
+       drag with seven of them open: 0.8 ms of readers a frame, at a still t (043 P-BUILD).  Playing, nothing changes, and the first paused frame
+       runs them all. */
+    const still = !clock.playing && asks === seen.asks && reg.version === seen.version && clock.t === seen.t;
+    if (clock.playing) seen.asks = -1; else { seen.asks = asked; seen.version = reg.version; seen.t = clock.t; }
     if (cpuTick) {
       /* modesAt() already evolved the same register into these scratch arrays on a reconstruction frame. Reuse it;
          in 120 Hz mode the other three frames need no CPU-reader coefficient vector at all. */
@@ -526,8 +539,8 @@ export async function boot(dom) {
       LW.nodes.tick(clock.t);                                        // 040 N2 THE GRAIN KEEPS TIME: FILM GRAIN's jump is the clock's (lab/node-layers.js)
       tickWidgets(nowMs, { c, ids: stateReaders().populated, may, tick });   // 037 W1: the stage's WIDGETS, from this one CPU frame (a hidden page and H stand them down); V1: the frame's c and labels and the reader law, for the visualizers
       syncEq();                                                      // 0.6.0 B2: the BEAT EQUALIZER's table follows the register, the operator and the space (keyed)
-      if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
-      if (may('shadow', wSh)) tick('shadow', () => { shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected); if (ui.shadowDetails && !ui.shadowDetails.hidden) shadowFoot.update(reg, c, clock.t, stateReaders().populated); });
+      if ((!still || spectrum.owed) && may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));   // owed: lanes still to build, or a ψ line its 5 Hz rule held back
+      if (!still && may('shadow', wSh)) tick('shadow', () => { shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected); if (ui.shadowDetails && !ui.shadowDetails.hidden) shadowFoot.update(reg, c, clock.t, stateReaders().populated); });
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
     }
     const overlayDomain = app.state.space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P && !(app.state.chem && app.state.chem.on) && !app.state.eqNoNodes;
@@ -579,23 +592,23 @@ export async function boot(dom) {
     }
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
     ladder.setActive(canPresent(wLad));
-    if (cpuTick) {
-      if (sliceVisible && may('slice', wSlice)) tick('slice', () => slice.update(reg, clock.t));
-      if (may('atoms', wAtoms)) tick('atoms', () => atomsView.update());
-      if (may('wigner', wWig)) tick('wigner', () => {          // the WIGNER slice: its own throttle (2 Hz while playing, wignerview.js), its own guard
+    if (cpuTick) {                                                   // 043 P1: `!still` on the register readers; LATTICE and BLOCH keep their own clocks, the gas readout waits on a worker
+      if (!still && sliceVisible && may('slice', wSlice)) tick('slice', () => slice.update(reg, clock.t));
+      if (!still && may('atoms', wAtoms)) tick('atoms', () => atomsView.update());
+      if (!still && may('wigner', wWig)) tick('wigner', () => {          // the WIGNER slice: its own throttle (2 Hz while playing, wignerview.js), its own guard
         const G = hydroReader(); wWig.setStatus(G.status === null ? WIG_OK : G.status, G.status === null ? '' : 'warn');
         wignerView.update(reg, clock.t, clock.playing, G.on, G.why, domain.half);
       });
-      if (may('radiation', wRad)) tick('radiation', () => {        // the DIPOLE: cheap, so every CPU tick
+      if (!still && may('radiation', wRad)) tick('radiation', () => {        // the DIPOLE: cheap, so every CPU tick
         const G = hydroReader(true); radiationView.update(reg, clock.t, clock.playing, G.on, G.why);
         const st = G.status !== null ? G.status : radiationView.cache ? RAD_OK : 'no dipole in this state';
         wRad.setStatus(st, st === RAD_OK ? '' : 'warn');
       });
-      if (may('emission', wEm)) tick('emission', () => emissionView.update());   // iteration 016 E1: nothing unless the operator, the element or the register moved
-      if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P) calculus.update(reg, clock.t, domain.half, app.state.space === 'p', !!(app.state.chem && app.state.chem.on)); });   // 0.8.2 P3: a molecule reads only the RAY's sentence
+      if (!still && may('emission', wEm)) tick('emission', () => emissionView.update());   // iteration 016 E1: nothing unless the operator, the element or the register moved
+      if (!still && may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P) calculus.update(reg, clock.t, domain.half, app.state.space === 'p', !!(app.state.chem && app.state.chem.on)); });   // 0.8.2 P3: a molecule reads only the RAY's sentence
       if (may('lattice', wLat)) tick('lattice', () => lattice.update(clock.t));   // 0.7.2 L1: ψ(t) from LATTICE's eigenpairs, N² a frame, only while it can present
       if (may('bloch', wBlo)) tick('bloch', () => bloch.update(clock.t));   // 0.8.1 T1: one 2 × 2 step a frame (a chirp's few), only while it can present
-      if (canPresent(wSh)) ui.hc.set(reg.energy().toFixed(5));
+      if (!still && canPresent(wSh)) ui.hc.set(reg.energy().toFixed(5));
       if (canPresent(wSpec) && sturm.P && ui.sturmRo && sturm.roVersion !== reg.version) paintSturmRo();   // W-STURMIAN: the scale's readout follows the state
       if (canPresent(wSpec) && gas && gas.on && ui.gasRo && (perf.counts.cpu % 6) === 0) gasReadout(clock.t);   // K5w: the maths worker's stats(), painted when it lands
     }
@@ -614,7 +627,7 @@ export async function boot(dom) {
     }
     inLoop = false;
     loopTail(false);                                                  // LA4: the re-arm, one function for this tail and the fault's
-    if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - app.state.metersWall >= 100)) { app.state.metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
+    if (cpuTick && canPresent(wMet) && (clock.playing ? nowMs - app.state.metersWall >= 100 : !still || !metEngine.hidden)) { app.state.metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused — 043 P1: but a still one, unless the ENGINE rows (they read the frames themselves) are shown
     /* 0.4.0 S0 · wave 137: the STATUS TAGS, the Stark/Zeeman and masked/truncated warnings and the canvas's sentence tick on
        their OWN ≤ 10 Hz clock — they rode METERS' tick and went stale whenever METERS was closed.  Gated on the tags being
        shown or the canvas being read (focused); the governor's readout stays with METERS. */
@@ -632,6 +645,7 @@ export async function boot(dom) {
          message on consecutive frames) does not re-arm on `pending` alone: a throw before the tier read leaves
          `pending` unconsumed, and re-arming on it would spin a paused instrument at the display rate forever.  The
          next schedule() arms a frame as it always does. */
+      if (fault) seen.asks = -1;                                      // 043 P1: the readers after the throw did not run
       if (inLoop) { inLoop = false; loopTail(fault !== '' && fault === lastFault); }
       faultRun = fault !== '' && fault === lastFault ? faultRun + 1 : 0; if (faultRun === 1) dom.banner.warn('a frame could not be drawn', fault);   // 028 R-11: a fault that repeats is said to the user once a run (the banner counts the runs)
       lastFault = fault;
@@ -694,7 +708,7 @@ export async function boot(dom) {
   /* THE CAMERA LAW (wave 50) and the observer's pose — CAM, the camera, the two modes, orbitBy, the key orbit, ZOOM / FOV /
      RESET VIEW: lab/camera-law.js (wave 130 seam 11).  Built here, before the first window that reads it. */
   const { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
-    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, present: () => schedule(TIER.PRESENT),
+    camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, present: () => schedule(TIER.PRESENT, true),
     modHand, resetWall: app.loop.resetWall });
   const rack = dom.rack;
   app.host.camera = camera; app.host.camLevel = camLevel; app.host.syncFreeAngles = syncFreeAngles; app.host.syncCamUI = syncCamUI; app.host.rack = rack; app.host.panBy = panBy; app.host.setCamMode = setCamMode;
@@ -770,6 +784,7 @@ export async function boot(dom) {
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, metersDigest, calculusDigest } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat
+  const metEngine = wMet.body.querySelector('.met-engine');   // 043 P1: METERS' ENGINE fold body (readouts.js) — shown, METERS runs on a still frame too
 
   /* ── WAVE 52 · W-MODWINDOW: THE MODULATION RACK ────────────────────────────────────────────────
    * The model is lab/mir — vendored, headless, 53 gates green before a single pixel of this existed.

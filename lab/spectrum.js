@@ -453,15 +453,16 @@ export function createSpectrum(host, api) {
     if (best) api.selectEigen(best.k);
   });
   /** display-rate update: the bookkeeping on a version bump, one budget of lane construction, then the live phases */
-  let fxWall = 0;
+  let fxWall = 0, fxOwed = false;
   /** the c(t) line, at 5 Hz.  THE CADENCE IS THE LAB'S OWN LAW, not a new one: rack.js prints the `t`
       readout every 200 ms unless KEEP FRAMES is on, because that is as fast as a number can be read;
       a formula is a number and takes the same rule.  It is also the reason nothing here needs a
-      throttle of its own — three text writes at 5 Hz cost nothing on any frame. */
+      throttle of its own — three text writes at 5 Hz cost nothing on any frame.  A line the rule held
+      back is OWED (043 P1: the rack calls update() on a still frame until it is painted). */
   function paintPsi(c, t) {
     const now = performance.now();
-    if (now - fxWall < 200) return;
-    fxWall = now;
+    if (now - fxWall < 200) { fxOwed = true; return; }
+    fxWall = now; fxOwed = false;
     let a = selected;
     if (a < 0 || !lanes.has(a)) { let best = -1, bp = 0; for (const [i] of lanes) { const p = c.re[i] * c.re[i] + c.im[i] * c.im[i]; if (p > bp) { bp = p; best = i; } } a = best; }
     if (a < 0) { psiFx.set({ lab: '—', E: '—', t: '—', arg: '—', mag: '—' }); return; }
@@ -485,7 +486,7 @@ export function createSpectrum(host, api) {
   window.addEventListener('resize', () => paintLadder());
   /* the DIALS fold is project state (a demo opens with its lanes shown or folded as it was saved) */
   const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); if (spunC) spin(spunC); };
-  return { update, rebuild, select, energyText, preset, views, regrid, redraw: paintLadder, get selected() { return selected; }, lanes, get building() { return pending.length; },
+  return { update, rebuild, select, energyText, preset, views, regrid, redraw: paintLadder, get selected() { return selected; }, lanes, get building() { return pending.length; }, get owed() { return pending.length > 0 || fxOwed; },
     get dials() { return !rowsEl.hidden; }, setDials,
     openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; },
     /** iteration 008 A7: the folded shells (WORKSPACE, read and written by rack-wiring.js through the presses' aria-expanded) */

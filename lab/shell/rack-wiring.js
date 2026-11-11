@@ -401,7 +401,7 @@ export function createRackWiring(app) {
     camera, travel: camTravel, law: CAM,
     getDistance: () => obs.dist, zoomAt, pan: panBy, orbitBy, resetView,
     setDragging: value => { app.state.dragging = value; },
-    present: () => schedule(TIER.PRESENT),
+    present: () => schedule(TIER.PRESENT, true),   // 043 P1: a camera ask (rack.js `asks`): the register readers keep what they drew
     startSpecial(e) {
       if (e.ctrlKey) {
         bowStart(e);
