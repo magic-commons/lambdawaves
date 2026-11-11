@@ -1,6 +1,6 @@
 /* separable.js — SEPARABLE (0.9.4 S1): THE CARTESIAN OSCILLATORS, the first system the register plays that is not central.  V = ½Σωᵢ²xᵢ², ħ = m = 1:
  *     ψ = ∏ᵢ (ωᵢ/π)^{1/4}/√(2^{nᵢ} nᵢ!) · H_{nᵢ}(√ωᵢ xᵢ) e^{−ωᵢxᵢ²/2},     E = Σ ωᵢ(nᵢ + ½).
- * THE LABELS: the 91 slots carry the 56 triples with N = n_x + n_y + n_z ≤ 5, by energy then lexicographically (re-sorted when ω moves); slots 56–90 are
+ * THE LABELS: the 140 slots carry the 56 triples with N = n_x + n_y + n_z ≤ 5, by energy then lexicographically (re-sorted when ω moves); slots 56–139 are
  * UNUSED HERE — energy NaN, a zero record, "unused here" in the lane (CENTRAL's BOUND law).  THE RECORD for the kernel's space 7 (field.js) rides the packer's
  * own seats: (n, l, am, m) = (n_x, n_y, n_z, 0) is nlm, lag[0..2] = √ωᵢ is lag0.xyz, expo is c.w = the form (0 the oscillator; S2's cube 1, its L in lag0.w).
  * THE CUBE (S2): a box of side L, hard walls: ψ = (2/L)^{3/2} ∏ᵢ sin(nᵢπ(xᵢ/L + ½)), nᵢ ≥ 1, E = π²Σnᵢ²/(2L²) hartree; the 54 triples with Σnᵢ² ≤ 29 (whole
@@ -13,7 +13,7 @@ const RGB = [[255, 255, 255], [255, 190, 90], [120, 225, 240], [200, 140, 255], 
 const fact = (n) => (n < 2 ? 1 : n * fact(n - 1)), sum = (t) => t[0] + t[1] + t[2], sig = (t) => (form === 'cube' ? t.slice().sort().join() : sum(t));   // a level's members share sig, else it is mixed
 let form = 'iso', W = [1, 1, 1], L = 12, NL = 56, LABELS = [], LE = [], KEY = [], GROUPS = [];
 const tabs = new Map();
-export let SEP = null;   // the card: the one handle (the app literal never gains a key)
+let SEP = null;   // the card: the one handle (the app literal never gains a key)
 /** the form, its ω and the cube's L (absent or not positive: the form's own, L = 12 a₀); LABELS re-sorted by energy, the levels regrouped to 1e-9, the records re-made */
 export function configure(f, w, l) {
   form = FORMS[f] ? f : 'iso'; W = w && w.every((v) => v > 0) ? w.map(Number) : FORMS[form][1].slice(); L = l > 0 ? +l : 12;
@@ -62,7 +62,7 @@ export function createSeparable(host, api) {
   const kn = [...'xyz'].map((c, i) => knob({ label: 'ω_' + c, title: 'Frequency along ' + c, min: 0.5, max: 4, value: W[i], fmt: (v) => v.toFixed(2), onInput: (v) => pick(form, W.map((w, j) => (j === i ? v : w))) }));
   const kL = knob({ label: 'L', title: 'Side of the cube', min: 4, max: 30, value: L, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => pick(form, W, v) });
   r1.append(...kn.map((k) => k.root), kL.root, ro.root);
-  el('div', 'note', host).innerHTML = '<b>Separable.</b> V = ½(ω<sub>x</sub>²x² + ω<sub>y</sub>²y² + ω<sub>z</sub>²z²): each state is a product of three 1-D oscillators, labelled n<sub>x</sub> n<sub>y</sub> n<sub>z</sub>. The 56 triples with N ≤ 5 fill the register by energy; the other 35 labels are unused here. The slap and the radial tiles stand down: their integrals are spherical.'
+  el('div', 'note', host).innerHTML = '<b>Separable.</b> V = ½(ω<sub>x</sub>²x² + ω<sub>y</sub>²y² + ω<sub>z</sub>²z²): each state is a product of three 1-D oscillators, labelled n<sub>x</sub> n<sub>y</sub> n<sub>z</sub>. The 56 triples with N ≤ 5 fill the register by energy; the other 84 labels are unused here. The slap and the radial tiles stand down: their integrals are spherical.'
     + ' <b>Cube.</b> A box of side L with hard walls: ψ ∝ ∏ sin(n<sub>i</sub>π(x<sub>i</sub>/L + ½)), n<sub>i</sub> ≥ 1, E = π²Σn<sub>i</sub>²/(2L²) — the whole levels to Σn<sub>i</sub>² = 29 (54 labels), the (1,1,2) threefold and the (1,2,3) sixfold among them. Its own gas is deferred: SPECTRUM\'s GAS launches into the spherical well.';
   function pick(f, w, l) { configure(f, w, l ?? L); api.apply('separable'); }
   function sync() { step.set(form); kn.forEach((k, i) => { if (k.get() !== W[i]) k.set(W[i]); k.root.style.display = form === 'cube' ? 'none' : ''; }); if (kL.get() !== L) kL.set(L); kL.root.style.display = form === 'cube' ? '' : 'none';
