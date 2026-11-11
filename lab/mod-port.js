@@ -83,7 +83,7 @@ export function createModPort({ available, present, view, onCapture, save, say }
   const win = () => view() || null;
   const routed = (id) => !!host && host.registry.has(id) && host.registry.isModulated(id);
   const knobId = (k) => {
-    if (!idOf) { idOf = new Map(); for (const a of adapters) { try { const kk = a.knob && a.knob(); if (kk) idOf.set(kk, a.id); } catch (_) {} } }
+    if (!idOf || !idOf.has(k)) { idOf = new Map(); for (const a of adapters) { try { const kk = a.knob && a.knob(); if (kk) idOf.set(kk, a.id); } catch (_) {} } }   // a miss: a dial rebuilt since (a STATES lane)
     return idOf.get(k);
   };
   const capture = () => {
