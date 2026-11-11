@@ -4,13 +4,29 @@ One table for every host and device. A row is evidence; a missing row is an unkn
 
 Fields: **date · hardware · OS · runtime · commit/tag · payload (dist sha256[:12], files) · workload · duration · result · limitations · next decision**. Host-specific rows may carry extra fields (the Electron and iOS runbooks list theirs); the eleven above are the minimum.
 
+## 042 — the desktop for Steam (2026-11-11, the Linux workstation)
+
+The host was rewritten for Steam (`docs/release/STEAM.md`): the app is answered at `https://lambdawaves.localhost` from the package, not a
+custom scheme. Payload = `dist/` from `node tools/build-deploy.mjs --quiet` (run by `package.mjs`): **sha256 `b4ec42ca3707…`, 1837 files,
+108.84 MiB** (the menu's films and pictures are 85 MB of it). Hardware as below; Linux 7.0.0-42, Wayland; the machine's load was 14–20
+(other agents' node suites), so the timings are upper bounds.
+
+| date | hardware | OS | runtime | commit | payload | workload | duration | result | limitations | next |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-11-10 | Ryzen 5 5600G · RTX 3070 8 GB, driver 595.99.02 | Ubuntu 26.04.1, Linux 7.0.0-42, Wayland | Electron 44.10.0 dev tree, the 10-30 host (`lambdawaves://app`) | `81912a00` | `99623ffbf354` · 1837 | `smoke-run.mjs`, dev and packaged linux-x64 | ~40 s each | **PASS** 17/17 both (first frame 1936 / 2680 ms) — but the host's capture showed THE LOADER at 78 %: Cache Storage refuses the custom scheme, so the loader ran at every launch and ended "OFFLINE · 70 FILES WAIT FOR THE NETWORK"; Web MIDI, wake lock and persistent storage were refused | the smoke does not read the loader | fixed by the next row |
+| 2026-11-11 | same | same | **Electron 44.10.0 dev tree** / Chromium 152.0.7977.169 / Node 24.22.1, `https://lambdawaves.localhost`, switch `disable-blink-features=WebShare`, adapter nvidia/ampere (not fallback), webgpu enabled, rgba8unorm, maxTex2D 16384 | `a74d9542` (`s-042-sos`) | `b4ec42ca3707` · 1837 | `smoke-run.mjs` (now waits for the loader before its capture) | ~40 s | **PASS** 17/17 · first frame 1348 ms · frames 8 · nonBlack 12143 · round trip GREEN · shot `30398ec1474e` (the 1s₀ + 2p₀ field, SPECTRUM, the right rack, the bar, "Opened — p03-roundtrip") · errors 0 | sandbox OFF (below) | — |
+| 2026-11-11 | same | same | **packaged linux-x64** `out/lambdawaves-linux-x64`, **410,634,820 B, 1912 files** (`lambdawaves` `fe48bf9d2cb0`, `app.asar` `8045e6b7a6bb`: main.cjs, preload.cjs, package.json), same runtime and adapter | `a74d9542` | `b4ec42ca3707` · 1837 (`resources/dist`) | same | ~40 s | **PASS** 17/17 · first frame 1378 ms · frames 8 · nonBlack 12143 · shot `1b06a28eab9e` · errors 0. Root lists `COPYING`, `LICENSE`, `LICENSES.chromium.html`, `NOTICE`, `SOURCE.md` | sandbox OFF | Maintainer: the Steam install, STEAM.md §4 |
+| 2026-11-11 | same | same | packaged linux-x64, one profile, two launches (a CDP probe, not a suite) | `a74d9542` | same | first launch: the notice, CONTINUE, the loader; second launch | — | first: notice at 1.3 s, loader 1.8 s keeping 149 files / 91.3 MiB; second: no notice, no loader, ready 1.4 s; Web MIDI "inputs 2 outputs 2"; a menu film plays and seeks (206), 416 past the end; persist() true; wake lock and clipboard write OK; no CSP violation; no request off the origin; no dictionary download | the GPU path of a minimised window not measured (document.hidden stays false) | — |
+| 2026-11-11 | same | same | dev tree with `--disable-gpu` (no WebGPU adapter) | `1f4cc5bd` | `99623ffbf354` | first launch, then SIMPLE | — | the main menu stands (its pictures are films and stills); in the lab the kit's banner "⚠ WebGPU unavailable · no WebGPU adapter. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU" — never a black window | the banner sits UNDER the menu face (not seen there); the lab showed the banner alone 3 s after SIMPLE | a hand check: should the rack stand without WebGPU? |
+| 2026-11-11 | built: not here | Windows x64 | **packaged win32-x64** | `a74d9542` | — | — | — | **NOT BUILT** — Electron 44.10.0's win32 zip is not in `~/.cache/electron` and this row made no download | — | Maintainer: `node package.mjs --platform win32` (≈160 MB download), then STEAM.md §7 on the Windows PC |
+
 ## 0.9.9 — what moved since 0.9.1 (2026-10-30, the Linux workstation)
 
 | date | hardware | OS | runtime | commit | payload | workload | duration | result | limitations | next |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 2026-10-30 | Ryzen 5 5600G · RTX 3070 8 GB | Ubuntu 26.04.1, Linux 7.0.0-38, Wayland | **Electron 44.10.0 dev tree** / Chromium 152.0.7977.169 / Node 24.22.1 (from 44.4.5: `npm audit` 2 high → 0) | `568692fd` (chain E's branch) | the `dist/` left on disk — the deploy build failed V2 that day (since fixed); not re-identified | `smoke-run.mjs` | — | **PASS** 17/17 | packaged linux-x64 and win32-x64 not rebuilt on 44.10.0; the packaged rows below are still 44.4.5 | rebuild both packages from the 1.0 tag (`package.mjs` now writes SOURCE.md, COPYING, NOTICE and stamps BUILD_LINE's version) |
 
-The store hosts: the host proofs of 2026-09-24 and 2026-10-16 stand as recorded below; nothing is on Steam, Play or the
+The store hosts: the Electron rows of 2026-11-11 (above) supersede the desktop's earlier ones; the other host proofs of 2026-09-24 and 2026-10-16 stand as recorded below; nothing is on Steam, Play or the
 App Store. The Android upload keystore is gone with the `worktree-hosts-m0` worktree (the TWA row below says what to do); the Windows package
 waits for the maintainer's PC; the iOS shell has never been compiled. No row below is a pass for the 1.0 tree until it is re-measured on it.
 
@@ -52,7 +68,7 @@ Host: `tools/platform/electron/` (`main.cjs` policy, `preload.cjs`, `package.mjs
 Findings recorded by P03: `?warn=0` is ignored outside automation (`rack.js` `needed()` honours it only under `navigator.webdriver`), so desktop users see the photosensitivity notice like web users do; `getGPUFeatureStatus().webgpu` reads `disabled_off` at did-finish-load and `enabled` once the GPU is up, so the host samples it at capture time; Chromium logs "`--ozone-platform=wayland` is not compatible with Vulkan" yet WebGPU runs. Sudo line for the sandbox (never baked into the host):
 
 ```
-sudo chown root:root tools/platform/electron/out/lambdawaves-desktop-linux-x64/chrome-sandbox && sudo chmod 4755 tools/platform/electron/out/lambdawaves-desktop-linux-x64/chrome-sandbox
+sudo chown root:root tools/platform/electron/out/lambdawaves-linux-x64/chrome-sandbox && sudo chmod 4755 tools/platform/electron/out/lambdawaves-linux-x64/chrome-sandbox
 ```
 
 (the same two commands on `tools/platform/electron/node_modules/electron/dist/chrome-sandbox` for the dev tree).

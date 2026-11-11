@@ -9,10 +9,11 @@ import { distHash } from './dist-hash.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url)), REPO = path.resolve(HERE, '../../..');
 const PACKAGED = process.argv.includes('--packaged'), X11 = process.argv.includes('--x11');
-const PKG = path.join(HERE, 'out/lambdawaves-desktop-linux-x64');
-const BIN = PACKAGED ? path.join(PKG, 'lambdawaves-desktop') : createRequire(import.meta.url)('electron');
+const PKG = path.join(HERE, 'out/lambdawaves-linux-x64');
+const BIN = PACKAGED ? path.join(PKG, 'lambdawaves') : createRequire(import.meta.url)('electron');
 const DIST = PACKAGED ? path.join(PKG, 'resources/dist') : path.join(REPO, 'dist');
 const DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'lw-smoke-'));
+const ORIGIN = 'https://lambdawaves.localhost';   // main.cjs HOST
 const NAME = 'smoke/p03-roundtrip', FILE = path.join(DIR, 'smoke__p03-roundtrip.lambdawaves.json');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const sh = (cmd, args) => { try { return execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
@@ -36,7 +37,7 @@ async function launch(extra) {
   const p = spawn(BIN, [...(PACKAGED ? [] : [HERE]), `--remote-debugging-port=${port}`, ...extra], { env: { ...process.env, LW_SMOKE_DIR: DIR }, stdio: ['ignore', 'ignore', 'pipe'] });
   let err = ''; p.stderr.on('data', (d) => { err += d; });
   for (let i = 0; i < 120 && p.exitCode === null; i++) {
-    try { const t = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find((x) => x.type === 'page' && x.url.startsWith('lambdawaves://app')); if (t) return { p, t }; } catch {}
+    try { const t = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find((x) => x.type === 'page' && x.url.startsWith(ORIGIN)); if (t) return { p, t }; } catch {}
     await sleep(250);
   }
   if (p.exitCode === null) p.kill('SIGKILL'); else await sleep(300);
@@ -67,13 +68,14 @@ const a = await page.ev(`({ gpu: !!navigator.gpu, secure: isSecureContext, origi
 const pol = await page.ev(`(async () => { const r = await fetch('/main.js'), s = async (u) => (await fetch(u)).status;
   return { type: r.headers.get('content-type'), nosniff: r.headers.get('x-content-type-options'), headers: await s('/_headers'), up: await s('/%2e%2e/package.json'), enc: await s('/..%2fpackage.json'), bs: await s('/..%5cpackage.json') }; })()`);
 mark('protocol policy (MIME, nosniff, _headers 404, traversal refused)', /^text\/javascript/.test(pol.type) && pol.nosniff === 'nosniff' && pol.headers === 404 && pol.up >= 400 && pol.enc >= 400 && pol.bs >= 400, JSON.stringify(pol));
-mark('navigator.gpu', a.gpu); mark('isSecureContext', a.secure === true); mark('origin', a.origin === 'lambdawaves://app', a.origin);
+mark('navigator.gpu', a.gpu); mark('isSecureContext', a.secure === true); mark('origin', a.origin === ORIGIN, a.origin);
 
 // (b) the field
 const ff = await page.ev(`new Promise((r) => { const t = () => (window.__LW && __LW.stats && __LW.stats.frames > 0) ? r(Math.round(performance.now())) : performance.now() > 60000 ? r(-1) : setTimeout(t, 5); t(); })`);
 // the start by the hand's road: CONTINUE on the notice (Electron is not a webdriver), then NEW on the title screen (0.5.0 C6)
 await until(() => page.ev(`(() => { if (window.__LW && __LW.ready === true) return true;
   const b = document.querySelector('.mir-dialog-actions [data-kind=primary]') || document.querySelector('.mir-opener-home:not([disabled])'); if (b) b.click(); return false; })()`, true), 30000);
+await until(() => page.ev(`!document.getElementById('lwLoader')`), 60000);   // a fresh profile's first open fills the device (lab/loader.js)
 await page.ev('__LW.settle()');
 const b = await page.ev(`(async () => { const f = __LW.field, px = await __LW.readPixels(), ad = f.adapter;
   return { ready: __LW.ready === true, ok: f.ok, info: f.adapterInfo, fallback: ad && ((ad.info && ad.info.isFallbackAdapter) ?? ad.isFallbackAdapter), format: f.format,

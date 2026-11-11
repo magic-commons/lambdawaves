@@ -1,9 +1,8 @@
 /* Native window composition. Deliberately excludes the modulation plugin. */
 import { el, seg, sw } from './mir/kit.js'; import { foldFace } from './fold.js';   // 039 F3: SHADOW's details wear the fold rows' face
-import { infoPanel, installControlHelp, consolidateWindowHelp } from './mir/control-help.js';
+import { installControlHelp, consolidateWindowHelp } from './mir/control-help.js';
 import { planeModel } from './mir/plane-model.js';
-export { infoPanel, installControlHelp, consolidateWindowHelp, planeModel };
-
+export { planeModel };   // sliceview.js' road to the kit's plane
 
 export function reworkNative({ ui, mat, repaint }) {
   const ids=['spectrum','staticfield','palette','observer','camera','clip','slice','settings'];

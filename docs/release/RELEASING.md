@@ -35,6 +35,7 @@ npx --yes knip@6.43.0 --config tools/knip.json     # app (lab/ less lab/mir): 14
 npx --no-install dependency-cruiser --no-config --include-only '^lab' --output-type json lab   # 0 circular edges outside lab/mir (the kit's own: 37)
 npm audit                                          # 0 vulnerabilities
 (cd tools/platform/electron && npm audit)          # 5 moderate (glob, minimatch under @electron/packager 20.3.0); 0 high
+(cd tools/platform/electron && node package.mjs --platform linux && node smoke-run.mjs --packaged)   # 17/17 GREEN on 2026-11-11 (042 S); the Steam folders: STEAM.md
 node tools/build-deploy.mjs --quiet --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-3   # rc 0: dist/ 15,674 files, 5.85 GB (1,739 files, 28.9 MiB without --ship); §V7 the free plan's budget
 node tools/changelog.mjs --check                   # rc 0: CHANGELOG, CITATION.cff and BUILD_LINE (0.9.9-beta) in step
 # THE LOCK on a served tree (python3 tools/gate/server.py . <p> &), both fixtures: 0 readback differences

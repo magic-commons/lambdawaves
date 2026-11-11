@@ -33,7 +33,7 @@ export function createLinks(app) {
   }
 
   /** the href for the state as it stands, with everything encodeState measured about it */
-  function mintLink() { app.state.linkLast = linkFor(app.sh.serialize(), { paletteId: app.state.palette ? app.state.palette.id : PAL_DEF, orbitalKey: app.state.chem.on ? app.state.chem.orbitalKey() : null }); return app.state.linkLast; }   // S2: the molecule's orbital rides by its S1 name
+  function mintLink() { app.state.linkLast = linkFor(app.sh.serialize(), { paletteId: app.state.palette ? app.state.palette.id : PAL_DEF, orbitalKey: app.state.chem.on ? app.state.chem.orbitalKey() : null, base: globalThis.lwavesDesktop ? new URL('../', document.querySelector('meta[property="og:image"]').content).href : undefined }); return app.state.linkLast; }   // S2: the molecule's orbital rides by its S1 name; 042 S: a desktop link opens on the site (og:image's address, build-deploy §V3)
 
   /** MINT and copy.  Reports `chars`, and when something is not carried it SAYS SO. */
   async function copyLink() {
