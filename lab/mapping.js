@@ -102,5 +102,5 @@ export function createMapping(app, { kt }) {
     resumeMidi(midi, (m) => { say(m, 'warn'); if (app.w.wMet) app.w.wMet.setStatus(m, 'warn'); });   // 027 D4: METERS says a refusal once
     return n;
   }
-  return { root, midi, paint, install, learn, stop, targetOf };
+  return { root, paint, install, learn };
 }
