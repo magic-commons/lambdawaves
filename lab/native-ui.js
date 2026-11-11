@@ -58,7 +58,7 @@ export function reworkNative({ ui, mat, repaint }) {
   const viewport=el('div','settings-viewport',settings),pages={};
   for(const id of ['display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
   function row(page, names, cls=''){const r=el('div','row tight'+(cls?' '+cls:''),pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
-  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');if(ui.askUrl)row('display',['askUrl']);row('display',['editStage'],'lw-edit-stage');row('display',['editInfo','editWidgets'],'lw-edit-more');row('display',['gamutToggle','p3Seg'],'fit lw-gamut');   // 037 T1: FRAME · AXES · AXIS COLOUR and the stage's colour · STAGE · GAMMA live in STAGE (lab/stage-window.js); DISPLAY keeps EDIT STAGE
+  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');row('display',['editStage'],'lw-edit-stage');row('display',['editInfo','editWidgets'],'lw-edit-more');row('display',['gamutToggle','p3Seg'],'fit lw-gamut');   // 037 T1: FRAME · AXES · AXIS COLOUR and the stage's colour · STAGE · GAMMA live in STAGE (lab/stage-window.js); DISPLAY keeps EDIT STAGE
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
   const actions=el('div','row tight settings-actions',pages.display);
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig'))actions.appendChild(b);if(!actions.children.length)actions.remove();   // iteration 012 M1: WARNING left for ABOUT

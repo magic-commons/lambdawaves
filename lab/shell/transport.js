@@ -2,7 +2,7 @@
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
 import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp, label } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
-import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
+import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js';
 import { cssZoom } from '../mir/core/zoom.js'; import { notice } from '../mir/shell/notice.js'; import { adopt } from '../widgets.js'; import { STYLES as MOL_STYLES, STYLE_GLYPH } from '../widget-mol.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
@@ -138,36 +138,6 @@ export function createTransport(app) {
     for (const [id, c] of [['spectrum.scale', ui.scaleSeg], ['wave.space', ui.spaceSeg], ['wave.view', ui.viewSeg]]) favs.offer(id, c, { width: 150 });
     /* iteration 014 D4 (Josh: "Let Invert also be a custom button that's a 'Knob' size for the CSB"): PALETTE's INVERT, offered as a knob-sized switch */
     favs.offer('palette.invert', ui.invertSw, { width: 44, build: (c) => favs.swFace('palette.invert', c, { label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ' }) });
-    /* iteration 011 Q6 · GEMMA, HIDDEN: the ASK door and THE TYPE BOX mount only under ASK_ENABLED (lab/ask.js, the one flag); off, the strip is
-       the 0.6.5 strip, `openAsk` does nothing (no key row calls it) and createAsk is never made, so no request can leave */
-    let echoOn = false, openAsk = () => {};
-    if (ASK_ENABLED) {
-      /* 0.6.6 G2 · THE TYPE BOX: ASK (or /) swaps the centre — the t readout, REPEATS — for one line to Gemma (lab/ask.js); the first press ever asks consent.
-         036 W2: the t readout left the bar (TIME's hint); her echo keeps a readout of its own, made only under the flag */
-      const tro = readout({ label: 'GEMMA', value: '', cls: 'time' }), seat = el('span', 'ask-seat'); tro.root.before(seat);   // its seat, as 0.6.6 built it: just before the readout
-      const line = el('input', 'ask-line', seat), note = el('span', 'ask-note', seat), okB = el('button', 'tbtn ask-ok', seat, 'CONTINUE');
-      line.type = 'text'; line.spellcheck = false; line.autocomplete = 'off'; line.placeholder = 'ask Gemma — what does benzene look like?'; line.setAttribute('aria-label', 'ask Gemma'); okB.type = 'button'; okB.style.flex = 'none';
-      const askB = el('button', 'tbtn ask', null, 'ASK'); jmp.after(askB); askB.type = 'button'; askB.title = 'ask Gemma  (/)'; askB.setAttribute('aria-label', 'ask Gemma');
-      const asker = createAsk(app), troLbl = tro.root.querySelector('.ro-lbl'); app.sh.ask = asker;
-      let echoT = 0;
-      function showAsk(on) {
-        const first = on && !ui.askOk; T.classList.toggle('asking', on); T.classList.toggle('consent', first); if (!on) return;
-        note.title = note.textContent = 'sends your words and readouts to ' + askUrlOf(ui) + ' ·';
-        note.hidden = okB.hidden = !first; line.hidden = first; (first ? okB : line).focus();
-      }
-      function echo(s) { endEcho(); if (!s) return; echoOn = true; T.classList.add('echo'); troLbl.textContent = 'GEMMA'; tro.set(s, ''); tro.root.title = s; echoT = setTimeout(endEcho, 4000); }
-      function endEcho() { clearTimeout(echoT); if (!echoOn) return; echoOn = false; T.classList.remove('echo'); tro.root.title = ''; tro.set('', ''); }
-      openAsk = () => { endEcho(); showAsk(true); };
-      askB.addEventListener('click', () => (T.classList.contains('asking') ? showAsk(false) : openAsk()));
-      okB.addEventListener('click', () => { ui.askOk = true; saveSettings(); showAsk(true); });
-      line.addEventListener('keydown', async (e) => {
-        if (e.key === 'Escape') { e.preventDefault(); showAsk(false); return; }
-        const q = line.value.trim(); if (e.key !== 'Enter' || !q || asker.busy) return;
-        line.value = '…'; line.disabled = true; const r = await asker.ask(q); line.disabled = false; line.value = '';
-        showAsk(false); echo(r.error || r.echo);
-      });
-      document.addEventListener('pointerdown', (e) => { if (!T.contains(e.target)) endEcho(); }, true); addEventListener('keydown', (e) => { if (e.key === 'Escape') endEcho(); });
-    }
     jmp.addEventListener('click', () => { const P = periodNow(true); if (P && P.T > 0) { const t = clock.t, next = t + P.T - (((t % P.T) + P.T) % P.T); appPlay.seek(next); } });
     let lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
     /* LA6 · ONE SCAN IN FLIGHT, THE LATEST KEY WAITING.  Every new key used to post a fresh O(pairs × 2·10⁶) scan into a
@@ -296,7 +266,7 @@ export function createTransport(app) {
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled
     setModArm(app.state.modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included
-    return { update, stepDt, openAsk, bar, search };
+    return { update, stepDt, bar, search };
   })();
   /** THE PLAY (0.5.0 A6): the physics clock's toggle; its edge plays or pauses the modulation (C4: the one clock, always). */
   function togglePlay() { appPlay.toggle(); schedule(TIER.EVOLVE); }

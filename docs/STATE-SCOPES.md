@@ -36,7 +36,7 @@ this file.
 
 Every key this device keeps, one row each (`lab/settings-store.js` RECORDS). FORGET (MIR OPTIONS) wipes the rows marked yes; `kit ·` rows are
 the kit's own, listed so nothing is unnamed. The settings blob's WORKSPACE keys: `closed`, `layouts`, `nbW`, `nbH`, `abW`, `abH`, `modwin`, `phoneTr`, `phoneRack`, `tlwin`; every other blob key is
-PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `clockLink`, `spin`, `speed`, `modArm`, `modCadence`, `look`, `cam`, `theme`, `card`, `cardSet`, `frost`, `disc`, `blur`, `accent`, `badges`, `controlHints`, `hint`, `molFormula`, `molFormulaSize`, `atomLabels`, `atomLabelsSize`, `infoPos`, `infoPad`, `skeleton`, `skeletonSize`, `bead`, `ellipsoid`.
+PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `clockLink`, `spin`, `speed`, `modArm`, `modCadence`, `look`, `cam`, `theme`, `card`, `cardSet`, `frost`, `disc`, `blur`, `accent`, `badges`, `controlHints`, `hint`, `molFormula`, `molFormulaSize`, `atomLabels`, `atomLabelsSize`, `infoPos`, `infoPad`, `skeleton`, `skeletonSize`, `bead`, `ellipsoid`, `askOk`, `askUrl`.
 
 | key | scope | version | FORGET | owner |
 |---|---|---|---|---|
@@ -222,7 +222,5 @@ layout record and the settings. No key belongs to two scopes.
 | Key (0.6.4) | Where | Scope |
 |---|---|---|
 | `audio` (S2 THE CHORD): SETTINGS › AUDIO, the consent switch for sound from this page, off by default; SPECTRUM's SOUND and LEVELS · BEATS are never saved (a hand press each session), never in a project, a link or a history row | settings | PREFERENCE |
-| `askOk` (0.6.6 G2 THE TYPE BOX): the first ASK press's consent ("sends your words and this project’s readouts to <askUrl> on your network · CONTINUE"); `true` once CONTINUE is pressed, absent before; never in a project, a link or a history row | settings | PREFERENCE |
 | `skeleton` (0.7.0 V2; iteration 011 Q1: its own row in THE WORDS with `skeletonSize`, flat disks) and `bead` (0.8.2 P3 THE BEAD): INFORMATIONAL › THE WORDS › SKELETON and › MARKS › BEAD, the nuclei and bonds, and the expectation point with its trail, on the stage's `#skeleton` canvas; off by default; rows of `lambdawaves.q0.info` (iteration 008 fix round C6, an older blob's key lifted once), the project's since 036 S4 with every INFORMATIONAL row | info | PROJECT |
 | `ellipsoid` (0.8.3 B3 THE UNCERTAINTY ELLIPSOID): INFORMATIONAL › MARKS › UNCERTAINTY beside BEAD, the position covariance's three principal circles about the bead on the `#skeleton` canvas; off by default; a row of `lambdawaves.q0.info` (the fix round C6, lifted once), the project's since 036 S4 with every INFORMATIONAL row | info | PROJECT |
-| `askUrl` (0.6.6 G2): SETTINGS › the GEMMA address beside AUDIO, where ASK posts; absent means this page's host at 9443 (`${location.protocol}//${location.hostname}:9443/ask`, computed, never stored); written only when the hand types one (iteration 011 Q6: while `ASK_ENABLED` is off in `lab/ask.js` no door builds it — a stored value is read and carried by every save as it was, never written) | settings | PREFERENCE |

@@ -145,7 +145,7 @@ export async function boot(dom) {
       rotStep: null, modStore: null, saveMod: null, curvesStore: null, occlusion: null, look: null, applyAccent: null, paintMarks: null, markBatchBegin: null, markBatchEnd: null, wheelColor: null,
       accent: null, inkCtx: null, markInk: null, stageGround: null, busyWrap: null, busyFlash: null, busy: null, busySync: null, cardLoading: null, busyHost: null, field: null, maths: null,
       scan: null, cards: null, solveChem: null, solveCard: null, warmArm: null, touchState: null, loadPreset: null, setReference: null, api: null },
-    sh: { readSettings, csb: null, ask: null, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
+    sh: { readSettings, csb: null, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
       DIGESTS: null, quality: null, transport: null, togglePlay: null, setModArm: null, barLock: null, devById: null, rackCardWidth: null, rk: null,
       layout: null, winHint: null, phone: null, tablet: null, keyState: null, stageHasFocus: null, ACTIONS: null, kt: null, modSeats: null, serialize: null,
       restoreModulation: null, save: null, copyJSON: null, restore: null, notCarriedWords: null, esc: null, mintLink: null, copyLink: null, openLink: null, historyApi: null, verbs: null, LW: null },
@@ -896,7 +896,7 @@ export async function boot(dom) {
   const { historyApi } = createHistory(app); app.sh.historyApi = historyApi;
   installEnvelopeTrigger(app);   // 036 P6: THE ENVELOPE TRIGGER (lab/shell/modulation.js) — ENV + PATTERN, its rows a domain of the history just made
 
-  const verbs = createVerbs(app); app.sh.verbs = verbs;   // 0.6.6 G1: THE VERB TABLE + THE INVENTORY (lab/verbs.js), before the facade that carries it
+  const verbs = createVerbs(app); app.sh.verbs = verbs;   // 0.6.6 G1: THE VERB TABLE (lab/verbs.js), before the facade that carries it
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const LW = createFacade(app);   // 0.5.2 R5: lab/shell/facade.js — the literal, whole
   window.__LW = LW; app.sh.LW = LW;

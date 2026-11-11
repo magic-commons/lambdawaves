@@ -18,7 +18,7 @@ export const WORKSPACE = Object.freeze(['closed', 'layouts', 'nbW', 'nbH', 'abW'
  *  The look's (lab/look.js BLOB_LOOK) and INFORMATIONAL's (BLOB_INFO) are lifted out by their owners first; the rest are read by nothing. */
 export const RETIRED = Object.freeze(['palette', 'camMode', 'clockLink', 'spin', 'speed', 'modArm', 'modCadence', 'look', 'cam',
   'theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint',
-  'molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad', 'skeleton', 'skeletonSize', 'bead', 'ellipsoid']);
+  'molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad', 'skeleton', 'skeletonSize', 'bead', 'ellipsoid', 'askOk', 'askUrl']);
 const P = 'PREFERENCE', W = 'WORKSPACE', J = 'PROJECT', L = 'LIBRARY';
 const row = (key, scope, version, forget, owner, o = {}) => Object.freeze({ key, scope, version, forget, owner, ...o });
 export const RECORDS = Object.freeze([

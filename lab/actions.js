@@ -1,5 +1,5 @@
 /* lab/actions.js — ONE ACTION REGISTRY (021 I1; the DREAM's contract 2, research/iteration-021/REVIEW-B-INPUT.md).  Every act a hand, a key, a menu,
- * a bar seat, a verb (Gemma, a notebook `lw:` link), MIDI or a modulation route can fire is ONE row here, found by id, never by label or a press:
+ * a bar seat, a verb (a notebook `lw:` link, the conductor), MIDI or a modulation route can fire is ONE row here, found by id, never by label or a press:
  *   { id, label, group, kind: 'fire' | 'toggle' | 'hold' | 'set', args?, get?(), run(args), keys?: [chords], exact?, surface?, gesture?, undo, was?, … }
  *   · keys: the kit's chords (lab/mir/shell/keys.js); a chord with no Shift answers Shift too as the fine step ({ fine: 0.25 }) unless the row is `exact`
  *     (key-table.js expands it); `was` names the id (or ids) a saved binding was kept under; `stage` / `when` say when a key may run it (THE FOCUS LAW).
@@ -10,7 +10,7 @@
  * createActions(app) → { list(), get(id), run(id, args), add(rows), sync(), notify(id), onState(fn), onAdd(fn), escape: { push(close) }, keyState }
  * Seated in rack.js before the transport (the bar's seats read it); every row reads `app` at run time, so a module made later is found then. */
 import { TIER } from './tier.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from './field.js'; import { CAM } from './camera-law.js'; import { STAGE_BINDINGS } from './stage-gestures.js';
-import { infoActions } from './mir/info/layer.js'; import { mirGui } from './mir-gui.js'; import { ASK_ENABLED } from './ask.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
+import { infoActions } from './mir/info/layer.js'; import { mirGui } from './mir-gui.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
 import { EXPORTS } from './export3d.js'; import { isField } from './mir/core/pointer.js';
 import { knobAct } from './mir/shell/menubar.js'; import { copyText } from './mir/shell/clipboard.js'; import { notice } from './mir/shell/notice.js'; import { quickSaved } from './shell/persist.js';
 
@@ -63,7 +63,6 @@ export function createActions(app) {
     { id: 'timeline.beginning', icon: 'rewind', group: T, short: 'bar 1', label: 'the playhead to bar 1', hint: 'to bar 1 · ψ’s t stays', run: () => { if (app.state.tl) app.state.tl.controller.beginning(); sch(TIER.PRESENT); }, surface: true },
     { id: 'stepBack', icon: 'dirPrev', group: T, short: 'step back', label: 'step time back (shift: fine)', keys: ['ArrowLeft'], run: (a) => { clock.step(-S().transport.stepDt() * F(a)); sch(TIER.EVOLVE); }, surface: true },
     { id: 'stepFwd', icon: 'dirNext', group: T, short: 'step fwd', label: 'step time forward (shift: fine)', keys: ['ArrowRight'], run: (a) => { clock.step(S().transport.stepDt() * F(a)); sch(TIER.EVOLVE); }, surface: true },
-    ...(ASK_ENABLED ? [{ id: 'ask', group: T, short: 'ask Gemma', label: 'ask Gemma — the transport strip becomes the type box', keys: ['Slash'], exact: true, run: () => S().transport.openAsk() }] : []),   // iteration 011 Q6: only under ASK_ENABLED (createKeyTable's `keep`)
     { id: 'zoomIn', group: C, short: 'zoom in', label: 'camera closer', keys: ['ArrowUp'], run: (a) => H().setDist(obs.dist / (1 + 0.12 * F(a))), surface: true },
     { id: 'zoomOut', group: C, short: 'zoom out', label: 'camera farther', keys: ['ArrowDown'], run: (a) => H().setDist(obs.dist * (1 + 0.12 * F(a))), surface: true },
     ...[['yawL', 'yaw left', 'KeyA', -1, 0], ['yawR', 'yaw right', 'KeyD', 1, 0], ['pitchUp', 'pitch up', 'KeyW', 0, 1], ['pitchDn', 'pitch down', 'KeyS', 0, -1]].map(([id, w, k, y, p]) =>   // R-K1: S stays WASD's
