@@ -8,8 +8,7 @@
  *                                  or a NaN is refused, not opened);
  *   installed / fetchRecord / removeRecord / persistOnce / storageInfo   the store MOLECULES installs into and opens from;
  *   keepData                       the same store for a DATA file the lab only shows or reads as served (iteration 005 A: the
- *                                  Picker's pictures, the demo covers, a volume's ladder bases) — kept after its first good answer;
- *   keptSummary                    what the store holds, records and DATA apart (the Picker's LIBRARY, iteration 011 Q4).
+ *                                  Picker's pictures, the demo covers, a volume's ladder bases) — kept after its first good answer.
  * tools/orbital-library.mjs writes the records and lab/library.json, the catalogue lab/molecules.js reads. */
 import { sha256Hex } from './md.js';
 export const SCHEMA = 1, DATA_CACHE = 'lw-data-v1';
@@ -159,18 +158,6 @@ export async function keepData(url, res = null) {
     if (r.ok) await c.put(key, r);
     return r.ok;
   } catch (_) { return false; }
-}
-
-/** what lw-data-v1 holds (iteration 011 Q4, the Picker's LIBRARY): the records keepSection / fetchRecord kept (library/<sha-256>.json) and the
-    DATA files keepData kept (pictures, covers, ladder bases) — { records: { n, bytes }, data: { n, bytes } }.  A read: never creates the store. */
-async function keptSummary() {
-  const out = { records: { n: 0, bytes: 0 }, data: { n: 0, bytes: 0 } }, c = await store();
-  if (!c) return out;
-  for (const req of await c.keys().catch(() => [])) {
-    const r = await c.match(req).catch(() => null), b = r ? (await r.blob().catch(() => null)) : null, k = /\/library\/[0-9a-f]{64}\.json$/.test(req.url) ? out.records : out.data;
-    k.n++; k.bytes += b ? b.size : 0;
-  }
-  return out;
 }
 
 /* ── the iPad law (PLAN B2) ── persist() is asked on the user's FIRST install press, never at boot (Firefox prompts), and the

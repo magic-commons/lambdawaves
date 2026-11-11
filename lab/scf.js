@@ -33,11 +33,13 @@ function solveLinear(Ain, bin, n) {
 const mm = (A, B, n) => { const C = new Float64Array(n * n); for (let i = 0; i < n; i++) for (let k = 0; k < n; k++) { const a = A[i * n + k]; if (a === 0) continue; for (let j = 0; j < n; j++) C[i * n + j] += a * B[k * n + j]; } return C; };
 const tr = (A, n) => { const T = new Float64Array(n * n); for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) T[j * n + i] = A[i * n + j]; return T; };
 
-/** the closed-shell Fock matrix F[D] for a real density D, with the chemist's tensor g */
+/** the closed-shell Fock matrix F[D] for a real density D, with the chemist's tensor g.  (il|kj) is read at its 8-fold twin (jk|il), the
+    same double (md.js writes all eight from one value), so both reads run along l */
 export function fockReal({ h, eri, n }, D) {
-  const F = Float64Array.from(h);
+  const F = Float64Array.from(h), n2 = n * n;
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let f = 0;
-    for (let k = 0; k < n; k++) for (let l = 0; l < n; l++) f += D[k * n + l] * (eri[((i * n + j) * n + k) * n + l] - 0.5 * eri[((i * n + l) * n + k) * n + j]);
+    for (let k = 0; k < n; k++) { const J = ((i * n + j) * n + k) * n, K = (j * n + k) * n2 + i * n, d = k * n;
+      for (let l = 0; l < n; l++) f += D[d + l] * (eri[J + l] - 0.5 * eri[K + l]); }
     F[i * n + j] += f; }
   return F;
 }
@@ -116,7 +118,7 @@ export function rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, t
 /** the exchange matrix K[D]_ij = Σ_kl D_kl (il|kj) — fockReal(D) is h + J[D] − ½K[D], left as it was so every closed shell keeps its bits */
 function exchange({ eri, n }, D) {
   const K = new Float64Array(n * n);
-  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let f = 0; for (let k = 0; k < n; k++) for (let l = 0; l < n; l++) f += D[k * n + l] * eri[((i * n + l) * n + k) * n + j]; K[i * n + j] = f; }
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let f = 0; for (let k = 0; k < n; k++) { const o = (j * n + k) * n * n + i * n, d = k * n; for (let l = 0; l < n; l++) f += D[d + l] * eri[o + l]; } K[i * n + j] = f; }   // (il|kj) at its twin (jk|il), as fockReal
   return K;
 }
 /**
