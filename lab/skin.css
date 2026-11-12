@@ -414,6 +414,12 @@ body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="so
   .sp-b:not(.on), .pk-c:not(.on), .sp-row:not(.sel), .orbit-row, .plane-model, .dev-copy, #transport[data-layout="csb"] .csb-play > .tbtn.play:not(:active, .press),
   .nodes-card, #lwMenu .mm-arrow, #lwMenu .mm-pill) { background-color: transparent; background-image: none; }
 body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.dev:not(.mir-modwindow) .trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]):not(.lw-fold), .sp-b:not(.on), .pk-c:not(.on)) { border-color: var(--ctl-hairline); }
+/* 044 M4 · THE STATE BUTTONS FOLLOW THE STROKE (Josh 11-12: "When in glass faces mode, can the 140nlm state buttons not have an extreme outline
+   and be tied to the MIR options param?"): the kit declares --ctl-hairline on ITS controls (mir/css/base.css), so on λWAVES' cells the rule above
+   read an undeclared name and the border fell to currentColor — the full ink, at every STROKE.  The cells declare the kit's own hairline × STROKE
+   (0 none, 100 % the pane's hairline), and under GLASS a chosen cell's shell-coloured rim is × STROKE too (its fill and ink still say chosen) */
+.sp-b, .pk-c { --ctl-hairline: color-mix(in srgb, var(--glass-hairline) calc(var(--ctl-stroke) * 100%), transparent); }
+body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) .pk-c.on { border-color: color-mix(in oklab, var(--nc) calc(60% * var(--ctl-stroke)), transparent); }
 
 /* Explanatory pockets are optional; numerical interaction labels stay available. */
 body.window-info-off .native-info,
