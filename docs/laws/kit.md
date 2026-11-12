@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 044
+
+MAIN IS LINE 1.6 (Josh 2026-11-12: "merge/cut all the latest MIR work into main to get it's own alpha series"): the kit's `main` was fast-forwarded from 1.4.3 to the 1.5 line's tip (`kit-043-sos` @ bf9cf2a = 1.5.7-alpha.71) and renumbered 1.6.0-alpha.1 (9cb3acc; branch `kit-1.6` is the same commit); the app moved lines with `adopt.mjs . --line 1.6` (two files: version.js, tokens.json). A door is now `1.6.0-alpha.N`, built on a kit branch from `main` and merged back to it. MIR Focus (`focus`, `focus-043`) is its own line with its own numbers: the two trade ideas, never a merge. The 1.4.3 work that sat uncommitted in the `main` checkout since 10-01 is saved in the vault (`iteration-044/main-wip-saved-2026-11-12/`).
+
 ## The laws of 041
 
 THE DOORS OF 041 (THE SECOND HAND, Josh's 11-09 list; the clone road on kit branches `kit-041` (T) and `kit-041w` (W) from kit-040's a0e32f5, merged and adopted whole at alpha.63 (app a12502f2), then `kit-041-sos` (K) to 448e3ec = 1.5.7-alpha.67, adopted whole (app 719d94ca), then the fresh eyes' door alpha.68 A SCALED WINDOW KEEPS TO THE SCREEN (24cd015: `scaledRoom`, the rail's own px, PATTERN's seat); 52 and 53 unused; Focus's alpha.27…37 stay on `focus`):
