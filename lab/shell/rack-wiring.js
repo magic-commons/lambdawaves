@@ -238,6 +238,7 @@ export function createRackWiring(app) {
     /** put it back: the kit's apply (a retired id opens its heir, a phone parks the floats, `nb` sizes the notebook), then the extras */
     applyLayout(L) {
       if (!L || !Array.isArray(L.cards)) return false;
+      L = { ...L, cards: L.cards.filter((c) => c && typeof c.id === 'string') };   // 043 O5: a card that is not one (null, a number) threw in layoutExtras and refused the whole file
       if (typeof L.docked === 'boolean' && L.docked !== layout.docked) layout.dockTransport();
       rk.apply(L); layoutExtras(L);
       if (L.cards.some((c) => c && c.id === 'lattice' && !c.closed && c.open !== false) && !(app.state.chem && app.state.chem.on)) ui.hamSeg.show('lattice');   // 041 H4: an older layout's open LATTICE window is SPECTRUM's LATTICE room, shown

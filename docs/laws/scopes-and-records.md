@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 043
+
+EVERY OLD FILE OPENS AS ITSELF, IN ANY ORDER (043 O: every project the app ever wrote, its links and its stored records, opened in one page in two orders — the vault's iteration-043 `O-BUILD.md`). NO MOLECULES RECORD IS NO MOLECULE: a non-undo restore whose record has no `instruments.chem` (a 0.3 file, a hydrogen link) turns MOLECULES off before the look lands; A FILE WITHOUT INSTRUMENTS OPENS ON THEIR HOMES (a project open of a record with no `instruments` takes the MOLECULES card, ORBITALS, STATES, the register's mode, QCD and LADDER as the boot has them, captured at createPersist; a link keeps the reader's). THE OUTGOING ARRANGEMENT GOES FIRST: a non-undo restore clears the timeline before anything lands, so the last project's lanes never write the next one (its pose, its style memory); the file's own arrangement still lands last. THE LANDING HANDS THE BASE THE HAND'S ORBITAL: chem.orbital's re-registration reads chemview's `hand` (handK), never the live orbital a parked lane write stepped. A FILE OLDER THAN GAMMA OPENS AT 1. A BROKEN CARD, STOP OR VIEW IS SKIPPED, NEVER THROWN, and A FILE'S NUMBERS STAY INSIDE THEIR KNOBS (`persist.js` `inKnob`: WIDTH with AUTO off, Z, the well, DRAG; window > 0; slice axis 0…2; SPECTRUM's label; KEPLER's shell; LADDER's four, each in its knob).
+
 ## The law of 042
 
 A LINK OR A FILE ASKS ONLY FOR THE APP'S OWN GRIDS (042 B3): restore takes `quality.res` only when it is one of `GRID_PAIRING`'s (64 · 96 · 128, `lab/first-run.js`) and caps `steps` at 240 (128's), so no `#s=` link or file can ask for a 512³ grid or a 65535-step march (`lab/shell/persist.js`); every fixture and demo is on those grids.

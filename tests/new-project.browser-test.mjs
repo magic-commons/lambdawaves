@@ -158,7 +158,7 @@ try {
     window.fetch = (u, o) => /new-project/.test(String(u)) ? Promise.resolve(new Response('gone', { status: 404 })) : f0(u, o);
     const a = { ok: await P.fresh(), status: __st() }; await __LW.settle();
     Object.assign(a, { same: ser() === s0, current: P.current, dirty: P.dirty, nb: __LW.notebook.text === nb0 });
-    const bad = await (await f0('./new-project.lambdawaves.json', { cache: 'no-cache' })).json(); bad.data.presentation.palette.stops = [5];   /* failrestore2.mjs's breaker */
+    const bad = await (await f0('./new-project.lambdawaves.json', { cache: 'no-cache' })).json(); bad.data.experiment.modes = 5;   /* failrestore2.mjs's breaker; 043 O8: a register that is not a list (the one shape that still refuses a file: restore has cleared the register and put the arrangement and the modulation down when it throws) — a bad palette stop is skipped since O5 */
     window.fetch = (u, o) => /new-project/.test(String(u)) ? Promise.resolve(new Response(JSON.stringify(bad), { status: 200 })) : f0(u, o);
     const b = { ok: await P.fresh(), status: __st() }; await __LW.settle(); await __LW.settle();
     Object.assign(b, { same: ser() === s0, current: P.current, dirty: P.dirty, nb: __LW.notebook.text === nb0 });
