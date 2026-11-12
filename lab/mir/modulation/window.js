@@ -927,6 +927,7 @@ export function createModulation(host, port) {
     paintRings(idx);
   }
   function dropRing(rec) {
+    rec.life.abort();                   // 1.5.7-alpha.70: the listeners it put on the host and the dial, which stay in the page, go with it
     if (rec.svg) rec.svg.remove(); if (rec.range) rec.range.remove(); if (rec.dot) rec.dot.remove(); if (rec.depth) rec.depth.root.remove(); if (rec.x) rec.x.remove();
     if (ringFocus === rec.id) ringFocus = null;
     rec.host.classList.remove('has-ring', 'mod-selected', 'ring-focus');
@@ -934,7 +935,7 @@ export function createModulation(host, port) {
 
   /** a press held 600 ms (or a right-click) on `node` opens the route pop-over — the touch road to what Serum puts
    *  behind a right-click */
-  function holdForPop(node, id, capture = false) {
+  function holdForPop(node, id, capture = false, signal) {
     let hold = 0;
     /* `capture`: the press is heard on the node's parent in the capture phase, so a control that takes its own press in capture and stops it
        (the arc knob, controls/arc.js) still starts the hold; only a press on `node` itself counts */
@@ -947,8 +948,8 @@ export function createModulation(host, port) {
       const move = (ev) => { if (Math.abs(ev.clientX - x0) > 4 || Math.abs(ev.clientY - y0) > 4) done(); };
       const done = () => { clearTimeout(hold); hold = 0; window.removeEventListener('pointermove', move, true); window.removeEventListener('pointerup', done, true); window.removeEventListener('pointercancel', done, true); };
       window.addEventListener('pointermove', move, true); window.addEventListener('pointerup', done, true); window.addEventListener('pointercancel', done, true);
-    }, capture);
-    node.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); focusRing(id); openPop(id, e.clientX, e.clientY); });
+    }, { capture, signal });
+    node.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); focusRing(id); openPop(id, e.clientX, e.clientY); }, { signal });
   }
 
   /** THE ROUTE'S OVERLAY.  A knob gets the ring (its arcs, its depth gesture, its pop-over); a fader gets a range
@@ -957,7 +958,9 @@ export function createModulation(host, port) {
   function buildRing(dial, id) {
     const fader = dial.classList.contains('fd');
     const hostEl = fader ? dial : dial.parentElement;
-    const rec = { id, dial, host: hostEl, fader, svg: null };
+    /* 1.5.7-alpha.70 (λWAVES 043 F2): the ring's own life — what it puts on the host and the dial (they stay in the page) is aborted by dropRing,
+       or the host kept every dropped ring's listeners, their closures held its × and RANGE knob, and a route that came back added one more set */
+    const rec = { id, dial, host: hostEl, fader, svg: null, life: new AbortController() }, signal = rec.life.signal;
     if (fader) {
       rec.range = el('i', 'm2fdrange', hostEl);
       rec.range.setAttribute('aria-hidden', 'true');
@@ -983,7 +986,7 @@ export function createModulation(host, port) {
       const rs = M.routesOfTarget(id).filter((r) => !r.dormant);
       const chosen = rs.find(routeSelected) || rs[0];
       if (chosen) selectMacro(chosen.macroId);
-    }, true);
+    }, { capture: true, signal });
     const depth = knob({ label: 'RANGE', min: -1, max: 1, value: 0, fmt: (v) => (v * 100).toFixed(0) + '%',
       onInput: (d) => { const r = editRouteOf(id); if (!r) return; M.setRouteRange(r.id, { min: Math.max(0, -d), max: Math.max(0, d) }); apply(); paintRings(); } });
     depth.root.classList.add('k-route-depth'); depth.root.title = 'Selected macro range; the large dial sets the base';
@@ -1004,10 +1007,10 @@ export function createModulation(host, port) {
     /* a knob's dial is the door to the pop-over; a fader's track is its value (a hold there would fight the drag),
        so its range dial is the door — and a right-click on the fader opens it as well */
     if (fader) {
-      holdForPop(depth.root, id);
-      hostEl.addEventListener('pointerdown', () => focusRing(id));
-      hostEl.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); focusRing(id); openPop(id, e.clientX, e.clientY); });
-    } else holdForPop(dial, id, true);
+      holdForPop(depth.root, id, false, signal);
+      hostEl.addEventListener('pointerdown', () => focusRing(id), { signal });
+      hostEl.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); focusRing(id); openPop(id, e.clientX, e.clientY); }, { signal });
+    } else holdForPop(dial, id, true, signal);
     return rec;
   }
   /** one routed control at a time wears its badges: the one the hand last touched */

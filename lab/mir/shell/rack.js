@@ -244,11 +244,13 @@ export function createRackMotion(hosts, view = globalThis) {
     map.set(c, a); own(c, a);
     a.finished.then(() => { if (map.get(c) !== a) return; map.delete(c); if (sizing) c.classList.remove('rack-sizing'); }).catch(() => {});
   }
+  /* what a refresh compares: each card's rack, place, classes, width and its head's and body's heights */
+  const stampOf = (all) => all.map((c) => [hosts.indexOf(c.parentElement), c.dataset.id, c.hidden, ['folded', 'closed', 'compact', 'floating'].filter((k) => c.classList.contains(k)).join(','),
+    c.getBoundingClientRect().width, ...[...c.children].filter((n) => n.matches('.dev-head, .dev-body')).map((n) => n.getBoundingClientRect().height)].join(':')).join('|');
   function refresh() {
     if (syncing) return;
     const all = cards();
-    const stamp = all.map((c) => [hosts.indexOf(c.parentElement), c.dataset.id, c.hidden, ['folded', 'closed', 'compact', 'floating'].filter((k) => c.classList.contains(k)).join(','),
-      c.getBoundingClientRect().width, ...[...c.children].filter((n) => n.matches('.dev-head, .dev-body')).map((n) => n.getBoundingClientRect().height)].join(':')).join('|');
+    const stamp = stampOf(all);
     if (stamp === signature) return;
     signature = stamp; syncing = true;
     /* the last layout, as it is SEEN now: a running move's offset and a part-done height included */
@@ -280,6 +282,11 @@ export function createRackMotion(hosts, view = globalThis) {
       }
     }
     previous = next;
+    /* 1.5.7-alpha.71 (λWAVES 043 F3): the stamp is read again once the motion has started, so the bar its own moves bring back (cards drawn
+       where they were are scrollable overflow; a fold that made an overflowing rack fit) is not a change: the ResizeObserver delivery that
+       follows no longer restarts the same moves inside itself, which changed the rack's width there ("ResizeObserver loop completed with
+       undelivered notifications", Firefox) */
+    if (heights.size || moves.size) signature = stampOf(all);
     if (observed.size !== all.length || all.some((c) => !observed.has(c))) {
       attributes.disconnect();
       for (const [c, nodes] of observed) if (!all.includes(c)) { nodes.forEach((n) => sizes.unobserve(n)); observed.delete(c); }

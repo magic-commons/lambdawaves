@@ -168,8 +168,10 @@ export function createRampView(parent, o = {}) {
     b.setAttribute('role', 'slider'); b.setAttribute('aria-valuemin', '0'); b.setAttribute('aria-valuemax', '1');
     const pin = el('i', 'mir-ramp-pin', b); pin.setAttribute('aria-hidden', 'true');
     let was = null;
-    b.addEventListener('pointerdown', (e) => { if (e.button === 0) select(s.id); }, { signal: life.signal });
-    b.addEventListener('focus', () => select(s.id), { signal: life.signal });
+    /* the button's own listeners carry no signal: they die with the button when build() removes it (1.5.7-alpha.69, λWAVES 043 F1: the panel's one
+       signal held every removed handle, its drag and closures, for the panel's life — Firefox keeps a signal's targets until it aborts) */
+    b.addEventListener('pointerdown', (e) => { if (e.button === 0) select(s.id); });
+    b.addEventListener('focus', () => select(s.id));
     drag(b, { slop: 3,
       onStart() { was = s.at; b.classList.add('drag'); },
       onMove(p) {
@@ -187,7 +189,7 @@ export function createRampView(parent, o = {}) {
       if (dir) { e.preventDefault(); s.at = posOf(s.at + dir * step); push(false); return; }
       if (e.code === 'Home') { e.preventDefault(); s.at = 0; push(false); } else if (e.code === 'End') { e.preventDefault(); s.at = cyc ? TOP : 1; push(false); }
       else if (e.code === 'Delete' || e.code === 'Backspace') { e.preventDefault(); const c = rm.chip('remove'); select(s.id); if (c) c.click(); }
-    }, { signal: life.signal });
+    });
     handles.set(s.id, b);
     return b;
   }
