@@ -63,6 +63,11 @@ export function createPersist(app) {
   /* 0.5.0 D9 · QCD's window is deleted; its record `instruments.qcd` stays as QUARKONIUM's parameters (the key and shape it had) */
   const quarkonium = () => { const s = HAMILTONIANS.cornell.system; return { kind: s.kind, potential: s.pot, params: { alphaS: s.params.alphaS, sigma: s.params.sigma, C: s.params.C } }; };
   app.state.restoreNotice = '';   // D9: what the last restore could not bring back (a retired legacy window), in one line; '' when nothing
+  /* 043 O9 · THE INSTRUMENTS' HOMES, as the boot has them (nothing is restored yet here — a fresh boot is NEW's file): a project file from before
+     `instruments` existed (0.3) opens on these, never on the last project's MOLECULES card, ORBITALS / STATES selections or LADDER; LATTICE, BLOCH,
+     CENTRAL and SEPARABLE are already their defaults when absent */
+  const HOME_INSTRUMENTS = JSON.stringify({ chem: app.state.chem.save(), orbitals: app.state.orbitals.save(), states: app.state.states.save(),
+    register: { mode: app.state.register.mode }, qcd: quarkonium(), ladder: { ...ladder.params } });
   function serialize(opt) {
     const edit = !!(opt && opt.scope === 'edit');
     const m = JSON.parse(JSON.stringify(mat)); for (const k of ['bg', 'lightUI', 'stageCustom', 'stage', ...FIELD_CHROME]) delete m[k];   // 037 T4: STAGE's FX ride as presentation.stage   // the stage colour travels under presentation.ui.stage; GAMMA remains an artist-owned material value; the chrome is the reader's (S1)
@@ -203,6 +208,7 @@ export function createPersist(app) {
         ui.rateKnob.set(clock.rate); ui.presetSel.value = reg.preset || ''; app.state.lastNmax = -1; app.ctl.setReference();
       }
       if (pr && !hist && !(pr.instruments && pr.instruments.chem) && app.state.chem.on) app.state.chem.setOn(false);   // 043 O1 · NO MOLECULES RECORD IS NO MOLECULE: a 0.3 file (WAVE DANCER as 008 seeded it) and a hydrogen link carry none, and opened after a molecule they showed that molecule (and saved it); before the look, so the file's VIEW stands
+      if (pr && !hist && opt && opt.project && !(pr.instruments && typeof pr.instruments === 'object')) pr = { ...pr, instruments: JSON.parse(HOME_INSTRUMENTS) };   // 043 O9 · a FILE without instruments opens on their homes (the boot's), never on the last project's
       if (pr) { if (!hist) { camLevel.from = null; Object.assign(obs, finiteOver(obs, pr.obs || {})); if (pr.obs) obs.shift = clampShift(!camera.lock && pr.obs.shift);   /* 0.5.3 M6: under the LOCK a file's shift opens centred (the record is not written) */ obs.mode = obs.mode === 'free' ? 'free' : 'turntable';   /* S2: a pose without a shift (an older file or link) opens at 0 */ if (!Array.isArray(obs.quat) || obs.quat.length !== 4) obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); if (obs.mode === 'free') { /* WAVE 106 · THE ANGLES ARE A READOUT IN FREE, AND A READOUT MUST NOT MOVE THE RECORD.
       A link rounds the quaternion to f32; re-deriving the angles from THAT quaternion lands them an ulp off the
       ones the link carried, so mint(open(link)) stopped being byte-identical the moment the camera began booting
