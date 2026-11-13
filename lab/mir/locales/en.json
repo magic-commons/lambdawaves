@@ -100,18 +100,6 @@
   "B at 0, C and D at 1": "B at 0, C and D at 1",
   "BALANCED": "BALANCED",
   "BAND": "BAND",
-  "BASINS": "BASINS",
-  "BASINS — FL documents no Ctrl+B; every copy gets an independent source, never a linked one": "BASINS — FL documents no Ctrl+B; every copy gets an independent source, never a linked one",
-  "BASINS — FL has no lane axis to move on": "BASINS — FL has no lane axis to move on",
-  "BASINS — FL slices with the tool; Insert cuts the selection at the playhead": "BASINS — FL slices with the tool; Insert cuts the selection at the playhead",
-  "BASINS — FL’s Backspace toggles Global Snap; not adopted, since an iPad keyboard has no forward Delete": "BASINS — FL’s Backspace toggles Global Snap; not adopted, since an iPad keyboard has no forward Delete",
-  "BASINS — FL’s right-click opens a Delete menu instead": "BASINS — FL’s right-click opens a Delete menu instead",
-  "BASINS — Shift+T": "BASINS — Shift+T",
-  "BASINS — a touch-friendly zoom; a horizontal Ctrl-drag scrubs on Snap": "BASINS — a touch-friendly zoom; a horizontal Ctrl-drag scrubs on Snap",
-  "BASINS — active wherever the timeline is open": "BASINS — active wherever the timeline is open",
-  "BASINS — the hand leads": "BASINS — the hand leads",
-  "BASINS — the range the record window renders": "BASINS — the range the record window renders",
-  "BASINS — the transport’s one play (transportActions); FL’s Space stops to the start position instead": "BASINS — the transport’s one play (transportActions); FL’s Space stops to the start position instead",
   "BEAT": "BEAT",
   "BLACK": "BLACK",
   "BLACK · WHITE": "BLACK · WHITE",
@@ -193,6 +181,7 @@
   "Colour intensity across glass surfaces: 0% neutral · 100% original · 200% vivid.": "Colour intensity across glass surfaces: 0% neutral · 100% original · 200% vivid.",
   "Complete · {frames} frames · {time} render time": "Complete · {frames} frames · {time} render time",
   "Continue from the clock phase": "Continue from the clock phase",
+  "Control": "Control",
   "Copy the exact centre, zoom and rotation as text": "Copy the exact centre, zoom and rotation as text",
   "Copy the selection": "Copy the selection",
   "Corner radius across window panes.": "Corner radius across window panes.",
@@ -382,7 +371,7 @@
   "FL — Slice tool": "FL — Slice tool",
   "FL — Zoom in": "FL — Zoom in",
   "FL — Zoom out": "FL — Zoom out",
-  "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it": "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it",
+  "FL — Zoom to selection (Shift+5); Shift+Z is MIR’s own, kept beside it": "FL — Zoom to selection (Shift+5); Shift+Z is MIR’s own, kept beside it",
   "FL — Zoom tool (Z); unbound in MIR": "FL — Zoom tool (Z); unbound in MIR",
   "FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves": "FL — drag a clip’s edge; a selection resizes together; the lit edge is the one that moves",
   "FL — drag a node or a tension handle": "FL — drag a node or a tension handle",
@@ -555,15 +544,27 @@
   "MENUS": "MENUS",
   "MID": "MID",
   "MIN": "MIN",
+  "MIR": "MIR",
   "MIR ABOUT": "MIR ABOUT",
   "MIR OPTIONS": "MIR OPTIONS",
   "MIR is free software under the GNU GPL v3.0 only (GPL-3.0-only) — no warranty.": "MIR is free software under the GNU GPL v3.0 only (GPL-3.0-only) — no warranty.",
   "MIR is the shared Magic Commons interface kit behind its controls, window system, gestures, and modulation. MIR is an open source platform and will continuously be updated, allowing for ‘LLM Mods’ support and customizable skins.": "MIR is the shared Magic Commons interface kit behind its controls, window system, gestures, and modulation. MIR is an open source platform and will continuously be updated, allowing for ‘LLM Mods’ support and customizable skins.",
   "MIR {version} · SKIN {theme}": "MIR {version} · SKIN {theme}",
   "MIR — Ctrl shapes (Josh, 040)": "MIR — Ctrl shapes (Josh, 040)",
+  "MIR — FL documents no Ctrl+B; every copy gets an independent source, never a linked one": "MIR — FL documents no Ctrl+B; every copy gets an independent source, never a linked one",
+  "MIR — FL has no lane axis to move on": "MIR — FL has no lane axis to move on",
+  "MIR — FL slices with the tool; Insert cuts the selection at the playhead": "MIR — FL slices with the tool; Insert cuts the selection at the playhead",
+  "MIR — FL’s Backspace toggles Global Snap; not adopted, since an iPad keyboard has no forward Delete": "MIR — FL’s Backspace toggles Global Snap; not adopted, since an iPad keyboard has no forward Delete",
+  "MIR — FL’s right-click opens a Delete menu instead": "MIR — FL’s right-click opens a Delete menu instead",
   "MIR — Josh 2026-11-09; FL clears the selection on a click": "MIR — Josh 2026-11-09; FL clears the selection on a click",
   "MIR — Shift is the fine gear": "MIR — Shift is the fine gear",
+  "MIR — Shift+T": "MIR — Shift+T",
+  "MIR — a touch-friendly zoom; a horizontal Ctrl-drag scrubs on Snap": "MIR — a touch-friendly zoom; a horizontal Ctrl-drag scrubs on Snap",
+  "MIR — active wherever the timeline is open": "MIR — active wherever the timeline is open",
   "MIR — length and speed change together": "MIR — length and speed change together",
+  "MIR — the hand leads": "MIR — the hand leads",
+  "MIR — the range the record window renders": "MIR — the range the record window renders",
+  "MIR — the transport’s one play (transportActions); FL’s Space stops to the start position instead": "MIR — the transport’s one play (transportActions); FL’s Space stops to the start position instead",
   "MOD": "MOD",
   "MOD off": "MOD off",
   "MOD on": "MOD on",
@@ -1670,7 +1671,7 @@
   "{why} — what was open before is back": "{why} — what was open before is back",
   "{why}, and putting back what was open before failed too ({back})": "{why}, and putting back what was open before failed too ({back})",
   "{word} — the {menus} menus": "{word} — the {menus} menus",
-  "© 2026 Joshua Hosain · Magic Commons. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).": "© 2026 Joshua Hosain · Magic Commons. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).",
+  "© 2026 MAGIC COMMONS. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).": "© 2026 MAGIC COMMONS. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).",
   "λWAVES": "λWAVES",
   "“{action}” already has {chord}": "“{action}” already has {chord}",
   "“{action}” is now bound to {chord}": "“{action}” is now bound to {chord}",
@@ -2100,42 +2101,6 @@
   "BAND": [
    "mir/modulation/window.js"
   ],
-  "BASINS": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — FL documents no Ctrl+B; every copy gets an independent source, never a linked one": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — FL has no lane axis to move on": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — FL slices with the tool; Insert cuts the selection at the playhead": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — FL’s Backspace toggles Global Snap; not adopted, since an iPad keyboard has no forward Delete": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — FL’s right-click opens a Delete menu instead": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — Shift+T": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — a touch-friendly zoom; a horizontal Ctrl-drag scrubs on Snap": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — active wherever the timeline is open": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — the hand leads": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — the range the record window renders": [
-   "mir/timeline/shortcuts.js"
-  ],
-  "BASINS — the transport’s one play (transportActions); FL’s Space stops to the start position instead": [
-   "mir/timeline/shortcuts.js"
-  ],
   "BEAT": [
    "mir/modulation/window.js"
   ],
@@ -2395,6 +2360,9 @@
   ],
   "Continue from the clock phase": [
    "mir/modulation/window.js"
+  ],
+  "Control": [
+   "mir/shell/menubar.js"
   ],
   "Copy the exact centre, zoom and rotation as text": [
    "mir/render/panel.js"
@@ -2967,7 +2935,7 @@
   "FL — Zoom out": [
    "mir/timeline/shortcuts.js"
   ],
-  "FL — Zoom to selection (Shift+5); Shift+Z is BASINS’ own, kept beside it": [
+  "FL — Zoom to selection (Shift+5); Shift+Z is MIR’s own, kept beside it": [
    "mir/timeline/shortcuts.js"
   ],
   "FL — Zoom tool (Z); unbound in MIR": [
@@ -3485,6 +3453,9 @@
   "MIN": [
    "mir/modulation/modwindow/modwindow.js"
   ],
+  "MIR": [
+   "mir/timeline/shortcuts.js"
+  ],
   "MIR ABOUT": [
    "mir/app.js",
    "mir/shell/gui.js"
@@ -3505,13 +3476,46 @@
   "MIR — Ctrl shapes (Josh, 040)": [
    "mir/timeline/shortcuts.js"
   ],
+  "MIR — FL documents no Ctrl+B; every copy gets an independent source, never a linked one": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — FL has no lane axis to move on": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — FL slices with the tool; Insert cuts the selection at the playhead": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — FL’s Backspace toggles Global Snap; not adopted, since an iPad keyboard has no forward Delete": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — FL’s right-click opens a Delete menu instead": [
+   "mir/timeline/shortcuts.js"
+  ],
   "MIR — Josh 2026-11-09; FL clears the selection on a click": [
    "mir/timeline/shortcuts.js"
   ],
   "MIR — Shift is the fine gear": [
    "mir/timeline/shortcuts.js"
   ],
+  "MIR — Shift+T": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — a touch-friendly zoom; a horizontal Ctrl-drag scrubs on Snap": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — active wherever the timeline is open": [
+   "mir/timeline/shortcuts.js"
+  ],
   "MIR — length and speed change together": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — the hand leads": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — the range the record window renders": [
+   "mir/timeline/shortcuts.js"
+  ],
+  "MIR — the transport’s one play (transportActions); FL’s Space stops to the start position instead": [
    "mir/timeline/shortcuts.js"
   ],
   "MOD": [
@@ -6823,7 +6827,7 @@
   "{word} — the {menus} menus": [
    "mir/shell/menubar.js"
   ],
-  "© 2026 Joshua Hosain · Magic Commons. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).": [
+  "© 2026 MAGIC COMMONS. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).": [
    "mir/shell/gui.js"
   ],
   "λWAVES": [

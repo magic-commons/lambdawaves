@@ -114,7 +114,7 @@ export function createNotebook(app) {
         PLAY: () => [item('transport.play', 'PLAY / PAUSE'), item('home', 't → 0'), item('stepBack', 'STEP ◂'), item('stepFwd', 'STEP ▸'), null,
           item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK', { on: A.get('modBar').get }), item('settings.playLock', 'PLAYBACK LOCK'), null,
           sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
-        WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'search' }), item('gui', 'MIR OPTIONS…'), null,   // 038 M3 (Josh 11-06): the kit's OPTIONS window, a WINDOW row
+        WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'mirMark' }), item('gui', 'MIR OPTIONS…'), null,   // 038 M3 (Josh 11-06): the kit's OPTIONS window, a WINDOW row
           sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'FOLD ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
           sub('TOOLS', () => [item('modulation', 'MODULATION'), item('timeline', 'TIMELINE'), item('pattern', 'PATTERN'), item('nodes', 'NODES'), item('notebook', 'NOTEBOOK'), item('folders', 'FOLDERS'), item('history', 'HISTORY'), item('help', 'KEYBOARD')]), null,
           /* 018 E6 · one submenu per KIND (window-chrome.js data-kind), each window ✓ while open: a press opens a closed one by the FINDER's road

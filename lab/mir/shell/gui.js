@@ -581,7 +581,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
     vars: { roboto: ['Roboto', F + 'Roboto-OFL.txt'], title: ['LW Title', F + 'Spinwerad-OFL.txt'], stix: ['STIX Two Math', F + 'STIXTwoMath-OFL.txt'], spectral: ['Spectral', F + 'info/Spectral-OFL.txt'],
       playfair: ['Playfair Display', F + 'info/PlayfairDisplay-OFL.txt'], alegreya: ['Alegreya SC', F + 'info/AlegreyaSC-OFL.txt'] } }]);
   fine([{ t: 'The MIR logo is outlined from Butler Free Extra Bold by {who}.', vars: { who: ['Fabian De Smet', 'https://www.fabiandesmet.com/'] } }]);
-  for (const c of about.credits || [[{ t: '© 2026 Joshua Hosain · Magic Commons. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).' }]]) fine(c);
+  for (const c of about.credits || [[{ t: '© 2026 MAGIC COMMONS. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).' }]]) fine(c);
 
   /* the logo: the theme's file, inlined so its nine tiles can turn; ids stripped (the SVG's <title id="title"> would
      collide with the wordmark's #title) */

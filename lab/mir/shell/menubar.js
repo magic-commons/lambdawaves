@@ -169,37 +169,57 @@ export function contextMenu({ x = 0, y = 0, entries, anchor = null, onClose = nu
   return api;
 }
 
-/* ── 1.5.6-alpha.4 · ONE KNOB MENU: RESET · COPY · PASTE · FINE ✓ · ROUTES › · CLIP › · the app's rows ─────────────────────────────────
- * It merges the timeline's TIMELINE CLIP pop (timeline/knobs.js) and the modulation window's route pop (modulation/window.js) into one pane.
- * A part names its rows once — knobMenuPart(name, (id, root) → { entries, reset? } | null): 'routes' (the modulation window: RANGE ·
- * REMOVE · REMOVE ALL · the macros holding it; its `reset` keeps the routes), 'clip' (the timeline), 'app' (the app's rows for every knob).
- * The value is the knob's own door (root.mirKnob: get · home · input · fine); FINE halves its drag gain while on (this session). */
+/* ── 1.6.0-alpha.14 · ONE CONTROL MENU (λWAVES 044 R1, Josh 2026-11-13) ───────────────────────────────────────────────────────────────
+ * RESET · COPY VALUE · PASTE · FINE ✓ · ROUTES › · CLIP › · LEARN… · CREATE EVENT · the favourites — ONE order for every value control
+ * (CONTROL_MENU names the slots).  A row that does not apply is left out, never moved.  It began as the knob menu (1.5.6-alpha.4), which
+ * merged the timeline's TIMELINE CLIP pop (timeline/knobs.js) and the modulation window's route pop (modulation/window.js) into one pane.
+ * A VALUE DOOR — a knob's or a fader's `root.mirKnob` (get · home · input · fine?) — gives the kit's own RESET · COPY VALUE · PASTE · FINE
+ * (FINE halves a knob's drag gain while on, this session; a fader has no such gear and no such row); any other control (a switch, a
+ * segmented row, a trigger, a stepper) has only the rows its app hands in.
+ * A part names its rows once — knobMenuPart(name, (id, root) → { entries?, rows?, reset?, copied? } | null): 'routes' (the modulation
+ * window: RANGE · REMOVE · REMOVE ALL · the macros holding it; its `reset` keeps the routes), 'clip' (the timeline; its `copied(v)` hands
+ * a copied value to a point's PASTE VALUE), 'app' (the app's rows for every control: `rows` by slot, `{ learn: [entry…], event: […] }`;
+ * its `entries`, as before, are the foot). */
+export const CONTROL_MENU = ['reset', 'copy', 'paste', 'fine', 'routes', 'clip', 'learn', 'event', 'fav'];
 const knobParts = new Map();
 let knobCopied = null;
 export function knobMenuPart(name, fn) { if (typeof fn === 'function') knobParts.set(name, fn); else knobParts.delete(name); }
-const knobOf = (k) => (k && k.root && k.home ? k : (k && k.closest && (k.closest('.k') || {}).mirKnob) || null);
-const partOf = (name, k) => { const f = knobParts.get(name), id = k.root.dataset.param; try { return f && id ? f(id, k.root) : null; } catch (_) { return null; } };
-/** knobAct(knob, 'reset' | 'copy' | 'paste' | 'fine') — the menu's four acts on a knob (its root or its api), for an app's keys too */
+const knobOf = (k) => (k && k.root && k.home ? k : (k && k.closest && (k.closest('.k, .fd') || {}).mirKnob) || null);
+const partAt = (name, root) => { const f = knobParts.get(name), id = root && root.dataset ? root.dataset.param : ''; try { return f && id ? f(id, root) : null; } catch (_) { return null; } };
+const partOf = (name, k) => partAt(name, k.root);
+/** knobAct(knob, 'reset' | 'copy' | 'paste' | 'fine') — the menu's four acts on a value door (its root or its api), for an app's keys too */
 export function knobAct(knob, verb) {
   const k = knobOf(knob); if (!k) return false;
   if (verb === 'reset') { const r = partOf('routes', k); if (r && r.reset) r.reset(); else k.home(); return true; }
-  if (verb === 'copy') { knobCopied = k.get(); return true; }
+  if (verb === 'copy') { knobCopied = k.get(); const c = partOf('clip', k); if (c && c.copied) c.copied(knobCopied); return true; }
   if (verb === 'paste') { if (knobCopied === null) return false; k.input(knobCopied); return true; }
-  return verb === 'fine' ? k.fine(!k.fine()) : false;
+  return verb === 'fine' && k.fine ? k.fine(!k.fine()) : false;
 }
-/** knobMenu(knob, { x, y, appRows?, open?, onClose? }) → the contextMenu; appRows(id, root) → entries; open: 'routes' opens that submenu */
-export function knobMenu(knob, { x, y, appRows = null, open = '', onClose = null } = {}) {
-  const k = knobOf(knob); if (!k || k.root.classList.contains('disabled')) return null;   // 1.5.6-alpha.8: a greyed knob has its hint, never its menu
-  const id = k.root.dataset.param || '', act = (v) => () => knobAct(k, v);
-  const entries = [['RESET', act('reset'), false, 'Back to the default; the routes stay', { id: 'reset' }], ['COPY', act('copy'), false, 'Copy the value', { id: 'copy' }],
-    ['PASTE', act('paste'), knobCopied === null, 'Paste the copied value', { id: 'paste' }], ['FINE', act('fine'), false, 'Half the drag gain while on', { id: 'fine', checked: k.fine() }]];
-  for (const [part, word] of [['routes', 'ROUTES'], ['clip', 'CLIP']]) { const p = partOf(part, k); if (p && p.entries && p.entries.length) entries.push([word, () => p.entries, null, '', { sub: true, id: part }]); }
-  const app = [...((appRows && appRows(id, k.root)) || []), ...((partOf('app', k) || {}).entries || [])];
-  if (app.length) entries.push(null, ...app);
-  const m = contextMenu({ x, y, entries, onClose, label: 'Knob' });
+/** controlMenu(target, { x, y, rows?, appRows?, open?, onClose? }) → the contextMenu | null (no row applies)
+ *   target: a control's root, an element inside it, or a value door's api; rows: { slot: [entry…] } (or (id, root) → that) — the app's rows
+ *   by slot; a value door's own RESET · COPY VALUE · PASTE · FINE are never replaced; appRows(id, root) → entries, the foot; open: 'routes'
+ *   opens that submenu */
+export function controlMenu(target, { x, y, rows = null, appRows = null, open = '', onClose = null } = {}) {
+  const k = knobOf(target), root = k ? k.root : target && target.closest ? target : null;
+  if (!root || (k && root.classList.contains('disabled'))) return null;   // 1.5.6-alpha.8: a greyed knob has its hint, never its menu
+  const id = (root.dataset && root.dataset.param) || '', S = {}, act = (v) => () => knobAct(k, v);
+  const put = (slot, list) => { for (const r of list || []) if (r) (S[slot] || (S[slot] = [])).push(r); };
+  if (k) {
+    put('reset', [['RESET', act('reset'), false, 'Back to the default; the routes stay', { id: 'reset' }]]);
+    put('copy', [['COPY VALUE', act('copy'), false, 'Copy the value', { id: 'copy' }]]);
+    put('paste', [['PASTE', act('paste'), knobCopied === null, 'Paste the copied value', { id: 'paste' }]]);
+    if (k.fine) put('fine', [['FINE', act('fine'), false, 'Half the drag gain while on', { id: 'fine', checked: k.fine() }]]);
+  }
+  for (const [part, word] of [['routes', 'ROUTES'], ['clip', 'CLIP']]) { const p = partAt(part, root); if (p && p.entries && p.entries.length) put(part, [[word, () => p.entries, null, '', { sub: true, id: part }]]); }
+  const app = partAt('app', root) || {};
+  for (const given of [typeof rows === 'function' ? rows(id, root) : rows, app.rows]) for (const slot of CONTROL_MENU) { if (given && given[slot] && !(k && S[slot] && slot !== 'routes' && slot !== 'clip')) put(slot, given[slot]); }
+  put('fav', appRows && appRows(id, root)); put('fav', app.entries);
+  const m = contextMenu({ x, y, entries: CONTROL_MENU.flatMap((slot) => S[slot] || []), onClose, label: k ? 'Knob' : 'Control' });
   const row = open && m && m.pane.querySelector(`[data-id="${open}"]`); if (row) row.click();
   return m;
 }
+/** knobMenu(knob, { x, y, appRows?, rows?, open?, onClose? }) → controlMenu on a value door (a knob or a fader), or null */
+export function knobMenu(knob, o) { return knobOf(knob) ? controlMenu(knob, o) : null; }
 
 export function createMenubar({ opener, host, menus, label, phone, keep } = {}) {
   if (!opener || !menus) return null;

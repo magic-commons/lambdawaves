@@ -3,7 +3,7 @@
  * registered parameter) cancels its owned drag and opens TIMELINE CLIP: CREATE AUTOMATION CLIP · LOCATE CLIPS.  A right
  * click, ContextMenu or Shift+F10 on a focused knob opens it at once.  BASINS' sentence "Hold a camera or colour knob…" is
  * in the shortcut sheet.  Changed for the kit: the popup is the house's menu pane; since 1.5.6-alpha.4 it is THE KNOB MENU
- * (shell/menubar.js knobMenu: RESET · COPY · PASTE · FINE · ROUTES › · CLIP › · the app's rows), TIMELINE CLIP its CLIP › part.
+ * (shell/menubar.js controlMenu: RESET · COPY VALUE · PASTE · FINE · ROUTES › · CLIP › · the app's rows), TIMELINE CLIP its CLIP › part.
  *   installTimelineKnobs({ registry, editor, root = document }) → dispose */
 import { knobMenu, knobMenuPart, contextMenu } from '../shell/menubar.js';
 import { TAP } from '../core/tap.js';
@@ -21,7 +21,7 @@ export function installTimelineKnobs({ registry, editor }) {
   const cancel=()=>{if(pending)clearTimeout(pending.timer);pending=null;};
   const abort=()=>{const p=pending||owned;cancel();owned=null;if(p){p.dial.dispatchEvent(new PointerEvent('pointercancel',{pointerId:p.id,bubbles:false}));try{if(p.dial.hasPointerCapture(p.id))p.dial.releasePointerCapture(p.id);}catch(_){}}};
   /* 1.5.6-alpha.4 · ONE KNOB MENU (shell/menubar.js knobMenu): TIMELINE CLIP is its CLIP › part, the app's rows its foot */
-  const clip=(id)=>(registry.has(id)?{entries:[['CREATE AUTOMATION CLIP',()=>editor.createClip(id),false,'',{id:'create-clip'}],['LOCATE CLIPS',()=>editor.locate(id),false,'',{id:'locate-clips'}]]}:null);
+  const clip=(id)=>(registry.has(id)?{copied:(v)=>{const u=registry.toNorm(id,v);if(Number.isFinite(u))editor.copiedValue=u;},entries:[['CREATE AUTOMATION CLIP',()=>editor.createClip(id),false,'',{id:'create-clip'}],['LOCATE CLIPS',()=>editor.locate(id),false,'',{id:'locate-clips'}]]}:null);
   knobMenuPart('clip',clip);
   const rowsOf=(id)=>((appRows?appRows(id):null)||[]).filter((r)=>r&&typeof r.run==='function').map((r)=>[r.label,r.run,false,'',{id:'app'}]);
   const open=(root,x,y)=>{const id=root.dataset.param;if(!registry.has(id))return;close();

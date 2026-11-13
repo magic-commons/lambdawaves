@@ -127,8 +127,8 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
 
 - [ ] The publishing identity ([`LEGAL-PROVENANCE.md`](LEGAL-PROVENANCE.md) §5 item 4). Answered 2026-11-12 for the program: the
       `.exe`'s company name is `MAGIC COMMONS` and its copyright line `Copyright 2026 MAGIC COMMONS` (044 S2, S6, `package.mjs`
-      `MAKER`). The `NOTICE` file in the folder, the licence texts and ABOUT still name Joshua Hosain as the copyright holder; they
-      were not changed. Still yours: whether the Steam partner account, the store page's developer and publisher, and the tax and
+      `MAKER`). Since 044 R7 (Josh 11-13: "MAGIC COMMONS all.") the `NOTICE` file in the folder, the README's licence line and ABOUT name
+      MAGIC COMMONS as the copyright holder too; the author stays a person (`CITATION.cff`, the README's disclosure). Still yours: whether the Steam partner account, the store page's developer and publisher, and the tax and
       bank details are in that name too.
 - [ ] The partner site: the app, two depots, the launch options above, the AI disclosure, the store page, the price.
 - [ ] The Windows GPU run on your PC. The folder is built (044 S4, 2026-11-12, on Linux; the download you approved is done and

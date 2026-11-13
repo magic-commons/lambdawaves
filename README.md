@@ -257,9 +257,9 @@ The authorship record (commit identities, attribution trailers, AI-generated ass
 
 ## Licence
 
-GNU General Public License v3.0 only — Copyright 2026 Joshua Hosain. See [`LICENSE`](LICENSE).
+GNU General Public License v3.0 only — Copyright 2026 MAGIC COMMONS. See [`LICENSE`](LICENSE).
 
-Third-party notices are in [`NOTICE`](NOTICE): Spinwerad 0.3, Roboto 3.015, STIX Two Math 2.0.2, KaTeX 0.16.11 and its fonts,
+Third-party notices are in [`NOTICE`](NOTICE): Spinwerad 0.3, Roboto 3.015, STIX Two Math 2.0.2, KaTeX 0.19.1 and its fonts,
 marked 12.0.2, the notebook's Spectral, Playfair Display and Alegreya SC; the Basis Set Exchange records and NIST's measured lines are
 credited there as data.
 

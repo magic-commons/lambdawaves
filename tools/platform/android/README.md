@@ -35,7 +35,7 @@ cd tools/platform/android && mkdir -p local && chmod 700 local && umask 077
 PW="$(head -c 256 /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 24)"; printf '%s\n' "$PW" > local/KEYSTORE-PASSWORD.txt
 ~/.bubblewrap/jdk/jdk-17.0.11+9/bin/keytool -genkeypair -v -keystore local/upload.keystore -storetype PKCS12 \
   -alias lambdawaves-upload -keyalg RSA -keysize 2048 -validity 10000 -storepass "$PW" -keypass "$PW" \
-  -dname "CN=Joshua Hosain, O=Magic Commons, C=US"
+  -dname "CN=Joshua Hosain, O=MAGIC COMMONS, C=US"
 ```
 Play App Signing means Google holds the real app-signing key; this is only the *upload* key, and Play
 Console can reset a lost or compromised upload key (Setup ▸ App signing ▸ request upload key reset). So a
