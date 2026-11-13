@@ -682,13 +682,16 @@ export function fader(o) {
   });
   root.addEventListener('blur', () => announce(false));
   paint();
-  return { root, get: () => v, set(x) { v = x; shown = null; paint(); }, show(x) { shown = x; paint(); }, get shown() { return shown; },
+  const api = { root, get: () => v, set(x) { v = x; shown = null; paint(); }, show(x) { shown = x; paint(); }, get shown() { return shown; },
     /** the host's road to the number the user owns, as the knob's: fn() → the base, or null when nothing drives it */
     setBase(fn) { baseOf = typeof fn === 'function' ? fn : null; announce(false); },
     /** a dead fader says so and gives up its seat, as the knob does */
     setDisabled(on) { disabled = !!on; root.classList.toggle('disabled', disabled); root.tabIndex = disabled ? -1 : 0; root.setAttribute('aria-disabled', String(disabled));
       if (disabled && root === document.activeElement) { const dev = root.closest('.dev'); const seat = dev && dev.querySelector('.dev-power'); if (seat) seat.focus(); else root.blur(); } },
     paint, setDefault(x) { def = x; }, setLabel(s) { label(lbl, s); }, dragging: () => dragging };
+  /* 1.6.0-alpha.14 · THE VALUE DOOR, as the knob's (root.mirKnob): the control menu's RESET · COPY VALUE · PASTE reach a fader too */
+  root.mirKnob = { root, get: api.get, home: reset, input(x) { if (disabled) return; const nv = Math.min(hi, Math.max(lo, x)); if (nv !== v) { v = nv; paint(true); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); } } };
+  return api;
 }
 
 /** readout({ label, value, cls }) — a labelled number */

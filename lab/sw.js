@@ -43,7 +43,7 @@ const PRECACHE = [
   ['./bessel.js',                                                   '0689408ac984'],
   ['./bloch-model.js',                                              'cd6fb3613241'],
   ['./bloch.js',                                                    '595fcca1e97a'],
-  ['./build-id.js',                                                 'f07c33cf0f29'],
+  ['./build-id.js',                                                 '95b1a9290764'],
   ['./build-line.js',                                               '065c5ca6e747'],
   ['./busy-mark.js',                                                '7a654bb48c65'],
   ['./calculus.js',                                                 '253e73518bcd'],
@@ -217,7 +217,7 @@ const PRECACHE = [
   ['./mir/info/seats.js',                                           'b0f0ecdbd8f6'],
   ['./mir/keyboard/keyboard.css',                                   'e31ce0698973'],
   ['./mir/keyboard/keyboard.js',                                    '5570b4a40d73'],
-  ['./mir/kit.js',                                                  '2bbe5a8b15a9'],
+  ['./mir/kit.js',                                                  'fa9559932642'],
   ['./mir/locales/locales.css',                                     'cd2925eb7e5a'],
   ['./mir/locales/pseudo.js',                                       '152dbb0290ec'],
   ['./mir/mir.css',                                                 'ba4542bd7f58'],
@@ -277,9 +277,9 @@ const PRECACHE = [
   ['./mir/shell/dialog.js',                                         '395bc2d29854'],
   ['./mir/shell/flash-guard.js',                                    'eb3facf99ecd'],
   ['./mir/shell/gui.css',                                           'a08f21452620'],
-  ['./mir/shell/gui.js',                                            '8d2bde61e102'],
+  ['./mir/shell/gui.js',                                            '7b484f8c6fc6'],
   ['./mir/shell/keys.js',                                           '83f23ccf5a4a'],
-  ['./mir/shell/menubar.js',                                        'f9112346b67c'],
+  ['./mir/shell/menubar.js',                                        'f7625e401925'],
   ['./mir/shell/midi.js',                                           '668a2981eba1'],
   ['./mir/shell/notebook-math.js',                                  'fa1312541d4c'],
   ['./mir/shell/notebook-render.js',                                '2e4c9cbd4b80'],
@@ -338,21 +338,21 @@ const PRECACHE = [
   ['./mir/timeline/geometry.js',                                    'f8794d8a36ec'],
   ['./mir/timeline/history.js',                                     '5f23e118ee32'],
   ['./mir/timeline/kinds.js',                                       'aec89844d05a'],
-  ['./mir/timeline/knobs.js',                                       '548bc3951bba'],
+  ['./mir/timeline/knobs.js',                                       '8bd74104f4a0'],
   ['./mir/timeline/model.js',                                       '788e0848e3fb'],
   ['./mir/timeline/pattern-kind.js',                                '3b1f2f328c3f'],
   ['./mir/timeline/playhead.js',                                    'b918e4f78f01'],
   ['./mir/timeline/project.js',                                     '5333447c0b76'],
   ['./mir/timeline/readout.js',                                     '9e7c495c4555'],
   ['./mir/timeline/selection.js',                                   '12ffcdb73b0f'],
-  ['./mir/timeline/shortcuts.js',                                   'fde8bdf06b5e'],
+  ['./mir/timeline/shortcuts.js',                                   'f08a185a4247'],
   ['./mir/timeline/slice.js',                                       '54c15da61852'],
   ['./mir/timeline/source.js',                                      '1399ce6fe2ab'],
   ['./mir/timeline/time-format.js',                                 'bace74d4a020'],
   ['./mir/timeline/timeline.css',                                   'a57bdc02030b'],
   ['./mir/timeline/view.js',                                        'a8b9bddcdec5'],
   ['./mir/timeline/window.js',                                      '6d50f2cb9b85'],
-  ['./mir/version.js',                                              '733d551b96d3'],
+  ['./mir/version.js',                                              '3564e5378951'],
   ['./mir/window-activity.js',                                      '8eb6cefdf972'],
   ['./mir/window/dock.js',                                          '6b678fe06223'],
   ['./mir/window/rail.js',                                          '9f52cd12884d'],
@@ -514,7 +514,7 @@ const PRECACHE = [
  * --write as §1 is); the activate digests a kept copy and deletes it only when it differs — a kit adoption that changed it — and the next
  * open keeps the new bytes. */
 const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json', 'img/menu/', 'demos/', 'vendor/nist/', 'mir/shell/vendor/marked.min.js', 'mir/shell/vendor/katex/katex.min.js', 'mir/shell/vendor/katex/katex.min.css'];
-const KEPT = [['mir/shell/vendor/katex/katex.min.css', '717bc9ae7853'], ['mir/shell/vendor/katex/katex.min.js', 'e6bfe5deebd4'], ['mir/shell/vendor/marked.min.js', '15fabce5b658']];
+const KEPT = [['mir/shell/vendor/katex/katex.min.css', '00e0b094171b'], ['mir/shell/vendor/katex/katex.min.js', 'fa140498b8cf'], ['mir/shell/vendor/marked.min.js', '15fabce5b658']];
 const DATA_CACHE = 'lw-data-v1';
 const SWEEP = ['demos/covers/', 'vendor/nist/'];   // the DATA kept by a first view under a name no hash is in: one build's keep (§4); img/menu/ left it in 036 G7 — the page's loader validates what it keeps; the parsers are KEPT's
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
