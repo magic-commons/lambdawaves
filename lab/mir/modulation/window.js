@@ -35,7 +35,7 @@
  */
 import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, watchTouches } from '../kit.js';
 import { bindSliderKeys } from '../slider-keys.js';
-import { contextMenu, knobMenu, knobMenuPart } from '../shell/menubar.js';
+import { contextMenu, knobMenu, knobMenuPart, knobAct } from '../shell/menubar.js';
 import { createModWindow, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          buildGhost, buildAudioSheet, COPY } from './modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
@@ -1313,7 +1313,10 @@ export function createModulation(host, port) {
   function wireRing(rec) {
     const id = rec.id, hit = rec.hit;
     let drag = null, hold = 0, moved = false;
-    const dtap = tapWatcher(() => removeEditRoute(id));
+    /* 1.6.0-alpha.2 THE RING'S DOUBLE PRESS GOES HOME, THE RIGHT CLICK REMOVES (Josh 2026-11-12): two presses on the arc are two presses on the
+       knob under it — the knob's value goes home by the menu's RESET road (knobAct), the route and its depth stay; a right-click on the arc
+       removes the route (the knob's own right-click, the held press and the × are as they were) */
+    const dtap = tapWatcher(() => knobAct(rec.host, 'reset'));
     const cancelHold = () => { if (hold) { clearTimeout(hold); hold = 0; } };
     hit.addEventListener('pointerdown', (e) => {
       e.preventDefault(); e.stopPropagation();                  /* the press must NOT also turn the dial */
@@ -1351,8 +1354,8 @@ export function createModulation(host, port) {
     hit.addEventListener('pointerup', endDrag);
     hit.addEventListener('pointercancel', () => { cancelHold(); if (drag) { drag = null; moved = false;
       rec.host.classList.remove('ring-drag'); hideGhost(); restoreVal(id); } });
-    hit.addEventListener('dblclick', (e) => { e.preventDefault(); e.stopPropagation(); removeEditRoute(id); });
-    hit.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); openPop(id, e.clientX, e.clientY); });
+    hit.addEventListener('dblclick', (e) => { e.preventDefault(); e.stopPropagation(); });   // the double press was taken on the lift (dtap)
+    hit.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); if (!removeEditRoute(id)) openPop(id, e.clientX, e.clientY); });
   }
 
   /** DRAGGING THE DEPTH TO ZERO IS NOT REMOVAL AND MUST NEVER BE. */

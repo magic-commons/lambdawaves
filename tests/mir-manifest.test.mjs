@@ -100,6 +100,8 @@ const ACCEPTED = {
   '1.5.7-alpha.71': '6f2d3d4febb46e8a447b8e5e88fad2089287e42dccefa995f8aafc188c448c5e',
   /* 044 · MIR 1.6.0-alpha.1 MAIN IS LINE 1.6 (kit main @ 9cb3acc: the bytes of 1.5.7-alpha.71 under the new number; Josh 11-12: main numbers its own alpha series, Focus is its own line) */
   '1.6.0-alpha.1': 'b7d5b529f873785fd65b4f90276bdaed2fb4258c8d1297789eee3cbf06984432',
+  /* 044 K1 · MIR 1.6.0-alpha.2 THE RING'S DOUBLE PRESS GOES HOME, THE RIGHT CLICK REMOVES (kit-044k @ 9276406: modulation/window.js wireRing; Josh 11-12) */
+  '1.6.0-alpha.2': 'ce24d953348f8bd75eedc94565bd4733119774c6e605c98f20928a220713c054',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
