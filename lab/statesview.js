@@ -151,7 +151,7 @@ export function createStates(host, api) {
      and the lanes start hidden as ORBITAL's DIALS do (HIDE shows them) — nothing is lost, the card is the ladder and its foot until asked */
   rowsEl.hidden = true; hideBtn.classList.add('on');
   { const a = el('div', 'reg-more'), b = el('div', 'reg-more'); bar.before(a); a.append(bar, mrow, vr, fr); dr.before(b); b.append(dr, dk, roDrive.root.parentElement, sg, roSong.root.parentElement, songNote);
-    fold(head, [a, b], { what: 'presets, A ↔ B, view, flow, drive and song' }); chip(hideBtn, 'eyeShut', 'HIDE'); }
+    fold(head, [a, b], { what: 'presets, A ↔ B, view, flow, drive and song', key: 'presets, A ↔ B, view, flow, drive and song' });   /* 044 A3.3 (C24): the record's name is frozen as the key */ chip(hideBtn, 'eyeShut', 'HIDE'); }
   const rr = el('div', 'row tight', host);
   const roSum = readout({ label: '<m>Σ|b|²</m>', value: '—', sub: '' });
   const roBeat = readout({ label: 'BEAT', value: '—', sub: '' });

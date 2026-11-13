@@ -132,7 +132,7 @@ export function createOrbitals(host, api) {
   const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on this orbital’s current j', onChange: (v) => setFlow(v) });
   mrow.appendChild(flowSw.root);
   /* iteration 001 (Josh): PRESET · → A · → B and MORPH · FLOW fold behind the head's chevron (lab/fold.js); DIALS and CLEAR are glyphs */
-  { const more = el('div', 'reg-more'); bar.before(more); more.append(bar, mrow); fold(head, more, { what: 'presets, A ↔ B and flow' });
+  { const more = el('div', 'reg-more'); bar.before(more); more.append(bar, mrow); fold(head, more, { what: 'presets, A ↔ B and flow', key: 'presets, A ↔ B and flow' });   // 044 A3.3 (C24): the record's name is frozen as the key; the words are free
     chip(dialsBtn, 'sliders', 'DIALS'); }
   function setFlow(v) {
     flowOn = !!v && !!sol; flowSw.set(flowOn);
