@@ -132,12 +132,13 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
       bank details are in that name too.
 - [ ] The partner site: the app, two depots, the launch options above, the AI disclosure, the store page, the price.
 - [ ] The Windows GPU run on your PC. The folder is built (044 S4, 2026-11-12, on Linux; the download you approved is done and
-      cached): `out/lambdawaves-win32-x64/`, 495,884,961 B, 1,902 files, from commit `d9560b0c`. Checked here without running it: the
+      cached): `out/lambdawaves-win32-x64/`, 495,882,235 B, 1,901 files, rebuilt from commit `69476b0f` (044 S5–S9). Checked here without running it: the
       `.exe` is a 64-bit Windows program whose version resource reads CompanyName `MAGIC COMMONS`, ProductName and FileDescription
-      `λWAVES`, version `0.9.9-beta`, LegalCopyright `Copyright 2026 Joshua Hosain`; `resources/dist/` is byte-identical to the Linux
+      `λWAVES`, version `0.9.9-beta`, LegalCopyright `Copyright 2026 MAGIC COMMONS`; `resources/dist/` is byte-identical to the Linux
       package's (which passes its 17 checks); no AI mark and no OpenAI or Google face is in it. **Never started: no Windows machine
       and no wine here.** On the PC, copy the folder over and: start `lambdawaves.exe` from the folder (right-click › Properties ›
-      Details shows MAGIC COMMONS), then from Steam; the notice, the loader once, the MAIN MENU with no AI logos bottom left, the field
+      Details shows MAGIC COMMONS twice), then from Steam; the notice, the loader once, the MAIN MENU with nothing in its two bottom
+      corners, EXPANSIONS with no tip jar, the field
       drawing on the GPU, a project saved / quit / relaunched, AUDIO with the microphone, a MIDI controller, a film rendered with the
       window minimised, FOLDERS › EXPORT saving a file, F11 and FULL, the overlay (Shift+Tab) on and off.
 - [ ] The Linux install from Steam and the sandbox answer (§4); the Deck (§5).
