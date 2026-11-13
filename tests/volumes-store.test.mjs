@@ -41,11 +41,13 @@ const a1 = enc('LWM1 edition one ·· a'), a2 = enc('LWM1 edition two ·· a'), 
 const catalogue = (id, aBytes) => enc(JSON.stringify({ schema: 1, id, numeral: 'T', molecules: [
   { id: 'a', name: 'a', file: 'm/a.lwm', bytes: aBytes.length, sha256: sha(aBytes), thumb: 't/a.webp' },
   { id: 'b', name: 'b', file: 'm/b.lwm', bytes: b2.length, sha256: sha(b2), thumb: 't/b.webp' }] }));
-const ix1 = catalogue('vol-t', a1), ix2 = catalogue('vol-t', a2), fx1 = catalogue('vol-f', a1), fx2 = catalogue('vol-f', a2);
+const ix1 = catalogue('vol-t', a1), ix2 = catalogue('vol-t', a2), fx1 = catalogue('vol-f', a1), fx2 = catalogue('vol-f', a2), hx = catalogue('vol-3', a2);
 assert.equal(fx1.length, fx2.length, 'the fixture: the stale catalogue is the same length as the new one');
 net.set(BASE + 'volumes.json', enc(JSON.stringify({ schema: 1, volumes: [
   { id: 'vol-t', numeral: 'T', title: 'fetch', index: 'vol-t/index.json', indexSha256: sha(ix2), count: 2 },
-  { id: 'vol-f', numeral: 'F', title: 'file', archive: { name: 'vol-f.lwv' }, indexSha256: sha(fx2), count: 2 }] })));
+  { id: 'vol-f', numeral: 'F', title: 'file', archive: { name: 'vol-f.lwv' }, indexSha256: sha(fx2), count: 2 },
+  { id: 'vol-3', numeral: 'III', title: 'held', index: 'vol-3/index.json', indexSha256: sha(hx), count: 2 }] })));
+net.set(BASE + 'vol-3/index.json', hx);
 const T = BASE + 'vol-t/';
 for (const [k, b] of [['index.json', ix2], ['m/a.lwm', a2], ['m/b.lwm', b2], ['t/a.webp', tA], ['t/b.webp', tB]]) net.set(T + k, b);
 
@@ -92,4 +94,13 @@ await seed('lw-vol-vol-f', [[F + 'index.json', fx1], [F + 'm/a.lwm', a1], [F + '
   assert.equal(r.ok, false, 'installMolecule: not ok when a basis record it needs was not kept');
   assert(r.failed.length && r.failed.every((f) => f.id === 'basis') && /basis record/.test(r.why), 'installMolecule: the failed records and a why that says so'); }
 
-console.log('PASS the volumes store: a file kept under a stale sha is not kept on installStatus, kept, install and the .lwv road; a stale index.json is replaced; installMolecule says a basis record it could not keep');
+/* 044 S3: a HELD volume (lab/volumes.js HELD) is not offered, its entry is still read, and a device that holds some of it sees it */
+{ assert.deepEqual(V.HELD, ['vol-3'], 'HELD names VOL. III alone');
+  const s = await V.shelf({ fresh: true });
+  assert.deepEqual(s.volumes.map((v) => v.id), ['vol-t', 'vol-f'], 'shelf: a held volume is not offered');
+  assert.deepEqual(s.all.map((v) => v.id), ['vol-t', 'vol-f', 'vol-3'], 'shelf: its entry is kept');
+  assert.equal((await V.index('vol-3')).molecules.length, 2, 'index: a held volume still opens by its id');
+  await seed('lw-vol-vol-3', [[BASE + 'vol-3/index.json', hx, sha(hx)]]);
+  assert.deepEqual((await V.shelf({ fresh: true })).volumes.map((v) => v.id), ['vol-t', 'vol-f', 'vol-3'], 'shelf: a device that holds some of a held volume keeps it on its shelf'); }
+
+console.log('PASS the volumes store: a file kept under a stale sha is not kept on installStatus, kept, install and the .lwv road; a stale index.json is replaced; installMolecule says a basis record it could not keep; a held volume is off the shelf, still opens by id, and stays where a device holds it');

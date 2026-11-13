@@ -2,6 +2,11 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first. THE MAIN MENU (034) stands over them.
 
+## The laws of 044
+
+THE DESKTOP BUILD SHOWS NO AI MARKS (044 S1, Josh 11-12: "steam version does not show logo"): under the desktop host (`globalThis.lwavesDesktop`, the preload's one word) `lab/picker.js` builds no credits strip on the face and `lab/loader.js` asks for neither of its two faces; `tools/platform/electron/package.mjs` removes `img/ai/` and `img/menu/ai/` from the package, so the marks and the unlicensed OpenAI face are not in a Steam folder at all. The web build is as it was. ABOUT's sentence naming the agents stays on every host.
+TWO VOLUMES ON THE SHELF (044 S3, Josh 11-12: "Just release Volume 1 and 2 for now. Vol 3 will be a post release expansion. (Only show 2 volumes for now)"): `lab/volumes.js` `HELD = ['vol-3']` is the one place that says which volumes are not offered yet, on every host. `shelf().volumes` (EXPANSIONS' shelf, the volume stepper, MOLECULES' pages, the search) leaves a held volume out unless this device already holds some of it (its cache `lw-vol-<id>` exists); `shelf().all` and every by-id road (`index`, `file`, `installMolecule`, a project's or a link's molecule) still read its entry, which stays in `volumes.json` un-renumbered. Releasing a volume is deleting its id from HELD. The desktop's packaging and what is not built: docs/release/STEAM.md §8.
+
 ## The laws of 042
 
 A VOLUME PICTURE IS LET GO (042 H9): `lab/volumes.js` `picture()` hands back a fresh `blob:` URL for an installed volume's thumbnail; its reader revokes it once the image has loaded or failed (`lab/picker.js` `volPic`, as chemview does), or every tile, page and look change keeps a Blob for the page's life.

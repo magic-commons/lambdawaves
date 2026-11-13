@@ -7,6 +7,8 @@
  *   node tools/build-deploy.mjs --no-strip ship lab/'s bytes with their comments (for debugging a stripped build: §1b, §V8)
  *   node tools/build-deploy.mjs --shelf F  also ship THE SHELF F (a packer's volumes.json) as dist/volumes/volumes.json — each entry an
  *                                          archive the reader opens from disk (iteration 005 S); no volume's bytes ever ship here
+ *   node tools/build-deploy.mjs --desktop  this dist/ goes into the desktop package (tools/platform/electron/package.mjs), never to Workers:
+ *                                          §V7's free-plan budget is said, not enforced (044 S3: VOL. I and II as files are 19,223 files)
  *
  * Node stdlib only — this repo has no dependencies and the thing that ships it must not be the exception.
  * (`wrangler` is a devDependency of the DEPLOY, installed by npm and never imported here; the no-deps
@@ -102,6 +104,7 @@ const DIST = path.join(ROOT, 'dist');
 const ARGS = new Set(process.argv.slice(2));
 const RUN_TEST = !ARGS.has('--no-test');
 const QUIET    = ARGS.has('--quiet');
+const DESKTOP  = ARGS.has('--desktop');
 const STRIP    = !ARGS.has('--no-strip');
 const SHELF    = ARGS.has('--shelf') ? process.argv[process.argv.indexOf('--shelf') + 1] : null;
 const SHIP     = new Set(ARGS.has('--ship') ? process.argv[process.argv.indexOf('--ship') + 1].split(',').filter(Boolean) : []);   // 030: the volumes that travel as files
@@ -824,9 +827,10 @@ else {
 rule('V7 · THE FREE PLAN');
 const FREE_FILES = 20000, FREE_FILE_BYTES = 25 * 1024 * 1024;
 const over = distFiles.filter((r) => statSync(path.join(DIST, r)).size > FREE_FILE_BYTES);
-if (distFiles.length > FREE_FILES) fail('V7', `dist/ holds ${distFiles.length} files; the free plan deploys at most ${FREE_FILES} — ship one volume less (--ship)`);
-for (const r of over) fail('V7', `dist/${r} is ${kb(statSync(path.join(DIST, r)).size)}; the free plan serves files up to 25 MiB`);
-if (distFiles.length <= FREE_FILES && !over.length) console.log(`PASS  ${distFiles.length} of ${FREE_FILES} files (${FREE_FILES - distFiles.length} left for the volumes), every file under 25 MiB.`);
+if (DESKTOP) console.log(`SKIP  --desktop: ${distFiles.length} files, ${over.length} over 25 MiB — a desktop package is not a Workers deploy; THIS dist/ IS NOT DEPLOYED${distFiles.length > FREE_FILES || over.length ? ' (it would not fit the free plan)' : ''}.`);
+else if (distFiles.length > FREE_FILES) fail('V7', `dist/ holds ${distFiles.length} files; the free plan deploys at most ${FREE_FILES} — ship one volume less (--ship)`);
+if (!DESKTOP) for (const r of over) fail('V7', `dist/${r} is ${kb(statSync(path.join(DIST, r)).size)}; the free plan serves files up to 25 MiB`);
+if (!DESKTOP && distFiles.length <= FREE_FILES && !over.length) console.log(`PASS  ${distFiles.length} of ${FREE_FILES} files (${FREE_FILES - distFiles.length} left for the volumes), every file under 25 MiB.`);
 
 /* ══ V8.  THE STRIP, PROVED (042 Z) ═════════════════════════════════════════════════════════════════════════════════════════════════
  * §1b proved each file as it stripped it: the tokens of lab/'s file and of dist/'s are one list — every string, template chunk and regex
