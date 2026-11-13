@@ -195,6 +195,7 @@ export function createNotebook(app) {
         ['notebook', 'NOTEBOOK', 'notebook', 'Open the NOTEBOOK, or bring it forward', () => layout.notebook.isOpen, () => { const n = document.getElementById('notebook'); rise(n); if (n) n.focus({ preventScroll: true }); }, () => layout.notebook.open()],
         ['nodes', 'NODES', 'nodes', 'Open NODES, or raise it', () => !!A.get('nodes').get() || !!document.querySelector('.dev[data-id="nodes"]:not(.closed)'), () => { reveal('nodes'); rise(document.querySelector('[data-mir-window="nodes"]')); }, () => reveal('nodes')]]
         .map(([id, title, glyph, hint, open, up, run]) => ({ id, title, glyph, hint, open, run: () => (open() ? up : run)() }));
+      layout.special = special;   // 044 A2 (L19): THE ONE TABLE of the special windows — the FINDER's section and the search's window rows (csb-search.js) read it
       layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu',
         open: reveal, words: (id) => WINDOW_WORDS[id] || '', sections: [{ id: 'special', title: 'SPECIAL', rows: special }],
         can: (id) => { if (id === 'nodes') return null; const d = document.querySelector('.dev[data-id="' + id + '"]'); return !d || !d.hidden ? true : MODE[id] === 'molecules' ? 'MOLECULES ONLY' : 'HYDROGEN ONLY'; } });   // 021 R5: the MODE table's word

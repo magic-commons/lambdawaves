@@ -162,7 +162,7 @@ const ICONS = {
   nodeScanlines: n16('<path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/>'),
   /* 038 P · THE FULL NODES: LEVELS (Photoshop's: the histogram and its marks) · EXPOSURE with SHADOWS and HIGHLIGHTS (the sun, its core split) · COLOR
      (a wheel with three sliders: H · S · L) · BALANCE (a beam) · BRIGHTNESS & CONTRAST (the half-filled disc in rays); the + menu's ONE-KNOB group (a knob) */
-  nodeLevels2: n16('<path d="M2 10L5 5L8 8L11 3L14 10Z"/><path d="M2 12.5h12M3 15l1-2 1 2M7 15l1-2 1 2M11 15l1-2 1 2"/>'),
+  get nodeLevels2() { return this.nodeLevels; },   // 044 A2 (L97): ONE drawing — the + menu's LEVELS (levels2) wears the saved graphs' LEVELS'
   nodeExposure2: n16('<circle cx="8" cy="8" r="3"/><path d="M8 5a3 3 0 0 1 0 6Z" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3"/>'),
   nodeColor: n16('<circle cx="8" cy="8" r="6.5"/><path d="M4.5 5.5h7M4.5 8h7M4.5 10.5h7"/><circle cx="6" cy="5.5" r="1" fill="currentColor"/><circle cx="10" cy="8" r="1" fill="currentColor"/><circle cx="7.5" cy="10.5" r="1" fill="currentColor"/>'),
   nodeBalance: n16('<path d="M8 2.5v11M4.5 14h7M2 5h12"/><path d="M2 5L.8 9h2.4ZM14 5l-1.2 4h2.4Z"/>'),
@@ -190,7 +190,7 @@ export const WINDOW_GLYPH = {
   calculus: 'calculus', ladder: 'ladder', wigner: 'wigner', shadow: 'shadow', orbit: 'orbit', vortex: 'vortex', meters: 'meters',
   radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film', stage: 'stage', widgets: 'widgets', light: 'sun',   // 037 L1: LIGHTING wears the sun (the KEY)
   /* the kit factories' windows (windowGlyphs) */
-  gui: 'mirOptions', 'gui-about': 'about', keyboard: 'keyboard', 'keys-help': 'keyboard', timeline: 'timeline', modulation: 'modulation',
+  gui: 'mirOptions', 'gui-about': 'about', keyboard: 'keyboard', timeline: 'timeline', modulation: 'modulation',
   'transport-free': 'controlSurface', folders: 'folders', pattern: 'pattern',
 };
 

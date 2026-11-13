@@ -66,13 +66,13 @@ export function createSpectrumCard(app) {
        show their room below.  LATTICE keeps its own register: choosing it leaves the operator alone. */
     const SYS = ['hydrogen', 'qho', 'well', 'atom', 'central', 'cornell', 'separable', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => r.name + ' · ' + r.word;
     /* 013 H2 · THE WINDOW THAT FOLLOWS THE SYSTEM: ATOMS, the one window a system still opens, closes when the stepper leaves ATOM — only if this
-       stepper opened it (a window already open by hand stays).  It opens and closes by the rack's own roads (041 H5: `layout.reopen`, the card's ✕) */
+       stepper opened it (a window already open by hand stays).  It opens and closes by the rack's own roads (041 H5: `layout.reopen`; 044 A2: `rk.close`) */
     const WIN = { atom: 'atoms' }, dev = (id) => document.querySelector('.dev[data-id="' + id + '"]'), isOpen = (id) => { const d = dev(id); return !!d && !d.hidden && !d.classList.contains('closed'); };
     let opened = null;
     const chem = () => app.state.chem;
     const onSys = (v) => {
       if (chem() && chem().on) chem().setOn(false);   // 017 X3: a system lets the molecule go
-      const w = WIN[v]; if (opened && opened !== w) { if (isOpen(opened)) dev(opened).querySelector('.dev-close').click(); opened = null; } if (w && w !== opened) opened = isOpen(w) ? null : w;
+      const w = WIN[v]; if (opened && opened !== w) { if (isOpen(opened)) app.sh.rk.close(opened); opened = null; } if (w && w !== opened) opened = isOpen(w) ? null : w;
       if (v !== 'lattice') { switchHamiltonian(v); if (v === 'well') app.w.enterBox(); if (w) app.sh.layout.reopen(w); }
       if (w && dev(w) && dev(w).classList.contains('off')) dev(w).querySelector('.dev-power').click();   // 017 X3: a window the system needs that stands powered off is powered on with it
       ui.hamSeg.set(v === 'lattice' ? v : getHamiltonian().id); };

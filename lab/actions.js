@@ -47,7 +47,7 @@ export function createActions(app) {
   const wordOf = (k, a) => { const t = tileAt(a); if (t) return k === 'name' ? (t.getAttribute('aria-label') || '').split(' — ')[0] : (t.querySelector('.mm-lbl, .mm-sym') || {}).textContent;
     const q = (s) => (document.querySelector(s) || {}).textContent; return k === 'name' ? q('.mol-pick .mir-step-name') : q('.lw-stage .mir-info-text'); };
   const winOf = (id) => (S().rk ? S().rk.windows().find((x) => x.id === id) : null) || {};
-  const foldable = () => (S().rk ? S().rk.windows().filter((w) => w.open && w.built && !w.hidden && w.id !== 'transport') : []);   // 021 V3: a mode-hidden or LEGACY card is not FOLDS' (kit windows() `hidden`)
+  const foldable = () => (S().rk ? S().rk.windows().filter((w) => w.open && w.built && !w.hidden && !w.card) : []);   // 021 V3: a mode-hidden or LEGACY card is not FOLDS' (kit windows() `hidden`)
   /** reveal(id) — a window by the FINDER's road (kit rk.reveal: an open one scrolled to, a closed one opened at the top); NODES as its FREE window */
   const filmOpen = (a) => { const F = app.state.filmCard; if (!F) return false; reveal('render'); if (winOf('render').floating) L().raiseFloat('render'); else L().popOut('render'); return F.preset(a); };
   const reveal = (id) => { const N = nodes(), d = document.querySelector('.dev[data-id="' + id + '"]'); if (id === 'nodes' && N && (!d || d.classList.contains('closed'))) N.open(); else { S().rk.reveal(id); if (L().docked) L().seatTransport(); } S().saveSettings(); };   // 038 M7: a card opened at a rack's top stays under the docked CSB (018 C4: the bar's card is the left rack's top)

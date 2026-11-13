@@ -170,7 +170,7 @@ export function createKeys(app) {
     const dev = tabOrder[i];
     if (dev.classList.contains('floating')) { rk.float(dev.dataset.id); if (dev.classList.contains('compact')) layout.setCompact(dev.dataset.id, false); }
     else { (dev.parentElement || rack).prepend(dev); (dev.parentElement || rack).scrollTop = 0; }
-    if (dev.classList.contains('folded')) { const f = dev.querySelector('.dev-fold'); if (f) f.click(); }
+    if (dev.classList.contains('folded')) rk.fold(dev.dataset.id, false);   // 044 A2: the rack's own fold, never the head button's click
     dev.classList.add('tab-hot'); setTimeout(() => dev.classList.remove('tab-hot'), 600);
   }
   app.hooks.keys = {

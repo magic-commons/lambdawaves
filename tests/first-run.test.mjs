@@ -86,7 +86,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     storeTakesThem: src.includes('createLook({ settings: settingsStore, defaults: LOOK_DEFAULTS,'),
     unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
     phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
-    foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
+    foldsFromSeed: src.includes('rk.fold(id,FIRST_RUN.folded.includes(id));') && !src.includes("const fold=['settings','state']"),
     /* 038 M6: NODES' dock lands in its seat (under INFORMATIONAL), shown — never the kit's raise to the rack's top, above the docked CSB.
        018 C4 (Josh): the docked transport always seats at the left rack's top.  (039 S3: the racks a press lays and the fresh face's doors are
        pressed in tests/start.browser-test.mjs, not read here.) */

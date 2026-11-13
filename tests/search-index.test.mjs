@@ -12,12 +12,14 @@ const { gather } = await import('../lab/csb-search.js');
 const { createIndex, createFrecency, scope, marks, tokens } = await import('../lab/search-index.js');
 
 const WINDOWS = 'atoms ATOMS · bloch BLOCH · calculus CALCULUS · camera CAMERA · chem MOLECULES · clip CLIP · emission EMISSION SPECTRA · equalizer EQUALIZER · history HISTORY · informational INFORMATIONAL · ladder LADDER · light LIGHTING · meters METERS · nodes NODES · observer WAVE · orbit ORBIT · palette PALETTE · projects FOLDERS · radiation RADIATION · render RENDER · settings SETTINGS · shadow SHADOW · slice PLANE · spectrum SPECTRUM · stage STAGE · staticfield FIELD · transport CONTROL SURFACE · vortex VORTEX · widgets WIDGETS · wigner WIGNER'
-  .split(' · ').map((s) => { const i = s.indexOf(' '); return { id: s.slice(0, i), title: s.slice(i + 1), hidden: s.startsWith('chem') }; });
+  .split(' · ').map((s) => { const i = s.indexOf(' '); return { id: s.slice(0, i), title: s.slice(i + 1), hidden: s.startsWith('chem'), card: s.startsWith('transport ') }; });   // 044 A2: the bar's card is `card: true`, as the rack says it
 const one = new Set(ATOMS.map((a) => a.symbol));
 const app = { ui: { hamSeg: {} }, reg: {}, clock: {}, obs: {}, mat: {}, appPlay: {}, hooks: {}, ctl: {}, loop: {}, w: { setElement() {} }, sh: { rk: { windows: () => WINDOWS } },
   state: { picker: { hydrogen() {}, rows: async () => CHEM_PRESETS.filter((p) => !p.disabled && !one.has(p.formula.replace(/<\/?m>/g, ''))).map((p) => ({ id: p.id, name: p.name, formula: p.formula, vol: null })) } } };
 app.sh.ACTIONS = createActions(app);
-app.sh.layout = { projects: { list: () => [{ path: 'DEMOS/WAVE DANCER PROTOTYPE', folder: 'DEMOS', name: 'WAVE DANCER PROTOTYPE' }, { path: 'my orbitals', folder: '', name: 'my orbitals' }] } };
+/* 044 A2 (L19): the special windows are the FINDER's table (shell/notebook.js `layout.special`), read by the search */
+const SPECIAL = ['modulation MODULATION', 'timeline TIMELINE', 'transport CONTROL SURFACE', 'notebook NOTEBOOK', 'nodes NODES'].map((s) => { const i = s.indexOf(' '); return { id: s.slice(0, i), title: s.slice(i + 1), run() {} }; });
+app.sh.layout = { special: () => SPECIAL, projects: { list: () => [{ path: 'DEMOS/WAVE DANCER PROTOTYPE', folder: 'DEMOS', name: 'WAVE DANCER PROTOTYPE' }, { path: 'my orbitals', folder: '', name: 'my orbitals' }] } };
 const g = gather(app), docs = g.docs.concat(await g.later);
 const count = (k) => docs.filter((d) => d.kind === k).length;
 console.log(`corpus: ${docs.length} documents — ` + ['action', 'window', 'molecule', 'element', 'system', 'state', 'project', 'page'].map((k) => k + ' ' + count(k)).join(' · '));

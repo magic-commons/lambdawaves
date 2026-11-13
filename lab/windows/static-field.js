@@ -16,7 +16,7 @@ import { getHamiltonian, getZ } from '../hamiltonian.js';
 import { saddle, polarizability } from '../stark.js';
 export function createStaticField(app) {
   const { ui, device, reg, clock, mat, sturm } = app, { rack } = app.host, { modHand, ROT_LIMIT, setRotationRate, touchState } = app.ctl;
-  const wField = device({ id: 'staticfield', eyebrow: 'FIELD', title: 'static field · drives', status: '' });
+  const wField = device({ id: 'staticfield', eyebrow: 'FIELD', title: 'static field · drives', status: '', onPower: (live) => { if (!live) fieldDown(); } });   // 044 A2: POWER OFF by the hand, declared
   wField.root.classList.add('closed');
   rack.appendChild(wField.root);
 
@@ -39,7 +39,7 @@ export function createStaticField(app) {
     if (!f.Fz && !f.Bz && !f.inter && !drives) return;
     const c = f.inter && reg.at(clock.t); reg.setField({ Fz: 0, Bz: 0, inter: false }); if (c) reg.anchorFrom(c.re, c.im, clock.t); ui.bz.set(0); ui.fz.set(0);
     for (const [k, K] of [['z', ui.rotZRate], ['kz', ui.kzRate], ['def', ui.defRate]]) { setRotationRate(k, 0); K.set(0); } reg.setDamping(0); ui.dragKnob.set(0); touchState(); };
-  wField.root.addEventListener('devclose', fieldDown); wField.root.querySelector('.dev-power').addEventListener('click', () => { if (wField.root.classList.contains('off')) fieldDown(); });
+  wField.root.addEventListener('devclose', fieldDown);
   ui.fieldRo = readout({ label: 'H IN FORCE', value: 'H₀ (bare Coulomb)', cls: 'two', sub: '' });
   rf.appendChild(ui.fieldRo.root);
   ui.interRo = readout({ label: 'INTER-SHELL', value: 'off', cls: 'wide', sub: 'STARK F acts within each shell' }); el('div', 'row tight', gF).appendChild(ui.interRo.root);

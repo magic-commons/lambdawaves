@@ -116,7 +116,7 @@ export function createSettings(app) {
        atomLabels in the blob; iteration 008 Q: FIELD, no `dither` here — saveSettings has written `dither` on every save since 008 W, which merged after
        FIELD (S), so its absence is a blob no FIELD build ever saved, exactly as `atomLabels`' absence once said older than INFORMATIONAL) */
     const older = { informational: !infoKnown(), staticfield: !('dither' in s), emission: !(s.gen >= 16) };   // iteration 016 E1: `gen` (the iteration that wrote the blob) is written on every save from 016, so a blob without it never met EMISSION SPECTRA
-    if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) if (d.dataset.id !== 'transport') d.classList.toggle('closed', s.closed.includes(d.dataset.id) || older[d.dataset.id] === true);   // 038 S6: the CONTROL SURFACE card is open exactly while the bar is docked in it — the bar's own record says that, never this list (a docked bar's reload left the card open and empty)
+    if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) if (!(app.sh.rk.spec(d.dataset.id) || {}).card) d.classList.toggle('closed', s.closed.includes(d.dataset.id) || older[d.dataset.id] === true);   // 038 S6: the CONTROL SURFACE card is open exactly while the bar is docked in it — the bar's own record says that, never this list (a docked bar's reload left the card open and empty)
     /* 0.3.1 · S1 (D4's escape hatch): the camera MODE is the project's, like the pose it is needed to read, so a `camMode`
        an older build left here is not read — the boot is FREE (the shipped seed) and a project brings its own. */
     if (s.p3Mode === 'vivid' && ui.p3Seg) ui.p3Seg.set('vivid');
@@ -133,7 +133,7 @@ export function createSettings(app) {
   }
 
 
-  const KIND = { staticfield: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', light: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', equalizer: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', bloch: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info', emission: 'info', stage: 'core', widgets: 'core' };   // 037 T1: STAGE opens unfolded, as the picture's other controls
+  const KIND = { staticfield: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', light: 'core', clip: 'core', transport: 'core', settings: 'other', informational: 'other', shadow: 'info', equalizer: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', bloch: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info', emission: 'info', stage: 'core', widgets: 'core' };   // 037 T1: STAGE opens unfolded, as the picture's other controls
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
      ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by

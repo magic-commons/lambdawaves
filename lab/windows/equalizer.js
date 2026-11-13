@@ -19,7 +19,7 @@ export function createEqualizerCard(app) {
      (gapped cells, n along both edges, each shell's own diagonal ringed), each shell's fader on the row of its own n beside it; the colours are
      skin.css tokens (--eq-near · --eq-mid · --eq-far) and the ink is the card's.  AUDIO IN takes the faders from the MODULATION window's first
      AUDIO device (eq.audioTick, called by rack.js right after the model's feed). */
-  const wEq = device({ id: 'equalizer', eyebrow: 'EQUALIZER', title: 'beat equalizer', status: '' }); wEq.root.classList.add('closed'); rack.appendChild(wEq.root);
+  const wEq = device({ id: 'equalizer', eyebrow: 'EQUALIZER', title: 'beat equalizer', status: '', onPower: () => syncEq(false) }); wEq.root.classList.add('closed'); rack.appendChild(wEq.root);
   const eq = app.state.eq = createEqualizer(), gEq = group(wEq.body, ''), eqHead = el('div', 'row tight eq-head', gEq), mix = el('div', 'eq-mix', gEq), eqCv = el('canvas', 'eq-grid', mix);
   const eqStep = stepper({ aria: 'Equalizer preset', items: EQ_PRESETS.map((p) => ({ id: p.id, label: p.label })), value: eq.preset, cls: 'mol-step', onChange: (id) => { eq.setPreset(id); syncEq(true); hNote(); } });
   ui.eqPick = (id) => { eqStep.set(id); eq.setPreset(id); syncEq(true); hNote(); };   // 0.6.6 G1: the stepper's road for THE VERB TABLE's switch
@@ -27,7 +27,7 @@ export function createEqualizerCard(app) {
   const eqFd = Array.from({ length: EQ_SHELLS }, (_, i) => i).map((i) => fader({ label: 'n ' + (i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
   eqHead.append(eqStep.root, eqRo.root); eqFd.forEach((f, i) => { hint(f.root, 'Shell n = {n} · lower it to fade its beats', { n: i + 1 }); rFd.appendChild(f.root); });   // 039 V7: the label is hidden (skin.css), the hint says n
   /* 017 X1 · AN EFFECT SHOWS ITS WINDOW: × or POWER OFF stands the table down (syncEq's `why`); a reopen re-arms it from the knobs */
-  for (const t of ['devclose', 'devopen']) wEq.root.addEventListener(t, () => syncEq(false)); wEq.root.querySelector('.dev-power').addEventListener('click', () => syncEq(false));
+  for (const t of ['devclose', 'devopen']) wEq.root.addEventListener(t, () => syncEq(false));   // 044 A2: the power press is the card's `onPower`, above
   const aud = createEqAudio(app, { eq, host: gEq, sync: () => { eqKey = ''; syncEq(false); } });   // iteration 002: AUDIO IN (lab/eq-audio.js)
   el('div', 'note', gEq).textContent = 'the beats fade, the shells stay';
   /* 0.6.4 S2 · THE CHORD (lab/chord-audio.js): SOUND and LEVELS · BEATS, shown only while SETTINGS › AUDIO is on; not saved (a hand press each session) */
