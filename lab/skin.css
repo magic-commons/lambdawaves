@@ -12,9 +12,6 @@
    window's own name, changing under the eye while you read the name.  Nothing is LOST: `device()`
    already mirrors every status into the header's `title`, so the governor's PARKED sentence and the
    readers' own notes are one hover away, which is where a caveat belongs. */
-.dev-head > .dev-stat { display: none; }
-.dev-stat { color: var(--ink-faint); }
-.dev-stat.live { color: var(--acc); }
 
 /* ── 9. rails, rows, chips, canvases — the same two depths, nothing louder ── */
 .ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .atm-c, .atm-r, .picker { border-color: transparent; box-shadow: var(--relief-well, var(--neu-inset)); }
@@ -24,7 +21,6 @@
 .sp-b:active, .pk-c:active { box-shadow: var(--relief-well, var(--neu-inset)); background: var(--glass-well); }
 .sp-b.on { background: var(--acc-soft); color: var(--acc); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
 .sp-b.solo.on { color: var(--acc2); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 1px color-mix(in srgb, var(--acc2) 40%, transparent); }
-#title .ms { display: none; }                                                 /* the subtitle is a hover-level fact … */
 
 
 #sheet { border-radius: var(--card-r); }               /* wave 53: the '?' bindings sheet wears the same glass as the EXACT/NUMERICAL one */
@@ -39,9 +35,8 @@
    what IMPORT's <input type=file> needs: `hidden` resolves to `display: none !important`, which took it
    out of the tab order AND out of the accessibility tree, and a <label> is not focusable. */
 .skip, .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.skip:focus { width: auto; height: auto; clip-path: none; left: 8px; top: 8px; z-index: 9999; padding: 6px 10px;
-  border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .98); color: var(--fg); box-shadow: var(--relief-raise, var(--neu-raise));
-  font: var(--w-bold) var(--fs-small)/1 var(--font-ui); letter-spacing: var(--tr-wide); text-decoration: none; }
+.skip:focus { width: auto; height: auto; clip-path: none;
+  background: hsl(var(--glass-tint) / .98); }
 
 /* ── 12. the transport: `#transport.mini` — a 32-px subtitle bar, centred, the scrub a thin line ── */
 #transport { border-radius: var(--card-r); }
@@ -120,13 +115,10 @@ body #modwin.mir-modwindow .m2workbar :is(.tbtn, .tbtn > svg) { all: revert-laye
 
 @media (hover: none) { #rack { opacity: 1; }
 }   /* SIL OFL — fonts/STIXTwoMath-OFL.txt · v2.0.2 subset — fonts/STIXTwoMath-SOURCE.txt */
-#title .word { font-family: 'LW Title', var(--font-ui); color: #fff; letter-spacing: .06em; margin-right: -.06em; margin-left: .02em; }
-#title .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; letter-spacing: 0; margin-right: -.04em; }
-#title .mark { margin-left: .05em; }
+#title .word { font-family: 'LW Title', var(--font-ui); color: #fff; letter-spacing: .06em; }
+#title .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif; font-weight: 700; font-size: 1.3em; }
 body[data-theme="light"] #title .word { color: #000; }
 /* the logo sits on the stage directly: no glass, no background, one word */
-#title { pointer-events: auto; align-items: baseline; background: none; border: none; box-shadow: none; padding: 6px 10px; gap: 0; opacity: 1; }
-#title .mark { align-self: center; }
 body[data-theme="light"] #stage { background: #eef1f6; }
 /* 2026-09-10 (Josh): THE TRANSPORT IS A PANE LIKE THE WINDOWS. It follows CARD STYLE (tinted / refractive), the
    theme and FROST exactly as .dev does; it had kept a transparent surface of its own from an older wave. */
@@ -193,7 +185,6 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
  */
 @media (hover: none) and (max-width: 700px),
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
-  body.rack-hidden { --rack-edge: 0px; }           /* … and follows to the screen edge when the rack has gone */
 
   /* ── 1. ONE RACK, ON THE LEFT — portrait and landscape both ─────────────────────────────────── */
   #rack { top: calc(env(safe-area-inset-top) + var(--top-bar)); bottom: 0; left: 0; right: auto;
@@ -204,8 +195,7 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
   #rackL, #rackPeek, #rackPeekL { display: none !important; }               /* the mirror rack and both hover-peek strips stand down */
 
   /* ── 2. the masthead strip: the logo (which opens the menus) and the status tags ─────────────── */
-  #title { left: max(env(safe-area-inset-left), 8px); top: calc(env(safe-area-inset-top) + 3px); z-index: calc(var(--z-chrome) + 6); padding: 4px 6px; min-height: 40px; }
-  #title::after { content: ''; position: absolute; inset: -3px -8px; }      /* the 44-px finger on the menu opener, the same ink */
+  #title { z-index: calc(var(--z-chrome) + 6); }
   #badges { left: max(env(safe-area-inset-left), 8px); right: max(env(safe-area-inset-right), 8px); top: env(safe-area-inset-top); height: var(--top-bar); align-items: center;
     padding-left: 116px; justify-content: flex-start; flex-wrap: nowrap; overflow: hidden; z-index: calc(var(--z-chrome) + 5); }
   /* ── 3. THE HIDE TOGGLE FOLLOWS THE RACK, and sits in the thumb zone (desktop's stays fixed) ──── */
@@ -221,13 +211,9 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 
   /* ── 4. OPAQUE: no backdrop-filter anywhere the phone paints every frame ─────────────────────── */
   #notebook, #graphTip { -webkit-backdrop-filter: none; backdrop-filter: none; background: hsl(var(--glass-tint) / 1); }
-  body[data-theme="dark"] #notebook::before { display: none; }
-  #notebook { left: 0 !important; top: 0 !important; width: 100vw !important; height: 100dvh !important;   /* !important beats the inline width/height the desktop's resize grip wrote */
-    max-width: none; max-height: none; border-radius: 0; resize: none;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-  .nb-grip { display: none; }
+  #notebook { width: 100vw !important; height: 100dvh !important;   /* !important beats the inline width/height the desktop's resize grip wrote */
+    max-width: none; max-height: none; border-radius: 0; }
   .mb-list { max-width: calc(100vw - 24px); }
-  .mb-item { min-height: var(--touch); }
   /* HIDEABLE, NEVER CLOSABLE: the transport has no × at this breakpoint — ▾ is its hide, and which way it
      was left is remembered in this browser's settings (rack.js, `phoneTr`). */
   .dev[data-id="transport"] .dev-close { display: none; }
@@ -286,19 +272,15 @@ body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 .native-clean .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .native-clean .ro-sub { height: 2.6em; overflow: hidden; line-height: 1.3; }
 .native-clean .ro.lw-status .ro-val { white-space: normal; }   /* 0.5.4 P4's seat: INFORMATIONAL's STATUS is the kit's WIDE readout, two lines (base.css Final II) — the nowrap above would cut it mid-number */
-.native-info { display: inline-flex; vertical-align: middle; position: relative; height: 28px; align-items: center; }
-.native-info-button { width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: none; color: var(--dim); cursor: pointer; font: var(--w-bold) 13px/1 var(--font-ui); font-style: normal; }   /* 023 R5 (Josh: "strangely italic"): the ⓘ upright in the UI face (base.css: IT STAYS UPRIGHT), no Georgia slant */
+.native-info-button { font: var(--w-bold) 13px/1 var(--font-ui); font-style: normal; }   /* 023 R5 (Josh: "strangely italic"): the ⓘ upright in the UI face (base.css: IT STAYS UPRIGHT), no Georgia slant */
 .native-info-button:hover, .native-info-button:focus-visible, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--glass-raise); outline: none; }
-.native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--r-lg); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
-.control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--r-md); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
-.control-help[hidden] { display: none; }
+.native-info .native-info-content { width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); border-radius: var(--r-lg); }
+.control-help { max-width: min(280px, calc(100vw - 16px)); border-radius: var(--r-md); }
 .native-clean[data-id="observer"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="observer"] .row { margin: 4px 0; }
 .native-clean[data-id="settings"] .settings-section { margin-bottom: 18px; }
 .native-clean[data-id="settings"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="settings"] .sw { flex: 1 1 110px; }
-.plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
-.plane-model:active { cursor: grabbing; }
 .plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }
 body.disconnected:not(.phone) .dev.native-selected > .dev-head,
 body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
@@ -335,8 +317,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean .window-help-book > .note, .native-clean .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
 .native-clean .native-info-content .ro-sub { height:auto; }
 .native-clean .row:empty { display:none; }
-.native-info .native-info-content { position:fixed !important; inset:auto; margin:0; border:0; }
-.native-info .native-info-content:popover-open { display:block !important; }
+.native-info .native-info-content { border:0; }
 .native-clean[data-id="spectrum"] .grp > .row > .segw { flex:1 1 100%; }
 .native-clean[data-id="spectrum"] .grp > .row:first-of-type .seg { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
 .native-clean[data-id="spectrum"] .grp .seg button { padding:0 5px;min-width:0; }
@@ -352,13 +333,13 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="clip"] .grp > .row > .clip-on + .segw .seg-b { flex:1 1 0;min-width:0;padding:0 4px; }
 @media (pointer:coarse) { .native-clean[data-id="observer"] .seg button { min-height:44px; }
 }
-.plane-model[aria-disabled="true"] { opacity:.35;cursor:default; }
+.plane-model[aria-disabled="true"] { opacity:.35;}
 .native-play-row { display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;min-width:0; }
 #transport.mini .native-play-row { gap:2px; }
 #transport { box-sizing:border-box;max-width:100%;overflow:hidden; }
 #transport .native-play-row { min-width:0;width:100%;overflow:hidden; }
 .native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 44px) 22px;align-items:center; }
-.plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));border-radius:8px; }
+.plane-model { border-radius:8px; }
 
 /* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
 .dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--ctl-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
@@ -422,8 +403,6 @@ body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="so
 body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) .pk-c.on { border-color: color-mix(in oklab, var(--nc) calc(60% * var(--ctl-stroke)), transparent); }
 
 /* Explanatory pockets are optional; numerical interaction labels stay available. */
-body.window-info-off .native-info,
-body.window-info-off .native-info-content { display:none !important; }
 body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info))),
 body.window-info-off .settings-help { display:none; }
 

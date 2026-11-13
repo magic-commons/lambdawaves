@@ -6,6 +6,8 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 MAIN IS LINE 1.6 (Josh 2026-11-12: "merge/cut all the latest MIR work into main to get it's own alpha series"): the kit's `main` was fast-forwarded from 1.4.3 to the 1.5 line's tip (`kit-043-sos` @ bf9cf2a = 1.5.7-alpha.71) and renumbered 1.6.0-alpha.1 (9cb3acc; branch `kit-1.6` is the same commit); the app moved lines with `adopt.mjs . --line 1.6` (two files: version.js, tokens.json). A door is now `1.6.0-alpha.N`, built on a kit branch from `main` and merged back to it. MIR Focus (`focus`, `focus-043`) is its own line with its own numbers: the two trade ideas, never a merge. The 1.4.3 work that sat uncommitted in the `main` checkout since 10-01 is saved in the vault (`iteration-044/main-wip-saved-2026-11-12/`).
 
+THE APP DOES NOT RESTATE THE KIT (044 A1, ledger L113): an app declaration that equals the kit's own line under the same selector is not written — 521 of them left `keymap.css`, `lab.css` and `skin.css`. Identical text is not proof: the app's sheets are unlayered, so a copy also outranks every OTHER kit rule on that property (a `:hover`, a `:focus-visible` ring, a state class, a phone query) and holds the kit's value against the app's own lower rules; 42 identical declarations stay for one of those reasons. A deletion is proved by computed style over a walk (every element, dark, light and a phone pass, hover and focus), never by reading the two sheets.
+
 ## The laws of 041
 
 THE DOORS OF 041 (THE SECOND HAND, Josh's 11-09 list; the clone road on kit branches `kit-041` (T) and `kit-041w` (W) from kit-040's a0e32f5, merged and adopted whole at alpha.63 (app a12502f2), then `kit-041-sos` (K) to 448e3ec = 1.5.7-alpha.67, adopted whole (app 719d94ca), then the fresh eyes' door alpha.68 A SCALED WINDOW KEEPS TO THE SCREEN (24cd015: `scaledRoom`, the rail's own px, PATTERN's seat); 52 and 53 unused; Focus's alpha.27…37 stay on `focus`):
@@ -130,7 +132,7 @@ sentence (line 6), then `--check`. `index.html` declares `@layer app,
 mir;` then `mir/mir.css`; `lab.css` and `skin.css` stay UNLAYERED and beat
 every kit layer. An `app.*` layer ranks below the kit for a normal declaration,
 so keep a λWAVES look with an unlayered rule, and narrow an app rule the layers
-made live with a twin `:not(:where())`. The `!important` declarations stay unlayered: `grep -o '!important' lab/lab.css lab/skin.css lab/csb.css lab/keymap.css lab/nodes.css | wc -l` reads 31 at 022 P3 (skin.css 17, lab.css 11, nodes.css 3; comments counted; 39 at 021 — the hint tip's eight left with the popup law).
+made live with a twin `:not(:where())`. The `!important` declarations stay unlayered: `grep -o '!important' lab/lab.css lab/skin.css lab/csb.css lab/keymap.css lab/nodes.css | wc -l` reads 20 at 044 A1 (skin.css 11, lab.css 6, nodes.css 3; comments counted; 31 at 022 P3, 29 before A1 — nine left with THE APP DOES NOT RESTATE THE KIT; 39 at 021 — the hint tip's eight left with the popup law).
 R5-W1: a kit module no root reaches is reported by `wiring --unreached-kit`,
 never precached, never failed; our own modules keep the hard gate. The
 KEYBOARD window's paint is λWAVES' own in `lab/keymap.css` (021 G6; the window is the kit's, on `#floats`). Knobs follow 1.5's ONE KNOB LAW (vertical drag, ⅛
