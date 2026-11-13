@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 044
+
+A HELD VOLUME IS STILL A VOLUME (044 S3): `lab/volumes.js` `HELD` keeps VOL. III off the offered shelf; its entry, its id and every by-id read are as they were. docs/laws/picker.md, The laws of 044.
+
 ## The laws of 042
 
 THE CHEM WORKER HAS ONE QUEUE (042 F3): every `chem` op runs in arrival order on one promise chain, its basis fetch inside it, and every job answers (a reply that cannot be posted answers with its error) (`lab/mathworker.js` onmessage).

@@ -14,6 +14,7 @@
  * the same id makes a kept file whose sha differs NOT KEPT on every read (install · installStatus · kept · the file road), so it is fetched
  * again; a thumbnail has no hash in format v1 and is kept as served.
  *   shelf()                       the published volumes; [] when none is (no volumes.json): "no volumes are published yet"
+ *                                 (044 S3: `volumes` is what is offered — a HELD volume shows only where this device holds it; `all` names every entry)
  *   index(volId)                  the catalogue (from this device when installed, else the network), checked against the shelf's indexSha256
  *   status(volId)                 'absent' | 'partial n/N' | 'installed'   (installStatus: the same as { state, n, N, bytes, total })
  *   install(volId, { onProgress, signal })   every file into 'lw-vol-<id>': six at a time, resumable (a file already kept is skipped),
@@ -106,14 +107,22 @@ async function pagePicture(v, molId, style) {
 }
 
 /* ── THE SHELF ── the network's, else (offline) the entries the installed volumes keep */
+/* 044 S3 · TWO VOLUMES ON THE SHELF (Josh 11-12: "Just release Volume 1 and 2 for now. Vol 3 will be a post release expansion. (Only show 2
+   volumes for now)"): HELD is the one place that says which volumes are not offered yet, on every host.  A held volume keeps its entry in
+   volumes.json and its id (nothing is renumbered); shelf().volumes leaves it out unless this device already holds some of it (its cache
+   'lw-vol-<id>' exists: what was installed stays and opens), and `all` still names it, so a project or a link that opens one of its
+   molecules finds it as before.  Releasing it is deleting its id here. */
+export const HELD = ['vol-3'];
 let shelfMemo = null;
 export async function shelf({ fresh = false } = {}) {
   if (shelfMemo && !fresh) return shelfMemo;
   let s = null, from = 'network';
   try { const r = await fetch(SHELF_URL, { cache: 'no-cache' }); if (r.ok) s = await r.json(); } catch (_) { s = null; }
   if (!s || s.schema !== 1 || !Array.isArray(s.volumes)) { s = await deviceShelf(); from = 'device'; }
-  const volumes = (s && Array.isArray(s.volumes) ? s.volumes : []).filter(validVolume);
-  const out = { volumes, from: volumes.length ? from : null };
+  const all = (s && Array.isArray(s.volumes) ? s.volumes : []).filter(validVolume);
+  const here = caching() && all.some((v) => HELD.includes(v.id)) ? await caches.keys().catch(() => []) : [];
+  const volumes = all.filter((v) => !HELD.includes(v.id) || here.includes(cacheOf(v.id)));
+  const out = { volumes, all, from: volumes.length ? from : null };
   if (volumes.length) shelfMemo = out;   // an empty shelf is asked again next time (a volume may be published meanwhile)
   return out;
 }
@@ -130,7 +139,7 @@ async function deviceShelf() {
 }
 async function volume(volId) {
   if (!SAFE.test(volId)) throw new Error('not a volume id: ' + volId);
-  const v = (await shelf()).volumes.find((x) => x.id === volId) || (await shelf({ fresh: true })).volumes.find((x) => x.id === volId);
+  const v = (await shelf()).all.find((x) => x.id === volId) || (await shelf({ fresh: true })).all.find((x) => x.id === volId);   // 044 S3: a held volume is still a volume
   if (!v) throw new Error('no volume ' + volId + ' on the shelf');
   return v;
 }

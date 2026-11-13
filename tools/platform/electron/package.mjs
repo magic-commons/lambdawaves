@@ -11,7 +11,7 @@ import { distHash } from './dist-hash.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url)), REPO = path.resolve(HERE, '../../..'), OUT = path.join(HERE, 'out'), DIST = path.join(REPO, 'dist');
 const argv = process.argv.slice(2), cut = argv.indexOf('--'), own = cut < 0 ? argv : argv.slice(0, cut);
-execFileSync(process.execPath, ['tools/build-deploy.mjs', '--quiet', ...(cut < 0 ? [] : argv.slice(cut + 1))], { cwd: REPO, stdio: 'inherit' }); // throws, and so stops, on failure
+execFileSync(process.execPath, ['tools/build-deploy.mjs', '--quiet', '--desktop', ...(cut < 0 ? [] : argv.slice(cut + 1))], { cwd: REPO, stdio: 'inherit' }); // throws, and so stops, on failure
 // 028 R-28: the binary's version is BUILD_LINE's leading token (the one place the number lives); package.json's version is 0.0.0, not a seat.
 const appVersion = (fs.readFileSync(path.join(REPO, 'lab/build-line.js'), 'utf8').match(/BUILD_LINE = '([^ ']+)/) || [])[1];
 if (!appVersion) throw new Error('package.mjs: no BUILD_LINE in lab/build-line.js');

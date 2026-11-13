@@ -133,17 +133,46 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
       the window minimised, FOLDERS › EXPORT saving a file, F11 and FULL, the overlay (Shift+Tab) on and off.
 - [ ] The Linux install from Steam and the sandbox answer (§4); the Deck (§5).
 - [ ] A 30-minute real session on each, then a row in [`ACCEPTANCE-MATRIX.md`](ACCEPTANCE-MATRIX.md).
-- [ ] The volumes: how VOL. I–III reach a Steam player (§8) — your call.
+- [ ] The volumes: VOL. I and II for now, VOL. III later (answered 2026-11-12). Still yours: in the game's depot or as free add-ons (§8).
 
-## 8. The volumes (VOL. I–III)
+## 8. The volumes (VOL. I and II; VOL. III is held back)
 
-Today the desktop build carries no shelf, so LIBRARY says no volumes are published and has no road to install one. Three ways:
+Josh, 2026-11-12: "Just release Volume 1 and 2 for now. Vol 3 will be a post release expansion. (Only show 2 volumes for now)". So, on
+every host, the library's EXPANSIONS shelf offers VOL. I and VOL. II; `lab/volumes.js` `HELD = ['vol-3']` is the one place that says so
+(044 S3). VOL. III's entry stays in `volumes.json` and nothing is renumbered; a machine that already installed some of it still sees it
+and opens it. Releasing VOL. III is deleting its id from `HELD`.
 
-1. **In the base depot.** `node package.mjs -- --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-3` puts VOL. I
-   (5.7 GB) and VOL. III (152 MB) in `resources/dist/volumes/`; their molecules then open straight from the disk. INSTALL would copy
-   them again into `CacheStorage` (twice the disk), so the app should treat a volume it serves itself as installed (a small change to
-   `lab/volumes.js`, not made).
-2. **One DLC per volume.** Each volume is its own depot into `resources/dist/volumes/vol-N/`; Steam delivers a DLC's depot only to its
-   owners, so no SDK is needed. The shelf (`volumes.json`) must then list only the volumes present: the host can write it from the folders
-   it finds (not built yet).
-3. **Downloaded.** Refused: the desktop makes no network call of its own, and the site's policy forbids it.
+What the two volumes weigh (measured 2026-11-12 in `~/Documents/LAMBDAWAVES-VOLUMES/dist`):
+
+| | molecules | as files (`vol-N/`) | as one archive (`.lwv`) |
+|---|---|---|---|
+| VOL. I | 6,927 | 14,276 files, 6,064,046,591 B (5.65 GiB) | `LAMBDAWAVES-VOL-I.lwv`, 5,950,751,144 B |
+| VOL. II | 4,616 | 4,947 files, 5,848,310,795 B (5.45 GiB) | `LAMBDAWAVES-VOL-II.lwv`, 5,755,186,976 B |
+
+VOL. II has no pictures yet (the packer says "4616 of 4616 molecules have no picture yet"), so its card wears the WIP mark and its tiles
+are drawn without thumbnails. On the web VOL. II is an archive only (the reader opens the `.lwv` from disk); its files are in the folder
+above and nowhere on the site.
+
+Without a shelf the desktop build says "No volume is published yet." and has no road to install one. The road that is built:
+
+```bash
+node package.mjs -- --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-2
+```
+
+puts both volumes in each folder's `resources/dist/volumes/` (19,223 files, 11.9 GB more per folder; `build-deploy --desktop`, which
+`package.mjs` always passes, skips the web's 20,000-file free-plan check — that `dist/` holds 21,058 files and must never be deployed).
+Their molecules then open straight from the disk: the shelf shows VOL. I and VOL. II, a volume opens, a tile loads.
+
+**Not built:**
+
+- *A volume served from the disk is not "installed".* The card still offers INSTALL, which would copy the volume again into
+  `CacheStorage` (twice the disk). The lookup's search and the MOLECULES card's extra rungs read installed volumes only, so they do not
+  see a volume that is only in the package. The fix is small (`lab/volumes.js` `installStatus` answering installed for a volume the
+  desktop host serves) and is not made.
+- *One DLC per volume.* Each volume as its own depot into `resources/dist/volumes/vol-N/` works for the files (Steam delivers a DLC's
+  depot only to its owners; no SDK). But the shelf (`volumes.json`) is one file listing every volume, and nothing writes it from the
+  folders that are present, so a player without the DLC would see a card whose files are missing.
+- *Downloaded.* Refused: the desktop makes no network call of its own.
+
+**Yours to decide:** whether VOL. I and II are in the game's own depot (a 12 GB download for everyone) or each a free add-on (DLC) the
+player picks. The first needs only the first item above; the second needs both.
