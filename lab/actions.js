@@ -171,7 +171,7 @@ export function createActions(app) {
       run: () => { const C = app.state.capApi && app.state.capApi.capture; if (!C || !globalThis.ClipboardItem) return false;
         navigator.clipboard.write([new ClipboardItem({ 'image/png': C.picture({ scale: 1 }).then((r) => r.blob) })]).then(() => said(true, 'the picture'), () => said(false)); } },
     ...[['name', 'COPY the name'], ['formula', 'COPY the formula']].map(([k, label]) => ({ id: 'copy.' + k, group: PJ, short: 'copy ' + k, label, surface: true, undo: 'none', run: (a) => copyOut(wordOf(k, a), 'the ' + k) })),
-    ...['reset', 'copy', 'paste', 'fine'].map((v) => ({ id: 'knob.' + v, group: CA, short: 'knob ' + v, label: 'KNOB › ' + v.toUpperCase() + (v === 'fine' ? ' — half the drag gain' : ''), surface: true, undo: v === 'copy' || v === 'fine' ? 'none' : 'row',
+    ...['reset', 'copy', 'paste', 'fine'].map((v) => ({ id: 'knob.' + v, group: CA, short: 'knob ' + v, label: 'KNOB › ' + (v === 'copy' ? 'COPY VALUE' : v.toUpperCase()) + (v === 'fine' ? ' — half the drag gain' : ''), surface: true, undo: v === 'copy' || v === 'fine' ? 'none' : 'row',
       ...(v === 'fine' ? { kind: 'toggle', get: () => { const k = knobAt(); return !!(k && k.mirKnob && k.mirKnob.fine()); } } : {}), run: (a) => knobAct(knobAt(a), v) })),
     { id: 'knob.copyId', group: CA, short: 'copy id', label: 'COPY the control’s id (its modulation target)', hint: 'COPY the control’s id', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-param], [data-key-action], [data-fav], [data-event]');
       return c ? copyOut(c.dataset.param || c.dataset.keyAction || c.dataset.fav || c.dataset.event, 'the id') : false; } },   // 032 W3: an event target's id too

@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 044
+
+ONE CONTROL MENU, NO COPY ID (044 R1, Josh 11-13: "Copy value applies to the clips, I think remove copy ID to make it cleaner"; the kit's 1.6.0-alpha.14): a right-click (ContextMenu, Shift+F10, a still hold) on a knob, a fader, a switch, a segmented row, a trigger or a stepper opens the kit's `controlMenu` — ONE list in ONE order: RESET · COPY VALUE · PASTE · FINE · ROUTES › (ROUTE THE MACRO under it) · CLIP › · LEARN… · CREATE EVENT · the favourites. A row that does not apply is LEFT OUT, never greyed and never moved; `lab/context-menus.js` hands λWAVES' rows in BY SLOT (`slots`: `control.reset`, `event.copy`, `knob.route`, `control.learn`, `event.create`; the favourites as the foot) and keeps no second list. The word is COPY VALUE everywhere (the knob's COPY was the other word); a knob's copied value is also what a timeline point's PASTE VALUE takes. COPY ID is on no menu (the action `knob.copyId` stays in the registry for a key that names it). A fader has the knob's RESET · COPY VALUE · PASTE; a control that names nothing (no parameter, key, event or favourite) shows no menu, and never the browser's. The 140 grid's menu keeps its own rows (032 W3).
+
 ## The laws of 041
 
 THE FINDER WEARS THE GLASS; NOTEBOOK AND NODES ARE SPECIAL (041 P8, P8b, K4): the `windowPicker` action wears `search`, the CSB SEARCH's glyph (`windowPlus` left icons.js); SPECIAL is MODULATION · TIMELINE · CONTROL SURFACE · NOTEBOOK · NODES, NODES named there alone (`can('nodes')` null); since alpha.67 the rows are the kit's `sections` inside its filter and its ↑ ↓ Enter walk, and FIND_WORDS its `words` (`lab/shell/notebook.js`).

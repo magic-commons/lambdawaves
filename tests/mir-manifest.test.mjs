@@ -112,6 +112,8 @@ const ACCEPTED = {
   '1.6.0-alpha.13': '93f095b9ead7ea61e895005e108dd13ba9b3cfb57fa1767d62026f5d1efa0ec8',
   /* 044 R · MIR 1.6.0-alpha.17 JOSH'S RULINGS OF 11-13 (kit-044r @ 8a65610: alpha.14 ONE CONTROL MENU — shell/menubar.js controlMenu · CONTROL_MENU, COPY VALUE, a fader's value door; alpha.15 THE SHORTCUTS' COLUMN IS MIR'S — timeline/shortcuts.js and the ten packs; alpha.16 KATEX IS CURRENT — shell/vendor/katex 0.19.1, sha-512 verified against the registry and the GitHub release; alpha.17 MAGIC COMMONS EVERYWHERE — ABOUT's default credits line) */
   '1.6.0-alpha.17': '01e085540e5a79ae19de33555d7ac8a87864ab6aa0a21e38c6b91661e2697f8b',
+  /* 044 R1 · MIR 1.6.0-alpha.18 THE FADER'S RIGHT BUTTON IS THE MENU'S (kit-044r @ 75d1fd6: kit.js fader — a drag begins on the primary button alone, so the right-click that opens the control menu leaves the value) */
+  '1.6.0-alpha.18': '544bcb6e8bb9d1a09a303c4d26265fa7ee6452e6cb07b028a2d1778894b70853',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

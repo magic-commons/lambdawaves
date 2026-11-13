@@ -1,12 +1,14 @@
 /* lab/context-menus.js — 022 P2 · ONE MENU DOOR: every right-click, ContextMenu key, Shift+F10 and still hold (500 ms, 8 px: the kit's TAP law)
  * opens the kit's contextMenu (lab/mir/shell/menubar.js, 1.5.6-alpha.4) with a tree of ACTION IDS (lab/actions.js): the label, the key, the
  * icon and the ✓ / • are the registry's; the pressed element rides as `{ el }`, so a row acts on what was pressed (a tile, a knob, a window).
- * A surface with its own door keeps it — a registered knob (the kit's knob menu: the timeline's CLIP › and the modulation window's ROUTES ›;
- * λWAVES adds its rows here, as the part 'app'), FOLDERS (the kit's rows), NODES, the favourites strip — and a surface whose right button is a
+ * A surface with its own door keeps it — FOLDERS (the kit's rows), NODES, the favourites strip — and a surface whose right button is a
  * law keeps that (SPECTRUM's grid: right = REMOVE, paint-stroke.js), its menu on the keys and the hold.  A text field keeps the browser's menu.
  * The stage never shows the browser's menu.  Each menu is ≤ 8 rows but the stage's, ≤ 9 since 038 K4 (Josh's AUTO-ROTATE under LOCK; FLIP kept, no
- * submenu).  createContextMenus(app) is seated by rack.js after FOLDERS. */
-import { contextMenu, knobMenu, knobMenuPart, setMenuEscape } from './mir/shell/menubar.js';
+ * submenu).  createContextMenus(app) is seated by rack.js after FOLDERS.
+ * 044 R1 · ONE CONTROL MENU (Josh 11-13): a knob, a fader, a switch, a segmented row, a trigger and a stepper open the kit's controlMenu (MIR
+ * 1.6.0-alpha.14) — RESET · COPY VALUE · PASTE · FINE · ROUTES › · CLIP › · LEARN… · CREATE EVENT · the favourites, the kit's one order; a row
+ * that does not apply is left out.  λWAVES hands its rows in BY SLOT (`slots`) and keeps no list of its own; COPY ID is on no menu. */
+import { contextMenu, controlMenu, knobMenuPart, setMenuEscape } from './mir/shell/menubar.js';
 import { holdTap } from './mir/kit.js';
 import { VIEW_NAMES, drawStyle } from './field.js';
 
@@ -35,13 +37,19 @@ export function createContextMenus(app) {
     row('palette', 'PALETTE'), row('camReset', 'CAMERA HOME'), row('camera.flip', 'FLIP'), row('camera.lock', 'LOCK'), row('camera.autoRotate', 'AUTO-ROTATE'), null, row('copy.picture', 'COPY PICTURE'), row('hide', 'HIDE THE INTERFACE')];   // 038 K4 (Josh: "add 'Auto-rotate' … perhaps under 'lock'"): the ninth row
   const title = (id) => [row(`window.${id}.fold`, 'FOLD'), row(`window.${id}.float`, 'FLOAT'), row(`window.${id}.side`, win(id).side === 'right' ? 'TO THE LEFT RACK' : 'TO THE RIGHT RACK'),
     row(`window.${id}.reset`, 'RESET PLACE'), row(`window.${id}.solo`, 'SOLO'), row('notes', 'WINDOW HELP'), null, row(`window.${id}.close`, 'CLOSE')];
-  const favRows = (el) => { const f = el.closest('[data-fav]'), F = app.sh.csb; return f && F ? F.rowsFor(f.dataset.fav).map((r) => [r.label, r.run]) : []; };   // ADD TO / REMOVE FROM the CONTROL SURFACE
-  /* 032 W3 · CREATE EVENT and COPY VALUE (T23): on a control that names a target (`data-event`) — COPY VALUE on one option (a seg's button, a grid
-     state) or a switch */
+  const favRows = (el) => { const f = el.closest('[data-fav]'), F = app.sh.csb, id = f ? f.dataset.fav : el.matches('.k, .fd') ? el.dataset.param : '';   // ADD TO / REMOVE FROM the CONTROL SURFACE
+    return id && F ? F.rowsFor(id).map((r) => [r.label, r.run]) : []; };
+  /* 044 R1 · THE APP'S ROWS BY SLOT (the kit's CONTROL_MENU): RESET on a registered parameter, COPY VALUE on an event target's pressed option or
+     switch (032 W3: for a point's PASTE VALUE), ROUTE THE MACRO on a knob's parameter, LEARN… on a keyed control, CREATE EVENT on an event target.
+     A value door (a knob, a fader) has the kit's own RESET · COPY VALUE · PASTE; the kit leaves these out there. */
   const evOff = (el) => { const e = el.closest('[data-event]'), R = app.state.modHost && app.state.modHost.registry; return !e || !R || !R.has(e.dataset.event) || !app.state.tl; };
-  const events = (el) => [row('event.create', 'CREATE EVENT', { off: evOff(el) }), row('event.copy', 'COPY VALUE', { off: evOff(el) || !(pressed || el).closest('[data-v], .pk-c, .sw') })];   // the pressed button, not its row
-  const control = (el) => [row('control.reset', 'RESET', { off: !el.closest('[data-param]') }), row('control.learn', 'LEARN…', { off: !el.closest('[data-key-action]') }),
-    ...events(el), ...favRows(el), row('knob.copyId', 'COPY ID', { off: !el.closest('[data-param], [data-key-action], [data-fav], [data-event]') })];
+  const slots = (el) => { const ev = !evOff(el), value = el.closest('.k, .fd'); return {
+    reset: el.closest('[data-param]') ? [row('control.reset', 'RESET')] : [],
+    copy: ev && (pressed || el).closest('[data-v], .pk-c, .sw') ? [row('event.copy', 'COPY VALUE')] : [],   // the pressed button, not its row
+    routes: value && value.dataset.param ? [row('knob.route', 'ROUTE THE MACRO')] : [],
+    learn: el.closest('[data-key-action]') ? [row('control.learn', 'LEARN…')] : [],
+    event: ev ? [row('event.create', 'CREATE EVENT')] : [] }; };
+  const events = (el) => [row('event.create', 'CREATE EVENT', { off: evOff(el) }), row('event.copy', 'COPY VALUE', { off: evOff(el) || !(pressed || el).closest('[data-v], .pk-c, .sw') })];   // the 140 grid's menu (lanes)
   const bar = () => [row('dock', 'DOCK'), row('csb.expand', 'EXPAND'), sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get())),
     row('folds', A.get('folds') && A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'FOLD ALL', { on: () => undefined }), row('modArm', 'MOD'), row('gui', 'MIR OPTIONS'), null, row('hide', 'HIDE THE INTERFACE')];
   const tile = (el) => [row('picker.open', 'OPEN'), row('picker.isomers', 'ISOMERS', { off: !el.querySelector('.mm-iso') }), row('picker.keep', 'KEEP ON THIS DEVICE', { off: !el.querySelector('img[data-vol]') }), null,
@@ -55,9 +63,8 @@ export function createContextMenus(app) {
   const words = () => [row('view.formula', 'FORMULA'), row('view.labels', 'ATOM LABELS'), row('view.captions', 'CAPTIONS'), row('view.badges', 'STATUS TAGS'),
     sub('ESP BAR SIDE', () => radio('esp.side', 'side', [['right', 'RIGHT'], ['left', 'LEFT'], ['top', 'TOP'], ['bottom', 'BOTTOM']], () => A.get('esp.side').get())), null,
     row('copy.formula', 'COPY FORMULA'), row('copy.latex', 'COPY LaTeX')];
-  /* the knob's own rows at the foot of the kit's knob menu (part 'app'; the favourites' ADD / REMOVE ride setTimelineKnobRows): ROUTE, COPY ID */
-  const knobApp = (id, root) => { pressed = root; return { entries: [row('knob.route', 'ROUTE THE MACRO', { off: !root.dataset.param }), row('knob.copyId', 'COPY ID')] }; };
-  knobMenuPart('app', knobApp);
+  /* the app's rows on a registered knob, which the kit's timeline opens itself (part 'app'; the favourites' ADD / REMOVE ride setTimelineKnobRows) */
+  knobMenuPart('app', (id, root) => { pressed = root; return { rows: slots(root) }; });
 
   /* ── WHERE: the pressed element → its menu (a knob opens the kit's knob menu) ── */
   const inside = (r, x, y) => r && r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
@@ -69,10 +76,10 @@ export function createContextMenus(app) {
     if ((e = c('.wp-row[data-win]'))) return finder(e);
     if ((e = c('#lwMenu'))) return (e = c('.mm-tile')) ? tile(e) : pickerPage();
     if (c('#notebook')) return notebook();
-    if ((e = c('.k'))) return { knob: e };
-    if ((e = c('[data-fav]'))) return control(e);
+    if ((e = c('.k, .fd'))) return { control: e };
+    if ((e = c('[data-fav]'))) return { control: e };
     if (c('.mir-transport')) return bar();
-    if ((e = c('.dev .sw, .dev .segw, .dev .trig'))) return control(e);
+    if ((e = c('.dev .sw, .dev .segw, .dev .trig, .dev .mir-step'))) return { control: e };
     if ((e = c('.dev[data-id] > .dev-head'))) return title(e.parentElement.dataset.id);
     if ((e = c(LANES))) return lanes(e);
     if (t === app.dom.canvas || t.matches('#stage, #stage > canvas')) return wordsAt(x, y) ? words() : stage();   // the stage, or its words
@@ -82,7 +89,8 @@ export function createContextMenus(app) {
   function open(t, x, y, hold = false) {
     if (!hold && performance.now() - held < 700) return true;
     pressed = t; const m = menuAt(t, x, y); if (!m) return false; if (hold) held = performance.now();
-    if (m.knob) return !!knobMenu(m.knob, { x, y, appRows: m.knob.dataset.param ? null : (id, root) => knobApp(id, root).entries });
+    if (m.control) { const e = m.control, own = !!e.dataset.param && e.matches('.k, .fd');   // a parameter's value door: the part 'app' hands the rows in
+      controlMenu(e, { x, y, rows: own ? null : slots(e), appRows: () => favRows(e) }); return true; }   // a control with no row that applies shows no menu, and never the browser's
     return !!contextMenu({ x, y, entries: m });
   }
   /* the right button (not where a surface took it first: the kit's knob menu, FOLDERS, NODES, the favourites, a paint law) */

@@ -658,7 +658,7 @@ export function fader(o) {
   const fromEvent = (e) => { const r = root.getBoundingClientRect(); return denorm((e.clientX - r.left) / Math.max(1, r.width)); };
   watchTouches();
   let gid = null;   // the pointer that owns the gesture: a second finger is the fine gear, not a second drag
-  root.addEventListener('pointerdown', (e) => { if (disabled || dragging) return; e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; gid = e.pointerId; root.classList.add('drag'); tap(e); lastX = e.clientX; if (!fineHeld(e, gid)) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
+  root.addEventListener('pointerdown', (e) => { if (disabled || dragging || e.button) return;   /* 1.6.0-alpha.18: the left button, a finger or a pen alone drags; the right button is the menu's */ e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; gid = e.pointerId; root.classList.add('drag'); tap(e); lastX = e.clientX; if (!fineHeld(e, gid)) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
   let dragRect = null;   // 2026-09-11: the rect is read once per drag, not once per move
   root.addEventListener('pointermove', (e) => { if (!dragging || e.pointerId !== gid) return; if (fineHeld(e, gid)) { const r = dragRect || (dragRect = root.getBoundingClientRect()); v = denorm(norm(v) + (e.clientX - lastX) / Math.max(1, r.width * fine)); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });
   const end = (e) => { if (!dragging || (e && e.isTrusted && e.pointerId !== gid)) return; dragging = false; gid = null; dragRect = null; root.classList.remove('drag'); if (o.onChange) o.onChange(v); };
