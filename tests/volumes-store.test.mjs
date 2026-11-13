@@ -46,7 +46,8 @@ assert.equal(fx1.length, fx2.length, 'the fixture: the stale catalogue is the sa
 net.set(BASE + 'volumes.json', enc(JSON.stringify({ schema: 1, volumes: [
   { id: 'vol-t', numeral: 'T', title: 'fetch', index: 'vol-t/index.json', indexSha256: sha(ix2), count: 2 },
   { id: 'vol-f', numeral: 'F', title: 'file', archive: { name: 'vol-f.lwv' }, indexSha256: sha(fx2), count: 2 },
-  { id: 'vol-3', numeral: 'III', title: 'held', index: 'vol-3/index.json', indexSha256: sha(hx), count: 2 }] })));
+  { id: 'vol-3', numeral: 'III', title: 'held', index: 'vol-3/index.json', indexSha256: sha(hx), count: 2 }],
+  addons: [{ id: 'vol-9', numeral: 'IX', store: 'steam://store/123' }, { id: 'vol-8', numeral: 'VIII', store: 'https://example.org/' }, { id: 'vol-3', numeral: 'III', store: null }, { id: 'vol-t', numeral: 'T' }, { id: '../x', numeral: 'X' }] })));
 net.set(BASE + 'vol-3/index.json', hx);
 const T = BASE + 'vol-t/';
 for (const [k, b] of [['index.json', ix2], ['m/a.lwm', a2], ['m/b.lwm', b2], ['t/a.webp', tA], ['t/b.webp', tB]]) net.set(T + k, b);
@@ -99,6 +100,7 @@ await seed('lw-vol-vol-f', [[F + 'index.json', fx1], [F + 'm/a.lwm', a1], [F + '
   const s = await V.shelf({ fresh: true });
   assert.deepEqual(s.volumes.map((v) => v.id), ['vol-t', 'vol-f'], 'shelf: a held volume is not offered');
   assert.deepEqual(s.all.map((v) => v.id), ['vol-t', 'vol-f', 'vol-3'], 'shelf: its entry is kept');
+  assert.deepEqual(s.addons, [{ id: 'vol-9', numeral: 'IX', store: 'steam://store/123' }, { id: 'vol-8', numeral: 'VIII', store: null }], 'shelf: an add-on not installed is named with a steam://store/<digits> address or none; never a held volume, one on the shelf, or a bad id (044 S10)');
   assert.equal((await V.index('vol-3')).molecules.length, 2, 'index: a held volume still opens by its id');
   await seed('lw-vol-vol-3', [[BASE + 'vol-3/index.json', hx, sha(hx)]]);
   assert.deepEqual((await V.shelf({ fresh: true })).volumes.map((v) => v.id), ['vol-t', 'vol-f', 'vol-3'], 'shelf: a device that holds some of a held volume keeps it on its shelf'); }

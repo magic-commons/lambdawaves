@@ -132,7 +132,7 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
       bank details are in that name too.
 - [ ] The partner site: the app, two depots, the launch options above, the AI disclosure, the store page, the price.
 - [ ] The Windows GPU run on your PC. The folder is built (044 S4, 2026-11-12, on Linux; the download you approved is done and
-      cached): `out/lambdawaves-win32-x64/`, 495,882,235 B, 1,901 files, rebuilt from commit `69476b0f` (044 S5–S9). Checked here without running it: the
+      cached): `out/lambdawaves-win32-x64/`, 495,876,340 B, 1,902 files, rebuilt from commit `dfb39198` (044 S10). Checked here without running it: the
       `.exe` is a 64-bit Windows program whose version resource reads CompanyName `MAGIC COMMONS`, ProductName and FileDescription
       `λWAVES`, version `0.9.9-beta`, LegalCopyright `Copyright 2026 MAGIC COMMONS`; `resources/dist/` is byte-identical to the Linux
       package's (which passes its 17 checks); no AI mark and no OpenAI or Google face is in it. **Never started: no Windows machine
@@ -165,9 +165,12 @@ node package.mjs --depots -- --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volume
 A volume's folder is the same for Windows and Linux. It carries its own shelf entry (`volume.json`) beside its catalogue, and the
 desktop host answers the shelf from the folders that are present (`main.cjs` `shelf()`), so:
 
-- a player without an add-on does not see that volume at all; with none, EXPANSIONS says "No volume is installed. The volumes are free
-  add-ons on Steam." A card for a volume that is not there was not built: its only honest button would open the add-on's Steam page,
-  and that address does not exist until the add-on does;
+- an add-on the player has not added has a card all the same (044 S10, Josh 11-13: "Yes"): its art and numeral, the words "a free
+  add-on on Steam", not openable. The game knows its add-ons from one table, `tools/platform/electron/steam-addons.json`, which also
+  holds each add-on's Steam app id — **empty today; fill both in once the add-ons exist, then rebuild.** With an id the card has one
+  button, OPEN ON STEAM, which hands `steam://store/<that id>` to the system (Steam opens the add-on's page). That address, for the ids
+  in the table, is the only thing besides a web link the host ever hands on; the app itself still makes no network call. Without an
+  id there is no button;
 - a volume that is there is INSTALLED as it stands: its card reads INSTALLED and has nothing to press, nothing is copied into
   `CacheStorage`, the lookup's search finds its molecules, and MOLECULES' pages and extra rungs read it. Removing it is Steam's
   (untick the add-on); it is gone from the shelf at the next launch.
@@ -178,15 +181,18 @@ Without `--depots` the same command leaves the volumes inside both game folders 
 
 1. On the game's app page, *All Associated Packages, DLC, Demos and Tools* › *Add New DLC*, twice: "λWAVES — VOL. I" and "VOL. II".
    Set each to Free. Each needs its own small store page (a capsule image and a sentence) and goes through review with the game.
-2. *SteamPipe › Depots*: add one depot per add-on, no operating system set (the files are the same for both), and assign each depot
-   to its DLC. Then the DLC's package must include its depot.
+2. Put each add-on's app id into `tools/platform/electron/steam-addons.json` (`"appid": "1234560"`) and rebuild the game folders.
+   A DLC's depot has the DLC's own app id as its depot id and lives in the base game's depot list (Steamworks' DLC page, read
+   2026-11-13: "the DLC uses the app ID as the depot ID", "All DLC depots reside within the Base App Depot list"); choose the option
+   "stored in a new depot that will only be downloaded by users who own the content", no operating system set.
 3. Add the two depots to `app_build_<APPID>.vdf` beside the game's two, each with its own `depot_build_<DEPOT>.vdf` whose `ContentRoot`
    is `…/out/lambdawaves-vol-1/` (or `-vol-2/`) and the same `FileMapping` as §2. The files land in the game's install folder under
    `resources/dist/volumes/vol-N/`, which is where the app looks.
-4. Test on the PC: with neither add-on, the shelf's sentence; tick VOL. I in the game's Properties › DLC, let it download (6 GB),
+4. Test on the PC: with neither add-on, two cards that say "a free add-on on Steam" and whose button opens each page in Steam; tick VOL. I in the game's Properties › DLC, let it download (6 GB),
    start: one card, INSTALLED; open it, open a molecule; tick VOL. II; untick one and see it go.
 
-Proved here on the packaged Linux app in three states (ACCEPTANCE-MATRIX, 2026-11-12): no volume folder, VOL. I alone, VOL. I and II.
+Proved here on the packaged Linux app in three states (ACCEPTANCE-MATRIX, 2026-11-12 and 11-13): no volume folder, VOL. I alone, VOL. I and II.
+The store pages' drafts and the pictures Steam asks for: [`STEAM-ADDONS.md`](STEAM-ADDONS.md).
 Not proved: anything on Steam itself, and Windows.
 
 VOL. II's pictures: all six looks and the diagrams were drawn on 11-05/06 as page sheets (47 pages, none missing). The build used to

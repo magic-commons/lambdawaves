@@ -905,15 +905,28 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         c.addEventListener('drop', (e) => { if (!files(e)) return; e.preventDefault(); c.classList.remove('drop'); const f = e.dataTransfer.files[0]; if (f) ins.run(f); });
       }
     }
+    /* 044 S10 · A CARD FOR AN ADD-ON NOT INSTALLED (Josh 11-13: "Yes"): on the desktop a volume the game knows and the player has not added
+       wears its art and numeral, cannot be opened, and says what it is; its one button (only when the host has its Steam id) asks the host
+       for the add-on's Steam page — window.open on steam://store/<id>, which main.cjs refuses as a window and hands to the system */
+    function addonCard(a, k) {
+      const c = el('div', 'mm-vol filling', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.disabled = true; o.setAttribute('aria-label', volName(a) + ' · a free add-on on Steam');
+      o.style.setProperty('--k', String(k));
+      el('span', 'mm-halo', o); const art = el('span', 'mm-lit', o); el('span', 'mm-rim', o); heroArt(art, a.id); el('span', 'mm-foil', art);
+      const foot = el('span', 'mm-art-foot', art); el('b', 'mm-vol-num', foot, volName(a)); el('span', 'mm-vol-meta', foot, 'a free add-on on Steam');
+      if (!a.store) return;
+      const b = el('button', 'mm-install', c); b.type = 'button'; icon(el('span', 'mm-ring-host', b), 'download'); el('span', 'mm-install-word', b, 'OPEN ON STEAM');
+      b.addEventListener('click', (e) => { e.stopPropagation(); window.open(a.store); });
+    }
     async function paintShelf() {
       shelfEl.textContent = ''; shelfEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume'); volLooks = ''; paintLooks();
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
-      if (!s.volumes.length) {
+      const addons = s.addons || [];
+      if (!s.volumes.length && !addons.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'EXPANSIONS');
         el('span', '', e, globalThis.lwavesDesktop ? 'No volume is installed. The volumes are free add-ons on Steam.' : 'No volume is published yet.');   // 044 S8
         return;
       }
-      heroes.clear(); vols = s.volumes; s.volumes.forEach(card);
+      heroes.clear(); vols = s.volumes; s.volumes.forEach(card); addons.forEach((a, k) => addonCard(a, s.volumes.length + k));
       if (TIP_URL && !globalThis.lwavesDesktop) tipCard();   // 030 THE TIP JAR: the last card on the shelf; 044 S7: never on the desktop (Steam) build
       enterTiles([...shelfEl.children]);
     }
