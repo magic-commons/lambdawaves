@@ -3,7 +3,7 @@
 import { TIER } from '../tier.js';
 import { el, knob, sw, seg, group, readout, chip, hint, trig, label } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
 import { createLight, summonLight } from '../light-window.js';   // 037 L1: THE LIGHTING WINDOW, CAMERA's sibling (lab/, not windows/); L4 its summons
-import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName, presetSave } from '../user-presets.js'; import { createCameraPanel, directionSphere } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
+import { arcKnob } from '../mir/controls/arc.js'; import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName, presetSave } from '../user-presets.js'; import { createCameraPanel, directionSphere } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, obs, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
@@ -37,7 +37,9 @@ export function createMaterial(app) {
     const r2 = el('div', 'row tight', gSpace);
     ui.expK = knob({ label: 'EXPOSURE', min: 0.08, max: 12, value: 1, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.exposure', v)) return; mat.exposure = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.expK.root);
     ui.softK = knob({ label: 'SOFT', reverse: true, min: 0.3, max: 2.2, value: 0.7, fmt: (v) => 'γ' + v.toFixed(2), onInput: (v) => { if (modHand('material.softness', v)) return; mat.softness = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.softK.root);
-    ui.hueK = knob({ label: 'HUE', min: 0, max: 1, value: 0, wrap: true, fmt: (v) => (v * 360).toFixed(0) + '°', onInput: (v) => { if (modHand('material.hue', v)) return; mat.hueShift = v; applyAccent(); paintBar(); schedule(TIER.PRESENT); } }); r2.appendChild(ui.hueK.root);
+    /* 044 A3.5 (L55, REVIEW-B B10; Josh's control language: arcs are colour): WAVE's HUE is the kit's free arc on the colour wheel's track, as
+       NODES' HUE is (node-types.js WHEEL); its target `material.hue`, its 0 … 1 turn and its road are untouched */
+    ui.hueK = arcKnob({ label: 'HUE', min: 0, max: 1, value: 0, home: 0, wrap: true, stops: [0, 60, 120, 180, 240, 300, 360].map((h) => `hsl(${h} 100% 50%)`), fmt: (v) => (v * 360).toFixed(0) + '°', onInput: (v) => { if (modHand('material.hue', v)) return; mat.hueShift = v; applyAccent(); paintBar(); schedule(TIER.PRESENT); } }); r2.appendChild(ui.hueK.root);
   function createDrawClipPaletteCamera() {   // the second seat: WAVE's DRAW · CLIP · PALETTE · INVERT · CAMERA
     const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: DRAW STYLE (window id `style`) merged into WAVE (board #59); this block is the DRAW section of the WAVE window
     const rd = el('div', 'row tight', gd);

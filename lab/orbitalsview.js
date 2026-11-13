@@ -24,7 +24,7 @@
  * a `refusal()` dance and a push ORDER in the frame loop; the refusal survives only as the sentence the interface
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
-import { el, knob, sw, trig, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
+import { el, knob, fader, sw, trig, readout, graphHover, themeInk, accentRGB, chip, hint } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js'; import { softCapLevels } from './molecular-register.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
@@ -368,9 +368,11 @@ export function createOrbitals(host, api) {
     const nm = el('div', 'sp-name sp-nm', id); writeName(nm, k); nm.title = about(k);
     const es = el('div', 'sp-sub sp-e', id, `k${k + 1} · ${sol.eps[k].toFixed(6)} Eh · ${k < nocc() ? '2 e⁻' : 'virtual'}`);
     id.addEventListener('click', () => { selected = k; paint(); markSel(); });
-    const amp = knob({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp,
-      title: 'Amplitude |c_k| in the register',
+    /* 044 A3.4 (L58, REVIEW-B B16; Josh's control language: a thing's one own parameter is a slider): a lane's amplitude is the slider SPECTRUM's
+       and STATES' lanes carry (`.fd.pop`), in the knob's seat; the quantity stays |c| and its road setAmp */
+    const amp = fader({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp, cls: 'pop',
       fmt: (v) => v.toFixed(3), onInput: (v) => { setAmp(k, v); painted(); } });
+    hint(amp.root, 'Amplitude |c_k| in the register');
     const ph = knob({ label: '<m>arg c</m>', aria: 'phase ' + label(k), min: 0, max: TAU, value: c.phase, wrap: true,
       title: 'Phase arg c_k at t = 0',
       fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => { setPhase(k, v); painted(); } });
