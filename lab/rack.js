@@ -53,7 +53,7 @@ import { TIER, TIER_NAME } from './tier.js';   // 021 G1: the tiers live in lab/
 
 export async function boot(dom) {
   registerIcons();
-  const DEVICES = new Map(), device = (o) => { const d = kitDevice(o); DEVICES.set(o.id, d); if (d.foldBtn) hint(d.foldBtn, 'Fold or unfold this window'); return d; };   // 039 X8 · FOLDING'S ONE WORD (the kit's hint says "Collapse or expand": FOR-KIT)   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked
+  const DEVICES = new Map(), device = ({ onPower, ...o }) => { const d = kitDevice(o); d.onPower = onPower; DEVICES.set(o.id, d); if (d.foldBtn) hint(d.foldBtn, 'Fold or unfold this window'); return d; };   // 039 X8 · FOLDING'S ONE WORD (the kit's hint says "Collapse or expand": FOR-KIT)   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked · 044 A2: `onPower(live)` is THE HAND'S POWER PRESS, the rack's own door for a card it adopts (rack-wiring.js hands it to rk.register; a restore's setOff never calls it), so no window listens on `.dev-power`
   const reg = new Register();
   /* UNDO / REDO: the ring (`app.state.history`) is built at the foot of boot(), once every path it writes through exists; hNote() is
      the "an edit may have happened" ping for the few register-side setters that do not bump reg.version */
@@ -968,10 +968,13 @@ export async function boot(dom) {
   /* 038 M1 · M5 · M6 · THE FIRST RUN CHOOSES, THE CHOICE KEEPS: the arrangement this browser chose open (`nativeLayout` 2 = ADVANCED, the face's door;
      else SIMPLE), laid in ADVANCED's order — a window SIMPLE closes waits in its seat, so one its opener seated (THE SUMMONS, NODES' dock) comes back
      there; NEW's DEFAULT below is captured from it */
+  /* 044 A2 · A CARD'S FIRST FOLD IS DECIDED HERE, ONCE, by the rack's own fold (rk.fold; no head button is pressed): a CONTROL or OTHER window arrives
+     folded (settings.js KIND, where window-chrome.js pressed it); a first-run window by first-run.js' `folded`, just below; a record's folds win after */
+  for(const [id,kind] of Object.entries(app.sh.KIND))if(kind==='control'||kind==='other')rk.fold(id,true);
   if(useCompactDefaults) {
     const racks = firstRunRacks(readSettings().nativeLayout), open = [...racks.left, ...racks.right], { advanced } = FIRST_RUN_RACKS;
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',!open.includes(d.dataset.id));
-    for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
+    for(const [host,ids] of [[rackL,advanced.left],[rack,advanced.right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);rk.fold(id,FIRST_RUN.folded.includes(id));}
     /* iteration 011 Q2 (Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside every window closed (first-run.js `inner`); a record that loads after (rack-wiring.js `folds`) wins */
     if(FIRST_RUN.inner===false)for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]'))b.click();
     for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="false"]'))if(FIRST_RUN.innerOpen.includes(b.dataset.fold))b.click();   // 041 D2: but MOLECULES' presets and A ↔ B, open (first-run.js `innerOpen`)

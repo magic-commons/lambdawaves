@@ -41,6 +41,7 @@ export function createRackWiring(app) {
    * kit's record does not carry: the transport's dock and the MORE / CORE folds (layoutExtras), the transport card itself
    * (`card: true`), and `hidden` (a legacy card, a card a molecule stood down) kept out of the + list.  A reload keeps only
    * `closed`, as before (saveSettings), so the store hands the kit its ☆ slots and no layout. */
+  const isCard = (id) => !!(rk.spec(id) || {}).card;   // 044 A2: the CONTROL SURFACE's card by its declared flag (`card: true`), never by its id
   const sideKey = (s) => (s === 'L' || s === 'left' ? 'left' : s === 'R' || s === 'right' ? 'right' : undefined), sideLR = (s) => (s === 'left' ? 'L' : 'R');
   let parkedIds = [];   // the floats the crossing parks (the kit's memory is private: BRIEF R2), read by this listener, registered AHEAD of the kit's
   window.addEventListener('resize', () => { if (!rk.phone && isPhone()) parkedIds = rk.floating(); }, { passive: true });
@@ -68,9 +69,9 @@ export function createRackWiring(app) {
   /* 041 D4 · THE HANDLE WEARS THE WINDOW'S ICON (kit alpha.56; Josh 11-09: "replace the drag handles with the icon of the window"): the kit's ICON
      state stands a head's `.dev-glyph` in the dots' seat, and λWAVES' heads carried none — each rack window's one drawing (icons.js WINDOW_GLYPH)
      joins its head here; skin.css shows it only under ICON, so GRIP and HIDDEN look as they did */
-  for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) { const g = WINDOW_GLYPH[d.dataset.id], idz = d.querySelector('.dev-head > .dev-id');
+  for (const d of document.querySelectorAll('[data-mir-rack] > .dev')) { const g = WINDOW_GLYPH[d.dataset.id], idz = d.querySelector('.dev-head > .dev-id');
     if (g && idz && !idz.querySelector('.dev-glyph')) idz.prepend(glyphEl(g, 'dev-glyph gly gly-' + g, 14)); }
-  for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), glyph: WINDOW_GLYPH[d.dataset.id], hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
+  for (const d of document.querySelectorAll('[data-mir-rack] > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, onPower: (DEVICES.get(d.dataset.id) || {}).onPower, title: devTitle(d), glyph: WINDOW_GLYPH[d.dataset.id], hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
   /* ── iteration 006 R · A RACK'S SCROLLBAR ANSWERS ITS CONTENT, NEVER ITS MOTION ─────────────────────────────────────────────
    * Both racks are content-sized scrollers (lab.css: bottom auto, max-height 100%, overflow-y auto).  The kit's motion (mir/shell/
    * rack.js createRackMotion) FLIPs every card that moves UP when one above it hides, folds or leaves: for 320 ms it is drawn by a
@@ -127,7 +128,7 @@ export function createRackWiring(app) {
         if (rk.floatOf('transport')) rk.dock('transport');           // 038 S6: a restore never floats the bar's card — the kit's apply floats it from a record's `float` (a session, a ☆ slot saved while it was detached), the road onClose's dock (S2) never sees
         if (layout.docked) layout.seatTransport();                    // 018 C4: a record's seat is not read — the docked transport is the LEFT rack's top
         d.classList.toggle('closed', !layout.docked);                // iteration 014 A0: the card is open exactly while the kit's bar is docked in it
-        if (d.classList.contains('folded') !== !!c.folded) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
+        rk.fold(c.id, !!c.folded);                                   // 044 A2: the card's fold by the rack's verb (the kit's apply leaves a `card: true` to the app)
       }
       const mt = typeof c.more === 'boolean' ? d.querySelector('.mol-more-toggle') : null;   // an older record has no `more`: the fold stays as it is
       if (mt && (mt.getAttribute('aria-expanded') === 'true') !== c.more) mt.click();
@@ -179,7 +180,7 @@ export function createRackWiring(app) {
     floatOf(id) { const st = rk.floatOf(id); return st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: rk.floating().indexOf(id), home: { side: sideLR(st.home.side), index: st.home.index } } : null; },
     /** TAKE IT OFF THE RACK.  `at` overrides the landing spot and the home slot (a saved layout supplies both); the TRANSPORT's floating mode is the pill */
     popOut(id, at) {
-      if (id === 'transport') { if (layout.docked) layout.dockTransport(); return true; }
+      if (isCard(id)) { if (layout.docked) layout.dockTransport(); return true; }
       const a = { ...(at || {}), w: (at && at.w) || rackCardWidth() };
       if (at && at.home) a.home = { side: sideKey(at.home.side) || 'right', index: Math.max(0, at.home.index | 0) };
       /* 039 F4a · THE PLACEMENT STANDS (latex-copy's CALCULUS popped out at 520 px went back to its rack as two columns: 983 px on a 914-px page, F3's
@@ -188,8 +189,8 @@ export function createRackWiring(app) {
       const d = devById(id), placed = !!at && (at.x != null || at.y != null || !!at.w); if (d) { if (placed) d.dataset.placed = ''; else delete d.dataset.placed; }
       const ok = rk.float(id, a); if (!ok && d) delete d.dataset.placed; occlusion.dirty(); return ok;   // 017 P2 (R4's note): the placement itself marks a paused mask stale
     },
-    dockWindow(id) { if (id === 'transport') { if (!layout.docked) layout.dockTransport(); return true; } const ok = rk.dock(id); occlusion.dirty(); return ok; },
-    toggleFloat(id) { if (id === 'transport') { layout.dockTransport(); return true; } return rk.toggleFloat(id); },
+    dockWindow(id) { if (isCard(id)) { if (!layout.docked) layout.dockTransport(); return true; } const ok = rk.dock(id); occlusion.dirty(); return ok; },
+    toggleFloat(id) { if (isCard(id)) { layout.dockTransport(); return true; } return rk.toggleFloat(id); },
     setCompact: (id, on) => rk.setCompact(id, on),
     /** the kit has no move for a float (BRIEF R1): dock and float it again at (x, y), clamped, in the same seat of the layer */
     moveFloat(id, x, y) { const st = rk.floatOf(id), d = devById(id), next = d && d.nextElementSibling; if (!st) return false; rk.dock(id); const ok = rk.float(id, { x, y, w: st.w, compact: st.compact, home: st.home }); if (next && next.parentElement === floats) floats.insertBefore(d, next); return ok; },

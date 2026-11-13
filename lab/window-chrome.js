@@ -1,6 +1,6 @@
 /* window-chrome.js — TWO PASSES OVER EVERY WINDOW, run once at boot after the racks are built: LEAN (2026-09-18: the Aa
  * button that drops a window's notes and readouts, remembered per window in this browser) and the KIND taxonomy (wave 26:
- * data-kind on every card, ⧉ COPY on the INFO panels, CONTROL and OTHER folded).  A seam out of rack.js boot()
+ * data-kind on every card, ⧉ COPY on the INFO panels; 044 A2: CONTROL and OTHER's first fold is the boot's, rack.js).  A seam out of rack.js boot()
  * (optimization 2026-09-24 · N7 seam 9, AUDIT-E §6); three closure edges, handed in: `KIND` (the table stays with
  * the windows it names), `layout` (copyDigest) and `present` (a lean toggle repaints the stage: schedule(PRESENT)).
  * installWindowChrome() runs where the two passes stood. */
@@ -24,10 +24,9 @@ export function installWindowChrome({ KIND, layout, present }) {
     b.addEventListener('click', (e) => { e.stopPropagation(); setLean(d, !d.classList.contains('lean')); });
     if (firstLean || leanSet.has(d.dataset.id)) setLean(d, true);
   }
-  /* the taxonomy on every card: INFO panels get ⧉ COPY; CONTROL and OTHER start folded */
+  /* the taxonomy on every card: INFO panels get ⧉ COPY */
   for (const d of document.querySelectorAll('.dev')) {
     const kind = KIND[d.dataset.id] || 'other'; d.dataset.kind = kind;
     if (kind === 'info') { const util = d.querySelector('.dev-util'); const b = el('button', 'dev-copy', util, '⧉'); b.type = 'button'; b.title = 'Copy this panel as text'; b.setAttribute('aria-label', 'copy this panel as text'); util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); layout.copyDigest(d.dataset.id); }); }
-    if ((kind === 'control' || kind === 'other') && !d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
   }
 }

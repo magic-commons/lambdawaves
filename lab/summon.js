@@ -12,12 +12,12 @@ import { motionPolicy, motionToken } from './mir/core/motion.js';
 import { cssZoom } from './mir/core/zoom.js';
 const STEP = 180;
 const devOf = (id) => document.querySelector('.dev[data-id="' + id + '"]');
-const seated = (d) => !!d && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating') && /^rackL?$/.test(d.parentElement ? d.parentElement.id : '');
+const seated = (d) => !!d && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating') && !!d.parentElement && 'mirRack' in d.parentElement.dataset;
 export function summon(rk, fromId, id) {
   const from = devOf(fromId), to = devOf(id);
   if (!rk || !to) return false;
   if (!seated(from)) return rk.reveal(id);
-  const rack = from.parentElement, side = rack.id === 'rackL' ? 'left' : 'right';
+  const rack = from.parentElement, side = rack.dataset.side;
   const index = [...rack.children].filter((c) => c !== to && c.classList.contains('dev') && !c.hidden && !c.classList.contains('closed')).indexOf(from) + 1;
   if (to.classList.contains('floating')) rk.dock(id, { side, index });
   else if (to.classList.contains('closed')) rk.open(id, { side, index });

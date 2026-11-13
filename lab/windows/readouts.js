@@ -13,8 +13,8 @@ export function createReadouts(app) {
     { domain, cardLoading, solveCard, touchState, api, field, stats, perf, loadPreset } = app.ctl;
   /* 017 X1 · THE STAND-DOWN (AN EFFECT SHOWS ITS WINDOW): a special window's × (the kit's `devclose`) or POWER OFF ends its effect and ‹ SYSTEM ›
      reads back the operator in force; `hidden` (moleculeMode) is neither.  When the stepper closes the window it opened on its way to another
-     operator, the stepper switches (its value already names that operator), so the stand-down only reads back. */
-  const standDown = (w, end) => { w.root.addEventListener('devclose', end); w.root.querySelector('.dev-power').addEventListener('click', () => { if (w.root.classList.contains('off')) end(); }); };
+     operator, the stepper switches (its value already names that operator), so the stand-down only reads back.  044 A2: POWER OFF is the card's
+     declared `onPower` (device({ onPower }): the hand's press, by the rack), the × its `devclose`. */
   const toHydrogen = (ops, id) => () => { const H = getHamiltonian().id, v = ui.hamSeg.value; if (ops.includes(H) && (v === H || v === 'lattice')) switchHamiltonian('hydrogen'); ui.hamSeg.readBack(id); };
   const wSh = device({ id: 'shadow', eyebrow: 'SHADOW', status: '' });
   rack.appendChild(wSh.root);
@@ -177,7 +177,12 @@ export function createReadouts(app) {
   const calculusDigest = () => ({ md: calculus && calculus.last ? calculusMarkdown(calculus.last) : '' });   // 0.4.0 S3: ⧉ copies THE PROSE FIGURE (calculus.js), which pastes into the notebook and renders
   return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, metersDigest, calculusDigest }; }
   function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION · EMISSION SPECTRA
-  const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
+  /* 013 H4: the reader's hand turning the ATOMS window ON puts SPECTRUM's system on ATOM — the stepper's own road for 'atom' (the hand's press, so a
+     project restoring the window's power never moves the operator; switchHamiltonian never presses the power, so there is no loop) · 017 X1 (call 1,
+     the uniform law): its × or POWER OFF hands SPECTRUM back to HYDROGEN */
+  const atomsDown = toHydrogen(['atom'], 'atoms');
+  const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '', onPower: (live) => { if (!live) atomsDown(); else if (getHamiltonian().id !== 'atom') { switchHamiltonian('atom'); ui.hamSeg.set('atom'); } } });
+  wAtoms.root.addEventListener('devclose', atomsDown);
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
   const atomsView = createAtoms(wAtoms.body, {
     Z: () => HAMILTONIANS.atom.Z,
@@ -187,10 +192,6 @@ export function createReadouts(app) {
     busy: cardLoading(wAtoms, 'relativity'),   // iteration 008 Z: RELATIVITY Δ's second solve wears the card's busy mark
   });
   app.w.wAtoms = wAtoms; app.w.atomsView = atomsView;
-  /* 013 H4: the reader's hand turning the ATOMS window ON puts SPECTRUM's system on ATOM — the stepper's own road for 'atom' (a click, so a
-     project restoring the window's power never moves the operator; switchHamiltonian never presses the power, so there is no loop) */
-  wAtoms.root.querySelector('.dev-power').addEventListener('click', () => { if (!wAtoms.root.classList.contains('off') && getHamiltonian().id !== 'atom') { switchHamiltonian('atom'); ui.hamSeg.set('atom'); } });
-  standDown(wAtoms, toHydrogen(['atom'], 'atoms'));   // 017 X1 (call 1, the uniform law): its × or POWER OFF hands SPECTRUM back to HYDROGEN
 
   /* ELECTROSTATICS · LEGACY (Φ, E, B and j of the register's charge, the #fieldlines overlay) was DELETED in 0.5.0 D9b */
 
@@ -205,7 +206,10 @@ export function createReadouts(app) {
   rack.appendChild(wRad.root); wRad.root.classList.add('closed');
   const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => app.hooks.ab }); app.w.radiationView = radiationView;
   // EMISSION SPECTRA — the inverse map: the strip of lines the system can make, a press populates the pair that makes one (iteration 016 E1); CLOSED
-  const wEm = device({ id: 'emission', eyebrow: 'EMISSION SPECTRA', status: '' });
+  /* 017 X1: the A ↔ B TRANSITION a press started (its preset's id is `emission:…`) stops with the window (× or POWER OFF); the prepared pair stays */
+  const emDown = () => { if (reg.transition && /^emission:/.test(reg.preset || '') && app.hooks.ab) app.hooks.ab.set(false); };
+  const wEm = device({ id: 'emission', eyebrow: 'EMISSION SPECTRA', status: '', onPower: (live) => { if (!live) emDown(); } });
+  wEm.root.addEventListener('devclose', emDown);
   rack.appendChild(wEm.root); wEm.root.classList.add('closed');
   const emissionView = createEmission(wEm.body, { reg, clock, palette: () => app.state.palette, repaint() { schedule(TIER.PRESENT); }, status: (t, c) => wEm.setStatus(t, c),
     /* a press: ONE history row named for the line (held across the load, as verbs.js holds a link's), a HAND's preset (THE FADE) — the two labels
@@ -225,8 +229,6 @@ export function createReadouts(app) {
       } finally { if (H && !was) H.release(); }
     } });
   app.w.emissionView = emissionView;
-  /* 017 X1: the A ↔ B TRANSITION a press started (its preset's id is `emission:…`) stops with the window; the prepared pair stays */
-  standDown(wEm, () => { if (reg.transition && /^emission:/.test(reg.preset || '') && app.hooks.ab) app.hooks.ab.set(false); });
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
   /* the ⧉ digests (021 G3) */
   const atomsDigest = () => atomsView.digest();
