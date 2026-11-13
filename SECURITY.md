@@ -1,17 +1,17 @@
 # Security
 
 λWAVES is a static site: no server code, no accounts, no analytics. Every response carries a Content-Security-Policy that lets
-scripts, workers, fonts, the manifest and every fetch come from this origin alone (a note's own `https:` pictures are the one
-outside source it allows). After the page loads it makes these requests, all to its own origin unless said:
+scripts, workers, fonts, the manifest and every fetch come from this origin alone (its picture rule still names `https:`, the
+one outside source it would allow, and nothing the page draws uses it). After the page loads it makes these requests, all to its own origin unless said:
 
 - **The build check.** When the page is shown and 30 minutes have passed since the last check, the service worker asks for
   `sw.js` again and compares it byte for byte; a new build is offered, never forced.
 - **What you ask for.** The library's orbital records, a molecule volume (≈ 5 GB whole) and the basis records its rungs use,
   the Picker's pictures, the demo files and their covers, and NIST's measured lines — each fetched when you open what needs
   it, and kept in Cache Storage so the next time works offline.
-- **An imported notebook's images.** A note's `![](https://…)` is fetched from wherever it points, on every open of the
-  project that carries it. That host learns your address and the time. The fix belongs to the interface kit and is filed
-  there (`docs/FOR-MIR.md`); until it lands, treat a notebook from someone else as a page that can see you open it.
+- **An imported notebook's images.** A note's picture is shown only when this site serves it or when its bytes are written
+  into the note itself; a `![](https://…)` that points anywhere else is not fetched, and its caption stands in its place. Opening
+  a notebook from someone else asks no other host for anything.
 
 The microphone is opened only when you add an AUDIO device; its signal never leaves the page, and it is released when the
 last AUDIO device is removed. Web MIDI is asked for when you press CONNECT MIDI or LEARN; once a mapping is saved, the boot

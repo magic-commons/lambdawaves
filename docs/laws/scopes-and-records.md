@@ -22,7 +22,7 @@ THE WIDGETS ARE THE PROJECT'S (037 W1, Josh's 036 answer 2: the stage resets wit
 
 ONE STORE (021 R4): every stored key is a row of `lab/settings-store.js` RECORDS `{ key, scope, version, forget, owner }`; STATE-SCOPES' records table is generated (`node tools/state-scopes.mjs`, `--check` in the node gate), never hand-written; FORGET wipes the `forget` rows after `onForget` cancels, and `presets`, `palettes`, `curvePresets`, `nodePresets` are `forget: false` (the reader's work, R6); `saveSettings` writes `{ ...S0, ...owned }` minus RETIRED — never a carry list; the notebook lives only in the project part.
 
-THE ROLLBACK ROAD (021 R1): `openLink`, quick LOAD and the resume all go through `openPayload(…, rollback = true)` (FOLDERS' road); a resume that fails never arms autosave and keeps its record (kit 1.5.6-alpha.1).
+THE ROLLBACK ROAD (021 R1): `openLink`, quick LOAD and the resume all go through `openPayload(…, rollback = true)` (FOLDERS' road); a resume that fails never arms autosave and keeps its record (kit 1.5.6-alpha.1); a record the kit cannot read is that same failed resume (kit 1.6.0-alpha.7, 044 K1).
 
 ## The standing paragraphs
 

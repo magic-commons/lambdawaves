@@ -12,7 +12,8 @@
  *   · NOTHING IS WRITTEN BEFORE THE APP CHOSE.  Autosave is armed by `resume()` or `discard()` (the opener's RESUME or
  *     NEW), or by `arm()` for an app with no opener — so the boot's own writes can never overwrite the work a cold start
  *     is about to offer back.  A resume whose saved parts failed does NOT arm (1.5.6): the record is copied to
- *     `<key>.failed` and the app decides (a later resume that takes, NEW, or `arm()`).
+ *     `<key>.failed` and the app decides (a later resume that takes, NEW, or `arm()`).  A record the kit cannot READ is the
+ *     same failed resume (1.6.0-alpha.7): `{ ok: false, failed: ['record'] }`, copied to `<key>.failed`, unarmed.
  *   · `hold()` → true keeps the session from writing (BASINS: while a film renders the view is the film's, not the work).
  *   · NOTHING IS THROWN.  A storage that throws (a private window) is a session that keeps nothing; a part that throws is
  *     isolated by core/project.js.
@@ -114,9 +115,22 @@ export function createSession({ key, storage, parts, also = [], delay = 300, hol
     },
     /** resume(ctx) — put the saved work back (every part restored, ctx = { session: true, …ctx }), hand the seed over,
      *  and arm autosave — unless saved parts failed to restore (1.5.6: then `<key>.failed` keeps the record and autosave
-     *  stays unarmed).  → { ok, failed, seeded } (ok false: no saved parts to restore, or the restore threw) */
+     *  stays unarmed), or the record itself could not be read (1.6.0-alpha.7: the same, failed = ['record']).
+     *  → { ok, failed, seeded } (ok false: no saved parts to restore, the restore threw, or the record is unreadable) */
     resume(ctx = {}) {
       const rec = readSession(S, key, lift);
+      /* 1.6.0-alpha.7 · AN UNREADABLE RECORD IS A FAILED RESUME: text under `key` that the kit cannot read (it does not parse, a `v`
+         from a newer kit, an older form `lift` does not know) is still the user's last work, not "nothing saved".  Arming here would
+         let the next booked save write the fresh state over it.  It is kept as `<key>.failed`, autosave stays off, and the app is told
+         which part failed: 'record'. */
+      if (!rec) {
+        let text = null; try { text = S && S.getItem(key); } catch (_) {}
+        if (text) {
+          try { S.setItem(key + '.failed', text); } catch (_) {}
+          armed = false; last = null;
+          return { ok: false, failed: ['record'], seeded: false };
+        }
+      }
       let ok = false, failed = [];
       if (rec && rec.parts) {
         try { const r = P.restore(rec.parts, { session: true, ...ctx }); failed = r && Array.isArray(r.failed) ? r.failed : []; ok = true; } catch (_) { ok = false; }

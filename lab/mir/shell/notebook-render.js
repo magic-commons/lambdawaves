@@ -8,6 +8,17 @@ const NB_TAG = new Set(['P', 'BR', 'HR', 'STRONG', 'EM', 'B', 'I', 'U', 'DEL', '
 const NB_ATTR = { A: ['href', 'title'], IMG: ['src', 'alt', 'title'], INPUT: ['type', 'checked', 'disabled'],
   TH: ['align', 'colspan', 'rowspan'], TD: ['align', 'colspan', 'rowspan'], OL: ['start'], CODE: ['class'], PRE: ['class'], SPAN: ['class'] };
 const nbSafeURL = (u) => !/^(?:javascript|data|vbscript|file|blob):/i.test(String(u).replace(/[\u0000-\u0020]/g, '').toLowerCase());
+/** notebookImage(src, base, origin) → may a note's picture load this?  1.6.0-alpha.5 · A NOTE'S PICTURE IS THIS ORIGIN'S OR ITS OWN BYTES:
+ *  a note is untrusted (an imported project carries one), and an IMG is fetched with no press — so the host it names would learn the
+ *  reader's address and the hour of every open.  Only a picture this origin serves (http/https, the same origin as `origin` once resolved
+ *  against `base`) or one written into the note itself (`data:image/…`) loads; `blob:`, `file:` and any other host do not. */
+export function notebookImage(src, base, origin) {
+  if (!src) return false;
+  try {
+    const u = new URL(String(src), base);
+    return u.protocol === 'data:' ? /^image\//i.test(u.pathname) : /^https?:$/.test(u.protocol) && u.origin === origin;
+  } catch (_) { return false; }
+}
 function cleanNotebook(html, restoreMathText) {
   const t = document.createElement('template');
   t.innerHTML = html;                                       // INERT: no load, no execution, no navigation
@@ -19,7 +30,12 @@ function cleanNotebook(html, restoreMathText) {
         const n = a.name.toLowerCase();
         a.value = restoreMathText(a.value);
         if (allow.indexOf(n) < 0) { el.removeAttribute(a.name); continue; }
-        if ((n === 'href' || n === 'src') && !nbSafeURL(a.value)) el.removeAttribute(a.name);
+        if (n === 'href' && !nbSafeURL(a.value)) el.removeAttribute(a.name);
+      }
+      /* a picture that may not load leaves the words its author gave it; one that may asks without a referrer, and only when seen */
+      if (el.tagName === 'IMG') {
+        if (!notebookImage(el.getAttribute('src'), document.baseURI, globalThis.location && location.origin)) { el.replaceWith(document.createTextNode(el.getAttribute('alt') || '')); continue; }
+        el.setAttribute('referrerpolicy', 'no-referrer'); el.setAttribute('loading', 'lazy');
       }
       /* a link in a note goes OUT, and it goes out without a handle on this window */
       if (el.tagName === 'A' && el.getAttribute('href')) { el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener noreferrer'); }

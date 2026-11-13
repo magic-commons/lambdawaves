@@ -371,7 +371,7 @@ export async function createApp(o = {}) {
   if (o.session) {
     const so = opt(o.session);
     session = createSession({ key: key + '.session', ...so });
-    if (so.auto !== false) setTimeout(() => { try { if (session.hasResume()) session.resume(); else session.arm(); } catch (err) { console.warn('session', err); } }, 0);
+    if (so.auto !== false) setTimeout(() => { try { if (!session.hasResume()) session.arm(); else { const r = session.resume(); if (r.failed.length) console.warn('session: the saved work could not be put back (' + r.failed.join(', ') + '); it is kept as ' + key + '.session.failed and autosave is off'); } } catch (err) { console.warn('session', err); } }, 0);
   }
 
   /** safeRect() — where the picture may draw: the stage minus the racks showing a window and the transport bar, in the

@@ -116,11 +116,16 @@ export function recentRows(files, n = 5, open = () => {}) {
     .map((e) => ['↺  ' + e.name, () => open(e.id, e), null, (e.folder ? e.folder : 'ROOT') + ' / ' + e.name, { raw: true }]);
 }
 
-/** one entry passes inspection */
+/** thumbOf(t) → the picture as the kit keeps it: a `data:image/…` URL (what folders.js toThumb writes) or ''.
+ *  1.6.0-alpha.6 · A STORED PICTURE IS A PICTURE OR NOTHING: the gallery paints a thumb as `url(…)`, so a stored web address would be
+ *  fetched from whoever wrote it into the library (an imported or tampered store) on every look at the gallery. */
+export const thumbOf = (t) => (typeof t === 'string' && /^data:image\//.test(t) ? t : '');
+
+/** one entry passes inspection (its picture is one of the two shapes the kit writes: 1.6.0-alpha.6) */
 export function entryOk(e) {
   return !!(e && typeof e === 'object' && typeof e.id === 'string' && e.id &&
     typeof e.name === 'string' && typeof e.folder === 'string' &&
-    Number.isFinite(e.at) && typeof e.thumb === 'string' &&
+    Number.isFinite(e.at) && e.thumb === thumbOf(e.thumb) &&
     e.payload && typeof e.payload === 'object' &&
     (e.facts == null || typeof e.facts === 'object'));
 }
@@ -156,6 +161,8 @@ export function createFiles(opts) {
     if (env && typeof env === 'object' && env.formatVersion === FILES_V &&
         Array.isArray(env.entries) &&
         (env.folders == null || (typeof env.folders === 'object' && !Array.isArray(env.folders)))) {
+      /* a record whose only fault is its picture keeps its work and loses the picture (FOLDERS takes a new one on the next open) */
+      for (const e of env.entries) if (e && typeof e === 'object' && typeof e.thumb === 'string') e.thumb = thumbOf(e.thumb);
       const sound = env.entries.filter(entryOk);
       if (sound.length !== env.entries.length) {
         /* REPAIRED (MIR 1.5): the bad records are skipped, the raw text waits to be set aside by the first write */
@@ -303,7 +310,7 @@ export function createFiles(opts) {
           id: 'f' + (++L.seq),
           name: uniqueName((typeof i.name === 'string' && i.name.trim()) ? i.name : api.proposedName(folder), folder, L.entries),
           folder, at: Number.isFinite(i.at) && i.at > 0 ? Math.floor(i.at) : Date.now(),   // an import (a factory project) keeps its own date
-          thumb: typeof i.thumb === 'string' ? i.thumb : '',
+          thumb: thumbOf(i.thumb),
           facts: i.facts && typeof i.facts === 'object' ? clone(i.facts) : {},
           payload: clone(i.payload),
           bytes: 0
@@ -336,7 +343,7 @@ export function createFiles(opts) {
         const e = L.entries.find((x) => x.id === String(id));
         if (!e) return { ok: false, why: 'no such entry' };
         e.payload = clone(i.payload);
-        if (typeof i.thumb === 'string') e.thumb = i.thumb;
+        if (typeof i.thumb === 'string') e.thumb = thumbOf(i.thumb);
         if (i.facts && typeof i.facts === 'object') e.facts = clone(i.facts);
         e.at = Number.isFinite(i.at) && i.at > 0 ? Math.floor(i.at) : Date.now();
         reprice(e);
@@ -357,7 +364,7 @@ export function createFiles(opts) {
         for (const u of list) {
           const e = L.entries.find((x) => x.id === String(u.id)); if (!e) continue;
           e.payload = clone(u.payload);
-          if (typeof u.thumb === 'string') e.thumb = u.thumb;
+          if (typeof u.thumb === 'string') e.thumb = thumbOf(u.thumb);
           if (u.facts && typeof u.facts === 'object') e.facts = clone(u.facts);
           if (Number.isFinite(u.at) && u.at > 0) e.at = Math.floor(u.at);
           reprice(e); updated++;
@@ -466,7 +473,7 @@ export function createFiles(opts) {
       let entry = null; const evicted = [];
       const r = commit((L) => {
         const folder = normalizeFolder(i.folder);
-        entry = reprice({ id: 'f' + (++L.seq), name: 'x', folder, at: Date.now(), thumb: typeof i.thumb === 'string' ? i.thumb : '',
+        entry = reprice({ id: 'f' + (++L.seq), name: 'x', folder, at: Date.now(), thumb: thumbOf(i.thumb),
                           facts: i.facts && typeof i.facts === 'object' ? clone(i.facts) : {}, payload: clone(i.payload), bytes: 0 });
         if (entry.bytes + NAME_MAX + 400 > cap) return { ok: false, tooBig: true, entryChars: entry.bytes, capChars: cap,
           why: 'this project alone (' + Math.round(entry.bytes / 1e3) + ' k) is larger than the whole library (' + Math.round(cap / 1e3) + ' k) — nothing was deleted' };
