@@ -35,6 +35,10 @@ const ICONS = {
   mirOptions: solid('M19.64 9.64 22.35 10.22 22.35 13.78 19.64 14.36 19.08 15.73 20.57 18.06 18.06 20.57 15.73 19.08 14.36 19.64 13.78 22.35 10.22 22.35 ' +
     '9.64 19.64 8.27 19.08 5.94 20.57 3.43 18.06 4.92 15.73 4.36 14.36 1.65 13.78 1.65 10.22 4.36 9.64 4.92 8.27 3.43 5.94 5.94 3.43 8.27 4.92 9.64 4.36 ' +
     '10.22 1.65 13.78 1.65 14.36 4.36 15.73 4.92 18.06 3.43 20.57 5.94 19.08 8.27Z M12 5.8 18.2 12 12 18.2 5.8 12Z M12 8.6 15.4 12 12 15.4 8.6 12Z'),
+  /* 044 R2 · THE MIR MARK IN ONE INK (Josh 11-13: "Finder could be the MIR Logo but in all black or white depending on light or dark"): the logo's
+     diamond — nine square tiles, three by three, turned 45° (the kit's wordmark.js, JL-LOGOS mir-dark.svg #rainbow-diamond) — in currentColor, so it
+     wears the seat's ink (the theme's, the lit state's) as every other glyph; tile 4, pitch 5.07, the diagonal the box's live 20 */
+  mirMark: '<g transform="rotate(45 12 12)">' + [0, 1, 2].flatMap((r) => [0, 1, 2].map((q) => fill(4.93 + 5.07 * q, 4.93 + 5.07 * r, 4, 4, 0))).join('') + '</g>',
   fileName: p('M6.5 3.5H14L19.5 9v10A1.5 1.5 0 0 1 18 20.5H6.5A1.5 1.5 0 0 1 5 19V5a1.5 1.5 0 0 1 1.5-1.5Z') + p('M14 3.5V9h5.5') + p('M8.5 13.5h7') + p('M8.5 17h4.5'),
   folderName: p('M12 19.5H4.5A1.5 1.5 0 0 1 3 18V6a1.5 1.5 0 0 1 1.5-1.5h4.5l2 2.5h8.5A1.5 1.5 0 0 1 21 8.5v2.5') + p('M17.5 13.5l3 3L16 21h-3v-3l4.5-4.5Z'),
   folders: p('M7 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4.2l1.8 2h5A1.5 1.5 0 0 1 21 7v8a1.5 1.5 0 0 1-1.5 1.5H17') +
