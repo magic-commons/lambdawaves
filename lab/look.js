@@ -99,7 +99,10 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
      one tone the COLOUR_KEYS; LIGHT · DARK · SYSTEM, the hints and HELP stay the reader's own (shell/themes.js). */
   const first = homeOf(schema), pick = (keys) => Object.fromEntries(keys.map((k) => [k, first[k]]));
   const LAMBDAWAVES = { id: 'lambdawaves', name: 'λWAVES', values: pick(THEME_KEYS), tones: [{ id: 'lambdawaves', name: 'λWAVES', values: pick(COLOUR_KEYS) }] };
-  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: [LAMBDAWAVES, ...LW_THEMES], context: ctx, version: LOOK_VERSION, migrate: frostText });
+  /* 044 M3 · A SECOND DEFAULT SKIN (Josh 11-12: "another default skin … simply called 'Lambdawaves GLASS' where glass faces is on and stroke is at
+     80%"): the λWAVES skin with FACES · GLASS and STROKE 80 %, second in the stepper; a first run and RESET LOOK are still λWAVES (the rows' homes) */
+  const GLASS = { id: 'lambdawaves-glass', name: 'Lambdawaves GLASS', values: { ...LAMBDAWAVES.values, faces: 'glass', stroke: 0.8 }, tones: LAMBDAWAVES.tones };
+  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: [LAMBDAWAVES, GLASS, ...LW_THEMES], context: ctx, version: LOOK_VERSION, migrate: frostText });
   const blob = settings.read(), held = BLOB_LOOK.filter((k) => k in blob);
   let help = null; try { help = localStorage.getItem(HELP_KEY); localStorage.removeItem(HELP_KEY); } catch (_) {}
   if (held.length || help) prefs.set(liftLook(blob, help));

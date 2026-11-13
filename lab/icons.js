@@ -50,8 +50,9 @@ const ICONS = {
   videoOn: box(2.5, 6.5, 13, 11, 2.5) + p('M15.5 10.5 21.5 7v10l-6-3.5'),
   videoOff: box(2.5, 6.5, 13, 11, 2.5) + p('M15.5 10.5 21.5 7v10l-6-3.5') + p('M3.5 3.5l17 17'),
   labels: p('M3 10.5V5.5A1.5 1.5 0 0 1 4.5 4h5L17 11.5a1.5 1.5 0 0 1 0 2.1l-4.9 4.9a1.5 1.5 0 0 1-2.1 0L3 10.5Z') + dot(7, 8, 1.2) + p('M16 6h5') + p('M18.5 10H21'),
-  library: p('M2.5 20h19') + p('M4 20V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v15') + p('M9 20V4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v16') +
-    p('M15.6 20l-1.9-13.2a1 1 0 0 1 .8-1.1l2.9-.5a1 1 0 0 1 1.1.8L20.5 20'),     // the spine ticks gone: they were blobs at 14–16 px
+  /* 044 M1 · THE LOOKUP WEARS A BOOK (Josh 11-12: "Can the molecule lookup icon in the CSB be an open book icon?"): the bar's LIBRARY seat — an
+     open book, two pages bowed off one spine (was three books on a shelf) */
+  library: p('M12 6.6C9.9 5 6.9 4.4 3 4.8v13.7c3.9-.4 6.9.2 9 1.8 2.1-1.6 5.1-2.2 9-1.8V4.8c-3.9-.4-6.9.2-9 1.8Z') + p('M12 6.6v13.7'),
   mass: p('M12 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z') + p('M7 8.5h10a1.5 1.5 0 0 1 1.45 1.1l2.3 9a1.5 1.5 0 0 1-1.45 1.9H4.7a1.5 1.5 0 0 1-1.45-1.9l2.3-9A1.5 1.5 0 0 1 7 8.5z'),
   modulation: p('M3 12C6 4 9 4 12 12S18 20 21 12'),                             // the sine: the modulation window and its door
   molecule: p('M12 3l7.79 4.5v9L12 21l-7.79-4.5v-9Z') + p('M12.83 7.18l2.93 1.69M15.76 15.13l-2.93 1.69M7.41 13.7v-3.4'),   // 026 A0 · THE HEX RING: a benzene ring, three inner double bonds (Kekulé) — unlike NODES' three nodes at 14 px

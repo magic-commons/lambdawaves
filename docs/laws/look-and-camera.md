@@ -2,6 +2,12 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 044
+
+A SECOND DEFAULT SKIN (044 M3, Josh 11-12: "another default skin … simply called 'Lambdawaves GLASS' where glass faces is on and stroke is at 80%"): `lab/look.js` ships a second preset beside the λWAVES skin, id `lambdawaves-glass`, name `Lambdawaves GLASS` — the λWAVES values with FACES · GLASS and STROKE 80 %, second in MIR OPTIONS' SKIN stepper; a first run and RESET LOOK are still λWAVES, no key joins the settings blob, an older look opens as it did (A SAVED LOOK KEEPS ITS NAME).
+
+THE STATE BUTTONS FOLLOW THE STROKE (044 M4, Josh 11-12: "When in glass faces mode, can the 140nlm state buttons not have an extreme outline and be tied to the MIR options param?"): the app's glass rule read `--ctl-hairline` on `.pk-c` / `.sp-b`, a name the kit declares only on its own controls, so the cells' border fell to the full ink at every STROKE; the cells now declare the kit's hairline × STROKE (0 none, 100 % the pane's hairline) and under GLASS a chosen cell's rim is × STROKE too (its fill and ink still say chosen) (`lab/skin.css`).
+
 ## The laws of 041
 
 DOTS ARE DOTS (041 S1, Josh: "Can they just be floating circles?"): the FRAME's DOTS are round screen-facing discs, one 16-byte record a node (`lab/field.js` `vsDot` / `fsDot`), radius 0.014 half-widths by the perspective, never under 0.8 px (a smaller one fades by its area); the buffer 5.7 → 0.96 MiB.

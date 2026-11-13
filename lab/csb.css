@@ -18,8 +18,12 @@
    of each gap — at the bar's thirds (13 + 212 + 6 of 694 px, and its mirror); the racked bar is three rows already and has none */
 #transport.mini[data-layout="csb"] { column-gap: 12px; }
 #transport.mini[data-layout="csb"] > .csb-mid { position: relative; }
-#transport.mini[data-layout="csb"] > .csb-mid::before, #transport.mini[data-layout="csb"] > .csb-mid::after { content: ''; position: absolute; top: 4px; bottom: 4px; width: 2px; border-radius: 1px; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); pointer-events: none; }
-#transport.mini[data-layout="csb"] > .csb-mid::before { left: -7px; } #transport.mini[data-layout="csb"] > .csb-mid::after { right: -7px; }
+/* 044 M2 · THE DIVIDER BELONGS AMONG THE ICONS (Josh 11-12: "can it somehow look matching amongst the icons? The dark mode at least doesn't look
+   great"): the groove was the well's fill and relief — 2 × 66 px, black on the dark bar (unseen) and a pale trench on the light one.  It is a stroke
+   of the seats' own drawing now: their ink (--ink-key) at .3, their line (1.9 of 24 at 20 px = 1.6 px), round caps, from the upper glyphs' top to
+   the lower glyphs' foot (60 px: the seats' 20-px boxes, not the 36-px seats), in the middle of each 12-px gap — one rule for both themes */
+#transport.mini[data-layout="csb"] > .csb-mid::before, #transport.mini[data-layout="csb"] > .csb-mid::after { content: ''; position: absolute; top: 7px; bottom: 7px; width: 1.6px; border-radius: 1px; background: var(--ink-key); opacity: .3; pointer-events: none; }
+#transport.mini[data-layout="csb"] > .csb-mid::before { left: -6.8px; } #transport.mini[data-layout="csb"] > .csb-mid::after { right: -6.8px; }
 /* iteration 016 W6 · THE EXPANDER'S DIRECTION (call 9): at the stage's foot the panel is the grid's first row and rises above the bar; at the top
    (.at-top) it hangs below.  A narrow screen seats the bar at the top whatever its class (skin.css), so wide only. */
 @media (min-width: 861px) {
