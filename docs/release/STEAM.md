@@ -123,8 +123,10 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
 
 ## 7. What only you can do
 
-- [ ] Decide the publishing identity before the app record exists ([`LEGAL-PROVENANCE.md`](LEGAL-PROVENANCE.md) §5 item 4). The `.exe`'s
-      company name is NOTICE's copyright holder (`Joshua Hosain`); a Magic Commons entity changes that line of NOTICE and nothing else.
+- [ ] The publishing identity ([`LEGAL-PROVENANCE.md`](LEGAL-PROVENANCE.md) §5 item 4). Answered 2026-11-12 for the program: the
+      `.exe`'s company name is `MAGIC COMMONS` (044 S2, `package.mjs` `MAKER`). Its copyright line is still NOTICE's second line
+      (`Copyright 2026 Joshua Hosain`), because that line says who holds the copyright, not who publishes. Still yours: whether the Steam
+      partner account, the store page's developer and publisher, and the tax and bank details are in that name too.
 - [ ] The partner site: the app, two depots, the launch options above, the AI disclosure, the store page, the price.
 - [ ] `node package.mjs --platform win32` (one download), then the Windows GPU run on your PC: start from the folder, then from Steam;
       the notice, the loader once, a project saved / quit / relaunched, AUDIO with the microphone, a MIDI controller, a film rendered with

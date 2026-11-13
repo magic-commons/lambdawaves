@@ -15,13 +15,14 @@ execFileSync(process.execPath, ['tools/build-deploy.mjs', '--quiet', ...(cut < 0
 // 028 R-28: the binary's version is BUILD_LINE's leading token (the one place the number lives); package.json's version is 0.0.0, not a seat.
 const appVersion = (fs.readFileSync(path.join(REPO, 'lab/build-line.js'), 'utf8').match(/BUILD_LINE = '([^ ']+)/) || [])[1];
 if (!appVersion) throw new Error('package.mjs: no BUILD_LINE in lab/build-line.js');
-const copyright = fs.readFileSync(path.join(REPO, 'NOTICE'), 'utf8').split('\n')[1], holder = copyright.replace(/^Copyright \d+ /, '');   // NOTICE's second line
+const copyright = fs.readFileSync(path.join(REPO, 'NOTICE'), 'utf8').split('\n')[1];   // NOTICE's second line: the copyright holder, the exe's LegalCopyright
+const MAKER = 'MAGIC COMMONS';   // 044 S2 (Josh 11-12): the company the Windows program names; the copyright line stays NOTICE's
 const ver = (m) => JSON.parse(fs.readFileSync(path.join(HERE, 'node_modules', m, 'package.json'), 'utf8')).version;
 const at = own.indexOf('--platform'), platform = (at < 0 ? 'linux,win32' : own[at + 1]).split(',').sort();
 // lambdawaves.ico is lab/img/icon-512.png at 16–256 px (PIL: Image.save(sizes=…)); the exe and the taskbar wear it, Linux takes the PNG at run time
 const paths = await packager({ dir: HERE, out: OUT, platform, arch: 'x64', asar: true, overwrite: true, extraResource: [DIST], appVersion,
   name: 'lambdawaves', executableName: 'lambdawaves', icon: path.join(HERE, 'lambdawaves.ico'), appCopyright: copyright,
-  win32metadata: { CompanyName: holder, FileDescription: 'λWAVES', ProductName: 'λWAVES', InternalName: 'lambdawaves', OriginalFilename: 'lambdawaves.exe' },
+  win32metadata: { CompanyName: MAKER, FileDescription: 'λWAVES', ProductName: 'λWAVES', InternalName: 'lambdawaves', OriginalFilename: 'lambdawaves.exe' },
   ignore: [/^\/(out|node_modules)(\/|$)/, /^\/(package|smoke-run|dist-hash)\.mjs$/, /^\/package-lock\.json$/, /\.ico$/] });
 // 044 S1 (Josh 11-12: "steam version does not show logo"): the MAIN MENU's credits strip is not built on the desktop (lab/picker.js, lab/loader.js
 // read window.lwavesDesktop), and its files — three companies' marks, Google Sans Flex, and OpenAI Sans, which has no licence in the tree
