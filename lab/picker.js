@@ -477,9 +477,12 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     hue.addEventListener('pointerdown', (e) => { if (e.button) return; y0 = e.clientY; x0 = e.clientX; moved = 0; h0 = prefs.hue; hue.setPointerCapture(e.pointerId); hue.classList.add('drag'); e.preventDefault(); });   // M6: the colours while the hand turns it
     hue.addEventListener('pointermove', (e) => { if (y0 == null) return; moved = Math.max(moved, Math.abs(e.clientY - y0), Math.abs(e.clientX - x0)); if (moved >= 4) setHue(h0 + (y0 - e.clientY) * (e.shiftKey ? 0.125 : 1)); });
     const end = () => { y0 = null; hue.classList.remove('drag'); }; hue.addEventListener('pointerup', end); hue.addEventListener('pointercancel', end);
+    /* 044 R5 · THE HUE RING'S FIRST CLICK ARMS (Josh 11-13): a plain click on a ring that does not hold the focus only takes it (so the wheel turns
+       it); a click on an armed ring flips colour ↔ mono.  Read in the capture phase, before wheelTurn's own press focuses the ring. */
+    let armed = false; hue.addEventListener('pointerdown', () => { armed = document.activeElement === hue; }, true);
     wheelTurn(hue);   // 044 K2 THE WHEEL WAITS FOR A CLICK: pressed and focused, a notch is the ring's own arrow step (10°, Shift 2°); otherwise the wheel scrolls the deck
     /* a press that did not turn it: colour ↔ mono, held 300 ms so a double-click's second press can take it back (the double-click puts the hue at 0); a key's press at once */
-    hue.addEventListener('click', (e) => { if (!e.detail) { setMono(!prefs.mono); return; } if (moved >= 4) return; clearTimeout(monoT); monoT = 0; if (e.detail > 1) return; monoT = setTimeout(() => { monoT = 0; setMono(!prefs.mono); }, 300); });
+    hue.addEventListener('click', (e) => { if (!e.detail) { setMono(!prefs.mono); return; } if (moved >= 4 || !armed) return; clearTimeout(monoT); monoT = 0; if (e.detail > 1) return; monoT = setTimeout(() => { monoT = 0; setMono(!prefs.mono); }, 300); });
     hue.addEventListener('dblclick', () => setHue(0));
     hue.addEventListener('keydown', (e) => { const d = { ArrowUp: 10, ArrowRight: 10, ArrowDown: -10, ArrowLeft: -10 }[e.key]; if (d) { e.preventDefault(); e.stopPropagation(); setHue(prefs.hue + (e.shiftKey ? d / 5 : d)); } else if (e.key === 'Home' || e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); setHue(0); } }); }
 
