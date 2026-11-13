@@ -15,8 +15,23 @@ execFileSync(process.execPath, ['tools/build-deploy.mjs', '--quiet', '--desktop'
 // 028 R-28: the binary's version is BUILD_LINE's leading token (the one place the number lives); package.json's version is 0.0.0, not a seat.
 const appVersion = (fs.readFileSync(path.join(REPO, 'lab/build-line.js'), 'utf8').match(/BUILD_LINE = '([^ ']+)/) || [])[1];
 if (!appVersion) throw new Error('package.mjs: no BUILD_LINE in lab/build-line.js');
-const copyright = fs.readFileSync(path.join(REPO, 'NOTICE'), 'utf8').split('\n')[1];   // NOTICE's second line: the copyright holder, the exe's LegalCopyright
-const MAKER = 'MAGIC COMMONS';   // 044 S2 (Josh 11-12): the company the Windows program names; the copyright line stays NOTICE's
+const MAKER = 'MAGIC COMMONS';   // 044 S2 · S6 (Josh 11-12): the company the Windows program names, and its copyright line ("Change that too")
+const copyright = 'Copyright ' + fs.readFileSync(path.join(REPO, 'NOTICE'), 'utf8').split('\n')[1].match(/\d{4}/)[0] + ' ' + MAKER;   // the year is NOTICE's; NOTICE itself, copied into the package, keeps its own line
+// 044 S8 · THE VOLUMES ARE FREE ADD-ONS: a volume shipped by `-- --shelf F --ship vol-1,vol-2` carries its own shelf entry (volume.json) in
+// its folder and the one volumes.json goes: main.cjs writes the shelf from the folders present. `--depots` moves each volume out of the
+// app into out/lambdawaves-<id>/resources/dist/volumes/<id>/ — one depot per add-on, the same files for Windows and Linux.
+const VOLS = path.join(DIST, 'volumes'), depots = [];
+if (fs.existsSync(path.join(VOLS, 'volumes.json'))) {
+  for (const v of JSON.parse(fs.readFileSync(path.join(VOLS, 'volumes.json'), 'utf8')).volumes) {
+    const d = path.join(VOLS, v.id); if (!fs.existsSync(path.join(d, 'index.json'))) continue;
+    fs.writeFileSync(path.join(d, 'volume.json'), JSON.stringify(v, null, 1) + '\n');
+    if (!own.includes('--depots')) continue;
+    const depot = path.join(OUT, 'lambdawaves-' + v.id), to = path.join(depot, 'resources/dist/volumes', v.id);
+    fs.rmSync(depot, { recursive: true, force: true }); fs.mkdirSync(path.dirname(to), { recursive: true }); fs.renameSync(d, to); depots.push(depot);
+  }
+  fs.rmSync(path.join(VOLS, 'volumes.json'));
+  if (!fs.readdirSync(VOLS).length) fs.rmdirSync(VOLS);
+}
 const ver = (m) => JSON.parse(fs.readFileSync(path.join(HERE, 'node_modules', m, 'package.json'), 'utf8')).version;
 const at = own.indexOf('--platform'), platform = (at < 0 ? 'linux,win32' : own[at + 1]).split(',').sort();
 // lambdawaves.ico is lab/img/icon-512.png at 16–256 px (PIL: Image.save(sizes=…)); the exe and the taskbar wear it, Linux takes the PNG at run time
@@ -27,7 +42,7 @@ const paths = await packager({ dir: HERE, out: OUT, platform, arch: 'x64', asar:
 // 044 S1 (Josh 11-12: "steam version does not show logo"): the MAIN MENU's credits strip is not built on the desktop (lab/picker.js, lab/loader.js
 // read window.lwavesDesktop), and its files — three companies' marks, Google Sans Flex, and OpenAI Sans, which has no licence in the tree
 // (LEGAL-PROVENANCE row 18) — are not in the package at all. The site's dist/ keeps them; the identity below hashes what the package holds.
-const AI_MARKS = ['img/ai', 'img/menu/ai'], inner = (p) => path.join(p, 'resources/dist');
+const AI_MARKS = ['img/ai', 'img/menu/ai', 'img/menu/tip-qr.svg'], inner = (p) => path.join(p, 'resources/dist');   // 044 S7: and the tip jar's QR (no ko-fi card on the desktop)
 for (const p of paths) for (const d of AI_MARKS) fs.rmSync(path.join(inner(p), d), { recursive: true, force: true });
 const git = (...a) => { try { return execFileSync('git', ['-C', REPO, ...a], { encoding: 'utf8' }).trim(); } catch { return null; } };
 const id = { appVersion, gitSha: git('rev-parse', 'HEAD'), gitTag: git('describe', '--tags', '--always'), ...distHash(inner(paths[0])), electron: ver('electron'), packager: ver('@electron/packager'), builtAt: new Date().toISOString() };
@@ -41,4 +56,4 @@ for (const p of paths) {
   fs.copyFileSync(path.join(REPO, 'LICENSE'), path.join(p, 'COPYING'));
   fs.copyFileSync(path.join(REPO, 'NOTICE'), path.join(p, 'NOTICE'));
 }
-console.log(paths.join('\n') + '\n' + JSON.stringify(id));
+console.log([...paths, ...depots].join('\n') + '\n' + JSON.stringify(id));

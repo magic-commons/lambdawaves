@@ -22,7 +22,7 @@
 - **The free plan.** The account carries no payment method and the Worker has no code: every request is a static-asset request, free and
   unlimited, so no traffic can produce a bill. The build's §V7 holds the plan's 20,000-file / 25 MiB budget: 15,674 files ship today.
 - **The library.** VOL. I (6,927 molecules) and the filling VOL. III travel with the site as files, so INSTALL and the single-molecule
-  fetch work; VOL. II is its 5.76 GB archive, handed out from the maintainer's Drive and opened in PICKER › LIBRARY (`docs/VOLUMES-HOSTING.md`).
+  fetch work (044: VOL. III is held off the shelf on every host until it is released; its files still ship); VOL. II is its 5.76 GB archive, handed out from the maintainer's Drive and opened in PICKER › LIBRARY (`docs/VOLUMES-HOSTING.md`).
 - **The desktop (042 S, 2026-11-11).** `tools/platform/electron/` builds the two folders Steam takes (`lambdawaves-linux-x64`,
   `lambdawaves-win32-x64`); the host serves the app at `https://lambdawaves.localhost` from the package (never the network), with the edge's
   CSP, and makes no request of its own. The Linux package passes its smoke (17/17); Windows, Steam's Linux runtime and the Deck are unrun.

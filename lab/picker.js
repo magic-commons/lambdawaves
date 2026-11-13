@@ -224,7 +224,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const faceTop = el('div', 'mm-corner mm-tr', face);
   const faceTheme = el('button', 'mm-navb mm-themeb', faceTop); faceTheme.type = 'button'; faceTheme.title = 'Light or dark — the theme'; faceTheme.setAttribute('aria-label', faceTheme.title);
   icon(faceTheme, 'sun').classList.add('gly-sun'); icon(faceTheme, 'moon').classList.add('gly-moon'); faceTheme.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
-  { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'ABOUT MIR'); hint(mir, 'ABOUT MIR — the toolkit this app is built on'); mir.addEventListener('click', () => openAbout('mir', mir));
+  if (!globalThis.lwavesDesktop) { const mir = el('button', 'mm-corner mm-br mm-mirb', face);   // 044 S5 (Josh 11-12: "you can remove it outright"): no wordmark on the desktop's face; nothing else moves
+     mir.type = 'button'; mir.setAttribute('aria-label', 'ABOUT MIR'); hint(mir, 'ABOUT MIR — the toolkit this app is built on'); mir.addEventListener('click', () => openAbout('mir', mir));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
   if (!globalThis.lwavesDesktop) { const credits = el('button', 'mm-corner mm-credits', face);   // 044 S1 (Josh 11-12): the desktop (Steam) build shows no AI marks and its package holds none of their files (tools/platform/electron/package.mjs)
     credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');   // 041 P6 (Josh 11-09: "Show no mouse-over hint for the AI thingy in the main menu"): no hint (039 X16's is gone); the names still slide out and the aria name stands
@@ -820,13 +821,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (alt) { alt.type = 'button'; alt.title = 'Have the .lwv? Open it instead of downloading';
         altPick.type = 'file'; altPick.accept = '.lwv'; altPick.hidden = true; altPick.addEventListener('change', () => { const f = altPick.files && altPick.files[0]; altPick.value = ''; if (f) run(f); });
         alt.addEventListener('click', (e) => { e.stopPropagation(); if (!ctl) altPick.click(); }); }
-      let ctl = null; const arm = armer(b, () => paint());
+      let ctl = null, held = false; const arm = armer(b, () => paint());   // held (044 S8): the desktop package serves this volume from its own folder — installed, and Steam's to remove
       const paint = async () => {
         const s = await V.installStatus(v.id).catch(() => ({ state: 'absent', n: 0, N: v.count || 0 }));
         const est = fromFile && s.state !== 'installed' ? await navigator.storage?.estimate?.().catch(() => null) : null;
         const tight = est && est.quota && est.quota - (est.usage || 0) < size ? ' · TOO BIG FOR THIS DEVICE' : '';
-        b.dataset.state = s.state; if (alt) alt.hidden = s.state === 'installed'; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle'); eye(ico, s.state === 'installed');
-        word.textContent = s.state === 'installed' ? 'REMOVE' + (size ? ' · ' + fmtBytes(size) : '') : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
+        held = !!s.served; b.dataset.state = s.state; if (alt) alt.hidden = s.state === 'installed'; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle'); eye(ico, s.state === 'installed'); ico.style.visibility = held ? 'hidden' : ''; b.style.cursor = held ? 'default' : '';   // 044 S8: no bin on a volume the card cannot remove — the full ring alone
+        word.textContent = held ? 'INSTALLED' + (size ? ' · ' + fmtBytes(size) : '') : s.state === 'installed' ? 'REMOVE' + (size ? ' · ' + fmtBytes(size) : '') : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
           : (fromFile ? 'OPEN FILE…' : 'INSTALL') + (size ? ' · ' + fmtBytes(size) : '')) + tight;
       };
       const run = async (f) => {
@@ -841,12 +842,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       b.addEventListener('click', async (e) => {
         e.stopPropagation();
         if (ctl) { ctl.abort(); return; }
+        if (held) return;
         if (b.dataset.state === 'installed') {   // two presses remove: no window.confirm
           if (!arm.take()) { arm.arm(); word.textContent = 'REMOVE ' + volName(v) + '? PRESS AGAIN'; return; }
           await V.remove(v.id); await paint(); return;
         }
         const go = () => { if (pick) pick.click(); else run(null); };
-        if (TIP_URL && (pick || !tipAsked)) { if (!pick) tipAsked = true; tipSheet(go, !pick); return; }   // 030 THE TIP JAR: a network install is asked once a session; a file volume every press (its file is the tip's thank-you)
+        if (TIP_URL && !globalThis.lwavesDesktop && (pick || !tipAsked)) { if (!pick) tipAsked = true; tipSheet(go, !pick); return; }   // 030 THE TIP JAR: a network install is asked once a session; a file volume every press (its file is the tip's thank-you)
         go();
       });
       paint(); return { paint, run };
@@ -908,11 +910,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'EXPANSIONS');
-        el('span', '', e, 'No volume is published yet.');
+        el('span', '', e, globalThis.lwavesDesktop ? 'No volume is installed. The volumes are free add-ons on Steam.' : 'No volume is published yet.');   // 044 S8
         return;
       }
       heroes.clear(); vols = s.volumes; s.volumes.forEach(card);
-      if (TIP_URL) tipCard();   // 030 THE TIP JAR: the last card on the shelf
+      if (TIP_URL && !globalThis.lwavesDesktop) tipCard();   // 030 THE TIP JAR: the last card on the shelf; 044 S7: never on the desktop (Steam) build
       enterTiles([...shelfEl.children]);
     }
     async function enter(v) {

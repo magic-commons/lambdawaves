@@ -96,12 +96,12 @@ async function pagePicture(v, molId, style) {
   if (style !== 'labels') {
     const look = style || 'density', s = man.sheets && man.sheets[look] && man.sheets[look][p];
     if (!s || (s.missing || []).includes(molId)) return null;
-    const url = inVolume(v, `t/${look}-${p}.webp?v=${s.v}`); if (!pageFiles.has(url)) pageFiles.set(url, keepData(url));
+    const url = inVolume(v, `t/${look}-${p}.webp?v=${s.v}`); if (!served(v) && !pageFiles.has(url)) pageFiles.set(url, keepData(url));
     return `${url}#c=${n},${man.cols},${s.rows}`;
   }
   if (!man.diagrams || !man.diagrams[p]) return null;
   const url = inVolume(v, `t/diagrams-${p}.json?v=${man.diagrams[p]}`);
-  if (!pageFiles.has(url)) pageFiles.set(url, fetch(url).then((r) => { if (!r.ok) return null; keepData(url, r.clone()); return r.json(); }).catch(() => null));
+  if (!pageFiles.has(url)) pageFiles.set(url, fetch(url).then((r) => { if (!r.ok) return null; if (!served(v)) keepData(url, r.clone()); return r.json(); }).catch(() => null));
   const mk = ((await pageFiles.get(url)) || {})[molId];
   return mk ? 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${man.tile} ${man.tile}">${mk}</svg>`) : null;
 }
@@ -113,6 +113,11 @@ async function pagePicture(v, molId, style) {
    'lw-vol-<id>' exists: what was installed stays and opens), and `all` still names it, so a project or a link that opens one of its
    molecules finds it as before.  Releasing it is deleting its id here. */
 export const HELD = ['vol-3'];
+/* 044 S8 · A VOLUME THE DESKTOP SERVES IS INSTALLED (Josh 11-12: the volumes are free add-ons on Steam): the desktop host answers the shelf
+   from the volume folders its package holds (tools/platform/electron/main.cjs), so there a shelf entry with an `index` is a volume on this
+   disk.  It is installed as it stands: nothing is copied into Cache Storage (no install, no kept sheet), every molecule is kept, and it
+   is Steam's to remove, not the card's. */
+const served = (v) => !!globalThis.lwavesDesktop && !!v.index;
 let shelfMemo = null;
 export async function shelf({ fresh = false } = {}) {
   if (shelfMemo && !fresh) return shelfMemo;
@@ -177,6 +182,7 @@ export async function installStatus(volId) {
   const v = await volume(volId), c = await store(volId);
   let idx = null; try { idx = await index(volId); } catch (_) { idx = null; }
   const N = idx ? idx.molecules.length : (v.count || 0), total = idx ? idx.molecules.reduce((s, m) => s + (m.bytes || 0), 0) : (v.bytes || 0);
+  if (served(v) && idx) return { state: 'installed', n: N, N, bytes: total, total, served: true };
   if (!c || !idx) return { state: 'absent', n: 0, N, bytes: 0, total };
   const shas = await keptShas(c);
   let n = 0, bytes = 0;
@@ -194,7 +200,8 @@ export function install(volId, { onProgress = null, signal = null } = {}) {
   if (running.has(volId)) return running.get(volId);
   const asked = persistOnce().catch(() => null);   // the iPad law (library.js): asked on the FIRST install press, inside the gesture, never awaited here
   const job = (async () => {
-    const v = await volume(volId), buf = await indexBytes(v), idx = await index(volId);
+    const v = await volume(volId); if (served(v)) return { ok: true };
+    const buf = await indexBytes(v), idx = await index(volId);
     const c = await store(volId, true);
     if (!c) return { ok: false, why: 'this browser has no Cache Storage' };
     await c.put(indexUrl(v), json(buf.slice(0), v.indexSha256));
@@ -264,6 +271,7 @@ export function installFile(volId, file, { onProgress = null, signal = null } = 
     catch (_) { return { ok: false, why: (file.name || 'this file') + ' is not a λWAVES volume file' }; }
     const e = lwv.volume, vols = (await shelf({ fresh: true })).volumes, v = vols.find((x) => x.id === e.id), name = file.name || 'this file';
     if (!v || !v.archive) return { ok: false, why: `${name} holds ${volLabel(e)}, which is not on this shelf` };
+    if (served(v)) return { ok: true };
     if (volId && e.id !== volId) return { ok: false, why: `${name} holds ${volLabel(e)}, not ${volLabel(vols.find((x) => x.id === volId) || { id: volId })}` };
     if (lwv.files[0].sha256 !== v.indexSha256) return { ok: false, why: `${name} is another edition of ${volLabel(v)} than the one this app lists` };
     const c = await store(v.id, true);
@@ -298,6 +306,7 @@ export function installFile(volId, file, { onProgress = null, signal = null } = 
 
 export async function remove(volId) {
   if (!SAFE.test(volId) || !caching()) return false;
+  const v = await volume(volId).catch(() => null); if (v && served(v)) return false;
   const ok = await caches.delete(cacheOf(volId)).catch(() => false);
   changed(volId, 'remove'); return ok;
 }
@@ -305,9 +314,10 @@ export async function remove(volId) {
 /* ── iteration 008 V · ONE MOLECULE IN PLACE ── the fetch road's own keys, so the whole install, installStatus, file, picture and remove see no
    difference; the catalogue and the shelf entry are kept beside it (the first molecule makes the cache), and the ladder's basis records */
 export async function kept(volId) {
-  const c = await store(volId), out = new Set();
-  if (!c) return out;
+  const out = new Set();
   let v, idx; try { v = await volume(volId); idx = await index(volId); } catch (_) { return out; }
+  if (served(v)) return new Set(idx.molecules.map((m) => m.id));
+  const c = await store(volId); if (!c) return out;
   const shas = await keptShas(c);
   for (const m of idx.molecules) if (filesOf(v, m).every((f) => isKept(shas, f))) out.add(m.id);
   return out;
@@ -319,6 +329,7 @@ export function installMolecule(volId, molId, { onProgress = null, signal = null
   const asked = persistOnce().catch(() => null);   // the iPad law: asked on the press, inside the gesture, never awaited here
   const job = (async () => {
     const { v, m } = await molecule(volId, molId);
+    if (served(v)) return { ok: true };
     if (!v.index) return { ok: false, why: volLabel(v) + ' installs from its file (the main menu\'s EXPANSIONS: OPEN FILE…)' };
     const c = await store(volId, true);
     if (!c) return { ok: false, why: 'this browser has no Cache Storage' };
@@ -369,7 +380,7 @@ export async function file(volId, molId, { network = true } = {}) {   // network
   const { v, m } = await molecule(volId, molId), url = inVolume(v, m.file), c = await store(volId);
   const hit = c && await c.match(url).catch(() => null);
   if (hit) { const b = await hit.arrayBuffer(); if (!m.sha256 || await hex(b) === m.sha256) return b; await c.delete(url).catch(() => {}); }
-  if (!network) throw new Error(molId + ': not on this device');
+  if (!network && !served(v)) throw new Error(molId + ': not on this device');
   let r; try { r = await fetch(url); } catch (_) { throw new Error(molId + ': not on this device, and the network refused it (offline?)'); }
   if (!r.ok) throw new Error(molId + ': the server answered ' + r.status);
   const b = await r.arrayBuffer();

@@ -18,6 +18,9 @@ node tools/release/upgrade-rig.mjs --old <the build that is live> --new . --volu
                                   # offer, the take, the reload, the old cache collected, the volume kept, REPAIR; `git worktree add` the live tag
 node tools/build-deploy.mjs --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-3
                                   # assemble dist/ with the shelf and the volumes that travel as files (../VOLUMES-HOSTING.md), prove it
+                                  # 044 (Josh 11-12): the shelf offers VOL. I and II on every host; VOL. III is HELD (lab/volumes.js) and is
+                                  # not on the shelf, but its 87 files still ship here so a browser that kept part of it, or an old link,
+                                  # still opens its molecules. VOL. II's files are NOT on the site: it is an archive card (OPEN FILE…).
 npx wrangler deploy --dry-run     # compiles and checks, uploads nothing, costs nothing
 npx wrangler deploy               # publish exactly that
 node tools/release/live-check.mjs # THE WIRE IS THE BUILD: index.html and sw.js byte for byte, and EVERY precache entry as the install asks for it

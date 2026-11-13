@@ -29,7 +29,10 @@ molecule on the device and never fetches it again. The app holds no link to wher
 
 Cloudflare Workers static assets are free with unlimited requests, within 20,000 files per deploy and 25 MiB per file; the account
 carries no payment method, so there is nothing to bill. VOL. I (13,855 files) travels with the site this way (`--ship vol-1`), and the
-LIBRARY installs it with one press or fetches one molecule at a time. VOL. II would push the deploy past 20,000 files, so it is an
+LIBRARY installs it with one press or fetches one molecule at a time. Measured 2026-11-12 (044): the site alone is 1,834 files, VOL. I
+14,276, VOL. III 87 — 16,197 as deployed; VOL. II is 4,947 files (5.85 GB, none over 25 MiB), which would make 21,144. Since 044 the
+shelf offers VOL. I and II on every host and holds VOL. III back (`lab/volumes.js` `HELD`); VOL. III's files still ship so what a
+browser already kept of it, and old links, still open. VOL. II would push the deploy past 20,000 files, so it is an
 archive on Drive until a second assets-only Worker on the path `/volumes/vol-2/*` carries it (which needs the main Worker on a route
 instead of a custom domain). `tools/build-deploy.mjs` §V7 THE FREE PLAN refuses a build over either limit and says what is left.
 
