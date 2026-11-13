@@ -24,7 +24,7 @@
  * a `refusal()` dance and a push ORDER in the frame loop; the refusal survives only as the sentence the interface
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
-import { el, knob, sw, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
+import { el, knob, sw, trig, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js'; import { softCapLevels } from './molecular-register.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
@@ -56,8 +56,8 @@ export function createOrbitals(host, api) {
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
   const head = el('div', 'row tight sp-head', host);
-  const dialsBtn = el('button', 'trig', head); dialsBtn.type = 'button'; dialsBtn.textContent = 'DIALS';
-  dialsBtn.title = 'Amplitude and phase dials for the selection';
+  /* 044 A3.1 (L109, B13): the kit's trig(); DIALS' face is the sliders glyph (chip, below) until trig() draws a glyph alone */
+  const dialsBtn = head.appendChild(trig({ label: 'DIALS', title: 'Amplitude and phase dials for the selection' }).root);
   dialsBtn.setAttribute('aria-expanded', 'false');
   /* iteration 008 U (Josh: "can it become the 'fill all registers' button?") · ONE two-state button: an empty register shows FILL ALL, any
      other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
@@ -70,8 +70,7 @@ export function createOrbitals(host, api) {
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
   let coreOpen = false;
-  const coreBtn = el('button', 'trig orb-core-toggle', head); coreBtn.type = 'button'; coreBtn.textContent = 'CORE';
-  coreBtn.title = 'Fold the frozen-core levels';
+  const coreBtn = head.appendChild(trig({ label: 'CORE', title: 'Fold the frozen-core levels', cls: 'orb-core-toggle' }).root);
   coreBtn.setAttribute('aria-expanded', 'false'); coreBtn.hidden = true;
   const setCoreOpen = (v) => { coreOpen = !!v; coreBtn.setAttribute('aria-expanded', String(coreOpen)); coreBtn.classList.toggle('on', coreOpen); paint(); };
   coreBtn.addEventListener('click', () => setCoreOpen(!coreOpen));

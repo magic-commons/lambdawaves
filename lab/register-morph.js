@@ -7,14 +7,13 @@
  *   key           the stored entries' key name ('k' · 'key')      valid(k) a stored key this pane's ladder still holds
  *   snapshot()    the pane's register as Map key → { re, im }     stored(M) after → A / → B, changed() after a MORPH change (the pane's own repaint)
  *   lanes, knobTitle   the knob's and the switch's words          hand(id, v), status(t, cls), rows() (the dials, dimmed while MORPH plays) */
-import { el, sw, knob } from './mir/kit.js';
+import { sw, knob, trig } from './mir/kit.js';
 import { slerpCoefficients } from './molecular-register.js';
 
 export function createMorph(o) {
   let A = null, B = null, on = false, s = 0;
-  const aBtn = el('button', 'trig', o.bar); aBtn.type = 'button'; aBtn.textContent = '→ A'; aBtn.title = 'Store this register as A';
-  const bBtn = el('button', 'trig', o.bar); bBtn.type = 'button'; bBtn.textContent = '→ B'; bBtn.title = 'Store this register as B';
-  aBtn.addEventListener('click', () => api.store('A')); bBtn.addEventListener('click', () => api.store('B'));
+  /* 044 A3.1 (L109, B13): → A and → B are the kit's trig(); a filled store lights its word by the class alone (accent ink, no lamp), as before */
+  const aBtn = o.bar.appendChild(trig({ label: '→ A', title: 'Store this register as A', onFire: () => api.store('A') }).root), bBtn = o.bar.appendChild(trig({ label: '→ B', title: 'Store this register as B', onFire: () => api.store('B') }).root);
   const morphSw = sw({ label: 'MORPH', value: false, title: `Play the path from A to B instead of the ${o.lanes}`, onChange: (v) => api.set(v, s) });
   const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3), title: o.knobTitle,
     onInput: (v) => { if (o.hand(o.id, v)) return; api.set(on, v); } });   // iteration 007 (MIR check B2): routed, the hand moves the base

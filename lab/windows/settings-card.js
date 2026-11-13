@@ -76,7 +76,7 @@ export function createSettingsCard(app) {
          STAGE knob sits at its near-theme rest (≤ 5 %, the first run's 4 %), takes it to 100 %, so the colour chosen IS the ground; a knob the hand set
          higher keeps its blend */
       ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); if (app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });
-      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button';
+      ui.stageFollow = seat.appendChild(trig({ label: 'FOLLOW THEME', cls: 'stage-follow' }).root);   // 044 A3.1 (L109, B13): the kit's trig()
       /* 039 X4 (WALK-A #10: FOLLOW THEME off showed nothing until the STAGE knob was raised): a HAND turning it off lifts a resting knob (≤ 5 %) to 100 %,
          P7's road, so the colour chosen shows at once; a knob the hand set higher keeps its blend */
       ui.stageFollow.addEventListener('click', () => { const on = !app.state.stageFollow; setStageFollow(on); if (!on && app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });

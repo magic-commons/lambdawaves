@@ -12,7 +12,7 @@
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
-import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, chip, hint } from './mir/kit.js';
+import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, chip, hint, trig } from './mir/kit.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js';
 import { PRESET_BY_ID } from './state.js';
 import { createUserPresets } from './user-presets.js';
@@ -92,9 +92,10 @@ export function createSpectrum(host, api) {
     set note(t) { preStep.name.title = t || ''; } };
   users.watch(() => { syncUsers(); preset.value = preStep.get(); });
   const head = el('div', 'row tight sp-head', host);
-  const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
-  const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
-  hint(addBtn, 'Show or hide the 140 states to add');
+  /* 044 A3.1 (L109, B13): the head's two words are the kit's trig() — DIALS shows the lanes, + MODE the 140 states.  ON stays the class alone
+     (accent ink): the kit's `on` door adds aria-pressed, which this skin draws as a lamp, and + MODE has no room for one (A3-BUILD, for Josh's eye) */
+  const hideBtn = head.appendChild(trig({ label: 'DIALS', title: 'Hide or show the channels' }).root); hideBtn.setAttribute('aria-expanded', 'false');
+  const addBtn = head.appendChild(trig({ glyph: '+', label: 'MODE', title: 'Show or hide the 140 states to add' }).root);
   /* iteration 008 S · EMPTY ↔ FILL ALL (paint-stroke.js fillButton; the register's glyph since iteration 009 F2): a register with anything in it shows EMPTY (c ↦ 0, SPECTRUM's
      old CLEAR), an empty one FILL ALL (all 140 labels, equal and in phase, normalised); one undo row each.  NORM went: a HAND stroke on the grid
      normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
@@ -115,12 +116,11 @@ export function createSpectrum(host, api) {
     ['<m>c(t) = e^{−iE t} c(0)   ·   </m>', { s: 'lab' }],
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
-  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); if (spunC) spin(spunC); });
+  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); if (spunC) spin(spunC); });
   const rowsEl = el('div', 'sp-rows', host);
 
 
   rowsEl.hidden = true;
-  hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', 'false');
   const picker = el('div', 'picker', host); picker.hidden = true;
   host.appendChild(psiFx.root);                                                     // the live coefficient readout follows the scale/state controls
   host.appendChild(pre);   // iteration 015 S3 (Josh: "Move the preset thing to the bottom between the 140 picker and above the Hamiltonian"): outside the HAMILTONIAN fold
