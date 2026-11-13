@@ -1,7 +1,7 @@
 /* THE GROUND IS THE APP'S: this unconditional html/body background is what the document is from first paint until
    a theme resolves, and index.html's theme-color meta and tests/pwa.test.mjs read it from HERE (MIR's base.css owns
    the tokens and the widgets, not the stage). */
-html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #070a0f; }
+html, body { background: #070a0f; }
 /* 041 X7 · THE VEIL'S FADE TAKES NO PRESS (F's walk: a clean profile's first press on the bar's NODES opened nothing): the kit's boot veil wraps its
    dismissal in a view transition (mir/shell/boot.js, "a garnish"), and while it runs its pseudo-elements cover the page and a press lands on <html>.
    The transition is a picture; the page under it takes the press */
@@ -28,8 +28,7 @@ body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-head { -webkit-backdr
 
 /* ── shell ──────────────────────────────────────────────────────────────── */
 /* THE STAGE IS THE WHOLE WINDOW; the rack floats over it as detached cards */
-#lab { position: fixed; inset: 0; display: block; }
-#stage { position: absolute; inset: 0; min-width: 0; min-height: 0; background: #070a0f; }
+#stage { background: #070a0f; }
 #field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 #field.khover { cursor: pointer; } #field.kdrag { cursor: grabbing; }
 #field.drag { cursor: grabbing; }
@@ -53,8 +52,8 @@ body.rack-hidden.rack-peek-right #rack { transform: none; opacity: 1; }
 #rackToggle, #rackFav { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 body.rack-hidden #rackToggle { color: var(--acc); }
 .dev-loading .mark { width: 28px; height: 28px; animation: lw-busy-breathe 1.1s linear infinite alternate; }
-.dev.off .dev-stat::after { content: ' · OFF'; color: var(--dim); }
-.dev.copied .dev-stat::after { content: ' · COPIED'; color: var(--acc); }
+.dev.off .dev-stat::after { content: ' · OFF'; }
+.dev.copied .dev-stat::after { content: ' · COPIED'; }
 /* wave 54 (board #48): FAVOURITE LAYOUTS takes the next seat down the same column, on the same rules as its two
    neighbours — one geometry, one hide rule, one hover colour, and its list opens where the + list opens. */
 #rackFav { top: 80px; font-size: 15px; line-height: 1; transition: opacity .28s ease; }
@@ -66,32 +65,27 @@ body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
 .mb-item:hover .fav-x { color: var(--acc2); }
 body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
 /* ── the NOTEBOOK: a free glass — real blur, no colour overlay ── */
-#notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 280px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
+#notebook { min-width: 280px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); border-radius: 16px;
   border: 1px solid hsl(0 0% 100% / .45); background: transparent; -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%);
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); color: var(--fg); overflow: hidden; }   /* 039 F3: min-width 280 — the seat beside a docked TIMELINE (the 286-px column at 1300 × 850) */
-body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
-body[data-theme="dark"] #notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; background: hsl(0 0% 0% / .22); pointer-events: none; }   /* a shade behind the blur on DARK, the glass itself stays clear */
-.nb-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 16px 10px 12px 14px; cursor: grab; user-select: none; touch-action: none; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title") */
-.nb-titles { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
-.nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; color: var(--fg); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; }
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); }   /* 039 F3: min-width 280 — the seat beside a docked TIMELINE (the 286-px column at 1300 × 850) */
+body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); }
+body[data-theme="dark"] #notebook::before { background: hsl(0 0% 0% / .22); }   /* a shade behind the blur on DARK, the glass itself stays clear */
+.nb-head { padding: 16px 10px 12px 14px; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title") */
+.nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; outline: 0; }
 .nb-title:focus { color: var(--acc); }
-.nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; color: var(--fg-soft); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; margin-top: 2px; }
+.nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; outline: 0; }
 .nb-subtitle:focus { color: var(--acc); }
-.nb-subtitle::placeholder { color: var(--dim); opacity: .6; }
+.nb-subtitle::placeholder { opacity: .6; }
 #notebook[data-face="projects"] .nb-titles, #notebook[data-face="projects"] .nb-title, #notebook[data-face="projects"] .nb-subtitle { visibility: hidden; }
-.nb-view { flex: 1 1 auto; min-height: 120px; overflow: auto; padding: 4px 2px; font: 14px/1.6 var(--font-ui); color: var(--fg); }
-.nb-view h1, .nb-view h2, .nb-view h3 { margin: .6em 0 .3em; line-height: 1.2; font-weight: 700; color: var(--fg); }
+.nb-view { font: 14px/1.6 var(--font-ui); }
+.nb-view h1, .nb-view h2, .nb-view h3 { font-weight: 700; }
 .nb-view h1 { font-size: 22px; } .nb-view h2 { font-size: 18px; } .nb-view h3 { font-size: 15px; }
-.nb-view p { margin: .35em 0; } .nb-view ul, .nb-view ol { margin: .3em 0 .3em 1.4em; } .nb-view li { margin: .1em 0; }
-.nb-view code { font-family: var(--font-mono); font-size: 12px; padding: 0 4px; border-radius: 4px; background: hsl(0 0% 50% / .14); }
-.nb-view pre { padding: 8px 10px; border-radius: 8px; background: hsl(0 0% 50% / .12); overflow: auto; } .nb-view pre code { padding: 0; background: transparent; }
-.nb-view blockquote { margin: .4em 0; padding: 2px 10px; border-left: 2px solid var(--acc); color: var(--fg-soft); }
-.nb-view table { border-collapse: collapse; margin: .4em 0; } .nb-view th, .nb-view td { padding: 3px 8px; border-bottom: 1px solid hsl(0 0% 50% / .25); }
-.nb-view hr { border: 0; height: 1px; background: hsl(0 0% 50% / .3); margin: .8em 0; }
-.nb-view a { color: var(--acc); }
+.nb-view code { font-size: 12px; border-radius: 4px; background: hsl(0 0% 50% / .14); }
+.nb-view pre { border-radius: 8px; background: hsl(0 0% 50% / .12); } .nb-view pre code { background: transparent; }
+.nb-view blockquote { border-left: 2px solid var(--acc); }
+.nb-view th, .nb-view td { border-bottom: 1px solid hsl(0 0% 50% / .25); }
+.nb-view hr { background: hsl(0 0% 50% / .3); }
 .nb-view .katex { font-size: 1.08em; } .nb-view .katex-display { margin: .5em 0; overflow-x: auto; }
-#notebook[data-mode="view"] .nb-text { display: none; } #notebook[data-mode="view"] .nb-view { display: block; }
-#notebook[data-mode="edit"] .nb-view { display: none !important; }
 .nb-mode, .nb-projects-btn { font-size: 12px; }
 /* ══ WAVE 106 · THE HISTORY LIST ═══════════════════════════════════════════════════════════════
    Newest at the top, the way a stack reads.  Three states, and only ONE of them is a colour trick:
@@ -103,63 +97,52 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
                 that deleted them would be lying about what the next click can still do.
    0.3.1 · S4 listed every row the ring keeps (≤ 61) in a 250 px scroller; since 017 R2 the card shows twelve rows a page
    and the rack pager (pager.js) turns the rest — no window in a rack scrolls (Josh). */
-.hist-list { display: flex; flex-direction: column; gap: 1px; overflow: visible; }   /* the kit sheet's `overflow: auto` (its floating window) is not a rack card's */
-.hist-row { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left;
-  border: 0; border-left: 2px solid transparent; background: transparent; cursor: pointer;
-  padding: 3px 6px; border-radius: var(--r-sm); color: var(--fg); font: 12px/1.4 var(--font-ui); }
+.hist-list { gap: 1px; overflow: visible; }   /* the kit sheet's `overflow: auto` (its floating window) is not a rack card's */
+.hist-row { display: flex; gap: 8px;
+  border-left: 2px solid transparent; background: transparent;
+  padding: 3px 6px; color: var(--fg); font: 12px/1.4 var(--font-ui); }
 .hist-row:hover { background: hsl(0 0% 50% / .12); }
-.hist-i { flex: 0 0 auto; min-width: 1.6em; text-align: right; color: var(--dim);
+.hist-i { flex: 0 0 auto; min-width: 1.6em;
   font: var(--fs-micro)/1.4 var(--font-mono); font-variant-numeric: tabular-nums; }
-.hist-lbl { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-lbl { flex: 1 1 auto; }
 .hist-current { border-left-color: var(--acc); color: var(--acc); }
-.hist-current .hist-i { color: var(--acc); }
 /* the stepped-back future: still there, still clickable, and visibly spent */
 .hist-future { opacity: .42; }
 .hist-future .hist-lbl { text-decoration: line-through; text-decoration-thickness: 1px; }
 .hist-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
 .hist-actions > .trig { width: 100%; min-width: 0; padding-inline: 5px; }
 
-.nb-tools { display: flex; gap: 4px; }
-.nb-tools button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); cursor: pointer; font-size: 13px; line-height: 1; }
+.nb-tools button { font-size: 13px; }
 .nb-tools button:hover { color: var(--acc); }
-.nb-face { display: flex; flex-direction: column; padding: 0 14px 12px; flex: 1 1 auto; min-height: 0; overflow: auto; }   /* the faces fill the glass: the resize handle sizes the notes and the preview */
-.nb-text { flex: 1 1 auto; min-height: 120px; resize: none; border: 0; outline: 0; background: transparent; color: var(--fg); font: 13px/1.5 var(--font-ui); padding: 4px 0; }
-.nb-text::placeholder { color: var(--dim); }
-.nb-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--dim); }
-.nb-foot button, .nb-dump, .ab-home { border-radius: 8px; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; box-sizing: border-box; }
-.nb-foot button { height: 26px; padding: 0 12px; }
-.nb-dump, .ab-home { height: 30px; padding: 0 14px; line-height: 28px; }
-.nb-aboutface { align-items: center; text-align: center; gap: 4px; padding-top: 4px; }
+.nb-text { font: 13px/1.5 var(--font-ui); }
+.nb-foot { letter-spacing: var(--tr-wide); }
+.nb-foot button, .nb-dump, .ab-home { border-radius: 8px; font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); }
+.nb-dump, .ab-home { line-height: 28px; }
 /* 034 N1 · the ABOUT window (shell/notebook.js): the notebook's button ink, its two faces filling the body */
 .mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); }
 body[data-theme="dark"] .mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
 .mir-win.lw-about > .mir-win-body { display: flex; flex-direction: column; }
 .mir-win.lw-about .nb-face { padding: 0 14px 12px; }
 .lw-about-mir { align-items: stretch; }
-.nb-logo { display: flex; align-items: baseline; gap: 0; font-size: 35px; margin: 6px 0 4px; }
+.nb-logo { font-size: 35px; }
 .nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; margin-right: -.04em; }
-.nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: 700; letter-spacing: .06em; color: var(--fg); }
+.nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: 700; letter-spacing: .06em; }
 .nb-logo .mark { align-self: center; height: 1.05em; width: 1.05em; margin-left: .05em; }
 /* iteration 016 P5 · ABOUT: the λWAVES wordmark (lab/img/lambdawaves-logo.svg) large, its word in the ink; the MIR page's mark small */
 .nb-logo.nb-wordmark { display: block; width: min(380px, 86%); margin: 14px auto 10px; color: var(--fg); }
 .nb-logo.nb-wordmark > svg { display: block; width: 100%; height: auto; }
-.ab-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--dim); margin-top: 6px; }
-.ab-version { font-size: 12px; letter-spacing: .06em; color: var(--acc); }
+.ab-eyebrow { letter-spacing: var(--tr-wider); }
+.ab-version { font-size: 12px; letter-spacing: .06em; }
 .ab-tag { text-transform: uppercase; }
-.ab-tagline { margin: 4px 0; font-size: 13px; line-height: 1.45; color: var(--fg); max-width: 34ch; }
-.ab-credit { margin: 2px 0; font-size: 12px; line-height: 1.4; color: var(--fg-soft); }
-.ab-team { color: var(--fg); }
-.ab-made { text-align: center; }
-.ab-fine { margin: 1px 0; font-size: 10.5px; color: var(--dim); }
+.ab-tagline { font-size: 13px; }
+.ab-credit { font-size: 12px; }
+.ab-fine { font-size: 10.5px; }
 
 /* 033 THE UPDATER · ABOUT's build line (sw-client.js paintBuild) and the diagnostics' text (COPY DIAGNOSTICS) */
 .ab-build { font-variant-numeric: tabular-nums; letter-spacing: .02em; opacity: .85; word-break: break-word; }
 .lw-diag { white-space: pre-wrap; word-break: break-word; font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; max-height: min(52vh, 420px); overflow: auto; margin: 0; text-align: left; user-select: text; }
 .ab-fine code { font-family: var(--font-mono); }
-.nb-aboutface a { color: var(--acc); }
-.ab-rule { width: 60%; height: 1px; background: hsl(0 0% 50% / .25); margin: 8px 0; }
-.ab-actions { display: flex; align-items: center; justify-content: center; gap: 24px; width: 100%; margin-top: auto; padding-top: 12px; flex: 0 0 auto; }
-.nb-aboutface .ab-home { color: var(--fg-soft); text-decoration: none; }
+.ab-rule { background: hsl(0 0% 50% / .25); }
 .nb-dump:hover, .ab-home:hover { color: var(--fg); border-color: color-mix(in srgb, var(--acc) 45%, var(--nb-btn-line)); }
 .nb-dump:active, .ab-home:active { transform: translateY(1px); background: var(--glass-press); }
 
@@ -204,11 +187,7 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
  * tabular figures, so the mathematics reads as mathematics and the numbers substituted into it can
  * never dance.  The slot is also the brightest ink on the line, which is how the eye finds the values
  * that are moving WITHOUT anything having to move decoratively (MOTION-LAW gate 3). */
-.fx { margin: 3px 0 0; display: flex; flex-direction: column; gap: 1px; }
-.fx-l { display: block; font-size: var(--fs-small); line-height: 1.55; color: var(--ink-key); letter-spacing: 0; }
-.fx-v { font-style: normal; font-family: var(--font-num); font-size: .92em; font-variant-numeric: tabular-nums;
-        color: var(--fg); letter-spacing: var(--tr-tight); }
-.fx.dim .fx-l { color: var(--ink-faint); }
+.fx-v { font-size: .92em; }
 /* SPECTRUM's live law never reflows the window: a number that grows (t, arg c) cannot wrap the line or
    change the card's height. Each slot holds its widest value; the line clips instead of wrapping. */
 .sp-fx .fx-l { white-space: nowrap; overflow: hidden; text-overflow: clip; }
@@ -222,17 +201,13 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
    in one flex row, and a two-line expression there would either be clipped or would break the row.
    It is `display: none`, so the pill still has exactly twelve seats and B74's claim stays true. */
 #transport.mini .fx { display: none; }
-.mb-group { position: relative; }
-.mb-btn { height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--fg-soft); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; }
+.mb-btn { border-radius: 7px; letter-spacing: var(--tr-wider); }
 .mb-btn:hover { background: transparent; color: var(--acc); }
-.mb-item { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; text-align: left; border: 0; background: transparent; color: var(--fg-soft); padding: 6px 10px; border-radius: 6px; font: var(--fs-small) var(--font-ui); cursor: pointer; white-space: nowrap; }
+.mb-item { text-align: left; background: transparent; color: var(--fg-soft); border-radius: 6px; cursor: pointer; }
 .mb-item:hover { background: var(--glass-raise); color: var(--fg); }
-.mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
-.mb-sep { height: 1px; margin: 4px 8px; background: var(--glass-hairline); pointer-events: none; }
+.mb-key { letter-spacing: var(--tr-wide); }
 /* 021 I3 · the kit's submenus, checks and radios (MIR 1.5.6-alpha.2) under these unlayered rules: an accordion stays in its list on a phone, a mark has its gutter */
-.mb-sub-list.mb-accordion { position: static; flex: 0 0 auto; min-width: 0; max-height: none; overflow: visible; margin: 0 0 4px 12px; box-shadow: none; }
 .mb-item.mb-check, .mb-item.mb-radio { position: relative; padding-inline-start: 26px; }
-.mb-item:has(> .mb-icon) { align-items: center; }
 /* 039 X8 · ONE COLUMN OF WORDS (WALK-A #15, WALK-C #18): in a list where any row wears an icon, a row without one starts its word in the icons'
    word column (10 + 16 − 8 + 18 = 36 px); a check or radio row WITH an icon keeps the icons' padding and wears its ✓ or • at the row's end */
 .mb-list:has(> .mb-item > .mb-icon) > .mb-item:not(:has(> .mb-icon)) { padding-inline-start: 36px; }
@@ -249,11 +224,8 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 @media (max-width: 860px) {
   #rack { top: auto; bottom: 0; left: 0; right: 0; width: auto; height: 46vh; }
 }
-#title { position: absolute; left: calc(var(--rack-w) + 14px); top: 6px; z-index: calc(var(--z-chrome) + 2); display: flex; border-radius: var(--r-pill); }
+#title { z-index: calc(var(--z-chrome) + 2); }
 /* 039 V7: the logo (the menus' door) over the scroll pills (chrome + 1, C #22: at 150 % CAMERA's pill lay on it), under #floats (the same z, later in the page) and the bar */
-#title .lam { color: var(--acc); }
-#title .word { font-size: var(--fs-lead); font-weight: var(--w-bold); }
-#title .mark { height: 1.05em; width: 1.05em; display: inline-block; vertical-align: -0.12em; }
 #badges { position: absolute; left: min(calc(var(--rack-w) + 340px), calc(100% - var(--rack-w) - 266px)); right: calc(var(--rack-w) + 56px); top: 9px; z-index: var(--z-chrome); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); pointer-events: none; }
 #badges > * { pointer-events: auto; }
 /* WAVE 133: the row's left edge gives way on a narrow stage so the row is never under 210 px — at rack-w + 340 alone it
@@ -329,8 +301,7 @@ body.transport-under #transport.mini { z-index: var(--z-chrome); }
 .tbtn.modb { font-size: var(--fs-tiny); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); color: var(--ink-key); }   /* the 44-px `.tbtn` box IS the seat — B70 walks it at the phone breakpoint and a 40 would fail the law */
 .tbtn.modb.on { color: var(--acc2); border-color: color-mix(in srgb, var(--acc2) 55%, transparent); background: var(--acc2-soft); }
 #transport.mini .tbtn.modb { width: 26px; font-size: var(--fs-micro); }
-.dev-stat { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: right; font-size: var(--fs-tiny); letter-spacing: var(--tr-tight); font-variant-numeric: tabular-nums;
-  padding: 0 var(--sp-2); }   /* the header's spacing lives in the STATUS's own padding, so it collapses with the status instead of stealing the eyebrow's width (wave 44) */
+.dev-stat { text-align: right; }   /* the header's spacing lives in the STATUS's own padding, so it collapses with the status instead of stealing the eyebrow's width (wave 44) */
 .dev-stat.warn { color: var(--warn); }
 
 /* ── §55 · THE FLOATING WINDOW ─────────────────────────────────────────────────────────────────────
@@ -551,9 +522,8 @@ body.rack-hidden #transport.mini { visibility: hidden; transition: transform var
 body.rack-hidden.transport-peek #transport.mini { visibility: visible; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear 0s; }
 
 
-.nb-grip { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; z-index: 4; cursor: nwse-resize; touch-action: none; }
-.nb-grip::before { content: ''; position: absolute; right: 5px; bottom: 5px; width: 10px; height: 10px; opacity: .85;
-  border-right: 2px solid var(--nb-line); border-bottom: 2px solid var(--nb-line); border-bottom-right-radius: 3px; }
+.nb-grip::before { opacity: .85;
+  border-bottom-right-radius: 3px; }
 .nb-grip:hover::before { opacity: 1; }
 
 
@@ -569,12 +539,10 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
 
 
 #title .mark, .nb-logo .mark { transform-origin: 50% 50%; }
-#title .mark.turn rect { animation-duration: var(--logo-turn, 1.2s); animation-timing-function: linear; animation-iteration-count: 1; }
+#title .mark.turn rect { animation-duration: var(--logo-turn, 1.2s); animation-timing-function: linear; }
 #title .mark.busy rect, #busyMark .mark rect, .dev-loading .mark rect { animation-duration: var(--logo-turn, 1.2s); animation-timing-function: linear; animation-iteration-count: infinite; }
 
 
-#title { transform-origin: left center; }
-#title.menu-open { transform: none; }
 
 /* (e3) §53c — THE '?' SHEET: every binding, built live from the table.  Same glass, same ink and the same seat as
    #sheet (which is the badges' EXACT/NUMERICAL panel) — a second panel, not a second design. */
@@ -596,8 +564,6 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
 @media (prefers-reduced-motion: reduce) {
   /* "fewer and gentler, never zero": the palette turn and the busy breath are COLOUR and OPACITY and they stay
      (MOTION-LAW); what goes is the one transform-based motion the logo has, the menu's enlarge. */
-  #title { transition: none !important; }
-  #title.menu-open { transform: none !important; }
   /* ── WAVE 69 · THE HALF THE DOC SAID WAS MISSING, TAKEN BEFORE ANOTHER ANIMATION WAS ADDED ───────
    * MOTION-LAW's accessibility section names this list and says it will keep growing until somebody
    * closes it: the rack's 310-px slide losing on SPECIFICITY, the two fold chevrons, the card's
@@ -614,7 +580,6 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
   body.rack-hidden #transport.mini, body.rack-hidden.transport-peek #transport.mini {
     transition-property: opacity, visibility; }
   body.rack-hidden #rack, body.rack-hidden #rackL, body.rack-hidden #transport.mini { transform: none; }
-  .dev-fold > svg { transition: none; }
   /* the PORTED plugin declares its own motion tokens and this is what they are for — one line
      reaches every `var(--m2-motion-*)` transition in modwindow.css without touching its sheet */
   .mir-modwindow, .kwin-chiprail { --m2-motion-structural: 0s; --m2-motion-micro: 0s; }
@@ -652,7 +617,6 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
 body.mod-arming .k[data-param] { position: relative; }
 body.mod-arming .k[data-param].mod-drop > .k-dial {
   outline: 2px dashed color-mix(in srgb, var(--acc2) 55%, transparent); outline-offset: 3px; }
-body.mod-arming .k[data-param].mod-drop > .k-lbl { color: var(--acc2); }
 /* A CONTROL THIS MACRO ALREADY REACHES: solid, not dashed, and no highlight on press — a drop here
    SELECTS the existing route rather than adding a second (addRoute answers `already`). */
 body.mod-arming .k[data-param].mod-drop.is-dup > .k-dial { outline-style: solid; outline-color: color-mix(in srgb, var(--acc2) 75%, transparent); }
