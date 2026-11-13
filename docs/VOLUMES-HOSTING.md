@@ -36,6 +36,39 @@ browser already kept of it, and old links, still open. VOL. II would push the de
 archive on Drive until a second assets-only Worker on the path `/volumes/vol-2/*` carries it (which needs the main Worker on a route
 instead of a custom domain). `tools/build-deploy.mjs` §V7 THE FREE PLAN refuses a build over either limit and says what is left.
 
+**VOL. II as files beside VOL. I (044 S12, built 2026-11-13, NOT deployed).** Josh, 11-13: "There can be an update to the volumes."
+VOL. I's 6,927 single pictures become 70 page sheets, as VOL. II's are:
+
+```
+python3 tools/volumes/sheet-pictures.py --src ~/Documents/LAMBDAWAVES-VOLUMES/dist \
+        --out ~/Documents/LAMBDAWAVES-VOLUMES/dist-sheets-2026-11-13 --volume vol-1        # 13 minutes; reads --src, writes a new directory only
+node tools/build-deploy.mjs --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist-sheets-2026-11-13/volumes.json --ship vol-1,vol-2,vol-3
+```
+
+| | files | bytes | largest file |
+|---|---|---|---|
+| the site alone | 1,835 | — | — |
+| VOL. I as shipped today | 14,276 | 6,064,046,591 | 13,149,000 |
+| VOL. I sheet-packed (edition 3) | 7,419 | 6,185,171,588 | 13,149,000 |
+| VOL. II | 4,947 | 5,848,310,795 | 4,904,462 |
+| VOL. III (held, still shipped) | 87 | 158,748,701 | 2,314,888 |
+| **the deploy with all three** | **14,289 of 20,000** | 12,303,456,120 | under 25 MiB (§V7 PASS) |
+
+The sheets are lossless (each cell is the old picture pixel for pixel), which is why the volume grows by 121 MB: 70 sheets are
+145,962,264 B where the 6,927 pictures were 24,697,930 B. The `.lwm` files are byte-identical; the catalogue differs only in `thumb`
+(null in every row) and `indexVersion` (3), so its `indexSha256` is new and this is a new edition.
+
+What a browser that installed the old VOL. I meets (proved in Firefox, the old dist served, installed, then the new one served to the
+same page): it still says INSTALLED 6,927 / 6,927 with nothing to download (a molecule's file is kept by its own hash, which did not
+change); its pictures now come from the sheets; the 6,927 old single pictures stay in its storage, unused, until REMOVE. A fresh
+install of the new edition keeps 6,929 entries where the old kept 13,856.
+
+Owed before a deploy: (1) the old `LAMBDAWAVES-VOL-I.lwv` is the old edition and OPEN FILE… would refuse it, so the new shelf entry
+has no `archive` — `tools/volumes/pack.mjs --archive` must write a new one if the file road is to stay; (2) `pack.mjs` still names a
+single picture per molecule, so the next real pack would undo this unless it is taught that a `density` cell is the picture; (3) both
+volumes installed are about 9.8 GB of browser storage (4.9 GB each as Firefox counts it), against a 10.7 GB best-effort quota
+measured in Firefox here — not tried together.
+
 ## What the reader does
 
 Download the `.lwv`. Then open the MAIN MENU › LIBRARY, scroll down to EXPANSIONS, find the volume's card and press **OPEN FILE…** (or drop the file on the card).
