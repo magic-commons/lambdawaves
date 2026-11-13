@@ -8,7 +8,6 @@
 import { el, chip } from './mir/kit.js';
 import { cssZoom } from './mir/core/zoom.js';
 import { setGlyph } from './mir/glyph.js';
-import { windowOf } from './mir/window/window.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { parseChord, modText, keyText } from './mir/shell/keys.js';
 import { createIndex, createFrecency, scope, marks, WINDOW_WORDS } from './search-index.js';
@@ -26,8 +25,6 @@ function capsOf(kt, row) {
   const P = (kt && kt.table && kt.table.platform) || 'other', c = (kt ? kt.window.chords(row.id) : [].concat(row.keys || []))[0], p = c && parseChord(c, P);
   return p ? [...p.mods.map((m) => modText(m, P)), keyText(p.code, P)] : [];
 }
-const SPECIAL = { modulation: (app) => app.state.modView && app.state.modView.root, timeline: () => document.querySelector('[data-mir-window="timeline"]'),
-  notebook: () => document.getElementById('notebook'), nodes: () => document.querySelector('[data-mir-window="nodes"]') };
 
 /** THE PROVIDERS: each kind's documents from its road, and what Enter does */
 const PROVIDERS = {
@@ -41,14 +38,14 @@ const PROVIDERS = {
       }); },
     run: (app, d) => app.sh.ACTIONS.run(d.key) },
   window: {
+    /* 044 A2 (L19) · ONE TABLE: the special windows are the FINDER's own rows (notebook.js `layout.special`: MODULATION · TIMELINE · CONTROL SURFACE ·
+       NOTEBOOK · NODES), each with the FINDER's open-or-raise; a rack window that is one of them (NODES) or an app card (the bar's) is not listed twice */
     docs(app) { const rk = app.sh.rk; if (!rk) return [];
-      const wins = rk.windows().filter((w) => !w.card && w.id !== 'nodes' && w.id !== 'transport').map((w) => ({ id: 'window:' + w.id, kind: 'window', key: w.id, title: w.title,
+      const special = app.sh.layout && app.sh.layout.special ? app.sh.layout.special() : [], named = new Set(special.map((r) => r.id));
+      const wins = rk.windows().filter((w) => !w.card && !named.has(w.id)).map((w) => ({ id: 'window:' + w.id, kind: 'window', key: w.id, title: w.title,
         alias: WINDOW_WORDS[w.id] || '', glyph: WINDOW_GLYPH[w.id], prior: 0.2, off: !!w.hidden }));   // a window the mode hides is greyed (the FINDER's)
-      return wins.concat(Object.keys(SPECIAL).map((id) => ({ id: 'window:' + id, kind: 'window', key: id, title: id.toUpperCase(), alias: WINDOW_WORDS[id] || '', glyph: WINDOW_GLYPH[id], prior: 0.2, special: true }))); },
-    run(app, d) { const A = app.sh.ACTIONS;
-      if (!d.special) return A.reveal(d.key);
-      const a = A.get(d.key), w = a && a.get && a.get() && SPECIAL[d.key](app);
-      if (w && windowOf(w)) windowOf(w).raise(); else if (d.key === 'nodes') A.reveal('nodes'); else if (!a || !a.get || !a.get()) A.run(d.key); } },
+      return wins.concat(special.map((r) => ({ id: 'window:' + r.id, kind: 'window', key: r.id, title: r.title, alias: WINDOW_WORDS[r.id] || '', glyph: WINDOW_GLYPH[r.id] || r.glyph, prior: 0.2, run: r.run }))); },
+    run: (app, d) => (d.run ? d.run() : app.sh.ACTIONS.reveal(d.key)) },
   molecule: {
     async docs(app) { const P = app.state.picker; if (!P || !P.rows) return [];
       return (await P.rows()).map((r) => ({ id: 'molecule:' + (r.vol || '') + ':' + r.id, kind: 'molecule', title: cap(plain(r.name)), exact: [plain(r.formula), r.id], body: r.vol || '', r })); } },
