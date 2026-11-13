@@ -17,14 +17,14 @@
  * 020 X3 THE FLAGS: an eye on every bar (VIEW HERE: the stage shows the chain up to it, the foot says "viewing 3 of 6"; the lit eye again =
  * STAGE OUT), SOLO (S, a second lit mark: this node alone), BYPASS ALL (the head's power, key \: the foot says "graph off").
  * 038 N4 THE WIRE HAS A KNOB (FL Studio's Patcher): on each wire into a node a round HANDLE at its middle — the node's MIX (its FADE; a LAYER's or a
- * SHADER's own 0–1 MIX or AMOUNT), turned by a vertical drag or the wheel, its arc the value; a press selects the wire (Delete unplugs it, the arrows
+ * SHADER's own 0–1 MIX or AMOUNT), turned by a vertical drag or, once it was pressed (044 K2), the wheel, its arc the value; a press selects the wire (Delete unplugs it, the arrows
  * turn it); a card's PORT carried onto a wire moves its node into that wire (and plugs it in), an in-port let go on the empty ground unplugs it.
  * 038 N5 THE MINIMAP (the window): the graph in small at the ground's bottom-right — the cards, the view as an accent rect; a drag looks round, the
  * wheel zooms about the view's centre; hidden while every card is in view.
  * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
  * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
-import { el, label, ariaLabel, chip, onContext, placeholder } from './mir/kit.js'; import { contextMenu } from './mir/shell/menubar.js'; import { openDialog } from './mir/shell/dialog.js';
+import { el, label, ariaLabel, chip, onContext, placeholder, wheelNotches, setKnobLaw } from './mir/kit.js'; import { contextMenu } from './mir/shell/menubar.js'; import { openDialog } from './mir/shell/dialog.js';
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun, over } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js'; import { setText } from './mir/core/perf.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
@@ -184,7 +184,7 @@ export function createView(parent, kind, M) {
   /* 038 N4 · THE WIRE HAS A KNOB (Josh: "The connector wires also need a way to connect and disconnect. Check out FL Studio's 'Patcher' … how they
      design the 'knob' on the wires"): each wire is its downstream node's input, so its knob is that node's MIX — FADE (already folded, already a
      target), or a LAYER's / SHADER's own 0–1 MIX or AMOUNT (none: no arc).  The kit's hand: 220 px of rise is the whole range, Shift the fine gear
-     (1/8), two presses come home; the wheel turns it here, where nothing scrolls */
+     (1/8), two presses come home; the wheel turns it once it was pressed (044 K2 THE WHEEL WAITS FOR A CLICK) */
   const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
   const mixOf = (t) => (!over(t) ? 'fade' : ['mix', 'amount'].find((k) => t.knobs.some((K) => K.k === k && K.min === 0 && K.max === 1)) || null);
   const homeOf = (t, k) => [...t.knobs, ...FOOT].find((K) => K.k === k).home;
@@ -194,7 +194,7 @@ export function createView(parent, kind, M) {
     if (k) label(h.querySelector('.nodes-hand-val'), k === 'amount' ? 'AMOUNT {v} %' : 'MIX {v} %', { v: Math.round(x * 100) }); };   // 038 N8: the readout's words through label()
   function handOf(q) {
     const id = q.id; let h = H.get(id); if (h) return h;
-    h = el('div', 'nodes-hand'); h.dataset.wire = id; h.title = 'the wire\'s MIX: drag or wheel · Delete unplugs';
+    h = el('div', 'nodes-hand'); h.dataset.wire = id; h.title = 'the wire\'s MIX: drag · press, then wheel · Delete unplugs';
     const s = SV('svg', { viewBox: '0 0 20 20', 'aria-hidden': 'true' }, h);
     SV('circle', { class: 't', cx: 10, cy: 10, r: 7, pathLength: 360, 'stroke-dasharray': '300 360', transform: 'rotate(120 10 10)' }, s);
     SV('circle', { class: 'v', cx: 10, cy: 10, r: 7, pathLength: 360, transform: 'rotate(120 10 10)' }, s); SV('circle', { class: 'c', cx: 10, cy: 10, r: 2.4 }, s); el('span', 'nodes-hand-val', h);
@@ -208,8 +208,12 @@ export function createView(parent, kind, M) {
       const end = () => { for (const [t, f] of on) h.removeEventListener(t, f); h.classList.remove('turn'); };
       const on = [['pointermove', mv], ['pointerup', end], ['pointercancel', end]]; for (const [t, f] of on) h.addEventListener(t, f);
     });
-    h.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) return; const q = M.byId(id), k = q && mixOf(T[q.type]); if (!k) return; e.preventDefault(); e.stopPropagation();
-      M.hand(q, k, clamp01(+q.values[k] - Math.sign(e.deltaY) * (e.shiftKey ? 0.01 : 0.05))); h.classList.add('turn'); clearTimeout(h.tw); h.tw = setTimeout(() => h.classList.remove('turn'), 700); }, { passive: false });
+    /* 044 K2 THE WHEEL WAITS FOR A CLICK: the hand takes no focus of its own (a press picks its wire and gives the ground the keys), so "pressed and
+       still holds the focus" is: this wire is the picked one and the ground has the focus.  Then a notch is the knob's arrow step (1/100, Shift an
+       eighth of it); otherwise the wheel is not the hand's */
+    h.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey || wsel !== id || document.activeElement !== ground) return; const q = M.byId(id), k = q && mixOf(T[q.type]); if (!k) return; e.preventDefault(); e.stopPropagation();
+      const n = wheelNotches(e, h.wn || (h.wn = {}), e.timeStamp); if (!n) return;
+      M.hand(q, k, clamp01(+q.values[k] + n * 0.01 * (e.shiftKey ? setKnobLaw().keyFine : 1))); h.classList.add('turn'); clearTimeout(h.tw); h.tw = setTimeout(() => h.classList.remove('turn'), 700); }, { passive: false });
     H.set(id, h); paintHand(q); return h;
   }
   /** a card's port carried onto a wire (or onto a port: the wire it ends) puts its node INTO that wire and plugs it in — THE COLUMN IS THE CHAIN,

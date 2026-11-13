@@ -33,7 +33,7 @@
  * Kept as they were: every law in modwindow/ACCEPTANCE.md and host-contract.md, the FL curve gestures
  * (curve-gesture.js), Sol's automation / exact resume / runtime capture in host.js and mod.js.
  */
-import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, watchTouches } from '../kit.js';
+import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, watchTouches, wheelTurn } from '../kit.js';
 import { bindSliderKeys } from '../slider-keys.js';
 import { contextMenu, knobMenu, knobMenuPart, knobAct } from '../shell/menubar.js';
 import { createModWindow, setDeviceMode, setWorkLane, sizeLaw, GEOM,
@@ -2797,7 +2797,7 @@ export function createModulation(host, port) {
         }
       });
       const end=()=>{drag=null;row.classList.remove('editing');};track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);track.addEventListener('lostpointercapture',end);
-      track.addEventListener('wheel',e=>{if(!e.deltaY)return;e.preventDefault();e.stopPropagation();select(key);shift(key,(e.deltaY<0?1:-1)*(e.shiftKey ? .1 : 1));},{passive:false});
+      wheelTurn(track,(n,e)=>{select(key);shift(key,n*(e.shiftKey ? .1 : 1));},{focus:handles.floorDb});   // 1.6.0-alpha.3 THE WHEEL WAITS FOR A CLICK: the band moves by the wheel once its track was pressed and holds the focus
       track.addEventListener('dblclick',e=>{e.preventDefault();e.stopPropagation();patch(key,{floorDb:M.AUDIO_DB_FLOOR,ceilingDb:M.AUDIO_DB_TOP});});
     track.title='Resize at the edges; shift inside; double-click to reset';
       rows[key]={row,head,text,mix,low,high,fill,zone,cursor,handles};

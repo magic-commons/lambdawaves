@@ -204,7 +204,6 @@ export function directionSphere(o = {}) {
   const end = (e) => { if (!g || (e && e.pointerId !== g.id)) return; g = null; svg.classList.remove('drag'); paint(); if (o.onChange) o.onChange(); };
   svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end); svg.addEventListener('lostpointercapture', end);
   svg.addEventListener('dblclick', (e) => e.preventDefault());                     // the double-tap was taken on the press
-  svg.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
   svg.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey || svg.getAttribute('aria-disabled') === 'true') return;
     const step = (2 * Math.PI / 100) * (e.code.startsWith('Page') ? 10 : 1) * (e.shiftKey ? setKnobLaw().keyFine : 1);   // the kit's one fine gear
@@ -265,7 +264,6 @@ function planeSphere(o, { root, body, svg, film, look, tip }) {
   const end = (e) => { if (!g || (e && e.pointerId !== g.id)) return; g = null; svg.classList.remove('drag'); paint(); if (o.onChange) o.onChange(); };
   svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end); svg.addEventListener('lostpointercapture', end);
   svg.addEventListener('dblclick', (e) => e.preventDefault());
-  svg.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
   svg.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey || svg.getAttribute('aria-disabled') === 'true') return;
     const step = SPHERE.R * (2 * Math.PI / 100) * (e.code.startsWith('Page') ? 10 : 1) * (e.shiftKey ? setKnobLaw().keyFine : 1);   // the camera sphere's arrow, as a tip step on the drawing

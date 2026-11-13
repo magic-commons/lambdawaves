@@ -12,7 +12,7 @@
  *     onInput(lo, hi) while a thumb moves; onChange(lo, hi) when a gesture or key lands.  minGap is in value units (default: one step, or 0).
  *   → { root, lo, hi, get() → [lo, hi], set(lo, hi), setDisabled(on), destroy() }   (lo and hi are the thumb widgets)
  * The pure parts (for tests): rangeBounds, nearestThumb. */
-import { el, label, ariaLabel, hint, watchTouches, gearOf, tapWatcher } from '../kit.js';
+import { el, label, ariaLabel, hint, watchTouches, gearOf, tapWatcher, wheelTurn } from '../kit.js';
 import { setVar, setText, setAttr } from '../core/perf.js';
 import { digitsOf } from './number.js';
 import { t as tx } from '../core/i18n.js';
@@ -137,7 +137,7 @@ export function rangeSlider(o = {}) {
   };
   rail.addEventListener('pointerup', end); rail.addEventListener('pointercancel', end); rail.addEventListener('lostpointercapture', end);
   rail.addEventListener('dblclick', (e) => { const t = e.target.closest && e.target.closest('.rng-t'); if (t) { e.preventDefault(); homeOf(t.classList.contains('rng-lo') ? 'lo' : 'hi'); } });
-  rail.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+  wheelTurn(rail, null, { focus: null });   // 1.6.0-alpha.3 THE WHEEL WAITS FOR A CLICK: the pressed thumb, while it holds the focus, turns by the wheel as by its arrows
   /* the keys, on a thumb: one hundredth of the range, Shift an eighth of it (the one gear), Page ten; Home and End its bounds */
   const KEYDIR = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 1, PageDown: -1 };
   for (const which of ['lo', 'hi']) T[which].root.addEventListener('keydown', (e) => {

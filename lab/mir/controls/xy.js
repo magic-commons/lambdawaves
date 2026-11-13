@@ -217,7 +217,6 @@ export function xyPad(o = {}) {
   const end = (e) => { if (!g || (e && e.pointerId !== g.id)) return; g = null; pad.classList.remove('drag'); lat.hold(false); paintPad(); land(); };
   pad.addEventListener('pointerup', end); pad.addEventListener('pointercancel', end); pad.addEventListener('lostpointercapture', end);
   pad.addEventListener('dblclick', (e) => { e.preventDefault(); });   // the double-tap is taken on the press (300 ms within 14 px); a click would answer it a second time
-  pad.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
   pad.addEventListener('keydown', (e) => {
     if (disabled || e.ctrlKey || e.metaKey || e.altKey) return;
     const d = 0.01 * (e.code.startsWith('Page') ? 10 : 1) * (e.shiftKey ? setKnobLaw().keyFine : 1);   // the kit's one fine gear

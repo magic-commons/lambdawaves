@@ -223,7 +223,6 @@ export function curveEditor(o = {}) {
     } else return;
     e.preventDefault(); e.stopPropagation();
   });
-  svg.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
   paint();
   return {
     root, svg, paint, schedule, setHistogram,

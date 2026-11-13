@@ -7,10 +7,10 @@
  * lab/vendor/nist/lines.json, read on the first ATOM landing and kept as DATA) and THE STATE lit in ACCENT A (dynamics.js stateLines over the
  * populated labels, rebuilt on the register's `version`, never in a frame).  Under the ATOM the lit line stands at the COMPUTED Xα Δε, beside — not on
  * — the measured one: the gap is the engine's error, shown.  RANGE VISIBLE | ALL, ‹ SERIES ›, ‹ PAIR › and DECAY are the hand's, never saved.
- * A wheel over the strip steps the hover line by line (← → too, Enter presses); the hover is the kit's graph tip.  Nothing here runs on the frame
+ * Once the strip was pressed and holds the focus a wheel steps the hover line by line (044 K2; ← → too, Enter presses); the hover is the kit's graph tip.  Nothing here runs on the frame
  * path: update() returns at once unless the operator, the element or the register moved.  The fold holds the prepared state's line table, which
  * was RADIATION's EMISSION LINES (moved whole, call 1 of the plan; RADIATION keeps its far field). */
-import { el, seg, sw, stepper, accentRGB, themeInk, showGraphTip, hideGraphTip } from './mir/kit.js'; import { toLUT } from './mir/palette.js';
+import { el, seg, sw, stepper, accentRGB, themeInk, showGraphTip, hideGraphTip, wheelTurn } from './mir/kit.js'; import { toLUT } from './mir/palette.js';
 import { fold } from './fold.js';
 import { levelLine } from './paint-stroke.js';
 import { BASIS, BASIS_INDEX } from './hydrogen.js';
@@ -193,7 +193,7 @@ export function createEmission(host, api) {
   function edge(x, acc) { g.fillStyle = `rgb(${acc[0]},${acc[1]},${acc[2]})`; g.beginPath(); const d = x <= rect.x0 ? -1 : 1, y = (rect.top + rect.base) / 2; g.moveTo(x + d * 5, y); g.lineTo(x - d * 1, y - 5); g.lineTo(x - d * 1, y + 5); g.fill(); }
   function say(t) { if (g.canvas !== cv) return; g.font = `10px ${face}`; g.fillStyle = T ? T.ink(0.85) : 'rgba(128,128,128,0.85)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, (rect.x0 + rect.x1) / 2, (rect.top + rect.base) / 2); }
 
-  /* ── the hover: the cursor bracket, the kit's graph tip; the wheel and ← → step it ── */
+  /* ── the hover: the cursor bracket, the kit's graph tip; ← → and (once pressed) the wheel step it ── */
   function tipFor(L) {
     if (sys === 'hydrogen') { const P = pairsOf(L)[0];
       return `${L.name} · ${nmText(L.lambda)} · ${L.upper} → ${L.lower}${P ? ` · ${lbl(P.a)} + ${lbl(P.b)} · A ${sci(P.level)} s⁻¹` : ''}`; }
@@ -216,7 +216,7 @@ export function createEmission(host, api) {
     hover = h; pressLine(view[h], e.shiftKey || decaySw.get()); paint(); showHover();
   });
   const stepHover = (d) => { if (!view.length) return; hover = hover < 0 ? (d > 0 ? 0 : view.length - 1) : Math.max(0, Math.min(view.length - 1, hover + d)); paint(); showHover(); };
-  cv.addEventListener('wheel', (e) => { if (!view.length) return; e.preventDefault(); stepHover(e.deltaY > 0 || e.deltaX > 0 ? 1 : -1); }, { passive: false });
+  wheelTurn(cv, (n) => { if (!view.length) return false; stepHover(n > 0 ? -1 : 1); });   // 044 K2 THE WHEEL WAITS FOR A CLICK: the strip pressed and focused, a notch is one line (as ← →); otherwise the wheel scrolls the rack
   cv.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); stepHover(e.key === 'ArrowRight' ? 1 : -1); }
     else if ((e.key === 'Enter' || e.key === ' ') && hover >= 0) { e.preventDefault(); pressLine(view[hover], e.shiftKey || decaySw.get()); paint(); }
