@@ -45,7 +45,7 @@ export function createMirGui(app) {
   gui = createGui({ host: document.getElementById('floats') || document.getElementById('lab'), prefs, accent: look.accent, projectAccent: false,
     app: { name: 'λWAVES', version: BUILD_LINE },
     about: { fonts: './fonts/', credits: [
-      [{ t: '{name} {version} · © 2026 Joshua Hosain · Magic Commons', vars: { name: 'λWAVES', version: BUILD_LINE } }],
+      [{ t: '{name} {version} · © 2026 MAGIC COMMONS', vars: { name: 'λWAVES', version: BUILD_LINE } }],
       gplLicence('λWAVES'),
       [{ t: 'Special thanks: Team @ Chronus Quantum for the Molecular Orbital Model (ChronusQ) · ‘Electron Orbitals’ by Brian Johnson · Paul Falstad’s Math & Physics Java Applets · Seth Shultz · Beatriz Erranté, independent research & assistance.' }],
       [{ t: 'Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).' }]] },

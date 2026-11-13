@@ -1,6 +1,6 @@
 λWAVES
-Copyright 2026 Joshua Hosain
-λWAVES by Joshua Hosain · Magic Commons
+Copyright 2026 MAGIC COMMONS
+λWAVES by MAGIC COMMONS
 
 λWAVES is free software: you may redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -78,7 +78,7 @@ Version under the SIL Open Font License, and each entry below says so.
     Licence:   lab/mir/shell/vendor/marked-LICENSE.md
 
 5.  KaTeX  —  the notebook's mathematics typesetting
-    Version:   0.16.11
+    Version:   0.19.1
     Licence:   The MIT License (MIT)
     Notice:    Copyright (c) 2013-2020 Khan Academy and other contributors
     Files:     lab/mir/shell/vendor/katex/katex.min.js, lab/mir/shell/vendor/katex/katex.min.css
@@ -99,7 +99,7 @@ Version under the SIL Open Font License, and each entry below says so.
     Licence:   lab/mir/shell/vendor/katex/fonts/OFL.txt
 
 7.  lab/mir/glyph.js
-    From:      the MANDELBROT app, © 2026 Joshua Hosain · Magic Commons,
+    From:      the MANDELBROT app, © 2026 MAGIC COMMONS,
                GNU General Public License v3.0 only — the same author and licence as
                λWAVES, so no third-party obligation arises.  Its header names the
                one edit made for this tree.
