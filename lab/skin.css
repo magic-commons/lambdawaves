@@ -12,9 +12,6 @@
    window's own name, changing under the eye while you read the name.  Nothing is LOST: `device()`
    already mirrors every status into the header's `title`, so the governor's PARKED sentence and the
    readers' own notes are one hover away, which is where a caveat belongs. */
-.dev-head > .dev-stat { display: none; }
-.dev-stat { color: var(--ink-faint); }
-.dev-stat.live { color: var(--acc); }
 
 /* ── 9. rails, rows, chips, canvases — the same two depths, nothing louder ── */
 .ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .atm-c, .atm-r, .picker { border-color: transparent; box-shadow: var(--relief-well, var(--neu-inset)); }
@@ -24,7 +21,6 @@
 .sp-b:active, .pk-c:active { box-shadow: var(--relief-well, var(--neu-inset)); background: var(--glass-well); }
 .sp-b.on { background: var(--acc-soft); color: var(--acc); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
 .sp-b.solo.on { color: var(--acc2); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 1px color-mix(in srgb, var(--acc2) 40%, transparent); }
-#title .ms { display: none; }                                                 /* the subtitle is a hover-level fact … */
 
 
 #sheet { border-radius: var(--card-r); }               /* wave 53: the '?' bindings sheet wears the same glass as the EXACT/NUMERICAL one */
@@ -39,9 +35,8 @@
    what IMPORT's <input type=file> needs: `hidden` resolves to `display: none !important`, which took it
    out of the tab order AND out of the accessibility tree, and a <label> is not focusable. */
 .skip, .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.skip:focus { width: auto; height: auto; clip-path: none; left: 8px; top: 8px; z-index: 9999; padding: 6px 10px;
-  border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .98); color: var(--fg); box-shadow: var(--relief-raise, var(--neu-raise));
-  font: var(--w-bold) var(--fs-small)/1 var(--font-ui); letter-spacing: var(--tr-wide); text-decoration: none; }
+.skip:focus { width: auto; height: auto; clip-path: none;
+  background: hsl(var(--glass-tint) / .98); }
 
 /* ── 12. the transport: `#transport.mini` — a 32-px subtitle bar, centred, the scrub a thin line ── */
 #transport { border-radius: var(--card-r); }
@@ -60,7 +55,7 @@
    width budget says it wants 556 in 560, and that was at the OLD sizes).  The seats are pinned and
    the SCRUB — the one `flex: 1 1 auto` in the row — gives the room up, which is what it is there for. */
 #transport.mini .tbtn { width: 34px; height: 34px; min-width: 0; flex: 0 0 auto; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 12px; }
-#transport.mini .tbtn:hover { color: var(--fg); background: var(--glass-raise); }
+#transport.mini .tbtn:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
 
 
 #transport.mini .tbtn.play { width: 34px; color: var(--ink-faint); background: transparent;
@@ -120,13 +115,10 @@ body #modwin.mir-modwindow .m2workbar :is(.tbtn, .tbtn > svg) { all: revert-laye
 
 @media (hover: none) { #rack { opacity: 1; }
 }   /* SIL OFL — fonts/STIXTwoMath-OFL.txt · v2.0.2 subset — fonts/STIXTwoMath-SOURCE.txt */
-#title .word { font-family: 'LW Title', var(--font-ui); color: #fff; letter-spacing: .06em; margin-right: -.06em; margin-left: .02em; }
-#title .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; letter-spacing: 0; margin-right: -.04em; }
-#title .mark { margin-left: .05em; }
+#title .word { font-family: 'LW Title', var(--font-ui); color: #fff; letter-spacing: .06em; }
+#title .lam { font-family: var(--font-math); font-weight: var(--w-heavy); font-size: 1.3em; }
 body[data-theme="light"] #title .word { color: #000; }
 /* the logo sits on the stage directly: no glass, no background, one word */
-#title { pointer-events: auto; align-items: baseline; background: none; border: none; box-shadow: none; padding: 6px 10px; gap: 0; opacity: 1; }
-#title .mark { align-self: center; }
 body[data-theme="light"] #stage { background: #eef1f6; }
 /* 2026-09-10 (Josh): THE TRANSPORT IS A PANE LIKE THE WINDOWS. It follows CARD STYLE (tinted / refractive), the
    theme and FROST exactly as .dev does; it had kept a transparent surface of its own from an older wave. */
@@ -193,7 +185,6 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
  */
 @media (hover: none) and (max-width: 700px),
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
-  body.rack-hidden { --rack-edge: 0px; }           /* … and follows to the screen edge when the rack has gone */
 
   /* ── 1. ONE RACK, ON THE LEFT — portrait and landscape both ─────────────────────────────────── */
   #rack { top: calc(env(safe-area-inset-top) + var(--top-bar)); bottom: 0; left: 0; right: auto;
@@ -204,8 +195,7 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
   #rackL, #rackPeek, #rackPeekL { display: none !important; }               /* the mirror rack and both hover-peek strips stand down */
 
   /* ── 2. the masthead strip: the logo (which opens the menus) and the status tags ─────────────── */
-  #title { left: max(env(safe-area-inset-left), 8px); top: calc(env(safe-area-inset-top) + 3px); z-index: calc(var(--z-chrome) + 6); padding: 4px 6px; min-height: 40px; }
-  #title::after { content: ''; position: absolute; inset: -3px -8px; }      /* the 44-px finger on the menu opener, the same ink */
+  #title { z-index: calc(var(--z-chrome) + 6); }
   #badges { left: max(env(safe-area-inset-left), 8px); right: max(env(safe-area-inset-right), 8px); top: env(safe-area-inset-top); height: var(--top-bar); align-items: center;
     padding-left: 116px; justify-content: flex-start; flex-wrap: nowrap; overflow: hidden; z-index: calc(var(--z-chrome) + 5); }
   /* ── 3. THE HIDE TOGGLE FOLLOWS THE RACK, and sits in the thumb zone (desktop's stays fixed) ──── */
@@ -221,13 +211,9 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 
   /* ── 4. OPAQUE: no backdrop-filter anywhere the phone paints every frame ─────────────────────── */
   #notebook, #graphTip { -webkit-backdrop-filter: none; backdrop-filter: none; background: hsl(var(--glass-tint) / 1); }
-  body[data-theme="dark"] #notebook::before { display: none; }
-  #notebook { left: 0 !important; top: 0 !important; width: 100vw !important; height: 100dvh !important;   /* !important beats the inline width/height the desktop's resize grip wrote */
-    max-width: none; max-height: none; border-radius: 0; resize: none;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-  .nb-grip { display: none; }
+  #notebook { width: 100vw !important; height: 100dvh !important;   /* !important beats the inline width/height the desktop's resize grip wrote */
+    max-width: none; max-height: none; border-radius: 0; }
   .mb-list { max-width: calc(100vw - 24px); }
-  .mb-item { min-height: var(--touch); }
   /* HIDEABLE, NEVER CLOSABLE: the transport has no × at this breakpoint — ▾ is its hide, and which way it
      was left is remembered in this browser's settings (rack.js, `phoneTr`). */
   .dev[data-id="transport"] .dev-close { display: none; }
@@ -280,25 +266,21 @@ body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 /* 041 D0 · SPACING REACHES THE RACKS, THE WINDOWS AND THE BAR: MIR OPTIONS' SPACING knob writes --rack-gap / --rack-inset (the racks, line 2) and --pad-k (a pane's padding over home's; csb.css the bar); at home, 10 px, it writes nothing */
 .native-clean .dev-body { padding: calc(10px * var(--pad-k, 1)) calc(12px * var(--pad-k, 1)); }
 .native-clean .grp { border: 0; outline: 0; box-shadow: none; background: none; padding: 0; margin: 0 0 12px; }
-.native-clean .grp-lbl { font-size: var(--fs-micro); color: var(--dim); letter-spacing: .12em; margin: 4px 0 8px; }
+.native-clean .grp-lbl { font-size: var(--fs-micro); color: var(--dim); letter-spacing: var(--tr-wide); margin: 4px 0 8px; }
 .native-clean .row { gap: 8px; align-items: center; justify-content: center; margin: 6px 0; }
 .native-clean .ro { min-width: 0; box-shadow:var(--relief-well, var(--neu-inset));border:0;background:var(--glass-well); }
 .native-clean .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .native-clean .ro-sub { height: 2.6em; overflow: hidden; line-height: 1.3; }
 .native-clean .ro.lw-status .ro-val { white-space: normal; }   /* 0.5.4 P4's seat: INFORMATIONAL's STATUS is the kit's WIDE readout, two lines (base.css Final II) — the nowrap above would cut it mid-number */
-.native-info { display: inline-flex; vertical-align: middle; position: relative; height: 28px; align-items: center; }
-.native-info-button { width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: none; color: var(--dim); cursor: pointer; font: var(--w-bold) 13px/1 var(--font-ui); font-style: normal; }   /* 023 R5 (Josh: "strangely italic"): the ⓘ upright in the UI face (base.css: IT STAYS UPRIGHT), no Georgia slant */
+.native-info-button { font: var(--w-bold) var(--fs-lead)/1 var(--font-ui); font-style: normal; }   /* 023 R5 (Josh: "strangely italic"): the ⓘ upright in the UI face (base.css: IT STAYS UPRIGHT), no Georgia slant */
 .native-info-button:hover, .native-info-button:focus-visible, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--glass-raise); outline: none; }
-.native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--r-lg); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
-.control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--r-md); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
-.control-help[hidden] { display: none; }
+.native-info .native-info-content { width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); border-radius: var(--r-lg); }
+.control-help { max-width: min(280px, calc(100vw - 16px)); border-radius: var(--r-md); }
 .native-clean[data-id="observer"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="observer"] .row { margin: 4px 0; }
 .native-clean[data-id="settings"] .settings-section { margin-bottom: 18px; }
 .native-clean[data-id="settings"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="settings"] .sw { flex: 1 1 110px; }
-.plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
-.plane-model:active { cursor: grabbing; }
 .plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }
 body.disconnected:not(.phone) .dev.native-selected > .dev-head,
 body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
@@ -313,7 +295,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean [hidden] { display: none !important; }
 .native-clean .row > .trig { flex: 1 1 76px; min-width: 0; }
 .native-clean .sp-head { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
-.native-clean .sp-head .trig { padding: 0 3px; font-size: 9px; }
+.native-clean .sp-head .trig { padding: 0 3px; font-size: var(--fs-tiny); }
 .native-clean .sp-head .native-info { grid-row: 2; }
 .native-clean[data-id="settings"] > .dev-body > .segw { margin-bottom: 12px; }
 .native-clean[data-id="settings"] .settings-page > .row { margin: 10px 0 14px; }
@@ -335,8 +317,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean .window-help-book > .note, .native-clean .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
 .native-clean .native-info-content .ro-sub { height:auto; }
 .native-clean .row:empty { display:none; }
-.native-info .native-info-content { position:fixed !important; inset:auto; margin:0; border:0; }
-.native-info .native-info-content:popover-open { display:block !important; }
+.native-info .native-info-content { border:0; }
 .native-clean[data-id="spectrum"] .grp > .row > .segw { flex:1 1 100%; }
 .native-clean[data-id="spectrum"] .grp > .row:first-of-type .seg { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
 .native-clean[data-id="spectrum"] .grp .seg button { padding:0 5px;min-width:0; }
@@ -352,22 +333,22 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="clip"] .grp > .row > .clip-on + .segw .seg-b { flex:1 1 0;min-width:0;padding:0 4px; }
 @media (pointer:coarse) { .native-clean[data-id="observer"] .seg button { min-height:44px; }
 }
-.plane-model[aria-disabled="true"] { opacity:.35;cursor:default; }
+.plane-model[aria-disabled="true"] { opacity:.35;}
 .native-play-row { display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;min-width:0; }
 #transport.mini .native-play-row { gap:2px; }
 #transport { box-sizing:border-box;max-width:100%;overflow:hidden; }
 #transport .native-play-row { min-width:0;width:100%;overflow:hidden; }
 .native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 44px) 22px;align-items:center; }
-.plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));border-radius:8px; }
+.plane-model { border-radius: var(--r-md); }
 
 /* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
 .dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--ctl-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
 .dev:not(.mir-modwindow) .seg-b { border:0;border-radius:6px;background:transparent;color:var(--ink-key); }
-.dev:not(.mir-modwindow) .seg-b:hover { background:var(--glass-raise); }
+.dev:not(.mir-modwindow) .seg-b:hover { background: var(--state-hover, var(--glass-raise)); }
 .dev:not(.mir-modwindow) .seg-b.on { background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise, var(--neu-raise));color:var(--acc); }
-.dev:not(.mir-modwindow) .trig { background:hsl(var(--glass-tint) / 1);border:1px solid transparent;box-shadow:var(--relief-raise, var(--neu-raise));border-radius:8px; }
+.dev:not(.mir-modwindow) .trig { background:hsl(var(--glass-tint) / 1);border:1px solid transparent;box-shadow:var(--relief-raise, var(--neu-raise));border-radius: var(--r-md); }
 .dev:not(.mir-modwindow) .trig:active { background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
-.dev:not(.mir-modwindow) .sw { border:1px solid transparent;border-radius:8px;box-shadow:var(--neu-flat), var(--relief-raise, var(--neu-raise)); }   /* 036 the critic: at STROKE 0 the resting ring is gone, so an OFF switch keeps the relief's soft outset (the neumorphism Josh asked back) */
+.dev:not(.mir-modwindow) .sw { border:1px solid transparent;border-radius: var(--r-md);box-shadow:var(--neu-flat), var(--relief-raise, var(--neu-raise)); }   /* 036 the critic: at STROKE 0 the resting ring is gone, so an OFF switch keeps the relief's soft outset (the neumorphism Josh asked back) */
 .dev:not(.mir-modwindow) .sw.on,
 .dev:not(.mir-modwindow) .trig[aria-expanded="true"],
 .dev:not(.mir-modwindow) .trig[aria-pressed="true"],
@@ -422,8 +403,6 @@ body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="so
 body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) .pk-c.on { border-color: color-mix(in oklab, var(--nc) calc(60% * var(--ctl-stroke)), transparent); }
 
 /* Explanatory pockets are optional; numerical interaction labels stay available. */
-body.window-info-off .native-info,
-body.window-info-off .native-info-content { display:none !important; }
 body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info))),
 body.window-info-off .settings-help { display:none; }
 
@@ -492,15 +471,15 @@ body.window-info-off .settings-help { display:none; }
 .palette-enable > .sw { flex: 1 1 auto; min-width: 0; }
 .palette-enable > .mir-ramp-sel { flex: 0 0 auto; }
 .palette-enable > .mir-ramp-sel > .mir-ramp-remove { margin-left: 0; }
-.lw-pop { position: fixed; left: 50%; top: 0; z-index: 21; pointer-events: none; user-select: none; white-space: nowrap; opacity: 0;
-  transform: translateX(-50%); font-size: calc(15px * var(--lw-pop-size, 1)); font-family: var(--font-info-body, "Spectral"), var(--font-math); font-weight: 400;   /* a glyph Spectral lacks (a subscript, a Greek letter) falls to the math face */
-  color: hsl(40 33% 96%); }
+.lw-pop { position: fixed; left: 50%; top: 0; z-index: var(--z-stage-pop); pointer-events: none; user-select: none; white-space: nowrap; opacity: 0;
+  transform: translateX(-50%); font-size: calc(15px * var(--lw-pop-size, 1)); font-family: var(--font-info-body, "Spectral"), var(--font-math); font-weight: var(--w-regular);   /* a glyph Spectral lacks (a subscript, a Greek letter) falls to the math face */
+  color: var(--stage-ink-light); }
 /* 041 I6 · THE ANNOUNCEMENT WEARS THE STAGE'S FACE (Josh 11-09: "The styling of the new announcements … have a weird glow or shadow on it.  Let it match the
    styling of the formula, name, subtitle, font, and font form"): no glow, no shadow, no tracking; the formula's and the NAME's serif (the kit's
    --font-info-body) in their ink — the theme's here, the stage's own under a coloured stage (lab.css, body[data-stage-ink]).  040 I4's math stands where it
    is maths: WAVE VIEW's line is KaTeX's, the formula's own face (stage-words.js) */
 .lw-pop[data-kind="view"] { font-size: calc(17px * var(--lw-pop-size, 1)); }
-[data-theme="light"] .lw-pop { color: hsl(232 22% 10%); }
+[data-theme="light"] .lw-pop { color: var(--stage-ink-dark); }
 /* 041 I5 (Josh 11-09: "Let the announcements stick around for a second longer"): 2.6 s, was 1.6 — the same 0.19 s in and 0.56 s out, a second more lit */
 .lw-pop.go { animation: lw-pop 2.6s ease-out forwards; }
 @keyframes lw-pop { 0% { opacity: 0; transform: translate(-50%, 6px); } 7.4% { opacity: 1; transform: translate(-50%, 0); } 78.5% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -4px); } }
@@ -515,7 +494,7 @@ body.no-mol-formula .lw-pop { display: none; }
  * (windows/spectrum.js): the grid's canvas at device pixels beside its six faders, one per shell row; its colours are tokens here. */
 #lwMode { position: absolute; left: calc(var(--rack-w) + 24px); top: 46px; z-index: var(--z-chrome); width: auto; display: flex; flex-direction: column; gap: 4px; }
 /* 013 H4: LIBRARY · MOLECULAR · HYDROGEN, a column of icons (021 V2: the table's library · molecule · atom, SVG in the ink); the pressed mode wears the seg's ON face */
-#lwMode .lw-stage-b { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--fg); opacity: .6; cursor: pointer; }
+#lwMode .lw-stage-b { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--r-md); background: none; color: var(--fg); opacity: .6; cursor: pointer; }
 #lwMode .lw-stage-b:hover, #lwMode .lw-stage-b:focus-visible { opacity: 1; }
 #lwMode .lw-stage-b[aria-pressed="true"] { opacity: 1; color: var(--acc); background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
 body.ui-hidden #lwMode { display: none; }
@@ -573,7 +552,7 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-logo { height: 56px; color: var(--fg); } #lwMenu .mm-logo svg { height: 100%; width: auto; display: block; }
 /* the tabs: R9's sliding pill and approach accent */
 #lwMenu .mm-tabs { position: relative; isolation: isolate; display: flex; gap: 26px; }
-#lwMenu .mm-pill { position: absolute; top: -2px; bottom: -2px; left: 0; width: var(--pw, 0); translate: var(--px, 0) 0; border-radius: 999px; background: hsl(var(--glass-tint) / .5); z-index: -1; pointer-events: none;
+#lwMenu .mm-pill { position: absolute; top: -2px; bottom: -2px; left: 0; width: var(--pw, 0); translate: var(--px, 0) 0; border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .5); z-index: -1; pointer-events: none;
   transition: translate var(--t-relocate) var(--ease), width var(--t-relocate) var(--ease); }
 #lwMenu .mm-tab { --on: 0; position: relative; display: inline-flex; align-items: center; gap: 8px; font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; padding: 5px 2px; opacity: calc(.45 + .55 * max(var(--approach, 0), var(--on)));
   color: color-mix(in srgb, var(--acc) calc(max(var(--approach, 0), var(--on)) * 100%), var(--fg)); transition: opacity .12s ease; }
@@ -609,7 +588,7 @@ img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no
 /* the periodic table: 18 columns, 7 periods, a gap row, the two f rows; the picture full, the symbol and Z in its corners */
 #lwMenu .mm-table { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 270px) / 10.3), var(--fit, 100vh)); display: grid; grid-template-columns: repeat(18, var(--t)); grid-template-rows: repeat(7, var(--t)) calc(var(--t) * .35) repeat(2, var(--t)); gap: 2px; }
 #lwMenu .mm-el { border-radius: 6px; } #lwMenu .mm-el .mm-pic { inset: 6%; width: 88%; height: 88%; }
-#lwMenu .mm-sym { position: absolute; left: 7%; bottom: 4%; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: calc(var(--t) * .3); font-weight: 400; line-height: 1; text-shadow: 0 0 5px hsl(var(--glass-tint)); }
+#lwMenu .mm-sym { position: absolute; left: 7%; bottom: 4%; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: calc(var(--t) * .3); font-weight: var(--w-regular); line-height: 1; text-shadow: 0 0 5px hsl(var(--glass-tint)); }
 #lwMenu .mm-table[hidden] { display: none; }
 /* iteration 016 L3 · THE 140 ON ONE PAGE: fourteen columns of the periodic cell (the same --t while the screen is wide; on a narrow one the
    fourteen take the width), ten rows, the state's name centred at the tile's foot */
@@ -619,12 +598,12 @@ img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no
 #lwMenu .mm-htable.mm-hscroll { overflow-y: auto; scrollbar-width: thin; }   /* 039 W9 (D #5): a page too short for ten 24-px rows scrolls the grid, then the page */
 #lwMenu .mm-htable .mm-hl { left: 50%; bottom: 3%; translate: -50% 0; font-size: clamp(11px, calc(var(--t) * .2), 24px); white-space: nowrap; }
 /* iteration 015 M3 · THE 140 (HYDROGEN on the ATOMIC deck): the state's name in STIX, its m the subscript; under SHOW LABELS as the symbols are */
-#lwMenu .mm-hl { position: absolute; left: 7%; bottom: 5%; pointer-events: none; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(14px, calc(var(--t) * .17), 30px); line-height: 1;
+#lwMenu .mm-hl { position: absolute; left: 7%; bottom: 5%; pointer-events: none; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: var(--w-regular); font-size: clamp(14px, calc(var(--t) * .17), 30px); line-height: 1;
   text-shadow: 0 0 5px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 200ms ease; }
 #lwMenu .mm-hl sub { font-size: .6em; vertical-align: -.3em; margin-left: .04em; }
 #lwMenu:not(.labels-atom) .mm-orb .mm-hl { opacity: 0; }
 #lwMenu .mm-amode { display: inline-flex; gap: 2px; } #lwMenu .mm-amode[hidden] { display: none; }
-#lwMenu .mm-el .mm-under { font-size: 11px; }
+#lwMenu .mm-el .mm-under { font-size: var(--fs-base); }
 /* the deck: pages sized by picker.js (--t, --cols, --gap), ‹ › beside them (R4), dots or a count under */
 /* iteration 013 P1: a page sliding sideways fades out instead of being cut at the grid's edge — the container runs --fade past the grid a side
    under the tag strip's mask (wider); pages sit 2·--fade apart so a page's start is still k × clientWidth (picker.js) and no neighbour shows at rest */
@@ -642,7 +621,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-arrow:hover { scale: 1.08; color: var(--acc); } #lwMenu .mm-arrow:active { scale: .94; } #lwMenu .mm-arrow:focus-visible { opacity: 1; color: var(--acc); }
 @media (hover: none) { #lwMenu .mm-arrow { opacity: 1; } }
 #lwMenu .mm-arrow[disabled] { opacity: 0; pointer-events: none; }
-#lwMenu .mm-dots, .lw-pager .mm-dots { display: flex; gap: 8px; justify-content: center; align-items: center; height: 18px; font-size: 12px; letter-spacing: .14em; font-variant-numeric: tabular-nums; opacity: .8; }
+#lwMenu .mm-dots, .lw-pager .mm-dots { display: flex; gap: 8px; justify-content: center; align-items: center; height: 18px; font-size: 12px; letter-spacing: var(--tr-wider); font-variant-numeric: tabular-nums; opacity: .8; }
 #lwMenu .mm-dots[hidden] { display: none; }
 #lwMenu .mm-dot, .lw-pager .mm-dot { width: 7px; height: 7px; border-radius: 4px; background: currentColor; opacity: .28; transition: width 160ms, opacity 160ms; }
 #lwMenu .mm-dot.on, .lw-pager .mm-dot.on { width: 22px; opacity: 1; background: var(--acc); }
@@ -652,15 +631,15 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-caption { height: 110px; display: grid; place-items: center; padding: 2px 16px 20px; overflow: hidden; }
 #lwMenu .mm-line { grid-area: 1 / 1; display: flex; gap: 6px 20px; align-items: baseline; justify-content: center; flex-wrap: wrap; text-align: center; max-width: 92vw; }
 #lwMenu .mm-line.out { pointer-events: none; }
-#lwMenu .mm-cap-f { font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: clamp(24px, 3.1vw, 36px); font-weight: 400; }
+#lwMenu .mm-cap-f { font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: clamp(24px, 3.1vw, 36px); font-weight: var(--w-regular); }
 #lwMenu .mm-cap-n { font-family: 'LW Title', var(--font-ui); font-size: clamp(26px, 3.7vw, 46px); letter-spacing: .04em; line-height: 1.05; }
-#lwMenu .mm-cap-s { flex-basis: 100%; font-style: normal; font-size: clamp(12px, 1.25vw, 16px); letter-spacing: .12em; opacity: .65; }
-#lwMenu .mm-cap-m { font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: clamp(16px, 1.7vw, 22px); letter-spacing: .02em; opacity: .8; }   /* an element's subshell, 3d² */
+#lwMenu .mm-cap-s { flex-basis: 100%; font-style: normal; font-size: clamp(12px, 1.25vw, 16px); letter-spacing: var(--tr-wide); opacity: .65; }
+#lwMenu .mm-cap-m { font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: clamp(16px, 1.7vw, 22px); letter-spacing: var(--tr-tight); opacity: .8; }   /* an element's subshell, 3d² */
 /* LIBRARY: the shelf of volumes (the numeral huge in LW Title), the install ring (R7), a volume's tags, its group line, its deck */
 #lwMenu .mm-shelf { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: flex-start; max-width: 1240px; }
 #lwMenu .mm-shelf[hidden], #lwMenu .mm-volview[hidden] { display: none; }
 #lwMenu .mm-empty { display: grid; gap: 12px; justify-items: center; text-align: center; max-width: 600px; }
-#lwMenu .mm-empty b { font-family: 'LW Title', var(--font-ui); font-size: clamp(44px, 7vw, 104px); font-weight: 400; letter-spacing: .04em; line-height: 1; }
+#lwMenu .mm-empty b { font-family: 'LW Title', var(--font-ui); font-size: clamp(44px, 7vw, 104px); font-weight: var(--w-regular); letter-spacing: .04em; line-height: 1; }
 #lwMenu .mm-empty span { font-size: 14px; line-height: 1.6; opacity: .7; }
 /* 032 THE PORTRAIT SHELF (picker.js card): a volume is album art — 9:16 as tall as the page allows, its still for the theme in use (the hero
    over it on a hover, faded in once it plays), or the λWAVES palette (teal · lilac · violet, placed by the card's --k) until it has one; the
@@ -686,9 +665,9 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 #lwMenu .mm-vol-wip .mm-ico { width: 14px; height: 14px; }   /* 030: the cone — under construction, amber like a site sign */   /* iteration 014 C4: a volume still filling */
 #lwMenu .mm-vol.filling .mm-vol-open { cursor: default; } #lwMenu .mm-vol.filling .mm-vol-num { opacity: .55; } #lwMenu .mm-vol.filling .mm-vol-open:hover .mm-vol-num { color: inherit; }   /* iteration 015 M5: VOL. II · WIP, FILLING */
 #lwMenu .mm-vol-meta { font-size: 12px; letter-spacing: .08em; opacity: .7; font-variant-numeric: tabular-nums; }
-#lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: 999px; font-variant-numeric: tabular-nums; transition: color 120ms; }
+#lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: var(--fs-base); letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: var(--r-pill); font-variant-numeric: tabular-nums; transition: color 120ms; }
 #lwMenu .mm-install:hover, #lwMenu .mm-install:focus-visible { color: var(--acc); }
-#lwMenu .mm-install-alt { font-size: 10px; letter-spacing: .2em; opacity: .55; padding: 2px 8px; margin-top: -8px; transition: opacity 120ms, color 120ms; }   /* 030: a site volume's .lwv from disk */
+#lwMenu .mm-install-alt { font-size: var(--fs-small); letter-spacing: .2em; opacity: .55; padding: 2px 8px; margin-top: -8px; transition: opacity 120ms, color 120ms; }   /* 030: a site volume's .lwv from disk */
 #lwMenu .mm-install-alt:hover, #lwMenu .mm-install-alt:focus-visible { opacity: 1; color: var(--acc); } #lwMenu .mm-install-alt[hidden] { display: none; }
 #lwMenu .mm-ring-host { position: relative; width: 30px; height: 30px; flex: none; }
 #lwMenu .mm-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
@@ -699,18 +678,18 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 /* iteration 008 P: the volume's head is ONE row (‹ LIBRARY · ‹ VOL. I › · the count · the tags · the search · INSTALL), so the deck under it
    takes a row more; the tags are one line that scrolls sideways under a feathered edge, each a pill in the seg's manner (the lit one the accent) */
 #lwMenu .mm-vhead { display: flex; align-items: center; gap: 8px 14px; flex-wrap: nowrap; width: min(calc(var(--t, 170px) * var(--cols, 10) + var(--gap, 10px) * (var(--cols, 10) - 1)), calc(100vw - 60px)); min-height: 40px; }
-#lwMenu .mm-back { flex: none; font-size: 11px; letter-spacing: .22em; opacity: .55; white-space: nowrap; transition: opacity 120ms, color 120ms; } #lwMenu .mm-back:hover, #lwMenu .mm-back:focus-visible { opacity: 1; color: var(--acc); }
+#lwMenu .mm-back { flex: none; font-size: var(--fs-base); letter-spacing: .22em; opacity: .55; white-space: nowrap; transition: opacity 120ms, color 120ms; } #lwMenu .mm-back:hover, #lwMenu .mm-back:focus-visible { opacity: 1; color: var(--acc); }
 #lwMenu .mm-vstep { flex: none; } #lwMenu .mm-vstep .mir-step-row { gap: 0; }
-#lwMenu .mm-vstep .mir-step-name { min-width: 0; min-height: 34px; padding: 0 6px; font-family: 'LW Title', var(--font-ui); font-size: 26px; letter-spacing: .02em; line-height: 1; white-space: nowrap; }
-#lwMenu .mm-vstep .mir-step-b { width: 26px; height: 34px; min-width: 0; min-height: 0; font-size: 18px; border-radius: 8px; } #lwMenu .mm-vstep .mir-step-b:disabled { opacity: .18; }
+#lwMenu .mm-vstep .mir-step-name { min-width: 0; min-height: 34px; padding: 0 6px; font-family: 'LW Title', var(--font-ui); font-size: 26px; letter-spacing: var(--tr-tight); line-height: 1; white-space: nowrap; }
+#lwMenu .mm-vstep .mir-step-b { width: 26px; height: 34px; min-width: 0; min-height: 0; font-size: 18px; border-radius: var(--r-md); } #lwMenu .mm-vstep .mir-step-b:disabled { opacity: .18; }
 #lwMenu .mm-count { flex: none; font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; white-space: nowrap; }
-#lwMenu .mm-search { flex: none; font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); border-radius: 999px; padding: 6px 12px; width: 150px; }
+#lwMenu .mm-search { flex: none; font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); border-radius: var(--r-pill); padding: 6px 12px; width: 150px; }
 #lwMenu .mm-search::placeholder { color: var(--fg); opacity: .45; }
 #lwMenu .mm-vhead .mm-install { flex: none; white-space: nowrap; padding: 2px 10px 2px 2px; } #lwMenu .mm-vhead .mm-ring-host { width: 26px; height: 26px; }
 #lwMenu .mm-tags { flex: 1 1 auto; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; overscroll-behavior-x: contain; padding: 2px 14px;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); }
 #lwMenu .mm-tags::-webkit-scrollbar { height: 4px; } #lwMenu .mm-tags::-webkit-scrollbar-thumb { background: var(--acc); border-radius: 2px; }   /* 029 Q: the rack's bar (lab.css), turned sideways */
-#lwMenu .mm-tag { flex: none; white-space: nowrap; font-size: 12px; letter-spacing: .06em; padding: 5px 10px; border-radius: 999px; opacity: .6; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 120ms, color 120ms, background-color 120ms; }
+#lwMenu .mm-tag { flex: none; white-space: nowrap; font-size: 12px; letter-spacing: .06em; padding: 5px 10px; border-radius: var(--r-pill); opacity: .6; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 120ms, color 120ms, background-color 120ms; }
 #lwMenu .mm-tag i { font-style: normal; opacity: .6; margin-left: 5px; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-tag:hover, #lwMenu .mm-tag:focus-visible { opacity: .95; } #lwMenu .mm-tag.on { opacity: 1; color: var(--acc); background: color-mix(in srgb, var(--acc) 16%, transparent); }
 /* iteration 011 Q4: the MOLECULAR deck is molecules only — a record not yet on this device keeps its picture and wears the kit's download glyph */
@@ -734,16 +713,16 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 #lwMenu .mm-iso-tail { position: absolute; z-index: 6; width: 24px; height: 12px; pointer-events: none; clip-path: polygon(0 0, 100% 0, 50% 100%); }
 #lwMenu .mm-iso-tail[data-side="up"] { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 #lwMenu .mm-isohead { display: flex; align-items: baseline; gap: 14px; }
-#lwMenu .mm-isof { font: var(--w-bold, 600) 22px/1 var(--font-math, serif); } #lwMenu .mm-isocount { font-size: 12px; letter-spacing: .12em; opacity: .6; }
+#lwMenu .mm-isof { font: var(--w-bold, 600) 22px/1 var(--font-math, serif); } #lwMenu .mm-isocount { font-size: 12px; letter-spacing: var(--tr-wide); opacity: .6; }
 #lwMenu .mm-isox { font-size: 18px; letter-spacing: 0; }
 #lwMenu .mm-isogrid { display: grid; grid-template-columns: repeat(min(var(--n, 1), var(--cols, 8)), var(--t, 150px)); grid-auto-rows: var(--t, 150px); gap: var(--gap, 10px); justify-content: center; }
 #lwMenu .mm-isogrid .mm-tile.here { background: color-mix(in srgb, var(--fg) 9%, transparent); border-radius: 14px; }   /* 037 M5: the volume's thumbnail isomer on a soft plate, no outline */
 /* … and under the shelf THIS DEVICE (032: the RECORDS cards left — every section's molecules are the MOLECULAR deck's) */
 #lwMenu .mm-dev[hidden] { display: none; }
-#lwMenu .mm-dev b { font-weight: 400; font-size: 11px; letter-spacing: .22em; opacity: .55; }
+#lwMenu .mm-dev b { font-weight: var(--w-regular); font-size: var(--fs-base); letter-spacing: .22em; opacity: .55; }
 #lwMenu .mm-dev { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 16px; max-width: 1000px; text-align: center; font-size: 12px; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-dev span { opacity: .6; }
-#lwMenu .mm-ph { position: absolute; inset: 0; display: grid; place-items: center; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: calc(var(--t) * .17); opacity: .75; transition: scale 280ms var(--ease); }
+#lwMenu .mm-ph { position: absolute; inset: 0; display: grid; place-items: center; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: var(--w-regular); font-size: calc(var(--t) * .17); opacity: .75; transition: scale 280ms var(--ease); }
 #lwMenu .mm-tile:hover .mm-ph { scale: 1.1; }
 @media (max-width: 700px) {
   #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
@@ -759,18 +738,18 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 #lwMenu .mm-ico { display: inline-block; flex: none; width: 14px; height: 14px; }
 #lwMenu :is(.mm-ico, .mm-hue-ring) > svg { display: block; width: 100%; height: 100%; }   /* 021 V2: the seat sizes its glyph (lab/icons.js), no mask */
 #lwMenu .mm-opts { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 22px; margin-top: -4px; }
-#lwMenu .mm-opt { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .22em; padding: 3px 8px; border-radius: 999px; opacity: .38; transition: opacity 140ms, color 140ms; }
+#lwMenu .mm-opt { display: inline-flex; align-items: center; gap: 7px; font-size: var(--fs-small); letter-spacing: .22em; padding: 3px 8px; border-radius: var(--r-pill); opacity: .38; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-opt:hover, #lwMenu .mm-opt:focus-visible { opacity: .8; } #lwMenu .mm-opt.on { opacity: .75; color: var(--acc); } #lwMenu .mm-opt[hidden] { display: none; }
 #lwMenu .mm-opt .mm-ico { width: 12px; height: 12px; }
 /* iteration 015 M1 · THE LOOK DROP (picker.js `.mm-lookdrop`): the LOOK button wears the look in use as its glyph (the math face); the drop is a
    2 × 3 pane of 72 px tiles on the Picker's surface, centred under the button and over the decks, the glyph alone in each (the word is its hint);
    the Gol note's motion — the spring open (scale .94 × .6 → 1, 320 ms, the overshoot), the tiles 30 ms apart, the 120 ms close; reduced motion none */
-#lwMenu .mm-lookg { font: 400 17px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
+#lwMenu .mm-lookg { font: var(--w-regular) 17px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
 #lwMenu .mm-lookb[aria-expanded="true"] { opacity: 1; color: var(--acc); }
 #lwMenu .mm-lookdrop { --ease-spring: cubic-bezier(.2, 1.4, .4, 1); position: absolute; z-index: 20; translate: -50% 0; transform-origin: 50% 0; display: grid; grid-template-columns: repeat(8, 33px); grid-auto-rows: 72px; gap: 6px; padding: 8px; border-radius: 16px; }   /* 016 L1: two brick rows (picker.js places each tile over two 33 px columns), 3 over 4 */
 #lwMenu .mm-lookdrop[hidden] { display: none; }
-#lwMenu .mm-lk { display: grid; place-items: center; border-radius: 12px; opacity: .6; transition: opacity 140ms, color 140ms, background-color 140ms, scale 160ms var(--ease); }
-#lwMenu .mm-lk-g { font: 400 26px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
+#lwMenu .mm-lk { display: grid; place-items: center; border-radius: var(--r-lg); opacity: .6; transition: opacity 140ms, color 140ms, background-color 140ms, scale 160ms var(--ease); }
+#lwMenu .mm-lk-g { font: var(--w-regular) 26px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
 #lwMenu :is(.mm-lk-g, .mm-lookg) svg { display: block; width: 1em; height: 1em; }   /* ● and ⊸, drawn at the glyph's em */
 #lwMenu .mm-lk:hover, #lwMenu .mm-lk:focus-visible { opacity: 1; background: color-mix(in srgb, var(--fg) 7%, transparent); }
 #lwMenu .mm-lk:active { scale: .95; }
@@ -783,10 +762,10 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 @keyframes mm-lk-in { from { transform: translateY(14px) scale(.96); opacity: 0; } 60% { opacity: 1; } }
 @keyframes mm-drop-close { to { transform: translateY(-6px) scale(.98); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-lookdrop.in, #lwMenu .mm-lookdrop.in .mm-lk, #lwMenu .mm-lookdrop.out { animation: none; } }
-#lwMenu .mm-vhead .mm-opt { flex: none; white-space: nowrap; font-size: 11px; letter-spacing: .18em; opacity: .55; } #lwMenu .mm-vhead .mm-opt.on { opacity: 1; }
+#lwMenu .mm-vhead .mm-opt { flex: none; white-space: nowrap; font-size: var(--fs-base); letter-spacing: .18em; opacity: .55; } #lwMenu .mm-vhead .mm-opt.on { opacity: 1; }
 #lwMenu .mm-back { display: grid; place-items: center; width: 28px; height: 28px; } #lwMenu .mm-back .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-lbl { position: absolute; left: 7%; bottom: 5%; max-width: 86%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none;
-  font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(11px, calc(var(--t) * .1), 18px); line-height: 1;
+  font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: var(--w-regular); font-size: clamp(11px, calc(var(--t) * .1), 18px); line-height: 1;
   text-shadow: 0 0 5px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); opacity: 0; transition: opacity 200ms ease; }
 #lwMenu.labels-mol .mm-lbl { opacity: .9; } #lwMenu .mm-tile:has(.mm-ph) .mm-lbl { display: none; }
 #lwMenu .mm-el .mm-sym { transition: opacity 200ms ease; }
@@ -827,12 +806,12 @@ html.mono #lwMenu .mm-hue-ring::after { opacity: 1; background: conic-gradient(f
 #lwMenu .mm-ring-host > .mm-ico { position: absolute; left: 50%; top: 50%; width: 52%; height: 52%; translate: -50% -50%; opacity: .7; transition: opacity 160ms; }
 #lwMenu .mm-install[data-state="installed"] .mm-ring-host > .mm-ico { opacity: 1; } #lwMenu .mm-install[data-state="busy"] .mm-ring-host > .mm-ico { opacity: 0; }
 #lwMenu .mm-tags { display: flex; flex-direction: column; justify-content: center; gap: 3px; padding-top: 1px; padding-bottom: 4px; }
-#lwMenu .mm-tags .mm-tag { font-size: 11px; padding: 3px 9px; }   /* iteration 014 C3 · 029 Q: two rows over the rail's bar */
+#lwMenu .mm-tags .mm-tag { font-size: var(--fs-base); padding: 3px 9px; }   /* iteration 014 C3 · 029 Q: two rows over the rail's bar */
 #lwMenu .mm-tagrow { display: flex; gap: 4px; flex-wrap: nowrap; width: max-content; }
 #lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { display: none; }   /* inside a volume its head's twin is the one */
 /* iteration 014 D1: inside a volume the seat under the tabs is the search; the head's old seat holds NAME and MASS (3-state, as-is unpressed) */
 #lwMenu .mm-opts .mm-search { display: none; width: 240px; text-align: center; padding-block: 3px; line-height: 16px; }   /* 041 P14: 22 px, the seat's own height — entering a volume no longer grows the head 8 px */ #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
-#lwMenu .mm-sort { flex: none; display: inline-flex; align-items: center; gap: 4px; min-width: 30px; height: 26px; padding: 0 8px; border-radius: 999px; font-size: 11px; letter-spacing: .08em; white-space: nowrap; opacity: .45; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 140ms, color 140ms; }
+#lwMenu .mm-sort { flex: none; display: inline-flex; align-items: center; gap: 4px; min-width: 30px; height: 26px; padding: 0 8px; border-radius: var(--r-pill); font-size: var(--fs-base); letter-spacing: .08em; white-space: nowrap; opacity: .45; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-sort:hover, #lwMenu .mm-sort:focus-visible { opacity: .8; } #lwMenu .mm-sort.on { opacity: 1; color: var(--acc); }
 #lwMenu .mm-sort .mm-ico { width: 14px; height: 14px; } #lwMenu .mm-sort[data-sort="name"] span { min-width: 2.4em; text-align: center; }
 #lwMenu.labels-mol .mm-lbl { animation: mm-rise 240ms var(--ease) both; }
@@ -900,7 +879,7 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 /* iteration 016 T1 · ONE TIME READER (Josh: "THE TIMELINE'S TIME READER takes the modulation window's tempo reader's CSS, font and sizing"): the value in
    the tempo number's face (modhost.css `.m2workbar .tempo-number`: bold 18 px, the numeral face, tabular, ACCENT B), `t` in its unit's (bold 8 px UI,
    .04em, soft); 015 T1's fixed 16 ch and its lining numerals stay */
-.mir-timeline .tl-transport .ro.time .ro-lbl { font: var(--w-bold) 8px/1 var(--font-ui); letter-spacing: .04em; color: var(--fg-soft); }
+.mir-timeline .tl-transport .ro.time .ro-lbl { font: var(--w-bold) var(--fs-micro)/1 var(--font-ui); letter-spacing: .04em; color: var(--fg-soft); }
 .mir-timeline .tl-transport .ro.time .ro-val { font: var(--w-bold) 18px/1 var(--font-num); font-variant-numeric: lining-nums tabular-nums; color: var(--acc2); }
 /* 023 R4: the kit's `.ro-val { min-height: 1.4em }` (base.css) gave the 18-px value a 25-px box with its numerals at the top, so t sat 3 px above
    the tempo number beside it; at its own 18 px the value is centred on the row as the tempo number is — one baseline, one box */
@@ -994,7 +973,7 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .native-clean[data-id="settings"] .lw-gamut > .segw { grid-column: span 3; width: auto; }
 /* 037 T1 · STAGE (lab/stage-window.js): FRAME the whole line; AXES · AXIS COLOUR halves; the colour a swatch bar beside FOLLOW THEME; STAGE · GAMMA */
 /* 041 S8 · THE STAGE COMES BACK: RELOAD STAGE, in the middle of a stage whose GPU device was lost (shell/controller.js stageLost) */
-.lw-stage-lost { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: 30; zoom: var(--ui-zoom, 1); }
+.lw-stage-lost { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: var(--z-stage-lost); zoom: var(--ui-zoom, 1); }
 .lw-stage-card .row { margin: 0 0 8px; }
 .lw-stage-card .stage-frame > .segw { flex: 1 1 100%; }
 .lw-stage-card .stage-axes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; }
@@ -1003,7 +982,7 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-stage-card .stage-seat { flex: 1 1 100%; flex-direction: row; align-items: center; align-self: center; gap: 8px; }
 .lw-stage-card .stage-colour { flex: 1 1 auto; width: auto; height: 22px; }
 .lw-stage-card .stage-knobs { margin-bottom: 2px; }
-.lw-stage-card .grp { margin: 4px 0 0; padding-top: 8px; border-top: 1px solid var(--glass-hairline); }   /* 037 T4: PULSE under a thin rule */
+.lw-stage-card .grp { margin: 4px 0 0; padding-top: 8px; border-top: var(--glass-border) solid var(--glass-hairline); }   /* 037 T4: PULSE under a thin rule */
 .lw-stage-card .stage-pulse { margin-bottom: 2px; }
 .lw-stage-card .stage-fx-head { display: flex; align-items: center; justify-content: space-between; min-height: 26px; }   /* 040 S2: a group's word, and PULSE's chevron (STROBE · BEAM) */
 .lw-stage-card .stage-fx-head > .grp-lbl { margin: 0; }
@@ -1017,7 +996,7 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
    above it, × at its top-right, the grip at its bottom-right, its kind's controls under it; SNAP's guide is a 1-px accent line across the stage */
 #widgets.edit .lw-widget { pointer-events: auto; cursor: move; touch-action: none; outline: 1px dashed color-mix(in srgb, currentColor 55%, transparent); outline-offset: 3px; }
 #widgets.edit .lw-widget:focus { outline: 1px solid var(--acc); }
-#widgets.edit .lw-widget::before { content: attr(data-word); position: absolute; left: -3px; bottom: 100%; margin-bottom: 6px; font: 400 11px/1 'LW Title', var(--font-ui); letter-spacing: .1em; opacity: .7; white-space: nowrap; }   /* 038 S4: the kind's word in the logo face */
+#widgets.edit .lw-widget::before { content: attr(data-word); position: absolute; left: -3px; bottom: 100%; margin-bottom: 6px; font: var(--w-regular) var(--fs-base)/1 'LW Title', var(--font-ui); letter-spacing: .1em; opacity: .7; white-space: nowrap; }   /* 038 S4: the kind's word in the logo face */
 #widgets.edit .lw-widget-x { display: grid; place-items: center; position: absolute; right: -14px; top: -14px; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: var(--acc); color: #fff; cursor: pointer; }
 #widgets.edit .lw-widget-grip { display: block; position: absolute; right: -7px; bottom: -7px; width: 12px; height: 12px; cursor: nwse-resize; border: solid currentColor; border-width: 0 2px 2px 0; }
 #widgets.edit .lw-widget-bar:not(:empty) { display: flex; position: absolute; left: 50%; top: 100%; width: max-content; margin-top: 10px; transform: translateX(-50%); gap: 4px; align-items: center; white-space: nowrap; cursor: default; }
@@ -1030,10 +1009,10 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-widgets-card .wg-gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 0 0 8px; }
 .lw-widgets-card .wg-kind { flex-direction: column; justify-content: center; gap: 5px; height: 58px; min-width: 0; min-height: 0; padding: 4px 0; }
 .lw-widgets-card .wg-kind .trig-g .gly { width: 22px; height: 22px; }
-.lw-widgets-card .wg-kind .trig-l { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8px; letter-spacing: .02em; }
-.lw-widgets-card .wg-list { max-height: 157px; margin: 0 0 8px; overflow: hidden auto; overscroll-behavior: contain; border-top: 1px solid var(--glass-hairline); }
+.lw-widgets-card .wg-kind .trig-l { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-micro); letter-spacing: var(--tr-tight); }
+.lw-widgets-card .wg-list { max-height: 157px; margin: 0 0 8px; overflow: hidden auto; overscroll-behavior: contain; border-top: var(--glass-border) solid var(--glass-hairline); }
 .lw-widgets-card .wg-list[hidden] { display: none; }
-.lw-widgets-card .wg-row { display: flex; align-items: center; gap: 6px; height: 26px; border-bottom: 1px solid var(--glass-hairline); font-size: 11px; letter-spacing: .06em; }
+.lw-widgets-card .wg-row { display: flex; align-items: center; gap: 6px; height: 26px; border-bottom: 1px solid var(--glass-hairline); font-size: var(--fs-base); letter-spacing: .06em; }
 .lw-widgets-card .wg-word { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-widgets-card .wg-n { opacity: .6; font-variant-numeric: tabular-nums; }
 .lw-widgets-card .wg-x { flex: 0 0 24px; width: 24px; height: 22px; min-width: 0; min-height: 0; padding: 0; }
@@ -1078,14 +1057,14 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 #lwMenu .mm-tip-art .mm-lit { padding: 7px; box-sizing: border-box; animation: mm-tip-spin 10s linear infinite;
   background: conic-gradient(from var(--tip-a), var(--hl-1), var(--hl-2), var(--hl-3), var(--hl-4), var(--hl-1)); }
 #lwMenu .mm-tip-art img { position: relative; display: block; width: 100%; height: 100%; border-radius: 24px; background: #fff; }
-#lwMenu .mm-tip-word { font-size: 11px; letter-spacing: .24em; opacity: .75; transition: color 160ms, opacity 160ms; }
+#lwMenu .mm-tip-word { font-size: var(--fs-base); letter-spacing: .24em; opacity: .75; transition: color 160ms, opacity 160ms; }
 #lwMenu .mm-tip:hover .mm-tip-word, #lwMenu .mm-tip:focus-visible .mm-tip-word { color: var(--acc); opacity: 1; }
 #lwMenu .mm-tip-back { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; }
 #lwMenu .mm-tip-sheet { display: grid; gap: 14px; justify-items: center; padding: 26px 28px 22px; border-radius: 28px; animation: mm-tip-in 300ms cubic-bezier(.3, 1.4, .5, 1); }
 #lwMenu .mm-tip-sheet .mm-tip-art { width: 200px; }
-#lwMenu .mm-tip-free { font-size: 10px; letter-spacing: .26em; opacity: .6; }
+#lwMenu .mm-tip-free { font-size: var(--fs-small); letter-spacing: .26em; opacity: .6; }
 #lwMenu .mm-tip-row { display: flex; gap: 10px; }
-#lwMenu .mm-tip-yes, #lwMenu .mm-tip-no { font-size: 11px; letter-spacing: .18em; padding: 9px 18px; border-radius: 999px; color: inherit; text-decoration: none; transition: transform 160ms, color 120ms; }
+#lwMenu .mm-tip-yes, #lwMenu .mm-tip-no { font-size: var(--fs-base); letter-spacing: .18em; padding: 9px 18px; border-radius: var(--r-pill); color: inherit; text-decoration: none; transition: transform 160ms, color 120ms; }
 #lwMenu .mm-tip-yes { color: #fff; background: linear-gradient(120deg, #168878, #5b4bc4 55%, #a52eab); }
 #lwMenu .mm-tip-no { background: color-mix(in srgb, var(--fg) 8%, transparent); }
 #lwMenu .mm-tip-yes:hover, #lwMenu .mm-tip-yes:focus-visible { transform: scale(1.06); }
@@ -1144,7 +1123,7 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 #lwMenu .mm-doors { display: flex; gap: clamp(16px, 3vw, 40px); }
 #lwMenu .mm-door { display: block; width: clamp(210px, 21vw, 330px); aspect-ratio: 16 / 10; border-radius: 18px; }
 #lwMenu .mm-door-word { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-#lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
+#lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: var(--w-regular); font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
 /* 037 M4 · THE DOORS' INK (Josh 11-05: "Don't use drop shadow for 'Tutorial' and 'Library' … let a copy underneath the text be inverted. So top
    layer is the text, next layer is … 4px right, 4px down, and then set to invert"): no shadow; the word's copy (the span's ::after, its
    data-word) 1 px right and 1 px down (Josh 11-05, later: "maybe just be 1px to the right, 1px down. instead of 4px") in white ink under `difference`, so it inverts the art beneath it.  The span is no stacking context (z
@@ -1153,7 +1132,7 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 #lwMenu .mm-door-word { z-index: auto; }
 #lwMenu .mm-door-word b { position: relative; z-index: 6; }
 #lwMenu .mm-door-word::after { content: attr(data-word); position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; translate: calc(1px + .05em) 1px; pointer-events: none;
-  font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; color: #fff; mix-blend-mode: difference; }
+  font-family: 'LW Title', var(--font-ui); font-weight: var(--w-regular); font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; color: #fff; mix-blend-mode: difference; }
 #lwMenu .mm-door:is(:hover, :focus-visible) .mm-door-word b { color: var(--acc); }
 /* 036 G1 · THE DOORS' ART (picker.js door): the word alone over the about site's pictures, img/menu/face/ (DATA), each faded in once loaded
    over the palette art.  TUTORIAL: the site's MIR picture placed as the site places it (right of centre, turned in perspective, its radial
@@ -1181,7 +1160,7 @@ body.menu-open.about-over #lab { z-index: 100001; visibility: hidden; }
 body.menu-open.about-over #lab :not(.lw-about, .lw-about *) { visibility: hidden; }   /* the DISCONNECTED look shows a window's parts explicitly (the kit's skin.css) */
 body.menu-open.about-over #floats > .lw-about { visibility: visible; background: hsl(var(--glass-tint) / .9); }   /* a page over the wall: its pane nearly opaque there */
 body.menu-open.about-over #lwMenu::after { content: ''; position: absolute; inset: 0; z-index: 9; background: hsl(var(--glass-tint) / .6); }   /* the face steps back under ABOUT; a press on it puts ABOUT away (picker.js) */
-#lwMenu .mm-face-lab { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(17px, 1.5vw, 22px); letter-spacing: .22em; margin-right: -.22em; padding: 6px 14px; opacity: .9; transition: opacity 140ms, color 140ms; }   /* 037 M4: the serif, no plate, no border */
+#lwMenu .mm-face-lab { font-family: 'LW Title', var(--font-ui); font-weight: var(--w-regular); font-size: clamp(17px, 1.5vw, 22px); letter-spacing: .22em; margin-right: -.22em; padding: 6px 14px; opacity: .9; transition: opacity 140ms, color 140ms; }   /* 037 M4: the serif, no plate, no border */
 #lwMenu .mm-face-lab:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
 #lwMenu .mm-face-way { display: flex; justify-content: center; gap: clamp(28px, 4vw, 56px); } #lwMenu .mm-face-lab[hidden] { display: none; }   /* 038 M1: CONTINUE's seat, or SIMPLE · ADVANCED there on a fresh install */
 #lwMenu .mm-face.in .mm-face-logo { animation: mm-drop 820ms var(--ease) both; }
@@ -1243,7 +1222,7 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
    in the accent on the decks' pill), no well, no word */
 #lwMenu .mm-tut-head { display: flex; justify-content: center; margin: 0 0 18px; }
 #lwMenu .mm-tut-head .seg { gap: 8px; padding: 0; background: none; }
-#lwMenu .mm-tut-head .seg-b { min-width: 52px; min-height: 0; padding: 5px 16px; border-radius: 999px; font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; color: var(--fg); opacity: .45;
+#lwMenu .mm-tut-head .seg-b { min-width: 52px; min-height: 0; padding: 5px 16px; border-radius: var(--r-pill); font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; color: var(--fg); opacity: .45;
   transition: opacity .12s ease, color .12s ease, background-color var(--t-relocate) var(--ease); }
 #lwMenu .mm-tut-head .seg-b:is(:hover, :focus-visible) { opacity: .8; }
 #lwMenu .mm-tut-head .seg-b.on { opacity: 1; color: var(--acc); background: hsl(var(--glass-tint) / .5); }
@@ -1265,7 +1244,7 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
   --mm-edge: 0px; transition: --mm-edge 260ms var(--ease); -webkit-mask-image: linear-gradient(var(--mm-dir, to bottom), transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); mask-image: linear-gradient(var(--mm-dir, to bottom), transparent, #000 var(--mm-edge), #000 calc(100% - var(--mm-edge)), transparent); }
 #lwMenu.mm-moving .mm-player-list { --mm-edge: 40px; }
 #lwMenu .mm-player-tile { position: relative; display: block; aspect-ratio: 9 / 16; border-radius: 10px; overflow: hidden; background: hsl(var(--glass-tint) / .5); }
-#lwMenu .mm-player-title { position: absolute; inset: auto 0 0; z-index: 2; padding: 24px 6px 8px; font-size: 10px; line-height: 1.2; letter-spacing: .14em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
+#lwMenu .mm-player-title { position: absolute; inset: auto 0 0; z-index: 2; padding: 24px 6px 8px; font-size: var(--fs-small); line-height: 1.2; letter-spacing: var(--tr-wider); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
   background: linear-gradient(to top, hsl(var(--glass-tint) / .85), transparent); opacity: 0; transition: opacity 120ms ease; pointer-events: none; }
 #lwMenu .mm-player-tile:is(:hover, :focus-visible) .mm-player-title { opacity: 1; }
 @media (max-width: 1000px) {
@@ -1308,16 +1287,16 @@ body.frost #lwMenu .mm-sheet-fx { display: block; }
 #lwMenu .mm-sheet-body .sw { background: transparent; } #lwMenu .mm-sheet-body .sw:hover { background: hsl(var(--glass-tint) / .4); }
 /* THE MORE FOLD (lab/fold.js): a quiet row, its word and the chevron; the rows under it once open */
 #lwMenu .mm-sh-more { display: flex; padding: 4px 0 0; }
-#lwMenu .mm-sh-more .lw-fold { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 30px; padding: 0; background: transparent; font-size: 10px; letter-spacing: .24em; color: var(--acc); }
+#lwMenu .mm-sh-more .lw-fold { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 30px; padding: 0; background: transparent; font-size: var(--fs-small); letter-spacing: .24em; color: var(--acc); }
 #lwMenu .mm-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 12px 6px 20px; }
-#lwMenu .mm-sheet-head b { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: 15px; letter-spacing: .12em; }
+#lwMenu .mm-sheet-head b { font-family: 'LW Title', var(--font-ui); font-weight: var(--w-regular); font-size: 15px; letter-spacing: var(--tr-wide); }
 #lwMenu .mm-sheet-x { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; opacity: .6; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-sheet-x:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); } #lwMenu .mm-sheet-x .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-sheet-body { overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; padding: 0 16px 24px 20px; }
 #lwMenu .mm-sh-group { display: grid; gap: 4px; padding: 8px 0 12px; }
-#lwMenu .mm-sh-h { padding: 4px 0 2px; font-size: 10px; letter-spacing: .24em; color: var(--acc); }
+#lwMenu .mm-sh-h { padding: 4px 0 2px; font-size: var(--fs-small); letter-spacing: .24em; color: var(--acc); }
 #lwMenu .mm-sh-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 12px; align-items: center; min-height: 32px; } #lwMenu .mm-sh-row.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-#lwMenu .mm-sh-row :is(.k-lbl, .sw-lbl, .ro-lbl) { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#lwMenu .mm-sh-row :is(.k-lbl, .sw-lbl, .ro-lbl) { font-size: var(--fs-base); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #lwMenu .mm-sh-row .segw { display: grid; grid-template-columns: var(--lab-w) minmax(0, 1fr); align-items: center; gap: 0 8px; max-width: none; }
 #lwMenu .mm-sh-row .segw > .seg { grid-column: 2; display: flex; flex-wrap: nowrap; }
 #lwMenu .mm-sh-row .seg-b { flex: 1 1 auto; min-width: 0; padding: 0 5px; white-space: nowrap; }
@@ -1329,7 +1308,7 @@ body.frost #lwMenu .mm-sheet-fx { display: block; }
 #lwMenu .mm-sh-row .k { display: grid; grid-template-columns: var(--lab-w) minmax(0, 1fr) auto; align-items: center; gap: 0 8px; width: auto; }
 #lwMenu .mm-sh-row.two .k { grid-template-columns: auto minmax(0, 1fr) auto; }
 #lwMenu .mm-sh-row .k > .k-lbl { grid-area: 1 / 1; } #lwMenu .mm-sh-row .k > .k-dial { grid-area: 1 / 3; width: 26px; height: 26px; }
-#lwMenu .mm-sh-row .k > .k-val { grid-area: 1 / 2; justify-self: end; position: static; opacity: 1; transform: none; padding: 0; background: transparent; box-shadow: none; font-size: 11px; }
+#lwMenu .mm-sh-row .k > .k-val { grid-area: 1 / 2; justify-self: end; position: static; opacity: 1; transform: none; padding: 0; background: transparent; box-shadow: none; font-size: var(--fs-base); }
 #lwMenu .mm-sh-row .k.disabled { opacity: .35; } #lwMenu .mm-sh-row .k.disabled > .k-dial { visibility: hidden; }   /* a dead knob (STRENGTH under DITHER OFF, WIDTH under DOMAIN AUTO) reads dim, its needle never a stray glyph */
 #lwMenu .mm-sh-row .ro { display: grid; grid-template-columns: var(--lab-w) minmax(0, 1fr); align-items: baseline; gap: 0 8px; padding: 0; background: none; border: 0; box-shadow: none; }
 #lwMenu .mm-sh-row .ro-val { padding-left: 6px; font-size: 12px; min-height: 0; } #lwMenu .mm-sh-row .ro-sub { display: none; }
@@ -1368,9 +1347,9 @@ body.frost #lwMenu.at-face { background: hsl(var(--glass-tint) / .985); -webkit-
   background: hsl(var(--glass-tint)); color: var(--fg); transition: opacity 450ms cubic-bezier(.22, .7, .25, 1); }
 #lwLoader.out { opacity: 0; pointer-events: none; }
 #lwLoader .ld-flag { width: clamp(150px, 30vmin, 240px); aspect-ratio: 1; }
-#lwLoader .ld-pct { margin-top: 6px; font: 300 42px/1 var(--font-ui); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
-#lwLoader .ld-line { min-height: 1.5em; max-width: 92vw; font-size: 10px; letter-spacing: .2em; line-height: 1.5; text-align: center; opacity: .62; font-variant-numeric: tabular-nums; }
-#lwLoader .ld-skip { margin-top: 10px; padding: 6px 12px; border: 0; border-radius: 999px; background: none; color: inherit; font: inherit; font-size: 11px; letter-spacing: .22em; opacity: .5; cursor: pointer; transition: opacity 140ms, color 140ms; }
+#lwLoader .ld-pct { margin-top: 6px; font: var(--w-light) 42px/1 var(--font-ui); font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); }
+#lwLoader .ld-line { min-height: 1.5em; max-width: 92vw; font-size: var(--fs-small); letter-spacing: .2em; line-height: 1.5; text-align: center; opacity: .62; font-variant-numeric: tabular-nums; }
+#lwLoader .ld-skip { margin-top: 10px; padding: 6px 12px; border: 0; border-radius: var(--r-pill); background: none; color: inherit; font: inherit; font-size: var(--fs-base); letter-spacing: .22em; opacity: .5; cursor: pointer; transition: opacity 140ms, color 140ms; }
 #lwLoader .ld-skip:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
 #lwLoader .ld-skip[hidden] { display: none; }
 body.lw-loading #menubar { visibility: hidden; }

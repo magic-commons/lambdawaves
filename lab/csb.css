@@ -41,7 +41,7 @@
 /* THE SEATS: one 36-px round box, flat until hovered, the icon a 20-px glyph (the kit's and lab/icons.js' alike) */
 #transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand) {
   display: inline-grid; place-items: center; width: 36px; height: 36px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none; }
-#transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand):hover { color: var(--fg); background: var(--glass-raise); }
+#transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand):hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
 #transport[data-layout="csb"] :is(.csb-ico, .csb-mod) svg { width: 20px; height: 20px; }
 #transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .tr-open.live, .csb-ico .mod-exp.live, .csb-search-b[aria-expanded="true"], #rackFav[aria-expanded="true"], .csb-info.on, .csb-nodes.on, .tr-expand.on) { color: var(--acc); }
 /* 021 V2 · every seat's icon is an SVG from the one table (lab/icons.js through the kit's setGlyph): no masks.  THEME carries the moon and the sun;
@@ -64,10 +64,10 @@ body[data-theme="light"] #transport .csb-theme > .gly-moon, body:not([data-theme
 /* 038 S3 · THE MINI-VIEWER RIDES THE BAR (lab/shell/transport.js): beside the bar's right edge as PLAY is beside its left — its mirror seat, the bar's row
    square, level with the row whichever way the panel opens — no chrome, the stage words' ink, never a pointer target; only while the bar is on the stage,
    in MOLECULAR, BY THE BAR on; the bar's hiding (B, H, a dodge under a window) is its own */
-#transport > .csb-mini { display: none; color: hsl(40 33% 96%); }
+#transport > .csb-mini { display: none; color: var(--stage-ink-light); }
 #transport.mini[data-layout="csb"] > .csb-mini:not([hidden]) { display: block; position: absolute; left: calc(100% + 16px); bottom: -1px; width: 92px; height: 92px; pointer-events: none; }   /* -1px: the bar's rim, so the square is the bar's own height */
 #transport.mini[data-layout="csb"].at-top > .csb-mini { top: -1px; bottom: auto; }
-[data-theme="light"] #transport > .csb-mini { color: hsl(232 22% 10%); }
+[data-theme="light"] #transport > .csb-mini { color: var(--stage-ink-dark); }
 #transport:has(#lwMode [data-id="hydrogen"][aria-pressed="true"]) > .csb-mini { display: none; }
 #transport > .csb-mini > :is(canvas, img) { position: absolute; inset: 0; width: 100%; height: 100%; }
 #transport > .csb-mini > img[hidden] { display: none; }
@@ -93,7 +93,7 @@ body[data-theme="light"] #transport .csb-theme > .gly-moon, body:not([data-theme
 #transport[data-layout="csb"] :is(#lwMode .lw-stage-b, .csb-folders) { width: 40px; height: 36px; border-radius: 10px; }
 #transport[data-layout="csb"] :is(#lwMode .lw-stage-b, .csb-folders) > svg { width: 22px; height: 22px; }   /* 021 V2: the glyph (was the mask ::before); 22 px kept as it was — 022 snaps it to 20 or 24 */
 #transport[data-layout="csb"] .csb-folders { display: inline-grid; place-items: center; padding: 0; border: 0; background: transparent; box-shadow: none; color: var(--ink-key); }
-#transport[data-layout="csb"] .csb-folders:hover { color: var(--fg); background: var(--glass-raise); }
+#transport[data-layout="csb"] .csb-folders:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
 #transport :is(#rackToggle, #rackFav) { position: static; inset: auto; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-events: auto; }
 #transport[data-layout="csb"] .csb-mid > .mol-pick { --touch: 34px; flex: 0 0 auto; width: 220px; min-width: 220px; max-width: 220px; height: 34px; overflow: hidden; }   /* 023 B3: the kit stepper's seat is --touch (44 px); in the 34-px box its foot was cut, so the bar seats it at 34 */
@@ -160,12 +160,12 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 .csb-suggest .csb-top .mm-tile { width: 36px; height: 36px; }
 .csb-suggest .csb-row .mm-tile .mm-lbl { display: none; }
 /* 018 A9 (Josh: "don't show a colored outline for the thumbnails, just either highlight/outset/inset"): relief only — hover raised, the chosen one sunk */
-.csb-suggest .mm-tile:hover { background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); }
+.csb-suggest .mm-tile:hover { background: var(--state-hover, var(--glass-raise)); box-shadow: var(--relief-raise, var(--neu-raise)); }
 .csb-suggest .mm-tile.on { background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 .csb-suggest .mm-pic { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; filter: hue-rotate(var(--mol-hue, 0deg)); }
 .csb-suggest .mm-under { display: none; }
-.csb-suggest .mm-ph { position: absolute; inset: 0 0 12px; display: grid; place-items: center; font: 400 15px/1 var(--font-math, serif); color: var(--fg); opacity: .75; pointer-events: none; }   /* 018 A3: no picture — the formula holds the square */
-.csb-suggest .mm-lbl { position: absolute; left: 0; right: 0; bottom: 3px; font: var(--w-bold) 10px/1 var(--font-math, serif); color: var(--fg); text-align: center; pointer-events: none; }
+.csb-suggest .mm-ph { position: absolute; inset: 0 0 12px; display: grid; place-items: center; font: var(--w-regular) 15px/1 var(--font-math, serif); color: var(--fg); opacity: .75; pointer-events: none; }   /* 018 A3: no picture — the formula holds the square */
+.csb-suggest .mm-lbl { position: absolute; left: 0; right: 0; bottom: 3px; font: var(--w-bold) var(--fs-small)/1 var(--font-math, serif); color: var(--fg); text-align: center; pointer-events: none; }
 /* 022 C2 · THE SURFACE IS A SURFACE (lab/shell/transport.js): the expander is ONE WELL (the kit's `data-mir-surface="well"`, its fill `--xport-well`)
    holding four kit sections on the 44-px grid (`--xport-grid`).  On the STAGE: TRANSPORT across the top, MACROS over FAVOURITES on the left and
    METERS standing beside them; in a rack card (docked, FREE) the four stack.  Nothing scrolls inside it (017 R2).  The bar's own rules hide a
@@ -233,7 +233,7 @@ body[data-theme="light"] .csb-float :is(.k-lbl, .k-val) { text-shadow: 0 1px 3px
 #transport.docked { --xport-micro: 8px; }   /* … 8 in the rack card */
 #transport .native-tempo { order: 9; width: 100%; }   /* 022 C2: its grid is THE SURFACE's (above) */
 #transport.mini.tempo-open { width:min(640px,calc(100vw - 24px));height:auto;min-height:46px;padding-bottom:8px; }
-#transport .tempo-expand { position:relative;flex:0 0 72px;width:72px;height:34px;padding:4px 15px 4px 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:4px;align-items:center;border:1px solid color-mix(in srgb,var(--glass-hairline) calc(100% * var(--ctl-stroke)),transparent);border-radius:8px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));color:var(--fg-soft);touch-action:none; }
+#transport .tempo-expand { position:relative;flex:0 0 72px;width:72px;height:34px;padding:4px 15px 4px 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:4px;align-items:center;border:1px solid color-mix(in srgb,var(--glass-hairline) calc(100% * var(--ctl-stroke)),transparent);border-radius: var(--r-md);background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));color:var(--fg-soft);touch-action:none; }
 #transport .tempo-expand:hover,#transport .tempo-expand:focus-visible { border-color:color-mix(in srgb,var(--acc2) calc(60% * var(--ctl-stroke)),transparent);background:var(--glass-raise);outline:0; }
 #transport .native-tempo { padding:8px;border-top:1px solid color-mix(in srgb,var(--glass-hairline) calc(100% * var(--ctl-stroke)),transparent);border-radius:0 0 10px 10px; }
 #transport.mini .tbtn.modb.on { color:var(--acc2); }
