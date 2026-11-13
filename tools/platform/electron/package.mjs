@@ -27,7 +27,7 @@ const paths = await packager({ dir: HERE, out: OUT, platform, arch: 'x64', asar:
 // 044 S1 (Josh 11-12: "steam version does not show logo"): the MAIN MENU's credits strip is not built on the desktop (lab/picker.js, lab/loader.js
 // read window.lwavesDesktop), and its files — three companies' marks, Google Sans Flex, and OpenAI Sans, which has no licence in the tree
 // (LEGAL-PROVENANCE row 18) — are not in the package at all. The site's dist/ keeps them; the identity below hashes what the package holds.
-const AI_MARKS = ['img/ai', 'img/menu/ai'], inner = (p) => path.join(p, 'resources/dist');
+const AI_MARKS = ['img/ai', 'img/menu/ai', 'img/menu/tip-qr.svg'], inner = (p) => path.join(p, 'resources/dist');   // 044 S7: and the tip jar's QR (no ko-fi card on the desktop)
 for (const p of paths) for (const d of AI_MARKS) fs.rmSync(path.join(inner(p), d), { recursive: true, force: true });
 const git = (...a) => { try { return execFileSync('git', ['-C', REPO, ...a], { encoding: 'utf8' }).trim(); } catch { return null; } };
 const id = { appVersion, gitSha: git('rev-parse', 'HEAD'), gitTag: git('describe', '--tags', '--always'), ...distHash(inner(paths[0])), electron: ver('electron'), packager: ver('@electron/packager'), builtAt: new Date().toISOString() };

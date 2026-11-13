@@ -847,7 +847,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
           await V.remove(v.id); await paint(); return;
         }
         const go = () => { if (pick) pick.click(); else run(null); };
-        if (TIP_URL && (pick || !tipAsked)) { if (!pick) tipAsked = true; tipSheet(go, !pick); return; }   // 030 THE TIP JAR: a network install is asked once a session; a file volume every press (its file is the tip's thank-you)
+        if (TIP_URL && !globalThis.lwavesDesktop && (pick || !tipAsked)) { if (!pick) tipAsked = true; tipSheet(go, !pick); return; }   // 030 THE TIP JAR: a network install is asked once a session; a file volume every press (its file is the tip's thank-you)
         go();
       });
       paint(); return { paint, run };
@@ -913,7 +913,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         return;
       }
       heroes.clear(); vols = s.volumes; s.volumes.forEach(card);
-      if (TIP_URL) tipCard();   // 030 THE TIP JAR: the last card on the shelf
+      if (TIP_URL && !globalThis.lwavesDesktop) tipCard();   // 030 THE TIP JAR: the last card on the shelf; 044 S7: never on the desktop (Steam) build
       enterTiles([...shelfEl.children]);
     }
     async function enter(v) {
