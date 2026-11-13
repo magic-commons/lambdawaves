@@ -125,7 +125,6 @@
 .mir-render .sr-record-estimate { color: var(--fg-soft); font-family: var(--font-mono); }
 .mir-render .sr-record-status { color: var(--fg-soft); }
 .mir-render .sr-render-status { padding: var(--render-status-pad); border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); font: var(--w-med) var(--fs-small)/1.4 var(--font-ui); color: var(--fg-soft); }
-.mir-render .sr-render-status.is-warning { border-color: var(--bad); }
 .mir-render .sr-record-files { display: flex; flex-direction: column; gap: 5px; }
 .mir-render .sr-prog[hidden], .mir-render .sr-done[hidden] { display: none; }
 /* THE HAND (1.5.0-alpha.19): the progress row is always there; CANCEL keeps its own word's width at the row's end and the

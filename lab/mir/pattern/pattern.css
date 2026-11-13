@@ -11,8 +11,8 @@
  * modulation and timeline plugins' host sheets: it ranks above the house, and an app's plain rule beats it. */
 @layer mir.kit.plugin.host {
 
-/* FROST · values — on the plugin's roots: the window and its row menu */
-.mir-pattern, .pt-menu {
+/* FROST · values — on the plugin's root, the window (1.6.0-alpha.13: the row menu `.pt-menu` no script builds, and its eleven tokens, are gone) */
+.mir-pattern {
   --pt-row: 40px;                                              /* one row per ENV (52 under a finger, below) */
   --pt-inset: 3px;                                             /* a block's inset from its row */
   --pt-surface-pad: 8px 10px;
@@ -39,17 +39,6 @@
   --pt-empty-size: 9px;
   --pt-empty-weight: 600;
   --pt-empty-track: .1em;
-  --pt-menu-r: 10px;
-  --pt-menu-fill: hsl(var(--glass-tint, 220 14% 16%) / .97);
-  --pt-menu-shadow: 0 8px 24px hsl(0 0% 0% / .35), inset 0 0 0 1px var(--glass-hairline, hsl(0 0% 100% / .12));
-  --pt-menu-z: 2000100;
-  --pt-mi-h: 30px;
-  --pt-mi-r: 6px;
-  --pt-mi-size: 9.5px;
-  --pt-mi-weight: 600;
-  --pt-mi-track: .08em;
-  --pt-mi-press: var(--glass-press, hsl(0 0% 100% / .1));
-  --pt-rule-ink: var(--glass-hairline, hsl(0 0% 100% / .12));
 }
 
 /* the body holds the rows and nothing else; the window's own glass is the plate */
@@ -99,14 +88,14 @@
 .mir-pattern .pt-play-bar { position: absolute; left: 14%; right: 14%; top: 4px; height: 3px; border-radius: var(--pt-led-r); background: var(--pt-play-ink); box-shadow: var(--pt-play-glow); }
 
 /* the cap's menu (on the document, above every window and rail, as the timeline's menus are) */
-/* the cap's menu is the kit's contextMenu since 1.5.6-alpha.4 (the menu surface; the --pt-menu-* / --pt-mi-* tokens above are no longer read) */
+/* the cap's menu is the kit's contextMenu since 1.5.6-alpha.4 (the menu surface; the row menu's own tokens left in 1.6.0-alpha.13) */
 
 /* docked, the row owns the height and the device owns the width: no resize corner */
 .mir-pattern[data-dock="anchor"] .mir-win-resize { display: none; }
 
-/* FINGER SEATS (BASINS lab.css §903, pattern.css): 52 px rows, a 44 px block, 20 px steps, 44 px menu rows */
+/* FINGER SEATS (BASINS lab.css §903, pattern.css): 52 px rows, a 44 px block, 20 px steps */
 @media (pointer: coarse) {
-  .mir-pattern, .pt-menu { --pt-row: 52px; --pt-inset: 4px; --pt-min-sw: 20px; --pt-mi-h: 44px; }
+  .mir-pattern { --pt-row: 52px; --pt-inset: 4px; --pt-min-sw: 20px; }
 }
 
 }   /* end @layer mir.kit.plugin.host */

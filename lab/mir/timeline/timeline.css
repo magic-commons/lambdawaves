@@ -72,10 +72,10 @@
   --tl-tension-w: 1.5;
   --tl-point-hover: 1.35;
   --tl-fade: 200ms;                                            /* the clip's fill */
-  --tl-quick: 120ms;                                           /* the points, the playhead's flag */
+  --tl-quick: var(--t-fast, 120ms);                                           /* the points, the playhead's flag */
   --tl-tab-t: 180ms;                                           /* the tab's tint and rim, the grips */
   --tl-pop-t: 140ms;
-  --tl-ease: ease;
+  --tl-ease: var(--ease-std, ease);
   --tl-ease-spring: cubic-bezier(.2, .8, .2, 1);
   --tl-playhead-w: 1.5px;
   --tl-flag-w: 7px;                                            /* the playhead's flag: 14 × 10, its apex on the line at the strip's foot */

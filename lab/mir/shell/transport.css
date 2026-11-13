@@ -177,7 +177,7 @@
 .mir-transport.mini:not([data-seat="top"]) .native-tempo { order: -1; border-top: 0; border-bottom: 1px solid var(--glass-hairline); border-radius: var(--xport-pill-r) var(--xport-pill-r) 0 0; }
 .mir-transport .native-tempo[hidden] { display: none; }
 .mir-transport .tempo-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
-.mir-transport .native-tempo .trig { min-width: 0; height: 44px; min-height: 44px; padding: 0 3px; justify-content: center; font-size: var(--xport-tile-size); letter-spacing: var(--xport-tile-track); }
+.mir-transport .native-tempo .trig { min-width: 0; height: var(--touch, 44px); min-height: var(--touch, 44px); padding: 0 3px; justify-content: center; font-size: var(--xport-tile-size); letter-spacing: var(--xport-tile-track); }
 .mir-transport.mini > :is(.tr-openers, .tr-seat, .dock-btn, .mod-exp) { order: 3; }
 
 /* ── THIN SEATS (createTransport({ seats: 'thin' }) writes data-seats="thin"; 1.5.5, from λWAVES skin.css §12): the app's own nodes drawn small on a floating or work bar — the scrub a thin line, a small RATE knob, the readouts stacked without labels; docked, the card keeps the app's readouts with their labels.  :where() keeps the specificity λWAVES drew them at. ── */
