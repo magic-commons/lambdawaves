@@ -32,13 +32,22 @@ const isWeb = (u) => /^https?:\/\//i.test(u);
 // 044 S8 · THE SHELF IS THE FOLDERS PRESENT: each volume is a free add-on whose depot is one folder, dist/volumes/<id>/, carrying its own
 // shelf entry (volume.json, written by package.mjs) beside its catalogue. The shelf the page asks for is those entries, so a volume Steam
 // has not delivered is not on it, and one it removed is gone at the next launch.
+// 044 S10 · A CARD FOR AN ADD-ON NOT INSTALLED: steam-addons.json is the one table of the add-ons the game knows and their Steam app ids
+// (empty until the add-ons exist). One the package does not hold is named beside the shelf (`addons`), with its store address when its id
+// is set. That address is the only thing but a web link the host hands to the system (hand(), below): steam://store/<an id of the table>.
+const ADDONS = require('./steam-addons.json').filter((a) => a && typeof a.id === 'string' && typeof a.numeral === 'string');
+const storeOf = (a) => (/^\d{1,12}$/.test(String(a.appid || '')) ? 'steam://store/' + a.appid : null);
+const hand = (u) => {
+  if (!isWeb(u) && !ADDONS.some((a) => storeOf(a) === u)) return;
+  if (SMOKE) fs.appendFileSync(path.join(SMOKE, 'external.log'), u + '\n'); else shell.openExternal(u);   // the test mode says what it would open, and opens nothing
+};
 function shelf() {
   const dir = path.join(root, 'volumes'), volumes = [];
   let names = []; try { names = fs.readdirSync(dir); } catch {}
   for (const n of names.sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))) {
     try { const v = JSON.parse(fs.readFileSync(path.join(dir, n, 'volume.json'), 'utf8')); if (v && v.id === n && fs.existsSync(path.join(dir, n, 'index.json'))) volumes.push(v); } catch {}
   }
-  return JSON.stringify({ schema: 1, volumes });
+  return JSON.stringify({ schema: 1, volumes, addons: ADDONS.filter((a) => !volumes.some((v) => v.id === a.id)).map((a) => ({ id: a.id, numeral: a.numeral, store: storeOf(a) })) });
 }
 
 async function serve(req) {
@@ -86,11 +95,11 @@ app.on('web-contents-created', (_e, wc) => {
     const to = e.url || url;
     if (inApp(to)) return;
     e.preventDefault();
-    if (isWeb(to)) shell.openExternal(to);
+    hand(to);
   });
   wc.setWindowOpenHandler(({ url }) => {
     if (inApp(url)) return { action: 'allow', overrideBrowserWindowOptions: { backgroundColor: GROUND, webPreferences: WEB_PREFS } };
-    if (isWeb(url)) shell.openExternal(url);
+    hand(url);
     return { action: 'deny' };
   });
   wc.on('will-prevent-unload', (e) => {
