@@ -205,31 +205,31 @@
  },
  {
   "file": "mir/panels/xy.js",
-  "line": 322,
+  "line": 323,
   "why": "fragment",
   "text": " — XY pad"
  },
  {
   "file": "mir/panels/xy.js",
-  "line": 331,
+  "line": 332,
   "why": "fragment",
   "text": " — XY controller"
  },
  {
   "file": "mir/panels/xy.js",
-  "line": 353,
+  "line": 354,
   "why": "fragment",
   "text": "the XY controller's "
  },
  {
   "file": "mir/panels/xy.js",
-  "line": 405,
+  "line": 406,
   "why": "fragment",
   "text": "the morph pad's "
  },
  {
   "file": "mir/panels/xy.js",
-  "line": 405,
+  "line": 406,
   "why": "fragment",
   "text": ": A and "
  },

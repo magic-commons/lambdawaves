@@ -38,6 +38,7 @@
  * createRack(options) → api — see docs/RACK.md.  windows() lists the windows with their titles and state (for describe()
  * and the openers); keepClear() gives the rects a new floating window should not land on (FOLDERS' first seat).  The pure helpers are exported for node tests. */
 import { el, device, chip, ariaLabel } from '../kit.js';
+import { TAP } from '../core/tap.js';
 import { drag } from '../core/pointer.js';
 import { sequence, motionPolicy, motionToken, own, parseDuration } from '../core/motion.js';
 import { createProximity } from '../core/proximity.js';
@@ -60,7 +61,7 @@ export const RACK = Object.freeze({
   peekHold: 48,     // … and holds while the pointer stays within the rack plus this (the armed dismiss)
   barNear: 160,     // the hidden transport peeks when the pointer is this near its seat (1.5.7-alpha.63) …
   barHold: 220,     // … and holds while it stays within this of it
-  longPress: 400,   // a finger holds a header this long to lift it
+  longPress: TAP.hold,   // a finger holds a header this long to lift it: the kit's one hold (1.6.0-alpha.4; it was 400)
   slop: 3,          // the hand travels this far before a press becomes a drag
   nudge: 24,        // an arrow nudges a floating window this far (the window rail's Shift+arrow)
   favourites: 4,    // ☆ layout slots (λWAVES LAYOUT_SLOTS)

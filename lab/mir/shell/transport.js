@@ -39,6 +39,7 @@
  * The pure helpers are exported for node tests. */
 import { bindNumber, fineSteps } from '../controls/number.js';
 import { el, label, ariaLabel, trig, gripDots, tapWatcher, knob, lamp, knobBank, WHEEL, wheelNotches, wheelTurn } from '../kit.js';
+import { TAP } from '../core/tap.js';
 import { onLanguage, phrase } from '../core/i18n.js';
 import { drag } from '../core/pointer.js';
 import { frame } from '../core/frame.js';
@@ -58,7 +59,7 @@ export const TRANSPORT = Object.freeze({
   pxPerStep: 9,        // a mouse drag on the pill: one step per 9 px (BASINS transport.js:66)
   touchPxPerStep: 14,  // a finger: one step per 14 px, always in ones (BASINS transport.js:69)
   slop: 4,             // the hand travels this far before a press on the pill is a drag (BASINS: |dy| ≥ 4)
-  longPress: 500,      // a finger held on the bar opens the seat menu
+  longPress: TAP.hold, // a finger held on the bar opens the seat menu: the kit's one hold (1.6.0-alpha.4)
   latchTap: 240,       // a bend tapped quicker than this latches (BASINS transport.js:126)
   bpmMin: 20, bpmMax: 300,
   fieldChars: 8,       // the inline tempo field takes eight characters (BASINS tempo-editor.js)
@@ -955,7 +956,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     if (!seatMenuOn || e.pointerType !== 'touch' || e.target.tagName === 'INPUT' || e.target.closest('.tempo-expand, .native-tempo')) return;
     hold = { id: e.pointerId, x: e.clientX, y: e.clientY, timer: view.setTimeout(() => { hold = null; swallow = true; seatMenu(true, { x: e.clientX }); }, TRANSPORT.longPress) };
   }, on);
-  bar.addEventListener('pointermove', (e) => { if (hold && e.pointerId === hold.id && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > TRANSPORT.slop) endHold(); }, on);
+  bar.addEventListener('pointermove', (e) => { if (hold && e.pointerId === hold.id && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > TAP.slop) endHold(); }, on);   // the hold's stillness is the kit's (TRANSPORT.slop is the pill's drag)
   for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) bar.addEventListener(ev, endHold, on);
   bar.addEventListener('click', (e) => { if (swallow) { swallow = false; e.preventDefault(); e.stopPropagation(); } }, { capture: true, signal });
 

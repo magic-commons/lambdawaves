@@ -40,6 +40,7 @@
  *       clear(kind?), debug(), destroy(), root, stage }
  *   anchor: a feature id (looked up in features() every view change), 'ui:name' (a control), { x, y, r }, or
  *   () => { x, y, r } | null.  Each add returns { el, remove(), id }.  Pages: info/page.js. */
+import { TAP } from '../core/tap.js';
 import { frame } from '../core/frame.js';
 import { motionPolicy, motionToken } from '../core/motion.js';
 import { drag } from '../core/pointer.js';
@@ -52,7 +53,7 @@ import { loadRenderer } from '../shell/notebook.js';
 
 /* THE NUMBERS — tuned by eye on gallery/info.html.  Times in ms, lengths in CSS px. */
 export const INFO = Object.freeze({
-  cross: 0.08, dwell: 350, reach: 140, near: 110, longPress: 480, touchGrace: 600,
+  cross: 0.08, dwell: 350, reach: 140, near: 110, longPress: TAP.hold, touchGrace: 600,
   gap: 36, out: 46, rise: 34, pad: 6, comb: 14, margin: 14,
   enter: { dot: 140, lineAt: 60, line: 260, textAt: 200, perLine: 30, maxLines: 6, stagger: 55, maxStagger: 5, block: 340, blockLine: 45 },
   exit: { text: 120, lineAt: 70, line: 120, dot: 90, stagger: 25 },
@@ -643,7 +644,7 @@ export function createInfoLayer({ stage, host = stage.parentElement, subject = n
     if (ptr.on) { ptr.vx += (((p.x - ptr.x) / dt) * 1000 - ptr.vx) * a; ptr.vy += (((p.y - ptr.y) / dt) * 1000 - ptr.vy) * a; }
     else { ptr.vx = 0; ptr.vy = 0; }
     ptr.x = p.x; ptr.y = p.y; ptr.t = now; ptr.on = true;
-    if (pressAt && Math.hypot(e.clientX - pressAt.x, e.clientY - pressAt.y) > 8) { win.clearTimeout(pressTimer); pressAt = null; }
+    if (pressAt && Math.hypot(e.clientX - pressAt.x, e.clientY - pressAt.y) > TAP.slop) { win.clearTimeout(pressTimer); pressAt = null; }
     const over = S.has && p.x > S.left && p.x < S.right && p.y > S.top && p.y < S.bottom;
     if (over !== ptr.onSubject) { ptr.onSubject = over; setAttr(root, 'data-pointer', over ? 'subject' : null); }
     judge();

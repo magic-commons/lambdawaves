@@ -46,6 +46,7 @@
 import { setGlyph, glyphEl, hasGlyph } from './glyph.js';
 import { setText, setVar } from './core/perf.js';   // paint writes only what changed, and the meter counts both
 import { frame } from './core/frame.js';
+import { TAP } from './core/tap.js';
 import { createLayoutMotion, wireReorder } from './modulation/layout-motion.js';
 import { t as tx, onLanguage } from './core/i18n.js';
 import { srgbToLinear, linearToSrgb, contrastRatio, hslToRgb01, rgbToHsl, hexToRgb } from './palette.js';
@@ -155,7 +156,7 @@ const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 /** THE ONE DOUBLE-TAP LAW (Josh, 2026-10-07, call 20: "300ms"): two presses within 300 ms and 14 px.  It was two laws
  *  (320 ms anywhere here, 300 ms within 14 px in the colour controls); this is the one, and controls/gesture.js re-exports
  *  it (TAP, tapHome) so the colour controls read the same numbers. */
-export const TAP = Object.freeze({ ms: 300, px: 14, hold: 500, slop: 8 });   // 1.5.6-alpha.4: hold · slop, THE ONE HOLD LAW (holdTap)
+export { TAP };   // core/tap.js: ms · px the double tap, hold · slop THE ONE HOLD LAW (1.5.6-alpha.4 holdTap); 1.6.0-alpha.4 THE HOLD IS 550
 /** holdTap(el, fn, { ms = TAP.hold, slop = TAP.slop, accept }) → off() — a still press held `ms` (moving under `slop` px) runs fn(event, x, y)
  *  once; the click its release would make is swallowed.  `accept(event)` filters the pointers that may start one (default: the primary button). */
 export function holdTap(node, fn, { ms = TAP.hold, slop = TAP.slop, accept = null } = {}) {

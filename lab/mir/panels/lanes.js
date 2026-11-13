@@ -47,7 +47,8 @@ import { registerProjectPart } from '../core/project.js';
 import { handWrite } from '../modulation/registry.js';
 import { ARM_MS } from '../controls/list.js';
 
-export const HOLD_MS = 250;                       // a hold this long is a peek, not a click (SOLEIL atlas.js HOLD_MS)
+export const PEEK_MS = 250;                       // a press this long is a peek, not a click (SOLEIL atlas.js HOLD_MS): a split, not a long press, so not TAP.hold
+export const HOLD_MS = PEEK_MS;                   // its name until 1.6.0-alpha.4, kept for an app that imports it
 let uid = 0;
 
 /* ── the pure part ───────────────────────────────────────────────────────────────────────────────────────── */
@@ -223,7 +224,7 @@ export function createLanesView(parent, o = {}) {
       let timer = 0, held = false;
       const over = () => { clearTimeout(timer); timer = 0; if (held) { solo.peek(id, false); delete b.root.dataset.peek; changed(); } };
       b.root.addEventListener('pointerdown', (e) => { if (e.button) return; held = false; clearTimeout(timer);
-        timer = setTimeout(() => { timer = 0; if (solo.peek(id, true)) { held = true; b.root.dataset.peek = ''; changed(); } }, HOLD_MS); }, { signal: life.signal });
+        timer = setTimeout(() => { timer = 0; if (solo.peek(id, true)) { held = true; b.root.dataset.peek = ''; changed(); } }, PEEK_MS); }, { signal: life.signal });
       for (const t of ['pointerup', 'pointercancel']) b.root.addEventListener(t, over, { signal: life.signal });
       b.root.addEventListener('pointerleave', () => { if (timer) { clearTimeout(timer); timer = 0; } }, { signal: life.signal });
       b.root.addEventListener('contextmenu', (e) => e.preventDefault(), { signal: life.signal });

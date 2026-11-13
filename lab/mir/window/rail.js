@@ -20,6 +20,7 @@
  */
 import { glyphEl } from '../glyph.js';
 import { ariaLabel, hint } from '../kit.js';
+import { TAP } from '../core/tap.js';
 import { phrase } from '../core/i18n.js';
 import { rect, setAttr, setVar, setText } from '../core/perf.js';
 import { tweenRect, flip, owns } from '../core/motion.js';
@@ -30,7 +31,7 @@ export const SIDES = Object.freeze(['left', 'right', 'top', 'bottom']);
 /* gap: how far a FLOATING window's rail sits from its pane, per side — kwin.js's RAIL_GAP (BASINS): 8 px on the right,
    flush on the left; kwin has no top or bottom rail, and BASINS' mod-window-snap seats those flush.  A docked rail
    (seatOn in its lane) is flush: snap-window seats it there. */
-export const RAIL = Object.freeze({ pad: 4, longPress: 450, slop: 6, nudge: 24, gap: Object.freeze({ left: 0, right: 8, top: 0, bottom: 0 }) });
+export const RAIL = Object.freeze({ pad: 4, longPress: TAP.hold, slop: 6, nudge: 24, gap: Object.freeze({ left: 0, right: 8, top: 0, bottom: 0 }) });
 /** gapOf(gap, side) — a gap given as one number or as a per-side table */
 export const gapOf = (g, side) => (typeof g === 'number' ? g : (g && g[side]) || 0);
 const vertical = (side) => side === 'left' || side === 'right';
@@ -251,7 +252,7 @@ export function createRail({ id, title, chips = [], layer, seats, onChip, onSide
   const holdMove = (e) => {
     if (!hold || e.pointerId !== hold.id) return;
     if (picking) { prox.update({ x: e.clientX / cssZoom(el), y: e.clientY / cssZoom(el) }, seatsNow()); return; }
-    if (hold.timer && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > RAIL.slop) { clearTimeout(hold.timer); hold = null; }
+    if (hold.timer && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > TAP.slop) { clearTimeout(hold.timer); hold = null; }   // the hold's stillness is the kit's (RAIL.slop is the grip's drag)
   };
   const holdUp = (e) => {
     if (!hold || e.pointerId !== hold.id) return;

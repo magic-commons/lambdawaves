@@ -33,7 +33,7 @@
  * Kept as they were: every law in modwindow/ACCEPTANCE.md and host-contract.md, the FL curve gestures
  * (curve-gesture.js), Sol's automation / exact resume / runtime capture in host.js and mod.js.
  */
-import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, watchTouches, wheelTurn } from '../kit.js';
+import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, watchTouches, wheelTurn, TAP } from '../kit.js';
 import { bindSliderKeys } from '../slider-keys.js';
 import { contextMenu, knobMenu, knobMenuPart, knobAct } from '../shell/menubar.js';
 import { createModWindow, setDeviceMode, setWorkLane, sizeLaw, GEOM,
@@ -933,7 +933,7 @@ export function createModulation(host, port) {
     rec.host.classList.remove('has-ring', 'mod-selected', 'ring-focus');
   }
 
-  /** a press held 600 ms (or a right-click) on `node` opens the route pop-over — the touch road to what Serum puts
+  /** a press held TAP.hold (550 ms, still within TAP.slop; or a right-click) on `node` opens the route pop-over — the touch road to what Serum puts
    *  behind a right-click */
   function holdForPop(node, id, capture = false, signal) {
     let hold = 0;
@@ -944,8 +944,8 @@ export function createModulation(host, port) {
       focusRing(id);
       if (e.button) return;
       const x0 = e.clientX, y0 = e.clientY; clearTimeout(hold);
-      hold = setTimeout(() => { hold = 0; openPop(id, x0, y0); }, 600);
-      const move = (ev) => { if (Math.abs(ev.clientX - x0) > 4 || Math.abs(ev.clientY - y0) > 4) done(); };
+      hold = setTimeout(() => { hold = 0; openPop(id, x0, y0); }, TAP.hold);
+      const move = (ev) => { if (Math.hypot(ev.clientX - x0, ev.clientY - y0) > TAP.slop) done(); };
       const done = () => { clearTimeout(hold); hold = 0; window.removeEventListener('pointermove', move, true); window.removeEventListener('pointerup', done, true); window.removeEventListener('pointercancel', done, true); };
       window.addEventListener('pointermove', move, true); window.addEventListener('pointerup', done, true); window.addEventListener('pointercancel', done, true);
     }, { capture, signal });
@@ -1326,12 +1326,12 @@ export function createModulation(host, port) {
       drag = { r, y0: e.clientY, x0: e.clientX, d0: r.max - r.min, touch: e.pointerType === 'touch' };
       moved = false;
       rec.host.classList.add('ring-drag');
-      hold = setTimeout(() => { hold = 0; if (drag && !moved) { const p = [drag.x0, drag.y0]; endDrag(); openPop(id, p[0], p[1]); } }, 450);
+      hold = setTimeout(() => { hold = 0; if (drag && !moved) { const p = [drag.x0, drag.y0]; endDrag(); openPop(id, p[0], p[1]); } }, TAP.hold);
       showReach(id);
     });
     hit.addEventListener('pointermove', (e) => {
       if (!drag) return;
-      if (!moved && Math.abs(e.clientY - drag.y0) < 4 && Math.abs(e.clientX - drag.x0) < 4) return;
+      if (!moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) <= TAP.slop) return;   // the hold's stillness is the drag's start: TAP.slop
       if (!moved) { moved = true; cancelHold(); }
       /* a rise grows the arc clockwise, as a rise turns the dial — on a reversed dial (`k-rev`, 1.5.7-alpha.12) that is toward the lower values */
       let d = drag.d0 + (rec.host.classList.contains('k-rev') ? -1 : 1) * (drag.y0 - e.clientY) / TRAVEL(e, drag.touch);

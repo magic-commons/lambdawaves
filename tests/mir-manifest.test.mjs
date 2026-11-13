@@ -104,6 +104,8 @@ const ACCEPTED = {
   '1.6.0-alpha.2': 'ce24d953348f8bd75eedc94565bd4733119774c6e605c98f20928a220713c054',
   /* 044 K2 · MIR 1.6.0-alpha.3 THE WHEEL WAITS FOR A CLICK (kit-044k @ b67aa3e: kit.js wheelTurn · WHEEL · wheelNotches; the knob, the fader, the range, the tempo field, AUDIO IN's range; Josh 11-12) */
   '1.6.0-alpha.3': 'b723800ebf5cdb47f276b8b098ab8597189c569b9f041a40d46b90cced29c7b1',
+  /* 044 K3 · MIR 1.6.0-alpha.4 THE HOLD IS 550 (kit-044k @ 15f69ab: core/tap.js TAP.hold 550 · slop 8, read by the rack head, the rail, the bar, INFORMATIONAL, the XY corner, the route pop-over and the arc, the timeline's knob menu; lanes PEEK_MS 250; Josh 11-12) */
+  '1.6.0-alpha.4': '10b1c4d103db9ec72d27dc5d9a95971f5633fee50990be9f05ce12da79aa494f',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
