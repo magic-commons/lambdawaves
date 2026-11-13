@@ -29,6 +29,8 @@ the build's description on Steam, and attach the source archive to the matching 
 Claude, Gemini and GPT) is not built when the page runs in the desktop host (`window.lwavesDesktop`, the same signal that hides UPDATE
 APP), and `package.mjs` removes `img/ai/` and `img/menu/ai/` (the marks, Google Sans Flex, and OpenAI Sans, which has no licence in the
 tree) from each folder's `resources/dist/`. ABOUT still says in words that AI coding agents built the app. The site is unchanged.
+The same signal leaves two more things unbuilt on the desktop (044 S5, S7, Josh 11-12): the MIR wordmark in the MAIN MENU's bottom-right
+corner, and the tip jar (EXPANSIONS' ko-fi card and the "tip?" sheet before an install); `package.mjs` removes `img/menu/tip-qr.svg` too.
 
 Packaging Windows on Linux needs nothing but the Electron zip, which the packager downloads once (about 160 MB from GitHub, checksummed)
 into `~/.cache/electron`. The `.exe` is not code-signed: Steam does not need it, and a game started from Steam gets no SmartScreen prompt.
@@ -124,9 +126,10 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
 ## 7. What only you can do
 
 - [ ] The publishing identity ([`LEGAL-PROVENANCE.md`](LEGAL-PROVENANCE.md) §5 item 4). Answered 2026-11-12 for the program: the
-      `.exe`'s company name is `MAGIC COMMONS` (044 S2, `package.mjs` `MAKER`). Its copyright line is still NOTICE's second line
-      (`Copyright 2026 Joshua Hosain`), because that line says who holds the copyright, not who publishes. Still yours: whether the Steam
-      partner account, the store page's developer and publisher, and the tax and bank details are in that name too.
+      `.exe`'s company name is `MAGIC COMMONS` and its copyright line `Copyright 2026 MAGIC COMMONS` (044 S2, S6, `package.mjs`
+      `MAKER`). The `NOTICE` file in the folder, the licence texts and ABOUT still name Joshua Hosain as the copyright holder; they
+      were not changed. Still yours: whether the Steam partner account, the store page's developer and publisher, and the tax and
+      bank details are in that name too.
 - [ ] The partner site: the app, two depots, the launch options above, the AI disclosure, the store page, the price.
 - [ ] The Windows GPU run on your PC. The folder is built (044 S4, 2026-11-12, on Linux; the download you approved is done and
       cached): `out/lambdawaves-win32-x64/`, 495,884,961 B, 1,902 files, from commit `d9560b0c`. Checked here without running it: the
@@ -139,46 +142,52 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
       window minimised, FOLDERS › EXPORT saving a file, F11 and FULL, the overlay (Shift+Tab) on and off.
 - [ ] The Linux install from Steam and the sandbox answer (§4); the Deck (§5).
 - [ ] A 30-minute real session on each, then a row in [`ACCEPTANCE-MATRIX.md`](ACCEPTANCE-MATRIX.md).
-- [ ] The volumes: VOL. I and II for now, VOL. III later (answered 2026-11-12). Still yours: in the game's depot or as free add-ons (§8).
+- [ ] The volumes: VOL. I and II as two free add-ons, VOL. III later (answered 2026-11-12). Still yours: the Steamworks steps of §8.
 
-## 8. The volumes (VOL. I and II; VOL. III is held back)
+## 8. The volumes: two free add-ons (VOL. I, VOL. II); VOL. III is held back
 
-Josh, 2026-11-12: "Just release Volume 1 and 2 for now. Vol 3 will be a post release expansion. (Only show 2 volumes for now)". So, on
-every host, the library's EXPANSIONS shelf offers VOL. I and VOL. II; `lab/volumes.js` `HELD = ['vol-3']` is the one place that says so
-(044 S3). VOL. III's entry stays in `volumes.json` and nothing is renumbered; a machine that already installed some of it still sees it
-and opens it. Releasing VOL. III is deleting its id from `HELD`.
+Josh, 2026-11-12: "Just release Volume 1 and 2 for now. Vol 3 will be a post release expansion", and, asked how they reach a player,
+"As free add-ons". `lab/volumes.js` `HELD = ['vol-3']` keeps VOL. III off the shelf on every host; releasing it is deleting that id.
 
-What the two volumes weigh (measured 2026-11-12 in `~/Documents/LAMBDAWAVES-VOLUMES/dist`):
-
-| | molecules | as files (`vol-N/`) | as one archive (`.lwv`) |
-|---|---|---|---|
-| VOL. I | 6,927 | 14,276 files, 6,064,046,591 B (5.65 GiB) | `LAMBDAWAVES-VOL-I.lwv`, 5,950,751,144 B |
-| VOL. II | 4,616 | 4,947 files, 5,848,310,795 B (5.45 GiB) | `LAMBDAWAVES-VOL-II.lwv`, 5,755,186,976 B |
-
-VOL. II has no pictures yet (the packer says "4616 of 4616 molecules have no picture yet"), so its card wears the WIP mark and its tiles
-are drawn without thumbnails. On the web VOL. II is an archive only (the reader opens the `.lwv` from disk); its files are in the folder
-above and nowhere on the site.
-
-Without a shelf the desktop build says "No volume is published yet." and has no road to install one. The road that is built:
+**Build the folders** (one command, about three minutes):
 
 ```bash
-node package.mjs -- --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-2
+node package.mjs --depots -- --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-2
 ```
 
-puts both volumes in each folder's `resources/dist/volumes/` (19,223 files, 11.9 GB more per folder; `build-deploy --desktop`, which
-`package.mjs` always passes, skips the web's 20,000-file free-plan check — that `dist/` holds 21,058 files and must never be deployed).
-Their molecules then open straight from the disk: the shelf shows VOL. I and VOL. II, a volume opens, a tile loads.
+| folder in `out/` | what it is | size (2026-11-12) |
+|---|---|---|
+| `lambdawaves-win32-x64/`, `lambdawaves-linux-x64/` | the game, with no volume in it | 496 MB / 407 MB |
+| `lambdawaves-vol-1/` | VOL. I's depot: `resources/dist/volumes/vol-1/` (6,927 molecules) | 14,277 files, 6.06 GB |
+| `lambdawaves-vol-2/` | VOL. II's depot: `resources/dist/volumes/vol-2/` (4,616 molecules) | 4,948 files, 5.85 GB |
 
-**Not built:**
+A volume's folder is the same for Windows and Linux. It carries its own shelf entry (`volume.json`) beside its catalogue, and the
+desktop host answers the shelf from the folders that are present (`main.cjs` `shelf()`), so:
 
-- *A volume served from the disk is not "installed".* The card still offers INSTALL, which would copy the volume again into
-  `CacheStorage` (twice the disk). The lookup's search and the MOLECULES card's extra rungs read installed volumes only, so they do not
-  see a volume that is only in the package. The fix is small (`lab/volumes.js` `installStatus` answering installed for a volume the
-  desktop host serves) and is not made.
-- *One DLC per volume.* Each volume as its own depot into `resources/dist/volumes/vol-N/` works for the files (Steam delivers a DLC's
-  depot only to its owners; no SDK). But the shelf (`volumes.json`) is one file listing every volume, and nothing writes it from the
-  folders that are present, so a player without the DLC would see a card whose files are missing.
-- *Downloaded.* Refused: the desktop makes no network call of its own.
+- a player without an add-on does not see that volume at all; with none, EXPANSIONS says "No volume is installed. The volumes are free
+  add-ons on Steam." A card for a volume that is not there was not built: its only honest button would open the add-on's Steam page,
+  and that address does not exist until the add-on does;
+- a volume that is there is INSTALLED as it stands: its card reads INSTALLED and has nothing to press, nothing is copied into
+  `CacheStorage`, the lookup's search finds its molecules, and MOLECULES' pages and extra rungs read it. Removing it is Steam's
+  (untick the add-on); it is gone from the shelf at the next launch.
 
-**Yours to decide:** whether VOL. I and II are in the game's own depot (a 12 GB download for everyone) or each a free add-on (DLC) the
-player picks. The first needs only the first item above; the second needs both.
+Without `--depots` the same command leaves the volumes inside both game folders (12 GB each) and they behave the same way.
+
+**In Steamworks** (yours; nothing here can do it):
+
+1. On the game's app page, *All Associated Packages, DLC, Demos and Tools* › *Add New DLC*, twice: "λWAVES — VOL. I" and "VOL. II".
+   Set each to Free. Each needs its own small store page (a capsule image and a sentence) and goes through review with the game.
+2. *SteamPipe › Depots*: add one depot per add-on, no operating system set (the files are the same for both), and assign each depot
+   to its DLC. Then the DLC's package must include its depot.
+3. Add the two depots to `app_build_<APPID>.vdf` beside the game's two, each with its own `depot_build_<DEPOT>.vdf` whose `ContentRoot`
+   is `…/out/lambdawaves-vol-1/` (or `-vol-2/`) and the same `FileMapping` as §2. The files land in the game's install folder under
+   `resources/dist/volumes/vol-N/`, which is where the app looks.
+4. Test on the PC: with neither add-on, the shelf's sentence; tick VOL. I in the game's Properties › DLC, let it download (6 GB),
+   start: one card, INSTALLED; open it, open a molecule; tick VOL. II; untick one and see it go.
+
+Proved here on the packaged Linux app in three states (ACCEPTANCE-MATRIX, 2026-11-12): no volume folder, VOL. I alone, VOL. I and II.
+Not proved: anything on Steam itself, and Windows.
+
+VOL. II's pictures: all six looks and the diagrams were drawn on 11-05/06 as page sheets (47 pages, none missing). The build used to
+mark it WIP because its catalogue names no per-molecule picture file; `build-deploy` now counts a molecule's cell in the `density`
+sheet as its picture (044 S9), so VOL. II's card has no WIP mark.

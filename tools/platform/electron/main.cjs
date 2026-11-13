@@ -29,12 +29,25 @@ const CSP = ((() => { try { return fs.readFileSync(path.join(root, '_headers'), 
 const inApp = (u) => { try { return new URL(u).origin === ORIGIN; } catch { return false; } };
 const isWeb = (u) => /^https?:\/\//i.test(u);
 
+// 044 S8 · THE SHELF IS THE FOLDERS PRESENT: each volume is a free add-on whose depot is one folder, dist/volumes/<id>/, carrying its own
+// shelf entry (volume.json, written by package.mjs) beside its catalogue. The shelf the page asks for is those entries, so a volume Steam
+// has not delivered is not on it, and one it removed is gone at the next launch.
+function shelf() {
+  const dir = path.join(root, 'volumes'), volumes = [];
+  let names = []; try { names = fs.readdirSync(dir); } catch {}
+  for (const n of names.sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))) {
+    try { const v = JSON.parse(fs.readFileSync(path.join(dir, n, 'volume.json'), 'utf8')); if (v && v.id === n && fs.existsSync(path.join(dir, n, 'index.json'))) volumes.push(v); } catch {}
+  }
+  return JSON.stringify({ schema: 1, volumes });
+}
+
 async function serve(req) {
   const u = new URL(req.url);
   if (u.host !== HOST) return net.fetch(req, { bypassCustomProtocolHandlers: true });   // a notebook's https picture (the CSP's img-src), as on the web
   const fail = (status) => new Response(String(status), { status, headers: { 'Content-Type': 'text/plain' } });
   let rel;
   try { rel = decodeURIComponent(u.pathname); } catch { return fail(400); }
+  if (rel === '/volumes/volumes.json') return new Response(shelf(), { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache' } });
   if (rel.endsWith('/')) rel += 'index.html';
   const file = path.resolve(root, '.' + path.posix.normalize(rel));
   const back = path.relative(root, file);

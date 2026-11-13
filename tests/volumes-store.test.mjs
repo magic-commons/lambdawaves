@@ -103,4 +103,15 @@ await seed('lw-vol-vol-f', [[F + 'index.json', fx1], [F + 'm/a.lwm', a1], [F + '
   await seed('lw-vol-vol-3', [[BASE + 'vol-3/index.json', hx, sha(hx)]]);
   assert.deepEqual((await V.shelf({ fresh: true })).volumes.map((v) => v.id), ['vol-t', 'vol-f', 'vol-3'], 'shelf: a device that holds some of a held volume keeps it on its shelf'); }
 
-console.log('PASS the volumes store: a file kept under a stale sha is not kept on installStatus, kept, install and the .lwv road; a stale index.json is replaced; installMolecule says a basis record it could not keep; a held volume is off the shelf, still opens by id, and stays where a device holds it');
+/* 044 S8: on the desktop host a shelf volume with an index is served from the package's disk — installed as it stands, nothing copied */
+{ globalThis.lwavesDesktop = {}; stores.delete('lw-vol-vol-t'); fetched.length = 0;
+  const st = await V.installStatus('vol-t');
+  assert.deepEqual([st.state, st.n, st.N, st.served], ['installed', 2, 2, true], 'served: installed without a cache');
+  assert.deepEqual([...await V.kept('vol-t')].sort(), ['a', 'b'], 'served: every molecule is kept');
+  assert.equal((await V.install('vol-t')).ok, true, 'served: install is ok'); assert.equal((await V.installMolecule('vol-t', 'a')).ok, true, 'served: installMolecule is ok');
+  assert.equal(stores.has('lw-vol-vol-t'), false, 'served: nothing was copied into Cache Storage');
+  assert.equal(sha(new Uint8Array(await V.file('vol-t', 'a', { network: false }))), sha(a2), 'served: a project re-open reads the file from the package');
+  assert.equal(await V.remove('vol-t'), false, 'served: the card does not remove what Steam installed');
+  delete globalThis.lwavesDesktop; }
+
+console.log('PASS the volumes store: a file kept under a stale sha is not kept on installStatus, kept, install and the .lwv road; a stale index.json is replaced; installMolecule says a basis record it could not keep; a held volume is off the shelf, still opens by id, and stays where a device holds it; a volume the desktop serves is installed with nothing copied');

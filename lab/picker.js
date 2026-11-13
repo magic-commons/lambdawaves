@@ -821,13 +821,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (alt) { alt.type = 'button'; alt.title = 'Have the .lwv? Open it instead of downloading';
         altPick.type = 'file'; altPick.accept = '.lwv'; altPick.hidden = true; altPick.addEventListener('change', () => { const f = altPick.files && altPick.files[0]; altPick.value = ''; if (f) run(f); });
         alt.addEventListener('click', (e) => { e.stopPropagation(); if (!ctl) altPick.click(); }); }
-      let ctl = null; const arm = armer(b, () => paint());
+      let ctl = null, held = false; const arm = armer(b, () => paint());   // held (044 S8): the desktop package serves this volume from its own folder — installed, and Steam's to remove
       const paint = async () => {
         const s = await V.installStatus(v.id).catch(() => ({ state: 'absent', n: 0, N: v.count || 0 }));
         const est = fromFile && s.state !== 'installed' ? await navigator.storage?.estimate?.().catch(() => null) : null;
         const tight = est && est.quota && est.quota - (est.usage || 0) < size ? ' · TOO BIG FOR THIS DEVICE' : '';
-        b.dataset.state = s.state; if (alt) alt.hidden = s.state === 'installed'; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle'); eye(ico, s.state === 'installed');
-        word.textContent = s.state === 'installed' ? 'REMOVE' + (size ? ' · ' + fmtBytes(size) : '') : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
+        held = !!s.served; b.dataset.state = s.state; if (alt) alt.hidden = s.state === 'installed'; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle'); eye(ico, s.state === 'installed'); ico.style.visibility = held ? 'hidden' : ''; b.style.cursor = held ? 'default' : '';   // 044 S8: no bin on a volume the card cannot remove — the full ring alone
+        word.textContent = held ? 'INSTALLED' + (size ? ' · ' + fmtBytes(size) : '') : s.state === 'installed' ? 'REMOVE' + (size ? ' · ' + fmtBytes(size) : '') : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
           : (fromFile ? 'OPEN FILE…' : 'INSTALL') + (size ? ' · ' + fmtBytes(size) : '')) + tight;
       };
       const run = async (f) => {
@@ -842,6 +842,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       b.addEventListener('click', async (e) => {
         e.stopPropagation();
         if (ctl) { ctl.abort(); return; }
+        if (held) return;
         if (b.dataset.state === 'installed') {   // two presses remove: no window.confirm
           if (!arm.take()) { arm.arm(); word.textContent = 'REMOVE ' + volName(v) + '? PRESS AGAIN'; return; }
           await V.remove(v.id); await paint(); return;
@@ -909,7 +910,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'EXPANSIONS');
-        el('span', '', e, 'No volume is published yet.');
+        el('span', '', e, globalThis.lwavesDesktop ? 'No volume is installed. The volumes are free add-ons on Steam.' : 'No volume is published yet.');   // 044 S8
         return;
       }
       heroes.clear(); vols = s.volumes; s.volumes.forEach(card);
