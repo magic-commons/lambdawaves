@@ -25,7 +25,7 @@
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
 import { el, knob, sw, trig, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js'; import { softCapLevels } from './molecular-register.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
 
@@ -375,9 +375,7 @@ export function createOrbitals(host, api) {
       title: 'Phase arg c_k at t = 0',
       fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => { setPhase(k, v); painted(); } });
     root.appendChild(amp.root); root.appendChild(ph.root);
-    const x = el('button', 'sp-x', root, '×'); x.type = 'button';
-    x.title = 'Take this orbital out of the register'; x.setAttribute('aria-label', 'remove ' + label(k));
-    x.addEventListener('click', () => deselect(k));
+    laneStrip(root, { name: label(k), onRemove: () => deselect(k), remove: 'Take this orbital out of the register' });   // 044 A3.2: the one strip's × (paint-stroke.js)
     return { root, amp, ph, nm, es, k };
   }
   function markSel() { for (const [k, L] of lanes) L.root.classList.toggle('sel', k === selected); }

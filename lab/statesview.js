@@ -29,7 +29,7 @@
 import { stateName } from './names.js';
 import { el, knob, sw, seg, fader, trig, readout, graphHover, themeInk, accentRGB, vividInk, nRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 import { cssZoom } from './mir/core/zoom.js';
@@ -533,15 +533,9 @@ export function createStates(host, api) {
     const ph = knob({ aria: 'phase ' + label(key), min: 0, max: TAU, value: c.phase, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
       onDelta: (dv) => { const l = lanes.get(key); if (!l) return; painted(); const w = ((l.phase + dv) % TAU + TAU) % TAU; if (hand(slotId('ph', key), w)) return; setPhase(key, w); }, onReset: () => { painted(); if (hand(slotId('ph', key), 0)) return; setPhase(key, 0); } });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);
-    const mute = el('button', 'sp-b mute', root, 'M'); mute.type = 'button'; mute.title = 'Mute: leave this state out of the FIELD';
-    mute.setAttribute('aria-label', 'mute ' + label(key)); mute.setAttribute('aria-pressed', 'false');
-    mute.addEventListener('click', () => { const l = lanes.get(key); l.mute = !l.mute; touch(); syncLanes(); api.repaint(); });
-    const solo = el('button', 'sp-b solo', root, 'S'); solo.type = 'button'; solo.title = 'solo: play this state alone';
-    solo.setAttribute('aria-label', 'solo ' + label(key)); solo.setAttribute('aria-pressed', 'false');
-    solo.addEventListener('click', () => { const l = lanes.get(key); l.solo = !l.solo; touch(); syncLanes(); api.repaint(); });
-    const x = el('button', 'sp-x', root, key === GROUND ? '' : '×'); x.type = 'button'; x.disabled = key === GROUND;
-    x.title = key === GROUND ? 'S₀ is pinned' : 'Take this state out of the register'; x.setAttribute('aria-label', 'remove ' + label(key));
-    x.addEventListener('click', () => deselect(key));
+    const flip = (f) => () => { const l = lanes.get(key); l[f] = !l[f]; touch(); syncLanes(); api.repaint(); };
+    const { mute, solo } = laneStrip(root, { name: label(key), onMute: flip('mute'), onSolo: flip('solo'), onRemove: () => deselect(key),   // 044 A3.2: the one strip (paint-stroke.js)
+      remove: 'Take this state out of the register', pinned: key === GROUND ? 'S₀ is pinned' : '' });
     return { root, pop, ph, mute, solo, nm, es, key };
   }
   function markSel() { for (const [k, L] of rows) L.root.classList.toggle('sel', k === selected); }

@@ -29,7 +29,7 @@ import { PRIM_TYPES } from './node-prims.js';
 import { SHADER_TYPES, createShaderHost } from './node-shader.js';
 import { createFocusHandles } from './node-focus.js';   // 040 N1: a kind's point on the stage, shown while the node is edited
 import { jsonStore } from './mir/core/prefs.js';
-import { createUserPresets, uniqueName } from './user-presets.js';
+import { createUserPresets, uniqueName, presetSave } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
 import { createView, keysAt } from './nodes-view.js';
 import { createUndo } from './nodes-undo.js';
@@ -247,17 +247,9 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   function curvesIn(body) {
     const v = createCurvesView(body, { model, presets });
     for (const l of v.root.querySelectorAll('.curves-channel .k-lbl, .curves-foot .k-lbl')) if (/^(CHANNEL|PRESET)$/.test(l.textContent.trim())) { ariaLabel(l.parentElement, l.textContent.trim()); l.remove(); }
-    const foot = v.root.querySelector('.curves-foot'), nm = foot.querySelector('.mir-step-name'), save = chip(el('button', 'sp-presave', foot), 'saveInto'); save.type = 'button';
-    ariaLabel(save, 'SAVE CURVE'); save.title = 'SAVE · this curve as your own preset';
-    save.addEventListener('click', () => {
-      if (foot.querySelector('.sp-prename')) return;
-      const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'curve name'); f.value = 'My curve';
-      nm.parentElement.insertBefore(f, nm); nm.hidden = true;
-      let done = false; const end = (keep, key) => { if (done) return; done = true; const n = f.value.trim(); f.remove(); nm.hidden = false;
-        if (keep && n) users.add(n, { points: model.points().map((q) => ({ t: q.t, v: q.v, tension: q.tension || 0 })) }); if (key) nm.focus(); };
-      f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
-      f.addEventListener('blur', () => end(false)); f.focus(); f.select();
-    });
+    const foot = v.root.querySelector('.curves-foot'), nm = foot.querySelector('.mir-step-name');
+    presetSave(foot, nm, { word: 'SAVE CURVE', tip: 'SAVE · this curve as your own preset', field: 'curve name', suggest: () => 'My curve',   // 044 A3.3: the one save (user-presets.js)
+      keep: (n) => users.add(n, { points: model.points().map((q) => ({ t: q.t, v: q.v, tension: q.tension || 0 })) }) });
     nm.addEventListener('click', () => { const pane = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!pane) return;
       for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + CU + '"]')) {
         const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'remove ' + name; ariaLabel(x, 'remove {name}', { name });

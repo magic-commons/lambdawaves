@@ -3,7 +3,7 @@
 import { TIER } from '../tier.js';
 import { el, knob, sw, seg, group, readout, chip, hint, trig, label } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
 import { createLight, summonLight } from '../light-window.js';   // 037 L1: THE LIGHTING WINDOW, CAMERA's sibling (lab/, not windows/); L4 its summons
-import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel, directionSphere } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
+import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName, presetSave } from '../user-presets.js'; import { createCameraPanel, directionSphere } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, obs, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
@@ -354,17 +354,9 @@ export function createMaterial(app) {
     /* P3 · the bare save glyph in a 26-px seat after the stepper (S4's `.sp-presave`); a press asks the name in the stepper's own seat — Enter keeps the
        current stops under it, Escape or a press elsewhere lets it go — and the list is re-fed with the reader's row shown */
     palUsers.watch(() => rp.setPresets(palPresets(), palShown));
-    { const top = rv.root.querySelector('.mir-ramp-presets'), nm = top.querySelector('.mir-ramp-step .mir-step-name'), save = chip(el('button', 'sp-presave', top), 'saveInto'); save.type = 'button';
-      save.setAttribute('aria-label', 'SAVE PALETTE'); save.title = 'SAVE · these stops as your own palette (kept on this device)';
-      save.addEventListener('click', () => {
-        if (top.querySelector('.sp-prename')) return;
-        const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; f.setAttribute('aria-label', 'palette name');
-        f.value = 'My ' + (nm.textContent || 'palette').trim(); nm.parentElement.insertBefore(f, nm); nm.hidden = true;
-        let done = false; const end = (keep, key) => { if (done) return; done = true; let n = f.value.trim(); f.remove(); nm.hidden = false;
-          if (keep && n) { n = uniqueName(n, palUsers.list().map((x) => x.name)); palShown = PU + n; palUsers.add(n, { stops: rv.stops().map((s) => ({ at: s.at, rgb: mat.invert ? s.rgb.map((v) => 1 - v) : s.rgb.slice() })) }); }   /* 018 B6: INVERT on bakes the colours seen (1 − rgb); the switch stays */ if (key) nm.focus(); };
-        f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
-        f.addEventListener('blur', () => end(false)); f.focus(); f.select();
-      }); }
+    { const top = rv.root.querySelector('.mir-ramp-presets'), nm = top.querySelector('.mir-ramp-step .mir-step-name');   // 044 A3.3: the one save (user-presets.js presetSave)
+      presetSave(top, nm, { word: 'SAVE PALETTE', tip: 'SAVE · these stops as your own palette (kept on this device)', field: 'palette name', suggest: () => 'My ' + (nm.textContent || 'palette').trim(),
+        keep: (n) => { n = uniqueName(n, palUsers.list().map((x) => x.name)); palShown = PU + n; palUsers.add(n, { stops: rv.stops().map((s) => ({ at: s.at, rgb: mat.invert ? s.rgb.map((v) => 1 - v) : s.rgb.slice() })) }); } }); }   /* 018 B6: INVERT on bakes the colours seen (1 − rgb); the switch stays */
     palHandWatch(rv.root.querySelector('.mir-ramp-step'));
     { const n = rv.root.querySelector('.mir-ramp-step .mir-step-name'); if (n) { n.addEventListener('click', palPick); n.addEventListener('keydown', () => queueMicrotask(palPick)); } }
     const showArg = () => { const s = rv.stops()[rv.selected()]; if (!s) return; argRo.set(argFloat.textContent = ang(s.at)); argRo.root.title = argFloat.title = ((2 * s.at - 1) * 180).toFixed(1) + '°'; argFloat.style.setProperty('--at', s.at); };

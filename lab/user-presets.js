@@ -12,6 +12,24 @@ export function uniqueName(name, taken) {
   for (let k = 2; ; k++) if (!has.has(name + ' ' + k)) return name + ' ' + k;
 }
 import { jsonStore } from './mir/core/prefs.js';
+import { el, chip, hint, ariaLabel } from './mir/kit.js';
+
+/** 044 A3.3 · THE PRESET BAR'S SAVE (L109, REVIEW-B B15: assembled by hand in SPECTRUM, PALETTE and CURVES), written once: the bare save glyph
+ *  in a 26-px seat after a preset stepper (`.sp-presave`, lab.css); a press asks the name in the stepper's own seat (`.sp-prename` in place of
+ *  `name`, the stepper's `.mir-step-name`) — Enter keeps it, Escape or a press elsewhere lets it go, and a key gives the focus back to the name.
+ *    presetSave(seat, name, { word, tip, field, suggest() → the name offered, or null: nothing to save, keep(n) }) → the button */
+export function presetSave(seat, name, { word, tip, field, suggest, keep }) {
+  const save = chip(el('button', 'sp-presave', seat), 'saveInto'); save.type = 'button'; ariaLabel(save, word); hint(save, tip);
+  save.addEventListener('click', () => {
+    if (seat.querySelector('.sp-prename')) return; const first = suggest(); if (first === null) return;
+    const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, field); f.value = first;
+    name.parentElement.insertBefore(f, name); name.hidden = true;
+    let done = false; const end = (ok, key) => { if (done) return; done = true; const n = f.value.trim(); f.remove(); name.hidden = false; if (ok && n) keep(n); if (key) name.focus(); };
+    f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
+    f.addEventListener('blur', () => end(false)); f.focus(); f.select();
+  });
+  return save;
+}
 
 export function createUserPresets(storeKey) {
   const store = jsonStore(storeKey), fans = new Set();
