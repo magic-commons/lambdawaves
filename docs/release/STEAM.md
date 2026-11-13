@@ -128,9 +128,15 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
       (`Copyright 2026 Joshua Hosain`), because that line says who holds the copyright, not who publishes. Still yours: whether the Steam
       partner account, the store page's developer and publisher, and the tax and bank details are in that name too.
 - [ ] The partner site: the app, two depots, the launch options above, the AI disclosure, the store page, the price.
-- [ ] `node package.mjs --platform win32` (one download), then the Windows GPU run on your PC: start from the folder, then from Steam;
-      the notice, the loader once, a project saved / quit / relaunched, AUDIO with the microphone, a MIDI controller, a film rendered with
-      the window minimised, FOLDERS › EXPORT saving a file, F11 and FULL, the overlay (Shift+Tab) on and off.
+- [ ] The Windows GPU run on your PC. The folder is built (044 S4, 2026-11-12, on Linux; the download you approved is done and
+      cached): `out/lambdawaves-win32-x64/`, 495,884,961 B, 1,902 files, from commit `d9560b0c`. Checked here without running it: the
+      `.exe` is a 64-bit Windows program whose version resource reads CompanyName `MAGIC COMMONS`, ProductName and FileDescription
+      `λWAVES`, version `0.9.9-beta`, LegalCopyright `Copyright 2026 Joshua Hosain`; `resources/dist/` is byte-identical to the Linux
+      package's (which passes its 17 checks); no AI mark and no OpenAI or Google face is in it. **Never started: no Windows machine
+      and no wine here.** On the PC, copy the folder over and: start `lambdawaves.exe` from the folder (right-click › Properties ›
+      Details shows MAGIC COMMONS), then from Steam; the notice, the loader once, the MAIN MENU with no AI logos bottom left, the field
+      drawing on the GPU, a project saved / quit / relaunched, AUDIO with the microphone, a MIDI controller, a film rendered with the
+      window minimised, FOLDERS › EXPORT saving a file, F11 and FULL, the overlay (Shift+Tab) on and off.
 - [ ] The Linux install from Steam and the sandbox answer (§4); the Deck (§5).
 - [ ] A 30-minute real session on each, then a row in [`ACCEPTANCE-MATRIX.md`](ACCEPTANCE-MATRIX.md).
 - [ ] The volumes: VOL. I and II for now, VOL. III later (answered 2026-11-12). Still yours: in the game's depot or as free add-ons (§8).
