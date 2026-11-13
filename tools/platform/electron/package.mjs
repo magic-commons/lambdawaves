@@ -23,8 +23,13 @@ const paths = await packager({ dir: HERE, out: OUT, platform, arch: 'x64', asar:
   name: 'lambdawaves', executableName: 'lambdawaves', icon: path.join(HERE, 'lambdawaves.ico'), appCopyright: copyright,
   win32metadata: { CompanyName: holder, FileDescription: 'λWAVES', ProductName: 'λWAVES', InternalName: 'lambdawaves', OriginalFilename: 'lambdawaves.exe' },
   ignore: [/^\/(out|node_modules)(\/|$)/, /^\/(package|smoke-run|dist-hash)\.mjs$/, /^\/package-lock\.json$/, /\.ico$/] });
+// 044 S1 (Josh 11-12: "steam version does not show logo"): the MAIN MENU's credits strip is not built on the desktop (lab/picker.js, lab/loader.js
+// read window.lwavesDesktop), and its files — three companies' marks, Google Sans Flex, and OpenAI Sans, which has no licence in the tree
+// (LEGAL-PROVENANCE row 18) — are not in the package at all. The site's dist/ keeps them; the identity below hashes what the package holds.
+const AI_MARKS = ['img/ai', 'img/menu/ai'], inner = (p) => path.join(p, 'resources/dist');
+for (const p of paths) for (const d of AI_MARKS) fs.rmSync(path.join(inner(p), d), { recursive: true, force: true });
 const git = (...a) => { try { return execFileSync('git', ['-C', REPO, ...a], { encoding: 'utf8' }).trim(); } catch { return null; } };
-const id = { appVersion, gitSha: git('rev-parse', 'HEAD'), gitTag: git('describe', '--tags', '--always'), ...distHash(DIST), electron: ver('electron'), packager: ver('@electron/packager'), builtAt: new Date().toISOString() };
+const id = { appVersion, gitSha: git('rev-parse', 'HEAD'), gitTag: git('describe', '--tags', '--always'), ...distHash(inner(paths[0])), electron: ver('electron'), packager: ver('@electron/packager'), builtAt: new Date().toISOString() };
 fs.writeFileSync(path.join(OUT, 'build-identity.json'), JSON.stringify(id, null, 1) + '\n');
 const source = `# λWAVES desktop — corresponding source\n\nThis binary was built from https://github.com/magic-commons/lambdawaves at tag \`${id.gitTag}\`, commit \`${id.gitSha}\`.\n` +
   `The source archive is attached to the matching GitHub Release. dist/ sha256 ${id.distSha256} (${id.fileCount} files), Electron ${id.electron}.\n` +
