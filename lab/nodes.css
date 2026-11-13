@@ -24,7 +24,7 @@
 .nodes-mark { font-style: normal; letter-spacing: 0; color: var(--fg-soft); }
 .nodes-knobs { --cell-min: 56px; }   /* 022 F2: a card's knobs are a fit row (`.row.fit`); 56-px cells keep OUT WHITE whole */
 .nodes-title { display: flex; align-items: center; gap: 6px; height: 26px; margin: 0 -8px 6px; padding: 0 8px; cursor: move; user-select: none;
-  font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--acc); border-bottom: 1px solid var(--glass-hairline); }
+  font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--acc); border-bottom: var(--glass-border) solid var(--glass-hairline); }
 .nodes-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nodes-ico { flex: none; width: 14px; height: 14px; }
 .nodes-body { font-size: var(--fs-tiny); color: var(--dim); }
@@ -101,7 +101,7 @@
 .nodes-card.unplug { opacity: .5; }
 /* 038 N5 · THE MINIMAP: a well at the ground's bottom-right; the cards faint ink (STAGE IN / OUT the accent), the view an accent frame */
 .nodes-map { position: absolute; right: 8px; bottom: 8px; z-index: 1; width: 120px; height: 80px; box-sizing: border-box; overflow: hidden; cursor: crosshair; touch-action: none;
-  border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+  border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 .nodes-map > svg { display: block; width: 100%; height: 100%; }
 .nodes-map .c { fill: color-mix(in srgb, var(--ink-faint) 60%, transparent); }
 .nodes-map .c.io { fill: color-mix(in srgb, var(--acc) 55%, transparent); }
@@ -142,7 +142,7 @@
 .nodes-prename.dirty { border-color: color-mix(in srgb, var(--acc) 60%, transparent); }
 /* 040 N1 · THE FOCAL POINT (lab/node-focus.js): a ring with a cross-hair on the stage, at z 19 beside the widgets, only while its node is edited; the host
    takes no pointer, the handle does; H and the menu take it out with the rest */
-.nodes-focus-host { position: absolute; inset: 0; z-index: 19; pointer-events: none; }
+.nodes-focus-host { position: absolute; inset: 0; z-index: var(--z-stage-widgets); pointer-events: none; }
 .nodes-focus { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; pointer-events: auto; cursor: move; touch-action: none; box-sizing: border-box;
   border: 2px solid var(--acc); box-shadow: 0 0 0 1px rgb(0 0 0 / .55), inset 0 0 0 1px rgb(0 0 0 / .55); }
 .nodes-focus::before, .nodes-focus::after { content: ''; position: absolute; left: 50%; top: 50%; background: var(--acc); box-shadow: 0 0 0 1px rgb(0 0 0 / .45); }
@@ -154,7 +154,7 @@ body.ui-hidden .nodes-focus-host, body.menu-open .nodes-focus-host { display: no
 /* 038 P8 · THE LAYERS BLEND WITH THE STAGE: the host is no stacking context (z auto), so each layer's mix-blend-mode meets the stage beneath it; the
    layers take the host's old z 8 themselves — above #skeleton (7), under the atom labels (9) */
 #nodeLayers { position: absolute; inset: 0; z-index: auto; overflow: hidden; pointer-events: none; }
-.node-layer { position: absolute; inset: 0; z-index: 8; clip-path: var(--lw-glass-cut, none); }   /* 039 V5: cut where a window stands (shell/ink.js) */
+.node-layer { position: absolute; inset: 0; z-index: var(--z-stage-marks); clip-path: var(--lw-glass-cut, none); }   /* 039 V5: cut where a window stands (shell/ink.js) */
 canvas.node-layer { width: 100%; height: 100%; }   /* 024 S: a SHADER node's canvas (lab/node-shader.js), the stage's pixels stretched over it */
 .node-layer[data-type="grain"] > i { position: absolute; inset: -50% 0 0 -50%; transform: translate(var(--gx, 0%), var(--gy, 0%)); }   /* 1.5 × the stage: a jump of up to a third of it never shows an edge */
 /* 040 N2 · THE GRAIN KEEPS TIME: the jump is the clock's (node-layers.js `tick`, --gx · --gy), so a paused clock holds it still — 021 V3's keyframes and

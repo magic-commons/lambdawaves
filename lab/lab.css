@@ -78,10 +78,10 @@ body[data-theme="dark"] #notebook::before { background: hsl(0 0% 0% / .22); }   
 .nb-subtitle::placeholder { opacity: .6; }
 #notebook[data-face="projects"] .nb-titles, #notebook[data-face="projects"] .nb-title, #notebook[data-face="projects"] .nb-subtitle { visibility: hidden; }
 .nb-view { font: 14px/1.6 var(--font-ui); }
-.nb-view h1, .nb-view h2, .nb-view h3 { font-weight: 700; }
+.nb-view h1, .nb-view h2, .nb-view h3 { font-weight: var(--w-heavy); }
 .nb-view h1 { font-size: 22px; } .nb-view h2 { font-size: 18px; } .nb-view h3 { font-size: 15px; }
 .nb-view code { font-size: 12px; border-radius: 4px; background: hsl(0 0% 50% / .14); }
-.nb-view pre { border-radius: 8px; background: hsl(0 0% 50% / .12); } .nb-view pre code { background: transparent; }
+.nb-view pre { border-radius: var(--r-md); background: hsl(0 0% 50% / .12); } .nb-view pre code { background: transparent; }
 .nb-view blockquote { border-left: 2px solid var(--acc); }
 .nb-view th, .nb-view td { border-bottom: 1px solid hsl(0 0% 50% / .25); }
 .nb-view hr { background: hsl(0 0% 50% / .3); }
@@ -112,11 +112,11 @@ body[data-theme="dark"] #notebook::before { background: hsl(0 0% 0% / .22); }   
 .hist-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
 .hist-actions > .trig { width: 100%; min-width: 0; padding-inline: 5px; }
 
-.nb-tools button { font-size: 13px; }
+.nb-tools button { font-size: var(--fs-lead); }
 .nb-tools button:hover { color: var(--acc); }
-.nb-text { font: 13px/1.5 var(--font-ui); }
+.nb-text { font: var(--fs-lead)/1.5 var(--font-ui); }
 .nb-foot { letter-spacing: var(--tr-wide); }
-.nb-foot button, .nb-dump, .ab-home { border-radius: 8px; font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); }
+.nb-foot button, .nb-dump, .ab-home { border-radius: var(--r-md); font: var(--w-heavy) var(--fs-small) var(--font-ui); letter-spacing: var(--tr-wider); }
 .nb-dump, .ab-home { line-height: 28px; }
 /* 034 N1 · the ABOUT window (shell/notebook.js): the notebook's button ink, its two faces filling the body */
 .mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); }
@@ -125,8 +125,8 @@ body[data-theme="dark"] .mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .08); --nb
 .mir-win.lw-about .nb-face { padding: 0 14px 12px; }
 .lw-about-mir { align-items: stretch; }
 .nb-logo { font-size: 35px; }
-.nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; margin-right: -.04em; }
-.nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: 700; letter-spacing: .06em; }
+.nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: var(--w-heavy); font-size: 1.3em; line-height: 1; margin-right: -.04em; }
+.nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: var(--w-heavy); letter-spacing: .06em; }
 .nb-logo .mark { align-self: center; height: 1.05em; width: 1.05em; margin-left: .05em; }
 /* iteration 016 P5 · ABOUT: the λWAVES wordmark (lab/img/lambdawaves-logo.svg) large, its word in the ink; the MIR page's mark small */
 .nb-logo.nb-wordmark { display: block; width: min(380px, 86%); margin: 14px auto 10px; color: var(--fg); }
@@ -134,13 +134,13 @@ body[data-theme="dark"] .mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .08); --nb
 .ab-eyebrow { letter-spacing: var(--tr-wider); }
 .ab-version { font-size: 12px; letter-spacing: .06em; }
 .ab-tag { text-transform: uppercase; }
-.ab-tagline { font-size: 13px; }
+.ab-tagline { font-size: var(--fs-lead); }
 .ab-credit { font-size: 12px; }
 .ab-fine { font-size: 10.5px; }
 
 /* 033 THE UPDATER · ABOUT's build line (sw-client.js paintBuild) and the diagnostics' text (COPY DIAGNOSTICS) */
-.ab-build { font-variant-numeric: tabular-nums; letter-spacing: .02em; opacity: .85; word-break: break-word; }
-.lw-diag { white-space: pre-wrap; word-break: break-word; font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; max-height: min(52vh, 420px); overflow: auto; margin: 0; text-align: left; user-select: text; }
+.ab-build { font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); opacity: .85; word-break: break-word; }
+.lw-diag { white-space: pre-wrap; word-break: break-word; font: var(--fs-base)/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; max-height: min(52vh, 420px); overflow: auto; margin: 0; text-align: left; user-select: text; }
 .ab-fine code { font-family: var(--font-mono); }
 .ab-rule { background: hsl(0 0% 50% / .25); }
 .nb-dump:hover, .ab-home:hover { color: var(--fg); border-color: color-mix(in srgb, var(--acc) 45%, var(--nb-btn-line)); }
@@ -159,7 +159,7 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 .sp-row .sp-knobs .k { width: 30px; gap: 0; }
 .sp-row .sp-knobs .k-dial { width: 17px; height: 17px; }
 .sp-row .sp-knobs .k-needle { height: 6px; width: 1.2px; }
-.sp-row .sp-knobs .k-val { font-size: 8px; line-height: 1; padding: 0 3px; }
+.sp-row .sp-knobs .k-val { font-size: var(--fs-micro); line-height: 1; padding: 0 3px; }
 /* PHASE — the live one: it turns by itself, so it takes the accent the rest of the lab spends on live.
    ⚠ AS A RING OF SHADOW, NOT A BORDER, and that is not a detail: skin.css sets `border-color:
    transparent` on EVERY `.k-dial` and draws the puck with `--neu-raise` instead — "the puck stands
@@ -204,7 +204,7 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 .mb-btn { border-radius: 7px; letter-spacing: var(--tr-wider); }
 .mb-btn:hover { background: transparent; color: var(--acc); }
 .mb-item { text-align: left; background: transparent; color: var(--fg-soft); border-radius: 6px; cursor: pointer; }
-.mb-item:hover { background: var(--glass-raise); color: var(--fg); }
+.mb-item:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
 .mb-key { letter-spacing: var(--tr-wide); }
 /* 021 I3 · the kit's submenus, checks and radios (MIR 1.5.6-alpha.2) under these unlayered rules: an accordion stays in its list on a phone, a mark has its gutter */
 .mb-item.mb-check, .mb-item.mb-radio { position: relative; padding-inline-start: 26px; }
@@ -274,13 +274,13 @@ body.transport-under #transport.mini { z-index: var(--z-chrome); }
    `flex: 1 1 auto` in it — takes the rest.  Move a seat in this row and re-run the measurement. */
 #transport.mini .ro { flex: 0 0 76px; min-width: 76px; }
 #transport.mini .ro.period { width: 120px; }
-#transport.mini .tbtn.jump { font-size: 13px; }
+#transport.mini .tbtn.jump { font-size: var(--fs-lead); }
 /* THE CONTROL SURFACE's rules live in lab/csb.css (021 G6). */
 
 
 .dock-btn { width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto; cursor: pointer;
   border: var(--glass-border) solid var(--glass-border-color); background: transparent;
-  box-shadow: var(--glass-shadow); color: var(--ink-key); font-size: 11px;
+  box-shadow: var(--glass-shadow); color: var(--ink-key); font-size: var(--fs-base);
   display: inline-flex; align-items: center; justify-content: center; }
 .dock-btn > svg, .mod-exp > svg { filter: drop-shadow(0 1px 0 var(--glass-raise)); }
 .dock-btn:hover { color: var(--fg); }
@@ -334,7 +334,7 @@ body.transport-under #transport.mini { z-index: var(--z-chrome); }
 /* iteration 016 R1 · THE REGISTER'S FOOTNOTE (paint-stroke.js footLine): the law line under SPECTRUM's ladder and MOLECULES' two ladders; reduced motion: no fade.
    037 H7 · THE LAW LINE REVEALS ITSELF (Josh: "should only happen inside that reader thingy"): shown while the pointer is on ITS LADDER — the canvas it
    lies over (the line is pointer-events none, so the ladder's own hover is the line's) — or keyboard focus walks the window; no longer on the window's hover */
-.reg-foot { position: absolute; z-index: 1; height: 11px; font: 8px/11px ui-monospace, monospace; color: var(--fg); opacity: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; transition: opacity 160ms ease; }
+.reg-foot { position: absolute; z-index: 1; height: 11px; font: var(--fs-micro)/11px ui-monospace, monospace; color: var(--fg); opacity: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; transition: opacity 160ms ease; }
 canvas:hover + .reg-foot, .dev:has(:focus-visible) .reg-foot { opacity: .8; }
 @media (prefers-reduced-motion: reduce) { .reg-foot { transition: none; } }
 .sp-rows { display: flex; flex-direction: column; gap: 3px; }
@@ -356,10 +356,10 @@ canvas:hover + .reg-foot, .dev:has(:focus-visible) .reg-foot { opacity: .8; }
 .sp-row .k-needle { height: 11px; }
 .sp-b { width: 34px; height: 40px; border-radius: 6px; border: var(--glass-border) solid var(--glass-hairline); font-size: var(--fs-tiny); font-weight: var(--w-bold); }
 .sp-b.solo.on { background: hsl(288 70% 62% / .35); }
-.sp-x { width: 26px; height: 40px; border: 0; background: transparent; color: var(--ink-faint); font-size: 13px; border-radius: 6px; }
+.sp-x { width: 26px; height: 40px; border: 0; background: transparent; color: var(--ink-faint); font-size: var(--fs-lead); border-radius: 6px; }
 .sp-x:active { color: var(--bad); background: var(--glass-press); }
 /* LEAN: a window without its paragraphs and readout tiles (rack.js, the Aa header button) */
-.dev-lean { width: 26px; height: 22px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-faint); font-size: 11px; font-weight: var(--w-bold); letter-spacing: 0; cursor: pointer; }
+.dev-lean { width: 26px; height: 22px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-faint); font-size: var(--fs-base); font-weight: var(--w-bold); letter-spacing: 0; cursor: pointer; }
 .dev-lean.on { color: var(--acc); text-decoration: line-through; }
 /* 0.4.0 S0: MOLECULES keeps its Aa with HELP off — LEAN is on by default and its readouts (E, ε, Tr DS) have no other road back */
 body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-lean { display: none; }   /* iteration 012 R1: INFORMATIONAL's Aa is its STATUS switch, never a note toggle */
@@ -406,7 +406,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .mol-pick .mol-dl { position: relative; --arc-pad: 1px; --arc-stroke: 4; --arc-groove: hsl(0 0% 50% / .25); }
 .mol-pick .mol-dl:not([data-busy]) .k-arc { display: none; }
 .mol-tile > img.mol-tile-pic { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
-.mol-tile > .mol-tile-ph { display: grid; place-items: center; aspect-ratio: 1; font: 400 15px/1 var(--font-math, serif); opacity: .75; }
+.mol-tile > .mol-tile-ph { display: grid; place-items: center; aspect-ratio: 1; font: var(--w-regular) 15px/1 var(--font-math, serif); opacity: .75; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }
@@ -445,7 +445,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 /* ── frontier: the vortex overlay, the orbit spheres, the ladder plots ──── */
 #vortex, #particles, #flow, #kepler, #skeleton { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 5; }
 #particles, #flow { z-index: 6; }
-#kepler, #skeleton { z-index: 7; }
+#kepler, #skeleton { z-index: var(--z-stage-orbits); }
 /* H: the interface hides, the stage takes the whole window */
 
 
@@ -600,7 +600,7 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
    measured, `.mod-exp` read 22 px against the 34 the chip rule asked for.  It IS the chip now. */
 .mod-exp { width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto; cursor: pointer;
   border: var(--glass-border) solid var(--glass-border-color); background: transparent;
-  box-shadow: var(--glass-shadow); color: var(--ink-key); font-size: 11px;
+  box-shadow: var(--glass-shadow); color: var(--ink-key); font-size: var(--fs-base);
   display: inline-flex; align-items: center; justify-content: center; }
 .mod-exp:hover { color: var(--fg); background: var(--glass-press); }
 .mod-exp.live { color: var(--acc2); border-color: color-mix(in srgb, var(--acc2) calc(55% * var(--ctl-stroke)), transparent); background: var(--acc2-soft); }
@@ -651,7 +651,7 @@ body.mod-arming .mir-select, body.mod-arming .k:not([data-param]) { opacity: .45
 /* iteration 016 P2 (Josh: "a denser picker when expanded"): the ‹ MOLECULE › chooser's open list is the platform's own <select> popup (optgroups,
    disabled reasons and native keys kept, 0.5.3 M8), so its rows are set by its options' face: 11 px with no padding — Firefox draws a row ≈ 20 px where
    the inherited face drew ≈ 24; a browser that ignores option styling keeps its own list.  The closed name keeps its face. */
-.mol-pick select.sel :is(option, optgroup) { font-size: 11px; line-height: 1.25; padding-block: 0; min-block-size: 0; }
+.mol-pick select.sel :is(option, optgroup) { font-size: var(--fs-base); line-height: 1.25; padding-block: 0; min-block-size: 0; }
 /* iteration 007 M · VIEW in two balanced rows (Josh: "not so top-heavy"): DENSITY · ORBITAL · Δρ over ESP · SPIN · Δ LDA−RHF, three equal
    columns across the card's body — the kit's render card's grid-on-.seg idiom (render.css), one word a cell, never wrapped */
 .mol-view { flex: 1 1 100%; align-items: stretch; }
@@ -688,7 +688,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    shade and serif at the kit's seat; beneath every window (z 20 < rack 30 < #floats 32: the kit's root has none), never a pointer
    target, never in the occlusion mask.  The type is the notebook's × SIZE (--lw-stage-size): the formula its title (34 px), an
    announcement ([data-fade]) its heading (22 px), each held to 8 % of the window's width and at least 16 px, KaTeX at .nb-view's 1.08em. */
-.mir-info.lw-stage { z-index: 20; --info-size-body: calc(clamp(16px, 8vw, 34px) * var(--lw-stage-size, 1)); }
+.mir-info.lw-stage { z-index: var(--z-stage-words); --info-size-body: calc(clamp(16px, 8vw, 34px) * var(--lw-stage-size, 1)); }
 .mir-info.lw-stage .mir-info-block[data-fade] { font-size: calc(clamp(16px, 8vw, 22px) * var(--lw-stage-size, 1)); }
 /* iteration 007 I · NAME: the molecule's name is the formula block's second paragraph, at the notebook's heading (22 px of the title's 34) and close under it */
 .mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p + p { font-size: 0.65em; margin-top: -0.25em; line-height: 1.1; }   /* iteration 012 R1 (Josh 10-20): the name sits close under its formula */
@@ -703,16 +703,21 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 @keyframes lw-fresh { from { opacity: 0; } }
 /* 037 W1 · THE WIDGETS (lab/widgets.js): their own layer beside the words, z 19 — over the atom labels (9), under INFORMATIONAL (20) and every window —
    in the words' ink; a widget is a box in stage fractions with no background, border or shadow, never a pointer target outside EDIT; H takes them out */
-#widgets { position: absolute; inset: 0; z-index: 19; pointer-events: none; user-select: none; -webkit-user-select: none; color: hsl(40 33% 96%); }
-[data-theme="light"] #widgets { color: hsl(232 22% 10%); }
+/* 044 A1 · DECLARED ONCE, READ BY NAME (L114: A15, A22).  The stage's ink pair (the pale ink over a dark stage, the deep ink over a pale one: the widgets, a pop, the ESP
+   bar, the mini viewer and INFORMATIONAL's words wear one of them), and the stage's own stack, bottom to top (under the kit's ladder: --z-chrome is 30).  The values are
+   the ones the rules wrote. */
+:root { --stage-ink-light: hsl(40 33% 96%); --stage-ink-dark: hsl(232 22% 10%);
+  --z-stage-orbits: 7; --z-stage-marks: 8; --z-stage-labels: 9; --z-stage-widgets: 19; --z-stage-words: 20; --z-stage-pop: 21; --z-stage-lost: 30; }
+#widgets { position: absolute; inset: 0; z-index: var(--z-stage-widgets); pointer-events: none; user-select: none; -webkit-user-select: none; color: var(--stage-ink-light); }
+[data-theme="light"] #widgets { color: var(--stage-ink-dark); }
 /* 039 X4 · THE STAGE WORDS WEAR THE STAGE'S INK (WALK-A #11): the caption, INFORMATIONAL's words, WIDGETS and the ESP key read against the stage's
    own ground — body[data-stage-ink], from mat.bg's luminance (settings-card.js setStageMix); at the theme's own ground it is the theme's ink, as before */
-body[data-stage-ink="light"] .mir-info { --info-ink: hsl(40 33% 96%); --info-paper: hsl(228 40% 4% / .27); --info-paper-soft: hsl(228 40% 4% / .14); }
-body[data-stage-ink="dark"] .mir-info { --info-ink: hsl(232 22% 10%); --info-paper: hsl(42 45% 97% / .38); --info-paper-soft: hsl(42 45% 97% / .2); }
-body[data-stage-ink="light"] #widgets { color: hsl(40 33% 96%); } body[data-stage-ink="dark"] #widgets { color: hsl(232 22% 10%); }
-body[data-stage-ink="light"] .lw-pop { color: hsl(40 33% 96%); } body[data-stage-ink="dark"] .lw-pop { color: hsl(232 22% 10%); }   /* 041 I6: a pop wears the words' ink */
+body[data-stage-ink="light"] .mir-info { --info-ink: var(--stage-ink-light); --info-paper: hsl(228 40% 4% / .27); --info-paper-soft: hsl(228 40% 4% / .14); }
+body[data-stage-ink="dark"] .mir-info { --info-ink: var(--stage-ink-dark); --info-paper: hsl(42 45% 97% / .38); --info-paper-soft: hsl(42 45% 97% / .2); }
+body[data-stage-ink="light"] #widgets { color: var(--stage-ink-light); } body[data-stage-ink="dark"] #widgets { color: var(--stage-ink-dark); }
+body[data-stage-ink="light"] .lw-pop { color: var(--stage-ink-light); } body[data-stage-ink="dark"] .lw-pop { color: var(--stage-ink-dark); }   /* 041 I6: a pop wears the words' ink */
 body[data-stage-ink="light"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(0 0 0 / .5); } body[data-stage-ink="dark"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(255 255 255 / .75); }
-body[data-stage-ink="light"] .lw-espbar { color: hsl(40 33% 96%); text-shadow: 0 0 6px rgb(0 0 0 / .75); } body[data-stage-ink="dark"] .lw-espbar { color: hsl(232 22% 10%); text-shadow: 0 0 6px rgb(255 255 255 / .8); }
+body[data-stage-ink="light"] .lw-espbar { color: var(--stage-ink-light); text-shadow: 0 0 6px rgb(0 0 0 / .75); } body[data-stage-ink="dark"] .lw-espbar { color: var(--stage-ink-dark); text-shadow: 0 0 6px rgb(255 255 255 / .8); }
 html body[data-stage-ink="light"] #title .word { color: #fff; } html body[data-stage-ink="dark"] #title .word { color: #000; }   /* the wordmark and the menu's words stand on the stage too */
 html body[data-stage-ink="light"] #menubar .mb-btn:not(:hover):not([aria-expanded="true"]) { color: hsl(40 33% 96% / .86); } html body[data-stage-ink="dark"] #menubar .mb-btn:not(:hover):not([aria-expanded="true"]) { color: hsl(232 22% 10% / .8); }
 #widgets .lw-widget { position: absolute; box-sizing: border-box; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; outline: 0; }
@@ -723,7 +728,7 @@ html body[data-stage-ink="light"] #menubar .mb-btn:not(:hover):not([aria-expande
 #widgets .lw-w-pic[hidden] { display: none; }
 /* 037 W5 · 038 S4 THE FACE: CLOCK and PLAYHEAD in the logo face (widget-clock.js), as large as the box holds — each figure in its own fixed cell (the face has no tabular
    figures: the widest is .59 em), the words and separators in the UI face, small and soft; PLAYHEAD's tenths small and soft, its beat a hairline under it */
-#widgets .lw-w-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; font: 400 clamp(10px, min(58cqh, 10.5cqw), 96px)/1 'LW Title', var(--font-num); letter-spacing: 0; }
+#widgets .lw-w-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; font: var(--w-regular) clamp(10px, min(58cqh, 10.5cqw), 96px)/1 'LW Title', var(--font-num); letter-spacing: 0; }
 #widgets [data-kind="playhead"] .lw-w-face { font-size: clamp(10px, min(62cqh, 24cqw), 140px); }
 #widgets .lw-w-c { display: inline-block; width: .62em; text-align: center; } #widgets .lw-w-c.p { width: .3em; }
 #widgets :is(.lw-w-w, .lw-w-s) { font-family: var(--font-ui); opacity: .62; }
@@ -734,12 +739,12 @@ html body[data-stage-ink="light"] #menubar .mb-btn:not(:hover):not([aria-expande
    the logo face (the notebook title's), a soft halo of the ground's colour under the words so they read over a bright field, an arriving block fades in (widget-text.js) */
 #widgets .lw-w-text { font-family: var(--font-info-body, "Spectral", Georgia, serif); line-height: 1.3; overflow-wrap: anywhere; text-shadow: 0 0 .35em rgb(0 0 0 / .5); }
 [data-theme="light"] #widgets .lw-w-text { text-shadow: 0 0 .35em rgb(255 255 255 / .75); }
-#widgets .lw-w-text :is(h1, h2) { font-family: 'LW Title', var(--font-ui); font-weight: 400; letter-spacing: .04em; }
+#widgets .lw-w-text :is(h1, h2) { font-family: 'LW Title', var(--font-ui); font-weight: var(--w-regular); letter-spacing: .04em; }
 #widgets .lw-w-text :is(h1, h2).lw-uiface { font-family: var(--font-ui); letter-spacing: 0; }   /* 039 X12 · A HEADING WEARS ONE FACE: a ψ, λ or É sets the whole heading in the UI face */
 #widgets .lw-w-text > :first-child { margin-top: 0; }
 #widgets .lw-w-text :is(h1, h2, h3, h4, p, ul, ol, blockquote) { margin: 0 0 .35em; }
 #widgets .lw-w-text h1 { font-size: 1.5em; } #widgets .lw-w-text h2 { font-size: 1.25em; } #widgets .lw-w-text :is(h3, h4) { font-size: 1.1em; }
-.lw-w-ask { display: block; box-sizing: border-box; width: min(440px, 72vw); min-height: 120px; padding: 8px; resize: vertical; font: 14px/1.4 var(--font-ui); color: var(--fg); background: var(--glass-well); border: 1px solid var(--glass-hairline); border-radius: 8px; }
+.lw-w-ask { display: block; box-sizing: border-box; width: min(440px, 72vw); min-height: 120px; padding: 8px; resize: vertical; font: 14px/1.4 var(--font-ui); color: var(--fg); background: var(--glass-well); border: 1px solid var(--glass-hairline); border-radius: var(--r-md); }
 body.ui-hidden #widgets { display: none; }
 body.menu-open #widgets { visibility: hidden; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
@@ -747,8 +752,8 @@ body.menu-open #widgets { visibility: hidden; }
 /* ATOM LABELS (INFORMATIONAL since 0.5.3 M9; stage-words.js atomLabels): each nucleus's element symbol, small, at its projected
    position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
    over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
-#atomLabels { position: fixed; inset: 0; z-index: 9; pointer-events: none; user-select: none; -webkit-user-select: none;
-  mix-blend-mode: difference; color: #fff; font-family: var(--font-math); font-style: normal; font-weight: 600; line-height: 1; }
+#atomLabels { position: fixed; inset: 0; z-index: var(--z-stage-labels); pointer-events: none; user-select: none; -webkit-user-select: none;
+  mix-blend-mode: difference; color: #fff; font-family: var(--font-math); font-style: normal; font-weight: var(--w-semi); line-height: 1; }
 #atomLabels[hidden] { display: none; }
 #atomLabels .atom-label { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }
 /* THE IMPULSE VECTOR (iteration 008 K; keplerview.js setBow/bowFrame): its own layer beside #kepler, shown only while Ctrl+drag is held —
@@ -758,14 +763,14 @@ body.menu-open #widgets { visibility: hidden; }
    INFORMATIONAL body size (info.css --info-size-body, read against the window: 14–18 px). */
 #impulse { position: absolute; inset: 0; pointer-events: none; user-select: none; -webkit-user-select: none; }
 #impulse[hidden] { display: none; }
-#impulse > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: 8; }
+#impulse > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: var(--z-stage-marks); }
 #impulse .imp-ink { mix-blend-mode: difference; }
 #impulse .imp-guide { stroke: #fff; stroke-width: 1.5; stroke-linecap: butt; fill: none; }
 #impulse .imp-hub { fill: #fff; }
 #impulse .imp-shaft { stroke: var(--acc); stroke-width: 2; stroke-linecap: butt; }
 #impulse .imp-head { fill: var(--acc); stroke: none; }
-#impulse .imp-words { position: absolute; left: 0; top: 0; z-index: 8; mix-blend-mode: difference; color: #fff; will-change: transform;
-  font-family: var(--font-math); font-style: normal; font-weight: 400; font-size: clamp(14px, 8px + .68vw, 18px); line-height: 1.2;
+#impulse .imp-words { position: absolute; left: 0; top: 0; z-index: var(--z-stage-marks); mix-blend-mode: difference; color: #fff; will-change: transform;
+  font-family: var(--font-math); font-style: normal; font-weight: var(--w-regular); font-size: clamp(14px, 8px + .68vw, 18px); line-height: 1.2;
   font-variant-numeric: tabular-nums; white-space: nowrap; text-shadow: none; }
 
 /* iteration 004 · RENDER's SUBJECT on its rack card (FOLDERS' ⓘ names the project it describes).  The kit stacks the name and its verbs
@@ -852,16 +857,16 @@ body.lw-notice .mir-dialog[data-kind="notice"]::before, body.lw-notice .mir-dial
 body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #transport { visibility: hidden; opacity: 0; }   /* as under the Picker (skin.css menu-open) */
 /* iteration 014 B3 · THE POTENTIAL MAP's colour bar (material.js): under every window and the stage words, never a pointer target; 018 B7: seated by
    INFORMATIONAL (left/top from material.js barSeat), vertical on the RIGHT or LEFT, lying down on the TOP or BOTTOM */
-.lw-espbar { position: absolute; left: 0; top: 0; width: 64px; height: min(46vh, 320px); z-index: 8; pointer-events: none; user-select: none;
-  font: 600 11px/1 var(--mono, ui-monospace, monospace); color: var(--fg); text-shadow: 0 0 6px hsl(var(--glass-tint, 220 20% 10%) / .8); }
+.lw-espbar { position: absolute; left: 0; top: 0; width: 64px; height: min(46vh, 320px); z-index: var(--z-stage-marks); pointer-events: none; user-select: none;
+  font: var(--w-semi) var(--fs-base)/1 var(--mono, ui-monospace, monospace); color: var(--fg); text-shadow: 0 0 6px hsl(var(--glass-tint, 220 20% 10%) / .8); }
 .lw-espbar[hidden] { display: none; }
-.lw-espbar-ramp { position: absolute; left: 0; top: 0; bottom: 0; width: 12px; border-radius: 3px; box-shadow: 0 0 0 1px hsl(0 0% 50% / .35); }
+.lw-espbar-ramp { position: absolute; left: 0; top: 0; bottom: 0; width: 12px; border-radius: var(--r-xs); box-shadow: 0 0 0 1px hsl(0 0% 50% / .35); }
 .lw-espbar-n { position: absolute; left: 18px; transform: translateY(-50%); white-space: nowrap; }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) { width: min(46vw, 320px); height: 30px; }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-ramp { bottom: auto; width: auto; right: 0; height: 12px; }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-n { top: 20px; transform: translateX(-50%); }
 /* 039 X3 · THE KEY'S WORDS beyond the ramp's ends: + over the top (a lying bar: right of its + end), − under the foot (left of its − end) */
-.lw-espbar .lw-espbar-w { left: 0; transform: none; font-size: 10px; letter-spacing: .06em; }
+.lw-espbar .lw-espbar-w { left: 0; transform: none; font-size: var(--fs-small); letter-spacing: .06em; }
 .lw-espbar .lw-espbar-w[data-end="pos"] { top: auto; bottom: calc(100% + 6px); }
 .lw-espbar .lw-espbar-w[data-end="neg"] { top: calc(100% + 6px); }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-w { top: -2px; bottom: auto; transform: none; }
@@ -876,7 +881,7 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 /* iteration 016 E1 · EMISSION SPECTRA (lab/emissionview.js): the strip is λWAVES' own black canvas, a whole line; ‹ SERIES › and ‹ PAIR › take the
    row, RANGE is a knob-sized seg (its two options in a column, SPECTRUM's `.sp-vseg` look), DECAY and the fold close the third row */
 .dev[data-id="emission"] .em-strip { display: block; width: 100%; height: 92px; border-radius: 6px; background: transparent; cursor: crosshair; touch-action: none; }
-.dev[data-id="emission"] .em-strip:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.dev[data-id="emission"] .em-strip:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 .dev[data-id="emission"] .em-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .dev[data-id="emission"] .em-step { flex: 1 1 auto; min-width: 0; }
 .dev[data-id="emission"] .em-step .mir-step-row { width: 100%; justify-content: space-between; }
@@ -887,7 +892,7 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .dev[data-id="emission"] .em-row > .lw-fold { flex: 0 0 30px; }
 .dev[data-id="emission"] .em-table table { width: 100%; border-collapse: collapse; font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
 .dev[data-id="emission"] .em-table th, .dev[data-id="emission"] .em-table td { padding: 2px 4px; text-align: right; white-space: nowrap; }
-.dev[data-id="emission"] .em-table th { color: var(--dim); font-weight: 500; }
+.dev[data-id="emission"] .em-table th { color: var(--dim); font-weight: var(--w-med); }
 .dev[data-id="emission"] .em-table td:last-child, .dev[data-id="emission"] .em-table th:last-child { text-align: left; }
 .dev[data-id="emission"] .em-none { color: var(--dim); font-size: var(--fs-micro); margin: 4px 0; }
 /* 039 V7 · THE TOAST CLEARS THE BAR: the kit's toast stands where clearRack (shell/modulation.js) seats it — 8 px over the bar when the bar holds its band */
