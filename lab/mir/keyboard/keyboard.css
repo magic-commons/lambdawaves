@@ -69,7 +69,7 @@
   font-family: var(--font-ui); text-align: center; overflow: hidden; background-color: transparent; color: var(--ink-key);
   transition: background-color var(--t-fast), box-shadow var(--t-fast), scale var(--t-fast); }
 /* the 44 px finger over smaller ink */
-.km-key::before { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max(100%, 44px); height: max(100%, 44px); }
+.km-key::before { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max(100%, var(--touch, 44px)); height: max(100%, var(--touch, 44px)); }
 .km-key-w-1 { flex-grow: 1; } .km-key-w-esc { flex-grow: 1.25; } .km-key-w-bksp { flex-grow: 1.6; }
 .km-key-w-tab { flex-grow: 1.5; } .km-key-w-backslash { flex-grow: 1.35; } .km-key-w-caps { flex-grow: 1.8; }
 .km-key-w-enter { flex-grow: 2.05; } .km-key-w-lshift { flex-grow: 2.2; } .km-key-w-rshift { flex-grow: 1.8; }

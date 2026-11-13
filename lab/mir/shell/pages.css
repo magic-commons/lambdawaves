@@ -35,7 +35,7 @@
     border-radius: var(--r-md); color: var(--fg-soft); transition: background-color var(--t-fast); }
   .nb-tab:hover { background: var(--nb-tab-hover); }
   .nb-tab[data-sel] { background: var(--nb-tab-on); box-shadow: var(--nb-tab-on-rim); }
-  .nb-tab:has(> .nb-tab-b:focus-visible) { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .nb-tab:has(> .nb-tab-b:focus-visible) { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
   .nb-tab[data-carried] { z-index: 2; background: var(--nb-tab-on); box-shadow: var(--nb-tab-carried), var(--nb-tab-on-rim); outline: 2px solid var(--acc); outline-offset: 1px; }
 
   .nb-tab-b { display: inline-flex; align-items: baseline; gap: 5px; min-width: 0; height: 100%; padding: 0 9px; margin: 0;
@@ -67,7 +67,7 @@
   .nb-tab-ask button { height: 20px; padding: 0 8px; border: 1px solid var(--nb-btn-line); border-radius: var(--r-pill); background: var(--nb-btn); color: var(--fg-soft);
     font: var(--w-heavy) var(--fs-tiny) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); cursor: pointer; }
   .nb-tab-ask button:hover { color: var(--acc); }
-  .nb-tab-ask button:focus-visible, .nb-tab-add:focus-visible, .nb-pageacts button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .nb-tab-ask button:focus-visible, .nb-tab-add:focus-visible, .nb-pageacts button:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
   @media (pointer: coarse) { .nb-tab-ask button { height: 32px; } }
 
   .nb-tab-add { flex: 0 0 auto; width: 24px; height: 24px; margin-right: 4px; padding: 0; border: 1px solid var(--nb-btn-line); border-radius: 50%;

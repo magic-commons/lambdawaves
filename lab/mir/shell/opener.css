@@ -119,7 +119,7 @@ html .mir-opener .mir-opener-option[data-active] .mir-opener-cover[data-light]::
 .mir-opener-option[data-active] .mir-opener-foot { top: calc(100% * (1 + var(--opener-spill)) + 24px); transform: translate3d(calc(-50% + var(--label-x, 0px)), var(--label-y, 0px), 0); }
 .mir-opener-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; }
 .mir-opener-btn {
-  display: inline-block; flex: 0 0 160px; width: 160px; margin: 0; padding: .8rem 1rem; min-height: 44px; min-width: 44px; box-sizing: border-box;
+  display: inline-block; flex: 0 0 160px; width: 160px; margin: 0; padding: .8rem 1rem; min-height: var(--touch, 44px); min-width: var(--touch, 44px); box-sizing: border-box;
   background: transparent; color: var(--opener-ink); font: inherit; font-size: var(--opener-btn-size); font-weight: 600; letter-spacing: var(--opener-btn-tracking); text-transform: var(--label-case, uppercase);
   border: 1px solid var(--opener-btn-line); border-radius: var(--opener-btn-r); cursor: pointer;
   transition: background-color var(--opener-t-btn), border-color var(--opener-t-btn), color var(--opener-t-btn);

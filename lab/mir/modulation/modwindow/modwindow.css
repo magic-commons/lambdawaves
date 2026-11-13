@@ -47,7 +47,7 @@
   --m2-dialink-well: inset 0 0 0 1px var(--m2-mat-edge), inset 0 2px 4px hsl(0 0% 0% / .25);
   --m2-dot-on-shadow: inset 0 0 0 1px hsl(0 0% 100% / .18);
   --m2-dot-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.34);
-  --m2-ease: ease;
+  --m2-ease: var(--ease-std, ease);
   --m2-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --m2-edge-acc-62-55: color-mix(in oklch, hsl(var(--hue-acc) var(--sat-acc) 62% / 0.55), white var(--acc-white, 0%));
   --m2-edge-acc-65-35: color-mix(in oklch, hsl(var(--hue-acc) var(--sat-acc) 65% / .35), white var(--acc-white, 0%));
@@ -1317,7 +1317,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   pointer-events: none;
   color: var(--m2-ink-w50); }
 /* ── THE ROUTING DRAG, and the min-max ring it leaves behind ─────────────── */
-.m2ghost { position: fixed; left: 0; top: 0; z-index: 9000; pointer-events: none;
+.m2ghost { position: fixed; left: 0; top: 0; z-index: calc(var(--z-top, 10000) - 1000); pointer-events: none;
   min-width: 30px; height: 30px; padding: 0 10px; border-radius: var(--m2-r-15); background: var(--acc);
   color: var(--acc-ink); font: var(--m2-win-font);
   display: flex; align-items: center; justify-content: center;
@@ -2139,8 +2139,8 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
    both. The existing glass scrim value reaches this face as --m2-separation:
    it strengthens protection without changing the skin's identity. */
 :root {
-  --m2-motion-micro: 80ms;
-  --m2-motion-structural: 120ms;
+  --m2-motion-micro: var(--motion-micro, 80ms);        /* 1.6.0-alpha.10 · ONE MOTION: the plugin's quick step IS the house's micro step (core/core.css) */
+  --m2-motion-structural: var(--t-fast, 120ms);        /* … and its structural step the house's fast one (css/base.css) */
   --m2-motion-ease: cubic-bezier(.2, .7, .2, 1);
   --m2-blend: var(--m2-separation, var(--glass-canvas-scrim, .26));
   --m2-mat-hue: var(--glass-hue, 212);

@@ -5,7 +5,7 @@
  * every rule below is gated, and with no `data-ui-tier` on <html> nothing here applies.
  *
  * ── THE THREE TIERS OF TOKEN (plan §5.2; the schema is mir/tokens.json, the page docs/TOKENS.md) ──────────────────
- *   primitive  a raw scale step: --fs-*, --r-*, --sp-*, --t-*, --glass-blur … (1.5 will name them --p-*).  A skin owns
+ *   primitive  a raw scale step: --fs-*, --r-*, --sp-*, --t-*, --tr-*, --w-*, --glass-blur … (no prefix: the family is the name).  A skin owns
  *              them; a component never reads one directly once the semantic tier covers it.
  *   semantic   what a thing is FOR — the names a skin sets and a component reads: the ink ladder (--fg, --fg-soft,
  *              --ink-key, --dim, --ink-faint), the accents (--acc, --acc2 …), and the 1.5 names landed here:
@@ -30,7 +30,7 @@
  *   --state-carried) stay undeclared and are read with their drawing as the fallback.
  *
  * ── THE NAMING LAW ──────────────────────────────────────────────────────────────────────────────────────────────────
- *   lower-kebab · --p-* primitive · a bare semantic group (--surface-, --relief-, --state-, --label-, --ink-, --acc,
+ *   lower-kebab · a primitive by its family (--fs- --r- --sp- --t- --tr- --w-) · a bare semantic group (--surface-, --relief-, --state-, --label-, --ink-, --acc,
  *   --motion-, --type-, --z-) · --<component>-<part> component, read with a semantic fallback · data-ui-tier on <html>
  *   for the switches · runtime state written by script is documented as such in the schema (owner: runtime).
  *   A token's row in mir/tokens.json comes first; tests/tokens.node.mjs fails a name the schema does not have.

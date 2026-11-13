@@ -29,7 +29,7 @@ body.disconnected:not(.phone) [data-mir-rack] > .dev.rack-sizing { overflow: vis
 .mir-rack {
   --rack-shadow-gutter: 0px;   /* paint space beside the cards for their shadows; not a hit-test column */
   position: absolute; top: 0; right: 0; bottom: auto; max-height: 100%; width: calc(var(--rack-w) + var(--rack-shadow-gutter));
-  box-sizing: border-box; z-index: var(--z-chrome); min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
+  box-sizing: border-box; z-index: var(--z-rack, var(--z-chrome)); min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
   padding: var(--rack-inset, var(--card-gap, var(--sp-2))); display: flex; flex-direction: column; gap: var(--rack-gap, var(--card-gap, var(--sp-2)));
   background: transparent; border: 0; pointer-events: none; touch-action: pan-y;
   scrollbar-width: thin; scrollbar-color: var(--acc) transparent;

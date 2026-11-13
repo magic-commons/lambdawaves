@@ -24,7 +24,7 @@
     background: var(--nb-btn); color: var(--fg-soft); font: var(--w-heavy) var(--fs-small) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); cursor: pointer; }
   .nb-shelfface button:hover { color: var(--acc); }
   .nb-shelfface button:active { background: var(--state-press, var(--glass-press)); }
-  .nb-shelfface button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .nb-shelfface button:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 
   .nt-recent, .nt-roots { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
   .nt-label { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--dim); margin-right: 4px; }

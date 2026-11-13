@@ -44,7 +44,7 @@
      carry, and the generic `serif` is the last resort the SOURCE.txt contract warns about. */
   --font-math: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif;
   --glass-blur: 22px;                                      /* the notebook's and FROST's blur radius (SETTINGS · GLASS BLUR) */
-  --fs-micro: 8px; --fs-tiny: 9px; --fs-small: 10px; --fs-base: 11px; --fs-lead: 13px;
+  --fs-micro: 8px; --fs-tiny: 9px; --fs-small: 10px; --fs-base: 11px; --fs-mid: 12px; --fs-lead: 13px; --fs-large: 14px;   /* 1.6.0-alpha.8: 12 and 14 are steps (THE FINDER's row and search, an app's search surface) */
   --tr-tight: .02em; --tr-wide: .12em; --tr-wider: .14em; --lh: 1.45; --w-light: 300; --w-med: 500; --w-bold: 650;
   --r-xs: 3px; --r-sm: 5px; --r-md: 8px; --r-lg: 12px; --r-pill: 999px;
   --sp-1: 3px; --sp-2: 5px; --sp-3: 7px; --sp-4: 10px; --sp-5: 14px;
@@ -65,7 +65,15 @@
   --acc2: hsl(var(--hue-acc2) var(--sat-acc2) var(--lum-acc2)); --acc2-soft: color-mix(in srgb, var(--acc2) 18%, transparent);
   --ok: hsl(142 42% 70%); --warn: hsl(38 70% 70%); --bad: hsl(4 62% 74%);
   --n1: hsl(40 90% 80%); --n2: hsl(188 80% 68%); --n3: hsl(300 70% 76%); --n4: hsl(24 92% 66%); --n5: hsl(120 55% 68%); --n6: hsl(258 78% 78%);
-  --rack-w: 372px; --rail-w: 46px; --z-chrome: 30; --z-veil: 40; --z-prox: 44; --z-banner: 60;   /* --rail-w: a COMPACT floating window's strip (wave 55) */
+  --rack-w: 372px; --rail-w: 46px; --z-chrome: 30; --z-veil: 40; --z-prox: 44; --z-banner: 60; --z-top: 10000;   /* --rail-w: a COMPACT floating window's strip (wave 55) */
+  /* 1.6.0-alpha.11 · THE LADDER HAS A TOP, and the chrome rungs are written once.  --z-top is the page-level layer above every pane
+     (the hint tip sits on it, the skip link one under, the modulation ghost a thousand under); --z-rack and --z-toast are read FIRST
+     where the rack and the toast are drawn, with the ladder's own expression as the fallback (var(--z-rack, var(--z-chrome)),
+     var(--z-toast, calc(var(--z-veil) + 10))): undeclared, since each reads another rung.  The opener's cover (the largest integer)
+     and the pointer light (fx.css) stand above ANY ladder on purpose and read no token.
+     THE CHROME RUNGS (--z-chrome + n):  +0 the rack, the wordmark, the transport bar · +1 the rack's scrollbar and its buttons ·
+     +2 the rack's floats · +3 the menubar, the rack's list, the transport's seats · +4 the notebook · +6 THE FINDER, the phone's
+     wordmark · +8 the rack's edge handle.  A new chrome part takes a free rung or shares one on purpose, and says so here. */
   --phone: 0;   /* the sentinel skin.css's phone query raises to 1 — the breakpoint is written there, ONCE, and rack.js reads it back */
   /* MOTION (moved here from skin.css in 1.4.0: base.css reads --t-fast, so base.css defines it) */
   --t-fast: .12s; --t-soft: .35s; --t-linger: .7s;                /* the value tooltip: in fast, out soft after a linger */
@@ -532,7 +540,7 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
    in the top corner; createApp() puts one first in the page, pointing at the rack */
 .skip { --skip-fill: hsl(var(--glass-tint) / .98);
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.skip:focus { width: auto; height: auto; clip-path: none; left: 8px; top: 8px; z-index: 9999; padding: 6px 10px;
+.skip:focus { width: auto; height: auto; clip-path: none; left: 8px; top: 8px; z-index: calc(var(--z-top) - 1); padding: 6px 10px;
   border-radius: var(--r-pill); background: var(--skip-fill); color: var(--fg); box-shadow: var(--relief-raise, var(--neu-raise));
   font: var(--w-bold) var(--fs-small)/1 var(--font-ui); letter-spacing: var(--tr-wide); text-decoration: none; }
 
@@ -549,7 +557,7 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
   body.touch-tablet.disconnected:not(.phone) .mir-rack-floats > .dev:not(.compact) > .dev-body {
     max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 88px); min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
   body.touch-tablet .mir-rack-floats > .dev:not(.compact) { max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); }
-  body.touch-tablet .dev-head { min-height: 44px; }
+  body.touch-tablet .dev-head { min-height: var(--touch, 44px); }
   body.touch-tablet .dev-util > :is(.dev-swap, .dev-copy) { display: none; }
   body.touch-tablet .dev-head > .dev-util { gap: 2px; }
   body.touch-tablet .dev-head .dev-util > button:not(.dev-rail), body.touch-tablet .dev.floating .dev-head .dev-util > .dev-rail { width: 38px; min-width: 38px; height: 38px; margin: 0; }

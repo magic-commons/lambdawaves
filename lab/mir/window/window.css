@@ -170,7 +170,7 @@ body.touch-tablet .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--t
 }
 .mir-chip-ink, .mir-grip-dots, .mir-chip-text { pointer-events: none; }
 .mir-chip-text { white-space: nowrap; }
-.mir-chip:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }   /* focus: the accent ring OUTSIDE */
+.mir-chip:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }   /* focus: the accent ring OUTSIDE */
 .mir-chip[data-kind="grip"] { cursor: move; touch-action: none; }
 .mir-grip-dots {
   width: calc(14px * var(--ui-scale)); height: calc(14px * var(--ui-scale));

@@ -40,7 +40,6 @@
   --folders-part-size: var(--fs-micro);
   --folders-part-track: .04em;
   --folders-box-pad: 10px;
-  --folders-menu-rim: color-mix(in srgb, var(--acc) 40%, transparent);        /* the menu: a well with a .40 accent rim */
   --folders-ask-rim: color-mix(in srgb, var(--acc) 55%, transparent);         /* the ask: a solid tinted pane with a .55 rim … */
   --folders-ask-fill: color-mix(in srgb, hsl(var(--glass-hue) 18% 22% / .98) 88%, var(--acc) 12%);
   --folders-ask-ink: hsl(204 23% 96%);                                         /* … its own light ink (#f2f5f7), in either theme */
@@ -76,7 +75,7 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 .mir-folders .sv-toolbar { display: grid; grid-template-columns: repeat(var(--sv-verbs, 6), minmax(0, 1fr)); gap: var(--folders-tool-gap); }   /* the gap sets the tool's width: six tools at 4 px = BASINS' 55 px */
 @container (max-width: 285px) { .mir-folders .sv-toolbar { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .mir-folders .sv-toolbar :is(.trig, .sv-options) { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
-  width: 100%; min-width: 0; height: 44px; min-height: 44px; padding: 0; }
+  width: 100%; min-width: 0; height: var(--touch, 44px); min-height: var(--touch, 44px); padding: 0; }
 /* the options disclosure is BASINS' plain button: it wears a trigger's relief here (raised at rest, the ON face open) */
 .mir-folders .sv-toolbar .sv-options { border: 1px solid var(--ctl-hairline, var(--glass-hairline)); border-radius: var(--r-md); background: var(--trig-face, var(--glass-well));   /* alpha.47: a chip, no face and no outline (skin.css) */
     /* BASINS' ground and hairline; raised, not a well (INTENT) */ box-shadow: var(--relief-raise, var(--neu-raise));
@@ -153,7 +152,7 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 .mir-folders .sv-shot:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -3px; }
 .mir-folders :is(.sv-shot, .sv-folder-shot):is(:active, .press) { scale: var(--state-press-scale, .96); }
 
-.mir-folders .sv-folder-shot { position: relative; display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: 44px; padding: 8px;
+.mir-folders .sv-folder-shot { position: relative; display: flex; align-items: center; gap: var(--sp-2); width: 100%; min-height: var(--touch, 44px); padding: 8px;
   border: 0; border-radius: 0; background: transparent; color: var(--fg-soft); cursor: pointer; isolation: isolate; transition: scale var(--motion-micro) var(--ease-out); }
 .mir-folders .sv-folder-shot:hover { background: var(--state-hover, var(--glass-raise)); }
 .mir-folders .sv-folder-shot:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -3px; }
@@ -191,8 +190,8 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 .mir-folders .sv-inline { width: 100%; min-height: 28px; padding: 0 var(--sp-1); pointer-events: auto; }
 .mir-folders .sv-empty { grid-column: 1 / -1; padding: var(--sp-4) var(--sp-1); font: var(--w-regular) var(--fs-small)/1.5 var(--font-ui); color: var(--dim); }
 @media (pointer: coarse) {
-  .mir-folders .sv-acts button { min-height: 44px; }
-  .mir-folders :is(.sv-input, .sv-part.sw, .sv-crumb) { min-height: 44px; }
+  .mir-folders .sv-acts button { min-height: var(--touch, 44px); }
+  .mir-folders :is(.sv-input, .sv-part.sw, .sv-crumb) { min-height: var(--touch, 44px); }
 }
 
 /* ── the one box: menus, questions, refusals — since 1.5.6-alpha.4 a MENU PANE (`.glass[data-mir-surface="menu"]`, gallery.js), no longer a well:
@@ -230,7 +229,7 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 .mir-folders .sv-paged .sv-card { align-self: start; }
 .mir-folders .sv-folder-seat { visibility: hidden; }   /* THE FOLDER ROW KEEPS ITS SEAT (1.5.7-alpha.26): a later page's hidden seat, a folder's own height */
 .mir-folders .sv-pages { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: var(--folders-gap); margin-top: 8px; }
-.mir-folders .sv-pages button { width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--glass-hairline); border-radius: 50%; background: var(--glass-well);
+.mir-folders .sv-pages button { width: var(--touch, 44px); height: var(--touch, 44px); min-height: var(--touch, 44px); border: 1px solid var(--glass-hairline); border-radius: 50%; background: var(--glass-well);
   color: var(--acc); font: var(--folders-page-glyph)/1 var(--font-ui); cursor: pointer; }   /* BASINS' page buttons: round wells */
 .mir-folders .sv-pages button > svg { display: block; width: 1em; height: 1em; margin: auto; pointer-events: none; }   /* the drawn chevron at the typed ‹ ›'s size */
 .mir-folders .sv-pages button:disabled { opacity: var(--state-disabled, .38); cursor: default; }
