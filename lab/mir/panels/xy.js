@@ -33,6 +33,7 @@
  *            morph() → { set, engaged, x, y, bank }, store(corner | slot?), engage(on), capture(), restore(s), params(), sync(), destroy() }
  *   Pure, for tests: MODES, resolveRef, morphSets, readXY. */
 import { el, label, hint, ariaLabel, sw, seg, trig } from '../kit.js';
+import { TAP } from '../core/tap.js';
 import { xyPad } from '../controls/xy.js';
 import { stepper } from '../controls/stepper.js';
 import { glyphEl } from '../glyph.js';
@@ -45,7 +46,7 @@ import { createMorph, kindOf, snapshot, recallValues, loadBank, saveBank, CORNER
 
 export const MODES = Object.freeze(['pair', 'route', 'morph']);
 export const TRAIL = 12;                                   // the trail's dots (the last positions while a route moves the pad)
-export const HOLD_MS = 450;                                 // a corner held this long stores onto it (the window's own long press)
+export const HOLD_MS = TAP.hold;                            // a corner held this long stores onto it: the kit's one hold (1.6.0-alpha.4)
 const WORD = { pair: 'PAIR', route: 'ROUTE', morph: 'MORPH' };
 const TIP = {
   pair: 'PAIR — the pad drives one of the app\'s coupled pairs',

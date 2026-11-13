@@ -16,7 +16,7 @@
  * Under the logo (iteration 012 L2): RETURN HOME (the lab), FOLDERS (the projects and the demos) and THE HUE ring (a dial that turns the
  * molecules' pictures round the colour wheel), THEME (032) and LOOK.  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
-import { el, chip, mathPlain, stepper, seg, hint } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
+import { el, chip, mathPlain, stepper, seg, hint, wheelTurn } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
 import { chordFromEvent } from './mir/shell/keys.js';   // 039 R5: the menu's own chord passes to the key table while the menu holds the keys
 import { CHEM_PRESETS } from './chemview.js';
@@ -173,7 +173,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { for (const host of [logo, faceLogo]) { host.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = host.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } } }).catch(() => { logo.textContent = faceLogo.textContent = 'λWAVES'; });
   /* iteration 015 M1 · THE HEAD (Josh: "Logo (a little bit bigger), Atomic, molecular, etc. Row, and then Home Folder, and Hue. Add a 4th
      button"): the logo, the tabs, then four round buttons — RETURN HOME (the lab), FOLDERS (the projects and the demos), THE HUE ring (a dial
-     dressed as a circle: a vertical drag, the wheel or ↑ ↓ turn the molecules' pictures round the colour wheel, a double-click puts it back at
+     dressed as a circle: a vertical drag, ↑ ↓ or (once it was pressed and holds the focus, 044 K2) the wheel turn the molecules' pictures round the colour wheel, a double-click puts it back at
      0; the Picker's PREFERENCE, never a project's or a link's) and LOOK, which opens THE LOOK DROP below */
   const tabs = el('div', 'mm-tabs', top), pill = el('i', 'mm-pill', tabs);
   const nav = el('div', 'mm-nav', top);
@@ -477,7 +477,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     hue.addEventListener('pointerdown', (e) => { if (e.button) return; y0 = e.clientY; x0 = e.clientX; moved = 0; h0 = prefs.hue; hue.setPointerCapture(e.pointerId); hue.classList.add('drag'); e.preventDefault(); });   // M6: the colours while the hand turns it
     hue.addEventListener('pointermove', (e) => { if (y0 == null) return; moved = Math.max(moved, Math.abs(e.clientY - y0), Math.abs(e.clientX - x0)); if (moved >= 4) setHue(h0 + (y0 - e.clientY) * (e.shiftKey ? 0.125 : 1)); });
     const end = () => { y0 = null; hue.classList.remove('drag'); }; hue.addEventListener('pointerup', end); hue.addEventListener('pointercancel', end);
-    hue.addEventListener('wheel', (e) => { e.preventDefault(); setHue(prefs.hue - Math.sign(e.deltaY) * (e.shiftKey ? 2 : 10)); }, { passive: false });
+    wheelTurn(hue);   // 044 K2 THE WHEEL WAITS FOR A CLICK: pressed and focused, a notch is the ring's own arrow step (10°, Shift 2°); otherwise the wheel scrolls the deck
     /* a press that did not turn it: colour ↔ mono, held 300 ms so a double-click's second press can take it back (the double-click puts the hue at 0); a key's press at once */
     hue.addEventListener('click', (e) => { if (!e.detail) { setMono(!prefs.mono); return; } if (moved >= 4) return; clearTimeout(monoT); monoT = 0; if (e.detail > 1) return; monoT = setTimeout(() => { monoT = 0; setMono(!prefs.mono); }, 300); });
     hue.addEventListener('dblclick', () => setHue(0));

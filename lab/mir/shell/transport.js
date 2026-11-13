@@ -38,7 +38,8 @@
  *
  * The pure helpers are exported for node tests. */
 import { bindNumber, fineSteps } from '../controls/number.js';
-import { el, label, ariaLabel, trig, gripDots, tapWatcher, knob, lamp, knobBank } from '../kit.js';
+import { el, label, ariaLabel, trig, gripDots, tapWatcher, knob, lamp, knobBank, WHEEL, wheelNotches, wheelTurn } from '../kit.js';
+import { TAP } from '../core/tap.js';
 import { onLanguage, phrase } from '../core/i18n.js';
 import { drag } from '../core/pointer.js';
 import { frame } from '../core/frame.js';
@@ -58,7 +59,7 @@ export const TRANSPORT = Object.freeze({
   pxPerStep: 9,        // a mouse drag on the pill: one step per 9 px (BASINS transport.js:66)
   touchPxPerStep: 14,  // a finger: one step per 14 px, always in ones (BASINS transport.js:69)
   slop: 4,             // the hand travels this far before a press on the pill is a drag (BASINS: |dy| ≥ 4)
-  longPress: 500,      // a finger held on the bar opens the seat menu
+  longPress: TAP.hold, // a finger held on the bar opens the seat menu: the kit's one hold (1.6.0-alpha.4)
   latchTap: 240,       // a bend tapped quicker than this latches (BASINS transport.js:126)
   bpmMin: 20, bpmMax: 300,
   fieldChars: 8,       // the inline tempo field takes eight characters (BASINS tempo-editor.js)
@@ -66,8 +67,8 @@ export const TRANSPORT = Object.freeze({
   travelTouch: 320,    // … 320 px for a finger …
   travelFine: 1760,    // … and 1760 px with Shift held
   panelGap: 16,        // the tempo panel opens below when that much room is left under it (BASINS positionTempo)
-  notchPx: 50,         // 1.5.6-alpha.9: a trackpad's pixels gather to one wheel notch every 50 px …
-  notchIdle: 300,      // … and a part-notch is forgotten after 300 ms of rest
+  notchPx: WHEEL.notchPx,         // 1.5.6-alpha.9: a trackpad's pixels gather to one wheel notch every 50 px …
+  notchIdle: WHEEL.notchIdle,      // … and a part-notch is forgotten after 300 ms of rest
 });
 /** placementOf({ docked, host, free }) — BASINS' rule: the rack's dock wins, then the FREE window (1.5.0-alpha.25), then a work lane
  *  that shows, else the stage */
@@ -153,18 +154,9 @@ export function keyStep(code, shift = false) {
   if (!dir) return 0;
   return dir * (shift ? 0.1 : code.startsWith('Page') ? 10 : 1);
 }
-/** wheelNotches(e, state, now) — 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the whole notches a wheel event turns (+ up).  A line or page event
- *  is one notch, and so is a pixel event of a notch's size or more (a mouse: one event a notch, however far the browser says it went);
- *  smaller pixels (a trackpad) gather in `state.acc` to TRANSPORT.notchPx, a part-notch forgotten after TRANSPORT.notchIdle ms */
-export function wheelNotches(e, state = {}, now = 0) {
-  const mode = e.deltaMode, dy = e.deltaY;                            // deltaMode first: Firefox then keeps a mouse's lines
-  if (!dy) return 0;
-  if (mode || Math.abs(dy) >= TRANSPORT.notchPx) { state.acc = 0; return dy < 0 ? 1 : -1; }
-  if (!(now - (state.at ?? -Infinity) <= TRANSPORT.notchIdle)) state.acc = 0;
-  state.at = now; state.acc = (state.acc || 0) - dy;
-  const n = Math.trunc(state.acc / TRANSPORT.notchPx); state.acc -= n * TRANSPORT.notchPx;
-  return n;
-}
+/** wheelNotches(e, state, now) — 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the whole notches a wheel event turns (+ up).  It is the kit's one notch law
+ *  since 1.6.0-alpha.3 (kit.js WHEEL, wheelNotches), kept under this name here; TRANSPORT.notchPx · notchIdle read WHEEL */
+export { wheelNotches };
 /** parseBpm(text) — a typed tempo (a comma is a decimal point); null if it is not a number */
 export function parseBpm(text) {
   const v = Number.parseFloat(String(text ?? '').trim().replace(',', '.'));
@@ -361,13 +353,22 @@ export function bindTempoField({ button, input, tempo, enabled = () => true, dra
   /* the tempo field IS the kit's number field (controls/number.js bindNumber): a click opens it, Enter or leaving takes the number, Escape
      does not; the drag is the one knob law (220 px, 320 under a finger, ⅛ on any modifier or a second finger, on a virtual point) */
   const field = bindNumber({ button, input, model: tempo, parse: parseBpm, format: formatBpm, enabled, drag: dragToo, click: dragToo, paint, chars: TRANSPORT.fieldChars, step: 0.1, signal });   // 1.5.7-alpha.3: 30.0, as the pill reads
-  /* 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the field's button turns by the wheel as the pill does (the modulation window's own tempo had none) */
+  /* 1.5.6-alpha.9 ONE NOTCH IS ONE BPM, 1 BPM a notch and Shift a tenth; 1.6.0-alpha.3 THE WHEEL WAITS FOR A CLICK: only once the button was
+     pressed and while it holds the focus (kit.js wheelTurn); otherwise the wheel is the window's */
+  const turn = (n, e) => {
+    if (!enabled()) return false;
+    const from = field.editing ? (parseBpm(input.value) ?? tempo.get()) : tempo.get();   // an open field: the number as typed so far
+    tempo.set(clampBpm(from + n * (e.shiftKey ? 0.1 : 1), tempo.min, tempo.max)); paint(); frame.coalesce(button, () => tempo.commit());
+    if (field.editing) { input.value = formatBpm(tempo.get()); input.select(); }
+  };
+  wheelTurn(button, turn, { signal });
+  /* where a click TYPES the tempo (a work bar, λWAVES' pill) the click's focus is the open field's: the field is there because the pill was
+     pressed, so while it is open and focused the wheel over it steps the number in it, live */
   const notch = {};
-  button.addEventListener('wheel', (e) => {
-    if (!enabled() || field.editing) return;
-    e.preventDefault();
-    const n = wheelNotches(e, notch, e.timeStamp); if (!n) return;
-    tempo.set(clampBpm(tempo.get() + n * (e.shiftKey ? 0.1 : 1), tempo.min, tempo.max)); paint(); frame.coalesce(notch, () => tempo.commit());
+  input.addEventListener('wheel', (e) => {
+    if (!field.editing || input.ownerDocument.activeElement !== input || e.ctrlKey || e.metaKey) return;
+    const n = wheelNotches(e, notch, e.timeStamp); if (n && turn(n, e) === false) return;
+    e.preventDefault(); e.stopPropagation();
   }, { passive: false, signal });
   return field;
 }
@@ -955,7 +956,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     if (!seatMenuOn || e.pointerType !== 'touch' || e.target.tagName === 'INPUT' || e.target.closest('.tempo-expand, .native-tempo')) return;
     hold = { id: e.pointerId, x: e.clientX, y: e.clientY, timer: view.setTimeout(() => { hold = null; swallow = true; seatMenu(true, { x: e.clientX }); }, TRANSPORT.longPress) };
   }, on);
-  bar.addEventListener('pointermove', (e) => { if (hold && e.pointerId === hold.id && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > TRANSPORT.slop) endHold(); }, on);
+  bar.addEventListener('pointermove', (e) => { if (hold && e.pointerId === hold.id && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > TAP.slop) endHold(); }, on);   // the hold's stillness is the kit's (TRANSPORT.slop is the pill's drag)
   for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) bar.addEventListener(ev, endHold, on);
   bar.addEventListener('click', (e) => { if (swallow) { swallow = false; e.preventDefault(); e.stopPropagation(); } }, { capture: true, signal });
 

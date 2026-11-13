@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 044
+
+THE RING'S DOUBLE PRESS GOES HOME, THE RIGHT CLICK REMOVES (044 K1; Josh 2026-11-12: "double click returns knob home, right click remove routing is where it's at."; the kit's 1.6.0-alpha.2): MODULATION's coloured arc round a routed knob has no double press of its own. Two presses on it are two presses on the knob under it: the KNOB's value goes home (the base to its default, the menu's RESET road) and the route and its depth stay (until here a double press removed the route). A right-click on the arc removes the route the arc edits, one gesture and so one undo row (Ctrl+Z brings it back); it no longer opens the route's menu. The other roads stand: the × badge, the knob's own right-click and held press (the menu with REMOVE and REMOVE ALL), a held press on the arc. The depth goes to zero by the arc's drag or the small RANGE dial (its own double press is 0). All of it is the kit's `modulation/window.js`; the app has no code of its own here.
+
 ## The laws of 041
 
 THE TIMELINE'S MODES IN THE APP (041 T, N7; the kit's alpha.49–51): THE MODE MENU opens on a middle click on the lanes, middle + right, or the bar's MODE chip; the chosen mode is the left button's tool, 040's right-drag delete and Shift gestures stand under every mode (the kit's docs/TIMELINE.md). FOLLOW PLAYHEAD no longer ends on the middle press that opens the menu (`lab/timeline-follow.js`); KEYBOARD lists nine … MODE rows, PAINT · PAINT ADD · DELETE · MUTE · ZOOM unbound; the rack's title pills stand over a docked TIMELINE, the CSB and `#floats` (alpha.50); an empty lane wears no hint (alpha.51, Josh's call 10: "DAWs never have any hints").

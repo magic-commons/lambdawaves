@@ -3,7 +3,7 @@
  * Primitive types are preserved (§23): boolean → switch, scalar → knob or fader,
  * enumeration → segmented select, event → trigger.  Every control is a real 44 px seat,
  * takes pointer events (mouse, pen and touch alike, `touch-action: none`), and the rack
- * wheel never changes a hovered control (§24).  Knobs reset on double-tap.
+ * wheel never changes a hovered control (§24; 1.6.0-alpha.3: it turns one that was pressed and holds the focus, wheelTurn).  Knobs reset on double-tap.
  *
  * ── WAVE 62 · EVERY CONTROL IS OPERABLE FROM A KEYBOARD, AND THE LAW WAS ALREADY HERE ───────────
  * `knob()`'s pointer drag moves normalized TRAVEL (`p`) and then denormalizes.  So the key law is
@@ -46,6 +46,7 @@
 import { setGlyph, glyphEl, hasGlyph } from './glyph.js';
 import { setText, setVar } from './core/perf.js';   // paint writes only what changed, and the meter counts both
 import { frame } from './core/frame.js';
+import { TAP } from './core/tap.js';
 import { createLayoutMotion, wireReorder } from './modulation/layout-motion.js';
 import { t as tx, onLanguage } from './core/i18n.js';
 import { srgbToLinear, linearToSrgb, contrastRatio, hslToRgb01, rgbToHsl, hexToRgb } from './palette.js';
@@ -155,7 +156,7 @@ const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 /** THE ONE DOUBLE-TAP LAW (Josh, 2026-10-07, call 20: "300ms"): two presses within 300 ms and 14 px.  It was two laws
  *  (320 ms anywhere here, 300 ms within 14 px in the colour controls); this is the one, and controls/gesture.js re-exports
  *  it (TAP, tapHome) so the colour controls read the same numbers. */
-export const TAP = Object.freeze({ ms: 300, px: 14, hold: 500, slop: 8 });   // 1.5.6-alpha.4: hold · slop, THE ONE HOLD LAW (holdTap)
+export { TAP };   // core/tap.js: ms · px the double tap, hold · slop THE ONE HOLD LAW (1.5.6-alpha.4 holdTap); 1.6.0-alpha.4 THE HOLD IS 550
 /** holdTap(el, fn, { ms = TAP.hold, slop = TAP.slop, accept }) → off() — a still press held `ms` (moving under `slop` px) runs fn(event, x, y)
  *  once; the click its release would make is swallowed.  `accept(event)` filters the pointers that may start one (default: the primary button). */
 export function holdTap(node, fn, { ms = TAP.hold, slop = TAP.slop, accept = null } = {}) {
@@ -196,6 +197,51 @@ export function tapWatcher(fn) {
     last = { t: now, x, y, placed };
     return false;
   };
+}
+/** THE WHEEL WAITS FOR A CLICK (1.6.0-alpha.3; Josh, 2026-11-12: "not even tempo; it has to click then the scroll is available").  A wheel over
+ *  a value control scrolls the window under it and changes nothing, UNLESS that control was pressed first and still holds the focus: then the
+ *  wheel turns it — one notch is the arrow key's step, Shift the fine gear — and the window does not scroll; the focus leaving ends it.
+ *  WHEEL: a trackpad's pixels gather to one notch every `notchPx`; a part-notch is forgotten after `notchIdle` ms of rest.
+ *  wheelNotches(e, state, now) → the whole notches a wheel event turns (+ up): a line or page event is one notch, and so is a pixel event of a
+ *  notch's size or more (a mouse: one event a notch, however far the browser says it went); smaller pixels gather in `state.acc`.
+ *  wheelTurn(node, turn?, { focus = node, signal }) → off() — the one listener.  A press on `node` arms it (and focuses `focus` when nothing in
+ *  `node` took the focus); while armed and the focus is inside `node`, a wheel there is the control's: turn(notches, event) runs (return false
+ *  to let the event scroll after all).  With no `turn`, a notch is an ArrowUp / ArrowDown keydown on the focused element (Shift carried), so
+ *  the step IS the key's.  Nothing listens to the wheel until the press: a control that was never clicked costs the scroll nothing. */
+export const WHEEL = Object.freeze({ notchPx: 50, notchIdle: 300 });
+export function wheelNotches(e, state = {}, now = 0) {
+  const mode = e.deltaMode, dy = e.deltaY;                            // deltaMode first: Firefox then keeps a mouse's lines
+  if (!dy) return 0;
+  if (mode || Math.abs(dy) >= WHEEL.notchPx) { state.acc = 0; return dy < 0 ? 1 : -1; }
+  if (!(now - (state.at ?? -Infinity) <= WHEEL.notchIdle)) state.acc = 0;
+  state.at = now; state.acc = (state.acc || 0) - dy;
+  const n = Math.trunc(state.acc / WHEEL.notchPx); state.acc -= n * WHEEL.notchPx;
+  return n;
+}
+export function wheelTurn(node, turn = null, { focus = node, signal } = {}) {
+  let armed = false; const state = {};
+  const arrow = (n, e) => {
+    const to = node.ownerDocument.activeElement; let took = false;
+    for (let i = Math.abs(n); i > 0; i--) { const k = new KeyboardEvent('keydown', { key: n > 0 ? 'ArrowUp' : 'ArrowDown', code: n > 0 ? 'ArrowUp' : 'ArrowDown', shiftKey: e.shiftKey, cancelable: true }); to.dispatchEvent(k); took = took || k.defaultPrevented; }
+    return took;
+  };
+  const onWheel = (e) => {
+    const a = node.ownerDocument.activeElement;
+    if (!a || !node.contains(a) || e.ctrlKey || e.metaKey) return;      // the focus is elsewhere (or a zoom is meant): the window's
+    const n = wheelNotches(e, state, e.timeStamp);
+    if (n && (turn || arrow)(n, e) === false) return;                  // a dead control: the wheel scrolls
+    e.preventDefault(); e.stopPropagation();
+  };
+  const disarm = () => { if (armed) { armed = false; node.removeEventListener('wheel', onWheel); } };
+  const arm = (e) => {
+    if (e.button) return;
+    if (!armed) { armed = true; node.addEventListener('wheel', onWheel, { passive: false }); }
+    if (focus && focus.focus && !node.contains(node.ownerDocument.activeElement)) focus.focus({ preventScroll: true });
+  };
+  const out = (e) => { if (!e.relatedTarget || !node.contains(e.relatedTarget)) disarm(); };
+  node.addEventListener('pointerdown', arm, { capture: true, signal }); node.addEventListener('focusout', out, { signal });
+  if (signal) signal.addEventListener('abort', disarm, { once: true });
+  return () => { disarm(); node.removeEventListener('pointerdown', arm, true); node.removeEventListener('focusout', out); };
 }
 
 /* ── 1.5.0-alpha.13 · THE ONE KNOB LAW (docs/CONTROLS.md) ─────────────────────────────────────────────────────────────
@@ -377,7 +423,7 @@ export function knob(o) {
   const reset = () => { if (disabled) return; if (o.onDelta) { if (o.onReset) o.onReset(); return; } v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };
   const tap = tapWatcher(reset);                       // two taps within 300 ms and 14 px reset the control to its default …
   dial.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });   // … and so does a double-click
-  dial.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+  wheelTurn(root);                                     // 1.6.0-alpha.3 THE WHEEL WAITS FOR A CLICK: pressed and focused, a notch is the arrow key's step
   /* THE KEY MAP.  Δp = 1/100 of TRAVEL · Shift ×⅛ (the one gear) · Page ×10 · Home/End the ends · Delete resets.
      Three rulings a builder gets wrong, so they are written here rather than inferred:
        · SHIFT ON A STEPPED KNOB IS IGNORED.  `o.step` quantizes with Math.round(nv/step)*step, so a
@@ -620,7 +666,7 @@ export function fader(o) {
   const reset = () => { if (disabled) return; v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };   // a disabled fader does not reset either (1.4.0)
   const tap = tapWatcher(reset);
   root.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });
-  root.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+  wheelTurn(root);
   const FDIR = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 1, PageDown: -1 };
   root.addEventListener('keydown', (e) => {
     if (disabled || root.tabIndex < 0 || e.ctrlKey || e.metaKey || e.altKey) return;   // a fader taken out of the tab order (the scrub, with KEEP FRAMES off) takes no keys either

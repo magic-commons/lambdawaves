@@ -6,6 +6,7 @@
  * (shell/menubar.js knobMenu: RESET · COPY · PASTE · FINE · ROUTES › · CLIP › · the app's rows), TIMELINE CLIP its CLIP › part.
  *   installTimelineKnobs({ registry, editor, root = document }) → dispose */
 import { knobMenu, knobMenuPart, contextMenu } from '../shell/menubar.js';
+import { TAP } from '../core/tap.js';
 
 /* 1.5.0-alpha.25 (λWAVES iteration 014 A3): an app's own rows under LOCATE CLIPS — `setTimelineKnobRows((id) => [{ label, run }])`, one port for
    every installed popup (λWAVES: ADD TO / REMOVE FROM CONTROL SURFACE).  The label is a word the app passes through label(). */
@@ -35,9 +36,9 @@ export function installTimelineKnobs({ registry, editor }) {
       owned=p;
       try{if(dial.hasPointerCapture(p.id))dial.releasePointerCapture(p.id);}catch(_){}
       open(root,p.x,p.y);
-    },500)};
+    },TAP.hold)};
   },true);
-  listen(document,'pointermove',e=>{if(owned&&owned.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();return;}if(pending&&(e.pointerId!==pending.id||Math.hypot(e.clientX-pending.x,e.clientY-pending.y)>8))cancel();},true);
+  listen(document,'pointermove',e=>{if(owned&&owned.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();return;}if(pending&&(e.pointerId!==pending.id||Math.hypot(e.clientX-pending.x,e.clientY-pending.y)>TAP.slop))cancel();},true);
   const end=e=>{if(owned&&owned.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();owned=null;suppressUntil=performance.now()+350;}cancel();};
   listen(document,'pointerup',end,true);listen(document,'pointercancel',e=>{cancel();if(owned&&owned.id===e.pointerId)owned=null;},true);
   listen(document,'click',e=>{if(performance.now()<suppressUntil&&e.target.closest?.('.k[data-param]')){e.preventDefault();e.stopImmediatePropagation();}},true);
