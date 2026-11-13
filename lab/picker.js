@@ -224,7 +224,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const faceTop = el('div', 'mm-corner mm-tr', face);
   const faceTheme = el('button', 'mm-navb mm-themeb', faceTop); faceTheme.type = 'button'; faceTheme.title = 'Light or dark — the theme'; faceTheme.setAttribute('aria-label', faceTheme.title);
   icon(faceTheme, 'sun').classList.add('gly-sun'); icon(faceTheme, 'moon').classList.add('gly-moon'); faceTheme.addEventListener('click', () => app.sh.ACTIONS.run('theme'));
-  { const mir = el('button', 'mm-corner mm-br mm-mirb', face); mir.type = 'button'; mir.setAttribute('aria-label', 'ABOUT MIR'); hint(mir, 'ABOUT MIR — the toolkit this app is built on'); mir.addEventListener('click', () => openAbout('mir', mir));
+  if (!globalThis.lwavesDesktop) { const mir = el('button', 'mm-corner mm-br mm-mirb', face);   // 044 S5 (Josh 11-12: "you can remove it outright"): no wordmark on the desktop's face; nothing else moves
+     mir.type = 'button'; mir.setAttribute('aria-label', 'ABOUT MIR'); hint(mir, 'ABOUT MIR — the toolkit this app is built on'); mir.addEventListener('click', () => openAbout('mir', mir));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
   if (!globalThis.lwavesDesktop) { const credits = el('button', 'mm-corner mm-credits', face);   // 044 S1 (Josh 11-12): the desktop (Steam) build shows no AI marks and its package holds none of their files (tools/platform/electron/package.mjs)
     credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');   // 041 P6 (Josh 11-09: "Show no mouse-over hint for the AI thingy in the main menu"): no hint (039 X16's is gone); the names still slide out and the aria name stands
