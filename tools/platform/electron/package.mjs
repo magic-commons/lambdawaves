@@ -15,8 +15,8 @@ execFileSync(process.execPath, ['tools/build-deploy.mjs', '--quiet', '--desktop'
 // 028 R-28: the binary's version is BUILD_LINE's leading token (the one place the number lives); package.json's version is 0.0.0, not a seat.
 const appVersion = (fs.readFileSync(path.join(REPO, 'lab/build-line.js'), 'utf8').match(/BUILD_LINE = '([^ ']+)/) || [])[1];
 if (!appVersion) throw new Error('package.mjs: no BUILD_LINE in lab/build-line.js');
-const copyright = fs.readFileSync(path.join(REPO, 'NOTICE'), 'utf8').split('\n')[1];   // NOTICE's second line: the copyright holder, the exe's LegalCopyright
-const MAKER = 'MAGIC COMMONS';   // 044 S2 (Josh 11-12): the company the Windows program names; the copyright line stays NOTICE's
+const MAKER = 'MAGIC COMMONS';   // 044 S2 · S6 (Josh 11-12): the company the Windows program names, and its copyright line ("Change that too")
+const copyright = 'Copyright ' + fs.readFileSync(path.join(REPO, 'NOTICE'), 'utf8').split('\n')[1].match(/\d{4}/)[0] + ' ' + MAKER;   // the year is NOTICE's; NOTICE itself, copied into the package, keeps its own line
 const ver = (m) => JSON.parse(fs.readFileSync(path.join(HERE, 'node_modules', m, 'package.json'), 'utf8')).version;
 const at = own.indexOf('--platform'), platform = (at < 0 ? 'linux,win32' : own[at + 1]).split(',').sort();
 // lambdawaves.ico is lab/img/icon-512.png at 16–256 px (PIL: Image.save(sizes=…)); the exe and the taskbar wear it, Linux takes the PNG at run time
