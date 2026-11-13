@@ -259,7 +259,9 @@ if (SHELF) {
   mkdirSync(path.join(DIST, at('volumes')), { recursive: true });
   for (const v of shelf.volumes) {   // 030: a catalogue beside the shelf with rows that have no picture marks its volume `drawing` (the card's WIP)
     const cat = path.join(srcDir, v.id, 'index.json');
-    if (existsSync(cat)) { const rows = (JSON.parse(readFileSync(cat, 'utf8')).molecules || []);   /* a catalogue lists its rows under `molecules` */ const bare = rows.filter((r) => !r.thumb).length; if (bare) { v.drawing = true; console.log(`  shelf    ${v.id}: ${bare} of ${rows.length} molecules have no picture yet → WIP`); } }
+    if (existsSync(cat)) { const rows = (JSON.parse(readFileSync(cat, 'utf8')).molecules || []);   /* a catalogue lists its rows under `molecules` */ const pg = path.join(srcDir, v.id, 't/pages.json'), man = existsSync(pg) ? JSON.parse(readFileSync(pg, 'utf8')) : null, plain = new Set();   /* 044 S9: a row's plain picture is its t/<id>.webp (`thumb`) OR its cell in the pages' `density` sheet (037 D5, lab/volumes.js pagePicture) — VOL. II has the sheets and no `thumb`, and was called WIP */
+      if (man && man.index === v.indexSha256 && man.sheets && man.sheets.density) man.pages.forEach((ids, p) => { const s = man.sheets.density[p]; if (s) for (const id of ids) if (!(s.missing || []).includes(id)) plain.add(id); });
+      const bare = rows.filter((r) => !r.thumb && !plain.has(r.id)).length; if (bare) { v.drawing = true; console.log(`  shelf    ${v.id}: ${bare} of ${rows.length} molecules have no picture yet → WIP`); } }
     if (!SHIP.has(v.id)) { delete v.index; continue; }                       // an archive volume keeps indexSha256: installFile checks the edition by it
     const src = path.join(srcDir, v.id), dst = path.join(DIST, at('volumes/' + v.id));
     if (!(path.resolve(dst) + path.sep).startsWith(path.resolve(DIST) + path.sep)) { console.error(`--ship ${v.id}: the destination leaves dist/`); process.exit(2); }
