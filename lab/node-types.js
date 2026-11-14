@@ -144,7 +144,7 @@ function vibrance(V, id, src) {
 /** 020 X4 · FADE AND MASK: the foot of every node but a LAYER (whose AMOUNT is its fade) — lab/nodes-compile.js folds FADE; a MASK makes the
  *  node its own run.  FADE and SOFT are knobs, so modulation targets (`nodes.<node>.fade`, `.soft`) */
 export const FOOT = [{ k: 'fade', label: 'FADE', min: 0, max: 1, home: 1, hint: 'the node mixed back with its input: 100 % is all of it', fmt: (x) => Math.round(x * 100) + ' %' },
-  { k: 'mask', label: 'MASK', home: 'none', hint: 'MASK — only the lights, darks, mids, centre or edges', options: ['none', 'lights', 'darks', 'mids', 'centre', 'edges'].map((id) => ({ id, label: id.toUpperCase() })) },
+  { k: 'mask', label: 'MASK', home: 'none', ordered: true,   /* 044 K3: six short options stay a stepper (kit alpha.24 would set two rows of three) */ hint: 'MASK — only the lights, darks, mids, centre or edges', options: ['none', 'lights', 'darks', 'mids', 'centre', 'edges'].map((id) => ({ id, label: id.toUpperCase() })) },
   { k: 'soft', label: 'SOFT', min: 0, max: 1, home: 0.5, hint: 'the mask\'s edge: 0 hard, 1 a long ramp' },
   /* 038 N6 · A NODE HAS A TARGET (nodes-compile.js): BOTH · STAGE (the background) · OBJECT (the orbital and the molecule, 038 F8), appended — a file
      without it reads BOTH */
@@ -167,7 +167,7 @@ export function nodeBody(parent, node, T, { idOf, hand }) {
        way to the node, so the saved value keeps its range (HUE: −180 … 180) */
     const span = K.max - K.min, f = K.wrap ? (x) => K.min + ((((x - K.min) % span) + span) % span) : (x) => x;
     const c = ctls[K.k] = control({ id: idOf(K.k), label: K.label, hint: tip, min: K.wrap ? K.home : K.min, max: K.wrap ? K.home + span : K.max, wrap: K.wrap, step: K.step, log: K.log, home: K.home, unit: K.unit,
-      fmt: K.wrap && K.fmt ? (x) => K.fmt(f(x)) : K.fmt, colour: K.colour, options: K.options, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, f(v), false), onChange: (v) => hand(K.k, f(v), true) });
+      fmt: K.wrap && K.fmt ? (x) => K.fmt(f(x)) : K.fmt, colour: K.colour, options: K.options, ordered: K.ordered, stops: K.stops, value: node.values[K.k], onInput: (v) => hand(K.k, f(v), false), onChange: (v) => hand(K.k, f(v), true) });
     (at[K.k] || at[''] || parent).appendChild(c.root);
     if (c.targets[0]) c.targets[0].root.dataset.param = idOf(K.k);
   }

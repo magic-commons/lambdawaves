@@ -312,7 +312,7 @@ export function createCurvesView(parent, o = {}) {
   const extra = () => (typeof o.presets === 'function' && o.presets()) || [];
   const shownOf = (pts) => { const k = JSON.stringify(pack(pts)); return presetOf(pts) || (extra().find((r) => r.points && JSON.stringify(pack(normalizePoints(r.points))) === k) || {}).id || 'LINEAR'; };
   const foot = el('div', 'curves-row curves-foot', root);
-  const preset = control({ id: M.part + '.preset', label: 'PRESET', hint: 'PRESET — a curve to start from', options: [...extra(), ...BUILT],
+  const preset = control({ id: M.part + '.preset', label: 'PRESET', hint: 'PRESET — a curve to start from', options: [...extra(), ...BUILT], ordered: true,   // a list walked in order: a stepper (1.6.0-alpha.34; alpha.24 had made its six a two-row segment)
     value: shownOf(M.points()), get: () => shownOf(M.points()),
     set: (v) => { const r = extra().find((x) => x.id === v && x.points); if (r) M.set(M.channel(), r.points); else M.preset(M.channel(), v); } });
   const setPresets = () => preset.widget.setItems([...extra(), ...BUILT].map((r) => ({ id: r.id, label: r.label, coming: !!r.coming })), shownOf(M.points()));

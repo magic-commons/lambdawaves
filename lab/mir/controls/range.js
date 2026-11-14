@@ -8,11 +8,12 @@
  * virtual point; a press on the track brings the NEAREST thumb to it (unless the gear is engaged: then nothing jumps); a double-tap on a
  * thumb is home.  The keys on a thumb: ← ↓ and → ↑ one hundredth of the range (one step on a stepped range, Shift ignored there, as on a stepped knob),
  * Shift ⅛ of that, Page ten, Home and End its bounds.
- *   rangeSlider({ label, aria, min, max, lo, hi, step, log, fmt, minGap, onInput, onChange, cls, loLabel, hiLabel })
+ *   rangeSlider({ label, aria, title, min, max, lo, hi, home, step, log, fmt, minGap, onInput, onChange, cls, loLabel, hiLabel })
+ *     title: the hint, on the root; home: [lo, hi], where a double-tap and Delete send each thumb (default the built lo / hi).
  *     onInput(lo, hi) while a thumb moves; onChange(lo, hi) when a gesture or key lands.  minGap is in value units (default: one step, or 0).
  *   → { root, lo, hi, get() → [lo, hi], set(lo, hi), setDisabled(on), destroy() }   (lo and hi are the thumb widgets)
  * The pure parts (for tests): rangeBounds, nearestThumb. */
-import { el, label, ariaLabel, hint, watchTouches, gearOf, tapWatcher, wheelTurn } from '../kit.js';
+import { el, label, ariaLabel, hint, watchTouches, gearOf, tapWatcher, wheelTurn, setKnobLaw } from '../kit.js';
 import { setVar, setText, setAttr } from '../core/perf.js';
 import { digitsOf } from './number.js';
 import { t as tx } from '../core/i18n.js';
@@ -44,7 +45,7 @@ export function rangeSlider(o = {}) {
   el('i', 'mir-rng-track', rail);
   const spanEl = el('i', 'mir-rng-span', rail);
   const vals = el('div', 'mir-rng-vals', root);
-  const state = { lo: o.lo ?? min, hi: o.hi ?? max }, def = { lo: state.lo, hi: state.hi };
+  const state = { lo: o.lo ?? min, hi: o.hi ?? max }, def = Array.isArray(o.home) ? { lo: o.home[0], hi: o.home[1] } : { lo: state.lo, hi: state.hi };   // `home: [lo, hi]` (1.6.0-alpha.23)
   let disabled = false, drag = null;
   watchTouches();
 
@@ -83,8 +84,10 @@ export function rangeSlider(o = {}) {
       setBase(fn) { baseOf = typeof fn === 'function' ? fn : null; announce(false); },
       setDefault(x) { def[which] = x; },
       setDisabled(on) { t.classList.toggle('disabled', !!on); t.tabIndex = on ? -1 : 0; t.setAttribute('aria-disabled', String(!!on)); },
-      paint, which };
-    t._api = api;
+      paint, which,
+      /* THE VALUE DOOR, as the knob's (1.6.0-alpha.26): home() = a double tap on this thumb, input(x) = a hand's value, held against the other */
+      home: () => homeOf(which), input(x) { if (!disabled && move(which, x)) land(); } };
+    t._api = api; t.mirKnob = api;
     return api;
   }
   const lo = thumb('lo', o.loLabel), hi = thumb('hi', o.hiLabel);
@@ -111,11 +114,12 @@ export function rangeSlider(o = {}) {
     const onThumb = e.target.closest && e.target.closest('.rng-t');
     const u = clamp01((e.clientX - r.left) / Math.max(1, r.width));
     const which = onThumb ? (onThumb.classList.contains('rng-lo') ? 'lo' : 'hi') : nearestThumb(u, norm(state.lo), norm(state.hi));
-    e.preventDefault(); try { rail.setPointerCapture(e.pointerId); } catch (_) {}
+    e.preventDefault();
     T[which].root.focus({ preventScroll: true });
-    drag = { id: e.pointerId, which, lastX: e.clientX, w: r.width || 1, u: norm(state[which]), tie: !!onThumb && state.hi - state.lo <= gap };   // two thumbs on one spot: the first move chooses which one goes
-    rail.classList.add('drag'); T[which].root.classList.add('drag');
-    if (onThumb) tap[which](e);
+    if (onThumb && tap[which](e)) return;                              // HOME, and no drag after it (1.6.0-alpha.19: a pixel of travel put the thumb back)
+    try { rail.setPointerCapture(e.pointerId); } catch (_) {}
+    drag = { id: e.pointerId, which, lastX: e.clientX, w: r.width || 1, u: norm(state[which]), tie: !!onThumb && state.hi - state.lo <= gap, lo0: state.lo, hi0: state.hi };   // two thumbs on one spot: the first move chooses which one goes
+    rail.classList.add('drag'); T[which].root.classList.add('drag'); root.ownerDocument.addEventListener('keydown', esc, true);
     if (!onThumb && gearOf(e, e.pointerId) === 1) { drag.u = u; move(which, denorm(u)); }
   });
   rail.addEventListener('pointermove', (e) => {
@@ -130,13 +134,18 @@ export function rangeSlider(o = {}) {
     if (x < bl || x > bh) drag.u = norm(Math.min(bh, Math.max(bl, x)));                  // pinned against the other thumb: the point stays on the edge
     move(drag.which, denorm(drag.u));
   });
-  const end = (e) => {
-    if (!drag || (e && e.pointerId !== drag.id)) return;
+  /* the lift commits; a cancel (the pointer cancelled, its capture lost, Escape) puts both thumbs back and lands nothing (1.6.0-alpha.20) */
+  const stop = (e) => {
+    if (!drag || (e && e.pointerId !== undefined && e.pointerId !== drag.id)) return null;
     const d = drag; drag = null; rail.classList.remove('drag'); T[d.which].root.classList.remove('drag');
-    paintAll(); land();
+    root.ownerDocument.removeEventListener('keydown', esc, true); try { rail.releasePointerCapture(d.id); } catch (_) {}
+    return d;
   };
-  rail.addEventListener('pointerup', end); rail.addEventListener('pointercancel', end); rail.addEventListener('lostpointercapture', end);
-  rail.addEventListener('dblclick', (e) => { const t = e.target.closest && e.target.closest('.rng-t'); if (t) { e.preventDefault(); homeOf(t.classList.contains('rng-lo') ? 'lo' : 'hi'); } });
+  const end = (e) => { if (stop(e)) { paintAll(); land(); } };
+  const abort = (e) => { const d = stop(e); if (!d) return; const moved = state.lo !== d.lo0 || state.hi !== d.hi0; state.lo = d.lo0; state.hi = d.hi0; paintAll(); if (moved) emit(); };
+  function esc(e) { if (drag && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); abort(); } }
+  rail.addEventListener('pointerup', end); rail.addEventListener('pointercancel', abort); rail.addEventListener('lostpointercapture', abort);
+  rail.addEventListener('dblclick', (e) => e.preventDefault());   // the second press on a thumb was the double-tap (1.6.0-alpha.19: one home, not two)
   wheelTurn(rail, null, { focus: null });   // 1.6.0-alpha.3 THE WHEEL WAITS FOR A CLICK: the pressed thumb, while it holds the focus, turns by the wheel as by its arrows
   /* the keys, on a thumb: one hundredth of the range, Shift an eighth of it (the one gear), Page ten; Home and End its bounds */
   const KEYDIR = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 1, PageDown: -1 };
@@ -147,7 +156,7 @@ export function rangeSlider(o = {}) {
     let x = state[which];
     if (dir) {
       if (step && !log) x = x + dir * step * (page ? 10 : 1);
-      else x = denorm(norm(x) + dir * 0.01 * (page ? 10 : 1) * (e.shiftKey ? 0.125 : 1));
+      else x = denorm(norm(x) + dir * 0.01 * (page ? 10 : 1) * (e.shiftKey ? setKnobLaw().keyFine : 1));   // the ONE gear (1.6.0-alpha.22: this was a literal 0.125 that setKnobLaw never reached)
     } else if (e.code === 'Home') x = bl; else if (e.code === 'End') x = bh;
     else if (e.code === 'Delete' || e.code === 'Backspace') x = def[which]; else return;
     e.preventDefault();

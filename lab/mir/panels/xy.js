@@ -305,7 +305,7 @@ export function createXYPanel(o = {}) {
 
   function buildPair(box) {
     if (pairs.length > 1) {
-      V.pairStep = stepper({ label: 'PAIR', items: pairs.map((p, i) => ({ id: String(i), label: p.label || 'PAIR ' + (i + 1) })), value: String(S.pair),
+      V.pairStep = stepper({ label: 'PAIR', options: pairs.map((p, i) => ({ id: String(i), label: p.label || 'PAIR ' + (i + 1) })), value: String(S.pair),
         onChange: (sid) => { S.pair = +sid; mountPair(); changed(); } });
       V.pairStep.root.classList.add('xy-pick'); box.appendChild(V.pairStep.root);
     }
@@ -371,7 +371,7 @@ export function createXYPanel(o = {}) {
   function buildMorph(box) {
     const all = sets();
     if (all.length > 1) {
-      V.setStep = stepper({ label: 'WINDOW', items: all.map((s) => ({ id: s.id, label: s.label })), value: S.set || all[0].id, onChange: (sid) => setSet(sid) });
+      V.setStep = stepper({ label: 'WINDOW', options: all.map((s) => ({ id: s.id, label: s.label })), value: S.set || all[0].id, onChange: (sid) => setSet(sid) });
       V.setStep.root.classList.add('xy-pick'); box.appendChild(V.setStep.root);
     }
     title_(box, 'SNAPSHOTS');

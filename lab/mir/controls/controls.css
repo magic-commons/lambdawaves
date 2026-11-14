@@ -88,6 +88,17 @@ button.mir-step-name:disabled { cursor: default; }
 .mir-sel-b[aria-expanded="true"] .mir-sel-c { transform: rotate(180deg); }
 .mir-sel-b:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 .mir-select.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+.mir-step.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }   /* stepper.setDisabled (1.6.0-alpha.23), as the select's */
+/* A SEGMENT IN TWO ROWS (factory.js: five or six short options; 1.6.0-alpha.24, λWAVES' VIEW): three equal columns, the track as wide as its seat */
+.segw.seg-2 { flex: 1 1 100%; align-items: stretch; }
+.segw.seg-2 .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; box-sizing: border-box; }
+.segw.seg-2 .seg-b { min-width: 0; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* A CARD'S OWN HEAD BUTTON (kit.js devTool / device({ tools }), 1.6.0-alpha.26): the bare disc of the head's ×, a drawn glyph, pressed = the accent */
+.dev-tool { width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 0; background: transparent; color: var(--dim); cursor: pointer; }
+.dev-tool:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
+.dev-tool[aria-pressed="true"] { color: var(--acc); }
+/* THE TRIGGER'S GLYPH FORM (kit.js trig({ glyph, word: false }), 1.6.0-alpha.23): the glyph alone on a square touch seat; the label is its name */
+.trig.trig-glyph { min-width: var(--touch); padding: 0; }
 
 /* ── the list pane: the menu height, the card style's material (skin.css), a box here ── */
 .mir-pick { position: fixed; z-index: var(--list-z); display: flex; flex-direction: column; gap: 1px; padding: var(--sp-1); overflow-y: auto; box-sizing: border-box;

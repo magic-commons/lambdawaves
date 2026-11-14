@@ -233,5 +233,9 @@ export function arcKnob(o) {
     /** take the knob out of the page: its listeners are on its own nodes and the gesture's are removed at its end */
     destroy() { drag.abort(); root.remove(); },
   });
+  /* THE VALUE DOOR (1.6.0-alpha.26): the knob's own root.mirKnob IS `k`, whose `home` is the NUMBER above, so the control menu's RESET called a
+     number on an arc.  The door is its own object here: home() is the arc's own home (a double-tap), input(x) a hand's value */
+  root.mirKnob = { root, get: () => k.get(), home: goHome, fine: k.fine,
+    input(x) { if (root.classList.contains('disabled')) return; const nv = settle(x); if (nv !== k.get()) { k.set(nv); if (o.onInput) o.onInput(nv); if (o.onChange) o.onChange(nv); reshow(); } } };
   return k;
 }

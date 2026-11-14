@@ -136,6 +136,7 @@ function deltaMove(g, e, o, fn, own) {
 export function directionSphere(o = {}) {
   const unit = o.unit || 1, toRad = (v) => v * DEG / unit;
   const root = el('div', 'mir-camsphere' + (o.plane ? ' plane' : ''));
+  if (o.title) hint(root, o.title);                                               // THE ROOT WEARS THE HINT (1.6.0-alpha.23)
   if (o.label) label(el('div', 'k-lbl', root), o.label);
   const body = el('div', 'mir-camsphere-body', root);
   const svg = svgEl('svg', 'cs-svg', body);
@@ -318,17 +319,21 @@ export function createCameraView(parent, o = {}) {
     }
     return c;
   }
-  /* a bounded angle (PITCH) is an arc with a gap, not a wrapped one: control() reads every angle as cyclic, so this one is built directly */
-  function boundedArc(id, d) {
-    const k = arcKnob({ label: d.label, title: d.hint, min: d.min, max: d.max, value: port.get(id), home: d.home, wrap: false, fmt: d.fmt, step: d.step, onInput: (v) => { write(id, v); schedule(); } });
-    return { kind: 'arc', root: k.root, widget: k, targets: [k], get: () => k.get(), set: (v) => k.set(v),
-      params: () => [{ id: modId(id), label: d.label, min: d.min, max: d.max, step: d.step || 0, map: 'linear', hint: d.hint, def: d.home, get: () => port.get(id), set: (v) => port.set(id, v), widget: k }] };
+  /* THIS PANEL'S ANGLES ARE ARCS, built directly (its header's own rule): a wrapped one (YAW, ROTATION) turns freely, a bounded one (PITCH) is
+     an arc with a gap.  control() draws an angle as a knob since 1.6.0-alpha.24 (arcs are colour); whether these should follow is Josh's to say.
+     `desc` is the descriptor the hand writes through, as control()'s is: the rotation's trip north replaces its `set`. */
+  function angleArc(id, d, extra) {
+    const ds = desc(id, extra), wrap = !!d.wrap;
+    const k = arcKnob({ label: d.label, title: d.hint, min: d.min, max: d.max, value: port.get(id), home: d.home, wrap, log: d.log, fmt: d.fmt, step: d.step, onInput: (v) => { ds.set(v); schedule(); }, onChange: (v) => ds.set(v) });
+    k.root.dataset.control = 'arc';
+    return { kind: 'arc', root: k.root, widget: k, targets: [k], desc: ds, get: () => k.get(), set: (v) => k.set(v),
+      params: () => [{ id: modId(id), label: d.label, min: d.min, max: d.max, step: d.step || 0, map: wrap ? 'wrap' : 'linear', hint: d.hint, def: d.home, get: () => port.get(id), set: (v) => port.set(id, v), widget: k }] };
   }
   const single = (id, parentEl, extra) => {
     const d = D(id);
     const c = d.kind === 'switch' ? control({ id: modId(id), label: d.label, hint: d.hint, value: !!port.get(id), get: () => !!port.get(id), set: (v) => write(id, !!v) })
       : d.kind === 'options' ? control({ id: modId(id), label: d.label, options: d.options.map((x) => ({ id: x.id, label: x.label, hint: x.hint })), value: String(port.get(id)), get: () => String(port.get(id)), set: (v) => write(id, v) })
-      : d.kind === 'angle' && !d.wrap ? boundedArc(id, d)
+      : d.kind === 'angle' ? angleArc(id, d, extra)
       : control(desc(id, extra));
     return add(parentEl, [id], c, () => (d.kind === 'switch' ? !!port.get(id) : d.kind === 'options' ? String(port.get(id)) : port.get(id)));
   };

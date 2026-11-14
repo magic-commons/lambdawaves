@@ -684,6 +684,7 @@
   "Open or close audio input. Audio is analysed locally and is not stored.": "Open or close audio input. Audio is analysed locally and is not stored.",
   "Open the modulation window": "Open the modulation window",
   "Open the preset list — {factory} ships with the app, the rest are yours": "Open the preset list — {factory} ships with the app, the rest are yours",
+  "Open this as a window": "Open this as a window",
   "Open {name}": "Open {name}",
   "Open {name} — tap again": "Open {name} — tap again",
   "Opened {name}": "Opened {name}",
@@ -1377,6 +1378,7 @@
   "nothing to read": "nothing to read",
   "numbered lossless PNG frames": "numbered lossless PNG frames",
   "opal": "opal",
+  "open this as a window": "open this as a window",
   "open {path} in your notes tab": "open {path} in your notes tab",
   "opened {name}": "opened {name}",
   "page 0 — the greeting, shown when the project opens": "page 0 — the greeting, shown when the project opens",
@@ -3886,6 +3888,9 @@
   "Open the preset list — {factory} ships with the app, the rest are yours": [
    "mir/modulation/modwindow/modwindow.js"
   ],
+  "Open this as a window": [
+   "mir/shell/rack.js"
+  ],
   "Open {name}": [
    "mir/shell/opener.js"
   ],
@@ -6055,6 +6060,9 @@
   ],
   "opal": [
    "mir/palette.js"
+  ],
+  "open this as a window": [
+   "mir/shell/rack.js"
   ],
   "open {path} in your notes tab": [
    "mir/notes/face.js"

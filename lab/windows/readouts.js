@@ -168,7 +168,7 @@ export function createReadouts(app) {
   const rooms = ui.hamRooms, wLat = { root: rooms.lattice, setStatus() {} };
   const lattice = createLattice(rooms.lattice, { active: () => canPresent(wLat), t: () => clock.t, palette: () => app.state.palette, solve: (H) => solveCard({ op: 'lattice.solve', ...H }, () => solveLattice(H)) });
   rooms.lattice.addEventListener('roomopen', () => lattice.prepare());
-  const wBlo = device({ id: 'bloch', eyebrow: 'BLOCH', status: '' }); wBlo.root.classList.add('closed'); rack.appendChild(wBlo.root);   // 0.8.1 T1: one qubit, its own register (lab/bloch.js); ships closed, and opening it runs its preset from the start
+  const wBlo = device({ id: 'bloch', eyebrow: 'BLOCH', status: '', closed: true }); rack.appendChild(wBlo.root);   // 0.8.1 T1: one qubit, its own register (lab/bloch.js); ships closed, and opening it runs its preset from the start
   const bloch = createBloch(wBlo.body, { t: () => clock.t, obs }); wBlo.root.addEventListener('devopen', () => bloch.set({}));
   const central = createCentral(rooms.central, { solve: (w) => solveCard({ op: 'central.solve', ...w }, () => solveCentral(w.preset, w.params)), apply: (id) => { switchHamiltonian(id); if (ui.hamSeg.value !== 'lattice') ui.hamSeg.set(id); }, current: () => getHamiltonian().id, populated: () => reg.populated() }); rooms.central.addEventListener('roomopen', () => central.prepare());
   const sep = createSeparable(rooms.separable, { apply: (id) => { switchHamiltonian(id); if (ui.hamSeg.value !== 'lattice') ui.hamSeg.set(id); } }); rooms.separable.addEventListener('roomopen', () => sep.prepare());

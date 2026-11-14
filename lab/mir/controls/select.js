@@ -4,13 +4,13 @@
  * (no frost, no theme, no touch size, no keyboard law of ours), so the kit does not use one (docs/CONTROLS.md).  The pane is a
  * `.glass[data-mir-surface="menu"]` on the body: the menu height of INTENT's four, the card style's material, and it closes on
  * an outside press, Escape, a resize or the page losing focus.  Rows are real 44 px touch seats; an item marked `coming`
- * is shown and never chosen; the keys are the listbox's (arrows, Home, End, Enter, a typed letter, Escape).
+ * is shown and never chosen; the keys are the listbox's (arrows, which wrap at both ends; Home, End, Enter, a typed letter, Escape).
  *   listPane({ anchor, items, value, onPick, onClose, label, cls, signal }) → { root, close(), items }   one pane for the stepper and the select
- *   select({ label, aria, items, value, onChange, placeholder, cls, disabled, repick }) → { root, button, get, set(id), setItems(list, id), open(), close(), isOpen, setDisabled(on), destroy() }
+ *   select({ label, aria, title, options, value, onChange, placeholder, cls, disabled, repick })   (`options` was `items`, which still reads; `title` hints the root) → { root, button, get, set(id), setItems(list, id), open(), close(), isOpen, setDisabled(on), destroy() }
  * items: [{ id, label, vars?, coming?, pic?, title? }] — the same record the stepper takes (`pic` a picture at the row's left, loaded lazily;
  * `title` its hint; `repick: true` — a press on the chosen row still calls onChange; 1.5.6-alpha.4).  Words go through label() and so translate.
  * No pollers, no timers: the pane is placed once from one rect read, and idle costs nothing. */
-import { el, label, ariaLabel } from '../kit.js';
+import { el, label, ariaLabel, hint } from '../kit.js';
 import { setGlyph } from '../glyph.js';
 
 /** the live (choosable) items of a list */
@@ -27,6 +27,10 @@ export function typeahead(items, from, typed) {
   }
   return -1;
 }
+
+/** walk(n, at, d) → the index one step `d` (±1) from `at` in a list of n, WRAPPING at both ends; from nowhere (at < 0) ↓ is the first and ↑ the
+ *  last — pure, for tests.  One walk for the open pane and the closed button (1.6.0-alpha.21: the select stopped at its ends, alone among the lists) */
+export const walk = (n, at, d) => (n ? (at < 0 ? (d > 0 ? 0 : n - 1) : (at + d + n) % n) : -1);
 
 /** where the pane goes: below the anchor while there is room, else above, clamped to the viewport (pure, for tests) */
 export function placePane(a, pane, view, gap = 4, margin = 8) {
@@ -66,8 +70,8 @@ export function listPane({ anchor, items, value, onPick, onClose, label: name, c
     if (e.code === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); return; }
     if (e.code === 'Tab') { close(false); return; }
     let to = null;
-    if (e.code === 'ArrowDown') to = L[Math.min(L.length - 1, at + 1)];
-    else if (e.code === 'ArrowUp') to = L[Math.max(0, at < 0 ? 0 : at - 1)];
+    if (e.code === 'ArrowDown') to = L[walk(L.length, at, 1)];        // the walk WRAPS (1.6.0-alpha.21), as the stepper's, the seg's and the menus'
+    else if (e.code === 'ArrowUp') to = L[walk(L.length, at, -1)];
     else if (e.code === 'Home') to = L[0];
     else if (e.code === 'End') to = L[L.length - 1];
     else if (e.key.length === 1 && e.key !== ' ') {
@@ -109,7 +113,8 @@ export function select(o = {}) {
   btn.setAttribute('aria-haspopup', 'listbox'); btn.setAttribute('aria-expanded', 'false');
   const text = el('span', 'mir-sel-t', btn); setGlyph(el('i', 'mir-sel-c', btn), 'chevronDown');
   if (o.aria || o.label) ariaLabel(btn, o.aria || o.label);
-  let items = o.items || [], v = o.value, pane = null;
+  if (o.title) hint(root, o.title);
+  let items = o.options || o.items || [], v = o.value, pane = null;   // `options` is the list's one name (1.6.0-alpha.23); `items` still reads
   const paint = () => {
     const it = items.find((i) => i.id === v);
     if (it) label(text, it.label, it.vars); else label(text, o.placeholder || '—');
@@ -128,7 +133,7 @@ export function select(o = {}) {
     const L = liveItems(items), at = L.findIndex((x) => x.id === v);
     if (e.code === 'ArrowDown' && e.altKey) { e.preventDefault(); openIt(); return; }
     if (e.altKey) return;
-    if (e.code === 'ArrowDown' || e.code === 'ArrowUp') { e.preventDefault(); if (L.length) choose(L[Math.max(0, Math.min(L.length - 1, at + (e.code === 'ArrowDown' ? 1 : -1)))].id); }
+    if (e.code === 'ArrowDown' || e.code === 'ArrowUp') { e.preventDefault(); if (L.length) choose(L[walk(L.length, at, e.code === 'ArrowDown' ? 1 : -1)].id); }
     else if (e.code === 'Home' || e.code === 'End') { e.preventDefault(); if (L.length) choose(L[e.code === 'Home' ? 0 : L.length - 1].id); }
   });
   paint();

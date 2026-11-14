@@ -417,9 +417,9 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   let g = groupEl('theme', phrase('THEME'));
   /* a theme's and a tone's name is a NAME (shell/themes.js): shown as it is in every language */
   const themeItems = () => [...themes.map((t) => ({ id: t.id, label: phrase(t.name, 'name') })), { id: 'custom', label: 'CUSTOM', coming: true }];
-  const skinStep = stepper({ label: 'SKIN', items: themeItems(), value: P.preset(), onChange: (id) => applyTheme(id) });   // tr[SKIN]: the look the kit wears: one of the built-in THEMES (FROST, MORPH …, whose names stay as written)
+  const skinStep = stepper({ label: 'SKIN', options: themeItems(), value: P.preset(), onChange: (id) => applyTheme(id) });   // tr[SKIN]: the look the kit wears: one of the built-in THEMES (FROST, MORPH …, whose names stay as written)
   const toneItems = (t) => { const th = themeOf(t); return th ? [...th.tones.map((o) => ({ id: o.id, label: phrase(o.name, 'name') })), { id: 'custom', label: 'CUSTOM', coming: true }] : []; };
-  const toneStep = stepper({ label: 'TONE', items: toneItems(P.preset()), value: toneOf(P.all(), P.preset()), onChange: (id) => applyTone(id) });   // tr[TONE]: a colour variant of the chosen theme (its tones have names, kept as written)
+  const toneStep = stepper({ label: 'TONE', options: toneItems(P.preset()), value: toneOf(P.all(), P.preset()), onChange: (id) => applyTone(id) });   // tr[TONE]: a colour variant of the chosen theme (its tones have names, kept as written)
   skinStep.root.classList.add('gui-skin'); toneStep.root.classList.add('gui-tone');
   line(g, 'gui-pair').append(skinStep.root, toneStep.root);
   const costNote = el('div', 'gui-note gui-theme-cost', g); costNote.title = 'What this theme cost when it was applied: surfaces that blur, shadows drawn, shine layers, the mean frame time';

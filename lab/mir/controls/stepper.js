@@ -3,20 +3,20 @@
  * THE LAW IT KEEPS: ONE BUILD OF "STEP THROUGH A LIST".  The census found five (the GUI's, BASINS' blend picker and SAVE pager,
  * λWAVES' palette and transport step); this is the GUI's, generalised, and the others use it.  Two round 44 px buttons around a
  * live name (`aria-live`); the arrows wrap; an item marked `coming` is listed and never chosen (the arrows skip it and stand down
- * when nothing else can be reached); the keys are ← and → on the row, and on the name ↑ ↓ step as a closed select's do (Alt+↓
+ * when nothing else can be reached); the keys are ← and → on the row (Home and End the first and the last, 1.6.0-alpha.21), and on the name ↑ ↓ step as a closed select's do (Alt+↓
  * opens the list: one law for ↑ ↓ on a closed list, wave 19).  A TAP ON THE NAME OPENS THE FULL LIST in the kit's menu pane
  * (controls/select.js `listPane`), so a long ordered list (twelve blend modes) is one tap from any entry, not eleven.  By the rules of
  * docs/INTENT.md: no relief at rest, hover a lighter face, press a sink and a small scale, focus an accent ring outside.
- *   stepper({ label, aria, title, items, value, onChange, wrap, list, pager, count, compact, cls })
+ *   stepper({ label, aria, title, options, value, onChange, wrap, list, pager, count, compact, cls })
  *     title   the control's hint, on its root (THE ROOT WEARS THE HINT, 1.5.7-alpha.18), as every other kit control's
- *     items   [{ id, label, vars?, coming? }]
+ *     options [{ id, label, vars?, coming? }]   (the list's one name since 1.6.0-alpha.23; `items` still reads)
  *     onChange(id, dir)   dir is −1 / +1 for an arrow, 0 for a pick from the list
  *     wrap    false stops at the ends (default true)
  *     list    false: the name is a label, not an opener (default true)
  *     pager   true: the PAGE TURNER form (BASINS' rack-card pager): the list is off, the name is a label
  *     count   true: the name is followed by `n / N` (a pager that says where it is)
  *     compact true: no arrows in the DOM (a strip a finger wide): the name opens the list, ← → still step it from the keys
- *   → { root, prev, next, name, get, set(id), setItems(items, id), step(d), open(), close(), destroy() }
+ *   → { root, prev, next, name, get, set(id), setItems(items, id), step(d), open(), close(), setDisabled(on), destroy() }
  * Styled by controls.css; the buttons are `.mir-step-b[data-step="-1|1"]`, the name `.mir-step-name`. */
 import { el, label, ariaLabel, hint, mathPlain } from '../kit.js';
 import { t as tx, onLanguage } from '../core/i18n.js';
@@ -58,7 +58,7 @@ export function stepper(o = {}) {
   ariaLabel(prev, 'previous'); ariaLabel(next, 'next');
   if (o.aria || o.label) ariaLabel(row, o.aria || o.label);
   row.setAttribute('role', 'group');
-  let items = o.items || [], v = o.value, pane = null;
+  let items = o.options || o.items || [], v = o.value, pane = null, dead = false;   // `options` is the list's one name (1.6.0-alpha.23); `items` still reads
   const sizeSeat = () => {                           // once when built, and again when the options change
     for (const s of seat.querySelectorAll('.mir-step-size')) s.remove();
     for (const it of items) { if (typeof it.label !== 'string' || !it.label) continue;
@@ -70,11 +70,11 @@ export function stepper(o = {}) {
     label(text, it ? it.label : '—', it && it.vars);
     const L = liveItems(items), i = L.findIndex((x) => x.id === v), wrap = o.wrap !== false;
     if (count) count.textContent = L.length > 1 ? ' ' + (Math.max(0, i) + 1) + ' / ' + L.length : '';
-    prev.disabled = L.length < 2 || (!wrap && i <= 0); next.disabled = L.length < 2 || (!wrap && i >= L.length - 1);
-    if (canList) name.disabled = L.length < 2 && !items.some((x) => x.coming);
+    prev.disabled = dead || L.length < 2 || (!wrap && i <= 0); next.disabled = dead || L.length < 2 || (!wrap && i >= L.length - 1);
+    if (canList) name.disabled = dead || (L.length < 2 && !items.some((x) => x.coming));
   };
   const step = (d) => {
-    const to = stepTo(items, v, d, o.wrap !== false);
+    const to = dead ? null : stepTo(items, v, d, o.wrap !== false);
     if (to === null) return;
     v = to; paint(); if (o.onChange) o.onChange(v, d);
   };
@@ -101,8 +101,13 @@ export function stepper(o = {}) {
     let rtl = false; try { rtl = row.matches(':dir(rtl)'); } catch (_) {}
     const fwd = rtl ? 'ArrowLeft' : 'ArrowRight', back = rtl ? 'ArrowRight' : 'ArrowLeft';
     if (e.code === back) { e.preventDefault(); step(-1); } else if (e.code === fwd) { e.preventDefault(); step(1); }
+    else if (!dead && (e.code === 'Home' || e.code === 'End')) {                // the first and the last live item (1.6.0-alpha.21), as on a seg and a select
+      const L = liveItems(items), to = L.length ? L[e.code === 'Home' ? 0 : L.length - 1].id : v;
+      e.preventDefault(); if (to !== v) { v = to; paint(); if (o.onChange) o.onChange(v, e.code === 'Home' ? -1 : 1); }
+    }
   });
   paint();
   return { root, prev, next, name, get: () => v, set(id) { v = id; paint(); }, setItems(list, id) { items = list; if (id !== undefined) v = id; sizeSeat(); paint(); },
+    setDisabled(on) { dead = !!on; root.classList.toggle('disabled', dead); if (dead) close(false); paint(); },   // 1.6.0-alpha.23, as the select's
     step, open: openIt, close, get isOpen() { return !!pane; }, destroy() { close(false); root.remove(); } };
 }

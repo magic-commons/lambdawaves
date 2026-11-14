@@ -9,12 +9,18 @@
  *   a coupled pair (pair: [axisX, axisY]) ...................................... XY pad + its two knobs
  *   a lo/hi range (type 'range', or a value [lo, hi]) ........................... range slider
  *   options, 1–4 and every label short (< 26 characters) ........................ segment
- *   options, 5 or more, in order ............................................... stepper   (the page turner's form)
+ *   options, 5 or 6, every label short ........................................... segment in two rows   (`.seg-2`: three columns; 1.6.0-alpha.24;
+ *                                                                                  `ordered: true` — a list WALKED in order — keeps the stepper)
  *   options, a long list of data (list: true, ordered: false, or over 16) ....... select
- *   a finite range, cyclic (wrap, cyclic, hue or angle) ......................... arc knob  (a hue or an angle: INTENT rule 2)
+ *   options, 7 or more, in order ................................................ stepper   (the page turner's form)
+ *   a finite range that is a hue (hue: true) ..................................... arc knob  (ARCS ARE COLOUR: Josh, 2026-10-02)
  *   a finite range with a gradient track (stops: [css, …], 1.5.7-alpha.15) ...... arc knob  (its track the colours, a thumb the value)
  *   a finite range, the thing's one principal amount (principal: true) .......... lane slider
- *   a finite range ............................................................ knob
+ *   a finite range ............................................................ knob      (a cyclic one — wrap, cyclic, angle — turns freely: knob({ wrap }))
+ *
+ * 1.6.0-alpha.24 (λWAVES 044, LEDGER L56 · L59): the arc row was "any cyclic value" (wrap, cyclic, hue or angle); a phase or an angle is a
+ * PARAMETER and is a knob (Josh: "arcs = colour, knobs = parameters"), so the row is a hue and a gradient track alone.  And five or six short
+ * options are a segment in two rows, where five or more went to a stepper (λWAVES' VIEW, six as two rows of three, was Josh's own call).
  *   otherwise ................................................................. number field
  *
  * descriptor: { id, label, hint, value, get?, set?, type?, options?: [{ id, label, coming?/disabled? }], min, max, step, log, wrap, hue, angle,
@@ -41,7 +47,7 @@ import { laneSlider } from './lane.js';
 import { hueSwatch } from './swatch.js';
 
 export const KINDS = Object.freeze(['switch', 'swatch', 'xy', 'range', 'segment', 'stepper', 'select', 'arc', 'lane', 'knob', 'number']);
-const SHORT = 26, LONG_LIST = 16;
+const SHORT = 26, LONG_LIST = 16, SEG_ONE = 4, SEG_TWO = 6;          // a segment: up to SEG_ONE in one row, up to SEG_TWO in two
 const finiteRange = (d) => Number.isFinite(d.min) && Number.isFinite(d.max) && d.max > d.min;
 
 /** controlKind(descriptor) → one of KINDS (pure) */
@@ -51,13 +57,14 @@ export function controlKind(d) {
   if (Array.isArray(d.pair) && d.pair.length === 2) return 'xy';
   if (d.type === 'range' || (Array.isArray(d.value) && d.value.length === 2)) return 'range';
   if (Array.isArray(d.options)) {
-    const n = d.options.length;
-    if (n <= 4 && d.options.every((o) => String(o.label).length < SHORT)) return 'segment';
-    if (d.list || d.ordered === false || n > LONG_LIST || d.options.some((o) => String(o.label).length >= SHORT && n <= 4)) return 'select';
+    const n = d.options.length, short = d.options.every((o) => String(o.label).length < SHORT);
+    if (n <= SEG_ONE && short) return 'segment';
+    if (d.list || d.ordered === false || n > LONG_LIST || (!short && n <= SEG_ONE)) return 'select';
+    if (n <= SEG_TWO && short && d.ordered !== true) return 'segment';   // five or six: two rows of three (1.6.0-alpha.24); a list walked in order stays a stepper
     return 'stepper';
   }
   if (finiteRange(d)) {
-    if (d.wrap || d.cyclic || d.hue || d.angle || (Array.isArray(d.stops) && d.stops.length >= 2)) return 'arc';   // 1.5.7-alpha.15: a gradient track is an arc
+    if (d.hue || (Array.isArray(d.stops) && d.stops.length >= 2)) return 'arc';   // ARCS ARE COLOUR (1.6.0-alpha.24): a hue, or a gradient track (1.5.7-alpha.15); a phase or an angle is a knob
     if (d.principal) return 'lane';
     return 'knob';
   }
@@ -80,17 +87,17 @@ export function control(d, hooks = {}) {
   let widget, targets = [], getter, setter, recs = null;
   switch (kind) {
     case 'switch': widget = sw({ ...common, value: !!read(), lamp: d.lamp, onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
-    case 'swatch': widget = hueSwatch({ ...common, rgb: read(), onInput: (c) => input(c), onChange: () => change(widget.get ? widget.get() : read()) }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
-    case 'segment': widget = seg({ ...common, options: d.options.map((o) => ({ id: o.id, label: o.label, title: o.hint })), value: String(read()), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
-    case 'stepper': widget = stepper({ ...common, items: itemsOf(d), value: read(), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
-    case 'select': widget = select({ ...common, items: itemsOf(d), value: read(), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
+    case 'swatch': widget = hueSwatch({ ...common, rgb: read(), onInput: input, onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
+    case 'segment': widget = seg({ ...common, cls: d.options.length > SEG_ONE ? 'seg-2' : '', options: d.options.map((o) => ({ id: o.id, label: o.label, title: o.hint })), value: String(read()), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
+    case 'stepper': widget = stepper({ ...common, options: itemsOf(d), value: read(), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
+    case 'select': widget = select({ ...common, options: itemsOf(d), value: read(), onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v); break;
     case 'arc': widget = arcKnob({ ...knobOpts(), ink: d.ink, home: d.home, stops: d.stops }); targets = [widget]; getter = () => widget.get(); setter = (v) => widget.set(v); break;
     case 'lane': widget = laneSlider({ ...common, min: d.min, max: d.max, value: read(), log: d.log, fmt: d.fmt, ink: d.ink, orient: d.orient, home: d.home, onInput: input, onChange: change }); targets = [widget]; getter = () => widget.get(); setter = (v) => widget.set(v); break;
-    case 'knob': widget = knob(knobOpts()); if (Number.isFinite(d.home)) widget.setDefault(d.home); targets = [widget]; getter = () => widget.get(); setter = (v) => widget.set(v); break;   // a double-tap goes HOME
+    case 'knob': widget = knob({ ...knobOpts(), home: d.home }); targets = [widget]; getter = () => widget.get(); setter = (v) => widget.set(v); break;   // a double-tap goes HOME
     case 'xy': {
       const [ax, ay] = d.pair;
       const axis = (a, f) => ({ label: a.label, min: a.min, max: a.max, value: typeof a.get === 'function' ? a.get() : a.value, step: a.step, log: a.log, unit: a.unit, fmt: a.fmt, title: a.hint });
-      widget = xyPad({ label: d.label, aria: d.aria, x: axis(ax), y: axis(ay), home: d.home, tags: d.tags, wrap: d.wrap,   // 1.5.7-alpha.13: a pair's `wrap` is its pad's ('plane' | 'sphere')
+      widget = xyPad({ label: d.label, aria: d.aria, title: d.hint, x: axis(ax), y: axis(ay), home: d.home, tags: d.tags, wrap: d.wrap,   // 1.5.7-alpha.13: a pair's `wrap` is its pad's ('plane' | 'sphere')
         onInput: (x, y) => { if (typeof ax.set === 'function') ax.set(x); if (typeof ay.set === 'function') ay.set(y); if (d.onInput) d.onInput([x, y]); if (hooks.onInput) hooks.onInput([x, y]); },
         onChange: (x, y) => { if (typeof ax.set === 'function') ax.set(x); if (typeof ay.set === 'function') ay.set(y); if (d.onChange) d.onChange([x, y]); if (hooks.onChange) hooks.onChange([x, y]); } });
       targets = [widget.x, widget.y]; getter = () => widget.get(); setter = (v) => widget.set(v[0], v[1]);
@@ -99,13 +106,12 @@ export function control(d, hooks = {}) {
     case 'range': {
       const v0 = Array.isArray(d.value) ? d.value : (typeof d.get === 'function' ? d.get() : [d.min, d.max]);
       const both = (lo, hi) => { if (typeof d.set === 'function') d.set([lo, hi]); };
-      widget = rangeSlider({ label: d.label, aria: d.aria, title: d.hint, min: d.min, max: d.max, lo: v0[0], hi: v0[1], step: d.step, log: d.log, fmt: d.fmt, minGap: d.minGap,
+      widget = rangeSlider({ label: d.label, aria: d.aria, title: d.hint, min: d.min, max: d.max, lo: v0[0], hi: v0[1], home: d.home, step: d.step, log: d.log, fmt: d.fmt, minGap: d.minGap,
         onInput: (lo, hi) => { both(lo, hi); if (d.onInput) d.onInput([lo, hi]); if (hooks.onInput) hooks.onInput([lo, hi]); },
         onChange: (lo, hi) => { both(lo, hi); if (d.onChange) d.onChange([lo, hi]); if (hooks.onChange) hooks.onChange([lo, hi]); } });
-      if (Array.isArray(d.home)) { widget.lo.setDefault(d.home[0]); widget.hi.setDefault(d.home[1]); }
       targets = [widget.lo, widget.hi]; getter = () => widget.get(); setter = (v) => widget.set(v[0], v[1]); break;
     }
-    default: widget = number({ ...common, min: d.min, max: d.max, value: read(), step: d.step, digits: d.digits, fmt: d.fmt, unit: d.unit, onInput: input, onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v);
+    default: widget = number({ ...common, min: d.min, max: d.max, value: read(), home: d.home, step: d.step, digits: d.digits, fmt: d.fmt, unit: d.unit, onInput: input, onChange: change }); getter = () => widget.get(); setter = (v) => widget.set(v);
   }
   const root = widget.root;
   root.dataset.control = kind;

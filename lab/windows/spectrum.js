@@ -74,7 +74,7 @@ export function createSpectrumCard(app) {
       if (chem() && chem().on) chem().setOn(false);   // 017 X3: a system lets the molecule go
       const w = WIN[v]; if (opened && opened !== w) { if (isOpen(opened)) app.sh.rk.close(opened); opened = null; } if (w && w !== opened) opened = isOpen(w) ? null : w;
       if (v !== 'lattice') { switchHamiltonian(v); if (v === 'well') app.w.enterBox(); if (w) app.sh.layout.reopen(w); }
-      if (w && dev(w) && dev(w).classList.contains('off')) dev(w).querySelector('.dev-power').click();   // 017 X3: a window the system needs that stands powered off is powered on with it
+      if (w) app.sh.rk.power(w, true);   // 017 X3: a window the system needs that stands powered off is powered on with it (044 K4: the rack's power verb, the hand's press)
       ui.hamSeg.set(v === 'lattice' ? v : getHamiltonian().id); };
     const sys = stepper({ aria: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0] })), value: 'hydrogen', cls: 'mol-step', onChange: onSys });
     sys.name.addEventListener('click', () => { for (const b of document.querySelectorAll('.mir-pick-i[data-id]')) { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }

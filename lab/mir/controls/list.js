@@ -116,7 +116,7 @@ export function chipStrip({ id = 'strip', title, chips = [], onChip, onGrip, onK
   grip && grip.addEventListener('contextmenu', (e) => e.preventDefault());
 
   return {
-    el: root, grip,
+    root, el: root, grip,                                             // `root`, as every builder's (1.6.0-alpha.23); `el` still reads
     chip: (name) => nodes.get(name), setChip, state: (name) => states.get(name),
     setDisabled(name, on) { const b = nodes.get(name); if (!b) return; if (on) disarm(name); b.disabled = !!on; b.classList.toggle('disabled', !!on); },
     destroy() { for (const t of timers.values()) clearTimeout(t); timers.clear(); root.remove(); },
@@ -233,7 +233,7 @@ export function sortableList({ items = [], build, onMove, onRemove, onAdd, cap =
       { name: 'remove', kind: 'close', glyph: 'close', label: [phrase('Remove {noun} {n}'), vars(n)], hint: [phrase('Remove this {noun} (tap twice)'), { noun }],
         confirm: { text: phrase('sure?'), ms: armMs, label: [phrase('Remove {noun} {n} — tap again to confirm'), vars(n)] } }],
       onChip: (name) => { if (name === 'remove') remove(it.id); }, onKey: keyMove(it.id) });
-    row.appendChild(strip.el);                                  // the DOM keeps the rail first (the grip is the first tab stop); only the grid moves it
+    row.appendChild(strip.root);                                  // the DOM keeps the rail first (the grip is the first tab stop); only the grid moves it
     const pane = el('div', 'mir-list-pane mir-lane', row); if (!X) pane.dataset.mirSurface = 'island';
     const made = build ? build(it, i, pane) : null;
     const node = made && made.el ? made.el : made;

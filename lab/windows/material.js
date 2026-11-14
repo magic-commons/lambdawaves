@@ -165,7 +165,7 @@ export function createMaterial(app) {
       for (const [k, key, id] of MEM) if (Number.isFinite(back[key]) && !T.has(id) && back[key] !== mat[key]) { mat[key] = back[key]; ui[k].set(back[key]); if (k === 'hueK') { applyAccent(); paintBar(); } }
     };
     /* the kit's muted look on the three shapes: a knob's own setDisabled, a switch's button, a seg's buttons */
-    const mute = (c, off, why) => { if (c.setDisabled) c.setDisabled(off); else { c.root.classList.toggle('disabled', off); c.root.setAttribute('aria-disabled', String(off));
+    const mute = (c, off, why) => { if (c.setDisabled && !c.root.matches('.sw, .seg')) c.setDisabled(off); else {   /* 044 K3: the kit's sw and seg gained a setDisabled (alpha.23) that sets `disabled` alone; the muted look is the class, here */ c.root.classList.toggle('disabled', off); c.root.setAttribute('aria-disabled', String(off));
       for (const b of c.root.matches('button') ? [c.root] : c.root.querySelectorAll('button')) b.disabled = off; }
       whyHint(c.root, off ? why : ''); };
     /* iteration 017 W2 (Josh 2026-10-26: "Grey out anything from 'Wave' that shouldn't work when switching between molecules or atoms/hydrogen"):

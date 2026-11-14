@@ -261,7 +261,7 @@ export function createModSeam(app) {
     for (const d of defs) if (/^(chem|reg)\./.test(d.id)) { const { set, get } = d;
       d.set = (v) => { if (quiet()) slept.set(d.id, set); else set(v); };
       d.get = () => (slept.has(d.id) ? R().read(d.id) : get()); }
-    wChem.root.querySelector('.dev-power').addEventListener('click', () => { if (quiet()) return;
+    wChem.root.addEventListener('devpower', () => { if (quiet()) return;   // 044 K4: the card's `devpower` (kit 1.6.0-alpha.29: the hand's press and rk.power, after the card has switched)
       for (const [id, set] of slept) { slept.delete(id); if (R().has(id)) set(R().read(id)); }
       app.state.modHost.clock.applyAll(true); });
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:

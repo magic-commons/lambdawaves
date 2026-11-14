@@ -207,7 +207,7 @@ export function createLanesView(parent, o = {}) {
     /* the blend: a stepper (five or more modes in order); a tap on the name opens the list */
     if (rec.blend) {
       const items = rec.blend.map((m) => (typeof m === 'string' ? { id: m, label: m } : m));
-      const b = stepper({ aria: aria('BLEND'), items, value: port.get(id, 'blend'), cls: 'mir-lane-blend', compact: layout === 'strips', onChange: (v) => { port.set(id, 'blend', v); commit(id, 'blend'); } });
+      const b = stepper({ aria: aria('BLEND'), options: items, value: port.get(id, 'blend'), cls: 'mir-lane-blend', compact: layout === 'strips', onChange: (v) => { port.set(id, 'blend', v); commit(id, 'blend'); } });
       grid.appendChild(b.root); lc.ctl.blend = b;
     }
 

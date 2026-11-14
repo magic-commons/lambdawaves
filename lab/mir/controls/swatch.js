@@ -5,7 +5,7 @@
  * value kept; a hue ring of the colour's own ink rides round it (no glow: Josh, 2026-10-07).  Josh: "Color sliders for
  * color related things" · "A colour the user picks" is a swatch (docs/CONTROLS-COLOUR.md).
  *
- *   hueSwatch({ rgb, label, title, onInput(rgb), onChange() }) → { root, button, input, arc, set(rgb), get(), dragging() }
+ *   hueSwatch({ rgb, label, title, onInput(rgb), onChange(rgb) }) → { root, button, input, arc, set(rgb), get(), dragging() }
  *   rgb is [r, g, b] in 0..1.  `root` is a seat holding the round .mir-swatch button and, over it, the transparent
  *   input the tap lands on.  onInput runs on every change (the chooser's and the drag's); onChange once per drag and
  *   once per chooser close.  Pure helpers: rgbToHsv, hsvToRgb, rgbCss (and the kit's own hexToRgb / rgbToHex, palette.js).
@@ -60,7 +60,7 @@ export function hueSwatch(o) {
     if (input.value !== hx && document.activeElement !== input) input.value = hx;
   }
   input.addEventListener('input', () => { const c = hexToRgb(input.value); if (c) { set(c); if (o.onInput) o.onInput(c); } });
-  input.addEventListener('change', () => { if (o.onChange) o.onChange(); });
+  input.addEventListener('change', () => { if (o.onChange) o.onChange(rgb.slice()); });   // the value, as every builder's onChange (1.6.0-alpha.23)
   const apply = (next) => { set(next); if (o.onInput) o.onInput(next); };
   const move = (e) => {
     if (!d || e.pointerId !== d.id) return;
@@ -78,7 +78,7 @@ export function hueSwatch(o) {
      to the chooser; a drag's lift persists once and swallows the click it ends in; a cancelled drag puts the colour back */
   const drag = valueDrag(input, { key, move,
     release: () => { d = null; root.classList.remove('drag'); },
-    end: (was) => { if (!was.armed) return; swallow = performance.now(); if (o.onChange) o.onChange(); },
+    end: (was) => { if (!was.armed) return; swallow = performance.now(); if (o.onChange) o.onChange(rgb.slice()); },
     abort: (was) => { if (was.armed) { apply(was.rgb0); swallow = performance.now(); } } });
   input.addEventListener('pointerdown', (e) => {
     if (e.button || d) return;
