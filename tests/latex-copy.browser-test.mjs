@@ -57,7 +57,7 @@ try {
       afterPower: !!b && kids.indexOf(b) > kids.indexOf(util.querySelector('.dev-power')), beforeFold: !!b && b.nextElementSibling === util.querySelector('.dev-fold'),
       infoSeat: !!info && info.nextElementSibling === info.parentElement.querySelector('.dev-fold'), size: r && [Math.round(r.width), Math.round(r.height)], hit: hit === b };`);
   assert.deepEqual(head, { copies: 1, inUtil: true, type: 'button', title: 'Copy the state as LaTeX', aria: 'Copy the state as LaTeX', glyph: '⧉',
-    afterPower: true, beforeFold: true, infoSeat: true, size: [22, 22], hit: true });
+    afterPower: true, beforeFold: true, infoSeat: true, size: [32, 32], hit: true });   // 044 KV1: the head's button is --head-btn 32 (Josh's tick: the 38-px head everywhere); it was 22
   console.log('PASS SPECTRUM\'s ⧉ is one 22 × 22 button in .dev-util, in the same seat as the INFO panels\' ⧉ (after ⏻, before ▾), and elementFromPoint at its centre is the button');
 
   /* ── 3 · a real press on the A set → line 1 is the notebook's own sentence; `copied` flashes; the status counts ── */
