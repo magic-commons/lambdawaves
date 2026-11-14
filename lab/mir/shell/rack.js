@@ -26,7 +26,8 @@
  *      (the likely cause of the Linux bug where a clicked rack window lost its blur).  rack.css says the same.
  *   5. A TOUCH USER ALWAYS HAS A WAY BACK: the edge handle shows while the interface is hidden on a coarse pointer.
  *   6. KEYBOARD AND TOUCH ARE FIRST-CLASS.  A window's header is focusable: ↑ ↓ move it in its rack, ← → move it to the
- *      other rack, Enter floats or docks it (arrows nudge a floating one).  A finger holds the header 400 ms to lift it.
+ *      other rack, Enter floats or docks it; Shift+arrows nudge a floating one (headKeyAct: the window rail's law, 1.6.0-alpha.32).
+ *      A finger holds the header TAP.hold (550 ms) to lift it; two presses (TAP) fold it.
  *   7. IDLE COSTS NOTHING: no poller, no rAF while nothing moves; peek reads one cached width per pointer move.
  *   8. THE LAYOUT IS DATA.  capture() → { v, hidden, phoneShown, cards: [{ id, side, open, folded, off, float }], nb? } in
  *      rack order, through an injected store; readLayout() repairs anything it is handed (unknown ids are dropped,
@@ -37,7 +38,7 @@
  *
  * createRack(options) → api — see docs/RACK.md.  windows() lists the windows with their titles and state (for describe()
  * and the openers); keepClear() gives the rects a new floating window should not land on (FOLDERS' first seat).  The pure helpers are exported for node tests. */
-import { el, device, chip, ariaLabel } from '../kit.js';
+import { el, device, chip, ariaLabel, tapWatcher } from '../kit.js';
 import { TAP } from '../core/tap.js';
 import { drag } from '../core/pointer.js';
 import { sequence, motionPolicy, motionToken, own, parseDuration } from '../core/motion.js';
@@ -63,7 +64,7 @@ export const RACK = Object.freeze({
   barHold: 220,     // … and holds while it stays within this of it
   longPress: TAP.hold,   // a finger holds a header this long to lift it: the kit's one hold (1.6.0-alpha.4; it was 400)
   slop: 3,          // the hand travels this far before a press becomes a drag
-  nudge: 24,        // an arrow nudges a floating window this far (the window rail's Shift+arrow)
+  nudge: 24,        // Shift+arrow nudges a floating window this far, as on a window's rail (1.6.0-alpha.32; a plain arrow did)
   favourites: 4,    // ☆ layout slots (λWAVES LAYOUT_SLOTS)
   seatTop: 52, seatBottom: 60,   // the transport's two seats (λWAVES seatRect)
   tabletEdge: 8,    // on a touch tablet a float stays this far inside the visual viewport (BASINS clampFloat)
@@ -144,6 +145,17 @@ export function dodgeSeat(seats, r, current = 'bottom', home = 'bottom') {
   if (!hits(seats[away], r)) return away;
   return current;
 }
+/** headKeyAct({ key, shiftKey, floating }) (1.6.0-alpha.32 ONE LAW TO MOVE A WINDOW BY KEYS; λWAVES 044 L47, REVIEW-F F19) — what a key
+ *  on a card's head does, the window rail's law: ARROWS ARE THE SEAT, SHIFT+ARROWS NUDGE.  Docked: ↑ ↓ 'order' (its place in the rack),
+ *  ← → 'side' (the other rack); Shift+arrows nothing (there is nothing to nudge).  Floating: Shift+arrows 'nudge' (24 px); a plain arrow
+ *  nothing (a float has no seat to choose; before, it nudged).  Enter 'float' (floats or docks it, or opens its window twin).  → the act, or null */
+export function headKeyAct({ key, shiftKey = false, floating = false }) {
+  if (key === 'Enter') return shiftKey ? null : 'float';
+  if (!/^Arrow(Up|Down|Left|Right)$/.test(key)) return null;
+  if (floating) return shiftKey ? 'nudge' : null;
+  if (shiftKey) return null;
+  return key === 'ArrowUp' || key === 'ArrowDown' ? 'order' : 'side';
+}
 /** queueToggle(queue, id) — SHIFT-click adds a window to the queue, or takes it back out */
 export const queueToggle = (q, id) => (q.includes(id) ? q.filter((x) => x !== id) : [...q, id]);
 /** openOrder(queue) — every open PREPENDS, so the queue is replayed backwards and the rack reads in pick order (λWAVES) */
@@ -180,6 +192,9 @@ export function readLayout(raw, known, retired) {
   }
   return out;
 }
+/** defaultCard(spec) (1.6.0-alpha.30) — the record of a window no saved layout names, opened by its `open` default: open, on its own
+ *  side, and FOLDED AS IT WAS REGISTERED (`folded: true`), so the rack's first arrangement does not undo a card's first fold */
+export const defaultCard = (spec) => ({ id: spec.id, side: sideOf(spec.side), open: true, folded: spec.folded === true });
 /** closedLayout(windows, { phoneShown, at }) — BASINS' reload record (createRack({ persist: 'closed' })): each window
  *  [{ id, side, open }] in registration order on its own side, open or closed, and nothing the hand arranged (no
  *  order, fold, float or hidden rack); readLayout reads it as any layout. */
@@ -449,7 +464,17 @@ export function createRack({ host = globalThis.document && document.body, sides 
     rackOf(w.spec.side).appendChild(dev.root);
     wire(w);
     try { if (w.spec.build) w.spec.build(dev.body, w.api); } catch (err) { console.warn('rack: build ' + id, err); }
+    first(w);
     return w;
+  }
+  /** 1.6.0-alpha.30 A CARD SAYS ITS KIND AND ITS FIRST FOLD (register({ kind, folded })): `kind` is the app's own word for the card's family,
+   *  written once as `data-kind` (an app's sheet and menus read it; the kit gives it no meaning); `folded: true` is the card's FIRST fold —
+   *  it arrives folded when it is built or taken over.  Not a press: no onFold, nothing saved.  A saved layout's fold wins after. */
+  function first(w) {
+    const root = w.dev.root;
+    if (typeof w.spec.kind === 'string' && w.spec.kind) root.dataset.kind = w.spec.kind;
+    if (w.spec.window) { root.dataset.twin = ''; popFace(root); }       // 1.6.0-alpha.31: rack.css shows its ↗ in the rack
+    if (w.spec.folded === true && !root.classList.contains('folded')) w.dev.fold(true);
   }
   /** adopt(w, x) — take over a window the app ALREADY BUILT (BASINS builds every window eagerly with its own builder):
    *  x is device()'s return value (best: its fold / setOff are used) or the `.dev` element itself.  Nothing is rebuilt
@@ -479,7 +504,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
     /* power: an adopted window's own power button tells the rack after it has acted */
     const pw = q('.dev-power');
     if (pw) pw.addEventListener('click', () => { call(w, 'onPower', !root.classList.contains('off')); save(); }, on);
-    wire(w);
+    wire(w); first(w);
     return w;
   }
   /** the rack's hands on a window, built or adopted: the header (pointer, keyboard), close / fold / pop / rail through
@@ -488,7 +513,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
     const id = w.spec.id, dev = w.dev, root = dev.root, head = root.querySelector('.dev-head') || root;
     /* the header: a handle for the hand (pointer pre-gesture) and for the keyboard */
     head.tabIndex = 0; head.setAttribute('aria-roledescription', 'rack window');
-    head.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown ArrowLeft ArrowRight Enter');
+    head.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown ArrowLeft ArrowRight Enter Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight');
     head.addEventListener('pointerdown', headDown, on);
     head.addEventListener('keydown', headKey, on);
     /* close, fold and double-click go through the rack so the neighbours travel (flip) and the layout is kept */
@@ -497,24 +522,35 @@ export function createRack({ host = globalThis.document && document.body, sides 
       const b = e.target.closest && e.target.closest('button'); if (!b || !root.contains(b)) return;
       /* an app card keeps its own buttons — but its × closes through the rack (1.5.6-alpha.28), so its onClose runs: the kit
          device's own close only marked it closed, and a later close(id) found it closed and returned (λWAVES' empty slot) */
-      if (w.spec.card && !b.classList.contains('dev-fold') && !b.classList.contains('dev-close')) return;
+      if (w.spec.card && !b.classList.contains('dev-fold') && !b.classList.contains('dev-close') && !(w.spec.window && b.classList.contains('dev-pop'))) return;
       if (b.classList.contains('dev-close')) { e.stopPropagation(); close(id); }
       else if (b.classList.contains('dev-fold')) { e.stopPropagation(); fold(id); }
-      else if (b.classList.contains('dev-pop')) { e.stopPropagation(); toggleFloat(id); }
+      else if (b.classList.contains('dev-pop')) { e.stopPropagation(); toggleFloat(id); }   // a card with a window twin: its ↗ opens the twin (toggleFloat)
       else if (b.classList.contains('dev-rail')) { e.stopPropagation(); setCompact(id, !root.classList.contains('compact')); }
     }, { capture: true, signal: life.signal });
-    head.addEventListener('dblclick', (e) => { if (e.target.closest(PRESSABLE)) return; e.stopImmediatePropagation(); fold(id); }, { capture: true, signal: life.signal });
+    /* 1.6.0-alpha.32 THE HEAD'S DOUBLE PRESS IS THE ONE TAP (λWAVES 044 L38, REVIEW-F F32): the fold is the second of two presses within
+       TAP.ms and TAP.px (tapWatcher: a mouse, a pen and a finger alike), not the browser's `dblclick` and its own timing.  The `dblclick`
+       is still taken here, and does nothing: device()'s own dblclick fold would answer the same two presses a second time. */
+    const tap = tapWatcher(() => fold(id));
+    head.addEventListener('pointerdown', (e) => { if (e.button === 0 && (e.isPrimary || !e.isTrusted) && !e.target.closest(PRESSABLE) && !root.classList.contains('closed')) tap(e); }, on);
+    head.addEventListener('dblclick', (e) => { if (e.target.closest(PRESSABLE)) return; e.stopImmediatePropagation(); }, { capture: true, signal: life.signal });
     /* BARE (1.5.6-alpha.28): popped off the rack, the card draws no title bar (rack.css) — its chips and × stay — and its empty
        glass is the handle the title bar was */
     if (w.spec.bare) { root.dataset.bare = '';
       root.addEventListener('pointerdown', (e) => { if (root.classList.contains('floating') && !head.contains(e.target) && !e.target.closest(CONTROLS)) headDown(e); }, on); }
     root.addEventListener('pointerdown', () => { if (root.classList.contains('floating')) raiseFloat(root); }, { capture: true, signal: life.signal });
+    /* 1.6.0-alpha.29 THE POWER HAS A VERB AND AN EVENT: `devpower` beside `devclose` / `devopen`, on the card, bubbling, detail { on } — for
+       the HAND's press (a click on ⏻, and rack.power(id), which is that click).  Never for a restore: a layout's `off` goes by dev.setOff,
+       and an element-adopted card's shim press is `passing`.  It follows the card's own listeners, so the card has acted when it is heard. */
+    const pw = root.querySelector('.dev-power');
+    if (pw) pw.addEventListener('click', () => { if (!passing) root.dispatchEvent(new CustomEvent('devpower', { bubbles: true, detail: { on: !root.classList.contains('off') } })); }, on);
     popFace(root); railFace(root);
     w.api = {
       id, dev, root, body: dev.body,
       setStatus: (t, cls) => dev.setStatus(t, cls),
       canPresent: () => activity.canPresent(root),
-      open: () => open(id), close: () => close(id), raise: () => raise(id),
+      open: () => open(id), close: () => close(id), raise: () => raise(id), power: (v) => power(id, v),
+      get on() { return !root.classList.contains('off'); },
       get isOpen() { return !root.classList.contains('closed'); },
       get floating() { return root.classList.contains('floating'); },
       get side() { return sideFor(root); },
@@ -525,7 +561,8 @@ export function createRack({ host = globalThis.document && document.body, sides 
   }
   function popFace(d) {
     const b = d.querySelector('.dev-pop'); if (!b) return;
-    const out = d.classList.contains('floating');
+    const out = d.classList.contains('floating'), w = reg.get(d.dataset.id);
+    if (w && w.spec.window && !out) { chip(b, 'popOut', 'open this as a window'); b.title = 'Open this as a window'; return; }   // 1.6.0-alpha.31: the twin's door
     chip(b, out ? 'dock' : 'popOut', out ? 'dock this window back into the rack' : 'take this window off the rack');
     b.title = out ? 'Return this window to its rack' : 'Move this window onto the stage';
   }
@@ -582,6 +619,18 @@ export function createRack({ host = globalThis.document && document.body, sides 
     if (next === now) return true;
     w.dev.fold(next);
     call(w, 'onFold', next); save(); return true;
+  }
+  /** power(id, on?) — 1.6.0-alpha.29 (λWAVES 044 L134): PRESS POWER AS THE HAND DOES.  It is the click on the card's ⏻, so everything a
+   *  press reaches runs: the device's own switch, the registration's onPower, any listener on the button, and `devpower`.  `on` true powers
+   *  it on, false off, left out flips it; already there, nothing is pressed.  (A restore is not a press: apply() and a ☆ layout go by
+   *  dev.setOff — docs/RACK.md "Power".)  A card with no ⏻ is switched by dev.setOff and its onPower called.  → false for an unbuilt id */
+  function power(id, want) {
+    const w = reg.get(id); if (!w || !w.dev) return false;
+    const root = w.dev.root, live = !root.classList.contains('off'), next = want === undefined ? !live : !!want;
+    if (next === live) return true;
+    const b = root.querySelector('.dev-power');
+    if (b) b.click(); else { w.dev.setOff(!next); call(w, 'onPower', next); save(); }
+    return true;
   }
   /** raise(id) — open it, unfold it, show the rack, and bring it to the top of its rack (or the front, floating) */
   function raise(id) {
@@ -687,7 +736,13 @@ export function createRack({ host = globalThis.document && document.body, sides 
     dockNow(id, drop);                                                // BASINS dockWindow: it lands at once; the rack makes room
     save(); return true;
   }
-  const toggleFloat = (id) => (floatState.has(id) ? dock(id) : float(id));
+  const toggleFloat = (id) => (floatState.has(id) ? dock(id) : twinOf(id) ? twin(id) : float(id));
+  /* 1.6.0-alpha.31 A CARD DECLARES ITS WINDOW (register({ window })): a card that has a window twin — the same thing as a kit window (λWAVES'
+     NODES, FOLDERS) — says so, and its ↗ seat, shown in the rack, opens the twin instead of floating the card: one way out of the rack.
+     `window` is the twin ({ open(), raise?() }) or () => it (it may be made later).  twin(id) opens and raises it; what becomes of the card
+     (it stays, or the app closes it from the twin's onOpen) is the app's.  A drag of the head still floats the card. */
+  const twinOf = (id) => { const w = reg.get(id), t = w && w.spec.window; if (!t) return null; try { const x = typeof t === 'function' ? t(w.api) : t; return x && typeof x.open === 'function' ? x : null; } catch (err) { console.warn('rack: ' + id + '.window', err); return null; } };
+  function twin(id) { const t = twinOf(id); if (!t) return false; t.open(); if (typeof t.raise === 'function') t.raise(); return true; }
   function setCompact(id, v) {
     const w = reg.get(id), st = floatState.get(id); if (!w || !w.dev || !st) return false;
     st.compact = !!v; w.dev.root.classList.toggle('compact', !!v); railFace(w.dev.root); save(); return true;
@@ -834,19 +889,19 @@ export function createRack({ host = globalThis.document && document.body, sides 
   function headKey(e) {
     if (e.target !== e.currentTarget || e.ctrlKey || e.metaKey || e.altKey) return;
     const root = e.currentTarget.closest('.dev'), id = root.dataset.id, floating = root.classList.contains('floating');
-    const k = e.key; let done = true;
-    if (k === 'Enter') { if (floating) dock(id); else float(id); }
-    else if (floating && k.startsWith('Arrow')) {
+    const k = e.key, act = headKeyAct({ key: k, shiftKey: e.shiftKey, floating });   // arrows are the seat, Shift+arrows nudge (the rail's law)
+    if (!act) return;
+    if (act === 'float') toggleFloat(id);                             // floats or docks it; a card with a window twin opens the twin
+    else if (act === 'nudge') {
       const st = floatState.get(id), d = RACK.nudge;
       st.x += k === 'ArrowLeft' ? -d : k === 'ArrowRight' ? d : 0; st.y += k === 'ArrowUp' ? -d : k === 'ArrowDown' ? d : 0;
       placeFloat(root, st); save();
-    } else if (k === 'ArrowUp' || k === 'ArrowDown') {
+    } else if (act === 'order') {
       const i = cards(root.parentElement).indexOf(root); move(id, { index: Math.max(0, i + (k === 'ArrowUp' ? -1 : 1)) });
-    } else if (k === 'ArrowLeft' || k === 'ArrowRight') {
+    } else {
       const side = k === 'ArrowLeft' ? 'left' : 'right';
       if (racks[side] && racks[side] !== root.parentElement && !phoneOn) move(id, { side, index: Math.min(cards(root.parentElement).indexOf(root), cards(racks[side]).length) });
-    } else done = false;
-    if (!done) return;
+    }
     e.preventDefault();
     const head = root.querySelector('.dev-head'); if (doc.activeElement !== head) head.focus({ preventScroll: true });
   }
@@ -1118,7 +1173,10 @@ export function createRack({ host = globalThis.document && document.body, sides 
    *  order and in saved layouts, drags and folds with the rest, and is in neither the + list nor the WINDOW menu; its ×
    *  closes through the rack, so its onClose runs (1.5.6-alpha.28).
    *  { bare: true }: popped off the rack (floating), the card draws no title bar — the pop and rail chips and the × stay,
-   *  and its empty glass drags it (1.5.6-alpha.28). */
+   *  and its empty glass drags it (1.5.6-alpha.28).
+   *  { window } (1.6.0-alpha.31): the card's window twin ({ open(), raise?() } or () => it): its ↗ seat shows in the rack and opens it.
+   *  { kind, folded } (1.6.0-alpha.30): `kind` → `data-kind` on the card and in spec() / windows(); `folded: true` → it arrives folded
+   *  (its first fold; a saved layout's fold wins after). */
   function register(spec) {
     if (!spec || typeof spec.id !== 'string' || reg.has(spec.id)) throw new Error('rack.register: a new string id is required');
     /* an adopted window's home is the rack it is standing in, unless the app says otherwise */
@@ -1145,15 +1203,15 @@ export function createRack({ host = globalThis.document && document.body, sides 
     /* the reload: the notebook keeps its own size (only a ☆ load or a host's apply() resizes it) */
     if (raw && raw.layout) {
       const listed = new Set(saved.cards.map((c) => c.id));
-      arrange({ ...saved, cards: [...saved.cards, ...[...reg.values()].filter((w) => !listed.has(w.spec.id) && w.spec.open).map((w) => ({ id: w.spec.id, side: w.spec.side, open: true }))] }, false);
-    } else arrange({ v: 1, hidden: isHidden(), cards: [...reg.values()].filter((w) => w.spec.open && !w.spec.el).map((w) => ({ id: w.spec.id, side: w.spec.side, open: true })) }, false);   // an adopted window is already where the app put it
+      arrange({ ...saved, cards: [...saved.cards, ...[...reg.values()].filter((w) => !listed.has(w.spec.id) && w.spec.open).map((w) => defaultCard(w.spec))] }, false);
+    } else arrange({ v: 1, hidden: isHidden(), cards: [...reg.values()].filter((w) => w.spec.open && !w.spec.el).map((w) => defaultCard(w.spec)) }, false);   // an adopted window is already where the app put it
     started = true; save();
     return api;
   }
   queueMicrotask(() => { if (!life.signal.aborted) start(); });
 
   const api = {
-    register, start, open, close, toggle, isOpen, raise, reveal, lastFavourite: lastFavIds, fold, move, float, dock, toggleFloat, setCompact,
+    register, start, open, close, toggle, isOpen, raise, reveal, power, lastFavourite: lastFavIds, fold, move, float, dock, toggleFloat, twin, setCompact,
     setHidden, setInterface, dodge, setHome, windowMenu,
     get hidden() { return isHidden(); },
     toggleHidden: () => setHidden(!isHidden()),
@@ -1164,10 +1222,10 @@ export function createRack({ host = globalThis.document && document.body, sides 
     get built() { return built; },
     get registered() { return [...reg.keys()]; },
     isBuilt: (id) => !!(reg.get(id) && reg.get(id).dev),
-    /** windows() — every registered window, in registration order: [{ id, title, side, open, built, floating, folded, hidden, glyph }];
+    /** windows() — every registered window, in registration order: [{ id, kind, title, side, open, built, floating, folded, off, hidden, glyph }];
      *  `hidden` (1.5.6-alpha.3): its card is `[hidden]` (an app's mode or a legacy window) — open or not, nobody sees it */
-    windows: () => [...reg.values()].map((w) => ({ id: w.spec.id, card: !!w.spec.card, title: w.spec.title, side: (w.dev && w.dev.root.parentElement && w.dev.root.parentElement.dataset.side) || w.spec.side, open: isOpen(w.spec.id), built: !!w.dev,
-      floating: !!(w.dev && w.dev.root.classList.contains('floating')), folded: !!(w.dev && w.dev.root.classList.contains('folded')), hidden: !!(w.dev && w.dev.root.hidden), glyph: w.spec.glyph || '' })),
+    windows: () => [...reg.values()].map((w) => ({ id: w.spec.id, card: !!w.spec.card, kind: w.spec.kind || '', title: w.spec.title, side: (w.dev && w.dev.root.parentElement && w.dev.root.parentElement.dataset.side) || w.spec.side, open: isOpen(w.spec.id), built: !!w.dev,
+      floating: !!(w.dev && w.dev.root.classList.contains('floating')), folded: !!(w.dev && w.dev.root.classList.contains('folded')), off: !!(w.dev && w.dev.root.classList.contains('off')), hidden: !!(w.dev && w.dev.root.hidden), glyph: w.spec.glyph || '' })),
     /** keepClear() — the rects a new floating window should not land on: each rack showing a window, and the transport */
     keepClear() {
       const out = [];

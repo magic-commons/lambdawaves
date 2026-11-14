@@ -91,8 +91,7 @@ export function createMolecules(app) {
      removing the macro/clips and is purely to save resources"): POWER OFF keeps the mode and the molecule — the RT pump and the register stand still
      (rack.js' loop reads `powered`), the routes and clips on chem.* · reg.* write nothing and POWER ON lands them again (shell/modulation.js, C4),
      and the stage keeps what it shows; a HAND (a molecule, a volume's, an orbital, a favourite's turn) powers it on by the rack's road (chemview `wake`) */
-  const power = wChem.root.querySelector('.dev-power');
-  const wake = () => { if (!powered(wChem)) power.click(); };
+  const wake = () => { if (!powered(wChem)) app.sh.rk.power('chem', true); };   // 044 K4: the rack's power verb (kit 1.6.0-alpha.29), the hand's press
   /* SKELETON · BEAD · ELLIPSOID (0.7.0 V2 · 0.8.2 P3 · 0.8.3 B3) are INFORMATIONAL's MARKS since iteration 007 (lab/informational.js builds them):
      MOLECULES no longer reaches into that card's body.  The stage words are spoken through ONE verb, stageText.say(kind, text) (shell/stage-words.js) */
   const say = (kind, t, o) => !!app.state.stageText && app.state.stageText.say(kind, t, o);

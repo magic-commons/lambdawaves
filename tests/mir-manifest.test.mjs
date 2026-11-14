@@ -114,6 +114,8 @@ const ACCEPTED = {
   '1.6.0-alpha.17': '01e085540e5a79ae19de33555d7ac8a87864ab6aa0a21e38c6b91661e2697f8b',
   /* 044 R1 · MIR 1.6.0-alpha.18 THE FADER'S RIGHT BUTTON IS THE MENU'S (kit-044r @ 75d1fd6: kit.js fader — a drag begins on the primary button alone, so the right-click that opens the control menu leaves the value) */
   '1.6.0-alpha.18': '544bcb6e8bb9d1a09a303c4d26265fa7ee6452e6cb07b028a2d1778894b70853',
+  /* 044 K4 · MIR 1.6.0-alpha.33 RACK AND WINDOW (kit-044k4 @ 55b7c23: alpha.27 THE FLOOR IS THE RESIZER'S, EMPTY GLASS IS A HANDLE BY DEFAULT — window/window.js floorOf · FLOOR, emptyDrag true, timeline/window.js says false; alpha.28 A WINDOW OPENS CLEAR — createWindow({ avoid }), windowAvoid, clearSeat; alpha.29 THE POWER HAS A VERB AND AN EVENT — rack.power(id, on), `devpower`; alpha.30 A CARD SAYS ITS KIND AND ITS FIRST FOLD — register({ kind, folded }), defaultCard; alpha.31 THE HEAD BUTTONS KEEP THEIR SEATS, A CARD DECLARES ITS WINDOW — rack.css order, register({ window }), twin(id); alpha.32 ONE LAW TO MOVE A WINDOW BY KEYS, THE HEAD'S DOUBLE PRESS IS THE ONE TAP — headKeyAct, tapWatcher; alpha.33 A RAIL KEEPS ITS SIDE — windowLayout; alpha.19–26 are K3's, on kit-044k3, not in this tree) */
+  '1.6.0-alpha.33': '48b27f6e29e179e263a1f16a25a31a400f91138ed202ae02eaf5df87b6de88f8',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

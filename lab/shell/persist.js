@@ -338,7 +338,7 @@ export function createPersist(app) {
         if (!app.state.chem.on) { const H = getHamiltonian().id, f = reg.field;
           for (const [id, on] of [['spectrum', H === 'separable' || H === 'central' || H === 'cornell'], ['atoms', H === 'atom'], ['staticfield', !!(f.Fz || f.Bz || f.inter)],
             ['equalizer', !app.state.eq.birth()], ['emission', !!reg.transition && /^emission:/.test(reg.preset || '')]]) {
-            if (!on || !layout.reopen(id)) continue; const d = document.querySelector('.dev[data-id="' + id + '"]'); if (d.classList.contains('off')) d.querySelector('.dev-power').click(); }
+            if (!on || !layout.reopen(id)) continue; app.sh.rk.power(id, true); }   // 044 K4: the rack's power verb (the hand's press; nothing is pressed when it is on)
           if (pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'lattice' && !c.closed && c.open !== false)) ui.hamSeg.show('lattice'); }   // 041 H4: an older file's open LATTICE window is SPECTRUM's LATTICE room (after the operator's own read-backs)
         /* S3 · an UNDO's bases are its record's seats, never read back off a control the modulator is moving (an unseated target keeps
            its base; an unmodulated one is the control just written) */

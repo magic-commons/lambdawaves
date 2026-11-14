@@ -56,7 +56,7 @@ export function createTimeline(host, port) {
   const seatBar = () => { if (seatShared && editor) seatShared.mountIn(win.isOpen() && editor.workLane() !== 'hidden' ? editor.transportHost : null); };
 
   const win = createWindow({
-    id: port.id || 'timeline', title: port.title || 'TIMELINE', host, size, min, resizable: true, material: 'modulation',
+    id: port.id || 'timeline', title: port.title || 'TIMELINE', host, size, min, resizable: true, emptyDrag: false, material: 'modulation',   // emptyDrag: its glass is its own ground (the default is true since 1.6.0-alpha.27)
     scaledRoom: port.scaledRoom !== false,   // 1.5.7-alpha.68: under UI SCALE above 100 % at most the screen's room ÷ the scale tall; TIMELINE_MIN.h yields
     dock: port.dock || null, persist: { read: () => saved, write: writeShape }, onMoved: port.moved,
     chips: [
