@@ -12,10 +12,10 @@
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
-import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, chip, hint } from './mir/kit.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js';
+import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, hint, trig } from './mir/kit.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js';
 import { PRESET_BY_ID } from './state.js';
-import { createUserPresets } from './user-presets.js';
+import { createUserPresets, presetSave } from './user-presets.js';
 
 /** iteration 015 S4 · THE READER'S PRESETS: SPECTRUM's PREFERENCE record (settings-store.js FAMILIES), rows `{ name, data: { labels } }` */
 const USER_PRESETS_KEY = 'lambdawaves.q0.presets';
@@ -74,27 +74,21 @@ export function createSpectrum(host, api) {
       x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
         if (!pane.querySelector('.mir-pick-i[data-id^="' + UK + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
     } });
-  const preSave = chip(el('button', 'sp-presave', null), 'saveInto'); preSave.type = 'button'; preSave.setAttribute('aria-label', 'SAVE PRESET');
-  preSave.title = 'SAVE · the populated labels as a preset';
-  pre.append(preStep.root, preSave);
-  /** the name, asked in the stepper's seat: Enter keeps it, Escape or a press elsewhere lets it go */
-  preSave.addEventListener('click', () => {
-    const labels = api.reg.populated(); if (!labels.length || pre.querySelector('.sp-prename')) return;
-    const row = preStep.name.parentElement, f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; f.setAttribute('aria-label', 'preset name');
-    f.value = labels.slice(0, 4).map((a) => BASIS[a].label).join(' + ') + (labels.length > 4 ? ' …' : ''); row.insertBefore(f, preStep.name); preStep.name.hidden = true;
-    let done = false; const end = (keep, key) => { if (done) return; done = true; const n = f.value.trim(); f.remove(); preStep.name.hidden = false;
-      if (keep && n) { const got = users.add(n, { labels }) || n; preset.value = UK + got; preset.note = PRESET_BY_ID.get(UK + got).note; } if (key) preStep.name.focus(); };
-    f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
-    f.addEventListener('blur', () => end(false)); f.focus(); f.select();
-  });
+  pre.append(preStep.root);
+  /** 044 A3.3: the one save (user-presets.js presetSave) — the populated labels, named in the stepper's seat; nothing populated, nothing asked */
+  { let labels = [];
+    presetSave(pre, preStep.name, { word: 'SAVE PRESET', tip: 'SAVE · the populated labels as a preset', field: 'preset name',
+      suggest: () => { labels = api.reg.populated(); return labels.length ? labels.slice(0, 4).map((a) => BASIS[a].label).join(' + ') + (labels.length > 4 ? ' …' : '') : null; },
+      keep: (n) => { const got = users.add(n, { labels }) || n; preset.value = UK + got; preset.note = PRESET_BY_ID.get(UK + got).note; } }); }
   /** `ui.presetSel` keeps the select's two words (persist.js and the one road write `.value`, the old note is the hover) */
   const preset = { root: preStep.root, get value() { return preStep.get(); }, set value(id) { const v = isPreset(id) ? id : ''; preStep.setItems(itemsFor(v), v); },
     set note(t) { preStep.name.title = t || ''; } };
   users.watch(() => { syncUsers(); preset.value = preStep.get(); });
   const head = el('div', 'row tight sp-head', host);
-  const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
-  const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
-  hint(addBtn, 'Show or hide the 140 states to add');
+  /* 044 A3.1 (L109, B13): the head's two words are the kit's trig() — DIALS shows the lanes, + MODE the 140 states.  ON stays the class alone
+     (accent ink): the kit's `on` door adds aria-pressed, which this skin draws as a lamp, and + MODE has no room for one (A3-BUILD, for Josh's eye) */
+  const hideBtn = head.appendChild(trig({ label: 'DIALS', title: 'Hide or show the channels' }).root); hideBtn.setAttribute('aria-expanded', 'false');
+  const addBtn = head.appendChild(trig({ glyph: '+', label: 'MODE', title: 'Show or hide the 140 states to add' }).root);
   /* iteration 008 S · EMPTY ↔ FILL ALL (paint-stroke.js fillButton; the register's glyph since iteration 009 F2): a register with anything in it shows EMPTY (c ↦ 0, SPECTRUM's
      old CLEAR), an empty one FILL ALL (all 140 labels, equal and in phase, normalised); one undo row each.  NORM went: a HAND stroke on the grid
      normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
@@ -115,12 +109,11 @@ export function createSpectrum(host, api) {
     ['<m>c(t) = e^{−iE t} c(0)   ·   </m>', { s: 'lab' }],
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
-  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); if (spunC) spin(spunC); });
+  hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); if (spunC) spin(spunC); });
   const rowsEl = el('div', 'sp-rows', host);
 
 
   rowsEl.hidden = true;
-  hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', 'false');
   const picker = el('div', 'picker', host); picker.hidden = true;
   host.appendChild(psiFx.root);                                                     // the live coefficient readout follows the scale/state controls
   host.appendChild(pre);   // iteration 015 S3 (Josh: "Move the preset thing to the bottom between the 140 picker and above the Hamiltonian"): outside the HAMILTONIAN fold
@@ -257,14 +250,7 @@ export function createSpectrum(host, api) {
     const rate = knob({ aria: 'phase rate ' + labelText(a), min: 0.25, max: 4, value: api.rateOf ? api.rateOf(a) : 1, log: true, cls: 'rate', fmt: (v) => v.toFixed(2) + '×', onInput: (v) => { if (api.setRate) api.setRate(a, v); } });
     rate.root.title = RATE_TITLE;
     kn.appendChild(rate.root);
-    const mute = el('button', 'sp-b mute', root, 'M'); mute.type = 'button'; mute.title = 'mute: drop from the FIELD reconstruction (the state keeps c)';
-    mute.setAttribute('aria-label', 'mute ' + labelText(a)); mute.setAttribute('aria-pressed', 'false');
-    mute.addEventListener('click', () => api.toggleMute(a));
-    const solo = el('button', 'sp-b solo', root, 'S'); solo.type = 'button'; solo.title = 'solo: reconstruct from this mode alone';
-    solo.setAttribute('aria-label', 'solo ' + labelText(a)); solo.setAttribute('aria-pressed', 'false');
-    solo.addEventListener('click', () => api.toggleSolo(a));
-    const x = el('button', 'sp-x', root, '×'); x.type = 'button'; x.title = 'remove (sets c = 0)'; x.setAttribute('aria-label', 'remove ' + labelText(a));
-    x.addEventListener('click', () => api.remove(a));
+    const { mute, solo } = laneStrip(root, { name: labelText(a), onMute: () => api.toggleMute(a), onSolo: () => api.toggleSolo(a), onRemove: () => api.remove(a), remove: 'Remove: sets c = 0' });   // 044 A3.2: the one strip (paint-stroke.js)
     /* `was` is the dirty-cache: the values ACTUALLY applied to this lane's DOM.  The two strings start at what
        lane() just wrote (so a fresh lane is never rewritten); every other field starts unset, so the lane's
        first refresh() writes it once. */

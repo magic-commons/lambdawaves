@@ -28,7 +28,7 @@
  * `lambdawaves.q0.stroke` { mode, mol } (041 H1: SPECTRUM's and MOLECULES' own, homes BUTTONS and PAINT); `strokeButton` (037 H6: one toggle
  * button) is its seat on each ladder's head, the seats of one family in step.
  */
-import { el } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
+import { el, hint } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
 const STROKE_KEY = 'lambdawaves.q0.stroke', MODES = ['buttons', 'paint'];
 /* 041 H1 · PAINT IN MOLECULES, BUTTONS IN SPECTRUM (Josh 11-09: "Let paint be the default for molecules and 'buttons' for default for spectrum"):
    the one record holds a mode per family — `mode` SPECTRUM's (its old field, so an older record is SPECTRUM's choice), `mol` the ORBITAL and
@@ -127,6 +127,20 @@ export function fillButton(row, titles, onPress) {
   };
   b.addEventListener('click', () => onPress(empty));
   return { root: b, set(v, ok = true) { const e = !!v; if (e !== empty) { empty = e; draw(e); } b.disabled = !ok; }, get empty() { return empty; } };
+}
+
+/** 044 A3.2 · THE LANE'S STRIP (L109, REVIEW-B B14: M · S · × was built three times, its hints already apart), written once for the three
+ *  registers' lanes — SPECTRUM and STATES carry all three, ORBITAL the × alone.  `name` is the lane's own (its aria names: "mute 2p₀");
+ *  a press of M or S runs the lane's own road (a reconstruction mask, never an edit) and the caller paints `.on` and aria-pressed as it
+ *  reads its register; `pinned` is the lane that cannot leave (STATES' S₀): its × is empty and dead.
+ *    laneStrip(row, { name, onMute, onSolo, onRemove, remove: the ×'s hint, pinned }) → { mute, solo, x }   (mute and solo null without onMute) */
+export function laneStrip(row, { name, onMute, onSolo, onRemove, remove = 'Take this lane out of the register', pinned = '' }) {
+  const b = (cls, text, word, tip, run) => { const x = el('button', cls, row, text); x.type = 'button'; hint(x, tip); x.setAttribute('aria-label', word + ' ' + name); x.addEventListener('click', run); return x; };
+  const tog = (cls, text, word, tip, run) => { const x = b(cls, text, word, tip, run); x.setAttribute('aria-pressed', 'false'); return x; };
+  const mute = onMute ? tog('sp-b mute', 'M', 'mute', 'Mute: leave this lane out of the FIELD', onMute) : null;
+  const solo = onSolo ? tog('sp-b solo', 'S', 'solo', 'Solo: play this lane alone', onSolo) : null;
+  const x = b('sp-x', pinned ? '' : '×', 'remove', pinned || remove, onRemove); x.disabled = !!pinned;
+  return { mute, solo, x };
 }
 
 /* iteration 008 A (Josh: "simple lines that's dark when off and full vivid color when on") · THE LEVEL LINE, written once for the three

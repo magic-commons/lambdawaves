@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, trig, readout, group, label, hint } from '../mir/kit.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { rgbToHex, hexToRgb, srgbToLinear } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { summon } from '../summon.js';
+import { el, knob, sw, seg, trig, readout, group, label, hint } from '../mir/kit.js'; import { hueSwatch } from '../mir/controls/swatch.js'; import { glyphEl } from '../mir/glyph.js'; import { fold } from '../fold.js'; import { srgbToLinear } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { createStageWindow } from '../stage-window.js'; import { summon } from '../summon.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, perf, modHand, look, applyAccent, field, mod, MOD } = app.ctl;
@@ -57,7 +57,7 @@ export function createSettingsCard(app) {
     app.hooks.restage = () => setStageMix(app.state.stageMix);
     function setStageColour(colour) {
       if (Array.isArray(colour) && colour.length >= 3) mat.stageCustom = colour.slice(0, 3).map((v) => Math.max(0, Math.min(1, +v || 0)));
-      if (ui.stageColour) ui.stageColour.value = rgbToHex(mat.stageCustom);
+      if (ui.stageColour) ui.stageColour.set(mat.stageCustom);
       setStageMix(app.state.stageMix);
     }
     function setStageFollow(on) {
@@ -71,12 +71,15 @@ export function createSettingsCard(app) {
     ui.stageK = knob({ label: 'STAGE', title: 'How much of your colour the stage wears; 0 % is the theme', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
     app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); if (x === app.state.stageMix) return x; ui.stageK.set(x); setStageMix(x); return x; };   // 029 M1: the value in force writes nothing
     { const seat = el('div', 'stage-seat'); ui.stageSeat = { root: seat };   // 037 T1: the seat, STAGE and GAMMA are seated in STAGE (lab/stage-window.js)
-      ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
+      /* 044 A3.5 (L55, REVIEW-B B10; Josh's control language: a picked colour is the kit's swatch): the STAGE colour was the platform's bare colour
+         input; it is hueSwatch() — a drag turns its hue, a tap opens the chooser.  Its chooser keeps the hook `.stage-colour` */
+      ui.stageColour = hueSwatch({ rgb: mat.stageCustom, label: 'stage colour', title: 'Stage colour at 100%',
+        onInput: (c) => { setStageColour(c); setStageFollow(false); if (app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); } });
+      ui.stageColour.input.classList.add('stage-colour'); seat.appendChild(ui.stageColour.root);
       /* iteration 016 P7 (Josh: "if a user chooses a background color, let that automatically" turn it on): a pick leaves FOLLOW THEME and, when the
          STAGE knob sits at its near-theme rest (≤ 5 %, the first run's 4 %), takes it to 100 %, so the colour chosen IS the ground; a knob the hand set
          higher keeps its blend */
-      ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); if (app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });
-      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button';
+      ui.stageFollow = seat.appendChild(trig({ label: 'FOLLOW THEME', cls: 'stage-follow' }).root);   // 044 A3.1 (L109, B13): the kit's trig()
       /* 039 X4 (WALK-A #10: FOLLOW THEME off showed nothing until the STAGE knob was raised): a HAND turning it off lifts a resting knob (≤ 5 %) to 100 %,
          P7's road, so the colour chosen shows at once; a knob the hand set higher keeps its blend */
       ui.stageFollow.addEventListener('click', () => { const on = !app.state.stageFollow; setStageFollow(on); if (!on && app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });

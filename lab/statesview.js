@@ -27,9 +27,9 @@
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
 import { stateName } from './names.js';
-import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, vividInk, nRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
+import { el, knob, sw, seg, fader, trig, readout, graphHover, themeInk, accentRGB, vividInk, nRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 import { cssZoom } from './mir/core/zoom.js';
@@ -77,8 +77,8 @@ export function createStates(host, api) {
 
   /* ── the head ─────────────────────────────────────────────────────────────────────────────────── */
   const head = el('div', 'row tight sp-head', host);
-  const mk = (txt, title) => { const b = el('button', 'trig', head); b.type = 'button'; b.textContent = txt; b.title = title; return b; };
-  const hideBtn = mk('HIDE', 'Hide or show the lanes');
+  /* 044 A3.1 (L109, B13): the pane's words are the kit's trig(); HIDE's face is the eye glyph (chip, below) until trig() draws a glyph alone */
+  const hideBtn = head.appendChild(trig({ label: 'HIDE', title: 'Hide or show the lanes' }).root);
   /* iteration 008 U · EMPTY <-> FILL ALL (paint-stroke.js fillButton): S₀ alone shows FILL ALL — every state the ladder shows, up to the eight
      lanes, equal and in phase — anything more shows EMPTY.  NORM is gone: a HAND stroke normalises at its end */
   /* 034 F7 (Josh: "anything that is painted onto the registry switches it to 'mix'"): a HAND's FILL ALL, preset or dial is a stroke — VIEW MIX */
@@ -92,7 +92,7 @@ export function createStates(host, api) {
   const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: PRESETS.map((p) => ({ id: p, label: p })), value: null,
     onChange: (p) => { presetSel.set(null); if (p && preset(p)) { painted(); if (api.announce) api.announce(p); } } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   bar.appendChild(presetSel.root); presetSel.button.title = 'Rule-based presets, for every molecule';
-  const brightBtn = el('button', 'trig on', bar); brightBtn.type = 'button'; brightBtn.textContent = 'BRIGHT'; brightBtn.title = 'Bright valence states only, or every state';
+  const brightT = trig({ label: 'BRIGHT', title: 'Bright valence states only, or every state' }), brightBtn = bar.appendChild(brightT.root); brightBtn.classList.add('on');   // ON is the class alone (accent ink, no lamp), as before
   const mrow = el('div', 'row tight fit reg-morph', host);
   /* A ↔ B (register-morph.js, one for both panes): its own target `reg.morph`; a store asks the worker for its states' vectors */
   const M = createMorph({ bar, row: mrow, id: 'reg.morph', key: 'key', lanes: 'lanes', hand, status, rows: () => rowsEl,
@@ -102,7 +102,7 @@ export function createStates(host, api) {
 
   const rowsEl = el('div', 'sp-rows', host);
   hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', rowsEl.hidden); });
-  brightBtn.addEventListener('click', () => { brightOnly = !brightOnly; brightBtn.classList.toggle('on', brightOnly); brightBtn.textContent = brightOnly ? 'BRIGHT' : 'ALL'; paint(); });
+  brightBtn.addEventListener('click', () => { brightOnly = !brightOnly; brightBtn.classList.toggle('on', brightOnly); brightT.setLabel(brightOnly ? 'BRIGHT' : 'ALL'); paint(); });
 
   const vr = el('div', 'row tight', host);
   const viewSeg = seg({ label: 'VIEW', value: 'change', options: [{ id: 'change', label: 'CHANGE' }, { id: 'density', label: 'DENSITY' }],
@@ -124,8 +124,7 @@ export function createStates(host, api) {
   const polSel = listSelect({ aria: 'drive polarisation', cls: 'sel', value: drive.pol, onChange: (v) => setDriveParam('pol', v),
     items: [['x', 'x'], ['y', 'y'], ['z', 'z'], ['xy+', 'xy ⟲'], ['xy-', 'xy ⟳'], ['yz+', 'yz ⟲'], ['yz-', 'yz ⟳'], ['zx+', 'zx ⟲'], ['zx-', 'zx ⟳']].map(([id, label]) => ({ id, label })) });
   dr.appendChild(polSel.root); polSel.button.title = 'Polarisation: linear, or circular ⟲ ⟳';
-  const tuneBtn = el('button', 'trig', dr); tuneBtn.type = 'button'; tuneBtn.textContent = 'ω → LANE'; tuneBtn.title = 'Tune to the selected lane: its ω and axis';
-  tuneBtn.addEventListener('click', () => tune());
+  dr.appendChild(trig({ label: 'ω → LANE', title: 'Tune to the selected lane: its ω and axis', onFire: () => tune() }).root);
   const envSeg = seg({ label: 'ENVELOPE', value: 'cw', options: [{ id: 'cw', label: 'CW' }, { id: 'pulse', label: 'PULSE' }], onChange: (v) => setDriveParam('envelope', v) });
   const dk = el('div', 'row tight fit reg-drive', host);
   const wK = knob({ label: '<m>ω</m>', aria: 'drive frequency', min: 0.05, max: 3, value: drive.omega, log: true, unit: ' Eh', fmt: (v) => v.toFixed(4),
@@ -142,7 +141,7 @@ export function createStates(host, api) {
   const song = { on: false, meta: null, samples: null, sr: 0, e0: 3e-3, ship: false, ready: false, busy: false, seq: 0, v: -1, last: null, omega: 0, dt: 0.5, speed: 0, wall: 0, paint: 0 };
   const sg = el('div', 'row tight reg-drive', host), songSw = sw({ label: 'SONG', value: false, title: 'Drive H with the track\'s E_z(t)', onChange: (v) => setSong(v) });
   const songIn = el('input', '', sg); songIn.type = 'file'; songIn.accept = 'audio/*'; songIn.hidden = true; songIn.addEventListener('change', () => { songFile(songIn.files[0]); songIn.value = ''; });
-  const fileBtn = el('button', 'trig', sg, 'FILE'); fileBtn.type = 'button'; fileBtn.title = 'Choose an audio file — or drop one on this row'; fileBtn.addEventListener('click', () => songIn.click());
+  sg.appendChild(trig({ label: 'FILE', title: 'Choose an audio file — or drop one on this row', onFire: () => songIn.click() }).root);
   const sE = knob({ label: '<m>E₀</m>', aria: 'song amplitude', min: 1e-4, max: 1e-2, value: song.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2), title: 'The field at the track’s peak, in atomic units', onInput: (v) => setSongE0(v) });
   sg.prepend(songSw.root); sg.appendChild(sE.root); sg.addEventListener('dragover', (e) => e.preventDefault()); sg.addEventListener('drop', (e) => { e.preventDefault(); songFile(e.dataTransfer.files[0]); });
   const roSong = readout({ label: 'SONG', cls: 'wide', value: 'no track' }); el('div', 'row tight', host).appendChild(roSong.root); const songNote = el('div', 'note', host); refreshSong();
@@ -152,7 +151,7 @@ export function createStates(host, api) {
      and the lanes start hidden as ORBITAL's DIALS do (HIDE shows them) — nothing is lost, the card is the ladder and its foot until asked */
   rowsEl.hidden = true; hideBtn.classList.add('on');
   { const a = el('div', 'reg-more'), b = el('div', 'reg-more'); bar.before(a); a.append(bar, mrow, vr, fr); dr.before(b); b.append(dr, dk, roDrive.root.parentElement, sg, roSong.root.parentElement, songNote);
-    fold(head, [a, b], { what: 'presets, A ↔ B, view, flow, drive and song' }); chip(hideBtn, 'eyeShut', 'HIDE'); }
+    fold(head, [a, b], { what: 'presets, A ↔ B, view, flow, drive and song', key: 'presets, A ↔ B, view, flow, drive and song' });   /* 044 A3.3 (C24): the record's name is frozen as the key */ chip(hideBtn, 'eyeShut', 'HIDE'); }
   const rr = el('div', 'row tight', host);
   const roSum = readout({ label: '<m>Σ|b|²</m>', value: '—', sub: '' });
   const roBeat = readout({ label: 'BEAT', value: '—', sub: '' });
@@ -534,15 +533,9 @@ export function createStates(host, api) {
     const ph = knob({ aria: 'phase ' + label(key), min: 0, max: TAU, value: c.phase, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
       onDelta: (dv) => { const l = lanes.get(key); if (!l) return; painted(); const w = ((l.phase + dv) % TAU + TAU) % TAU; if (hand(slotId('ph', key), w)) return; setPhase(key, w); }, onReset: () => { painted(); if (hand(slotId('ph', key), 0)) return; setPhase(key, 0); } });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);
-    const mute = el('button', 'sp-b mute', root, 'M'); mute.type = 'button'; mute.title = 'Mute: leave this state out of the FIELD';
-    mute.setAttribute('aria-label', 'mute ' + label(key)); mute.setAttribute('aria-pressed', 'false');
-    mute.addEventListener('click', () => { const l = lanes.get(key); l.mute = !l.mute; touch(); syncLanes(); api.repaint(); });
-    const solo = el('button', 'sp-b solo', root, 'S'); solo.type = 'button'; solo.title = 'solo: play this state alone';
-    solo.setAttribute('aria-label', 'solo ' + label(key)); solo.setAttribute('aria-pressed', 'false');
-    solo.addEventListener('click', () => { const l = lanes.get(key); l.solo = !l.solo; touch(); syncLanes(); api.repaint(); });
-    const x = el('button', 'sp-x', root, key === GROUND ? '' : '×'); x.type = 'button'; x.disabled = key === GROUND;
-    x.title = key === GROUND ? 'S₀ is pinned' : 'Take this state out of the register'; x.setAttribute('aria-label', 'remove ' + label(key));
-    x.addEventListener('click', () => deselect(key));
+    const flip = (f) => () => { const l = lanes.get(key); l[f] = !l[f]; touch(); syncLanes(); api.repaint(); };
+    const { mute, solo } = laneStrip(root, { name: label(key), onMute: flip('mute'), onSolo: flip('solo'), onRemove: () => deselect(key),   // 044 A3.2: the one strip (paint-stroke.js)
+      remove: 'Take this state out of the register', pinned: key === GROUND ? 'S₀ is pinned' : '' });
     return { root, pop, ph, mute, solo, nm, es, key };
   }
   function markSel() { for (const [k, L] of rows) L.root.classList.toggle('sel', k === selected); }
