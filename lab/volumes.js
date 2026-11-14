@@ -129,7 +129,7 @@ export async function shelf({ fresh = false } = {}) {
   const volumes = all.filter((v) => !HELD.includes(v.id) || here.includes(cacheOf(v.id)));
   /* 044 S10: the desktop host names beside its shelf the add-ons it knows and does not hold ({ id, numeral, store }); never a held one */
   const addons = (s && Array.isArray(s.addons) ? s.addons : []).filter((a) => a && SAFE.test(a.id) && typeof a.numeral === 'string' && !HELD.includes(a.id) && !all.some((v) => v.id === a.id))
-    .map((a) => ({ id: a.id, numeral: a.numeral, store: typeof a.store === 'string' && /^steam:\/\/store\/\d{1,12}$/.test(a.store) ? a.store : null }));
+    .map((a) => ({ id: a.id, numeral: a.numeral, ...(typeof a.title === 'string' && a.title.length <= 60 ? { title: a.title } : {}), store: typeof a.store === 'string' && /^steam:\/\/store\/\d{1,12}$/.test(a.store) ? a.store : null }));
   const out = { volumes, all, addons, from: volumes.length ? from : null };
   if (volumes.length) shelfMemo = out;   // an empty shelf is asked again next time (a volume may be published meanwhile)
   return out;

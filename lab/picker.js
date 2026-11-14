@@ -892,6 +892,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
          nothing to install or open yet */
       if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; el('span', 'mm-vol-meta', foot, 'FILLING'); return; }
       const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
+      if (v.title) el('span', 'mm-vol-meta', foot, v.title);   // 044 S13 (Josh 11-14): the volume's name — the shelf entry's `title` ('Common Molecules I') — under its numeral
       if (meta) el('span', 'mm-vol-meta', foot, meta);
       if (hero) { heroes.add(hero); bindHero(o, hero); }
       o.addEventListener('click', () => enter(v));
@@ -910,7 +911,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const c = el('div', 'mm-vol filling', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.disabled = true; o.setAttribute('aria-label', volName(a) + ' · a free add-on on Steam');
       o.style.setProperty('--k', String(k));
       el('span', 'mm-halo', o); const art = el('span', 'mm-lit', o); el('span', 'mm-rim', o); heroArt(art, a.id); el('span', 'mm-foil', art);
-      const foot = el('span', 'mm-art-foot', art); el('b', 'mm-vol-num', foot, volName(a)); el('span', 'mm-vol-meta', foot, 'a free add-on on Steam');
+      const foot = el('span', 'mm-art-foot', art); el('b', 'mm-vol-num', foot, volName(a)); if (a.title) el('span', 'mm-vol-meta', foot, a.title); el('span', 'mm-vol-meta', foot, 'a free add-on on Steam');
       if (!a.store) return;
       const b = el('button', 'mm-install', c); b.type = 'button'; icon(el('span', 'mm-ring-host', b), 'download'); el('span', 'mm-install-word', b, 'OPEN ON STEAM');
       b.addEventListener('click', (e) => { e.stopPropagation(); window.open(a.store); });

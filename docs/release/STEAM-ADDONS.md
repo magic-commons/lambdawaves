@@ -22,13 +22,13 @@ The first molecules of VOL. I are the familiar ones (water, ammonia, urea, carbo
 by name and runs to natural products, drugs and flavour molecules. The names, formulas and identifiers come from PubChem; every orbital
 was computed for λWAVES (PySCF), then checked by the app's own code before it was packed.
 
-## VOL. I
+## VOL. I — Common Molecules I
 
-- **Name:** λWAVES — VOL. I · All the Molecules
+- **Name:** λWAVES — Common Molecules I
 - **One line (short description):** 6,927 real molecules for λWAVES, each with its electron orbitals already solved, ready to open, turn and animate.
 - **About this content:**
 
-  VOL. I adds 6,927 named molecules to λWAVES' library, from water and benzene to buckminsterfullerene. Each one arrives with its
+  Common Molecules I (VOL. I on the shelf) adds 6,927 named molecules to λWAVES' library, from water and benzene to buckminsterfullerene. Each one arrives with its
   orbitals already computed, so it opens at once: pick it in LIBRARY › EXPANSIONS or type its name in the search, and it is on the
   stage as a field you can light, slice, colour and play.
 
@@ -38,20 +38,20 @@ was computed for λWAVES (PySCF), then checked by the app's own code before it w
 
   It is free. It needs λWAVES and 6.1 GB of disk. Nothing is downloaded while you use it and nothing leaves your machine.
 
-## VOL. II
+## VOL. II — Common Molecules II
 
-- **Name:** λWAVES — VOL. II · All the Molecules · 2
+- **Name:** λWAVES — Common Molecules II
 - **One line (short description):** 4,616 more molecules for λWAVES: natural products, medicines, flavours and fragrances, each with its orbitals solved.
 - **About this content:**
 
-  VOL. II adds 4,616 more named molecules, none of them in VOL. I: amino acids and sugars, alkaloids and terpenes, drugs, flavour and
+  Common Molecules II (VOL. II on the shelf) adds 4,616 more named molecules, none of them in Common Molecules I: amino acids and sugars, alkaloids and terpenes, drugs, flavour and
   fragrance molecules, up to 20 heavy atoms. Like VOL. I, each opens at once from LIBRARY › EXPANSIONS or the search, with its
   orbitals already computed.
 
   Each was solved on the same ladder of six basis sets (27,555 solved states), and each has its name, formula, kinds, six pictures and
   a structure diagram.
 
-  It is free and does not need VOL. I. It needs λWAVES and 5.9 GB of disk.
+  It is free and does not need Common Molecules I. It needs λWAVES and 5.9 GB of disk.
 
 ## The pictures Steam asks for
 
@@ -75,7 +75,7 @@ Steam's shapes with the λWAVES logo and "VOL. I" set on it). They are a design 
 
 ## Still yours
 
-- The add-ons' names (the drafts use the shelf's own titles; "All the Molecules · 2" is a working title).
+- The add-ons' names are yours (2026-11-14): "Common Molecules I" and "Common Molecules II". The app's shelf still calls them VOL. I and VOL. II in large type, with the name beneath; the texts below say VOL. I / VOL. II where they mean the card.
 - Whether the page says where the names come from (PubChem) and how the orbitals were computed (PySCF, RHF); the drafts say neither
   in the short text.
 - The AI disclosure for each add-on's page: the molecules' pictures are renders by the app, not AI-generated; the data was computed.

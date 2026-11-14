@@ -179,7 +179,7 @@ Without `--depots` the same command leaves the volumes inside both game folders 
 
 **In Steamworks** (yours; nothing here can do it):
 
-1. On the game's app page, *All Associated Packages, DLC, Demos and Tools* › *Add New DLC*, twice: "λWAVES — VOL. I" and "VOL. II".
+1. On the game's app page, *All Associated Packages, DLC, Demos and Tools* › *Add New DLC*, twice: "λWAVES — Common Molecules I" and "λWAVES — Common Molecules II" (Josh's names, 11-14; the shelf's cards read VOL. I and VOL. II with the name beneath).
    Set each to Free. Each needs its own small store page (a capsule image and a sentence) and goes through review with the game.
 2. Put each add-on's app id into `tools/platform/electron/steam-addons.json` (`"appid": "1234560"`) and rebuild the game folders.
    A DLC's depot has the DLC's own app id as its depot id and lives in the base game's depot list (Steamworks' DLC page, read
