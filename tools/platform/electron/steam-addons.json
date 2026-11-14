@@ -1,4 +1,4 @@
 [
- { "id": "vol-1", "numeral": "I", "appid": "" },
- { "id": "vol-2", "numeral": "II", "appid": "" }
+ { "id": "vol-1", "numeral": "I", "title": "Common Molecules I", "appid": "" },
+ { "id": "vol-2", "numeral": "II", "title": "Common Molecules II", "appid": "" }
 ]

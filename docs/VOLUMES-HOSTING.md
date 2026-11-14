@@ -9,7 +9,7 @@ molecule on the device and never fetches it again. The app holds no link to wher
 1. **Pack with the cut and the archive** (the data stay in `~/Documents/LAMBDAWAVES-VOLUMES/`, never in git):
    ```
    node tools/volumes/pack.mjs --candidates ~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json \
-        --volume vol-1 --numeral I --title 'All the Molecules' --sole --max-gb 5.25 --wip --next II --incremental --archive --fetchable
+        --volume vol-1 --numeral I --title 'Common Molecules I' --sole --max-gb 5.25 --wip --next II --incremental --archive --fetchable
    node tools/menu-thumbs.mjs --volume vol-<n>     # once per volume that lacks pictures, then pack again
    ```
    Every finished molecule fills VOL. I until the cut (5.25 GiB of `.lwm` and pictures), then the next numeral ("· 2", "· 3"); a released
@@ -68,6 +68,18 @@ has no `archive` — `tools/volumes/pack.mjs --archive` must write a new one if 
 single picture per molecule, so the next real pack would undo this unless it is taught that a `density` cell is the picture; (3) both
 volumes installed are about 9.8 GB of browser storage (4.9 GB each as Firefox counts it), against a 10.7 GB best-effort quota
 measured in Firefox here — not tried together.
+
+**The edition to ship (044 S14, 2026-11-14): `dist-sheets-2026-11-14/`.** Josh, 11-14: "Yes prepare new edition", "you can compress
+volume pictures", and the names "Common Molecules I" / "Common Molecules II". The same repack with `--quality 90 --title 'Common
+Molecules I' --shelf-title 'vol-2=Common Molecules II'`: the 70 sheets are lossy WebP at quality 90 with a lossless alpha (the format
+VOL. II's sheets are; the worst page is 49.5 dB from the lossless one on a dark ground), 26,585,916 B where the lossless were
+145,962,264 B and the single pictures 24,697,930 B — VOL. I is 7,419 files, 6,065,795,241 B. The three things owed above are done:
+`node tools/volumes/lwv-write.mjs --dist <that folder> --volume vol-1` wrote the new `LAMBDAWAVES-VOL-I.lwv` (5,924,888,496 B, 62 s;
+the archive's writer moved out of `pack.mjs` into that module, which `pack.mjs --archive` calls); `pack.mjs` gives a molecule with a
+`density` cell no single picture, never prunes a sheet its manifest names (its `--incremental` sweep used to delete every one), and
+re-stamps `t/pages.json` for a catalogue whose molecules and order did not move; and both volumes installed together were measured
+(9.76 GB of a 10.7 GB Firefox allowance). The steps to go live: `docs/release/VOLUMES-GO-LIVE.md`. The `2026-11-13` folder is the
+lossless trial and is not the one to ship.
 
 ## What the reader does
 

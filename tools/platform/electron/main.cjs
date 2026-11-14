@@ -47,7 +47,7 @@ function shelf() {
   for (const n of names.sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))) {
     try { const v = JSON.parse(fs.readFileSync(path.join(dir, n, 'volume.json'), 'utf8')); if (v && v.id === n && fs.existsSync(path.join(dir, n, 'index.json'))) volumes.push(v); } catch {}
   }
-  return JSON.stringify({ schema: 1, volumes, addons: ADDONS.filter((a) => !volumes.some((v) => v.id === a.id)).map((a) => ({ id: a.id, numeral: a.numeral, store: storeOf(a) })) });
+  return JSON.stringify({ schema: 1, volumes, addons: ADDONS.filter((a) => !volumes.some((v) => v.id === a.id)).map((a) => ({ id: a.id, numeral: a.numeral, title: a.title, store: storeOf(a) })) });
 }
 
 async function serve(req) {

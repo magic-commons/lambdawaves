@@ -57,7 +57,8 @@ import { BASIS_FILES } from '../../lab/rhf-molecule.js';
 import { nameOrbitals, characters, coreCount, CONVENTION } from '../../lab/names.js';
 import { stemOf, BASIS_LABEL } from '../../lab/latex-state.js';
 import { validateRecord, atomsKey, SCHEMA } from '../../lab/library.js';
-import { encodeLwm, parseLwm, rungRecord, LWM_SCHEMA, LWV_MAGIC, parseLwv } from '../../lab/volumes-format.js';
+import { encodeLwm, parseLwm, rungRecord, LWM_SCHEMA } from '../../lab/volumes-format.js';
+import { writeArchive } from './lwv-write.mjs';   // 044 S14: THE ARCHIVE's writer, shared with its own command
 import { chemRegister, chemOpen, chemSolverCalls } from '../../lab/mathworker.js';
 import { MOLECULE_BY_ID } from '../../lab/molecules.js';
 
@@ -317,37 +318,9 @@ const themeOf = (T, c) => {
   const k = T.findIndex((t) => meets(t, c)); return k >= 0 ? k : fallback; };
 const roman = (n) => [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]
   .reduce((s, [v, r]) => { while (n >= v) { s += r; n -= v; } return s; }, '');
-const pad8 = (n) => Math.ceil(n / 8) * 8;   // plain arithmetic: a bitwise AND wraps at 2 GiB, and VOL. I is 5.95 GB
-
-/* ── THE ARCHIVE: 'LWV1' · u32 H · the index JSON · pad to 8 · every file 8-aligned; deterministic (no clock; the same dist → the same bytes) ── */
-function writeArchive(entry, rows, vdir) {
-  const files = [{ path: 'index.json' }, ...rows.map((r) => ({ path: r.file })), ...rows.filter((r) => r.thumb).map((r) => ({ path: r.thumb })), ...rows.flatMap(variantPaths).map((f) => ({ path: f }))]
-    .map((f) => { const b = readFileSync(path.join(vdir, f.path)); return { path: f.path, offset: 0, length: b.length, sha256: sha(b) }; });
-  const volume = { ...entry };
-  let base = 0, text = '', end = 0;
-  for (;;) {                                                       // the offsets live in the index: iterate to its fixed point (its length only grows)
-    end = base; for (const f of files) { f.offset = end; end = f.offset + f.length; end = pad8(end); }
-    text = JSON.stringify({ schema: 1, volume, files });
-    const nb = pad8(8 + Buffer.byteLength(text)); if (nb === base) break; base = nb;
-  }
-  const name = `LAMBDAWAVES-VOL-${entry.numeral}.lwv`, out = path.join(DIST, name), tmp = out + '.tmp', hash = createHash('sha256');
-  const head = Buffer.alloc(base); head.write(LWV_MAGIC, 0, 'latin1'); head.writeUInt32LE(Buffer.byteLength(text), 4); head.write(text, 8, 'utf8');
-  const fd = openSync(tmp, 'w'); let at = 0;
-  const put = (b) => { writeSync(fd, b); hash.update(b); at += b.length; };
-  put(head);
-  for (const f of files) { if (f.offset > at) put(Buffer.alloc(f.offset - at)); put(readFileSync(path.join(vdir, f.path))); }
-  closeSync(fd); renameSync(tmp, out);
-  const digest = hash.digest('hex');
-  writeFileSync(out + '.sha256', `${digest}  ${name}\n`);
-  /* read back through the app's reader: the index parses and every file sits where it says, with its bytes — entry by entry at its
-     offset, since an archive is larger than one Buffer may be (VOL. I is 5.95 GB; readFileSync stops at 2 GiB) */
-  const rfd = openSync(out, 'r');
-  const slice = (offset, length) => { const b = Buffer.alloc(length); let n = 0; while (n < length) { const k = readSync(rfd, b, n, length - n, offset + n); if (!k) break; n += k; } return b; };
-  const idx = parseLwv(slice(0, base));
-  for (const f of idx.files) if (sha(slice(f.offset, f.length)) !== f.sha256) { closeSync(rfd); throw new Error(`${name}: ${f.path} does not read back`); }
-  closeSync(rfd);
-  return { name, bytes: at, sha256: digest };
-}
+/* 044 S13 (Josh 11-14: "Volume one can be called 'Common Molecules I', and Vol2 can be 'Common Molecules II'"): a title that ends in a
+   Roman numeral names the cut's next volume with ITS numeral ('Common Molecules II'); any other title keeps 'TITLE · 2' */
+const nextTitle = (n, part) => (/\s[IVXLCDM]+$/.test(TITLE) ? TITLE.replace(/\s[IVXLCDM]+$/, ' ' + roman(n)) : TITLE.replace(/\s*·\s*\d+$/, '') + ' · ' + part);
 
 /* ── the run ── */
 const ids = members(), packed = [], reports = [], skipped = [];
@@ -400,7 +373,7 @@ if (T) {
   for (const r of packed) { const k = home(r.id); if (k < 0) { fresh.push(r); continue; } const v = volAt(k); v.members.push(r); v.size += sizeOf(r, 'vol-' + (base + k)); }
   let k = Math.max(0, vols.length - 1);                            // the last volume already shelved: a released (earlier) one is never refilled
   for (const r of fresh) { for (;; k++) { const v = volAt(k), b = sizeOf(r, 'vol-' + (base + k)); if (!v.members.length || v.size + b <= MAX_BYTES) { v.members.push(r); v.size += b; break; } } }
-  plan = vols.map((v, k) => ({ id: 'vol-' + (base + k), numeral: roman(base + k), title: k ? TITLE.replace(/\s*·\s*\d+$/, '') + ' · ' + (k + 1) : TITLE, blurb: BLURB,
+  plan = vols.map((v, k) => ({ id: 'vol-' + (base + k), numeral: roman(base + k), title: k ? nextTitle(base + k, k + 1) : TITLE, blurb: BLURB,
     members: v.members.sort((a, b) => a.order - b.order), ...(WIP && k === vols.length - 1 && vols.length > 1 ? { wip: true } : {}) }));
 } else plan = [{ id: VOL, numeral: NUMERAL, title: TITLE, blurb: BLURB, members: packed }];
 
@@ -412,11 +385,22 @@ const isomersOf = (M) => { const l = (M.isomers || []).filter((i) => SHELVED.has
 for (const p of plan) {
   const VDIR = path.join(DIST, p.id), rows = [], vreports = [];
   mkdirSync(path.join(VDIR, 'm'), { recursive: true });
+  /* 044 S14 · A SHEET IS THE PICTURE: a volume whose t/pages.json carries the `density` sheets (tools/volume-thumbs.mjs, or
+     tools/volumes/sheet-pictures.py for VOL. I) shows a molecule's plain picture from its page's sheet (lab/volumes.js pagePicture), so a
+     molecule with a cell there gets no single t/<id>.webp: its row's `thumb` is null, none is carried in, and one left in t/ is pruned.
+     Every sheet the manifest names is the volume's own file and is never pruned (before this the --incremental sweep deleted them all:
+     no row reaches a sheet). */
+  const pagesAt = path.join(VDIR, 't/pages.json'), pagesText = existsSync(pagesAt) ? readFileSync(pagesAt, 'utf8') : null, man = pagesText ? JSON.parse(pagesText) : null;
+  const sheeted = new Set(), sheetFiles = new Set();
+  for (const [look, by] of Object.entries((man && man.sheets) || {})) for (const [pg, s] of Object.entries(by)) {
+    sheetFiles.add(`t/${look}-${pg}.webp`);
+    if (look === 'density' && existsSync(path.join(VDIR, `t/density-${pg}.webp`))) for (const id of man.pages[pg] || []) if (!(s.missing || []).includes(id)) sheeted.add(id);
+  }
   for (const r0 of p.members) {
     const r = retarget(r0, p.id), id = r.id;
     const file = path.join(VDIR, 'm', id + '.lwm'), tmp = file + '.tmp';
     writeFileSync(tmp, r.bytes); renameSync(tmp, file);
-    const thumbAt = path.join(VDIR, 't', id + '.webp'), th = findKept(p.id, 't', id + '.webp');
+    const thumbAt = path.join(VDIR, 't', id + '.webp'), th = sheeted.has(id) ? null : findKept(p.id, 't', id + '.webp');
     if (th && path.resolve(th) !== thumbAt) { mkdirSync(path.dirname(thumbAt), { recursive: true }); copyFileSync(th, thumbAt); }
     /* iteration 014 B4 · THE VARIANTS: tools/menu-thumbs.mjs --style writes t/<id>.<style>.webp; each one kept is carried and the row names them in
        `thumbs` (the Picker's STYLE seg; a row without the key shows its one picture as before, and an index without variants is byte-identical) */
@@ -425,14 +409,14 @@ for (const p of plan) {
     const M = r.header.meta;
     rows.push({ id, name: M.name, formula: M.formula, formulaM: M.formulaM, charge: M.charge, heavy: M.heavy, tags: M.tags || [], ...(M.geo && M.geo.length ? { geo: M.geo } : {}), cid: M.cid || null, inchikey: M.inchikey || null,
       mw: M.mw != null ? M.mw : M.mass, pg: M.pointGroup || null, file: 'm/' + id + '.lwm', bytes: r.bytes.length, sha256: sha(r.bytes),
-      thumb: existsSync(thumbAt) ? 't/' + id + '.webp' : null, ...(thumbs.length ? { thumbs } : {}),
+      thumb: !sheeted.has(id) && existsSync(thumbAt) ? 't/' + id + '.webp' : null, ...(thumbs.length ? { thumbs } : {}),
       rungs: Object.fromEntries(Object.entries(r.header.rungs).map(([b, g]) => [b, { E: g.record.ground.energy, nAO: g.record.ground.nAO, gapEv: g.record.stem.gapEv }])),
       ...(r.header.skipped ? { skipped: Object.keys(r.header.skipped) } : {}), ...(r.header.failed ? { failed: Object.keys(r.header.failed) } : {}),
       ...isomersOf(M) });
     vreports.push(r.report); reports.push(r.report);
     console.log(`${p.id.padEnd(6)} ${id.padEnd(16)} ${String(M.heavy).padStart(3)} heavy · ${Object.keys(r.header.rungs).length} rungs · ${(r.bytes.length / 1024).toFixed(1)} KB (header ${(r.report.headerBytes / 1024).toFixed(1)} KB)`);
   }
-  written.push({ dir: VDIR, reach: new Set(rows.flatMap((r) => [r.file, r.thumb, ...variantPaths(r)].filter(Boolean))) });
+  written.push({ dir: VDIR, reach: new Set([...rows.flatMap((r) => [r.file, r.thumb, ...variantPaths(r)].filter(Boolean)), ...sheetFiles]) });
   const stale = readdirSync(path.join(VDIR, 'm')).filter((f) => f.endsWith('.lwm') && !rows.some((r) => r.file === 'm/' + f));
   /* iteration 014 C4: EVERY index is versioned — `indexVersion` counts its changes (the old file's, + 1 when anything but the number moved; 1 for a
      new one), so a reader can tell an index it holds from a newer one; a volume still filling carries `wip: true` */
@@ -444,11 +428,19 @@ for (const p of plan) {
   const oldN = oldIdx ? +(JSON.parse(oldIdx).indexVersion || 0) : 0;
   const indexVersion = oldN && bare(oldIdx) === bare(vText(oldN)) ? oldN : oldN + 1, indexText = vText(indexVersion);
   writeFileSync(path.join(VDIR, 'index.json'), indexText);
+  /* 044 S14: the pages' manifest names the catalogue it was drawn for (`index`), and the app reads no other pack's.  A pack that moved only
+     words (a title, a tag, a blurb) and left the molecules and their order as they were keeps every cell where it is, so the manifest is
+     re-stamped with the new catalogue's hash; one that moved a molecule leaves it alone, and says the pages are to be drawn again. */
+  if (man && man.index !== sha(indexText)) {
+    const same = JSON.stringify((man.pages || []).flat()) === JSON.stringify(rows.map((r) => r.id));
+    if (same) writeFileSync(pagesAt, pagesText.replace('"index":"' + man.index + '"', '"index":"' + sha(indexText) + '"'));
+    console.log(`pack: ${p.id} t/pages.json ` + (same ? 're-stamped for the new catalogue (the same molecules in the same order)' : 'names another catalogue now: run tools/diagrams and tools/volume-thumbs.mjs for this volume'));
+  }
   const tags = {}; for (const r of rows) for (const t of r.tags) tags[t] = (tags[t] || 0) + 1;
   const entry = { id: p.id, numeral: p.numeral, title: p.title, blurb: p.blurb, ...(p.wip ? { wip: true } : {}), indexVersion, count: rows.length, bytes: rows.reduce((s, r) => s + r.bytes, 0), bases: LADDER,
     tags: Object.fromEntries(Object.entries(tags).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))), index: p.id + '/index.json', indexSha256: sha(indexText),
     built: { generator: 'tools/volumes/pack.mjs', commit: GENERATOR } };
-  if (ARCHIVE) { if (!FETCHABLE) delete entry.index; entry.archive = writeArchive(entry, rows, VDIR); }
+  if (ARCHIVE) { if (!FETCHABLE) delete entry.index; entry.archive = writeArchive(entry, rows, VDIR, DIST); }
   entries.push(entry);
   writeFileSync(path.join(path.dirname(DIST), `pack-report-${p.id}.json`), JSON.stringify({ volume: p.id, molecules: vreports, skipped }, null, 1) + '\n');   // outside dist/: measurements, not content
   console.log(`pack: ${p.id} ${p.numeral} ${p.title} — ${rows.length} molecules (${(entry.bytes / 1048576).toFixed(2)} MiB), index.json ${indexText.length} B`
@@ -458,7 +450,7 @@ for (const p of plan) {
 const NEXT = WIP && argOf('--next');                              // iteration 015 M5: VOL. II on the shelf while VOL. I still fills
 if (NEXT && plan.length) {
   const last = +plan[plan.length - 1].id.slice(4), id = 'vol-' + (last + 1);
-  if (!entries.some((e) => e.id === id) && !plan[plan.length - 1].wip) entries.push({ id, numeral: NEXT, title: TITLE.replace(/\s*·\s*\d+$/, '') + ' · ' + (plan.length + 1), blurb: BLURB, wip: true, count: 0, bytes: 0, bases: LADDER });
+  if (!entries.some((e) => e.id === id) && !plan[plan.length - 1].wip) entries.push({ id, numeral: NEXT, title: nextTitle(last + 1, plan.length + 1), blurb: BLURB, wip: true, count: 0, bytes: 0, bases: LADDER });
 }
 const shelfFile = path.join(DIST, 'volumes.json'), shelf = !SOLE && existsSync(shelfFile) ? JSON.parse(readFileSync(shelfFile, 'utf8')) : { schema: 1, volumes: [] };
 shelf.volumes = [...shelf.volumes.filter((v) => !entries.some((e) => e.id === v.id)), ...entries].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
