@@ -429,6 +429,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 /* ORBITALS' register lane: a .row, not the 7-column .sp-row grid — two dials and an × beside the orbital's name */
 .orb-lane { align-items: center; }
 .orb-lane .sp-id { flex: 1 1 0; min-width: 0; }
+.orb-lane > .fd { flex: 0 0 62px; width: 62px; height: 40px; }   /* 044 A3.4 (L58): the lane's amplitude slider in the knob's 62-px seat, as tall as SPECTRUM's (.sp-row .fd) */
 .orb-lane.sel .sp-name { color: var(--acc); }
 .pk-n { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; gap: 4px; }
 .pk-nl { font-size: var(--fs-small); color: var(--nc); padding-top: 9px; text-align: center; }
@@ -631,8 +632,6 @@ body.mod-arming .mir-select, body.mod-arming .k:not([data-param]) { opacity: .45
 
 /* One retained custom colour; FOLLOW THEME bypasses it without erasing it. */
 .stage-seat { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; align-self: flex-end; }
-.stage-colour { width: 26px; height: 34px; padding: 2px; }
-.stage-colour:focus-visible { box-shadow: 0 0 0 1.5px var(--acc); }
 .stage-follow { height: 18px; min-height: 18px; padding: 0 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
 
 

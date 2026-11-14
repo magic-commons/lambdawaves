@@ -19,7 +19,7 @@ export function createEqualizerCard(app) {
      (gapped cells, n along both edges, each shell's own diagonal ringed), each shell's fader on the row of its own n beside it; the colours are
      skin.css tokens (--eq-near · --eq-mid · --eq-far) and the ink is the card's.  AUDIO IN takes the faders from the MODULATION window's first
      AUDIO device (eq.audioTick, called by rack.js right after the model's feed). */
-  const wEq = device({ id: 'equalizer', eyebrow: 'EQUALIZER', title: 'beat equalizer', status: '', onPower: () => syncEq(false) }); wEq.root.classList.add('closed'); rack.appendChild(wEq.root);
+  const wEq = device({ id: 'equalizer', eyebrow: 'EQUALIZER', title: 'beat equalizer', status: '', closed: true, onPower: () => syncEq(false) }); rack.appendChild(wEq.root);
   const eq = app.state.eq = createEqualizer(), gEq = group(wEq.body, ''), eqHead = el('div', 'row tight eq-head', gEq), mix = el('div', 'eq-mix', gEq), eqCv = el('canvas', 'eq-grid', mix);
   const eqStep = stepper({ aria: 'Equalizer preset', items: EQ_PRESETS.map((p) => ({ id: p.id, label: p.label })), value: eq.preset, cls: 'mol-step', onChange: (id) => { eq.setPreset(id); syncEq(true); hNote(); } });
   ui.eqPick = (id) => { eqStep.set(id); eq.setPreset(id); syncEq(true); hNote(); };   // 0.6.6 G1: the stepper's road for THE VERB TABLE's switch

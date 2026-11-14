@@ -203,6 +203,7 @@ export function createRackWiring(app) {
     retired: RETIRED_WINDOWS,
     /** reopen a closed window into a rack (default: the one it was in) */
     reopen(id, side) { const dev = devById(id); if (!dev) return false; dev.hidden = false; rk.open(id, { side: sideKey(side) }); saveSettings(); return true; },
+    power: (id, on) => rk.power(id, on),   // 044 K4: the rack's power verb (kit 1.6.0-alpha.29: the hand's press), for a module that holds `layout`
     closed() { return [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id); },
     /* ── FAVOURITE LAYOUTS (wave 54): capture, restore, and the four slots in this browser's settings key ──── */
     /** THE ARRANGEMENT, and nothing else.  Order is the ARRAY's order — restoring appends in it, which reproduces

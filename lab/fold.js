@@ -1,15 +1,14 @@
 /* lab/fold.js — THE FOLD (2026-10-16, Josh, iteration 001: "for very long windows have a show/collapse … unify them into a system"): one chevron
  * at the end of a window's row shows or hides that window's details — SHADOW's details and MOLECULES' MORE were the idiom (native-ui.js,
- * chemview.js; their toggles wear `.lw-fold` too), CAMERA and MO-REGISTRY fold through this.  `bodies` is one node or several, each
+ * chemview.js) and fold through this since 044 A3.3, as CAMERA and MO-REGISTRY do.  `bodies` is one node or several, each
  * `.lw-fold-body` (hidden by the attribute, skin.css); closed unless `open`.  A plain module: no `app`.
  * Iteration 011 Q2 (Josh: "By default make most of the hidable texts and expandable windows minimized for default users"): the press wears
  * `data-fold` (`key`, else `what`) — its name in a card's WORKSPACE record (shell/rack-wiring.js `folds`: the open ones, written only when one
  * is), and the handle the first-visit furniture closes every fold by (rack.js, first-run.js `inner`). */
 import { el, chip, hint } from './mir/kit.js';
 let n = 0;
-/** 039 F3 · THE FOLD'S FACE (V-REVIEW 8: MOLECULES' MORE and SHADOW's details, built by hand, showed no hover hint): the chevron, the aria name
- *  and the hint every fold press wears — fold() below, and chemview.js' and native-ui.js' own presses: one road */
-export function foldFace(b, what) { chip(b, 'chevronDown', 'Show ' + what); hint(b, 'Show or hide {what}', { what }); }
+/** 039 F3 · THE FOLD'S FACE: the chevron, the aria name and the hint every fold press wears (044 A3.3: fold() below is its one caller) */
+function foldFace(b, what) { chip(b, 'chevronDown', 'Show ' + what); hint(b, 'Show or hide {what}', { what }); }
 export function fold(row, bodies, { what = 'details', open = false, cls = '', key = '' } = {}) {
   const list = [].concat(bodies), b = el('button', 'trig lw-fold' + (cls ? ' ' + cls : ''), row); b.type = 'button'; b.dataset.fold = key || what;
   for (const x of list) { x.classList.add('lw-fold-body'); if (!x.id) x.id = 'lw-fold-' + ++n; }

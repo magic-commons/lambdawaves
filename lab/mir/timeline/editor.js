@@ -111,7 +111,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   const scopeSeg=seg({aria:'Selection scope',options:SCOPES.map(([id,name])=>({id,label:name})),value:scope,cls:'tl-scope-seg',onChange:v=>scopeCtl.set(v)});   // tr: what a selection picks: whole clips or curve points
   scopeSeg.root.querySelector('.seg').classList.add('tl-scope');toolbar.appendChild(scopeSeg.root);const scopeWrap=scopeSeg.root;
   const snapLabel=el('div','tl-setting',toolbar),snapWord=el('span','tl-setting-word',snapLabel);label(snapWord,'SNAP');
-  const snapStep=stepper({aria:'Timeline snap',items:SNAPS.map(([id,name])=>({id,label:name})),value:snap,compact:true,cls:'tl-snap',onChange:v=>{finish(null,true);snap=v;}});el('span','tl-select-wrap',snapLabel).appendChild(snapStep.root);
+  const snapStep=stepper({aria:'Timeline snap',options:SNAPS.map(([id,name])=>({id,label:name})),value:snap,compact:true,cls:'tl-snap',onChange:v=>{finish(null,true);snap=v;}});el('span','tl-select-wrap',snapLabel).appendChild(snapStep.root);
   const snapCtl={get:()=>snap,set(v){finish(null,true);snap=v;snapStep.set(v);}};
   const modeButton=(name,read,write,title,id)=>{const b=button(toolbar,name,()=>{write(!read());b.setAttribute('aria-pressed',String(read()));b.classList.toggle('on',read());surface.classList.toggle('tl-step-mode',stepMode&&PEN.has(tool));paintSelection();});b.dataset.mode=id;b.setAttribute('aria-pressed','false');b.title=title;return b;};
   const stepButton=modeButton('STEP',()=>stepMode,v=>stepMode=v,'Draw on Snap. Shift draws pulses. Snap OFF uses 1/16 beat.','step');

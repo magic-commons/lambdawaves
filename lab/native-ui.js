@@ -1,5 +1,5 @@
 /* Native window composition. Deliberately excludes the modulation plugin. */
-import { el, seg, sw } from './mir/kit.js'; import { foldFace } from './fold.js';   // 039 F3: SHADOW's details wear the fold rows' face
+import { el, seg, sw } from './mir/kit.js'; import { fold } from './fold.js';   // 044 A3.3: SHADOW's details fold through the one fold (lab/fold.js)
 import { installControlHelp, consolidateWindowHelp } from './mir/control-help.js';
 import { planeModel } from './mir/plane-model.js';
 export { planeModel };   // sliceview.js' road to the kit's plane
@@ -35,8 +35,7 @@ export function reworkNative({ ui, mat, repaint }) {
   const shadowDetails=el('div','shadow-details');shadowDetails.id='shadow-details';shadowDetails.hidden=true;shadow.appendChild(shadowDetails);
   shadowDetails.append(ui.hc.root);for(const n of shadow.querySelectorAll(':scope > .epi'))shadowDetails.appendChild(n);if(ui.shFoot)shadowDetails.appendChild(ui.shFoot);ui.shadowDetails=shadowDetails;   // 0.4.0 S3: the footer (L, T, V, S) runs only while this fold is open
   const shadowRow=ui.shadowSeg.root.parentElement;shadowRow.classList.add('shadow-controls');
-  const shadowToggle=el('button','trig shadow-details-toggle lw-fold',shadowRow);shadowToggle.type='button';shadowToggle.dataset.fold='shadow details';foldFace(shadowToggle,'shadow details');shadowToggle.setAttribute('aria-controls',shadowDetails.id);shadowToggle.setAttribute('aria-expanded','false');
-  shadowToggle.addEventListener('click',()=>{shadowDetails.hidden=!shadowDetails.hidden;shadowToggle.setAttribute('aria-expanded',String(!shadowDetails.hidden));shadowToggle.setAttribute('aria-label',shadowDetails.hidden?'Show shadow details':'Hide shadow details');});
+  fold(shadowRow,shadowDetails,{what:'shadow details',key:'shadow details',cls:'shadow-details-toggle'});   // 044 A3.3 (L109, C23): was a hand-made press; its record name `shadow details` is frozen as the key
   const settings=ui.set.body;
   const rows=[...settings.querySelectorAll(':scope > .grp')];
   for(const g of rows){g.classList.add('settings-section');}

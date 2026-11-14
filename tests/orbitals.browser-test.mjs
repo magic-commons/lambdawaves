@@ -108,14 +108,14 @@ try {
     await new Promise((r) => setTimeout(r, 150));
     const d = document.querySelector('.dev[data-id="chem"]');
     return { before: { sum: before.sum, n: before.selection.length }, after,
-      lanes: d.querySelectorAll('.orb-lane').length, knobs: d.querySelectorAll('.orb-lane .k').length,
+      lanes: d.querySelectorAll('.orb-lane').length, knobs: d.querySelectorAll('.orb-lane .k').length, faders: d.querySelectorAll('.orb-lane .fd.pop').length,
       errs: window.__e.slice() };`);
   judge('L3 HOMO + LUMO at equal amplitude gives Σ|c|² = 2, and NORM makes it exactly 1',
     l3.before.n === 2 && near(l3.before.sum, 2, 1e-12) && near(l3.after.sum, 1, 1e-12)
     && l3.after.selection.every((c) => near(c.amp, Math.SQRT1_2, 1e-12)),
     { beforeSum: l3.before.sum, afterSum: l3.after.sum, amps: l3.after.selection.map((c) => c.amp) });
-  judge('L3 the DIALS row is two lanes with an amplitude and a phase knob each',
-    l3.lanes === 2 && l3.knobs === 4 && l3.errs.length === 0, { lanes: l3.lanes, knobs: l3.knobs, errs: l3.errs });
+  judge('L3 the DIALS row is two lanes with an amplitude slider and a phase knob each (044 A3.4, L58: a lane\'s amplitude is a slider)',
+    l3.lanes === 2 && l3.knobs === 2 && l3.faders === 2 && l3.errs.length === 0, { lanes: l3.lanes, knobs: l3.knobs, faders: l3.faders, errs: l3.errs });
   judge(`L3 the beat readout is the period 2π/Δε = ${PERIOD.toFixed(6)} within 1e-4`,
     near(l3.after.period, PERIOD, 1e-4) && near(l3.after.dE, GAP, 1e-12),
     { period: l3.after.period, want: PERIOD, 'Δε': l3.after.dE, note: '2π/0.996409 = 6.3058' });

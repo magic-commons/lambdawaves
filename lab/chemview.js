@@ -32,7 +32,7 @@ import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storage
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
 import { planePoints } from './slice.js';   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
 import * as V from './volumes.js'; import { setPic } from './picker-fx.js'; import { parseLwm, rungRecord, espOf, espGrid } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
-import { foldFace } from './fold.js';   // 039 F3: MOLECULES' MORE wears the fold rows' face (V-REVIEW 8)
+import { fold } from './fold.js';   // 044 A3.3: MOLECULES' MORE folds through the one fold
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -550,15 +550,10 @@ export function createChem(host, api) {
     roH2.set(`R ${R.toFixed(2)} bohr · RHF ${eh(p.rhf)} · UHF ${eh(p.uhf)} · FCI ${eh(p.fci)} Eh · S ${p.S.toFixed(2)} of ln 2 · ⟨S²⟩ ${p.s2.toFixed(2)}`);
     roH2.setSub(`UHF leaves RHF at the Coulson–Fischer point, ${h2T.cf.toFixed(3)} bohr · S: the one-orbital entanglement entropy of the FCI state, ln 2 = 0.693 at the break`); drawCurve(h2Cv, h2T, R); }
   const probeLine = el('div', 'note', more); probeLine.hidden = true; probeLine.title = 'Electron potential at each nucleus (a.u.)';   // 0.6.5 X1 THE PROBE
-  const moreToggle = el('button', 'trig mol-more-toggle lw-fold', rM); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
-  foldFace(moreToggle, 'the kick, run and spectrum controls');
-  const setMore = (open) => {
-    more.hidden = !open; moreToggle.setAttribute('aria-expanded', String(open));
-    moreToggle.setAttribute('aria-label', open ? 'Hide the kick, run and spectrum controls' : 'Show the kick, run and spectrum controls');
-    if (open) requestAnimationFrame(() => paint());
-  };
-  moreToggle.addEventListener('click', () => setMore(more.hidden));
-  setMore(api.moreOpen !== false);
+  /* 044 A3.3 (L109, C23): MORE folds through the one fold (lab/fold.js), was a hand-made press.  It keeps its own WORKSPACE key (`more`, read by
+     `.mol-more-toggle` in shell/rack-wiring.js) and its open first run, so it wears no `data-fold`: the card's `folds` list never names it */
+  { const f = fold(rM, more, { what: 'the kick, run and spectrum controls', cls: 'mol-more-toggle', open: api.moreOpen !== false }); delete f.button.dataset.fold;
+    const drawn = () => { if (f.get()) requestAnimationFrame(() => paint()); }; f.button.addEventListener('click', drawn); drawn(); }
 
   /* ── the worker road ─────────────────────────────────────────────────────────────────────────── */
   const call = (msg, fallback) => Promise.resolve(api.solve(msg, fallback || (() => null), (r) => r));

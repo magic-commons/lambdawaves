@@ -122,7 +122,7 @@ export function createRampView(parent, o = {}) {
 
   /* ── the preset row ── */
   const top = el('div', 'mir-ramp-presets', root);
-  const stp = stepper({ aria: 'Ramp preset', items: stepItems(), value: null, cls: 'mir-ramp-step', onChange: (id) => loadPreset(id) });
+  const stp = stepper({ aria: 'Ramp preset', options: stepItems(), value: null, cls: 'mir-ramp-step', onChange: (id) => loadPreset(id) });
   top.appendChild(stp.root);
   const reset = trig({ label: 'RESET', cls: 'mir-ramp-reset', title: 'Reload the chosen preset', onFire: () => { if (preset) loadPreset(preset); } });
   top.appendChild(reset.root);

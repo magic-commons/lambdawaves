@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 044
+
+THE REGISTERS' CONTROLS ARE WRITTEN ONCE (044 A3, ledger L109 and L58; the vault's iteration-044 `A3-BUILD.md`): a word a register's head or bar shows is the kit's `trig()` (SPECTRUM's DIALS and + MODE, STATES' HIDE, BRIGHT / ALL, ω → LANE and FILE, ORBITAL's DIALS and CORE, → A and → B); ON stays the class alone on those words (accent ink): the kit's `on` door writes aria-pressed, which this skin draws as a lamp, and that is Josh's to choose. A lane's M · S · × is `laneStrip()` (`lab/paint-stroke.js`), one for SPECTRUM, STATES and ORBITAL. A LANE'S AMPLITUDE IS A SLIDER in all three (ORBITAL's |c| was a knob; `.fd.pop` in the knob's seat); the phase stays a knob. The save beside a preset stepper is `presetSave()` (`lab/user-presets.js`): SPECTRUM's presets, PALETTE's, CURVES'. The page dots are `pageDots()` (`lab/pager.js`): the rack pager's and the Picker's decks'. An inner fold is `fold()` (`lab/fold.js`) and passes a `key`: SHADOW's details and MOLECULES' MORE go through it; MORE keeps its own record key `more` and wears no `data-fold`.
+
 ## The laws of 042
 
 UNDER A FIELD A ROTOR ACTS AT t (042 D11, X2): with Fz or Bz ≠ 0 (or a propagator) `Register._op` turns c(t), not the anchor (`lab/state.js`), and KEPLER reads its orbits off c(t) under STARK or ZEEMAN (`lab/keplerview.js`, `lab/windows/kepler.js`); orbit.js's ORBIT drags pass no t and stay on the anchor.

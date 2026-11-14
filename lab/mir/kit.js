@@ -250,7 +250,7 @@ export function wheelTurn(node, turn = null, { focus = node, signal } = {}) {
  *   · THE DRAG IS VERTICAL.  A full scale is `travel` px of rise (220; a finger 320); sideways motion is ignored.
  *   · THE FINE GEAR IS ⅛, and ANY modifier engages it (Shift, Alt, Ctrl, Meta), and so does a SECOND FINGER put down while
  *     one drags.  It runs on a VIRTUAL POINT (p += gear · Δy / travel), so engaging or leaving the gear moves nothing.
- *   · DOUBLE-TAP (300 ms, 14 px: TAP) or double-click = home.
+ *   · DOUBLE-TAP (300 ms, 14 px: TAP) = home, taken on the second PRESS; the browser's `dblclick` is swallowed and answers nothing.
  * `verticalDrag(e)` is that law as one small object, so the arc knob, the lane slider, the swatch, the number field and the
  * XY pad stand on the same arithmetic instead of copying it.  `setKnobLaw()` retunes it (`fine` alone moves every gear). */
 /** setKnobLaw's defaults: travel = px for a full scale, fine = the gear's divisor on a drag, keyFine = the Shift factor on an
@@ -305,13 +305,15 @@ export function verticalDrag(e, { travel, fine, touchTravel, axis = 'y' } = {}) 
   return d;
 }
 /** the pixels of pointer travel for a full scale under the law, for a drag surface the kit did not build
- *  (the modulation window's dials still carry their own copy: 220, 1760 with a modifier, 320 under a finger) */
+ *  (the modulation window's dials still carry their own copy: 220, 1760 with a modifier, 320 under a finger).
+ *  NO CONTROL KEEPS THE LAW AS A NUMBER (1.6.0-alpha.22): a drag reads gearOf / verticalDrag / dragTravel, an arrow key setKnobLaw().keyFine. */
 export function dragTravel(e, { touch = false, travel, fine } = {}) {
   if (fineHeld(e)) return (travel || KNOB_LAW.travel) * (fine || KNOB_LAW.fine);
   return touch ? KNOB_LAW.touchTravel : (travel || KNOB_LAW.travel);
 }
 /**
- * knob({ label, aria, title, min, max, value, log, wrap, step, fmt, unit, onInput, onChange, onDelta, onReset, size, cls, travel, fine, dragAxis })
+ * knob({ label, aria, title, min, max, value, home, log, wrap, step, fmt, unit, onInput, onChange, onDelta, onReset, size, cls, travel, fine, dragAxis })
+ *   home: where a double-tap and Delete go (1.6.0-alpha.23: ONE spelling on every value control; default the built `value`; setDefault(x) moves it later).
  *   wrap: free-spinning (phase); onDelta(dRad) reports drag deltas instead of absolute values (a JOG WHEEL);
  *   onReset: what a wheel's reset does; size: 'lg'; travel / fine: this knob's own drag law (see setKnobLaw).
  *   dragAxis: 'vertical' (the default: one law for every knob) or 'sum' (the 1.4 law, rise + sideways, for an app that has not moved).
@@ -326,7 +328,7 @@ export function knob(o) {
   const dial = el('div', 'k-dial', root);
   const needle = el('i', 'k-needle', dial);
   const val = el('div', 'k-val', root);
-  let v = o.value, def = o.value, dragging = false, disabled = false, fine = false;   // fine: the menu's FINE (half the drag gain, this session)
+  let v = o.value, def = Number.isFinite(o.home) ? o.home : o.value, dragging = false, disabled = false, fine = false;   // def: `home` (1.6.0-alpha.23), else the built value; fine: the menu's FINE (half the drag gain, this session)
   let shown = null;                 // a value PAINTED over the base by a modulator (show()); the base v is what the hand owns
   const lo = o.min, hi = o.max, log = !!o.log, rev = !!o.reverse && !o.wrap;   // rev: the displayed direction flips (see reverse above)
   if (rev) root.classList.add('k-rev');   // 1.5.7-alpha.12 THE RING FOLLOWS THE DIAL: an overlay drawn in value space (the route ring) mirrors with it
@@ -401,14 +403,16 @@ export function knob(o) {
     if (o.wrap) return lo + ((((nv - lo) % (hi - lo)) + (hi - lo)) % (hi - lo));
     return Math.min(hi, Math.max(lo, nv));
   };
-  let p0 = 0, vd = null, acc = 0;
+  let p0 = 0, vd = null, acc = 0, v0 = 0;                 // v0: the value the hand found, where an abort puts it back
   /* THE GESTURE belongs to the pointer that started it: a second finger (the fine gear) is neither a new drag nor a move of this one. */
   dial.addEventListener('pointerdown', (e) => {
     if (disabled || dragging) return;
-    e.preventDefault(); try { dial.setPointerCapture(e.pointerId); } catch (_) {}   // a pointer already gone (or a synthetic one) must not abort the drag
-    dragging = true; root.classList.add('drag'); root.classList.add('active'); p0 = norm(v); acc = 0;   // p0 is the BASE: a routed knob's drag moves the range, never teleports it to where the modulator was
+    e.preventDefault();
+    if (tap(e)) return;                                 // HOME, and no drag after it (1.6.0-alpha.19: the drag it began started from the value before home)
+    try { dial.setPointerCapture(e.pointerId); } catch (_) {}   // a pointer already gone (or a synthetic one) must not abort the drag
+    dragging = true; root.classList.add('drag'); root.classList.add('active'); p0 = norm(v); acc = 0; v0 = v;   // p0 is the BASE: a routed knob's drag moves the range, never teleports it to where the modulator was
+    document.addEventListener('keydown', esc, true);
     vd = verticalDrag(e, { travel: o.travel, fine: o.fine, axis: o.dragAxis === 'sum' ? 'sum' : 'y' });
-    tap(e);
   });
   dial.addEventListener('pointermove', (e) => {
     if (!dragging || e.pointerId !== vd.id) return;
@@ -417,12 +421,21 @@ export function knob(o) {
     const nv = settle(denorm(o.wrap ? p0 + dp : clamp01(p0 + (rev ? -dp : dp))));
     if (nv !== v) { v = nv; paint(); if (o.onInput) o.onInput(v); }
   });
-  const end = (e) => { if (!dragging || (e && e.isTrusted && vd && e.pointerId !== vd.id)) return;   // a synthetic cancel (the timeline's hold, a test) ends it whoever it names
-    dragging = false; vd = null; root.classList.remove('drag'); setTimeout(() => root.classList.remove('active'), 700); if (o.onChange && !o.onDelta) o.onChange(v); };
-  dial.addEventListener('pointerup', end); dial.addEventListener('pointercancel', end); dial.addEventListener('lostpointercapture', end);
+  /* A GESTURE ENDS ONE OF TWO WAYS (core/pointer.js; 1.6.0-alpha.20 THE KNOB AND THE FADER TAKE THE ABORT): the lift commits; a cancel — the
+     pointer cancelled, its capture lost, Escape — puts the value back where the hand found it and lands nothing, as on the arc and the lane */
+  const stop = (e) => { if (!dragging || (e && e.isTrusted && vd && e.pointerId !== vd.id)) return false;   // a synthetic cancel (the timeline's hold, a test) ends it whoever it names
+    const id = vd.id; dragging = false; vd = null; root.classList.remove('drag'); setTimeout(() => root.classList.remove('active'), 700);
+    document.removeEventListener('keydown', esc, true); try { dial.releasePointerCapture(id); } catch (_) {}
+    return true; };
+  const end = (e) => { if (stop(e) && o.onChange && !o.onDelta) o.onChange(v); };
+  const abort = (e) => { if (!stop(e)) return;
+    if (o.onDelta) { if (acc) { turn = ((turn - acc * 360) % 360 + 360) % 360; o.onDelta(-acc * 2 * Math.PI); announce(true); } return; }   // a wheel turns back what it turned
+    if (v !== v0) { v = v0; if (o.onInput) o.onInput(v); } paint(); };
+  function esc(e) { if (dragging && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); abort(); } }
+  dial.addEventListener('pointerup', end); dial.addEventListener('pointercancel', abort); dial.addEventListener('lostpointercapture', abort);
   const reset = () => { if (disabled) return; if (o.onDelta) { if (o.onReset) o.onReset(); return; } v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };
   const tap = tapWatcher(reset);                       // two taps within 300 ms and 14 px reset the control to its default …
-  dial.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });   // … and so does a double-click
+  dial.addEventListener('dblclick', (e) => e.preventDefault());   // … and a double-CLICK is that second press, already answered (1.6.0-alpha.19: it ran home a second time)
   wheelTurn(root);                                     // 1.6.0-alpha.3 THE WHEEL WAITS FOR A CLICK: pressed and focused, a notch is the arrow key's step
   /* THE KEY MAP.  Δp = 1/100 of TRAVEL · Shift ×⅛ (the one gear) · Page ×10 · Home/End the ends · Delete resets.
      Three rulings a builder gets wrong, so they are written here rather than inferred:
@@ -495,7 +508,7 @@ export function knob(o) {
   return api;
 }
 
-/** sw({ label, value, onChange, lamp, glyph, glyphSize, title, cls }) — a boolean that stays on.  It wears the LAMP (Josh: "I like the
+/** sw({ label, value, onChange, lamp, glyph, glyphSize, title, cls }) → { root, get, set(on), setDisabled(on) } — a boolean that stays on.  It wears the LAMP (Josh: "I like the
  *  little light switches when things are on"); `lamp: false` is for the listed cases where the lamp is wrong (docs/CONTROLS.md): the label is
  *  then ON's light, as a trigger's is (accent, no glow).  `glyph: name` is the case where the glyph is the state (power, an eye, invert): a
  *  44 px round target with no face and no word (the label is its accessible name), `.sw-glyph` in controls.css; the owner says how the
@@ -516,10 +529,10 @@ export function sw(o) {
   const paint = () => { b.classList.toggle('on', v); b.setAttribute('aria-pressed', String(v)); };
   b.addEventListener('click', () => { v = !v; paint(); if (o.onChange) o.onChange(v); });
   paint();
-  return { root: b, get: () => v, set(x) { v = !!x; paint(); } };
+  return { root: b, get: () => v, set(x) { v = !!x; paint(); }, setDisabled(on) { b.disabled = !!on; } };   // setDisabled: 1.6.0-alpha.23, as every builder's
 }
 
-/** seg({ label, aria, title, options: [{id, label, title}], value, onChange }) — an enumeration.  `title` hints the control on its root
+/** seg({ label, aria, title, options: [{id, label, title}], value, onChange }) → { root, get, set(id), button(id), paint, setDisabled(on) } — an enumeration.  `title` hints the control on its root
  *  (THE ROOT WEARS THE HINT, 1.5.7-alpha.18), as every other kit control does; an option's own `title` hints that option. */
 export function seg(o) {
   const root = el('div', 'segw' + (o.cls ? ' ' + o.cls : ''));
@@ -586,10 +599,16 @@ export function seg(o) {
   };
   paint();
   try { new MutationObserver(paint).observe(row, { attributes: true, attributeFilter: ['disabled'], subtree: true }); } catch (_) {}
-  return { root, spec: o, get: () => v, set(x) { v = x; paint(); }, button: (id) => btns.get(id), paint };   // spec: as knob's (1.5.0-alpha.25)
+  /* setDisabled (1.6.0-alpha.23): the whole group, and back; an option the app disabled by itself (button(id).disabled) stays as the app left it */
+  const mine = new Set();
+  const setDisabled = (on) => { root.classList.toggle('disabled', !!on);
+    for (const [id, b] of btns) { if (on) { if (!b.disabled) { b.disabled = true; mine.add(id); } } else if (mine.delete(id)) b.disabled = false; } };
+  return { root, spec: o, get: () => v, set(x) { v = x; paint(); }, button: (id) => btns.get(id), paint, setDisabled };   // spec: as knob's (1.5.0-alpha.25)
 }
 
-/** trig({ label, onFire, glyph, cls }) — a momentary event (`glyph`: a glyph name draws, other text is text) */
+/** trig({ label, onFire, glyph, word, title, cls }) → { root, setLabel(s), setGlyph(g), on, setDisabled(on) } — a momentary event (`glyph`: a glyph name
+ *  draws, other text is text).  `word: false` with a `glyph` is THE GLYPH FORM (1.6.0-alpha.23), as sw({ glyph })'s: the glyph alone on a square
+ *  touch seat (`.trig-glyph`), no word shown, and `label` is its accessible name (setLabel renames it). */
 /** THE DOT GRIP — Josh's 5×5: dots at rows 1, 3, 5 × columns 1, 3, 5. The reorder handle in the modulation
  *  rail and the transport's macro tiles; the four-way cross stays the ROUTING grip. */
 export function gripDots(parent, size = 13) {
@@ -602,17 +621,20 @@ export function trig(o) {
   b.type = 'button';
   /* 1.5.6-alpha.3: a glyph NAME draws its SVG, as sw({ glyph }) does; any other string stays text (a character, as before) */
   const ink = (s, g) => { s.textContent = ''; if (hasGlyph(g)) s.appendChild(glyphEl(g, 'gly gly-' + g, 16)); else s.textContent = g; };
+  const bare = !!o.glyph && o.word === false;            // the glyph form: no word, the label is the name
+  if (bare) b.classList.add('trig-glyph');
   if (o.glyph) ink(el('span', 'trig-g', b), o.glyph);
-  label(el('span', 'trig-l', b), o.label);
+  if (bare) ariaLabel(b, o.label); else label(el('span', 'trig-l', b), o.label);
   if (o.title) hint(b, o.title);
   b.addEventListener('click', (e) => { if (o.onFire) o.onFire(e); });
   /* wave 62: a `trig` used as a STATE says so.  A trig that never sets `on` never gets the attribute,
      so this is correct for every caller and costs one expression. */
-  return { root: b, setLabel(s) { label(b.querySelector('.trig-l'), s); }, setGlyph(g) { const s = b.querySelector('.trig-g'); if (s) ink(s, g); }, set on(v) { b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
+  return { root: b, setDisabled(on) { b.disabled = !!on; }, setLabel(s) { if (bare) ariaLabel(b, s); else label(b.querySelector('.trig-l'), s); }, setGlyph(g) { const s = b.querySelector('.trig-g'); if (s) ink(s, g); }, set on(v) { b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
 }
 
-/** fader({ label, aria, min, max, value, fmt, log, fine, cls, onInput, onChange }) — a horizontal scalar
- *   log: a log scale (min must be > 0); fine: this fader's Shift divisor (see setKnobLaw)
+/** fader({ label, aria, title, min, max, value, home, fmt, log, fine, cls, onInput, onChange }) — a horizontal scalar
+ *   log: a log scale (min must be > 0); fine: this fader's Shift divisor (see setKnobLaw); title: its hint, on the root; home: where a
+ *   double-tap and Delete go (default the built value) — both 1.6.0-alpha.23, as the knob's
  *   → { root, get, set(x), show(x), shown, setBase(fn), setDisabled(on), paint, setDefault(x), setLabel(t), dragging() } */
 export function fader(o) {
   const root = ltr(el('div', 'fd' + (o.cls ? ' ' + o.cls : '')));
@@ -620,7 +642,8 @@ export function fader(o) {
   const edge = el('div', 'fd-edge', root);
   const lbl = label(el('div', 'fd-lbl', root), o.label || '');
   const val = el('div', 'fd-val', root);
-  let v = o.value, def = o.value, dragging = false, lastX = 0;
+  if (o.title) hint(root, o.title);                      // THE ROOT WEARS THE HINT, on a fader too (1.6.0-alpha.23: it could take none)
+  let v = o.value, def = Number.isFinite(o.home) ? o.home : o.value, dragging = false, lastX = 0, v0 = 0;   // v0: the value the hand found, where an abort puts it back
   const lo = o.min, hi = o.max;
   const fmt = o.fmt || ((x) => x.toFixed(3));
   const log = !!o.log && lo > 0 && hi > lo;   // a log fader: FREQ-shaped ranges on a slider
@@ -658,14 +681,19 @@ export function fader(o) {
   const fromEvent = (e) => { const r = root.getBoundingClientRect(); return denorm((e.clientX - r.left) / Math.max(1, r.width)); };
   watchTouches();
   let gid = null;   // the pointer that owns the gesture: a second finger is the fine gear, not a second drag
-  root.addEventListener('pointerdown', (e) => { if (disabled || dragging || e.button) return;   /* 1.6.0-alpha.18: the left button, a finger or a pen alone drags; the right button is the menu's */ e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; gid = e.pointerId; root.classList.add('drag'); tap(e); lastX = e.clientX; if (!fineHeld(e, gid)) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
+  root.addEventListener('pointerdown', (e) => { if (disabled || dragging || e.button) return;   /* 1.6.0-alpha.18: the left button, a finger or a pen alone drags; the right button is the menu's */ e.preventDefault(); if (tap(e)) return;   /* HOME, and no drag after it (1.6.0-alpha.19: the press then threw the value back to the pointer) */ try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; gid = e.pointerId; v0 = v; document.addEventListener('keydown', esc, true); root.classList.add('drag'); lastX = e.clientX; if (!fineHeld(e, gid)) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
   let dragRect = null;   // 2026-09-11: the rect is read once per drag, not once per move
   root.addEventListener('pointermove', (e) => { if (!dragging || e.pointerId !== gid) return; if (fineHeld(e, gid)) { const r = dragRect || (dragRect = root.getBoundingClientRect()); v = denorm(norm(v) + (e.clientX - lastX) / Math.max(1, r.width * fine)); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });
-  const end = (e) => { if (!dragging || (e && e.isTrusted && e.pointerId !== gid)) return; dragging = false; gid = null; dragRect = null; root.classList.remove('drag'); if (o.onChange) o.onChange(v); };
-  root.addEventListener('pointerup', end); root.addEventListener('pointercancel', end); root.addEventListener('lostpointercapture', end);
+  /* the lift commits; a cancel (the pointer cancelled, its capture lost, Escape) puts the value back and lands nothing (1.6.0-alpha.20, as the knob) */
+  const stop = (e) => { if (!dragging || (e && e.isTrusted && e.pointerId !== gid)) return false; const id = gid; dragging = false; gid = null; dragRect = null; root.classList.remove('drag');
+    document.removeEventListener('keydown', esc, true); try { root.releasePointerCapture(id); } catch (_) {} return true; };
+  const end = (e) => { if (stop(e) && o.onChange) o.onChange(v); };
+  const abort = (e) => { if (!stop(e)) return; if (v !== v0) { v = v0; if (o.onInput) o.onInput(v); } paint(); };
+  function esc(e) { if (dragging && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); abort(); } }
+  root.addEventListener('pointerup', end); root.addEventListener('pointercancel', abort); root.addEventListener('lostpointercapture', abort);
   const reset = () => { if (disabled) return; v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };   // a disabled fader does not reset either (1.4.0)
   const tap = tapWatcher(reset);
-  root.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });
+  root.addEventListener('dblclick', (e) => e.preventDefault());   // the second press was the double-tap (1.6.0-alpha.19: one home, not two)
   wheelTurn(root);
   const FDIR = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 1, PageDown: -1 };
   root.addEventListener('keydown', (e) => {
@@ -688,9 +716,11 @@ export function fader(o) {
     /** a dead fader says so and gives up its seat, as the knob does */
     setDisabled(on) { disabled = !!on; root.classList.toggle('disabled', disabled); root.tabIndex = disabled ? -1 : 0; root.setAttribute('aria-disabled', String(disabled));
       if (disabled && root === document.activeElement) { const dev = root.closest('.dev'); const seat = dev && dev.querySelector('.dev-power'); if (seat) seat.focus(); else root.blur(); } },
-    paint, setDefault(x) { def = x; }, setLabel(s) { label(lbl, s); }, dragging: () => dragging };
-  /* 1.6.0-alpha.14 · THE VALUE DOOR, as the knob's (root.mirKnob): the control menu's RESET · COPY VALUE · PASTE reach a fader too */
-  root.mirKnob = { root, get: api.get, home: reset, input(x) { if (disabled) return; const nv = Math.min(hi, Math.max(lo, x)); if (nv !== v) { v = nv; paint(true); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); } } };
+    paint, setDefault(x) { def = x; }, setLabel(s) { label(lbl, s); }, dragging: () => dragging,
+    /* THE VALUE DOOR, as the knob's: home() = a double tap, input(x) = a hand's value (1.6.0-alpha.26: on the widget too; a lane slider's `home` stays its number) */
+    home: reset, input(x) { if (disabled) return; const nv = Math.min(hi, Math.max(lo, x)); if (nv !== v) { v = nv; paint(true); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); } } };
+  /* 1.6.0-alpha.14 · root.mirKnob, as the knob's: the control menu's RESET · COPY VALUE · PASTE reach a fader too */
+  root.mirKnob = { root, get: api.get, home: api.home, input: api.input };
   return api;
 }
 
@@ -733,11 +763,30 @@ export function formula(o) {
   };
 }
 
-/** device({ id, eyebrow, title, status, glyph }) — a rack window: identity | live status | utilities.  `glyph` (1.5.6-alpha.3): the window's
+/** devTool(card, { id, glyph, label, hint, run, on, cls }) → the button — ONE DOOR FOR A CARD'S OWN HEAD BUTTONS (1.6.0-alpha.26; λWAVES 044, LEDGER L93):
+ *  `card` is device()'s result or its `.dev` root.  The button is `.dev-tool[data-tool=id]`: the bare 22 px disc of the head's × with a DRAWN glyph
+ *  (glyph.js; never a typed character), `label` its accessible name, `hint` its hover sentence; run(event, button) on a press (the press never
+ *  reaches the head: it folds and drags nothing).  The tools sit TOGETHER AT THE LEFT END of the head's buttons, before power, in the order they
+ *  were added, so power, fold, float and close never change seats.  `on` (a boolean) makes it a toggle: it starts with that `aria-pressed`, and
+ *  its owner writes `aria-pressed` after (pressed is the accent).  A railed card hides them, as it hides every head button but power and close. */
+export function devTool(card, { id, glyph, label: name, hint: tip, run, on, cls } = {}) {
+  const root = card && card.root ? card.root : card, util = root.querySelector(':scope > .dev-head > .dev-util');
+  const b = el('button', 'dev-tool' + (cls ? ' ' + cls : '')); b.type = 'button'; if (id) b.dataset.tool = id;
+  chip(b, glyph, name); if (tip) hint(b, tip);
+  if (on !== undefined) b.setAttribute('aria-pressed', String(!!on));
+  b.addEventListener('click', (e) => { e.stopPropagation(); if (run) run(e, b); });
+  util.insertBefore(b, util.querySelector(':scope > .dev-power'));
+  return b;
+}
+/** device({ id, eyebrow, status, glyph, closed, tools, onPower, loadingMark }) — a rack window: identity | live status | utilities.  `glyph` (1.5.6-alpha.3): the window's
  *  one drawing, written as data-glyph (createRack's register reads it when none is passed: the FINDER, the window menu, the scroll pill)
- *  and drawn before the name in the head (`.dev-glyph`) */
+ *  and drawn before the name in the head (`.dev-glyph`).  `closed: true` (1.6.0-alpha.25 THE CARD IS BORN CLOSED): the card starts closed
+ *  (`.dev.closed`), before any rack exists; a rack that adopts it reads it as closed, as register({ closed }) says for a window it builds.
+ *  `tools: [{ id, glyph, label, hint, run, on }]` (1.6.0-alpha.26): the card's own head buttons, each through devTool() above; `tool(spec)` on
+ *  the result adds one later and `tools[id]` is its button. */
 export function device(o) {
   const root = el('section', 'dev'); root.dataset.id = o.id;
+  if (o.closed) root.classList.add('closed');
   if (o.glyph) root.dataset.glyph = o.glyph;
   const head = el('header', 'dev-head', root);
   /* THE STATUS IS NOT ALWAYS VISIBLE (wave 44).  The header is one grid row — eyebrow, status, buttons — and on a
@@ -818,9 +867,10 @@ export function device(o) {
   let folded = false;
   const setFold = (on) => { folded = on; root.classList.toggle('folded', on); fold.setAttribute('aria-expanded', String(!on)); };   // the glyph is ONE drawing now; `.dev.folded .dev-fold svg` turns it (lab.css §55)
   fold.addEventListener('click', () => setFold(!folded));
-  /* the guard is `closest`, not `===`: the target of a click on a chip is the SVG inside the button, never the button */
-  head.addEventListener('dblclick', (e) => { if (e.target.closest && e.target.closest('button')) return; setFold(!folded); });
-  return { root, body, setOff, setLoading, popBtn: pop, railBtn: rail, foldBtn: fold, get off() { return off; }, get loading() { return loadingKeys.size > 0; }, setStatus(t, cls) { if (stat.textContent !== t) { stat.textContent = t; headHint(t); } if (cls !== undefined) stat.className = 'dev-stat ' + cls; }, fold: setFold, row(cls) { return el('div', 'row' + (cls ? ' ' + cls : ''), body); } };
+  /* a double press on the head folds through the RACK's one listener (shell/rack.js); the card keeps none of its own (1.6.0-alpha.19) */
+  const tools = {}, tool = (spec) => { const b = devTool(root, spec); if (spec && spec.id) tools[spec.id] = b; return b; };
+  for (const spec of o.tools || []) tool(spec);
+  return { root, body, tools, tool, setOff, setLoading, popBtn: pop, railBtn: rail, foldBtn: fold, get off() { return off; }, get loading() { return loadingKeys.size > 0; }, setStatus(t, cls) { if (stat.textContent !== t) { stat.textContent = t; headHint(t); } if (cls !== undefined) stat.className = 'dev-stat ' + cls; }, fold: setFold, row(cls) { return el('div', 'row' + (cls ? ' ' + cls : ''), body); } };
 }
 
 /** a labelled group inside a device body */

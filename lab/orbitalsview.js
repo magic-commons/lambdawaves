@@ -24,8 +24,8 @@
  * a `refusal()` dance and a push ORDER in the frame loop; the refusal survives only as the sentence the interface
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
-import { el, knob, sw, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
-import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { el, knob, fader, sw, trig, readout, graphHover, themeInk, accentRGB, chip, hint } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
+import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js'; import { softCapLevels } from './molecular-register.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
 
@@ -56,8 +56,8 @@ export function createOrbitals(host, api) {
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
   const head = el('div', 'row tight sp-head', host);
-  const dialsBtn = el('button', 'trig', head); dialsBtn.type = 'button'; dialsBtn.textContent = 'DIALS';
-  dialsBtn.title = 'Amplitude and phase dials for the selection';
+  /* 044 A3.1 (L109, B13): the kit's trig(); DIALS' face is the sliders glyph (chip, below) until trig() draws a glyph alone */
+  const dialsBtn = head.appendChild(trig({ label: 'DIALS', title: 'Amplitude and phase dials for the selection' }).root);
   dialsBtn.setAttribute('aria-expanded', 'false');
   /* iteration 008 U (Josh: "can it become the 'fill all registers' button?") · ONE two-state button: an empty register shows FILL ALL, any
      other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
@@ -70,8 +70,7 @@ export function createOrbitals(host, api) {
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
   let coreOpen = false;
-  const coreBtn = el('button', 'trig orb-core-toggle', head); coreBtn.type = 'button'; coreBtn.textContent = 'CORE';
-  coreBtn.title = 'Fold the frozen-core levels';
+  const coreBtn = head.appendChild(trig({ label: 'CORE', title: 'Fold the frozen-core levels', cls: 'orb-core-toggle' }).root);
   coreBtn.setAttribute('aria-expanded', 'false'); coreBtn.hidden = true;
   const setCoreOpen = (v) => { coreOpen = !!v; coreBtn.setAttribute('aria-expanded', String(coreOpen)); coreBtn.classList.toggle('on', coreOpen); paint(); };
   coreBtn.addEventListener('click', () => setCoreOpen(!coreOpen));
@@ -133,7 +132,7 @@ export function createOrbitals(host, api) {
   const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on this orbital’s current j', onChange: (v) => setFlow(v) });
   mrow.appendChild(flowSw.root);
   /* iteration 001 (Josh): PRESET · → A · → B and MORPH · FLOW fold behind the head's chevron (lab/fold.js); DIALS and CLEAR are glyphs */
-  { const more = el('div', 'reg-more'); bar.before(more); more.append(bar, mrow); fold(head, more, { what: 'presets, A ↔ B and flow' });
+  { const more = el('div', 'reg-more'); bar.before(more); more.append(bar, mrow); fold(head, more, { what: 'presets, A ↔ B and flow', key: 'presets, A ↔ B and flow' });   // 044 A3.3 (C24): the record's name is frozen as the key; the words are free
     chip(dialsBtn, 'sliders', 'DIALS'); }
   function setFlow(v) {
     flowOn = !!v && !!sol; flowSw.set(flowOn);
@@ -369,16 +368,16 @@ export function createOrbitals(host, api) {
     const nm = el('div', 'sp-name sp-nm', id); writeName(nm, k); nm.title = about(k);
     const es = el('div', 'sp-sub sp-e', id, `k${k + 1} · ${sol.eps[k].toFixed(6)} Eh · ${k < nocc() ? '2 e⁻' : 'virtual'}`);
     id.addEventListener('click', () => { selected = k; paint(); markSel(); });
-    const amp = knob({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp,
-      title: 'Amplitude |c_k| in the register',
+    /* 044 A3.4 (L58, REVIEW-B B16; Josh's control language: a thing's one own parameter is a slider): a lane's amplitude is the slider SPECTRUM's
+       and STATES' lanes carry (`.fd.pop`), in the knob's seat; the quantity stays |c| and its road setAmp */
+    const amp = fader({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp, cls: 'pop',
       fmt: (v) => v.toFixed(3), onInput: (v) => { setAmp(k, v); painted(); } });
+    hint(amp.root, 'Amplitude |c_k| in the register');
     const ph = knob({ label: '<m>arg c</m>', aria: 'phase ' + label(k), min: 0, max: TAU, value: c.phase, wrap: true,
       title: 'Phase arg c_k at t = 0',
       fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => { setPhase(k, v); painted(); } });
     root.appendChild(amp.root); root.appendChild(ph.root);
-    const x = el('button', 'sp-x', root, '×'); x.type = 'button';
-    x.title = 'Take this orbital out of the register'; x.setAttribute('aria-label', 'remove ' + label(k));
-    x.addEventListener('click', () => deselect(k));
+    laneStrip(root, { name: label(k), onRemove: () => deselect(k), remove: 'Take this orbital out of the register' });   // 044 A3.2: the one strip's × (paint-stroke.js)
     return { root, amp, ph, nm, es, k };
   }
   function markSel() { for (const [k, L] of lanes) L.root.classList.toggle('sel', k === selected); }

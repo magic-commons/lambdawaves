@@ -22,7 +22,7 @@
  *     onInput(v) while a drag or a key moves it; onChange(v) when a gesture, a typed number or a key lands.  set(x) is silent.
  *     snap: false keeps a typed or set number as it is (clamped, not rounded to `step`), as a native number input's value is:
  *     the keys and the drag still move by `step` (the RENDER panel's LENGTH, which an app writes to the millisecond). */
-import { el, label, ariaLabel, watchTouches, verticalDrag, setKnobLaw } from '../kit.js';
+import { el, label, ariaLabel, hint, watchTouches, verticalDrag, setKnobLaw } from '../kit.js';
 import { drag as pointerDrag } from '../core/pointer.js';
 import { setText, setAttr } from '../core/perf.js';
 import { cssZoom } from '../core/zoom.js';
@@ -111,24 +111,28 @@ export function number(o = {}) {
   if (o.aria || o.label) { ariaLabel(face, o.aria || o.label); ariaLabel(input, o.aria || o.label); }
   face.setAttribute('role', 'spinbutton');
   if (Number.isFinite(min)) face.setAttribute('aria-valuemin', String(min)); if (Number.isFinite(max)) face.setAttribute('aria-valuemax', String(max));
-  let v = Number.isFinite(o.value) ? o.value : (Number.isFinite(min) ? min : 0), def = v, disabled = false;
+  let v = Number.isFinite(o.value) ? o.value : (Number.isFinite(min) ? min : 0), def = Number.isFinite(o.home) ? o.home : v, disabled = false;   // `home`: where Delete goes (1.6.0-alpha.23)
+  if (o.title) hint(root, o.title);
   const settle = (x) => numberTravel(x, 0, { min, max, step: o.snap === false ? 0 : step });
   const paint = () => { setText(face, fmt(v)); setAttr(face, 'aria-valuenow', String(v)); setAttr(face, 'aria-valuetext', fmt(v)); };
   const model = { get: () => v, min, max,
     set(x) { x = settle(x); if (x !== v) { v = x; paint(); if (o.onInput) o.onInput(v); } },
     commit() { if (o.onChange) o.onChange(v); } };
   const binding = bindNumber({ button: face, input, model, parse: o.parse || parseNumber, enabled: () => !disabled, drag: o.drag !== false, paint, chars: o.chars || NUMBER.chars, step, range: o.range });
-  /* the keys: ↑ → up and ↓ ← down by one step (one unit when there is none), Shift an eighth of it, Page ten */
+  /* the keys: ↑ → up and ↓ ← down by one step (one unit when there is none), Page ten; Shift an eighth of a unit where there is NO step
+     (1.6.0-alpha.21: on a stepped number an eighth of a step rounded straight back, a dead key; one arrow is one step, as on a stepped knob) */
   const unit = step || (Number.isFinite(min) && Number.isFinite(max) ? (max - min) / NUMBER.steps : 1);
   face.addEventListener('keydown', (e) => {
     if (disabled || e.ctrlKey || e.metaKey || e.altKey) return;
     const dir = e.code === 'ArrowUp' || e.code === 'ArrowRight' || e.code === 'PageUp' ? 1 : e.code === 'ArrowDown' || e.code === 'ArrowLeft' || e.code === 'PageDown' ? -1 : 0;
-    if (dir) { e.preventDefault(); model.set(v + dir * unit * (e.code.startsWith('Page') ? 10 : 1) * (e.shiftKey ? 1 / setKnobLaw().fine : 1)); model.commit(); return; }
+    if (dir) { e.preventDefault(); model.set(v + dir * unit * (e.code.startsWith('Page') ? 10 : 1) * (e.shiftKey && !step ? setKnobLaw().keyFine : 1)); model.commit(); return; }   // keyFine, the arrow's own gear (1.6.0-alpha.22: it read the DRAG's divisor)
     if (e.code === 'Home' && Number.isFinite(min)) { e.preventDefault(); model.set(min); model.commit(); } else if (e.code === 'End' && Number.isFinite(max)) { e.preventDefault(); model.set(max); model.commit(); }
     else if (e.code === 'Delete' || e.code === 'Backspace') { e.preventDefault(); model.set(def); model.commit(); }
   });
   paint();
-  return { root, face, input, get: () => v, set(x) { v = settle(x); paint(); }, setDefault(x) { def = x; },
+  /* THE VALUE DOOR, as the knob's (1.6.0-alpha.26; `input` is the field here, so the door's hand is `write`): home() = Delete, write(x) = a typed value */
+  root.mirKnob = { root, get: () => v, home() { if (!disabled) { model.set(def); model.commit(); } }, input(x) { if (!disabled) { model.set(x); model.commit(); } } };
+  return { root, face, input, get: () => v, set(x) { v = settle(x); paint(); }, setDefault(x) { def = x; }, home: root.mirKnob.home, write: root.mirKnob.input,
     setDisabled(on) { disabled = !!on; root.classList.toggle('disabled', disabled); face.disabled = disabled; if (disabled) binding.close(false); },
     open: binding.open, close: binding.close, get editing() { return binding.editing; }, destroy() { binding.destroy(); root.remove(); } };
 }

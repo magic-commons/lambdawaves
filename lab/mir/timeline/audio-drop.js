@@ -60,7 +60,7 @@ export function installAudioDrop(editor, { mod, controller, say = () => {}, busy
       const field = el('div', 'tl-field tl-audio-target', pop), list = targets().map(([id, name]) => ({ id, label: name }));   // data: the target's own label
       const first = registry?.has?.(last) ? last : registry?.has?.('palette.phase') ? 'palette.phase' : list[0]?.id || '';
       label(el('span', 'tl-field-word', field), 'DRIVES');
-      const pickTarget = select({ aria: 'Target the envelope drives', items: list, value: first, cls: 'tl-audio-select' }); field.append(pickTarget.root);
+      const pickTarget = select({ aria: 'Target the envelope drives', options: list, value: first, cls: 'tl-audio-select' }); field.append(pickTarget.root);
       const life = new AbortController(), done = (v) => { life.abort(); pickTarget.destroy(); pop.remove(); resolve(v); };
       for (const { label: text, keep, hint: tip } of CHOICES) {
         const b = el('button', 'trig tl-action', pop); b.type = 'button'; label(b, text); b.dataset.audio = keep === null ? 'cancel' : keep ? 'keep' : 'signal';

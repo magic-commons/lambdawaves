@@ -188,7 +188,7 @@ export function createRenderView(parent, o = {}) {
       return asField(s.root, key, () => (s.get() ? on : off), (v) => s.set(v === on), (dis) => s.root.toggleAttribute('disabled', dis));
     }
     const changed = () => ctl.root.dispatchEvent(new Event('change'));
-    const ctl = kind === 'segment' ? seg({ aria, options: items, value, onChange: changed }) : select({ aria, items, value, onChange: changed });
+    const ctl = kind === 'segment' ? seg({ aria, options: items, value, onChange: changed }) : select({ aria, options: items, value, onChange: changed });
     if (kind === 'segment' && !at) line.classList.add('sr-' + key + '-row');   // the rack card lays a segment's row out (render.css .sr-fps-row)
     ctl.root.classList.add('sr-sel'); line.appendChild(ctl.root);
     return asField(ctl.root, key, () => ctl.get(), (v) => ctl.set(v),

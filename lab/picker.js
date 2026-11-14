@@ -18,6 +18,7 @@
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
 import { el, chip, mathPlain, stepper, seg, hint, wheelTurn } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
+import { pageDots } from './pager.js';
 import { chordFromEvent } from './mir/shell/keys.js';   // 039 R5: the menu's own chord passes to the key table while the menu holds the keys
 import { CHEM_PRESETS } from './chemview.js';
 import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
@@ -542,13 +543,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const near = (k) => { fill(k); fill(k - 1); fill(k + 1); };   // the page first, then its neighbours (iteration 012 L3: the requests in that order)
     function paint() {
       arrows[0].disabled = page <= 0; arrows[1].disabled = page >= pages.length - 1; foot.style.visibility = pages.length < 2 ? 'hidden' : '';   // iteration 012 L1: a one-page deck keeps the line, so the head never moves
-      if (pages.length <= 16) {
-        if (foot.dataset.mode !== 'dots' || foot.childElementCount !== pages.length) {
-          foot.textContent = ''; foot.dataset.mode = 'dots';
-          pages.forEach((_, i) => { const d = el('button', 'mm-dot', foot); d.type = 'button'; d.setAttribute('aria-label', 'page ' + (i + 1)); d.addEventListener('click', () => pageTo(i)); });
-        }
-        [...foot.children].forEach((d, i) => d.classList.toggle('on', i === page));
-      } else { foot.dataset.mode = 'count'; foot.textContent = (page + 1) + ' / ' + pages.length; }
+      pageDots(foot, page, pages.length, pageTo);   // 044 A3.3: the one page dots (lab/pager.js)
     }
     function size() {
       const narrow = innerWidth < 700, gap = narrow ? 6 : room;
