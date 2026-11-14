@@ -41,12 +41,12 @@
 .nodes-tools { position: absolute; top: 6px; left: 6px; z-index: 1; display: flex; gap: 2px; }
 .nodes-tools button { border-radius: var(--r-sm); background: var(--glass-tint); }
 /* 038 N3 · THE BAR: the window's dock door is a title-bar head button (the kit's .mir-win-btn), its glyph a size under the bar's 18; the card's
-   pop-out door wears × 's look before it (22 px, round, the dim ink, the head's 14-px glyph) — the seat's size under :where() so a finger's 44 still wins */
+   pop-out door wears × 's look before it (the head's seat and glyph: --head-btn, --head-glyph; round, the dim ink) — the seat's size under :where() so a finger's 44 still wins */
 .mir-win-btn.nodes-door > svg { width: 16px; height: 16px; }
 .dev-util > .nodes-door { padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--dim); cursor: pointer; }
-.dev-util > :where(.nodes-door) { width: 22px; height: 22px; }
+.dev-util > :where(.nodes-door) { width: var(--head-btn); height: var(--head-btn); }
 .dev-util > .nodes-door:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
-.dev-util > .nodes-door > svg { width: 14px; height: 14px; }
+.dev-util > .nodes-door > svg { width: var(--head-glyph); height: var(--head-glyph); }
 /* 020 X1 · the ground: focus, the selection's accent outline, the shift-drag box */
 .nodes-ground:focus-visible { outline: 1px solid color-mix(in srgb, var(--acc) 50%, transparent); outline-offset: -1px; }
 .nodes-card.sel { outline: 2px solid var(--acc); outline-offset: 2px; }

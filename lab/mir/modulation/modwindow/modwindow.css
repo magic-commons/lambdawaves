@@ -837,7 +837,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   font-size: var(--m2-fs-7); }
 .mir-modwindow .m2prenav:active:not(:disabled), .mir-modwindow .m2presave:active:not(:disabled),
 .mir-modwindow .m2predel:active:not(:disabled) { background: var(--state-press, var(--glass-press)); color: var(--m2-ink-w100); }
-.mir-modwindow .m2prenav:disabled, .mir-modwindow .m2presave:disabled, .mir-modwindow .m2predel:disabled { opacity: var(--state-disabled, 0.30); }
+.mir-modwindow .m2prenav:disabled, .mir-modwindow .m2presave:disabled, .mir-modwindow .m2predel:disabled { opacity: var(--state-disabled, .38); }
 /* ARMED — one tap asks, the second acts.  A confirm that costs a modal is a
    confirm nobody reads; a button that says SURE for four seconds is one. */
 .mir-modwindow .m2presave.m2arm { border-color: var(--acc); color: var(--acc); }
@@ -928,7 +928,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   background: transparent; color: var(--acc2);
   font: var(--m2-macadd-font-2); letter-spacing: var(--label-tracking, var(--m2-tr-08)); line-height: 1; }
 .mir-modwindow .m2macadd:active:not(:disabled), .mir-modwindow .m2devadd:active:not(:disabled) { background: var(--acc2-soft); }
-.mir-modwindow .m2macadd:disabled, .mir-modwindow .m2devadd:disabled { opacity: var(--state-disabled, 0.30); }
+.mir-modwindow .m2macadd:disabled, .mir-modwindow .m2devadd:disabled { opacity: var(--state-disabled, .38); }
 /* Every slot is one fixed controller row.  Its three permanent zones are the
    route grip, a future-ready 44 px number seat, and the information face. */
 .mir-modwindow .m2slot { position: relative; height: 64px; box-sizing: border-box;
@@ -1018,7 +1018,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   padding: 0; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline);
   background: transparent; color: var(--m2-ink-w62); font-size: var(--fs-lead); line-height: 1; }
 .mir-modwindow .m2mclr:active:not(:disabled) { background: var(--state-press, var(--glass-press)); color: var(--m2-ink-w100); }
-.mir-modwindow .m2mclr:disabled { opacity: var(--state-disabled, 0.30); }
+.mir-modwindow .m2mclr:disabled { opacity: var(--state-disabled, .38); }
 /* The trigger uses the same information anatomy; its signal line is the live
    hit level and the face remains the existing press/hold target. */
 .mir-modwindow .m2pad { padding: 0; color: var(--acc2); }
@@ -1093,7 +1093,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 .mir-modwindow .m2ab::before { content: ""; position: absolute; left: -2px; right: -2px; top: 50%;
   height: 44px; margin-top: -22px; }
 .mir-modwindow .m2ab:active { background: var(--state-press, var(--glass-press)); color: var(--acc); }
-.mir-modwindow .m2ab[disabled] { opacity: var(--state-disabled, 0.32); }
+.mir-modwindow .m2ab[disabled] { opacity: var(--state-disabled, .38); }
 /* THE REORDER ARROWS.  Presentation order and nothing else — mod.js's
    moveSource carries the proof that a move cannot reach a routing. */
 .mir-modwindow .m2move { flex: 0 0 auto; width: 34px; height: 40px; min-height: 40px; padding: 0; border: 0;
@@ -1102,7 +1102,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 .mir-modwindow .m2move::before { content: ""; position: absolute; left: -2px; right: -2px; top: 50%;
   height: 44px; margin-top: -22px; }
 .mir-modwindow .m2move:active { background: var(--state-press, var(--glass-press)); color: var(--m2-ink-w100); }
-.mir-modwindow .m2move[disabled] { opacity: var(--state-disabled, 0.24); }
+.mir-modwindow .m2move[disabled] { opacity: var(--state-disabled, .38); }
 /* The folded strip. */
 /* A folded strip is as tall as the device. */
 /* A folded device is 64 px wide and the view's height. */
@@ -1665,7 +1665,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 #modwin.mir-modwindow .modcad.on, #modwin.mir-modwindow .m2audsrc.on {
   box-shadow: var(--m2-chk-on-line); }
 #modwin.mir-modwindow button:disabled, #modwin.mir-modwindow input:disabled {
-  opacity: var(--state-disabled, .48); filter: var(--m2-button-off-filter); border-style: dashed; cursor: not-allowed; }
+  opacity: var(--state-disabled, .38); filter: var(--m2-button-off-filter); border-style: dashed; cursor: not-allowed; }
 /* WindowKit's global freeze still owns refusal and its known pointer fall-through.
    The hatch and explicit edge make a locked control more than a faded control. */
 #modwin.mir-modwindow .kctl.ctl-frozen {
@@ -1944,7 +1944,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   font: var(--m2-modtap-font); letter-spacing: var(--label-tracking, var(--m2-tr-06));
   cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none;
   -webkit-touch-callout: none; }
-.modwin.mir-modwindow .m2hold:disabled { opacity: var(--state-disabled, 0.34); cursor: default; }
+.modwin.mir-modwindow .m2hold:disabled { opacity: var(--state-disabled, .38); cursor: not-allowed; }
 /* A held hold button. */
 .modwin.mir-modwindow .m2hold.held { color: var(--acc); border-color: var(--acc);
   box-shadow: var(--m2-held-shadow); }

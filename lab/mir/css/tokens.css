@@ -104,6 +104,25 @@
   }
 }
 
+/* ── 1.6.0-alpha.42 · THE STRONGER GROUND WHERE NOTHING CAN BLUR (λWAVES 044, the picture sheet's tick 9).  A REFRACTIVE pane is legible because
+   of its blur; VEIL can thin it to 5 %, and the look store writes that veil on <body> itself, where no layered rule outranked it — so on a browser
+   with no backdrop filter at all, or under reduced transparency, a window was the bare picture with words on it.  Two gates the platform already
+   answers (no detector): a browser that does not know `backdrop-filter` takes the lite surface values, as reduced transparency does above; and in
+   both the pane's veil is the tinted fill WHATEVER the store wrote (`!important` in a layer outranks an inline declaration that is not).  A user
+   who sets FROST to OFF by hand is in neither gate and keeps his veil; QUALITY · BALANCED / LIGHT were already the tier's (the store writes no veil
+   below FULL). ── */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :where(html) { --surface-filter: none; --frost-filter: none; --glass-filter: none; }
+  :where(body) {
+    --surface-fill: hsl(var(--glass-tint) / var(--card-opacity));
+    --surface-veil: hsl(var(--glass-tint) / var(--card-opacity)) !important;
+  }
+  :where(body.frost[data-card="tinted"]) { --card-opacity: var(--glass-opacity); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :where(body) { --surface-veil: hsl(var(--glass-tint) / var(--card-opacity)) !important; }
+}
+
 /* ── FLAT: relief off, shadows off, sheen off, motion 0s ── */
 :where(html[data-ui-tier="flat"]) {
   --relief-raise: 0 0 0 0 transparent;

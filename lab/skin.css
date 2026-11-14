@@ -135,6 +135,12 @@ body.frost[data-card="tinted"] #transport.mini { -webkit-backdrop-filter: var(--
 /* 022 P2 · A POPUP WEARS THE SKIN: a menu pane (`.glass[data-mir-surface="menu"]`) is left to the kit's surface law and its menu floor */
 body.frost[data-card="refractive"] .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"] .glass:not(:where(.mir-modwindow, .mir-modwindow *, [data-mir-surface="menu"])), body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
 body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .glass:not(:where(.mir-modwindow, .mir-modwindow *, [data-mir-surface="menu"])), body.frost #transport { background: hsl(0 0% 100% / .10); }
+/* 044 KV1 (L148; the picture sheet, section 9, light, picture C) · THE LIGHT VEIL YIELDS WHERE NOTHING BLURS: the rule above paints the
+   light theme's pane as a literal, so at QUALITY · BALANCED / LIGHT (html[data-ui-tier]) and under reduced transparency a floating window
+   (ABOUT) stayed 10 % white with no blur while the rack's cards took the tier's solid ground.  There, and only there, the pane reads the
+   kit's --surface-veil (the tinted fill); at QUALITY · FULL the glass is untouched. */
+html[data-ui-tier] body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) :is(.dev, .glass):not(:where(.mir-modwindow, .mir-modwindow *, [data-mir-surface="menu"])) { background: var(--surface-veil, hsl(0 0% 100% / .10)); }
+@media (prefers-reduced-transparency: reduce) { body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) :is(.dev, .glass):not(:where(.mir-modwindow, .mir-modwindow *, [data-mir-surface="menu"])) { background: var(--surface-veil, hsl(0 0% 100% / .10)); } }
 /* 0.5.0 fix · B139 (wave 67): FROST · STILL changes the FILTER, never the material.  MIR 1.5's hold also swaps a REFRACTIVE
    veil for the tinted fill (mir/css/skin.css "FROST · STILL"); λWAVES' panes keep the veil (light joined: the twin above). */
 body.frost.frost-hold[data-card="tinted"] { --card-opacity: var(--frost-opacity); }   /* B139 TINTED (0.5.0 fix round 1b): the kit thins a tinted pane only while it blurs (mir/css/skin.css:522) and restores it under the hold — the fill must not move while playing */
@@ -264,10 +270,6 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 /* 041 D4: a head's own glyph (rack-wiring.js) shows only as the DRAG HANDLE's ICON (the kit's body.icon-grip) */
 body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 /* 041 D0 · SPACING REACHES THE RACKS, THE WINDOWS AND THE BAR: MIR OPTIONS' SPACING knob writes --rack-gap / --rack-inset (the racks, line 2) and --pad-k (a pane's padding over home's; csb.css the bar); at home, 10 px, it writes nothing */
-.native-clean .dev-body { padding: calc(10px * var(--pad-k, 1)) calc(12px * var(--pad-k, 1)); }
-.native-clean .grp { border: 0; outline: 0; box-shadow: none; background: none; padding: 0; margin: 0 0 12px; }
-.native-clean .grp-lbl { font-size: var(--fs-micro); color: var(--dim); letter-spacing: var(--tr-wide); margin: 4px 0 8px; }
-.native-clean .row { gap: 8px; align-items: center; justify-content: center; margin: 6px 0; }
 .native-clean .ro { min-width: 0; box-shadow:var(--relief-well, var(--neu-inset));border:0;background:var(--glass-well); }
 .native-clean .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .native-clean .ro-sub { height: 2.6em; overflow: hidden; line-height: 1.3; }
@@ -293,7 +295,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 @media (pointer: coarse) { .native-info-button, .native-tempo .trig { min-width: 44px; min-height: 44px; }
 }
 .native-clean [hidden] { display: none !important; }
-.native-clean .row > .trig { flex: 1 1 76px; min-width: 0; }
 .native-clean .sp-head { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
 .native-clean .sp-head .trig { padding: 0 3px; font-size: var(--fs-tiny); }
 .native-clean .sp-head .native-info { grid-row: 2; }
@@ -302,11 +303,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }
 .native-clean[data-id="observer"] .segw > .k-lbl { margin-bottom: 5px; }
 .native-clean[data-id="observer"] .row > .segw { width: 100%; flex: 1 1 100%; }
-.native-clean .segw { align-items: stretch; }
-.native-clean .segw > .seg { width: 100%; box-sizing: border-box; }
 .native-clean[data-id="observer"] .seg-b { min-height: 32px; }
-.native-clean .row { min-height: 0; }
-.native-clean .grp > .row { padding: 0; }
 .native-clean[data-id="palette"] .grp-lbl, .native-clean[data-id="clip"] .grp-lbl { display: none; }
 .native-clean[data-id="observer"] .wave-row > .segw > .seg { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%; }
 .native-clean[data-id="observer"] .wave-row-0 > .segw > .seg, .lw-dither > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -316,13 +313,11 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
 .native-clean .window-help-book > .note, .native-clean .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
 .native-clean .native-info-content .ro-sub { height:auto; }
-.native-clean .row:empty { display:none; }
 .native-info .native-info-content { border:0; }
 .native-clean[data-id="spectrum"] .grp > .row > .segw { flex:1 1 100%; }
 .native-clean[data-id="spectrum"] .grp > .row:first-of-type .seg { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
 .native-clean[data-id="spectrum"] .grp .seg button { padding:0 5px;min-width:0; }
 .native-clean[data-id="spectrum"] .grp .k-lbl { max-width:100%; }
-.native-clean > .dev-body { gap:4px; }
 .native-clean .k-val { position:absolute;top:100%;left:50%;transform:translate(-50%,2px);z-index:2; }
 .native-clean .k:hover .k-val, .native-clean .k:focus-within .k-val, .native-clean .k.drag .k-val, .native-clean .k[data-live] .k-val { transform:translate(-50%,0); }
 .native-clean[data-id="observer"] .wave-row { margin-bottom:8px; }

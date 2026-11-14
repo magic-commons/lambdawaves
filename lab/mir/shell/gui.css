@@ -36,8 +36,8 @@ body.window-info-off .mir-gui .gui-help { visibility: hidden; }
   padding: var(--gui-grp-pad); border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--gui-grp-r);
 }
 .gui-grp > * { flex-shrink: 0; }                            /* a title or a row never gives up height: every title keeps the same inset */
-/* a group's title is the house label */
-.gui-grp-lbl { margin: 0; font-size: var(--fs-micro); font-weight: var(--w-bold); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint); line-height: 1; }
+/* a group's title is the house label, light as a card's .grp-lbl (1.6.0-alpha.37; it was bold) */
+.gui-grp-lbl { margin: 0; font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint); line-height: 1; }
 .gui-line { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-2); }
 .gui-line.gui-knobs { justify-content: space-between; flex-wrap: nowrap; }
 .gui-line.gui-knobs > .sw.gui-link { flex: 0 0 auto; align-self: center; }   /* RELIEF's LINK, in a dial row */

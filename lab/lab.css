@@ -359,7 +359,7 @@ canvas:hover + .reg-foot, .dev:has(:focus-visible) .reg-foot { opacity: .8; }
 .sp-x { width: 26px; height: 40px; border: 0; background: transparent; color: var(--ink-faint); font-size: var(--fs-lead); border-radius: 6px; }
 .sp-x:active { color: var(--bad); background: var(--glass-press); }
 /* LEAN: a window without its paragraphs and readout tiles (rack.js, the Aa header button) */
-.dev-lean { width: 26px; height: 22px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-faint); font-size: var(--fs-base); font-weight: var(--w-bold); letter-spacing: 0; cursor: pointer; }
+.dev-lean { width: var(--head-btn); height: var(--head-btn); padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-faint); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: 0; cursor: pointer; }
 .dev-lean.on { color: var(--acc); text-decoration: line-through; }
 /* 0.4.0 S0: MOLECULES keeps its Aa with HELP off — LEAN is on by default and its readouts (E, ε, Tr DS) have no other road back */
 body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-lean { display: none; }   /* iteration 012 R1: INFORMATIONAL's Aa is its STATUS switch, never a note toggle */
@@ -434,7 +434,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .pk-n { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; gap: 4px; }
 .pk-nl { font-size: var(--fs-small); color: var(--nc); padding-top: 9px; text-align: center; }
 .pk-chips { display: flex; flex-wrap: wrap; gap: 3px; }
-.pk-c { min-width: 38px; height: 34px; padding: 0 4px; border-radius: 5px; border: var(--glass-border) solid var(--glass-hairline); font-size: var(--fs-tiny); }
+.pk-c { min-width: 38px; height: 34px; padding: 0 4px; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); font-size: var(--fs-tiny); }
 .pk-c.on { background: color-mix(in oklab, var(--nc) 28%, transparent); color: var(--fg); border-color: color-mix(in oklab, var(--nc) 60%, transparent); }
 /* ATOMS' PERIODIC TABLE (0.4.0 S3 · R-A2; atomsview.js): SPECTRUM's picker, every period a row.  Iteration 008 A took it to Rn: 86 cells
    do not fit the old columns (period 6 alone is 32), so the cells are small — eight to a row on the 300 px card, about as tall as the

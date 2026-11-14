@@ -190,15 +190,14 @@ export function lookSchema({ tier = () => null, spacingHome = SPACING_PX.default
     /* SCROLL PILL (1.5.0-alpha.25, from λWAVES): the window's name beside its title bar while a rack scrolls (rack.css); A, the scrollbar's accent, writes nothing (014 A10) */
     { key: 'rackPill', type: 'enum', values: ['off', 'a', 'b'], default: 'a', apply: [{ on: 'body', attr: 'data-rack-pill', map: (v) => (v === 'a' ? null : v) }] },
     /* SPACING — the rack's air (Josh, 2026-10-01: "the dock margins are too large … an option for 0 padding/margins"):
-       BASINS' levels 0 · TIGHT · DEFAULT (and AIRY, this kit's) to --rack-gap, --rack-inset, --pane-pad and --rail-gap
+       BASINS' levels 0 · TIGHT · DEFAULT (and AIRY, this kit's) to --rack-gap, --rack-inset, --pad-k and --rail-gap
        (core/look.js SPACING); 0 is flush (html[data-flush]) */
     /* 1.5.7-alpha.57 SPACING IS A KNOB (λWAVES 041 W6): px under the same key — the old levels open as 0 · 3 · 6 · 16 (`legacy`).  At the
-       HOME value (6, or the app's `defaults.spacing`) the pane's padding stays the sheets' own; --pad-k (the pane's padding over home's)
+       HOME value (6, or the app's `defaults.spacing`) the pane's padding stays the sheets' own; --pad-k (the pane's padding over home's: a card's body too, 1.6.0-alpha.36)
        carries SPACING into floating windows, the bars and the menus (window.css, transport.css, shell.css) */
     { key: 'spacing', type: 'number', min: 0, max: SPACING_MAX, step: 1, default: SPACING_PX.default, legacy: SPACING_PX, apply: [
       { on: 'html', prop: '--rack-gap', map: (v) => spacingPx(v).gap + 'px' },
       { on: 'html', prop: '--rack-inset', map: (v) => spacingPx(v).inset + 'px' },
-      { on: 'html', prop: '--pane-pad', map: (v) => (v === spacingHome ? null : spacingPx(v).pad + 'px') },
       { on: 'html', prop: '--pad-k', map: (v) => (v === spacingHome ? null : (spacingPx(v).pad / spacingPx(spacingHome).pad).toFixed(3)) },
       { on: 'html', prop: '--rail-gap', map: (v) => spacingPx(v).rail + 'px' },
       { on: 'html', attr: 'data-flush', map: (v) => (v === 0 ? '' : null) }] },
