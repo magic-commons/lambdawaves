@@ -46,7 +46,8 @@
      chip (mir/window/window.css), so the rail and the widgets draw ON one way. */
   --state-on: hsl(0 0% 100% / .086);
   --state-on-rim: inset 0 0 0 1px hsl(0 0% 100% / calc(.30 * var(--ctl-stroke))), inset 0 1px 0 hsl(0 0% 100% / .12);   /* 1.5.7-alpha.1: the ring × STROKE; the top light stays */
-  --state-press-scale: .96;                                       /* pressed: the wash and this small scale (INTENT O6) */
+  --state-press-scale: .96;                                       /* pressed: the wash and this small scale, on a pressable with a word (INTENT O6) */
+  --state-press-scale-round: .92;                                 /* … and on a round glyph button: a head's buttons, a rail's chips (1.6.0-alpha.40) */
   --state-disabled: .38;                                          /* the one fade, relief removed (INTENT O6) */
   --glass-well: hsl(0 0% 0% / .28); --glass-raise: hsl(0 0% 100% / .045); --glass-press: hsl(0 0% 100% / .12);
   --glass-groove: hsl(0 0% 100% / .08); --glass-groove-hot: hsl(0 0% 100% / .14);
@@ -121,6 +122,7 @@ body[data-theme="light"] {
   --glass-hue: 214; --glass-sat-tint: 22%; --glass-lum: 93%; --glass-tint: 214 22% 93%; --glass-opacity: .86;
   --card-opacity: var(--glass-opacity);                            /* .86, as the note on :root says it should be (it resolved at :root, .84); BASINS' tinted pane */
   --fg: hsl(214 30% 10%); --fg-soft: hsl(214 20% 18%); --dim: hsl(214 12% 36%); --ink-key: hsl(214 12% 30%); --ink-faint: hsl(214 10% 42%);
+  --ok: hsl(142 50% 28%); --warn: hsl(32 80% 32%); --bad: hsl(4 62% 40%);   /* 1.6.0-alpha.42: the status inks on a light pane (the dark theme's 70 % pastels read 1.6 : 1 on it); each ≥ 4.5 : 1 on the light card (236 239 243) */
   --glass-border-color: hsl(214 30% 40% / .22); --glass-hairline: hsl(214 30% 30% / .16);
   --glass-sheen: linear-gradient(hsl(0 0% 100% / .55), hsl(0 0% 100% / .55));   /* the same flat white wash it always was — but as an IMAGE, so it is a legal background LAYER (§14c) */
   --glass-well: hsl(214 30% 40% / .10); --glass-raise: hsl(0 0% 100% / .55); --glass-press: hsl(214 30% 40% / .16);
@@ -331,7 +333,7 @@ body[data-theme="light"] :is(.mir-modwindow, .kwin-chiprail, .m2ghost, [data-mir
   transition: box-shadow var(--t-fast); }
 
 
-.dev-head { position: relative; height: 34px; padding-inline-start: 28px; background: transparent; border-bottom-color: var(--glass-hairline); border-radius: var(--surface-radius, var(--card-r)) var(--surface-radius, var(--card-r)) 0 0;
+.dev-head { position: relative; padding-inline-start: 28px; background: transparent; border-bottom-color: var(--glass-hairline); border-radius: var(--surface-radius, var(--card-r)) var(--surface-radius, var(--card-r)) 0 0;
   cursor: grab; }                                                             /* the header is the drag handle */
 .dev-head::before { content: ""; position: absolute; inset-inline-start: 8px; top: 50%; width: 15px; height: 15px; margin-top: -7.5px;
   color: var(--ink-faint); pointer-events: none;
@@ -370,10 +372,9 @@ body.icon-grip .dev-head .dev-glyph { width: 15px; height: 15px; }
 .dev:hover .dev-eyebrow, .dev.tab-hot .dev-eyebrow { opacity: 1; }
 .dev-title { color: var(--fg-soft); }                                         /* resting titles are achromatic … */
 .dev:hover .dev-title, .dev.tab-hot .dev-title, .dev:hover .dev-eyebrow, .dev.tab-hot .dev-eyebrow { color: var(--acc); }         /* … the accent answers the pointer */
-.dev-fold { color: var(--ink-faint); border-radius: var(--r-md); }
+.dev-fold { color: var(--ink-faint); }
 .dev-fold:hover { color: var(--fg-soft); background: var(--state-hover, var(--glass-raise)); }
 .dev.tab-hot { outline-color: var(--dev-tab-ring); }
-.dev-body { padding: var(--pane-pad, var(--sp-3) var(--sp-3) var(--sp-4)); }   /* SPACING reaches inside the window (rack.css) */
 /* ── 3b. THE SHINE on a rack card: its own layer, blended additively (Josh: "set blend mode to 'add'").  A box-shadow
    cannot blend, so the card's free ::before draws the shine (--shine-term) and blends it with plus-lighter, and the
    card's own shadow drops the shine layer.  The card's paint containment is lifted while it shines (a contained card
@@ -459,7 +460,7 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
 /* DISABLED (INTENT): one fade, and no relief — a control that stands down neither stands proud nor sinks.  The one
    rule for every control (the knob and the fader were faded twice, .38 in base.css and .3 here: L55–L58).  It sits
    after .on so a disabled ON control loses its rim too. */
-.k.disabled, .fd.disabled, .sw.disabled, .sw:disabled, .seg-b:disabled, .trig:disabled { opacity: var(--state-disabled, .38); pointer-events: none; box-shadow: 0 0 0 0 transparent; }
+.k.disabled, .fd.disabled, :is(.sw, .seg-b, .trig):is(.disabled, :disabled, [aria-disabled="true"]) { opacity: var(--state-disabled, .38); pointer-events: none; box-shadow: 0 0 0 0 transparent; }   /* 1.6.0-alpha.39: a button stands down by the class, the attribute or aria alike */
 /* 1.5.0-alpha.28 (λWAVES 017, call 11): a DISABLED SEG BUTTON KEEPS ITS HINT — it takes the pointer again so the hover reaches the hint
    (control-help.js' pointerover), and the browser itself refuses a disabled button's click; no hover or press face answers it */
 .seg-b:disabled { pointer-events: auto; cursor: not-allowed; }
@@ -474,9 +475,13 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
    the kit builds (S2: the trigger, switch, segment, knob, fader and select had the browser's ring).  An outline, not a
    shadow, so it never has to be composed with each control's own relief.  The knob is focused as a whole (.k) and
    rings its puck. */
-:is(.trig, .sw, .seg-b, .fd, select.sel, .dev-util > button, .dev-fold, .native-info-button, .plane-model, .corner-axis-hit):focus-visible,
+:is(.trig, .sw, .seg-b, .fd, select.sel, .dev-util > button, .dev-fold, .native-info-button, .plane-model, .corner-axis-hit, .badge, .mir-bank-page, .mir-bank-plus, .mir-bank-grip):focus-visible,
 .k:focus-visible .k-dial { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 .k:focus-visible { outline: none; }
+/* 1.6.0-alpha.41 · THE RING REACHES THE FINDER (λWAVES 044, L62): its rows showed the browser's own ring and its search none.  Both wear the
+   house ring, drawn inside the box (the list clips its rows, the field is the pane's edge).  `:focus:focus-visible` weighs one more than the
+   picker's own `.wp-search:focus { outline: 0 }`, which loads later. */
+.mir-window-picker :is(.wp-row, .wp-search):focus:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -2px; }
 @media (prefers-reduced-motion: reduce) { .k:hover .k-dial, .trig:hover { translate: none; } }   /* the hover keeps its lighter face; the lift is travel */
 
 /* ── 7. fader: a well with a thin fill; the value appears on touch ─────── */
@@ -706,8 +711,7 @@ body.disconnected:not(.phone) .dev.dragging > .dev-body {
      the desk (LW.layout.copyDigest(id) still answers).  The four that remain — ⓘ ⏻ ▾ × — take a
      44 × 44 seat each at a 44-px pitch, which is 176 px of a 279-px header and leaves the eyebrow its
      width.  The INK of every one of them is unchanged. */
-  .dev-head { height: var(--touch); }
-  .dev-head::before { top: 17px; }                                          /* the six-dot grip, recentred */
+  .dev-head { --head-h: var(--touch); --head-btn: var(--touch); }           /* the head scale, a finger's (alpha.35): the head, its seats and the ⏻ in its seat follow */
   /* WAVE 55 · THE HOUSE FORM FOR HIDING A HEADER CHIP IS THE CHILD COMBINATOR.  lab.css §55b sets
      `display: inline-flex` on `.dev-util > button` so a drawing centres in its seat, and that selector
      is (0,1,1) — a bare `.dev-swap { display: none }` at (0,1,0) loses to it whatever the source order,
@@ -720,20 +724,16 @@ body.disconnected:not(.phone) .dev.dragging > .dev-body {
      here with every one of them DOCKED (rack.js, `applyLayout`). */
   .dev-util > .dev-pop, .dev-util > .dev-rail { display: none; }   /* the child combinator, for the same reason lab.css §55 gives: `.dev-util > button` sets display at (0,1,1) */
   .dev-util { gap: 0; }
-  .dev-util > button { width: var(--touch); height: var(--touch); margin: 0; flex: 0 0 auto; }
+  .dev-util > button { margin: 0; }
   /* the two ROUND ones keep a 22-px puck inside a 44-px box: the fill and its 1-px rim are painted into
      the CONTENT box instead of onto the border box.  Same two colours, same 22 px, same place. */
   .dock-btn { width: var(--touch); height: var(--touch); }
   .dock-btn { padding: calc((var(--touch) - 22px) / 2); border: 0; border-radius: 50%;
     background-origin: content-box; background-clip: content-box;
     background-image: radial-gradient(closest-side, var(--glass-raise) calc(100% - 1.5px), var(--glass-hairline) calc(100% - 1.5px) 100%, transparent 100%); }
-  .dev-power { padding: calc((var(--touch) - 22px) / 2); border: 0; border-radius: 50%; background: transparent; }   /* the icon alone, centred in the touch target; nothing painted */
-  .dev-power::before { inset: calc((var(--touch) - 22px) / 2 + 6px); }      /* the ⏻ ring, where it always sat in the puck */
-  .dev-power::after { top: calc((var(--touch) - 22px) / 2 + 4px); }         /* … and its tick */
 
   /* (b) the widgets.  Every seat that was under 44 px grows its SEAT, never its glyph. */
   .seg-b { min-width: var(--touch); min-height: var(--touch); }   /* the track wraps, so a wider seat costs a row, not a control */
-  .dev-fold { height: var(--touch); }
   /* THE ARC'S GRAB BAND IS THICKER UNDER A FINGER — and wave 63 had to say what "thicker" costs.
      It used to read "it still never eats the dial's own face", which was true of the 34-px FACE and
      false of the 44-px TARGET: with the band centred at r = 21.5 an 11-px stroke ran from 16 to 27
@@ -803,7 +803,7 @@ body[data-card] :is(.native-info .native-info-content, .control-help):not([hidde
 @media (pointer: coarse) { .native-info-button { min-width: var(--touch, 44px); min-height: var(--touch, 44px); } }
 .native-info .native-info-content { position:fixed !important; inset:auto; margin:0; }   /* the border is the pane's, above */
 .native-info .native-info-content:popover-open { display:block !important; }
-.plane-model[aria-disabled="true"] { opacity:var(--state-disabled, .38);cursor:default; }
+.plane-model[aria-disabled="true"] { opacity:var(--state-disabled, .38);cursor:not-allowed; }
 .plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));border-radius:var(--r-md); }
 body.window-info-off .native-info, body.window-info-off .native-info-content { display:none !important; }
 body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info))) { display:none; }

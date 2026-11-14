@@ -19,9 +19,8 @@
    the rail and re-pointed seat by seat (theme × card × frost) on the selectors it always had, in the order it always
    had; the rules below read names only. */
 :root { --chip-hover-scale: 1.06; --chip-press-scale: .92; }     /* HOVER grows the disc 6 %, PRESS sinks it to 92 % */
-/* the title bar of a rail-less window (chrome: 'close'): its height, its two buttons' seat and glyph; a finger's 44 on a
-   touch tablet (below) */
-.mir-win { --win-head-h: 38px; --win-head-btn: 32px; --win-head-glyph: 18px; --win-head-press: .92; }
+/* the title bar of a rail-less window (chrome: 'close') reads THE HEAD SCALE (base.css --head-h, --head-btn, --head-glyph: the
+   one a rack card's head reads, 1.6.0-alpha.35); a finger's 44 on a touch tablet (below) */
 /* the resize corner's two hairlines, drawn toward the corner the window grows from: bottom right (135°), or top right
    (45°) docked at the bottom.  The angle is the only thing that turns: no transform on the handle, so a sheet that
    draws its own glyph on the handle (the timeline's ::after) is not turned twice */
@@ -105,7 +104,7 @@ body.frost.frost-hold[data-card="refractive"] .mir-rail { --chip-fill: var(--sur
 
 /* ── THE TITLE BAR (chrome: 'close'): the title, the head buttons, a plain × in the corner; the whole bar drags ──── */
 .mir-win-head {
-  flex: 0 0 auto; display: flex; align-items: center; gap: var(--sp-2); min-height: var(--win-head-h); box-sizing: border-box;
+  flex: 0 0 auto; display: flex; align-items: center; gap: var(--sp-2); min-height: var(--head-h); box-sizing: border-box;
   padding: 0 var(--sp-2) 0 var(--sp-4); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
 }
 .mir-win-head.drag { cursor: grabbing; }
@@ -114,23 +113,23 @@ body.frost.frost-hold[data-card="refractive"] .mir-rail { --chip-fill: var(--sur
   font: var(--w-bold) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint);
 }
 /* 1.5.6-alpha.3 · createWindow({ glyph }): the window's one drawing before its title, the size of the head's glyphs */
-.mir-win-glyph { flex: none; width: var(--win-head-glyph); height: var(--win-head-glyph); color: var(--ink-faint); pointer-events: none; }
+.mir-win-glyph { flex: none; width: var(--head-glyph); height: var(--head-glyph); color: var(--ink-faint); pointer-events: none; }
 .mir-win-tools { flex: 0 0 auto; display: flex; align-items: center; gap: var(--sp-1); }
 .mir-win-btn {
-  width: var(--win-head-btn); height: var(--win-head-btn); flex: 0 0 auto; padding: 0; border: 0; border-radius: 50%;
+  width: var(--head-btn); height: var(--head-btn); flex: 0 0 auto; padding: 0; border: 0; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center; background: transparent; color: var(--ink-key); cursor: pointer;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   transition: background-color var(--motion-micro) var(--ease-out), transform var(--motion-micro) var(--ease-out);
 }
-.mir-win-btn > svg { width: var(--win-head-glyph); height: var(--win-head-glyph); pointer-events: none; }
+.mir-win-btn > svg { width: var(--head-glyph); height: var(--head-glyph); pointer-events: none; }
 /* hover follows the LIVE pointer (core/kbm.js, 1.5.0 wave 21), not `(hover: hover)`: a trackpad on an iPad hovers, a
    finger never leaves a sticky hover; :where() adds no weight, and a page without the layer keeps its hover */
 :where(:root:not(.kbm-touch)) .mir-win-btn:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
-.mir-win-btn:is(:active, .press) { background: var(--state-press, var(--glass-press)); color: var(--fg); transform: scale(var(--win-head-press)); }
+.mir-win-btn:is(:active, .press) { background: var(--state-press, var(--glass-press)); color: var(--fg); transform: scale(var(--state-press-scale-round, .92)); }
 .mir-win-btn:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 /* a finger: the bar and its buttons a touch target tall */
-body.touch-tablet .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--touch); }
-@media (pointer: coarse) { .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--touch); } }
+body.touch-tablet .mir-win { --head-h: var(--touch); --head-btn: var(--touch); }
+@media (pointer: coarse) { .mir-win { --head-h: var(--touch); --head-btn: var(--touch); } }
 /* a title-bar window's body starts under the bar: the bar carries the top inset */
 .mir-win:is([data-chrome="close"], [data-chrome="both"]) > .mir-win-body { padding-top: 0; }
 
@@ -195,7 +194,7 @@ body.touch-tablet .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--t
 .mir-chip:is(:active, .press) { color: var(--fg); }
 .mir-chip:is(:active, .press)::before {
   background-image: linear-gradient(var(--glass-press), var(--glass-press)); box-shadow: var(--chip-sink);
-  transform: translate(-50%, -50%) scale(var(--chip-press-scale));
+  transform: translate(-50%, -50%) scale(var(--state-press-scale-round, var(--chip-press-scale)));
 }
 
 /* ── THE MIR SWITCH between two workspaces (window/workspaces.js workspaceSwitch; BASINS skin.css:652–654): the palette
@@ -206,6 +205,8 @@ body.touch-tablet .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--t
 .mir-workspace-switch > .mod-palette-mark { display: block; width: var(--ws-diamond); height: var(--ws-diamond); overflow: visible; stroke: none; }
 .mir-workspace-switch > .ws-glyph { display: block; width: 20px; height: 20px; color: var(--ink-key, currentColor); }   /* a kit glyph in the ink (014 A11) */
 .mir-workspace-switch:hover > .ws-glyph { color: var(--fg, currentColor); }
-.mir-workspace-switch:focus-visible { outline: 1px solid var(--acc2); outline-offset: -2px; }
+.mir-workspace-switch { transition: scale var(--motion-micro) var(--ease-out); }
+.mir-workspace-switch:is(:active, .press) { scale: var(--state-press-scale-round, .92); }   /* a round glyph button (1.6.0-alpha.40) */
+.mir-workspace-switch:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }   /* the house ring (1.6.0-alpha.41; it was 1 px in accent B, inset) */
 
 }   /* end @layer mir.kit.house */

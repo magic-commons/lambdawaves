@@ -448,7 +448,7 @@ body.frost .glass:where(.mir-modwindow, .mir-modwindow *, .kwin-chiprail, .kwin-
         to the house ladder.  A SKIN THAT CHANGES A SIZE IS A SKIN THAT GOT SOMETHING WRONG. ── */
   --touch:    calc(44px * var(--ui-scale));   /* THE 44 px LAW's unit */
   --grip-hit: var(--touch);
-  --r-sm: calc(5px  * var(--ui-scale));
+  --r-sm: calc(6px  * var(--ui-scale));
   --r-md: calc(8px  * var(--ui-scale));
   --r-lg: calc(12px * var(--ui-scale));
   --sp-1: calc(3px  * var(--ui-scale));
@@ -2346,7 +2346,7 @@ body.mod-arming :is(.sw, .seg, .trig, .k:not([data-param]), .fd:not([data-param]
 #modwin.mir-modwindow .m2workbar .tbtn:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
 #modwin.mir-modwindow .m2workbar .tbtn:active { background: var(--state-press, var(--glass-press)); }
 #modwin.mir-modwindow .m2workbar .tbtn:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
-#modwin.mir-modwindow .m2workbar .tbtn:disabled { opacity: var(--state-disabled, .34); cursor: default; }
+#modwin.mir-modwindow .m2workbar .tbtn:disabled { opacity: var(--state-disabled, .38); cursor: not-allowed; }
 #modwin.mir-modwindow .m2workbar .tbtn[hidden], #modwin.mir-modwindow .m2workbar .tbtn.m2predead.off { display: none; }
 #modwin.mir-modwindow .m2workbar .tbtn.m2presave.m2arm { color: var(--acc); }
 /* the keys */
