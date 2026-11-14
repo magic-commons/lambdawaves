@@ -132,7 +132,7 @@ renders of the app itself. The app generates nothing with AI at run time."** Cod
       bank details are in that name too.
 - [ ] The partner site: the app, two depots, the launch options above, the AI disclosure, the store page, the price.
 - [ ] The Windows GPU run on your PC. The folder is built (044 S4, 2026-11-12, on Linux; the download you approved is done and
-      cached): `out/lambdawaves-win32-x64/`, 495,876,340 B, 1,902 files, rebuilt from commit `dfb39198` (044 S10). Checked here without running it: the
+      cached): `out/lambdawaves-win32-x64/`, 495,872,819 B, 1,902 files, rebuilt from commit `8fc36e17` (044 S13–S14). Checked here without running it: the
       `.exe` is a 64-bit Windows program whose version resource reads CompanyName `MAGIC COMMONS`, ProductName and FileDescription
       `λWAVES`, version `0.9.9-beta`, LegalCopyright `Copyright 2026 MAGIC COMMONS`; `resources/dist/` is byte-identical to the Linux
       package's (which passes its 17 checks); no AI mark and no OpenAI or Google face is in it. **Never started: no Windows machine
@@ -153,13 +153,13 @@ Josh, 2026-11-12: "Just release Volume 1 and 2 for now. Vol 3 will be a post rel
 **Build the folders** (one command, about three minutes):
 
 ```bash
-node package.mjs --depots -- --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist/volumes.json --ship vol-1,vol-2
+node package.mjs --depots -- --shelf ~/Documents/LAMBDAWAVES-VOLUMES/dist-sheets-2026-11-14/volumes.json --ship vol-1,vol-2
 ```
 
 | folder in `out/` | what it is | size (2026-11-12) |
 |---|---|---|
 | `lambdawaves-win32-x64/`, `lambdawaves-linux-x64/` | the game, with no volume in it | 496 MB / 407 MB |
-| `lambdawaves-vol-1/` | VOL. I's depot: `resources/dist/volumes/vol-1/` (6,927 molecules) | 14,277 files, 6.06 GB |
+| `lambdawaves-vol-1/` | VOL. I's depot (Common Molecules I): `resources/dist/volumes/vol-1/` (6,927 molecules; the 11-14 edition, pictures in sheets) | 7,420 files, 6.07 GB |
 | `lambdawaves-vol-2/` | VOL. II's depot: `resources/dist/volumes/vol-2/` (4,616 molecules) | 4,948 files, 5.85 GB |
 
 A volume's folder is the same for Windows and Linux. It carries its own shelf entry (`volume.json`) beside its catalogue, and the
