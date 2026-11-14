@@ -163,15 +163,18 @@ body.rack-hidden .mir-rack-btn[data-rack-btn="toggle"] { color: var(--acc); }
 body.rack-hidden:not(.rack-peek-right) :is(.mir-rack-btn[data-rack-btn="fav"], .mir-rack-list) { visibility: hidden; }
 .mir-rack-list {
   position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3);
-  display: flex; flex-direction: column; min-width: 260px; max-height: calc(100% - 132px); overflow: auto; padding: 4px; border-radius: var(--r-lg);
+  display: flex; flex-direction: column; min-width: 260px; max-height: calc(100% - 132px); overflow: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; padding: 4px; border-radius: var(--surface-radius, var(--card-r, var(--r-lg)));
 }
+.mir-rack-list.glass { box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); }   /* the menu height (1.6.0-alpha.55) */
 .mir-rack-list .mb-item { position: relative; justify-content: flex-start; }
 .mir-rack-list .mb-glyph { flex: 0 0 auto; color: var(--dim); }
 .mir-rack-list .mb-item.queued { color: var(--fg); }
 .mir-rack-list .mb-num { margin-left: auto; color: var(--acc); font-variant-numeric: tabular-nums; }
 .mir-rack-list .mb-fav { margin-left: auto; color: var(--acc2); display: inline-flex; align-self: center; }
 .mir-rack-list .mb-fav > svg { width: 1em; height: 1em; }   /* the drawn star at the size the typed ★ had: the row's own font */
-.mir-rack-list .fav-x { margin-left: auto; color: var(--dim); }
+.mir-rack-list .fav-x { display: inline-flex; margin-left: auto; padding: 4px; color: var(--dim); }
+.mir-rack-list .fav-x > svg { width: 12px; height: 12px; }
+.mir-rack-list .rack-fav-head { font: var(--w-regular) var(--fs-micro) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint); }   /* a head is light (1.6.0-alpha.54) */
 .mir-rack-list .mb-item:hover .fav-x { color: var(--acc2); }
 
 /* ── THE EDGE HANDLE: a touch user's way back from H (and from a hidden rack, where there is no hover peek) ── */

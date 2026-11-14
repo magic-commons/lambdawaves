@@ -76,7 +76,7 @@ try {
   assert.deepEqual(geo.groups, ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'CONTROL SURFACE', 'PROJECT', 'VIEW', 'SETTINGS', 'CARDS', 'NODES', 'WINDOWS', 'TIMELINE']);   // 021 I1: CONTROL SURFACE in ORDER (it sorted first at −1), the registry's groups   // 0.5.0 C7b: the TIMELINE's rows, after λWAVES' own; iteration 014 A8: the CONTROL SURFACE's row (Mod+K, the search)
   assert.equal(geo.oneRow, true); assert.deepEqual(geo.icons, ['⌘', 4]);
   assert.ok(geo.centred < 2); assert.equal(geo.above, true); assert.deepEqual(geo.bare, ['RECORD INPUT', 'RESET TO DEFAULT'], 'RECORD / RESET carry no subtitle');
-  assert.equal(geo.statusShown, false, 'an empty status is shown'); assert.deepEqual(geo.borders, Array(9).fill('0px'));
+  assert.equal(geo.statusShown, false, 'an empty status is shown'); assert.deepEqual(geo.borders, ['0px', '0px', '0px', '0px', '1px', '0px', '0px', '0px', '0px']);   // 044 KV2: the search is the kit's one search field (the FINDER's pill: a well and its hairline); nothing else wears a border
   assert.match(geo.q, /⇧/); assert.equal(geo.more, 0, 'the fine step\'s Shift twin is drawn as a second chord'); assert.equal(geo.play, 'Space');
   assert.equal(geo.card, 'refractive'); assert.equal(geo.mask, true, 'the pane is not in the occlusion mask'); assert.deepEqual(geo.errors, []);
   console.log(`PASS opened by a real ?: the kit's window on the float layer, ${geo.w} × ${geo.h}, five rows in the board's well, the five groups in order, legend and switch on one row, RECORD / RESET centred above the search with no subtitle, no status, no border, the pane masked`);

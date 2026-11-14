@@ -3,7 +3,8 @@
  * THE LAW IT KEEPS: A LIST OPENS IN THE KIT'S ONE MENU PANE, never in the platform's.  A native <select> draws its own popup
  * (no frost, no theme, no touch size, no keyboard law of ours), so the kit does not use one (docs/CONTROLS.md).  The pane is a
  * `.glass[data-mir-surface="menu"]` on the body: the menu height of INTENT's four, the card style's material, and it closes on
- * an outside press, Escape, a resize or the page losing focus.  Rows are real 44 px touch seats; an item marked `coming`
+ * an outside press, Escape, a resize or the page losing focus.  A row is THE FINDER's (34 px; a finger's is the 44 px touch seat), its word on one line
+ * ending in an ellipsis when it is too long (the whole word is then the row's hint; 1.6.0-alpha.47); an item marked `coming`
  * is shown and never chosen; the keys are the listbox's (arrows, which wrap at both ends; Home, End, Enter, a typed letter, Escape).
  *   listPane({ anchor, items, value, onPick, onClose, label, cls, signal }) → { root, close(), items }   one pane for the stepper and the select
  *   select({ label, aria, title, options, value, onChange, placeholder, cls, disabled, repick })   (`options` was `items`, which still reads; `title` hints the root) → { root, button, get, set(id), setItems(list, id), open(), close(), isOpen, setDisabled(on), destroy() }
@@ -12,6 +13,7 @@
  * No pollers, no timers: the pane is placed once from one rect read, and idle costs nothing. */
 import { el, label, ariaLabel, hint } from '../kit.js';
 import { setGlyph } from '../glyph.js';
+import { escapeLayer } from '../shell/menubar.js';
 
 /** the live (choosable) items of a list */
 export const liveItems = (items) => items.filter((i) => !i.coming);
@@ -54,9 +56,9 @@ export function listPane({ anchor, items, value, onPick, onClose, label: name, c
   for (const it of items) {
     const b = el('button', 'mir-pick-i' + (it.coming ? ' coming' : '') + (it.id === value ? ' on' : ''), root); b.type = 'button';
     b.setAttribute('role', 'option'); b.setAttribute('aria-selected', String(it.id === value)); b.dataset.id = String(it.id);
-    if (it.pic) { const p = el('img', 'mir-pick-pic', b); p.alt = ''; p.loading = 'lazy'; p.decoding = 'async'; p.src = it.pic; p.onerror = () => { p.style.visibility = 'hidden'; }; label(el('span', '', b), it.label, it.vars); }
-    else label(b, it.label, it.vars);   // 1.5.6-alpha.4: `pic` — a row's picture at its left, read lazily (λWAVES' MOLECULES chooser)
-    if (it.title) b.title = it.title;
+    if (it.pic) { const p = el('img', 'mir-pick-pic', b); p.alt = ''; p.loading = 'lazy'; p.decoding = 'async'; p.src = it.pic; p.onerror = () => { p.style.visibility = 'hidden'; }; }   // 1.5.6-alpha.4: `pic` — a row's picture at its left, read lazily (λWAVES' MOLECULES chooser)
+    const word = label(el('span', 'mir-pick-t', b), it.label, it.vars);   // 1.6.0-alpha.47: the word in its own box, so one too long for the pane ends in an ellipsis
+    b.title = it.title || word.textContent;                              // … and the whole name is the row's hint
     if (it.coming) { b.setAttribute('aria-disabled', 'true'); b.tabIndex = -1; b.addEventListener('mousedown', (e) => e.preventDefault()); }   // a row that cannot be chosen does not take the focus either
     else b.addEventListener('click', () => { const id = it.id; close(true); if (onPick) onPick(id); });
     rows.set(it.id, b);
@@ -87,9 +89,11 @@ export function listPane({ anchor, items, value, onPick, onClose, label: name, c
   win.addEventListener('resize', closeNow); win.addEventListener('blur', closeNow);
   if (signal) signal.addEventListener('abort', closeNow, { once: true });
   function closeNow() { close(false); }
+  let offEsc = escapeLayer(() => { offEsc = null; close(true); });   // a layer of the app's Escape stack while it is open (1.6.0-alpha.53)
   function close(refocus) {
     if (closed) return; closed = true;
     doc.removeEventListener('pointerdown', outside, true); win.removeEventListener('resize', closeNow); win.removeEventListener('blur', closeNow);
+    if (offEsc) { offEsc(); offEsc = null; }
     root.remove(); if (open === api) open = null;
     if (refocus) try { anchor.focus({ preventScroll: true }); } catch (_) {}
     if (onClose) onClose();
