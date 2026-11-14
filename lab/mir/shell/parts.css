@@ -51,15 +51,15 @@ body[data-theme="light"] .mir-toast { --toast-fill: hsl(0 0% 100% / .86); --toas
   --dialog-max-h: calc(80vh / var(--in-zoom, 1));
   --dialog-z: calc(var(--z-banner) + 10);
   position: fixed; inset: 0; margin: auto; z-index: var(--dialog-z);
-  width: min(var(--dialog-w), calc(calc(100vw / var(--in-zoom, 1)) - var(--dialog-gutter))); height: fit-content; max-height: var(--dialog-max-h); overflow: auto;
+  width: min(var(--dialog-w), calc(calc(100vw / var(--in-zoom, 1)) - var(--dialog-gutter))); height: fit-content; max-height: var(--dialog-max-h); overflow: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent;
   display: flex; flex-direction: column; gap: var(--dialog-gap); padding: var(--dialog-pad);
-  border-radius: var(--card-r); color: var(--fg); font-family: var(--font-ui); user-select: text; -webkit-user-select: text;
+  border-radius: var(--surface-radius, var(--card-r)); color: var(--fg); font-family: var(--font-ui); user-select: text; -webkit-user-select: text;
 }
 .mir-dialog.glass { box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); }
 .mir-dialog-title { margin: 0; font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); color: var(--fg); }
 .mir-dialog-body { margin: 0; font-size: var(--fs-base); line-height: var(--lh); color: var(--fg-soft); }
 .mir-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-3); }
-.mir-dialog-actions .trig { min-width: 6em; }
+.mir-dialog-actions .trig { min-width: 6em; min-height: var(--touch); border-radius: var(--r-md); }   /* 1.6.0-alpha.56: a dialog's button is the house's 44 px trigger, the middle corner */
 .mir-dialog-actions .trig[data-kind="primary"] .trig-l { color: var(--acc); }
 .mir-dialog-actions .trig[data-kind="danger"] .trig-l { color: var(--bad); }
 /* THE NOTICE IS BASINS' COLD-START WARNING (Josh, 2026-10-07: "return the design of the warning to the original design (font,

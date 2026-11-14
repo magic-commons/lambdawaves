@@ -20,7 +20,6 @@
  },
  "note": "The catalogue (tools/i18n-extract.mjs writes it; do not edit). Each key is the English; a key `context::ENGLISH` is one meaning of a word that has two. `strings` is English itself as a pack (a plural key holds its English forms); `notes` says what a key means where that is not obvious; `names` are names, never translated; `sources` says where each key is used. docs/LANGUAGES.md §11 and FOR-TRANSLATORS say how to fill a pack.",
  "strings": {
-  "  ·  replaces the oldest": "  ·  replaces the oldest",
   " — where the project stands": " — where the project stands",
   "(learned from the last render)": "(learned from the last render)",
   "(root)": "(root)",
@@ -642,6 +641,7 @@
   "No copies made: source budget reached.": "No copies made: source budget reached.",
   "No envelopes on the rack — add one with +": "No envelopes on the rack — add one with +",
   "No grip on window heads; they still drag": "No grip on window heads; they still drag",
+  "No layout saved yet": "No layout saved yet",
   "No macros yet — add one in the modulation window.": "No macros yet — add one in the modulation window.",
   "No name pill while a rack scrolls": "No name pill while a rack scrolls",
   "No room for another curve: remove a curve first.": "No room for another curve: remove a curve first.",
@@ -858,7 +858,6 @@
   "Resize window": "Resize window",
   "Restart phase on triggers and playback": "Restart phase on triggers and playback",
   "Restore the default window layout": "Restore the default window layout",
-  "Restore this window layout": "Restore this window layout",
   "Restored {added} of {total}.": "Restored {added} of {total}.",
   "Return this window to its rack": "Return this window to its rack",
   "Reveal or trim curve end": "Reveal or trim curve end",
@@ -879,6 +878,7 @@
   "SAVE": "SAVE",
   "SAVE AS": "SAVE AS",
   "SAVE AS ZIP…": "SAVE AS ZIP…",
+  "SAVE LAYOUT": "SAVE LAYOUT",
   "SAVE TO": "SAVE TO",
   "SAVE {name} · {size}": "SAVE {name} · {size}",
   "SAW↑": "SAW↑",
@@ -944,7 +944,6 @@
   "Sample the arrangement every rendered frame. The CLOCK tile sets how often modulation ticks at all.": "Sample the arrangement every rendered frame. The CLOCK tile sets how often modulation ticks at all.",
   "Save as — store what is on screen as a new project, with the name and folder below.": "Save as — store what is on screen as a new project, with the name and folder below.",
   "Save the current project, with the audio files it uses, as one .zip.": "Save the current project, with the audio files it uses, as one .zip.",
-  "Save the current window arrangement": "Save the current window arrangement",
   "Save this first?": "Save this first?",
   "Save this rack as a preset": "Save this rack as a preset",
   "Save to folder": "Save to folder",
@@ -1373,7 +1372,6 @@
   "notes — markdown, {inline} and {display} maths; ctrl+enter previews — kept in this browser and in the project": "notes — markdown, {inline} and {display} maths; ctrl+enter previews — kept in this browser and in the project",
   "nothing copied yet — press {:COPY} on a device first": "nothing copied yet — press {:COPY} on a device first",
   "nothing imported": "nothing imported",
-  "nothing saved yet": "nothing saved yet",
   "nothing to export — save first": "nothing to export — save first",
   "nothing to read": "nothing to read",
   "numbered lossless PNG frames": "numbered lossless PNG frames",
@@ -1413,6 +1411,7 @@
   "renamed to {name}": "renamed to {name}",
   "reorder or rename {macro}": "reorder or rename {macro}",
   "replace yours?": "replace yours?",
+  "replaces the oldest": "replaces the oldest",
   "retrying without the processing constraints": "retrying without the processing constraints",
   "right rack scroll": "right rack scroll",
   "rose window": "rose window",
@@ -1859,9 +1858,6 @@
   "VOLT"
  ],
  "sources": {
-  "  ·  replaces the oldest": [
-   "mir/shell/rack.js"
-  ],
   " — where the project stands": [
    "mir/history/history-list.js"
   ],
@@ -3758,6 +3754,9 @@
   "No grip on window heads; they still drag": [
    "mir/shell/gui.js"
   ],
+  "No layout saved yet": [
+   "mir/shell/rack.js"
+  ],
   "No macros yet — add one in the modulation window.": [
    "mir/shell/transport.js"
   ],
@@ -3792,7 +3791,7 @@
    "mir/folders/gallery.js"
   ],
   "Nothing matches": [
-   "mir/keyboard/keyboard.js"
+   "mir/shell/window-picker.js"
   ],
   "Nothing sliced: the cut must fall inside a clip.": [
    "mir/timeline/editor.js"
@@ -4415,9 +4414,6 @@
   "Restore the default window layout": [
    "mir/shell/gui.js"
   ],
-  "Restore this window layout": [
-   "mir/shell/rack.js"
-  ],
   "Restored {added} of {total}.": [
    "mir/folders/gallery.js"
   ],
@@ -4484,6 +4480,9 @@
   ],
   "SAVE AS ZIP…": [
    "mir/render/panel.js"
+  ],
+  "SAVE LAYOUT": [
+   "mir/shell/rack.js"
   ],
   "SAVE TO": [
    "mir/folders/gallery.js"
@@ -4687,9 +4686,6 @@
   ],
   "Save the current project, with the audio files it uses, as one .zip.": [
    "mir/render/panel.js"
-  ],
-  "Save the current window arrangement": [
-   "mir/shell/rack.js"
   ],
   "Save this first?": [
    "mir/folders/gallery.js"
@@ -6046,9 +6042,6 @@
   "nothing imported": [
    "mir/notes/face.js"
   ],
-  "nothing saved yet": [
-   "mir/shell/rack.js"
-  ],
   "nothing to export — save first": [
    "mir/notes/face.js"
   ],
@@ -6166,6 +6159,9 @@
   ],
   "replace yours?": [
    "mir/notes/face.js"
+  ],
+  "replaces the oldest": [
+   "mir/shell/rack.js"
   ],
   "retrying without the processing constraints": [
    "mir/modulation/audio-capture.js"

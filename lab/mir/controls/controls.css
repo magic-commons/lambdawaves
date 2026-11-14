@@ -11,7 +11,7 @@
 
 /* ── the values ── */
 .mir-step { --step-b: var(--touch); }                                      /* the stepper's button: the full touch seat (BASINS' round 44 px) */
-.mir-pick { --list-z: calc(var(--z-banner) + 4); }                         /* above the rack, the windows and the banner; one under the tip */
+.mir-pick { --list-z: calc(var(--z-banner) + 4); --pick-w: 420px; }                         /* above the rack, the windows and the banner; one under the tip */
 .mir-num { --num-w: 7em; }                                                 /* the number field's face */
 .mir-range { --rng-thumb: 18px; --rng-rail: 6px; }                        /* the thumb's disc and the track's groove */
 .rng-t { --rng-face: hsl(var(--glass-tint) / 1); --rng-hair: 0 0 0 1px var(--glass-hairline); --rng-mod: 0 0 0 2px var(--acc2);   /* the puck: the opaque tint (the knob's face), a hairline, accent B's ring when routed */
@@ -101,15 +101,19 @@ button.mir-step-name:disabled { cursor: default; }
 .trig.trig-glyph { min-width: var(--touch); padding: 0; }
 
 /* ── the list pane: the menu height, the card style's material (skin.css), a box here ── */
-.mir-pick { position: fixed; z-index: var(--list-z); display: flex; flex-direction: column; gap: 1px; padding: var(--sp-1); overflow-y: auto; box-sizing: border-box;
-  max-width: calc(calc(100vw / var(--in-zoom, 1)) - 16px); border-radius: var(--surface-radius, var(--r-lg)); }
-.mir-pick-i { display: flex; align-items: center; min-height: var(--touch); padding: 0 var(--sp-4); border: 0; border-radius: var(--r-sm); background: transparent; color: var(--fg-soft);
-  font: inherit; font-size: var(--fs-small); letter-spacing: var(--label-tracking, var(--tr-wide)); text-align: start; white-space: nowrap; cursor: pointer; }
-.mir-pick-i:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
-.mir-pick-i.on { background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); color: var(--acc); }   /* chosen: the frost face, a thin rim, the label in accent A */
+.mir-pick { position: fixed; z-index: var(--list-z); display: flex; flex-direction: column; gap: 1px; padding: var(--sp-1); overflow-y: auto; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--acc) transparent;
+  max-width: min(var(--pick-w), calc(calc(100vw / var(--in-zoom, 1)) - 16px)); border-radius: var(--surface-radius, var(--card-r, var(--r-lg))); }
+/* 1.6.0-alpha.47 · THE POPUP ROW: a list's row is THE FINDER's — 34 px (--pop-row), its 9 px corner, its bold 12 px tracked word; a word too long for the
+   pane (--pick-w at most) ends in an ellipsis and never wraps; a finger still gets the 44 px seat */
+.mir-pick-i { display: flex; align-items: center; gap: var(--pop-row-gap, 10px); flex: 0 0 auto; box-sizing: border-box; min-width: 0; height: var(--pop-row, 34px); padding: 0 10px; border: 0; border-radius: var(--pop-row-r, var(--r-md)); background: transparent; color: var(--fg-soft);
+  font: var(--w-bold) var(--fs-mid)/1 var(--font-ui); letter-spacing: var(--tr-wide); text-align: start; white-space: nowrap; cursor: pointer; }
+.mir-pick-t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.3; }
+@media (pointer: coarse) { .mir-pick-i { height: auto; min-height: var(--touch); } }
+.mir-pick-i:hover { background: var(--state-wash, var(--state-hover, var(--glass-raise))); color: var(--fg); }   /* the cursor row: THE WASH (1.6.0-alpha.45) */
+.mir-pick-i.on { background: var(--state-wash, var(--state-hover, var(--glass-raise))); color: var(--acc); }   /* chosen: THE WASH, the label in accent A (1.6.0-alpha.45; it was the ON face and a rim) */
 .mir-pick-i.coming { opacity: var(--state-disabled, .38); cursor: default; }
 .mir-pick-i.coming:hover { background: transparent; color: var(--fg-soft); }
-.mir-pick-pic { flex: 0 0 auto; width: 32px; height: 32px; margin-inline-end: var(--sp-3); object-fit: contain; border-radius: var(--r-sm); }   /* 1.5.6-alpha.4: a row's picture */
+.mir-pick-pic { flex: 0 0 auto; width: 28px; height: 28px; object-fit: contain; border-radius: var(--r-sm); }   /* 1.5.6-alpha.4: a row's picture */
 .mir-pick-i:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 0; }
 
 /* ── the number field: a well; drag it, type it, key it ── */

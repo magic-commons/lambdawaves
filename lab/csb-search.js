@@ -6,6 +6,7 @@
  * Mod+1…9 · Tab completes · PageUp/PageDown by section · Escape clears, then closes.  The empty pill: RECENT and the scope signs.  A pick is
  * frecency (PREFERENCE `lambdawaves.q0.search`); a greyed act (its `when` says no) is listed and Enter does nothing. */
 import { el, chip } from './mir/kit.js';
+import { searchField, emptyLine } from './mir/shell/window-picker.js';
 import { cssZoom } from './mir/core/zoom.js';
 import { setGlyph } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';
@@ -81,7 +82,7 @@ export function createCsbSearch(app, { bar }) {
   const root = el('button', 'csb-search-b'); root.type = 'button'; chip(root, 'search', 'search λWAVES'); root.title = 'Search λWAVES';
   root.dataset.keyAction = 'csb.search';
   const pill = el('div', 'lw-menu glass csb-pill', document.body); pill.hidden = true;
-  const input = el('input', 'csb-search-in', pill); input.type = 'search'; input.placeholder = 'search λWAVES'; input.spellcheck = false; input.autocomplete = 'off';
+  const input = searchField(pill, { cls: 'csb-search-in' }); input.placeholder = 'search λWAVES';   // 044 KV2: the kit's one search field (the FINDER's pill)
   input.setAttribute('aria-label', 'search λWAVES'); input.setAttribute('role', 'combobox'); input.setAttribute('aria-autocomplete', 'list'); input.setAttribute('aria-expanded', 'false');
   const count = el('div', 'csb-count', pill); count.setAttribute('aria-live', 'polite');
   const pane = el('div', 'lw-menu glass csb-suggest', document.body); pane.hidden = true; pane.dataset.mirSurface = 'menu'; pane.setAttribute('role', 'listbox'); pane.setAttribute('aria-label', 'results');
@@ -123,11 +124,11 @@ export function createCsbSearch(app, { bar }) {
     if (d.off) b.setAttribute('aria-disabled', 'true');
     const pic = d.kind === 'molecule' && app.state.picker ? app.state.picker.suggestTile(b, d.r) : null;
     if (!pic) { const g = el('i', 'mb-icon', b); if (d.glyph) setGlyph(g, d.glyph); }
-    const lbl = el('span', 'mb-lbl', b); let i = 0;
+    const lbl = el('span', 'mb-lbl', b); let i = 0; b.title = d.title;   // 044 KV2: a long name ends in an ellipsis; the whole name is the row's hint
     for (const [s, e] of q ? marks(d.title, q) : []) { if (s > i) lbl.append(d.title.slice(i, s)); el('b', 'csb-m', lbl, d.title.slice(s, e)); i = e; }
     lbl.append(d.title.slice(i));
     el('span', 'csb-kind', b, d.kind.toUpperCase());
-    if (d.caps && d.caps.length) { const k = el('span', 'mb-key', b); for (const c of d.caps) el('kbd', '', k, c); }
+    if (d.caps && d.caps.length) { const k = el('span', 'mb-key', b); for (const c of d.caps) el('kbd', 'mir-cap', k, c); }
     const o = { el: b, doc: d, sec, pic }; opts.push(o);
     b.addEventListener('pointermove', () => { if (at !== opts.indexOf(o)) mark(opts.indexOf(o)); });
     b.addEventListener('click', () => act(o));
@@ -141,7 +142,7 @@ export function createCsbSearch(app, { bar }) {
       const recent = fr.recent(6).map((id) => index.byId(id)).filter(Boolean);
       if (recent.length) { head('RECENT'); for (const d of recent) row(d, '', 0); }
       el('div', 'csb-hint', pane, '>  actions    @  windows    #  molecules    :  states');
-    } else if (!res.length) el('div', 'csb-none', pane, 'nothing matches');
+    } else if (!res.length) emptyLine(pane);   // 044 KV2: the one dim line, the kit's one wording ("Nothing matches")
     else {
       row(res[0].doc, q, 0, true);
       const by = new Map(); for (const r of res.slice(1)) { if (!by.has(r.doc.kind)) by.set(r.doc.kind, []); by.get(r.doc.kind).push(r.doc); }
@@ -184,4 +185,13 @@ export function createCsbSearch(app, { bar }) {
   document.addEventListener('pointerdown', (e) => { if (!pill.hidden && !pill.contains(e.target) && !pane.contains(e.target) && !root.contains(e.target)) close(); }, true);
   addEventListener('resize', () => { if (!pill.hidden) place(); }, { passive: true });
   return { root, input, pill, pane, open, close, get shown() { return !pill.hidden; } };
+}
+
+/** finderMatch(query, rows) — 044 KV2 · THE FINDER TAKES THE SEARCH'S BRAIN (MIR 1.6.0-alpha.51 createWindowPicker({ match })): the FINDER's rows ranked by
+ *  lab/search-index.js, so "tmln" finds TIMELINE there as it does here.  The FINDER still lists windows only; no frecency, no kinds: one look, one
+ *  matcher, two things (Josh 2026-11-13). */
+export function finderMatch(query, rows) {
+  const key = (r) => 'window:' + (r.section ? r.section + '/' : '') + r.id, by = new Map(rows.map((r) => [key(r), r]));
+  const index = createIndex(rows.map((r) => ({ id: key(r), kind: 'window', title: r.title, alias: r.words || '', off: r.off })));
+  return index.search(query).map((h) => by.get(h.doc.id)).filter(Boolean);
 }

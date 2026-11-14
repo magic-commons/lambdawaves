@@ -26,6 +26,7 @@
  * confirmDialog(text, { yes = 'OK', no = 'CANCEL', title, danger }) → Promise<boolean> */
 import { el, label, trig } from '../kit.js';
 import { presence } from '../core/motion.js';
+import { escapeLayer } from './menubar.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -121,8 +122,9 @@ function show(job) {
   window.addEventListener('click', (e) => { if (swallow && !inside(e.target)) { e.preventDefault(); e.stopPropagation(); } swallow = false; }, on);
 
   let done = false;
+  let offEsc = dismiss ? escapeLayer(() => { offEsc = null; shut(null); }) : null;   // a dismissable dialog is a layer of the app's Escape stack (1.6.0-alpha.53)
   function shut(v) {
-    if (done) return; done = true;
+    if (done) return; done = true; if (offEsc) { offEsc(); offEsc = null; }
     /* the click that followed an outside press must still be swallowed after we are gone */
     const tail = new AbortController();
     if (swallow) { window.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); tail.abort(); }, { capture: true, signal: tail.signal }); setTimeout(() => tail.abort(), 400); }

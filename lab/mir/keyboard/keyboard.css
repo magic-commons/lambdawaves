@@ -1,13 +1,13 @@
 /* keyboard/keyboard.css — the keyboard window and the keys help view, untinted and layered.
  *
  * THE LAW IT KEEPS: λWAVES' GEOMETRY, INTENT'S MATERIAL.  Every box below is λWAVES' (lab.css §KEYBOARD, waves
- * 113–115: the 2.1 : 1 wells, the 52 px keys with their 44 px finger, the flex widths of the ANSI board, the 38 px
- * rows, the 118 px chip column, one list under 860 px).  The four places λWAVES spent its glass tint are drawn by
+ * 113–115: the 2.1 : 1 wells, the 52 px keys with their 44 px finger, the flex widths of the ANSI board, the
+ * rows (THE FINDER's 34 px popup row since 1.6.0-alpha.47), the 118 px chip column, one list under 860 px).  The four places λWAVES spent its glass tint are drawn by
  * docs/INTENT.md instead:
  *   BOUND KEY   the ON frost face (--state-on) and rim (--state-on-rim); its LIGHT is the accent LED the legend shows
  *   WELLS       --glass-well under --relief-well (← --neu-inset), the same in both themes: no dark layer
  *   SWITCH      the kit's .seg (a well; the chosen side wears the ON face, its glyph in accent A)
- *   SEARCH      the kit's field: a well, the focus ring OUTSIDE (--state-focus)
+ *   SEARCH      the kit's one search field (.mir-search: THE FINDER's pill), the focus ring OUTSIDE (--state-focus)
  *   PANE        the window's own .glass (window/window.js); this sheet paints no pane
  * And the states: hover = a lighter face (--state-hover); pressed = the press wash + --state-press-scale; chosen (the
  * selected action's keys, a latched drawn modifier) = the ON face with the cap in accent A; recording = LIVE, an
@@ -28,7 +28,7 @@
 
 /* ── the body: the window's pane holds two wells and nothing else ─────────────────────────────────────────── */
 .km-win > .mir-win-body, .km-help-win > .mir-win-body { padding: var(--sp-4); overflow: hidden; }
-.km-help-win > .mir-win-body { overflow: hidden auto; }
+.km-help-win > .mir-win-body { overflow: hidden auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
 .km-win .mir-win-panel { height: 100%; min-height: 0; }   /* 1.5.6-alpha.2: with `panels`, each face fills the pane as the one body did */
 .km-win .mir-win-panel[hidden] { display: none; }
 .km { display: flex; gap: var(--sp-4); height: 100%; min-height: 0; min-width: 0; }
@@ -115,41 +115,38 @@
 .km-recording .km-btn-record { box-shadow: var(--state-on-rim, var(--neu-flat)), var(--km-live); }
 .km-status { margin: 0 0 6px; min-height: 1lh; font: var(--w-bold) var(--fs-base) / 1.3 var(--font-ui); color: var(--acc); overflow-wrap: anywhere; }   /* THE HAND (1.5.0-alpha.19): one line kept even when it is empty, so a message never pushes the search and the list down */
 .km-status[data-tone="conflict"] { color: var(--fg); }
-.km-search { box-sizing: border-box; width: 100%; height: 30px; flex: 0 0 auto; margin: 0 0 6px; padding: 0 9px; border: 0; border-radius: var(--r-sm);
-  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg); outline: none; user-select: text; -webkit-user-select: text; }
+.km-search { margin: 0 0 6px; }   /* the kit's one search field (.mir-search, shell.css; 1.6.0-alpha.49: it was a 30 px box, radius 5) */
 .km-search:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 .km-search::placeholder { color: var(--ink-faint); }
 .km-list { flex: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 3px;
-  scrollbar-width: thin; scrollbar-color: var(--glass-groove-hot) transparent; touch-action: pan-y; }
-.km-action-group { padding: 9px 5px 2px; color: var(--acc); font: var(--w-bold) var(--fs-micro) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wide)); }
-.km-action-row { box-sizing: border-box; flex: 0 0 auto; width: 100%; min-height: 38px; padding: 3px 7px; margin: 0; border: 0; border-radius: var(--r-sm);
-  display: grid; grid-template-columns: minmax(0, 1fr) 118px; align-items: center; gap: 5px;
+  scrollbar-width: thin; scrollbar-color: var(--acc) transparent; touch-action: pan-y; }
+.km-action-group { padding: 9px 10px 2px; color: var(--ink-faint); font: var(--w-regular) var(--fs-micro) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); }   /* 1.6.0-alpha.47: a head is LIGHT, the cards' .grp-lbl (it was bold, in accent A) */
+.km-action-row { box-sizing: border-box; flex: 0 0 auto; width: 100%; height: var(--pop-row, 34px); padding: 0 10px; margin: 0; border: 0; border-radius: var(--pop-row-r, var(--r-md));   /* 1.6.0-alpha.47 · THE POPUP ROW: THE FINDER's 34 px row and its corner (it was 38 px, radius 5) */
+  display: grid; grid-template-columns: minmax(0, 1fr) 118px; align-items: center; gap: var(--pop-row-gap, 10px);
   background-color: transparent; color: var(--fg-soft); cursor: pointer; text-align: start; transition: background-color var(--t-fast), scale var(--t-fast); }
 .km-action-row.km-action-row-hovered { background-image: linear-gradient(var(--state-hover, var(--glass-raise)), var(--state-hover, var(--glass-raise))); }
 :where(:root:not(.kbm-touch)) .km-action-row:hover { background-image: linear-gradient(var(--state-hover, var(--glass-raise)), var(--state-hover, var(--glass-raise))); }
 .km-action-row:active { background-color: var(--state-press, var(--glass-press)); scale: var(--state-press-scale, .96); }
 .km-action-row:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
-.km-action-row.km-action-row-selected { background-color: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
+.km-action-row.km-action-row-selected { background-color: var(--state-wash, var(--state-hover, var(--glass-raise))); }   /* the chosen row of a list: THE WASH (1.6.0-alpha.45; it was the ON face and a rim) */
 .km-action-row.km-action-row-selected .km-action-label { color: var(--acc); }
 .km-action-row.km-action-row-recording { box-shadow: var(--state-on-rim, var(--neu-flat)), var(--km-live); }
 .km-action-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; text-align: start; }
-.km-action-label { font-size: var(--fs-base); font-weight: var(--w-med); letter-spacing: var(--tr-tight); color: var(--fg-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.km-action-desc { color: var(--dim); font-size: var(--fs-tiny); font-weight: var(--w-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.km-empty { padding: 12px 5px; font-size: var(--fs-small); color: var(--dim); }
+.km-action-label { font-size: var(--fs-mid); font-weight: var(--w-bold); line-height: 1.15; letter-spacing: var(--tr-tight); color: var(--fg-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.km-action-desc { color: var(--dim); font-size: var(--fs-tiny); line-height: 1.15; font-weight: var(--w-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* the chord chips: a key cap's legend in a hairline, no relief (a chip is read, not pressed) */
+/* the chord chips: the kit's keycap (shell.css), the board's mono legend */
 .km-chips { display: flex; justify-content: center; align-items: center; flex-wrap: nowrap; gap: 2px; min-width: 0; overflow: hidden; direction: ltr; }
-.km-chip { box-sizing: border-box; padding: 3px 5px; border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-xs);
-  font: var(--w-bold) var(--fs-small) / 1 var(--font-mono); color: var(--fg-soft); white-space: nowrap; }
+.km-chip { padding: 3px 5px; font: var(--w-bold) var(--fs-small) / 1 var(--font-mono); color: var(--fg-soft); }   /* 1.6.0-alpha.48: the cap's face is the kit's one keycap (shell.css kbd.mir-cap: a well; it was a hairline) */
 .km-chip-key { color: var(--fg); }
 .km-chip-unbound, .km-chip-more { color: var(--ink-faint); }
-.km-chip-recording { border-color: transparent; color: var(--acc); font-family: var(--font-ui); }
+.km-chip-recording { background: transparent; box-shadow: none; color: var(--acc); font-family: var(--font-ui); }
 
 /* ── the help view: the same rows, read-only ──────────────────────────────────────────────────────────────── */
 .km-help { display: flex; flex-direction: column; gap: 3px; }
 .km-help > * { flex: 0 0 auto; }
-.km-help-row { min-height: 32px; padding: 3px 7px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
-.km-help .km-chips { justify-content: flex-end; flex-wrap: wrap; }
+.km-help-row { box-sizing: border-box; height: var(--pop-row, 34px); padding: 0 10px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.km-help .km-chips { justify-content: flex-end; }
 
 /* the phone gets one column (λWAVES): the board needs ~700 px to stay legible; below that the LIST is the manual */
 @media (max-width: 860px) {

@@ -5,7 +5,7 @@ import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle, quatFromYawPitch } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js'; import { WINDOW_WORDS } from '../search-index.js';   // 042 Q: the FINDER's words are the search's
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
-import { installWindowChrome } from '../window-chrome.js';
+import { installWindowChrome } from '../window-chrome.js'; import { finderMatch } from '../csb-search.js';
 import { createWindow, windowOf } from '../mir/window/window.js'; import { glyphEl, glyphSvg } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
 import { MODE } from './settings.js';   // 021 R5: ONE MODE (the FINDER's greys)
 import { NOTEBOOK_KEYS } from '../settings-store.js';   // 021 R4: the notebook's 0.4 keys, read once and retired
@@ -196,7 +196,7 @@ export function createNotebook(app) {
         ['nodes', 'NODES', 'nodes', 'Open NODES, or raise it', () => !!A.get('nodes').get() || !!document.querySelector('.dev[data-id="nodes"]:not(.closed)'), () => { reveal('nodes'); rise(document.querySelector('[data-mir-window="nodes"]')); }, () => reveal('nodes')]]
         .map(([id, title, glyph, hint, open, up, run]) => ({ id, title, glyph, hint, open, run: () => (open() ? up : run)() }));
       layout.special = special;   // 044 A2 (L19): THE ONE TABLE of the special windows — the FINDER's section and the search's window rows (csb-search.js) read it
-      layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu',
+      layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu', match: finderMatch,   // 044 KV2: the search's matcher (lab/csb-search.js)
         open: reveal, words: (id) => WINDOW_WORDS[id] || '', sections: [{ id: 'special', title: 'SPECIAL', rows: special }],
         can: (id) => { if (id === 'nodes') return null; const d = document.querySelector('.dev[data-id="' + id + '"]'); return !d || !d.hidden ? true : MODE[id] === 'molecules' ? 'MOLECULES ONLY' : 'HYDROGEN ONLY'; } });   // 021 R5: the MODE table's word
     }

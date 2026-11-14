@@ -7,7 +7,7 @@
  * the iPad have none, and the MIDI column says so.  The map is PREFERENCE `lambdawaves.q0.midi`. */
 import { el, label, trig } from './mir/kit.js'; import { createMidi, midiSupport } from './mir/shell/midi.js'; import { jsonStore } from './mir/core/prefs.js';
 import { displayChord } from './mir/shell/keys.js'; import { t } from './mir/core/i18n.js';
-import { ORDER } from './key-table.js';
+import { ORDER } from './key-table.js'; import { searchField, emptyLine } from './mir/shell/window-picker.js';
 
 const MIDI_KEY = 'lambdawaves.q0.midi';
 /** targetOf(id) — the modulation target an action answers as: `action.` + its id, each segment lower-case alphanumeric (the registry's grammar) */
@@ -30,7 +30,8 @@ export function createMapping(app, { kt }) {
   const midi = createMidi({ storage: jsonStore(MIDI_KEY), run: (id) => { if (!A.get(id) || A.get(id).gesture) return; A.run(id); }, up: (id) => A.up(id),
     onState: () => { for (const e of Object.values(midi.map())) if (e.mode === 'hold') A.up(e.id); if (root.isConnected) paint(); } });   // a port come or gone lets every HELD row go (an unplugged device sends no note-off)
   const root = el('div', 'mp'), head = el('div', 'mp-head', root);
-  const find = el('input', 'mp-find', head); find.type = 'search'; find.placeholder = t('Find an action…'); find.setAttribute('aria-label', t('Find an action'));
+  const find = searchField(head, { cls: 'mp-find' });   // 044 KV2: the kit's one search field
+   find.placeholder = t('Find an action…'); find.setAttribute('aria-label', t('Find an action'));
   const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'ask the browser for MIDI and list the inputs', onFire: () => midi.start() });
   head.appendChild(conn.root); if (!support.ok) conn.root.hidden = true;
   const status = el('div', 'mp-status', root); status.setAttribute('role', 'status');
@@ -65,7 +66,7 @@ export function createMapping(app, { kt }) {
       const b = trig({ label: learning === r.id ? 'LISTENING…' : 'LEARN', cls: 'mp-learn', title: 'the next key, MIDI or macro move is this action’s', onFire: () => (learning === r.id ? stop() : learn(r.id)) });
       b.on = learning === r.id; row.appendChild(b.root);
     }
-    if (!rows.length) label(el('div', 'mp-empty', list), 'Nothing matches');
+    if (!rows.length) emptyLine(list);
   }
 
   /* LEARN: the three roads race; the first to answer wins and the others stand down */

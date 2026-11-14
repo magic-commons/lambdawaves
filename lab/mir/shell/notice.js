@@ -4,7 +4,7 @@
  *   the bottom, at most 560 px wide, a pill; a new message REPLACES the one showing; no ×; 3 s unless told otherwise.
  *   THE CORNER (`seat: 'corner'`, or `stack: true`) is NEBULA's `#notice` (lab/index.html:213, main.js:43-47), copied
  *   into SOLEIL, AUTOMATA and EARTH: a stack in the bottom end corner, up to `max` (4), each with a ×, 5 s (9 s for an
- *   error).
+ *   error).  THE TIME IS THE NOTICE'S, BY KIND (NOTICE_MS, 1.6.0-alpha.56): a toast's warning stays 5 s and its error 9 s; `ms` still overrides.
  *
  * THE LAWS IT KEEPS (both seats)
  *   · NOTHING BLOCKS THE STAGE.  The toast takes no press at all (BASINS': a press goes to whatever is beneath it); with
@@ -24,6 +24,10 @@
  * guarded(fn) → fn's result; a throw (or a rejected promise) becomes an error notice instead (NEBULA's safe()). */
 import { el, label, ariaLabel, trig } from '../kit.js';
 import { presence } from '../core/motion.js';
+
+/** NOTICE_MS — 1.6.0-alpha.56 · THE NOTICE OWNS ITS TIME, BY KIND: how long a notice stays when its caller names no `ms` (an app need pass none).
+ *  The toast: info and ok 3 s (BASINS'), a warning 5 s, an error 9 s; the corner stack: 5 s, an error 9 s (NEBULA's). */
+export const NOTICE_MS = Object.freeze({ info: 3000, ok: 3000, warn: 5000, error: 9000 });
 
 /** the pause-under-the-hand timer both seats share: it starts at once; the pointer or the focus on `root` holds it */
 function timing(root, left, close, signal) {
@@ -71,7 +75,7 @@ function toastNotice(text, { kind = 'info', ms, action = null, offset } = {}) {
   if (action && action.label) seat.appendChild(actionOf(action, close));
   toastNow = me;
   presence(seat, true);
-  stop = timing(seat, ms === undefined ? 3000 : ms, close, life.signal);
+  stop = timing(seat, ms === undefined ? NOTICE_MS[kind] || NOTICE_MS.info : ms, close, life.signal);
   return { close, root: seat };
 }
 
@@ -102,7 +106,7 @@ function cornerNotice(text, { kind = 'info', ms, action = null, max = 4 } = {}) 
   root.__close = close;
   while (live.size > max) { const old = live.values().next().value; old.__close(); }
   presence(root, true);
-  stop = timing(root, ms === undefined ? (kind === 'error' ? 9000 : 5000) : ms, close, life.signal);
+  stop = timing(root, ms === undefined ? Math.max(5000, NOTICE_MS[kind] || 0) : ms, close, life.signal);
   return { close, root };
 }
 

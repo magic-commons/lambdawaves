@@ -204,15 +204,9 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 .mb-btn { border-radius: 7px; letter-spacing: var(--tr-wider); }
 .mb-btn:hover { background: transparent; color: var(--acc); }
 .mb-item { text-align: left; background: transparent; color: var(--fg-soft); border-radius: 6px; cursor: pointer; }
-.mb-item:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
 .mb-key { letter-spacing: var(--tr-wide); }
-/* 021 I3 · the kit's submenus, checks and radios (MIR 1.5.6-alpha.2) under these unlayered rules: an accordion stays in its list on a phone, a mark has its gutter */
-.mb-item.mb-check, .mb-item.mb-radio { position: relative; padding-inline-start: 26px; }
-/* 039 X8 · ONE COLUMN OF WORDS (WALK-A #15, WALK-C #18): in a list where any row wears an icon, a row without one starts its word in the icons'
-   word column (10 + 16 − 8 + 18 = 36 px); a check or radio row WITH an icon keeps the icons' padding and wears its ✓ or • at the row's end */
-.mb-list:has(> .mb-item > .mb-icon) > .mb-item:not(:has(> .mb-icon)) { padding-inline-start: 36px; }
-.mb-item:is(.mb-check, .mb-radio):has(> .mb-icon) { padding-inline-start: 10px; }
-.mb-item:is(.mb-check, .mb-radio):has(> .mb-icon) > .mb-mark { position: static; flex: 0 0 auto; }
+/* 044 KV2 · the menu row is the kit's whole (MIR 1.6.0-alpha.45 the wash on the cursor row, alpha.46 a picture's seat in every row): the hover face, the check
+   gutter and 039 X8's ONE COLUMN OF WORDS that stood here are the kit's now, and went */
 
 .mb-item:disabled { color: var(--dim); opacity: .45; cursor: default; }                    /* nothing to UNDO / REDO: the item is there and says so */
 .mb-item:disabled:hover { background: transparent; color: var(--dim); }

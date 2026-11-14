@@ -4,7 +4,7 @@
 /* THE KEYBOARD WINDOW IS THE KIT'S, ITS PAINT λWAVES' (0.5.0 C3, R5-S3): mir/keyboard/keyboard.js builds a 1.5 window on #floats (its rail
    carries the grip and the close), the two wells, the board and the list; these UNLAYERED rules beat keyboard.css's layer and keep the
    charcoal-blue skin — raised/inset relief, no hard borders, visible focus glows, five key rows in 416 px, the status only when it speaks. */
-.km-win.glass { border: 0; border-radius: var(--r-lg); box-shadow: var(--glass-shadow), 0 12px 32px hsl(0 0% 0% / .13); }
+.km-win.glass { border: 0; border-radius: var(--surface-radius, var(--card-r)); box-shadow: var(--glass-shadow), 0 12px 32px hsl(0 0% 0% / .13); }
 .km-win > .mir-win-body { padding: 10px; }
 .km { gap: 10px; }
 .km-col { padding: 10px; }
@@ -33,7 +33,6 @@
 .km-key-unbound { background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 body[data-theme="dark"] .km-col,
 body[data-theme="dark"] .km-platform .seg,
-body[data-theme="dark"] .km-search { background: hsl(var(--glass-tint) / .9); }
 body[data-theme="dark"] .km-key-unbound {
   background: hsl(var(--glass-hue) var(--glass-sat-tint) calc(var(--glass-lum) - 2%));
 }
@@ -51,12 +50,9 @@ body[data-theme="dark"] .km-key-unbound {
 .km-editor-actions .km-btn { padding: 5px 7px; }
 .km-search {
   outline: none; }
-.km-search:focus { box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 2px var(--acc-soft); }
 .km-list { overflow-y: auto; }
-.km-action-group { letter-spacing: var(--tr-wide); }
 .km-action-row { grid-template-columns: minmax(0,1fr) 118px;
   background: transparent; text-align: left; }
-.km-action-row-selected { background: var(--acc-soft); box-shadow: var(--relief-well, var(--neu-inset)); }
 .km-action-row-hovered, .km-action-row:hover { background: var(--glass-press); }
 .km-action-row:focus-visible { background: var(--glass-press); box-shadow: 0 0 0 2px var(--acc); outline: 0; }
 .km-action-row-recording { background: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 12px var(--bad); }
@@ -94,19 +90,18 @@ body[data-theme="dark"] .km-key-unbound {
 .mp { box-sizing: border-box; display: flex; flex-direction: column; height: 100%; min-height: 0; padding: var(--sp-4); border-radius: var(--r-md);
   background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 .mp-head { display: flex; gap: 8px; align-items: center; flex: 0 0 auto; margin-bottom: 6px; }
-.mp-find { flex: 1 1 auto; min-width: 0; height: 30px; padding: 0 9px; border: 0; border-radius: var(--r-sm); background: var(--glass-press); color: var(--fg); font: var(--w-med) 12px var(--font-ui); box-shadow: var(--relief-well, var(--neu-inset)); }
-.mp-find:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mp-find { flex: 1 1 auto; width: auto; min-width: 0; }   /* 044 KV2: the kit's one search field (.mir-search), as KEYBOARD's */
 .mp-connect { flex: 0 1 auto; max-width: 48%; }
 .mp-connect .trig-l { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mp-status { flex: 0 0 auto; min-height: 1lh; margin: 0 0 4px; font: var(--w-semi) var(--fs-base) / 1.3 var(--font-ui); color: var(--acc); overflow-wrap: anywhere; }
 .mp-status[data-tone="conflict"] { color: var(--fg); }
-.mp-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px 78px 84px; align-items: center; gap: 6px; min-height: 32px; padding: 2px 6px; border-radius: var(--r-sm); }
-.mp-cols { flex: 0 0 auto; min-height: 20px; color: var(--dim); font: var(--w-heavy) var(--fs-tiny) / 1 var(--font-ui); letter-spacing: var(--tr-wide, .08em); }
+.mp-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px 78px 84px; align-items: center; gap: 6px; box-sizing: border-box; height: var(--pop-row, 34px); padding: 0 10px; border-radius: var(--pop-row-r, 9px); }   /* 044 KV2: the kit's popup row, as KEYBOARD's */
+.mp-cols { flex: 0 0 auto; height: auto; min-height: 20px; color: var(--dim); font: var(--w-heavy) var(--fs-tiny) / 1 var(--font-ui); letter-spacing: var(--tr-wide, .08em); }
 .mp-col { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mp-list { flex: 1 1 auto; min-height: 0; overflow: hidden auto; }
-.mp-group { padding: 9px 6px 2px; color: var(--acc); font: var(--w-heavy) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wide, .08em); }
+.mp-list { flex: 1 1 auto; min-height: 0; overflow: hidden auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
+.mp-group { padding: 9px 10px 2px; color: var(--ink-faint); font: var(--w-regular) var(--fs-micro) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); }   /* a head is light, as KEYBOARD's */
 .mp-row.mp-learning { background-color: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
-.mp-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--w-semi) var(--fs-base) var(--font-ui); color: var(--fg); }
+.mp-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--w-bold) var(--fs-mid) var(--font-ui); letter-spacing: var(--tr-tight); text-transform: uppercase; color: var(--fg-soft); }   /* KEYBOARD's name: its size, its weight, its case */
 .mp-chip { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: space-between; gap: 3px; min-width: 0; height: 22px; padding: 0 5px;
   border-radius: var(--r-xs); background: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg); font: var(--w-semi) var(--fs-small) / 1 var(--font-mono); white-space: nowrap; overflow: hidden; }
 .mp-chip-t { overflow: hidden; text-overflow: ellipsis; }
@@ -114,5 +109,4 @@ body[data-theme="dark"] .km-key-unbound {
 .mp-x { flex: 0 0 auto; padding: 0 2px; border: 0; background: none; color: var(--dim); font: var(--w-heavy) 12px / 1 var(--font-ui); cursor: pointer; }
 .mp-x:hover { color: var(--acc); }
 .mp-learn { min-height: 26px; }
-.mp-empty { padding: 12px 6px; color: var(--dim); font: var(--w-med) var(--fs-base) var(--font-ui); }
 @media (max-width: 860px) { .mp-row { grid-template-columns: minmax(0, 1fr) 70px 70px 54px 70px; gap: 4px; } }
