@@ -677,8 +677,7 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 #lwMenu .mm-vstep .mir-step-name { min-width: 0; min-height: 34px; padding: 0 6px; font-family: 'LW Title', var(--font-ui); font-size: 26px; letter-spacing: var(--tr-tight); line-height: 1; white-space: nowrap; }
 #lwMenu .mm-vstep .mir-step-b { width: 26px; height: 34px; min-width: 0; min-height: 0; font-size: 18px; border-radius: var(--r-md); } #lwMenu .mm-vstep .mir-step-b:disabled { opacity: var(--state-disabled, .38); }
 #lwMenu .mm-count { flex: none; font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; white-space: nowrap; }
-#lwMenu .mm-search { flex: none; font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); border-radius: var(--r-pill); padding: 6px 12px; width: 150px; }
-#lwMenu .mm-search::placeholder { color: var(--fg); opacity: .45; }
+#lwMenu .mm-search::placeholder { color: var(--ink-faint); }   /* 044 AF (L3): the field is the kit's .mir-search (its height, well, pill and 14 px); its seat below gives the width */
 #lwMenu .mm-vhead .mm-install { flex: none; white-space: nowrap; padding: 2px 10px 2px 2px; } #lwMenu .mm-vhead .mm-ring-host { width: 26px; height: 26px; }
 #lwMenu .mm-tags { flex: 1 1 auto; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; overscroll-behavior-x: contain; padding: 2px 14px;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); }
@@ -719,7 +718,7 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 #lwMenu .mm-ph { position: absolute; inset: 0; display: grid; place-items: center; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: var(--w-regular); font-size: calc(var(--t) * .17); opacity: .75; transition: scale 280ms var(--ease); }
 #lwMenu .mm-tile:hover .mm-ph { scale: 1.1; }
 @media (max-width: 700px) {
-  #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
+  #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; }
   #lwMenu .mm-tabs { gap: 14px; } #lwMenu .mm-tab { font-size: 12px; letter-spacing: .08em; } #lwMenu .mm-tab .mm-ico { display: none; }
   #lwMenu .mm-caption { height: 92px; }   /* 038 close: the page arrows stay outside the deck (picker.js size() keeps 60 px a side for them) */
   #lwMenu .mm-shelf { gap: 16px; } #lwMenu .mm-vol { --vol-h: min(clamp(190px, calc(100dvh - 432px), 540px), calc((100vw - 56px) * 8 / 9)); } }   /* 032: two portraits a row */
@@ -804,7 +803,7 @@ html.mono #lwMenu .mm-hue-ring::after { opacity: 1; background: conic-gradient(f
 #lwMenu .mm-tagrow { display: flex; gap: 4px; flex-wrap: nowrap; width: max-content; }
 #lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { display: none; }   /* inside a volume its head's twin is the one */
 /* iteration 014 D1: inside a volume the seat under the tabs is the search; the head's old seat holds NAME and MASS (3-state, as-is unpressed) */
-#lwMenu .mm-opts .mm-search { display: none; width: 240px; text-align: center; padding-block: 3px; line-height: 16px; }   /* 041 P14: 22 px, the seat's own height — entering a volume no longer grows the head 8 px */ #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
+#lwMenu .mm-opts .mm-search { display: none; flex: none; width: 240px; text-align: center; } #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
 #lwMenu .mm-sort { flex: none; display: inline-flex; align-items: center; gap: 4px; min-width: 30px; height: 26px; padding: 0 8px; border-radius: var(--r-pill); font-size: var(--fs-base); letter-spacing: .08em; white-space: nowrap; opacity: .45; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-sort:hover, #lwMenu .mm-sort:focus-visible { opacity: .8; } #lwMenu .mm-sort.on { opacity: 1; color: var(--acc); }
 #lwMenu .mm-sort .mm-ico { width: 14px; height: 14px; } #lwMenu .mm-sort[data-sort="name"] span { min-width: 2.4em; text-align: center; }
@@ -1004,9 +1003,12 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-widgets-card .wg-kind { flex-direction: column; justify-content: center; gap: 5px; height: 58px; min-width: 0; min-height: 0; padding: 4px 0; }
 .lw-widgets-card .wg-kind .trig-g .gly { width: 22px; height: 22px; }
 .lw-widgets-card .wg-kind .trig-l { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-micro); letter-spacing: var(--tr-tight); }
-.lw-widgets-card .wg-list { max-height: 157px; margin: 0 0 8px; overflow: hidden auto; overscroll-behavior: contain; border-top: var(--glass-border) solid var(--glass-hairline); }
+/* 044 AF (AV2's L18): the placed list's row is the FINDER's row — 34 px, radius 9, bold 12 px, the kind's glyph dim at its start, the hover plate */
+.lw-widgets-card .wg-list { display: flex; flex-direction: column; gap: 1px; max-height: 209px; margin: 0 0 8px; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
 .lw-widgets-card .wg-list[hidden] { display: none; }
-.lw-widgets-card .wg-row { display: flex; align-items: center; gap: 6px; height: 26px; border-bottom: 1px solid var(--glass-hairline); font-size: var(--fs-base); letter-spacing: .06em; }
+.lw-widgets-card .wg-row { display: flex; align-items: center; gap: var(--pop-row-gap, 10px); flex: 0 0 var(--pop-row, 34px); padding: 0 4px 0 10px; border-radius: var(--pop-row-r, 9px); font: var(--w-bold) var(--fs-mid)/1 var(--font-ui); letter-spacing: var(--tr-wide); }
+.lw-widgets-card .wg-row:hover { background: var(--state-hover, var(--glass-raise)); }
+.lw-widgets-card .wg-gly { flex: none; color: var(--dim); }
 .lw-widgets-card .wg-word { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-widgets-card .wg-n { opacity: .6; font-variant-numeric: tabular-nums; }
 .lw-widgets-card .wg-x { flex: 0 0 24px; width: 24px; height: 22px; min-width: 0; min-height: 0; padding: 0; }
