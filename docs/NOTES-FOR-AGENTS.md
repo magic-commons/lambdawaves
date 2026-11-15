@@ -120,6 +120,10 @@ and the code disagree, the code is right; please say so in an issue.
 - A change to CSS or to what the page builds at boot is checked with MIR's `tools/stylehash.mjs` (computed
   styles and pixels, theme × card × frost, before and after). Source: `research/optimization-2026-09-24/BUILD-BRIEF.md`.
 - `node tools/changelog.mjs --check` fails when CHANGELOG.md is out of date with the tags. Source: that file.
+- The kit's gate, `node <MIR>/tools/adopt.mjs . --check` (with `node tests/mir-manifest.test.mjs`), is green only when it prints
+  `in step with MIR <version>`, run from the kit checkout on the app's line (`~/Documents/MIR`, branch `main`). A kit on another
+  line prints "pinned to line … checked against its own manifest" and exits 0 having compared nothing to its own bytes: not a pass.
+  Source: `<MIR>/tools/adopt.mjs`, docs/laws/kit.md (THE GATE'S GREEN WORD).
 - The standing law: the same state draws the same pixels, a saved project keeps the same bytes and the controls
   stay the same, unless the change is a proven bug fix or the owner ruled it. Source:
   `docs/OPTIMIZATION-2026-09-24.md` §1 (archived: the tag `research-archive-2026-10-30`).
@@ -139,10 +143,10 @@ and the code disagree, the code is right; please say so in an issue.
 - NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through the same restore-with-rollback road as any project; `node tools/new-project.mjs --check` proves the shipped file byte-exact against the modulation model and the boot defaults. The undo ring covers the whole PROJECT scope (not the camera pose, the notebook text or the quality hint): `serialize({ scope: 'edit' })` in, `restore(S, { history: true })` out; a project open, a link and NEW each start a new timeline whose bottom row is named for its origin.
 - The laws: CLAUDE.md (two pages since 021 D2: the standing constraints, the gates, the index) and `docs/laws/*.md` (the laws by subject), REPORT.md (the notebook to 0.5.2; since iteration 017 one wave line per closed iteration, the work itself in `research/iteration-0NN/`), `docs/`
   (the optimization record, `ui/STYLE-LOCK.md`, `release/SHIPPING-READINESS.md`) and docs/release/RELEASING.md.
-- `lab/mir/**` (and `lab/fonts/**`) is the adopted MIR interface kit: MIR 1.5.5 plus the doors 1.5.6-alpha.1…17 (`MIR-MANIFEST.json` is the number). The law is THE KIT SENTENCE, CLAUDE.md:6:
-  "THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS" — `lab/mir` is written by MIR's `adopt.mjs` alone, a λWAVES need is an additive
-  door `1.5.6-alpha.N` made in [MIR](https://github.com/magic-commons/mir) with its `docs/FOR-MIR.md` line, a removal waits for a
-  line, and `node <MIR>/tools/adopt.mjs . --check` says "in step". Source: CLAUDE.md:6, CONTRIBUTING.md.
+- `lab/mir/**` (and `lab/fonts/**`) is the adopted MIR interface kit (`MIR-MANIFEST.json` is the number; this page states none). The law
+  is THE KIT SENTENCE, CLAUDE.md:6, the one source for the version and the next door — `lab/mir` is written by MIR's `adopt.mjs` alone,
+  a λWAVES need is an additive door made in [MIR](https://github.com/magic-commons/mir) with its `docs/FOR-MIR.md` line, a removal
+  waits for a line, and `node <MIR>/tools/adopt.mjs . --check` says "in step". Source: CLAUDE.md:6, CONTRIBUTING.md.
 - The debug surface is `window.__LW` (`serialize()`, `restore()`, `fieldDigest()`, `readPixels()`, `perf`,
   `governor`, `quality`, `layout`, `report()`). Source: `lab/shell/facade.js` (`createFacade`; `rack.js` adds the late members at their seats).
 - A window's "copy" is one clipboard road: `layout.copyText(id, text)` writes and flashes `copied` on the named
