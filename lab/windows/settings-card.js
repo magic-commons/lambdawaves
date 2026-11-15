@@ -12,12 +12,12 @@ export function createSettingsCard(app) {
        STATUS TAGS, CONTROL HINTS (HINTS) and HELP are TEXT › SHOW there; THEME, CARD STYLE (PANE), FROST, GLASS BLUR (BLUR), DISCONNECTED,
        ACCENT A / B, VIVID, RESET LAYOUT and FORGET too.  SETTINGS keeps λWAVES' own: the stage, its chrome, sound, the gamut, quality. */
     ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
-    ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
+    ui.capSw = sw({ label: 'CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
     ui.audioSw = sw({ label: 'AUDIO', value: false, title: 'Levels as tones (SPECTRUM › EQUALIZER › SOUND)', onChange: (v) => { ui.setAudio(v); saveSettings(); } }); ri.appendChild(ui.audioSw.root);   // 0.6.4 S2: a PREFERENCE (`audio`), the consent
     createInformational(app);   // 0.5.3 M9: STAGE FORMULA and ATOM LABELS, each with its SIZE, left DISPLAY for their own window (lab/informational.js)
     /* 037 T1: FRAME · AXIS · AXIS COLOUR are made here as before (their keys FIELD_CHROME, their roads unchanged) and seated in STAGE (lab/stage-window.js) */
     ui.frameSw = sw({ label: 'FRAME', value: true, title: 'Show the field boundary', onChange: () => { const modes=['box','lattice','dots','off']; const current=mat.frame===false?'off':mat.frameMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.frame=next!=='off'; mat.frameMode=next==='off'?'box':next; ui.frameSw.set(mat.frame);  saveSettings(); schedule(TIER.PRESENT); } });
-    ui.axisSw = sw({ label: 'AXIS', value: true, title: 'Show or hide the x, y, and z axes', onChange: () => { const modes=['box','corner','off']; const current=mat.axis===false?'off':mat.axisMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.axis=next!=='off'; mat.axisMode=next==='off'?'box':next; ui.axisSw.set(mat.axis);  saveSettings(); schedule(TIER.PRESENT); } });
+    ui.axisSw = sw({ label: 'AXES', value: true, title: 'Show or hide the x, y, and z axes', onChange: () => { const modes=['box','corner','off']; const current=mat.axis===false?'off':mat.axisMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.axis=next!=='off'; mat.axisMode=next==='off'?'box':next; ui.axisSw.set(mat.axis);  saveSettings(); schedule(TIER.PRESENT); } });
     ui.axisInkSeg = seg({ label: 'AXIS COLOUR', value: 'theme', options: [
       { id: 'theme', label: 'THEME', title: 'Choose axis colours from the current theme' },
       { id: 'cmy', label: 'CMY', title: 'Use cyan, magenta, and yellow axes' },
@@ -249,10 +249,10 @@ export function createSettingsCard(app) {
       for (const g of ['videoOn', 'videoOff']) f.root.append(glyphEl(g, 'gly gly-' + g, 20));
       paints.push(() => f.set(on())); row(gm, f); }
     row(gm, lookSeg('frost', 'FROST', [['off', 'OFF', 'No backdrop blur'], ['still', 'STILL', 'Blur while the picture is still'], ['always', 'ALWAYS', 'Blur always: it can cost frames']]));
-    { const on = () => !!document.fullscreenElement, f = sw({ label: 'FULLSCREEN', value: on(), title: 'Fill the screen (F)', onChange: () => { app.sh.ACTIONS.run('fullscreen'); setTimeout(paint, 400); } });
+    { const on = () => !!document.fullscreenElement, f = sw({ label: 'FULL SCREEN', value: on(), title: 'Fill the screen (F)', onChange: () => { app.sh.ACTIONS.run('fullscreen'); setTimeout(paint, 400); } });
       paints.push(() => f.set(on())); document.addEventListener('fullscreenchange', () => f.set(on())); row(gm, f); }   // the `fullscreen` action's road; the switch mirrors the document
     row(gm, lookSeg('theme', 'THEME', [['light', 'LIGHT', 'Light windows and stage'], ['dark', 'DARK', 'Dark windows and stage'], ['system', 'SYSTEM', 'Follow the system']], (v) => app.hooks.setTheme(v)));
-    { const h = sw({ label: 'HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
+    { const h = sw({ label: 'CONTROL HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
     const moreRow = el('div', 'mm-sh-more', host), more = group('');
     { const f = fold(moreRow, more, { what: 'more settings', key: 'menuMore' }); f.button.prepend(el('span', 'mm-sh-morew', null, 'MORE')); hint(f.button, 'More: the grid, the clock and the fine-tuning'); }
     /* 036 G5b (chain K's FOR-SOS): STROKE — the kit's look key `stroke` (0–1 by .05; MIR OPTIONS › CONTROLS' 0–100 % knob; λWAVES' home 0), a

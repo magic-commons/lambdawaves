@@ -275,7 +275,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      card's OPEN AS A WINDOW door before × in its head (× 's own look) — the ground keeps no door */
   const door = (cls, glyph, word, run) => { const b = el('button', cls); b.type = 'button'; chip(b, glyph, word); b.addEventListener('click', run); return b; };
   vWin.anchor(win.rail.chip('add')); vWin.onTools = chips; chips();
-  win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'DOCK IN THE RACK', () => M.door('win')));
+  win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'Dock in the rack', () => M.door('win')));
   /* 040 N4 · THE NODES' PRESETS (Josh: "I want to add the modulation window's preset saving thing into Nodes and put it into the window title bar"):
      MOD's bar — the save glyph · PRESET NAME · ◀ ▶ — on the left after the title.  A preset is the graph: every node but CURVES (whose grade keeps its
      own presets), the shipped FILM · POSTER · PRINT then the reader's — the GRAPHS › list, `lambdawaves.q0.nodePresets` (PREFERENCE).  ◀ ▶ step through
@@ -317,7 +317,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     /* the hand's drag only (the kit's `dragging` let go while the card floats): a card floated by a road of its own (popOut, the header's Enter) stays a card */
     new MutationObserver((recs) => { const c = card.root.classList; if (!c.contains('floating') || c.contains('dragging') || !recs.some((m) => / dragging( |$)/.test(' ' + m.oldValue))) return;
       const r = card.root.getBoundingClientRect(); rk.dock('nodes'); rk.close('nodes'); win.open(); win.place({ x: r.left, y: r.top }); }).observe(card.root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }); }
-  const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'OPEN AS A WINDOW', () => M.door('card')), util.querySelector('.dev-close'));
+  const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'Float as a window', () => M.door('card')), util.querySelector('.dev-close'));
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root), ...[...win.rail.el.querySelectorAll('.mir-chip')].map((c) => paintedRect(c))] : []));   // 041 N1: the rail's chips are painted glass too
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });

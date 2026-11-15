@@ -96,7 +96,7 @@ body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* w
 /* the stepped-back future: still there, still clickable, and visibly spent */
 .hist-future .hist-lbl { text-decoration: line-through; text-decoration-thickness: 1px; }
 .hist-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
-.hist-actions > .trig { width: 100%; min-width: 0; padding-inline: 5px; }
+.hist-actions > .trig { width: 100%; min-width: 0; padding-inline: 2px; }   /* 044 A9: BACK FROM THE JUMP fits its cell on one line */
 
 .nb-text { font: var(--fs-lead)/1.5 var(--font-ui); }
 .nb-foot { letter-spacing: var(--tr-wide); }

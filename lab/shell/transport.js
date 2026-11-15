@@ -104,7 +104,7 @@ export function createTransport(app) {
     if (P) {
       P.dataset.mirSurface = 'well'; P.classList.add('csb-surface');
       for (const [k, t] of [['tr', 'TRANSPORT'], ['mac', 'MACROS'], ['fav', 'FAVOURITES'], ['met', 'METERS']]) sec[k] = section({ title: t, parent: P, cls: 'csb-sec csb-sec-' + k });
-      const home = seat('home', 'csb-home'); chip(home, 'reload', 'back to t = 0');   // 032 T14: ↺, as the bar's seat el('span', 'csb-steps', sec.tr.body).append(home, sm, sp, jmp);
+      const home = seat('home', 'csb-home'); chip(home, 'reload', 't → 0 · the beat stays');   // 032 T14: ↺, as the bar's seat el('span', 'csb-steps', sec.tr.body).append(home, sm, sp, jmp);
       mt.bpm = readout({ label: 'BPM', value: '—', cls: 'csb-bpm' }); mt.beat = lamp({ parent: mt.bpm.root, cls: 'mir-lamp csb-beat', title: 'the beat' });
       sec.tr.body.append(ui.periodRo.root, mt.bpm.root);
       const tiles = P.querySelector('.tempo-grid'); if (tiles) { sec.tr.body.append(...tiles.children); tiles.parentElement.remove(); }   // the kit's tiles, one strip
