@@ -5,7 +5,7 @@
  * a clipboard, a file picker) wants a real press: KEY only.  × on a chip unbinds.  The search line filters by word.  MIDI is asked for only on
  * a press (LEARN or CONNECT MIDI) — or at boot where a saved map exists and the browser already grants it (027 D4, resumeMidi); Safari and
  * the iPad have none, and the MIDI column says so.  The map is PREFERENCE `lambdawaves.q0.midi`. */
-import { el, label, trig } from './mir/kit.js'; import { createMidi, midiSupport } from './mir/shell/midi.js'; import { jsonStore } from './mir/core/prefs.js';
+import { el, label, trig } from './mir/kit.js'; import { keycaps } from './mir/shell/menubar.js'; import { createMidi, midiSupport } from './mir/shell/midi.js'; import { jsonStore } from './mir/core/prefs.js';
 import { displayChord } from './mir/shell/keys.js'; import { t } from './mir/core/i18n.js';
 import { ORDER } from './key-table.js'; import { searchField, emptyLine } from './mir/shell/window-picker.js';
 
@@ -47,7 +47,7 @@ export function createMapping(app, { kt }) {
 
   function chip(row, kind, text, unbind) {
     const c = el('span', 'mp-chip mp-chip-' + kind + (text ? '' : ' mp-none'), row); c.translate = false;
-    el('span', 'mp-chip-t', c, text || '—');
+    const tx = el('span', 'mp-chip-t', c, text || '—'); if (text && kind === 'key') keycaps(tx, text);   // 044 L12: a key is drawn as keycaps, as the menus and KEYBOARD draw it
     if (text && unbind) { const x = el('button', 'mp-x', c, '×'); x.type = 'button'; x.setAttribute('aria-label', t('unbind')); x.addEventListener('click', () => { unbind(); paint(); }); }
   }
   function paint() {

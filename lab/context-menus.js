@@ -80,7 +80,7 @@ export function createContextMenus(app) {
     if ((e = c('.k, .fd'))) return { control: e };
     if ((e = c('[data-fav]'))) return { control: e };
     if (c('.mir-transport')) return bar();
-    if ((e = c('.dev .sw, .dev .segw, .dev .trig, .dev .mir-step'))) return { control: e };
+    if ((e = c('.dev .sw, .dev .segw, .dev .trig, .dev .mir-step, .dev .mir-select, .dev .mir-num'))) return { control: e };   // 044 L45: the select and the number too (the number's value door is the kit's knobOf)
     if ((e = c('.dev[data-id] > .dev-head'))) return title(e.parentElement.dataset.id);
     if ((e = c(LANES))) return lanes(e);
     if (t === app.dom.canvas || t.matches('#stage, #stage > canvas')) return wordsAt(x, y) ? words() : stage();   // the stage, or its words
