@@ -21,9 +21,9 @@ export function createTransition(app) {
   const snap = () => ({ re: Float64Array.from(reg.re0), im: Float64Array.from(reg.im0) });
   const recall = (S) => { if (!S) return; if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } reg.re0.set(S.re); reg.im0.set(S.im); reg.version++; touchState(); abStatus(); };
   ui.abRo = readout({ label: '', value: '—  /  —', sub: SUB }); ui.abRo.root.querySelector('.ro-lbl').remove(); ui.abRo.root.setAttribute('aria-label', 'A / B');
-  rab.appendChild(trig({ label: 'STORE A', title: 'Keep the register as it is now as state A', onFire: () => { abA = snap(); abLast = 'A'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeA';   // 021 I1: the actions press them
+  rab.appendChild(trig({ label: '→ A', title: 'Store A: keep the register as it is now', onFire: () => { abA = snap(); abLast = 'A'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeA';   // 021 I1: the actions press them
   const slotA = rab.appendChild(trig({ label: 'A', cls: 'ab-slot', title: 'Recall state A', onFire: () => recall(abA) }).root);
-  rab.appendChild(trig({ label: 'STORE B', title: 'Keep the register as it is now as state B', onFire: () => { abB = snap(); abLast = 'B'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeB';
+  rab.appendChild(trig({ label: '→ B', title: 'Store B: keep the register as it is now', onFire: () => { abB = snap(); abLast = 'B'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeB';
   const slotB = rab.appendChild(trig({ label: 'B', cls: 'ab-slot', title: 'Recall state B', onFire: () => recall(abB) }).root);
   const clr = chip(el('button', 'sp-abclear', rab), 'trash'); clr.type = 'button'; clr.title = 'CLEAR · empty A and B'; clr.setAttribute('aria-label', 'CLEAR A and B');
   clr.addEventListener('click', () => { if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } abA = abB = abLast = null; touchState(); abStatus(); });

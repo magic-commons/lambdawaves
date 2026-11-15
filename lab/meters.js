@@ -14,7 +14,7 @@ export function createMeters(host, src = null, measure = null) {
   const abar = el('div', 'abar', auto.root); const abarI = el('i', '', abar);
   const modes = readout({ label: 'MODES', value: '—', sub: '' }); grid.appendChild(modes.root); hint(modes.root, 'Modes drawn / populated / of {n}', { n: BASIS.length });
   const field = readout({ label: 'FIELD CACHE', value: '—', sub: '' }); grid.appendChild(field.root);
-  const rates = readout({ label: 'CLOCKS Hz  disp · field · phys', value: '—', sub: '' }); grid.appendChild(rates.root);
+  const rates = readout({ label: 'CLOCKS  Hz', value: '—', sub: '' }); rates.root.title = 'Display · field · physics, in Hz'; grid.appendChild(rates.root);
   const tier = readout({ label: 'LAST TIER', value: '—', sub: '' }); grid.appendChild(tier.root);
   /* FLOOR · GRID ERROR (iteration 005 P3): the LIVE reading of the grid in force (a press, or GRID moving while METERS is open: `measure` is
      readouts.js', field.js' errorField against the exact twin), then two sub lines — what the reading says, and the CERTIFIED constants
