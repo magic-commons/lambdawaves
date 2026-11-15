@@ -15,7 +15,7 @@
  *   python3 tools/gate/server.py <root> <LW_PORT>   (stop it by pid)
  *   LW_PORT=… GD_PORT=… node tools/camera-routes.mjs [--out .tmp/routes.json] [--against .tmp/routes-base.json] */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { open } from './gate/gatekit.mjs';
+import { open, ASK } from './gate/gatekit.mjs';
 import { STARTERS } from '../lab/project-store.js';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
@@ -27,7 +27,7 @@ const SCENES = [...STARTERS.map((s) => [s.name, 'demo', s.file, 'demos/' + s.fil
 /** the saved-route law of the six observer.* targets (rack.js' defs; CAM in lab/camera-law.js) */
 const LAW = { 'observer.yaw': ['wrap', 0, 2 * Math.PI], 'observer.pitch': ['bipolar', -1.52, 1.52], 'observer.dist': ['log', 1, 12],
   'observer.fov': ['linear', 5 * Math.PI / 180, Math.PI / 2], 'observer.panx': ['bipolar', -1, 1], 'observer.pany': ['bipolar', -1, 1] };
-const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK}
   const md = navigator.mediaDevices; if (md) md.getUserMedia = () => Promise.reject(new Error('routes: no microphone'));
   window.__quiet = async () => { await __LW.settle(); let st = __LW.chem.state();
     for (let i = 0; i < 600 && st.on && !(st.fieldOwner && st.nocc); i++) { await __w(100); st = __LW.chem.state(); }

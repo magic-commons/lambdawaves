@@ -47,7 +47,7 @@ const padOf = (az, el) => { const r = (90 - el) / 180; return [r * Math.cos(az *
 
 export function createLight(app) {
   const { ui, device, mat, obs } = app, { schedule } = app.loop, { modHand, setKnob } = app.ctl;
-  const w = device({ id: 'light', eyebrow: 'LIGHTING', title: 'the key, the fill, the rim', status: '' });
+  const w = device({ id: 'light', eyebrow: 'LIGHTING', status: '' });
   w.root.classList.add('closed', 'lw-light'); app.host.rack.appendChild(w.root);
   const knobs = {}, cur = (k) => valOf(mat.light, k);
   /** the one write: the record keeps only what is off its home, and goes when nothing is.  038 K6: a FRESH record every write, never an edit in place —

@@ -6,7 +6,7 @@
 // with its fifth line, the molecule-level STATUS (NUMERICAL · its agreement with PySCF's energy; a live molecule has no geometry class).
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 import { readFileSync } from 'node:fs';
 /* iteration 009: the WATER demo left lab/demos/ — its file as it shipped is the fixture a demo open is read from */
 const WATER = readFileSync(new URL('./fixtures/retired-demos/water.lambdawaves.json', import.meta.url), 'utf8');
@@ -73,7 +73,7 @@ try {
   pass(`N₂'s head (D∞h, HOMO 3σg) left on Escape; WATER's head left the moment NH₃ was picked, and NH₃'s came with its solve`);
 
   /* ── 3 · NEVER on a handless road: an undo back to WATER, a link open, a demo open, STAGE TEXT off ── */
-  const t3 = await ev(`const S = __LW.stageText, Hd = __LW.head, H = __LW.history, P = __LW.layout.projects, c = __LW.chem, c0 = window.confirm; window.confirm = () => true;
+  const t3 = await ev(`const S = __LW.stageText, Hd = __LW.head, H = __LW.history, P = __LW.layout.projects, c = __LW.chem; ${ASK} __discard.yes = true;
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true })); await __w(400); H.flush(); await __w(450); H.flush();
     const n0 = Hd.shown, a0 = S.stats.announced;
     let undos = 0; while (c.preset() !== 'H2O' && undos < 12 && H.undo()) { undos++; await __w(200); }
@@ -86,7 +86,7 @@ try {
     const sw = [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === 'FORMULA');   // 0.5.3 M9: the INFORMATIONAL window's
     sw.click(); await __w(100); __pick('HF'); await __until(() => { const s = c.solution(); return s && s.key === 'HF|sto-3g|0'; }); await __w(600);
     const off = { stage: S.on, shown: Hd.shown - n0 }; sw.click(); await __w(300);
-    window.confirm = c0;
+
     return { undo, link: link.opened && link.ok, demo, off, announced: S.stats.announced - a0, after: { shown: Hd.shown - n0, fades: __fades() }, errs: __e.slice() };`);
   assert.ok(t3.undo.preset === 'H2O' && t3.undo.undos > 0, 'the undo did not walk back to WATER: ' + JSON.stringify(t3));
   assert.deepEqual([t3.undo.shown, t3.undo.fades], [0, 0], 'an undo back to WATER showed its head: ' + JSON.stringify(t3));

@@ -26,14 +26,14 @@
  *   fresh exportText importText · demo(file) (a DEMOS press) · download() (EXPORT .json) · pick() (IMPORT) · seed() · status · folders
  *   · changed() (the part's subscribe hears it) · resume(session) (the session's RESUME) · show({ folder, name }) · toggle()
  *   · entryOf(path) · inspected (the RENDER card's gallery: the project ⓘ pointed at) · restoreDemos()
- *   port { host, part, snapshot(), rollback(S) → bool, busy(±1), opened(label), notice() → D9's line, thumbnail(), confirm(text),
+ *   port { host, part, snapshot(), rollback(S) → bool, busy(±1), opened(label), notice() → D9's line, thumbnail(),
  *          rack, onMoved(rect), titleAfterSave(name) → bool, cover() → the front page { shown, close } | null, saved(name),
  *          inspect(entry | null, how), shown() (039 W4: FOLDERS came on screen — its Escape layer) } */
 import { createFolders, toThumb } from './mir/folders/folders.js'; import { glyphEl } from './mir/glyph.js'; import { hint } from './mir/kit.js';
 import { createFiles } from './mir/folders/files.js';
 import { registerProjectPart, restoreProject, projectSignature } from './mir/core/project.js';
 import { handOver } from './capture.js';   // 039 F1 (W-REVIEW row 1): a project's file leaves by the one hand-over, which says "Saved <name> to your downloads"
-import { notice } from './mir/shell/notice.js';
+import { notice } from './mir/shell/notice.js'; import { confirmDialog } from './mir/shell/dialog.js';
 import { coalesce } from './frame-coalescer.js';   // 0.5.0 C6b: the part's subscribe, once a frame
 import { keepData } from './library.js';   // iteration 005 A: the demo covers are DATA
 import { PJ_KEY, PART, MAX_PROJECT_BYTES, MAX_LIBRARY_CHARS, UNTOUCHED, pathOf, splitPath, readCollection, createProjectStore, touchRecent,
@@ -51,7 +51,7 @@ export function createProjects(port) {
   registerProjectPart(PART, { ...port.part, subscribe: (fn) => { heard.add(fn); return () => heard.delete(fn); } });
   let unarmed = null, currentId = null, status = '', echo = null, hush = 0, pinned = null, cleanAt = null, landed = false;
   const told = new Set(), skips = [];
-  const toast = (line, warn) => notice(line, { kind: warn ? 'warn' : 'ok', ms: warn ? 5000 : 3200 });
+  const toast = (line, warn) => notice(line, { kind: warn ? 'warn' : 'ok' });   // 044 A8 (L85): the notice owns its time, by kind (the kit's NOTICE_MS)
   const pjStatus = (line, warn) => { status = line; toast(line, warn); };
   /* an unreadable collection says so ONCE per reason: list() and recent() read it on every FILE menu */
   const unavailable = (why) => { status = 'projects unavailable — ' + why + '. ' + UNTOUCHED; if (!told.has(why)) { told.add(why); toast(status, true); } };
@@ -79,7 +79,8 @@ export function createProjects(port) {
   const markAt = (sig) => { pinned = sig; try { markViews(); } finally { pinned = null; } };
   const markClean = () => markAt(cleanAt = projectSignature());
   const dirty = () => { const d = folders.dirty(); return d.known && d.dirty; };
-  const discard = (action) => !dirty() || port.confirm(action + ' WITHOUT SAVING?\nYour unsaved project changes will be lost. Cancel to save them first.');
+  /* 044 A8 (L86): the question is the kit's dialog (it was the browser's grey box, the app's last window.confirm), so every road that asks awaits it */
+  const discard = async (action) => !dirty() || confirmDialog('Your unsaved project changes will be lost. Cancel to save them first.', { title: action + ' WITHOUT SAVING?', yes: 'DISCARD', danger: true });
   /* FOLDERS learns what the facade did: the same entry open (or NEW), its restore skipped for this one call.  Its own markClean
      then reads what is on screen a few microtasks later, so the facade's clean mark is put back when the telling ends */
   function tell(id) {
@@ -270,8 +271,8 @@ export function createProjects(port) {
     get dirty() { return dirty(); },
     markClean,
     discard,   // wave 133: the same question for a link opened over unsaved work (the hashchange road)
-    requestOpen(path) { return discard('OPEN') && api.open(path); },
-    requestFresh() { return discard('START A NEW PROJECT') ? api.fresh() : Promise.resolve(false); },
+    async requestOpen(path) { return (await discard('OPEN')) && api.open(path); },
+    async requestFresh() { return (await discard('START A NEW PROJECT')) ? api.fresh() : false; },
     /** save(path) — λWAVES' save: over the entry at that path (the open project's, when none is given), or a new one there.  A
      *  starter is never saved over (it came with the app): its save is the user's own copy beside it */
     save(path) {
@@ -338,7 +339,7 @@ export function createProjects(port) {
     /** demo(file) — a DEMOS press: the stored open's question first, then the bundled demo (its starter; the file itself when this
      *  browser has none) */
     async demo(file) {
-      if (!discard('OPEN')) return false;                       // S2: asked before anything is fetched or stored
+      if (!(await discard('OPEN'))) return false;                       // S2: asked before anything is fetched or stored
       sync();
       let path = starterOfFile(file) ? pathOf(starterOfFile(file)) : null;
       if (!path) {

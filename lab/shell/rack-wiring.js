@@ -132,11 +132,10 @@ export function createRackWiring(app) {
       }
       const mt = typeof c.more === 'boolean' ? d.querySelector('.mol-more-toggle') : null;   // an older record has no `more`: the fold stays as it is
       if (mt && (mt.getAttribute('aria-expanded') === 'true') !== c.more) mt.click();
-      const ct = typeof c.core === 'boolean' ? d.querySelector('.orb-core-toggle') : null;   // likewise MO-REGISTRY's CORE fold
-      if (ct && (ct.getAttribute('aria-expanded') === 'true') !== c.core) ct.click();
       /* iteration 011 Q2 · the folds INSIDE the card (lab/fold.js' presses, `data-fold`): `folds` names the open ones and is written only when one is, so a
-         record without it (an older one, or the default) closes them all — the first run's minimized card (first-run.js `inner`) */
-      for (const b of d.querySelectorAll('.lw-fold[data-fold]')) { const want = Array.isArray(c.folds) && c.folds.includes(b.dataset.fold); if ((b.getAttribute('aria-expanded') === 'true') !== want) b.click(); }
+         record without it (an older one, or the default) closes them all — the first run's minimized card (first-run.js `inner`).  044 A8 (L109):
+         MO-REGISTRY's CORE is one of them (`data-fold="core"` on its word; an older record's own `core: true` still opens it) */
+      for (const b of d.querySelectorAll(':is(.lw-fold, .orb-core-toggle)[data-fold]')) { const want = (Array.isArray(c.folds) && c.folds.includes(b.dataset.fold)) || (b.dataset.fold === 'core' && c.core === true); if ((b.getAttribute('aria-expanded') === 'true') !== want) b.click(); }
       /* iteration 008 A7 · SPECTRUM's folded shells (spectrum.js): `shells` is written only when it is not the default, so a record without it
          (an older one, or the default) folds n = 7 alone */
       if (c.id === 'spectrum') { const want = Array.isArray(c.shells) ? c.shells : SHELLS_FOLDED;
@@ -223,13 +222,12 @@ export function createRackWiring(app) {
              (SPECTRUM lives on the LEFT rack out of the box) that meant: rotate a tablet past the breakpoint,
              press ☆, rotate back, load — and the mirror rack is empty for ever. */
           const st = rk.floatOf(d.dataset.id), mt = d.querySelector('.mol-more-toggle');   // 0.4.0 S0: MOLECULES' MORE fold is the card's own WORKSPACE key
-          const ct = d.querySelector('.orb-core-toggle');                                      // 0.4.0 S1: MO-REGISTRY's CORE fold, the same kind of key
-          const fs = [...d.querySelectorAll('.lw-fold[data-fold][aria-expanded="true"]')].map((b) => b.dataset.fold);   // iteration 011 Q2: the card's open inner folds
+          const fs = [...d.querySelectorAll(':is(.lw-fold, .orb-core-toggle)[data-fold][aria-expanded="true"]')].map((b) => b.dataset.fold);   // iteration 011 Q2: the card's open inner folds
           const sh = d.dataset.id === 'spectrum' ? app.w.spectrum.folded : null;   // iteration 008 A7: the folded shells
           return { id: d.dataset.id, side: st ? sideLR(st.home.side) : (d.dataset.phoneFrom === 'left' || d.parentElement === rackL ? 'L' : 'R'),
             folded: d.classList.contains('folded'), closed: d !== wTr.root && d.classList.contains('closed'), off: d.classList.contains('off'),
             float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: rk.floating().indexOf(d.dataset.id), index: st.home.index } : null,
-            ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}), ...(ct ? { core: ct.getAttribute('aria-expanded') === 'true' } : {}),
+            ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}),
             ...(sh && sh.join() !== SHELLS_FOLDED.join() ? { shells: sh } : {}), ...(fs.length ? { folds: fs } : {}) };
         }),
         docked: !!layout.docked, rackHidden: document.body.classList.contains('rack-hidden'),

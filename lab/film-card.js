@@ -71,7 +71,7 @@ export function createFilmCard(o) {
       const file = await film.fileFacts(res).catch(() => null), A = film.audit({ asked, plan, res, last: film.last, file, current });
       if (film.last) film.last.audit = A;
       landed = A.ok ? [bounceLine(file, res, !!opts.previewS), false] : ['RENDER DISOBEYED: ' + A.lies.join(' · '), true];
-      say(...landed); notice(landed[0], { kind: landed[1] ? 'warn' : 'ok', ms: landed[1] ? 8000 : 5000 });   // the kit's toast, once; the card's status keeps it
+      say(...landed); notice(landed[0], { kind: landed[1] ? 'warn' : 'ok' });   // the kit's toast, once, for the kit's time by kind (044 A8, L85); the card's status keeps it
       return res;
     });
   };

@@ -4,7 +4,7 @@
 // the card built, the transition done, the route numbered, the restore landed, the clock moved, the drag's base moved, the demo opened. The one
 // quiet window kept is the click's (a click must move nothing: a window before a "nothing changed" read).
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`, { width:1500,height:1100,script:20000 });
 let failed = false;
 try {
@@ -248,7 +248,7 @@ try {
  /* THE BUNDLED DEMO (2026-09-11; iteration 009: the one demo, WAVE DANCER PROTOTYPE, re-saved at KNEE 3): it ships under lab/demos/ and opens through the projects road — eight
     modes, three macros, five routes, the A/B stores and the notebook, with no page error.  0.3.1 · S2: the button asks before it
     discards unsaved changes (the scenes above leave some), so the confirm is accepted here. */
- const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));window.confirm=()=>true;__LW.projects.demo('wave-dancer');await __until(()=>/opened demo/.test(__LW.projects.status));await __LW.settle();
+ const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));${ASK}__LW.projects.demo('wave-dancer');await __until(()=>/opened demo/.test(__LW.projects.status));await __LW.settle();
   const S=__LW.serialize(),nb=document.querySelector('[data-mir-window="notebook"]');return {status:__LW.projects.status,modes:S.experiment.modes.length,routes:(S.presentation.modulation.routes||[]).length,macros:(S.presentation.modulation.macros||[]).length,title:nb.querySelector('.nb-title').value,knee:__LW.mat.knee,ab:!!(S.presentation.ab&&S.presentation.ab.a&&S.presentation.ab.b),errs:__e.slice()}`);
  assert.equal(demo.status,'opened demo DEMOS/WAVE DANCER PROTOTYPE'); assert.equal(demo.modes,8); assert.equal(demo.routes,5); assert.equal(demo.macros,3); assert.equal(demo.title,'WAVE DANCER PROTOTYPE'); assert.equal(demo.knee,3); assert.equal(demo.ab,true); assert.deepEqual(demo.errs,[]);
  console.log('PASS the bundled demo: WAVE DANCER PROTOTYPE opens with its modes, macros, routes, A/B and notebook, at KNEE 3');

@@ -81,7 +81,7 @@ export function createMolecules(app) {
      let go of the field.  tests/field-owner.test.mjs is the law that keeps that "only" true. */
   app.state.molSession = createMolecularSession({ field: () => field, fieldView: molFieldView,
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); } });
-  const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
+  const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
   rack.appendChild(wChem.root);
   /* 017 (Josh's call 8, 2026-10-26): AN EFFECT SHOWS ITS WINDOW holds for the mode too — the card's × is MOLECULES OFF (the molecule lets the

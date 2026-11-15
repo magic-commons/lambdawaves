@@ -12,11 +12,11 @@
 //       entrance LANDS (not mid-motion), and leave it when it closes.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 import { go } from '../tools/gate/drv.mjs';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
-const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK}
   window.__keys = () => { const o = []; for (let i = 0; i < localStorage.length; i++) o.push(localStorage.key(i)); return o.sort(); };
   /* EXPORT hands a file to the person (folders/save-blob.js): an <a download> click.  Here the click is caught and the blob kept */
   window.__blobs = []; const cu = URL.createObjectURL.bind(URL); URL.createObjectURL = (b) => { __blobs.push(b); return cu(b); };

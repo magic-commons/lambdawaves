@@ -7,14 +7,14 @@
 //   4 · WIGNER stands down under MOLECULES (hydroReader did not know `chem`)
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 
 const SPACE = '';
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`, { width: 1500, height: 1000, script: 60000 });
 let failed = false;
 try {
   assert.equal((await g.waitFor('window.__LW&&__LW.ready', 150, 100)).ok, 1);
-  const helpers = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+  const helpers = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK}
     window.__clocks = () => ({ field: __LW.clock.playing, t: __LW.clock.t, mod: __LW.mod.playing, refused: __LW.mod.clock.stats().refusedPlays, editor: __LW.mod.expanded,
       running: __LW.mod.running, power: __LW.mod.armed, demand: __LW.mod.clock.anyRouted() && !__LW.mod.model.needsClock(), sources: __LW.mod.model.sourceList().length,
       routes: __LW.mod.model.routeList().length, held: __LW.mod.registry.isModulated('material.stage') });

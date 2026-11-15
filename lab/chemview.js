@@ -23,7 +23,7 @@
  * window is a collapsible inset, off by default, on its own amplitude scale, badged as a timestep diagnostic.
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
-import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint, ariaLabel, mathPlain, arcRing } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js';
+import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, hint, ariaLabel, mathPlain, arcRing } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js';
 import { rackPager } from './pager.js'; import { select as listSelect } from './mir/controls/select.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS, setPivot } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
@@ -213,7 +213,7 @@ export function createChem(host, api) {
   const mSel = { get value() { return mList.get() || ''; }, set value(id) { mList.set(mRows.some((r) => r.id === id && !r.coming) ? id : null); }, set selectedIndex(_) { mList.set(null); }, get options() { return mRows; } };
   /* iteration 008 U · THE DOWNLOAD GLYPH: the molecule chosen is a record not yet on this device — the kit's `download` beside its name, a press fetches
      it (checked against its sha-256 name, persist asked once) and opens it: the same road a DOWNLOAD row's pick takes */
-  const dlB = el('button', 'trig mol-dl'); dlB.type = 'button'; chip(dlB, 'download', 'Download this molecule’s record'); dlB.hidden = true;
+  const dlB = trig({ glyph: 'download', word: false, label: 'Download this molecule’s record', cls: 'mol-dl' }).root; dlB.hidden = true;   // 044 A8 (L89): the kit's glyph trig
   /* iteration 008 V: the glyph sits in the PICTURE's seat (left of the name) and wears the kit's ring (arcRing) while a molecule is kept; the
      picture is the molecule's own (a volume's t/<id>.webp, the catalogue's img/menu/<id>.webp), read for the molecule chosen only.  037 D3 (Josh 11-05: "Let it
      show the perspective diagram instead"): it is the molecule's DIAGRAM — the catalogue's img/menu/<id>.diagram.svg, a volume page's when the page
@@ -793,7 +793,7 @@ export function createChem(host, api) {
   const factor = () => !!(sol && !sol.D && sol.cols && sol.cols[sol.nocc - 1] === sol.nocc - 1);   // ascending, so cols[0 … nocc) = 0 … nocc − 1
   const ORB_ONLY = 'needs the density matrix; this record has orbitals', vTitle = new Map(['density', 'esp', 'spin', 'dlda'].map((id) => [id, vSeg.button(id).title])), dTitle = deltaSw.root.title;
   function views() {
-    { const d = !!(sol && sol.D); deltaSw.root.disabled = !d; deltaSw.root.title = d ? dTitle : ORB_ONLY; if (!d && delta) { delta = false; deltaSw.set(false); } }
+    { const d = !!(sol && sol.D); deltaSw.setDisabled(!d); deltaSw.root.title = d ? dTitle : ORB_ONLY; if (!d && delta) { delta = false; deltaSw.set(false); } }
     for (const [id, t] of vTitle) { const d = id === 'spin' ? !!(sol && sol.Ds) : id === 'dlda' ? !!pair() : !!(sol && (sol.D || (id === 'density' && factor()))), b = vSeg.button(id); b.disabled = !d;
     b.title = d ? t : id === 'spin' ? 'a closed shell has no spin density: ρα = ρβ' : id === 'dlda' ? 'needs both solves: METHOD LDA (RHF kept)' : ORB_ONLY;
     if (!d && view === id && !(id === 'dlda' && partner())) { view = id === 'spin' || id === 'dlda' ? 'density' : 'orbital'; vSeg.set(view); } } }

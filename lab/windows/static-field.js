@@ -16,7 +16,7 @@ import { getHamiltonian, getZ } from '../hamiltonian.js';
 import { saddle, polarizability } from '../stark.js';
 export function createStaticField(app) {
   const { ui, device, reg, clock, mat, sturm } = app, { rack } = app.host, { modHand, ROT_LIMIT, setRotationRate, touchState } = app.ctl;
-  const wField = device({ id: 'staticfield', eyebrow: 'FIELD', title: 'static field · drives', status: '', onPower: (live) => { if (!live) fieldDown(); } });   // 044 A2: POWER OFF by the hand, declared
+  const wField = device({ id: 'staticfield', eyebrow: 'FIELD', status: '', onPower: (live) => { if (!live) fieldDown(); } });   // 044 A2: POWER OFF by the hand, declared
   wField.root.classList.add('closed');
   rack.appendChild(wField.root);
 

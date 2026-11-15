@@ -16,12 +16,12 @@
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 import { go } from '../tools/gate/drv.mjs';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?sw=0`, SHOTS = process.env.SHOTS || null;
 const fixture = (f) => JSON.parse(readFileSync(new URL('./fixtures/retired-demos/' + f + '.lambdawaves.json', import.meta.url), 'utf8'));
-const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK}
     window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack']) delete o[k]; return JSON.stringify(o); };
     window.__gum = 0; const md = navigator.mediaDevices; if (md) md.getUserMedia = () => { __gum++; return Promise.reject(new Error('probe: no microphone')); };
     window.__demos = () => __LW.projects.folders.files.entries().filter((e) => e.folder === 'DEMOS')

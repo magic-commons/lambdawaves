@@ -17,7 +17,7 @@
  *   LW_PORT=… GD_PORT=… node tools/settings-probe.mjs [--out .tmp/settings-probe.json]
  * --out keeps every blob and every diff, so a tree served from `git archive` can be compared with this one by `diff`. */
 import { writeFileSync } from 'node:fs';
-import { open } from './gate/gatekit.mjs';
+import { open, ASK } from './gate/gatekit.mjs';
 import { go } from './gate/drv.mjs';
 import { SETTINGS_KEY, WORKSPACE, FAMILIES } from '../lab/settings-store.js';
 import { BLOB_LOOK } from '../lab/look.js';
@@ -25,7 +25,7 @@ import { BLOB_LOOK } from '../lab/look.js';
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
 const OUT = process.argv.includes('--out') ? process.argv[process.argv.indexOf('--out') + 1] : null;
 const SCENES = [['boot'], ['WAVE DANCER PROTOTYPE', 'wave-dancer'], ['NEW']];   // iteration 009: the one demo
-const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK}
   const md = navigator.mediaDevices; if (md) md.getUserMedia = () => Promise.reject(new Error('probe: no microphone'));
   window.__snap = () => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; };
   window.__quiet = async () => { await __LW.settle(); let st = __LW.chem.state();

@@ -7,7 +7,7 @@
 //   6 FORGET takes it away.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 import { go } from '../tools/gate/drv.mjs';
 
 const URL = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?warn=0`;
@@ -87,7 +87,7 @@ try {
   assert.ok(rec.raw); const parsed = JSON.parse(rec.raw); assert.equal(parsed.v, 1); assert.ok(parsed.curves.MASTER.length >= 3);
   /* was same === true (the grade never moved serialize()); 036 S1: it is the project's, so a grade change moves the project's bytes */
   assert.equal(rec.inBlob, false); assert.equal(rec.same, false, 'a grade change did not move serialize()'); assert.equal(rec.inProject, true); assert.equal(rec.inEdit, false);
-  await g.ev(`window.confirm = () => true; await __LW.layout.projects.requestFresh();   /* NEW asks first when the project is dirty (the steps above dirty it); the subject here is the grade, so it says yes */ await __w(600); await __LW.settle(); return 1;`);
+  await g.ev(`${ASK} await __LW.layout.projects.requestFresh();   /* NEW asks first when the project is dirty (the steps above dirty it); the subject here is the grade, so it says yes */ await __w(600); await __LW.settle(); return 1;`);
   const after = await g.ev(`return { grade: JSON.parse(localStorage.getItem('${KEY}')).curves, filter: __filter(), nodes: __LW.nodes.nodes().length };`);
   /* was after.raw === rec.raw and the screen still graded (NEW left the PREFERENCE alone); 036 S2: NEW clears the graph and the grade */
   assert.deepEqual(after, { grade: {}, filter: 'none', nodes: 0 }, 'NEW did not take the grade away');
