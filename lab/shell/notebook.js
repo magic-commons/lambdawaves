@@ -382,7 +382,7 @@ export function createNotebook(app) {
         shown: () => { if (fdDrop) fdDrop(); fdDrop = app.sh.ACTIONS.escape.push(() => projects.folders.close(), { fields: true, alive: () => projects.folders.isOpen() }); },
         snapshot: () => JSON.parse(JSON.stringify(app.sh.serialize())), rollback: (S) => app.sh.restore(S) === true,   // M5b: the instrument as it stood, through the same road
         busy: (d) => { busy.n = Math.max(0, busy.n + d); busySync(); },   // wave 48: a project load rebuilds the register, the operator and the field — BUSY work
-        notice: () => app.state.restoreNotice, thumbnail: () => app.sh.LW.thumbnail(), confirm: (text) => window.confirm(text), onMoved: () => occlusion.dirty(),
+        notice: () => app.state.restoreNotice, thumbnail: () => app.sh.LW.thumbnail(), onMoved: () => occlusion.dirty(),
         /* iteration 004 · the front page sits above every window (THE PICKER, z 100000): FOLDERS puts it away when it comes on screen */
         cover: () => app.state.picker,
         /* 022 P2 · a project's own menu (the kit's rows) adds OPEN, and EXPORT .mir / .png for the project that is open */

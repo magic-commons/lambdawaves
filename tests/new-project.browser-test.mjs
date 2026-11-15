@@ -5,7 +5,7 @@
 // 036 (Josh 11-03, "Nodes currently don't save into any project"): the graph, its grade and INFORMATIONAL ride in a project (scene 9).
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
 const IPAD = 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
@@ -44,18 +44,18 @@ try {
   /* ── 2 · THE DEMO PRESS (0.5.0 C6: P.demo, the alias of the old DEMOS button) ASKS before it discards unsaved changes (the stored open's question), then opens — and an untouched
          open stays CLEAN: WAVE DANCER PROTOTYPE's mat.steps (160, the rig it was re-saved on) becomes this device's quality.steps a frame later, which is not an edit
          (projectKey() drops quality and mat.steps); the stage colour is the work and dirties it ── */
-  const demo = await g.ev(`const P = __LW.layout.projects; let asked = 0; const c0 = window.confirm;
+  const demo = await g.ev(`const P = __LW.layout.projects; ${ASK} const asked0 = __discard.n;
     __LW.layout.notebook.open('projects'); await __w(150);
     __LW.setStage(0.61); const dirty = P.dirty;
     const list0 = P.list().length;   /* 0.5.0 C6: the six demos are FOLDERS' starters from boot; Cancel adds nothing to them */
-    window.confirm = () => { asked++; return false; }; await P.demo('wave-dancer'); await __w(900);
-    const refused = { asked, current: P.current, list: P.list().length - list0, status: __st() };
-    window.confirm = () => { asked++; return true; }; P.demo('wave-dancer');
+    ${ASK} __discard.yes = false; await P.demo('wave-dancer'); await __w(900);
+    const refused = { asked: __discard.n - asked0, current: P.current, list: P.list().length - list0, status: __st() };
+    __discard.yes = true; P.demo('wave-dancer');
     for (let i = 0; i < 60 && !/opened demo/.test(__st()); i++) await __w(50);
-    window.confirm = c0;
+
     const steps0 = JSON.parse(localStorage.getItem('lambdawaves.q0.projects')).items[P.current].data.presentation.mat.steps; await __w(1000); const clean = { dirty: P.dirty, steps: [steps0, __LW.mat.steps] };
     const sc = document.querySelector('.stage-colour'); sc.value = '#405060'; sc.dispatchEvent(new Event('input', { bubbles: true })); clean.colourDirty = P.dirty;
-    return { dirty, refused, asked, current: P.current, status: __st(), modes: __LW.serialize().experiment.modes.length, nbOpen: __LW.layout.notebook.isOpen, clean, errs: __e.slice() };`);
+    return { dirty, refused, asked: __discard.n - asked0, current: P.current, status: __st(), modes: __LW.serialize().experiment.modes.length, nbOpen: __LW.layout.notebook.isOpen, clean, errs: __e.slice() };`);
   assert.equal(demo.dirty, true); assert.deepEqual(demo.refused, { asked: 1, current: null, list: 0, status: demo.refused.status });
   assert.doesNotMatch(demo.refused.status, /opened demo/);
   assert.equal(demo.asked, 2); assert.equal(demo.current, 'DEMOS/WAVE DANCER PROTOTYPE'); assert.match(demo.status, /opened demo DEMOS\/WAVE DANCER PROTOTYPE/);
@@ -74,12 +74,12 @@ try {
     __LW.layout.reopen('history'); __LW.layout.modulation.expand();   /* 036 S3: windows moved off THE DEFAULT, the modulation window open */
     __LW.saveSettings(); await __w(50);
     const before = { ws: __ws(), theme: document.body.dataset.theme, arr: __arr(), abOn: __LW.ab.on, dirty: P.dirty, mod: __LW.layout.modulation.open };
-    let gum = 0, asked = 0; const md = navigator.mediaDevices, gum0 = md && md.getUserMedia, c0 = window.confirm;
+    let gum = 0, asked = 0; const md = navigator.mediaDevices, gum0 = md && md.getUserMedia;
     if (md) md.getUserMedia = () => { gum++; return Promise.reject(new Error('probe: no microphone')); };
-    window.confirm = () => false; const cancelled = P.requestFresh(), cancel = { promise: !!cancelled && typeof cancelled.then === 'function', value: await cancelled, dirty: P.dirty, abOn: __LW.ab.on };   /* Cancel is a Promise too, and changes nothing */
-    window.confirm = () => { asked++; return true; };
-    const t0 = performance.now(); const ok = await P.requestFresh(); const ms = performance.now() - t0;
-    window.confirm = c0;
+    ${ASK} __discard.yes = false; const cancelled = P.requestFresh(), cancel = { promise: !!cancelled && typeof cancelled.then === 'function', value: await cancelled, dirty: P.dirty, abOn: __LW.ab.on };   /* Cancel is a Promise too, and changes nothing */
+    __discard.yes = true; const asked0 = __discard.n;
+    const t0 = performance.now(); const ok = await P.requestFresh(); const ms = performance.now() - t0; asked = __discard.n - asked0;
+
     await __LW.settle(); await __LW.settle(); await __w(450);                 /* past the notebook's 300 ms debounce */
     const F = await __file(), keys = Object.keys(F.data.presentation), S = __LW.serialize();
     const live = __proj(S, keys), file = __proj({ presentation: F.data.presentation }, keys);
@@ -128,7 +128,7 @@ try {
   /* ── 5 · THE NOTEBOOK LAW (the coordinator's ruling; R-I3's second half): an open NEVER CLOSES the notebook, it only declines to
          OPEN one — a project with text opens onto its NOTES; a blank one (NEW's included) leaves the pane's visibility and face as
          they are.  0.5.0 C6: the list is FOLDERS' gallery — a tile pressed (select, then open) takes the kit's road ── */
-  const law = await g.ev(`const P = __LW.layout.projects, N = __LW.layout.notebook, c0 = window.confirm; window.confirm = () => true;
+  const law = await g.ev(`const P = __LW.layout.projects, N = __LW.layout.notebook; ${ASK} __discard.yes = true;
     const data = JSON.parse(JSON.stringify(__LW.serialize()));
     const put = (path, text) => P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, path, data, notebook: { title: path, text } }));
     const blank = put('probe/blank', '  \\n\\t '), hello = put('probe/hello', 'hello');
@@ -143,7 +143,7 @@ try {
     N.open('notes'); await __w(100);
     r.c = { pressed: await press(blank), open: N.isOpen, face: N.face, current: P.current };            /* (c) a blank tile keeps the notebook as it is (034 N1: one face, ABOUT left) */
     r.d = { pressed: await press(hello), open: N.isOpen, face: N.face, text: __LW.notebook.text, current: P.current };   /* (d) text opens onto NOTES */
-    F.close(); window.confirm = c0; r.errs = __e.slice(); return r;`);
+    F.close(); r.errs = __e.slice(); return r;`);
   assert.deepEqual(law, { a: { ok: true, open: false }, closedBlank: { ok: true, open: false }, alias: { folders: true, open: false },
     closedGallery: { pressed: true, open: false, folders: false, current: 'probe/blank' },   // iteration 012 M1: an OPEN from FOLDERS closes FOLDERS
     c: { pressed: true, open: true, face: 'notes', current: 'probe/blank' },
@@ -176,22 +176,22 @@ try {
          stage is the modulation's; a project open puts the running modulation down FIRST (as a running A/B transition is), so
          the file's stage mix lands — NEW while playing gives the empty project's 0.04, a stored project with mix 0.2 opened over
          the playing demo gives 0.2, and so does NEW after a play with the modulation window folded and then a pause ── */
-  const held = await g.ev(`const P = __LW.layout.projects, R = __LW.mod.registry, c0 = window.confirm; window.confirm = () => true;
+  const held = await g.ev(`const P = __LW.layout.projects, R = __LW.mod.registry; ${ASK} __discard.yes = true;
     const mix = () => __LW.serialize().presentation.ui.stage.mix;
     const playDemo = async () => { P.open('DEMOS/WAVE DANCER PROTOTYPE'); await __LW.settle(); __LW.play(); await __w(1200); return { held: R.isModulated('material.stage'), playing: __LW.mod.playing, mix: mix() }; };
     const out = {};
     await P.requestFresh(); await __LW.settle(); __LW.setStage(0.2); out.saved = P.save('probe/stage02'); out.savedMix = mix();
     out.a = await playDemo(); out.a.ok = await P.requestFresh(); await __LW.settle(); await __w(300); out.a.after = mix();
-    out.b = await playDemo(); out.b.ok = P.requestOpen('probe/stage02'); await __LW.settle(); await __w(300); out.b.after = mix();
+    out.b = await playDemo(); out.b.ok = await P.requestOpen('probe/stage02'); await __LW.settle(); await __w(300); out.b.after = mix();
     /* …and the same 0.2 as a file without the modulationBases table (serialize()'s own form, another build's save): the road
        that failed before the fix — restoreModulation then takes the stage off the knob, and the held route had written it */
     const d2 = JSON.parse(JSON.stringify(__LW.serialize())); d2.presentation.ui.stage.mix = 0.2; delete d2.presentation.modulationBases;
     const imp = P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, path: 'probe/stage02-nobases', data: d2, notebook: { title: 'x', text: '' } }));
-    out.b2 = await playDemo(); out.b2.ok = P.requestOpen(imp); await __LW.settle(); await __w(300); out.b2.after = mix();
+    out.b2 = await playDemo(); out.b2.ok = await P.requestOpen(imp); await __LW.settle(); await __w(300); out.b2.after = mix();
     P.open('DEMOS/WAVE DANCER PROTOTYPE'); await __LW.settle(); __LW.layout.modulation.expand(); await __w(300); __LW.layout.modulation.collapse();
     __LW.play(); await __w(1200); out.c = { held: R.isModulated('material.stage'), folded: !__LW.mod.expanded }; __LW.pause(); await __w(300);
     out.c.ok = await P.requestFresh(); await __LW.settle(); await __w(300); out.c.after = mix();
-    __LW.pause(); window.confirm = c0; out.errs = __e.slice(); return out;`);
+    __LW.pause(); out.errs = __e.slice(); return out;`);
   assert.equal(held.saved, true); assert.equal(held.savedMix, 0.2);
   for (const k of ['a', 'b', 'b2']) { assert.equal(held[k].held, true, k + ': the demo was not holding the stage'); assert.equal(held[k].playing, true, k + ': the modulation was not playing'); }
   assert.equal(held.a.ok, true); assert.equal(held.a.after, 0.04, 'NEW over the playing demo left the stage at ' + held.a.after);
@@ -205,7 +205,7 @@ try {
          nodes get saved and that new projects removes all nodes"): two nodes, a macro route on one's knob, a CURVES grade and STAGE FORMULA off, saved;
          NEW clears them all (the graph empty, the grade flat, the route gone, INFORMATIONAL at its first run); OPEN brings them back — the route on its
          target, its base the file's; a project saved before 036 (no `nodes`, no nodes.* route) opens on the empty graph ── */
-  const proj = await g.ev(`const P = __LW.layout.projects, N = __LW.nodes, M = __LW.mod.model, R = __LW.mod.registry, c0 = window.confirm; window.confirm = () => true;
+  const proj = await g.ev(`const P = __LW.layout.projects, N = __LW.nodes, M = __LW.mod.model, R = __LW.mod.registry; ${ASK} __discard.yes = true;
     const formula = () => JSON.parse(localStorage.getItem('lambdawaves.q0.info') || '{}').molFormula, flt = () => getComputedStyle(document.getElementById('field')).filter;
     await P.requestFresh(); await __LW.settle();
     const a = N.add('levels'); N.add('vignette'); N.setHas(true); __LW.curves.preset('MASTER', 'S'); N.set(a, 'gamma', 1.7);
@@ -225,7 +225,7 @@ try {
     const pre = P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, path: 'probe/pre036', data: old, notebook: { title: 'pre036', text: '' } }));
     const preOpened = P.open(pre); await __LW.settle(); await __w(300);
     const pre036 = { opened: preOpened, nodes: N.nodes().length, filter: flt(), formula: formula(), dirty: P.dirty };
-    window.confirm = c0; return { built, saved, file, cleared, back, pre036, errs: __e.slice() };`);
+ return { built, saved, file, cleared, back, pre036, errs: __e.slice() };`);
   assert.deepEqual(proj.built, { types: ['levels', 'vignette', 'curves'], routes: ['nodes.n1.gamma'], formula: false, dirty: true });
   assert.equal(proj.saved, true);
   assert.deepEqual(proj.file, { nodes: ['n1:levels', 'n2:vignette', 'curves:curves'], grade: true, info: { molFormula: false }, route: ['nodes.n1.gamma'], base: 1.7 }, 'the saved project does not carry the graph, its grade, its route, its base and INFORMATIONAL');
@@ -241,14 +241,14 @@ try {
          there is clean too, and marches at the device's steps (the empty project carries no quality and no mat.steps) ── */
   g2 = await open(LAB, { width: 1500, height: 1000, script: 30000, prefs: { 'general.useragent.override': IPAD } });
   assert.equal((await g2.waitFor('window.__LW&&__LW.ready', 150, 100)).ok, 1);
-  const tab = await g2.ev(`const P = __LW.layout.projects, w = (n) => new Promise((r) => setTimeout(r, n)), c0 = window.confirm; window.confirm = () => true;
+  const tab = await g2.ev(`const P = __LW.layout.projects, w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK} __discard.yes = true;
     const S = JSON.parse(JSON.stringify(__LW.serialize())); S.presentation.quality = { res: 128, steps: 240, scale: 1, auto: true, autoScale: 1, minScale: 0.35 }; S.presentation.mat.steps = 240;
     const path = P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, path: 'probe/grid128', data: S, notebook: { title: 'grid128', text: '' } }));
     const opened = P.open(path), q = { ...__LW.quality }; await __LW.settle(); await w(1000);
     const out = { tablet: __LW.layout.tablet.on, opened, clamped: [q.res, q.steps], steps: __LW.mat.steps, dirty: P.dirty };
     const sc = document.querySelector('.stage-colour'); sc.value = '#506070'; sc.dispatchEvent(new Event('input', { bubbles: true })); out.colourDirty = P.dirty;
     out.fresh = await P.requestFresh(); await __LW.settle(); await w(1000); out.freshDirty = P.dirty; out.freshSteps = __LW.mat.steps; out.freshQuality = [__LW.quality.res, __LW.quality.steps];
-    window.confirm = c0; out.errs = __e.slice(); return out;`);
+ out.errs = __e.slice(); return out;`);
   assert.equal(tab.tablet, true, 'the iPad UA did not make a tablet'); assert.equal(tab.opened, true);
   assert.deepEqual(tab.clamped, [96, 160], 'the tablet did not clamp the 128³ project'); assert.equal(tab.steps, 160);
   assert.equal(tab.dirty, false, 'the clamped project reads as edited 1 s after its open'); assert.equal(tab.colourDirty, true);

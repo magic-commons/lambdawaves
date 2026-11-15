@@ -203,3 +203,7 @@ export async function open(url, opts = {}) {
  *
  * Use it on every file, in every commission, in place of `node --check`. */
 export const ESM_CHECK = 'node --input-type=module --check < <file>';
+
+/** ASK — page-side: the app's "… WITHOUT SAVING?" question is the kit's dialog (044 A8, L86; it was window.confirm), and a suite answers it by
+ *  pressing it: `${ASK}` installs the presser (DISCARD by default), `__discard.yes = false` presses CANCEL, `__discard.n` counts the questions. */
+export const ASK = `window.__discard ||= { yes: true, n: 0 }; (window.__discardO ||= new MutationObserver(() => { for (const d of document.querySelectorAll('.mir-dialog:not([data-asked])')) if (/WITHOUT SAVING/.test(d.textContent)) { d.dataset.asked = '1'; __discard.n++; d.querySelector(__discard.yes ? '[data-kind="danger"]' : '.mir-dialog-actions .trig').click(); } })).observe(document.body, { childList: true });`;

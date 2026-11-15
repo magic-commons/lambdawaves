@@ -6,7 +6,7 @@
 // pressed the first of five CLEARs in document order — the undo ring's own once HISTORY floated.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`, { width: 1500, height: 1000, script: 30000 });
 let failed = false;
@@ -156,7 +156,7 @@ try {
   /* ── 6 · every other row does what it names, and the bar closes behind each one ── */
   const rest = await g.ev(`const R = {}, ok = (r) => r.found && r.closed && r.listsDown;
     const st = () => document.querySelector('.dev[data-id="spectrum"] .dev-stat').textContent;   // 018 C1: the lab's status line is SPECTRUM's
-    window.confirm = () => true;                                      // NEW project asks before discarding a dirty project
+    ${ASK}                                      // NEW project asks before discarding a dirty project
     /* EDIT */
     { __LW.pause(); const r = await __row('PLAY', 'PLAY / PAUSE'); R.play = ok(r) && __LW.clock.playing; __LW.pause(); }
     { __LW.loadPreset('1s+2pz'); const r = await __row('EDIT', 'STATE › NORMALIZE'); R.normalize = ok(r) && /‖c‖/.test(st()); }

@@ -9,7 +9,7 @@
 // announcement is a block marked `data-fade` at the heading size, and the switch hides the layer's root.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`, { width: 1500, height: 1000, script: 120000 });
 let failed = false;
@@ -49,7 +49,7 @@ try {
   pass(`the formula is KaTeX (${t1.boot.md}); twelve ticks at twelve clock times rendered 0 times and read layout 0 times; ten strings in ${t1.burst.span.toFixed(0)} ms rendered ${t1.burst.renders}× and the last one landed`);
 
   /* ── 2 · ONE BANNER, NOT THREE: a hand's preset announces; the undo, a project open and a link open do not ── */
-  const t2 = await ev(`const S = __LW.stageText, H = __LW.history, P = __LW.layout.projects, c0 = window.confirm; window.confirm = () => true;
+  const t2 = await ev(`const S = __LW.stageText, H = __LW.history, P = __LW.layout.projects; ${ASK} __discard.yes = true;
     const sel = document.querySelector('.dev[data-id="spectrum"] .sp-preset .mir-step-name'); H.flush(); await __w(450); H.flush();   // iteration 008 S: SPECTRUM's ‹ PRESET ›
     const a0 = S.stats.announced;
     sel.click(); await __w(30); document.querySelector('.mir-pick-i[data-id="1s+2s"]').click(); await __w(80);
@@ -58,7 +58,7 @@ try {
     const undid = H.undo(); await __w(400);
     const href = __LW.link.mint().href; const link = __LW.link.open(href); await __w(300);
     const r = await fetch('./demos/wave-dancer.lambdawaves.json', { cache: 'no-cache' }); const path = P.importText(await r.text()); P.open(path); await __w(800);
-    window.confirm = c0;
+
     await __w(4200);   /* the ttl and the fade (041 I5: a second longer) */
     return { pressed, undid, link: link.opened && link.ok, n: S.stats.announced - a0, after: { banner: S.banner, md: S.md, title: getComputedStyle(__node()).fontSize, fades: S.layer.root.querySelectorAll('.mir-info-block[data-fade]').length }, errs: __e.slice() };`);
   assert.equal(t2.pressed.banner, '1s \\+ 2s  beat', 'the press did not announce its preset: ' + JSON.stringify(t2));

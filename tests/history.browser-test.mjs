@@ -7,7 +7,7 @@
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 import { actions, relActions } from '../tools/gate/drv.mjs';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
@@ -480,7 +480,7 @@ try {
   pass(`MOLECULES ON is one row: the solve's fill joined it (orbital ${mol.filled}), the first undo turned it off byte for byte, redo brought it back byte for byte with its fill, no row after`);
 
   /* ── 8 · THE ORIGIN IS THE BOTTOM ROW'S NAME: a link, a project open, NEW ── */
-  const origins = await ev(`const P = __LW.layout.projects, c0 = window.confirm; window.confirm = () => true;
+  const origins = await ev(`const P = __LW.layout.projects; ${ASK} __discard.yes = true;
     const href = __LW.link.mint().href; __LW.setStage(0.3); __LW.history.flush();
     const link = __LW.link.open(href); const afterLink = { rows: __rows(), depth: __LW.history.depth };
     const r = await fetch('./demos/wave-dancer.lambdawaves.json', { cache: 'no-cache' }); const path = P.importText(await r.text());
@@ -492,7 +492,7 @@ try {
     const u = await __scene(async () => { __LW.setStyle(__LW.mat.style === 1 ? 'cloud' : 'solid'); __LW.history.note(); });
     __LW.setStage(0.5); __LW.history.flush(); const fresh = await P.fresh(); const afterNew = { rows: __rows(), depth: __LW.history.depth }; await __w(1500); const newLater = { rows: __rows(), depth: __LW.history.depth };
     const cardNew = [...document.querySelectorAll('.dev[data-id="history"] .hist-row')].map((b) => b.querySelector('.hist-lbl').textContent + (b.getAttribute('aria-current') === 'true' ? ' ·current' : ''));
-    window.confirm = c0;
+
     return { link: link.opened && link.ok, afterLink, openMs, afterOpen, openLater, demoBytes, demoUndo: u, fresh, afterNew, newLater, cardNew, errs: __e.slice() };`);
   assert.equal(origins.link, true); assert.deepEqual(origins.afterLink, { rows: ['link'], depth: 0 });
   assert.deepEqual(origins.afterOpen, { rows: ['open · WAVE DANCER PROTOTYPE'], depth: 0 }); assert.deepEqual(origins.openLater, { rows: ['open · WAVE DANCER PROTOTYPE'], depth: 0 }, 'a row appeared after the demo opened');
@@ -525,7 +525,7 @@ try {
          MOLECULES back on (Ctrl+Shift+Z, filled) → NEW is the empty file for the orbital and the STATES lanes ── */
   g2 = await open(LAB, { width: 1500, height: 1000, script: 60000, prefs: PREFS });
   assert.equal((await g2.waitFor('window.__LW&&__LW.ready', 200, 100)).ok, 1);
-  const molAt = await g2.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+  const molAt = await g2.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK}
     await __LW.layout.projects.fresh(); await __w(800); window.__pre = JSON.stringify(__LW.serialize({ scope: 'edit' }));
     const s = document.querySelector('.sw[aria-label="MOLECULES ON"]'), d = s.closest('.dev');   // 022 H2: the switch reads ON beside the molecule glyph; its name is its aria-label
     d.hidden = false; d.classList.remove('closed'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
@@ -553,7 +553,7 @@ try {
          H₂ → MOLECULES · H₂ density, ELECTROSTATICS → nothing drawn ── */
   const legacy = async (n, expect) => {
     const text = readFileSync(new URL('./fixtures/legacy-' + n + '.lambdawaves.json', import.meta.url), 'utf8');
-    return g2.ev(`window.confirm = () => true; const P = __LW.layout.projects, path = P.importText(${JSON.stringify(text)}), ok = P.open(path);
+    return g2.ev(`${ASK} const P = __LW.layout.projects, path = P.importText(${JSON.stringify(text)}), ok = P.open(path);
       await __LW.settle(); await __w(2500); await __LW.settle();
       const S = __LW.serialize({ scope: 'edit' }).presentation, chem = __LW.chem.state(), card = (id) => document.querySelector('.dev[data-id="' + id + '"]');
       return { ok, status: __LW.projects.status, notice: ${JSON.stringify(expect)},

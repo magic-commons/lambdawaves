@@ -42,7 +42,7 @@
  * software GPU (SwiftShader's Vulkan under Dawn) — the integrated-GPU proxy, ratios only; no window appears.
  * One browser at a time (the GPU is shared); nice -n 10 is the caller's. */
 import fs from 'node:fs'; import path from 'node:path'; import os from 'node:os'; import net from 'node:net';
-import { spawn, execFileSync } from 'node:child_process'; import { createHash } from 'node:crypto'; import zlib from 'node:zlib';
+import { spawn, execFileSync } from 'node:child_process'; import { createHash } from 'node:crypto'; import zlib from 'node:zlib'; import { ASK } from '../gate/gatekit.mjs';
 
 const argv = process.argv.slice(2);
 const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
@@ -184,7 +184,7 @@ const REST = { scale: '__LW.quality.auto = __lv.auto; __LW.quality.scale = __lv.
   steps: '__LW.quality.steps = __lv.steps; __LW.mat.steps = __lv.mstep;' };
 const restJs = (name) => [...new Set(name.split('+').map((k) => k.replace(/\d+$/, '')).filter((k) => k in REST))].map((k) => REST[k]).join(' ');
 const leverJs = (name) => name.split('+').map((k) => { if (!(k in LEVER)) throw new Error('no lever ' + k + ' (have: ' + Object.keys(LEVER).join(' ') + ')'); return LEVER[k]; }).join(' ');
-const PREP = (s) => `window.confirm = () => true; window.__w = (n) => new Promise((r) => setTimeout(r, n));
+const PREP = (s) => `${ASK} window.__w = (n) => new Promise((r) => setTimeout(r, n));
   try { if (__LW.warning && __LW.warning.dismiss) __LW.warning.dismiss(); } catch (_) {}
   const P = __LW.projects; try { P.folders.close(); } catch (_) {} await __w(300);
   await P.demo(${JSON.stringify(s.demo)}); await __w(1500); await __LW.settle();

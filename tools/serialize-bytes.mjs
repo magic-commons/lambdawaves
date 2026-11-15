@@ -16,7 +16,7 @@
  *   LW_PORT=… GD_PORT=… node tools/serialize-bytes.mjs [--out .tmp/serialize-bytes.json] [--texts]   (--texts keeps the bytes) */
 import { readdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { open } from './gate/gatekit.mjs';
+import { open, ASK } from './gate/gatekit.mjs';
 import { go } from './gate/drv.mjs';
 import { STARTERS } from '../lab/project-store.js';
 
@@ -27,7 +27,7 @@ const RETIRED = readdirSync(new URL('../tests/fixtures/retired-demos/', import.m
   .map((f) => ['retired · ' + f.replace('.lambdawaves.json', ''), '../tests/fixtures/retired-demos/' + f]);
 const EDITS = [['preset 1s+2pz', "__LW.loadPreset('1s+2pz')"], ['stage 0.30', '__LW.setStage(0.3)'], ['style solid', "__LW.setStyle('solid')"],
   ['palette on', '__LW.palette.setOn(true)'], ['hamiltonian qho', "__LW.setHamiltonian('qho')"], ['rate 0 → 1.7', '__LW.setRate(0, 1.7)']];
-const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK}
   const md = navigator.mediaDevices; if (md) md.getUserMedia = () => Promise.reject(new Error('probe: no microphone'));
   window.__quiet = async () => { await __LW.settle(); let st = __LW.chem.state();
     for (let i = 0; i < 600 && st.on && !(st.fieldOwner && st.nocc); i++) { await __w(100); st = __LW.chem.state(); }

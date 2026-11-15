@@ -4,7 +4,7 @@
 // the same text, the text must render under KaTeX in the notebook with no .katex-error, and an empty register copies nothing.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`, { width: 1500, height: 1000, script: 30000 });
 let failed = false;
@@ -33,7 +33,7 @@ try {
     return 1;`);
 
   /* ── 1 · WAVE DANCER opens through the projects road; Josh's two sentences are read out of its notebook ── */
-  const demo = await g.ev(`const w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
+  const demo = await g.ev(`const w = (n) => new Promise((r) => setTimeout(r, n)); ${ASK}
     __LW.projects.demo('wave-dancer');   /* 0.5.0 C6: the DEMOS press */
     for (let i = 0; i < 60 && !/WAVE DANCER/.test(__LW.projects.status); i++) await w(100);
     await w(300);

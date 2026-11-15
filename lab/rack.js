@@ -1026,11 +1026,11 @@ export async function boot(dom) {
      that opened is the clean state (the address bar can bring it back).  A cancel leaves the new fragment in the address bar
      while the page keeps its scene: a reload would then open the link, and the beforeunload guard asks there.  Only a fragment
      that CARRIES a link asks: the skip links' `#rack` is a hashchange too, and a malformed link changes nothing (openLink says so). */
-  addEventListener('hashchange', () => {
+  addEventListener('hashchange', async () => {
     let got = null;
     try { got = readLink(location.href); } catch (e) { openLink(); return; }
     if (!got) return;
-    if (layout.projects && !layout.projects.discard('OPEN THIS LINK')) return;
+    if (layout.projects && !(await layout.projects.discard('OPEN THIS LINK'))) return;   // 044 A8 (L86): the kit's dialog answers
     const r = openLink();
     if (r.opened && r.ok && layout.projects) layout.projects.markClean();
   });

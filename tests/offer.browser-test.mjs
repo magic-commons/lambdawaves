@@ -16,7 +16,7 @@
 // windows that precede a "nothing more happened" read (scene 14's hide 0.9 s after LATER, scene 13's 100 ms) stay windows.
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 
 const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`;
 const PREFS = { 'privacy.reduceTimerPrecision': false };   // the latencies are sub-millisecond; Firefox's default clamp is 1 ms
@@ -397,15 +397,14 @@ try {
           an edited one it asks first — no keeps the edit and the ring, yes opens it clean; an in-page anchor asks nothing ── */
   const hashB = new URL(linkB).hash, hashA = new URL(linkHref).hash;
   const s16 = await g3.ev(`const H = __LW.history, go = (h) => { const done = new Promise((q) => { const t = setTimeout(q, 10000); addEventListener('hashchange', () => { clearTimeout(t); q(); }, { once: true }); }); location.hash = h; return done; };
-    const read = () => ({ exposure: +__LW.mat.exposure.toFixed(3), rows: H.entries().map((e) => e.label), dirty: __LW.projects.dirty, canUndo: H.canUndo, confirms: window.__confirms });
-    window.__confirms = 0; const saved = window.confirm; let answer = false; window.confirm = () => { window.__confirms++; return answer; };
+    const read = () => ({ exposure: +__LW.mat.exposure.toFixed(3), rows: H.entries().map((e) => e.label), dirty: __LW.projects.dirty, canUndo: H.canUndo, confirms: __discard.n - n0 });
+    ${ASK} __discard.yes = false; const n0 = __discard.n;
     await __LW.settle(); const start = read();
     await go(${JSON.stringify(hashB)}); await __LW.settle(); const unedited = read();
     __LW.loadPreset('1s'); H.flush(); await __LW.settle(); const edited = read();
     await go(${JSON.stringify(hashA)}); await __LW.settle(); const no = read();
-    answer = true; await go(${JSON.stringify(hashB)}); await __LW.settle(); const yes = read();
+    __discard.yes = true; await go(${JSON.stringify(hashB)}); await __LW.settle(); const yes = read();
     __LW.loadPreset('1s'); H.flush(); await __LW.settle(); await go('#rack'); const anchor = read();
-    window.confirm = saved;
     return { start, unedited, edited, no, yes, anchor, errors: __e.slice() };`);
   assert.equal(s16.start.dirty, false);
   assert.deepEqual([s16.unedited.exposure, s16.unedited.rows, s16.unedited.dirty, s16.unedited.confirms], [1.9, ['link'], false, 0], 'an unedited session: the link opens, clean, no question');

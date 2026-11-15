@@ -17,7 +17,7 @@
 //     NEW keeps them (THE CHOICE KEEPS); the second visit shows CONTINUE, no doors, ADVANCED's racks
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
-import { open } from '../tools/gate/gatekit.mjs';
+import { open, ASK } from '../tools/gate/gatekit.mjs';
 import { go } from '../tools/gate/drv.mjs';
 import { FIRST_RUN_RACKS } from '../lab/first-run.js';
 
@@ -122,7 +122,7 @@ try {
     assert.deepEqual([r1.unfolded, r1.modeShows.length, r1.nativeLayout, r1.errors], [['spectrum', 'chem'], 1, kind === 'advanced' ? 2 : 1, []], kind.toUpperCase() + ': every window folded but SPECTRUM and MOLECULES (041 D3), the mode showing one, the answer saved: ' + JSON.stringify(r1));
     let kept = '';
     if (kind === 'advanced') {   /* THE CHOICE KEEPS (038 M5): NEW is the project's, the layout the workspace's */
-      const r2 = await g.ev('window.confirm = () => true; const ok = await __LW.layout.projects.requestFresh(); await __LW.settle(); return { ok, ...__racks() };');
+      const r2 = await g.ev(ASK + ' const ok = await __LW.layout.projects.requestFresh(); await __LW.settle(); return { ok, ...__racks() };');
       assert.deepEqual([r2.ok, { left: r2.left, right: r2.right }], [true, lay(kind)], 'NEW did not keep ADVANCED\'s racks: ' + JSON.stringify(r2));
       kept = '; NEW kept them';
     }
