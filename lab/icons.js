@@ -125,6 +125,23 @@ const ICONS = {
   film: box(3, 5, 18, 14, 2.5) + solid('M10 9v6l5.2-3Z'),                                                        // RENDER: a frame with a play
   picker: box(3.5, 3.5, 7.5, 7.5, 1.5) + box(13, 3.5, 7.5, 7.5, 1.5) + box(3.5, 13, 7.5, 7.5, 1.5) + fill(13, 13, 7.5, 7.5, 1.5),   // a shelf of tiles, one picked
   /* ── the Picker's look tiles (picker.js SHAPES) and the ladders' FILL ALL / EMPTY (paint-stroke.js, Gemini's 008 U drawings) ── */
+  /* 044 AV2 · A PICTURE ON EVERY MENU ROW (Josh's tick 4): the drawings of the ideas that had none — each named for its meaning, one row or family each */
+  fullscreen: p('M4 9V4h5') + p('M15 4h5v5') + p('M20 15v5h-5') + p('M9 20H4v-5'),                                  // FULL SCREEN: the four corners
+  frames: box(7.5, 3.5, 13, 10.5, 2) + p('M4.5 8v9.5a2 2 0 0 0 2 2H17'),                                            // EXPORT FRAMES: a stack of pictures
+  bolt: p('M13 2.5 5.5 13.5H12l-1 8 7.5-11H12Z'),                                                                   // QUICK
+  shape: p('M12 2.8 20 7.2v9.6L12 21.2 4 16.8V7.2Z') + p('M4 7.2 12 11.6l8-4.4') + p('M12 11.6v9.6'),               // EXPORT › SHAPE: a solid
+  grid: box(3.5, 3.5, 17, 17, 2.5) + p('M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17'),                           // EXPORT › GRID: ψ on the grid
+  unit: c(12, 12, 8.5) + p('M12 12 18 6') + dot(12, 12, 1.5),                                                       // NORMALIZE: the unit circle and its radius
+  particles: dot(6, 7, 1.7) + dot(13, 5, 1.2) + dot(18.5, 10, 1.7) + dot(9.5, 13, 1.2) + dot(15, 16.5, 1.7) + dot(6, 18.5, 1.2) + dot(20, 18.5, 1),   // RESEED
+  psi: p('M12 3.5v17') + p('M5.5 5.5V10a6.5 6.5 0 0 0 13 0V5.5'),                                                   // OBSERVABLE: ψ
+  captions: box(3, 5, 18, 14, 3) + p('M7 15h4M13.5 15H17M7 11.5h2.5M12 11.5h5'),                                    // CAPTIONS: a frame with its lines of words
+  formula: p('M4.5 6 12 16M12 6 4.5 16') + p('M15.6 14.4a1.9 1.9 0 0 1 3.6.9c0 1.5-3.7 2.5-3.7 4.7h3.9'),           // FORMULA: a symbol and its subscript
+  badge: box(2.5, 8, 19, 8, 4) + dot(7, 12, 1.5) + p('M11 12h6.5'),                                                 // STATUS TAGS: a pill with its lamp
+  tip: box(3, 4, 18, 11.5, 3) + p('M9.5 15.5 12 19.5l2.5-4') + p('M8 9.75h8'),                                      // CONTROL HINTS: the tip under a control
+  faster: p('M5 6.5 11 12l-6 5.5') + p('M12.5 6.5 18.5 12l-6 5.5'),                                                 // RATE
+  metronome: p('M9.2 3.5h5.6L18.5 20.5h-13Z') + p('M12 16 17.5 6.5') + p('M7.2 14.5h9.6'),                          // TEMPO
+  tools: p('M14.7 6.3a4 4 0 0 0-5.2 5.2L3.5 17.5a2.1 2.1 0 0 0 3 3l6-6a4 4 0 0 0 5.2-5.2l-2.6 2.6-2.4-.6-.6-2.4Z'), // WINDOW › TOOLS: a wrench
+  core: c(12, 12, 8.5) + dot(12, 12, 3),                                                                           // WINDOW › CORE: the nucleus in its shell
   balls: dot(12, 12, 6.5),
   sticks: p('M3 12h11.3') + c(17.5, 12, 3.2),                                   // was 1.6 wide
   bonds: p('M12 12.5V3.5M12 12.5l7.8 4.5M12 12.5 4.2 17'),                     // 038 S3 STICKS (the mini-viewer's style): three bonds meeting, no atoms

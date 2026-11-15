@@ -55,7 +55,7 @@ export function createActions(app) {
   const T = 'TRANSPORT', C = 'CAMERA', ST = 'STATE', WD = 'WINDOWS & DISPLAY', CS = 'CONTROL SURFACE', PJ = 'PROJECT', V = 'VIEW', SE = 'SETTINGS', CA = 'CARDS', N = 'NODES';
   const ROWS = [
     { id: 'transport.play', icon: 'play', was: 'play', group: T, short: 'play', label: 'play / pause', keys: ['Space'], kind: 'toggle', get: () => !!clock.playing, run: () => S().togglePlay(), surface: true },
-    { id: 'fullscreen', icon: 'expand', short: 'fullscreen', label: 'full screen (the browser) / back', keys: ['KeyF'], kind: 'toggle', get: fsOn, run: fullscreen, gesture: true },
+    { id: 'fullscreen', icon: 'fullscreen', short: 'fullscreen', label: 'full screen (the browser) / back', keys: ['KeyF'], kind: 'toggle', get: fsOn, run: fullscreen, gesture: true },
     { id: 'notebook', icon: 'notebook', short: 'notebook', label: 'notebook', keys: ['KeyJ'], kind: 'toggle', get: () => !!L().notebook.isOpen, run: (a) => (a && a.md !== undefined ? ran('notebook')(a) : L().notebook.toggle()), surface: true },
     /* wave 106: the key IS the bar's ⏮ (t → 0 through THE ONE SEEK, 021 R3) */
     { id: 'home', icon: 'reload', group: T, short: 'zero', label: 'time to zero', hint: 't → 0 · the beat stays', keys: ['Home'], run: () => appPlay.seek(0), surface: true },   // 032 T14: ↺ (⏮ is bar 1)
@@ -107,7 +107,7 @@ export function createActions(app) {
     { id: 'notes', icon: 'info', short: 'notes', label: 'show / hide window help', keys: ['KeyN'], kind: 'toggle', get: () => !document.body.classList.contains('window-info-off'), surface: true,
       run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
     { id: 'rack', icon: () => (S().rk && S().rk.hidden ? 'rackHidden' : 'rackToggle'), short: 'rack', label: 'hide / show the rack', keys: ['KeyB'], kind: 'toggle', get: () => !(S().rk && S().rk.hidden), run: () => L().toggleRack(), surface: true },   // 040 I6: the ghost before its window, behind it under B
-    { id: 'dock', icon: 'dock', short: 'dock', label: 'dock / undock the control surface', keys: ['KeyT'], kind: 'toggle', get: () => !!L().docked, run: () => L().dockTransport(), surface: true },
+    { id: 'dock', icon: 'rackIn', short: 'dock', label: 'dock / undock the control surface', keys: ['KeyT'], kind: 'toggle', get: () => !!L().docked, run: () => L().dockTransport(), surface: true },
     { id: 'modulation', icon: 'modulation', was: 'modWin', label: 'the modulation window — open it, or close it again', hint: 'The modulation window', keys: ['KeyM'], kind: 'toggle', get: () => !!L().modulation.open, run: () => L().modulation.toggle(), surface: true },
     { id: 'settings', icon: 'settings', inFields: true, label: 'settings', keys: ['Mod+Comma'], exact: true, run: () => L().raise('settings'), surface: true },
     { id: 'history', icon: 'history', group: PJ, short: 'history', label: 'the undo history window', run: () => L().raise('history'), surface: true },
@@ -123,12 +123,12 @@ export function createActions(app) {
     { id: 'timeline', icon: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', hint: 'The timeline window', kind: 'toggle', get: () => !!(app.state.tl && app.state.tl.isOpen()), run: () => { if (app.state.tl) app.state.tl.toggle(); }, surface: true },
     { id: 'pattern', icon: 'pattern', short: 'pattern', label: 'the PATTERN window — the ENVs’ step rows; open it, or close it again', hint: 'The PATTERN window — the ENVs’ step rows', kind: 'toggle', get: () => !!(L().pattern && L().pattern.open), run: () => { if (L().pattern) L().pattern.toggle(); }, surface: true },   // 036 P6: THE ENVELOPE TRIGGER (shell/modulation.js installEnvelopeTrigger)
     { id: 'gui', short: 'mir options', label: 'MIR OPTIONS — the interface’s look (BASINS’ GUI menu)', hint: 'MIR OPTIONS — the interface’s look', icon: 'mirOptions', run: () => { const g = mirGui(); if (g) g.toggle(); }, surface: true },
-    { id: 'guiAbout', icon: 'info', short: 'about mir', label: 'ABOUT MIR — what MIR is', run: () => L().about.open('mir'), surface: true },   // 034 N1: the ABOUT window's MIR face
-    { id: 'mapping', icon: 'keyboard', short: 'mapping', label: 'the MAPPING — a key, a MIDI note or knob, or a modulation route for every action', hint: 'The MAPPING — keys, MIDI, routes', run: () => L().keymap.open('MAPPING') },
+    { id: 'guiAbout', icon: 'about', short: 'about mir', label: 'ABOUT MIR — what MIR is', run: () => L().about.open('mir'), surface: true },   // 034 N1: the ABOUT window's MIR face
+    { id: 'mapping', icon: 'mapping', short: 'mapping', label: 'the MAPPING — a key, a MIDI note or knob, or a modulation route for every action', hint: 'The MAPPING — keys, MIDI, routes', run: () => L().keymap.open('MAPPING') },
     { id: 'about', icon: 'about', short: 'about', label: 'ABOUT λWAVES — its own window', run: () => L().about.open('lw'), surface: true },   // 034 N1
     { id: 'photosensitivity', icon: 'warn', label: 'PHOTOSENSITIVITY WARNING — show the notice now and on the next load', hint: 'Show the photosensitivity notice', run: () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } } },
     ...(globalThis.lwavesDesktop ? [] : [{ id: 'update', icon: 'download', label: 'UPDATE APP — check for a new build, rebuild the offline cache, and reload', hint: 'UPDATE APP — check for a new build', run: () => H().swClient.refresh() }]),   // 042 S: the desktop is updated by its store
-    { id: 'diagnostics', icon: 'informational', label: 'COPY DIAGNOSTICS — the build, the worker, the stores and the last errors, as text', hint: 'COPY DIAGNOSTICS — the build and the stores as text', run: () => H().swClient.copyDiagnostics() },   // 033 THE UPDATER
+    { id: 'diagnostics', icon: 'duplicate', label: 'COPY DIAGNOSTICS — the build, the worker, the stores and the last errors, as text', hint: 'COPY DIAGNOSTICS — the build and the stores as text', run: () => H().swClient.copyDiagnostics() },   // 033 THE UPDATER
     { id: 'keys.reset', label: 'RESET the key bindings', run: () => app.hooks.keys.reset() },
     { id: 'csb.search', group: CS, short: 'search', label: 'search λWAVES (the CONTROL SURFACE\'s pill)', hint: 'Search λWAVES', keys: ['Mod+KeyK'], run: () => { const s = S().transport && S().transport.search; if (s) s.open(); }, surface: true },   // iteration 014 A8; 042 Q: the whole app
     /* WAVE 65 · R-K1: the MOD arm is Ctrl+Space (the real Control: ⌘Space is Spotlight); its run() follows the one clock's POWER */
@@ -204,7 +204,7 @@ export function createActions(app) {
       run: () => { const b = document.querySelector('.dev[data-id="render"] ' + cls); if (b && !b.disabled) b.click(); } })),   // the kit's RENDER card's own buttons (by their class)
     { id: 'invert', icon: 'invertColors', group: V, short: 'invert', label: 'INVERT the cloud — ink, not light', kind: 'toggle', get: () => !!mat.invert, run: () => S().LW.setInvert(!mat.invert), surface: true },
     ...[['captions', 'STAGE CAPTIONS', 'capSw'], ['formula', 'STAGE FORMULA', 'molFormulaSw'], ['labels', 'ATOM LABELS', 'atomLabelsSw']].map(([k, label, h]) =>
-      ({ id: 'view.' + k, icon: { formula: 'informational', labels: 'labels' }[k], group: V, short: label.toLowerCase(), label: label + ' on / off', kind: 'toggle', get: () => !!(ui[h] && ui[h].get()), run: () => tap(ui[h]), surface: true })),
+      ({ id: 'view.' + k, icon: { captions: 'captions', formula: 'formula', labels: 'labels' }[k], group: V, short: label.toLowerCase(), label: label + ' on / off', kind: 'toggle', get: () => !!(ui[h] && ui[h].get()), run: () => tap(ui[h]), surface: true })),
     /* 032 W3: SETTINGS › DISPLAY's FRAME and AXIS as rows (a toggle each: `action.view.frame` · `action.view.axis` are their EVENT targets); the switch's own
        press still cycles the frame's look (BOX · LATTICE · DOTS) — these turn it on or off */
     { id: 'view.frame', group: V, short: 'frame', label: 'FRAME — the field boundary on / off', hint: 'FRAME on / off', kind: 'toggle', get: () => mat.frame !== false, run: () => S().LW.setFrame(mat.frame === false), surface: true },
@@ -231,21 +231,31 @@ export function createActions(app) {
       ['nodes.escape', 'menu away, else the selection', 'Escape', (k) => k.escape()]]
       .map(([id, label, k, f]) => ({ id, group: N, short: label.split(' — ')[0], label: 'NODES › ' + label, keys: [].concat(k), exact: !/^Arrow/.test(k), undo: 'none', when: () => !!nodesAt(), run: (a) => { const K = nodesAt(); if (K) f(K, a); } })),
   ];
+  /* 044 AV2 · A PICTURE ON EVERY MENU ROW (Josh's tick 4): the glyph of a row that names none itself, by its id — one drawing per idea (COPY wears
+     `duplicate`, a RESET `reload`, the project as a file `projectFile`); a menu, the search and a bar seat read `icon` as they always did */
+  const PIC = { zoomIn: 'zoom', zoomOut: 'zoom', 'state.normalize': 'unit', reseed: 'particles', 'preset.next': 'chevronRight', 'preset.prev': 'chevronLeft', style: 'paint', view: 'psi', palette: 'palette',
+    historyUndo: 'back', save: 'saveInto', saveAs: 'saveNew', open: 'folder', new: 'plus', 'quick.save': 'saveInto', 'quick.load': 'folder', 'import': 'upload', 'render.frames': 'frames',
+    'export.json': 'projectFile', 'export.mir': 'projectFile', 'export.png': 'projectFile', 'export.glb': 'shape', 'export.obj': 'shape', 'export.stl': 'shape', 'export.npz': 'grid', 'export.cube': 'grid',
+    'copy.latex': 'words', 'copy.json': 'projectFile', 'copy.picture': 'duplicate', 'copy.name': 'duplicate', 'copy.formula': 'duplicate', 'notebook.copy': 'duplicate', 'knob.copy': 'duplicate', 'knob.copyId': 'duplicate', 'event.copy': 'duplicate',
+    'knob.reset': 'reload', 'control.reset': 'reload', 'keys.reset': 'reload', 'knob.route': 'modulation', 'control.learn': 'mapping', 'picker.open': 'molecule', 'picker.isomers': 'bonds', 'picker.keep': 'download', 'picker.look': 'eye',
+    'esp.side': 'sideRight', 'spectrum.solo': 'solo', 'film.picture': 'gallery', 'film.record': 'record', 'view.badges': 'badge', 'view.hints': 'tip', 'settings.playLock': 'clock', modArm: 'power', modBar: 'lock',
+    'csb.search': 'search', 'csb.expand': 'expand', 'csb.rate.up': 'chevronUp', 'csb.rate.down': 'chevronDown', 'csb.tempo.up': 'chevronUp', 'csb.tempo.down': 'chevronDown',
+    'chem.on': 'molecule', 'chem.vibrate': 'molecule', 'chem.breathe': 'molecule', 'chem.kick': 'molecule' };
   const rows = [], byId = new Map(), subs = new Set(), added = new Set();
-  const add = (list) => { const out = []; for (const r of [].concat(list)) if (r && r.id && !byId.has(r.id)) { const row = { group: WD, kind: 'fire', undo: 'row', ...r }; rows.push(row); byId.set(row.id, row); out.push(row); } if (out.length) for (const f of added) f(out); return out; };
+  const add = (list) => { const out = []; for (const r of [].concat(list)) if (r && r.id && !byId.has(r.id)) { const row = { group: WD, kind: 'fire', undo: 'row', ...(PIC[r.id] ? { icon: PIC[r.id] } : {}), ...r }; rows.push(row); byId.set(row.id, row); out.push(row); } if (out.length) for (const f of added) f(out); return out; };
   add(ROWS);
   /* THE VERBS (lab/verbs.js): each verb is the action of its id with arguments — a verb with a key row of its own (view, notebook, new) runs that row */
   const verbRows = () => add((S().verbs ? S().verbs.table : []).map((v) => ({ id: v.id, label: v.doc, group: 'VERBS', kind: 'set', args: v.args, bind: false, undo: 'none', run: (a) => v.run(app, a || {}) })));
   /* every window of the rack: open · close · fold (generated, so a window registered later joins at the next sync) */
   const sync = () => { verbRows(); const rk = S().rk; if (!rk) return; for (const w of rk.windows()) { const t = (w.title || w.id).toUpperCase(), id = w.id;
-    add([{ id: `window.${id}.open`, group: 'WINDOWS', short: t + ' open', label: t + ' — open', run: () => reveal(id), surface: true },
-      { id: `window.${id}.close`, group: 'WINDOWS', short: t + ' close', label: t + ' — close', run: () => { if (id === 'nodes' && nodes()) nodes().close(); rk.close(id); S().saveSettings(); }, surface: true },
-      { id: `window.${id}.fold`, group: 'WINDOWS', short: t + ' fold', label: t + ' — fold / unfold', kind: 'toggle', get: () => !!(rk.windows().find((x) => x.id === id) || {}).folded, run: () => rk.fold(id, !(rk.windows().find((x) => x.id === id) || {}).folded), surface: true },
+    add([{ id: `window.${id}.open`, icon: 'plus', group: 'WINDOWS', short: t + ' open', label: t + ' — open', run: () => reveal(id), surface: true },
+      { id: `window.${id}.close`, icon: 'close', group: 'WINDOWS', short: t + ' close', label: t + ' — close', run: () => { if (id === 'nodes' && nodes()) nodes().close(); rk.close(id); S().saveSettings(); }, surface: true },
+      { id: `window.${id}.fold`, icon: 'chevronDown', group: 'WINDOWS', short: t + ' fold', label: t + ' — fold / unfold', kind: 'toggle', get: () => !!(rk.windows().find((x) => x.id === id) || {}).folded, run: () => rk.fold(id, !(rk.windows().find((x) => x.id === id) || {}).folded), surface: true },
       /* 022 P2 · the title bar's menu: FLOAT (toggle), SIDE (the other rack), RESET (home: docked on its own side, unfolded), SOLO (every other window folded) */
-      { id: `window.${id}.float`, group: 'WINDOWS', short: t + ' float', label: t + ' — float / dock', kind: 'toggle', get: () => !!winOf(id).floating, run: () => rk.toggleFloat(id), surface: true },
-      { id: `window.${id}.side`, group: 'WINDOWS', short: t + ' side', label: t + ' — to the other rack', run: () => { if (winOf(id).floating) rk.dock(id); rk.move(id, { side: winOf(id).side === 'right' ? 'left' : 'right' }); }, surface: true },
-      { id: `window.${id}.reset`, group: 'WINDOWS', short: t + ' reset', label: t + ' — back home, unfolded', run: () => { if (winOf(id).floating) rk.dock(id); rk.move(id, { side: (rk.spec(id) || {}).side }); rk.fold(id, false); }, surface: true },
-      { id: `window.${id}.solo`, group: 'WINDOWS', short: t + ' solo', label: t + ' — solo: fold every other window', hint: t + ' — solo', run: () => { for (const x of foldable()) rk.fold(x.id, x.id !== id); }, surface: true }]); } };
+      { id: `window.${id}.float`, icon: 'rackOut', group: 'WINDOWS', short: t + ' float', label: t + ' — float / dock', kind: 'toggle', get: () => !!winOf(id).floating, run: () => rk.toggleFloat(id), surface: true },
+      { id: `window.${id}.side`, icon: () => (winOf(id).side === 'right' ? 'sideLeft' : 'sideRight'), group: 'WINDOWS', short: t + ' side', label: t + ' — to the other rack', run: () => { if (winOf(id).floating) rk.dock(id); rk.move(id, { side: winOf(id).side === 'right' ? 'left' : 'right' }); }, surface: true },
+      { id: `window.${id}.reset`, icon: 'reload', group: 'WINDOWS', short: t + ' reset', label: t + ' — back home, unfolded', run: () => { if (winOf(id).floating) rk.dock(id); rk.move(id, { side: (rk.spec(id) || {}).side }); rk.fold(id, false); }, surface: true },
+      { id: `window.${id}.solo`, icon: 'solo', group: 'WINDOWS', short: t + ' solo', label: t + ' — solo: fold every other window', hint: t + ' — solo', run: () => { for (const x of foldable()) rk.fold(x.id, x.id !== id); }, surface: true }]); } };
   let edit = (a, run) => run();   // keys.js hands in THE ONE WRAPPER that names a history row (keyEdit), once the key table that spells the name exists
   /* THE ESCAPE STACK: the topmost layer closes first; a layer that has gone (`alive` false) is passed over; nothing open → the stage gives the keyboard back */
   const layers = [];
