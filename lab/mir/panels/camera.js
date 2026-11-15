@@ -4,13 +4,14 @@
  * again; then "move north as a third button in the row alongside center and pan home; move that row to the very top; remove the divider
  * between motion and the top section; remove the 'motion' text and 'route ORBIT ANGLE for…' text"), for the 2-D camera, and from the kit's
  * plane-model.js and λWAVES' lab/camera-law.js + rack.js (CONTROL · SPIN · FRICTION · DRAG GAIN · FLING · ZOOM · FOV) for the 3-D camera.
- * Built only from the control language (docs/CONTROLS.md): an arc for every angle, a knob for the rest, an XY pad and its two knobs for the
+ * Built only from the control language (docs/CONTROLS.md): a knob for every number — an angle's turns freely when it wraps (1.6.0-alpha.73, Josh
+ * 2026-11-14: "The camera dials could be all knobs"; the arc is colour's alone), an XY pad and its two knobs for the
  * pan, a switch with a lamp for a state, a trigger for a verb, a segment for 2–4 modes.
  *
  *   THE ROWS, top down (each only when the port has its ids)
  *     verbs     the app's own (BASINS: CENTER), then PAN HOME and NORTH (2-D) or HOME (3-D) — the row at the very top, no heading, no divider
  *     mode      TURNTABLE · FREE (a segment)
- *     sphere    a direction sphere for yaw / pitch (the plane model's drawing) and its two arcs, the modulation targets
+ *     sphere    a direction sphere for yaw / pitch (the plane model's drawing) and its two knobs, the modulation targets
  *     view      ROTATION · ROLL · ZOOM · FOV · FLIP
  *     pan       an XY pad and its two knobs (X, Y)
  *     scales    ROT SCALE · PAN SCALE · ORBIT · ORBIT ANGLE
@@ -34,9 +35,8 @@
  * PROJECT AND HISTORY  the values ride in the project as a part named `part` (default 'camera') unless `project: false` (the app's own part
  *   carries them); with `history` they are one snapshot domain, so a gesture is one row named CONTROL · WINDOW by the kit's own gesture names.
  * IDLE  The panel subscribes; one coalesced frame reads the port after a notice, and nothing runs at rest. */
-import { el, svgEl, label, hint, trig, watchTouches, gearOf, tapWatcher, setKnobLaw } from '../kit.js';
+import { el, svgEl, label, hint, trig, knob, watchTouches, gearOf, tapWatcher, setKnobLaw } from '../kit.js';
 import { control } from '../controls/factory.js';
-import { arcKnob } from '../controls/arc.js';
 import { frame } from '../core/frame.js';
 import { setAttr } from '../core/perf.js';
 import { registerProjectPart } from '../core/project.js';
@@ -99,9 +99,9 @@ export function createCssPort(canvas, { mode = '2d', values } = {}) {
  * way it went, the tip stops at a pole instead of flipping the yaw), under the one knob law (⅛ gear on any modifier or a second finger,
  * a double-tap is home, arrows nudge).
  *   directionSphere({ label, aria, yaw, pitch, unit, roll, turn(dyaw, dpitch) in radians, home(), onChange() })
- *     yaw, pitch   the arc knobs' options ({ min, max, value, wrap, fmt, … }) in the port's unit; `unit` is port-units per degree
+ *     yaw, pitch   the two knobs' options ({ min, max, value, wrap, fmt, … }) in the port's unit; `unit` is port-units per degree
  *     roll         () → the roll in degrees now, for the film's turn
- *   → { root, svg, yaw, pitch, paint(), destroy() }   yaw and pitch are the arc knobs: register them as the targets
+ *   → { root, svg, yaw, pitch, paint(), destroy() }   yaw and pitch are the knobs: register them as the targets
  * 1.5.7-alpha.7 THE SPHERE TAKES A PLANE — the same drawing for a plane (CLIP's), in place of plane-model.js's canvas:
  *   directionSphere({ plane: { normal() → [x, y, z], pos?() → −1…1, set(n), view?() → bool }, home(), onChange(), label, aria })
  *     the normal is the look line and the tip, the plane the film-like square through n·pos (no camera film), the three world rings, no
@@ -157,7 +157,7 @@ export function directionSphere(o = {}) {
   look.setAttribute('x1', f2(origin[0])); look.setAttribute('y1', f2(origin[1]));
   if (o.plane) return planeSphere(o, { root, body, svg, film, look, tip });
 
-  const mk = (a) => arcKnob({ ...a, onInput: (v) => { paint(); if (a.onInput) a.onInput(v); }, onChange: (v) => { paint(); if (a.onChange) a.onChange(v); } });
+  const mk = (a) => knob({ ...a, onInput: (v) => { paint(); if (a.onInput) a.onInput(v); }, onChange: (v) => { paint(); if (a.onChange) a.onChange(v); } });
   const ky = mk({ ...o.yaw }), kp = mk({ ...o.pitch });
   side.append(ky.root, kp.root);
   for (const k of [ky, kp]) {                                                      // the sphere paints from the knobs, by every road
@@ -319,21 +319,21 @@ export function createCameraView(parent, o = {}) {
     }
     return c;
   }
-  /* THIS PANEL'S ANGLES ARE ARCS, built directly (its header's own rule): a wrapped one (YAW, ROTATION) turns freely, a bounded one (PITCH) is
-     an arc with a gap.  control() draws an angle as a knob since 1.6.0-alpha.24 (arcs are colour); whether these should follow is Josh's to say.
+  /* THIS PANEL'S ANGLES ARE KNOBS (1.6.0-alpha.73; Josh 2026-11-14: "The camera dials could be all knobs" — they were arcs, which are colour's since
+     alpha.24): a wrapped one (YAW, ROTATION, ORBIT ANGLE) turns freely, a bounded one (PITCH) stops at its ends.  Built directly, not by control():
      `desc` is the descriptor the hand writes through, as control()'s is: the rotation's trip north replaces its `set`. */
-  function angleArc(id, d, extra) {
+  function angleKnob(id, d, extra) {
     const ds = desc(id, extra), wrap = !!d.wrap;
-    const k = arcKnob({ label: d.label, title: d.hint, min: d.min, max: d.max, value: port.get(id), home: d.home, wrap, log: d.log, fmt: d.fmt, step: d.step, onInput: (v) => { ds.set(v); schedule(); }, onChange: (v) => ds.set(v) });
-    k.root.dataset.control = 'arc';
-    return { kind: 'arc', root: k.root, widget: k, targets: [k], desc: ds, get: () => k.get(), set: (v) => k.set(v),
+    const k = knob({ label: d.label, title: d.hint, min: d.min, max: d.max, value: port.get(id), home: d.home, wrap, log: d.log, fmt: d.fmt, step: d.step, onInput: (v) => { ds.set(v); schedule(); }, onChange: (v) => ds.set(v) });
+    k.root.dataset.control = 'knob';
+    return { kind: 'knob', root: k.root, widget: k, targets: [k], desc: ds, get: () => k.get(), set: (v) => k.set(v),
       params: () => [{ id: modId(id), label: d.label, min: d.min, max: d.max, step: d.step || 0, map: wrap ? 'wrap' : 'linear', hint: d.hint, def: d.home, get: () => port.get(id), set: (v) => port.set(id, v), widget: k }] };
   }
   const single = (id, parentEl, extra) => {
     const d = D(id);
     const c = d.kind === 'switch' ? control({ id: modId(id), label: d.label, hint: d.hint, value: !!port.get(id), get: () => !!port.get(id), set: (v) => write(id, !!v) })
       : d.kind === 'options' ? control({ id: modId(id), label: d.label, options: d.options.map((x) => ({ id: x.id, label: x.label, hint: x.hint })), value: String(port.get(id)), get: () => String(port.get(id)), set: (v) => write(id, v) })
-      : d.kind === 'angle' ? angleArc(id, d, extra)
+      : d.kind === 'angle' ? angleKnob(id, d, extra)
       : control(desc(id, extra));
     return add(parentEl, [id], c, () => (d.kind === 'switch' ? !!port.get(id) : d.kind === 'options' ? String(port.get(id)) : port.get(id)));
   };
@@ -376,7 +376,7 @@ export function createCameraView(parent, o = {}) {
   /* ── the mode ── */
   if (has_('mode')) single('mode', row('cam-mode'));
 
-  /* ── the sphere (both of yaw and pitch), else yaw and pitch are arcs in the view row ── */
+  /* ── the sphere (both of yaw and pitch), else yaw and pitch are knobs in the view row ── */
   let sphere = null;
   const sphereOn = has_('yaw') && has_('pitch');
   if (sphereOn) {
@@ -386,7 +386,7 @@ export function createCameraView(parent, o = {}) {
       const toPort = 180 / Math.PI * unit;
       if (typeof port.turn === 'function' && !routed('yaw') && !routed('pitch')) {
         port.turn(dyawRad * toPort, dpitchRad * toPort);
-        sphere.yaw.set(port.get('yaw')); sphere.pitch.set(port.get('pitch'));      // alpha.46: the arcs follow the hand per move (sync skips a sphere mid-drag), so the next turn starts from the live arrow, not a stale one (λWAVES 0.5.3 M5 did this app-side)
+        sphere.yaw.set(port.get('yaw')); sphere.pitch.set(port.get('pitch'));      // alpha.46: the knobs follow the hand per move (sync skips a sphere mid-drag), so the next turn starts from the live arrow, not a stale one (λWAVES 0.5.3 M5 did this app-side)
         schedule(); return;
       }
       const wrapTo = (v, lo, hi) => lo + ((((v - lo) % (hi - lo)) + (hi - lo)) % (hi - lo));
@@ -428,7 +428,7 @@ export function createCameraView(parent, o = {}) {
     if (id === 'rotation') {
       const c = single(id, rotSeat || view);
       const d = D(id);
-      // BASINS: a double-tap (the arc's home) is a trip north, and remembers where it left
+      // BASINS: a double-tap (the knob's home) is a trip north, and remembers where it left
       const set0 = c.desc.set; c.desc.set = (v) => { if (v === d.home) { const b = base('rotation'); if (!atNorth(b / unit)) memo = wrapDegrees(b / unit); } set0(v); paintNorth(); };
     } else single(id, view);
   }

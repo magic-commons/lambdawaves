@@ -377,7 +377,7 @@ export function createMaterial(app) {
        routed dial writes its base (modHand), as everywhere. */
     const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['friction', 'drag', 'fling']); let feelSave = 0;
     const camPanel = createCameraPanel({ mode: '3d', modPrefix: 'observer', project: false, mod, panWrap: 'plane',   // 038 K3 (Josh: "allow the XY thing to do the pacman tunnel effect"): MIR 1.5.7-alpha.13 — the pivot leaves one edge of the frame and comes in at the other
-      port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } } } });   // 041 N4: the port's own drag(dx, dy) turns the sphere as the stage turns (camera-law.js); the kit re-reads the arcs per move, so 0.5.3 M5's turn wrapper is gone
+      port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } } } });   // 041 N4: the port's own drag(dx, dy) turns the sphere as the stage turns (camera-law.js); the kit re-reads its two knobs per move (arcs until MIR 1.6.0-alpha.73, 044 K6), so 0.5.3 M5's turn wrapper is gone
     camPanel.spec.build(gc, null);
     const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));

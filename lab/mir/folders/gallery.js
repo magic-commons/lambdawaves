@@ -24,6 +24,9 @@ import { normalizeFolder, leafOf, inFolderTree } from './files.js';
 import * as kitDefault from '../kit.js';
 import { label as kitLabel, ariaLabel as kitAria, placeholder as kitPh, onContext } from '../kit.js';   // the kit's own words, whatever kit the app hands in
 import { glyphEl } from '../glyph.js';
+import { contextMenu } from '../shell/menubar.js';
+import { TAP } from '../core/tap.js';
+import { isField } from '../core/pointer.js';
 import { t, tn, phrase, onLanguage } from '../core/i18n.js';
 import { drag, pointerField } from '../core/pointer.js';
 import { createProximity } from '../core/proximity.js';
@@ -458,30 +461,35 @@ export function buildGallery(panel, opts) {
     else say(t('Could not move: {why}', { why: r.why }), true);
     return r;
   }
-  function itemMenu(e) {
+  /* THE TILE'S MENU IS THE KIT'S (1.6.0-alpha.70): a right-click, a long press or the menu key on a project opens the kit's contextMenu at the pointer —
+     SET AS FOLDER PICTURE (inside a folder), the host's rows, MOVE TO › (every folder, a submenu), MOVE TO A NEW FOLDER… (the typed path: a box, as the
+     asks are).  The tile's MOVE verb opens the folders' list alone under itself.  It was an in-window box of buttons with no arrow walk. */
+  const toRows = (e) => (DRAG ? ['', ...files.folders()].filter((f) => f !== e.folder) : []).map((f) => [f || t(copy.root), () => moveTo(e, f), false, '', { raw: true, id: 'to:' + f }]);
+  const newRow = (e) => ['MOVE TO A NEW FOLDER…', () => moveBox(e), false, '', { id: 'move-new' }];
+  const openMenu = (e, x, y, entries) => { closeContext(); const m = contextMenu({ x, y, entries }); if (m) m.pane.setAttribute('aria-label', e.name); return m; };
+  function itemMenu(e, x = 0, y = 0) {
     selectCard(e.id);
+    const to = toRows(e);
+    return openMenu(e, x, y, [
+      ...(S.folder ? [['SET AS FOLDER PICTURE', () => {
+        const r = files.setFolderPicture(S.folder, e.id);
+        if (r.ok) { say(t('Folder picture set from {name}', { name: e.name })); paintExplorer(); } else say(t('Could not set the folder picture: {why}', { why: r.why }), true);
+      }, false, '', { id: 'folder-picture' }]] : []),
+      ...((o.itemRows ? o.itemRows(e) : null) || []).map(([word, run], i) => [word, run, false, '', { id: 'app-' + i }]),   // 1.5.6-alpha.4: the host's rows (λWAVES: OPEN · EXPORT)
+      ...(to.length ? [null, ['MOVE TO', () => to, false, '', { sub: true, id: 'move-to' }]] : []),
+      newRow(e)]);
+  }
+  /* the tile's MOVE verb — the touch and keyboard way to do what a carried tile does: the folders' list under the button, the keyboard on its first row */
+  function moveMenu(e, x, y) { selectCard(e.id); return openMenu(e, x, y, [...toRows(e), null, newRow(e)]); }
+  function moveBox(e) {
     const b = box(e.name);
-    if (S.folder) action(b, 'SET AS FOLDER PICTURE', () => {
-      const r = files.setFolderPicture(S.folder, e.id);
-      if (r.ok) { say(t('Folder picture set from {name}', { name: e.name })); closeContext(); paintExplorer(); } else say(t('Could not set the folder picture: {why}', { why: r.why }), true);
-    }, 'sv-primary');
-    for (const [word, run] of (o.itemRows ? o.itemRows(e) : null) || []) action(b, word, () => { closeContext(); run(); });   // 1.5.6-alpha.4: the host's rows (λWAVES: OPEN · EXPORT)
-    /* MOVE TO — every folder as a button: the touch and keyboard way to do what a carried tile does (with dragToFolder) */
-    const dests = DRAG ? ['', ...files.folders()].filter((f) => f !== e.folder) : [];
-    if (dests.length) {
-      mk('div', 'sv-context-label', b, t('MOVE TO'));
-      const list = mk('div', 'sv-context-row sv-moveto', b);
-      for (const f of dests) { const a = action(list, f ? f : copy.root, () => moveTo(e, f)); a.root.dataset.folder = f; }
-    }
     const row = mk('div', 'sv-context-row sv-move', b);
     const inp = mk('input', 'sv-input', row); inp.type = 'text'; inp.value = e.folder; inp.placeholder = t('{:ROOT} or folder path'); inp.spellcheck = false;
     inp.setAttribute('aria-label', t('Move {name} to folder', { name: e.name }));
     inp.addEventListener('keydown', (ev) => ev.stopPropagation());
     action(row, 'MOVE', () => moveTo(e, inp.value));
     action(b, 'CLOSE', closeContext);
-    scrollIn();
-    const first = DRAG && (b.querySelector('.sv-moveto .trig') || b.querySelector('.sv-act'));   // the keyboard lands in MOVE TO
-    if (first) first.focus({ preventScroll: true });
+    scrollIn(); inp.focus({ preventScroll: true }); inp.select();
   }
   function folderMenu(path) {
     const b = box(path);
@@ -509,7 +517,7 @@ export function buildGallery(panel, opts) {
   const scrollIn = () => { try { context.scrollIntoView({ block: 'nearest' }); } catch (_) {} };
 
   /* long-press (touch/pen) or right-click opens a menu; the click that follows a long-press is swallowed: the kit's onContext (1.5.6-alpha.4) */
-  const wireLongPress = (target, open) => onContext(target, () => open());
+  const wireLongPress = (target, open) => onContext(target, ({ x, y }) => open(x, y));
 
   /* inline rename — the latch that makes Escape genuinely reversible */
   function renameInline(label, initial, commit) {
@@ -563,7 +571,7 @@ export function buildGallery(panel, opts) {
     return out;
   }
   function wireCarry(shot, card, e) {
-    return drag(shot, { slop: 6,
+    return drag(shot, {                                                // the kit's one mouse slop (core/pointer.js: 4 px; it was 6 here — 1.6.0-alpha.70)
       onStart(s) {
         if (s.pointerType === 'touch' || locked()) return;              // a finger long-presses for the menu instead
         const r = rect(shot);
@@ -684,9 +692,9 @@ export function buildGallery(panel, opts) {
       shot.setAttribute('aria-pressed', String(S.selected === e.id));
       if (e.thumb) shot.style.setProperty('--sv-thumb', 'url(' + JSON.stringify(e.thumb) + ')');
       tileLife.push(pointerField(shot, { touch: true }));            // BASINS' parallax follows a finger too
-      let pressX = null, pressY = 0, dragged = false;                  // BASINS: a press that travels > 10 px is not a tap
+      let pressX = null, pressY = 0, dragged = false;                  // a press that travels past the slop is not a tap: a finger's is the kit's TAP.slop (8 px), a mouse's the drag's 4 (BASINS' own 10 is gone, 1.6.0-alpha.70)
       shot.addEventListener('pointerdown', (ev) => { dragged = false; pressX = ev.clientX; pressY = ev.clientY; });
-      shot.addEventListener('pointermove', (ev) => { if (pressX != null && ev.buttons && Math.hypot(ev.clientX - pressX, ev.clientY - pressY) > 10) dragged = true; });
+      shot.addEventListener('pointermove', (ev) => { if (pressX != null && ev.buttons && Math.hypot(ev.clientX - pressX, ev.clientY - pressY) > (ev.pointerType === 'mouse' ? 4 : TAP.slop)) dragged = true; });
       shot.addEventListener('pointerup', () => { pressX = null; });
       shot.addEventListener('pointercancel', () => { pressX = null; dragged = true; });
       if (DRAG) { const carried = wireCarry(shot, card, e); tileLife.push(() => carried.destroy()); }
@@ -695,7 +703,7 @@ export function buildGallery(panel, opts) {
         if (Date.now() - lastDrop < 400) return;                   // the click a carry's release makes is not a tap
         if (S.selected === e.id) openEntry(e.id); else selectCard(e.id);
       });
-      wireLongPress(shot, () => itemMenu(e));
+      wireLongPress(shot, (x, y) => itemMenu(e, x, y));
       const meta = mk('div', 'sv-meta' + (o.captions ? ' sv-cap' : ''), card);   // 1.5.7-alpha.22: `captions` — the name beneath the picture at rest
       const name = mk('div', 'sv-name', meta, e.name);
       name.title = e.name + ' · ' + fmtBytes(e.bytes);
@@ -703,7 +711,7 @@ export function buildGallery(panel, opts) {
       const acts = mk('div', 'sv-acts', card);
       const info = ink(btn('sv-info', acts, null, t('Show the data for {name}', { name: e.name })), 'info', 18);
       info.addEventListener('click', () => { S.selected = e.id; paintExplorer(); if (typeof o.onInspect === 'function') o.onInspect(files.entry(e.id), { show: true }); });
-      if (DRAG) ink(btn('sv-move-btn', acts, null, t('Move {name} to a folder', { name: e.name })), 'folder', 15).addEventListener('click', () => itemMenu(e));
+      if (DRAG) ink(btn('sv-move-btn', acts, null, t('Move {name} to a folder', { name: e.name })), 'folder', 15).addEventListener('click', (ev) => { const r = ev.currentTarget.getBoundingClientRect(); moveMenu(e, r.left, r.bottom + 2); });
       ink(btn('sv-rename', acts, null, t('Rename {name}', { name: e.name })), 'rename', 15).addEventListener('click', renameIt);
       const del = ink(btn('sv-del', acts, null, t('Delete {name}', { name: e.name })), 'close', 14);
       let tm = 0;
@@ -728,8 +736,12 @@ export function buildGallery(panel, opts) {
     if (S.selected && target.closest && !target.closest('.sv-card, .sv-duplicate, .sv-context, .sv-toolbar')) selectCard(null);
   }, on);
   doc.addEventListener('keydown', (ev) => {
+    /* DELETE REMOVES THE SELECTION (1.6.0-alpha.70): on a selected project, with the keyboard inside the window and not in a field, Delete presses the
+       tile's own × — the same road, the same "sure?" (a second Delete within its time deletes) */
+    if (ev.key === 'Delete' && S.selected && panel.isConnected && panel.contains(ev.target) && !isField(ev.target, true) && !ev.defaultPrevented) {
+      const del = [...panel.querySelectorAll('.sv-card')].find((c) => c.dataset.entry === S.selected)?.querySelector('.sv-del'); if (del) { ev.preventDefault(); del.click(); } return; }
     if (ev.key !== 'Escape' || !panel.isConnected || (ev.target.classList && ev.target.classList.contains('sv-inline'))) return;
-    if (carry) return;                                             // the carry's own Escape puts the tile back
+    if (carry || ev.defaultPrevented || doc.querySelector('.mir-ctx')) return;   // the kit's menu closes by its own road: one Escape, one layer                                             // the carry's own Escape puts the tile back
     if (S.closeParts && S.closeParts()) ev.preventDefault();
     else if (!context.hidden) { closeContext(); ev.preventDefault(); }
     else if (S.selected) { selectCard(null); ev.preventDefault(); }

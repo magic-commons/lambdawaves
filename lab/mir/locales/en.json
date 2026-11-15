@@ -304,13 +304,9 @@
   "ENV": "ENV",
   "ENV {n}": "ENV {n}",
   "ENVELOPE · HIGH": "ENVELOPE · HIGH",
-  "ENVELOPE · HIGH ✓": "ENVELOPE · HIGH ✓",
   "ENVELOPE · LEVEL": "ENVELOPE · LEVEL",
-  "ENVELOPE · LEVEL ✓": "ENVELOPE · LEVEL ✓",
   "ENVELOPE · LOW": "ENVELOPE · LOW",
-  "ENVELOPE · LOW ✓": "ENVELOPE · LOW ✓",
   "ENVELOPE · MID": "ENVELOPE · MID",
-  "ENVELOPE · MID ✓": "ENVELOPE · MID ✓",
   "ERROR": "ERROR",
   "EVT": "EVT",
   "EXPORT": "EXPORT",
@@ -574,7 +570,6 @@
   "MOVE CONTENTS TO {:ROOT}?": "MOVE CONTENTS TO {:ROOT}?",
   "MOVE EARLIER": "MOVE EARLIER",
   "MOVE LATER": "MOVE LATER",
-  "MOVE TO": "MOVE TO",
   "MP4 unavailable at this size/FPS. Choose PNG frames or a smaller size.": "MP4 unavailable at this size/FPS. Choose PNG frames or a smaller size.",
   "MULTI-SAW": "MULTI-SAW",
   "MULTI-TRI": "MULTI-TRI",
@@ -620,6 +615,7 @@
   "NEW": "NEW",
   "NEXT BAR": "NEXT BAR",
   "NOISE GATE": "NOISE GATE",
+  "NORMALIZED MIN / MAX": "NORMALIZED MIN / MAX",
   "NORTH": "NORTH",
   "NORTH — the view is at north": "NORTH — the view is at north",
   "NORTH — turn the view to north; press again to go back": "NORTH — turn the view to north; press again to go back",
@@ -1694,10 +1690,10 @@
   "Download {name} · {w} × {h}": "the same button's hint: {w} × {h} the picture's width and height in pixels",
   "Drag to route; tap to arm; double-tap to reset": "route: connect this macro to a control so it moves it; arm: make it wait for a tap on the control to connect to",
   "Drag ✥ onto a slider or knob to route it (a PAD’s ✥ makes that control get hit) · drop it there again to release · a macro bar: drag sideways to set, double-tap to reset, tap to rename or unassign · number ring: up/down = master depth, double-tap = 100% · route ring: up/down = depth, sideways = direction.": "✥ is the macro’s routing grip; a PAD is a trigger macro; one sentence of help shown along the window’s foot",
-  "ENVELOPE · LEVEL": "a clip's menu: the envelope band to follow, the one in use ticked",
-  "ENVELOPE · LEVEL ✓": "a clip's menu: the envelope band to follow, the one in use ticked",
-  "ENVELOPE · LOW": "a clip's menu: the envelope band to follow, the one in use ticked",
-  "ENVELOPE · LOW ✓": "a clip's menu: the envelope band to follow, the one in use ticked",
+  "ENVELOPE · HIGH": "a clip's menu: the envelope band to follow (the one in use is the row's radio mark, 1.6.0-alpha.66; it was a typed ✓)",
+  "ENVELOPE · LEVEL": "a clip's menu: the envelope band to follow (the one in use is the row's radio mark, 1.6.0-alpha.66; it was a typed ✓)",
+  "ENVELOPE · LOW": "a clip's menu: the envelope band to follow (the one in use is the row's radio mark, 1.6.0-alpha.66; it was a typed ✓)",
+  "ENVELOPE · MID": "a clip's menu: the envelope band to follow (the one in use is the row's radio mark, 1.6.0-alpha.66; it was a typed ✓)",
   "EVT": "short for EVENT: this output fires on a hit (an onset), it does not carry a level",
   "Each label’s ink from the picture under it (this app’s sampler)": "the app's own sampler reads the picture behind each word and picks white or black ink",
   "FINDER": "the finder: a search field over every window of the app; picking one opens it or scrolls the rack to it",
@@ -2729,25 +2725,13 @@
   "ENVELOPE · HIGH": [
    "mir/timeline/audio-kind.js"
   ],
-  "ENVELOPE · HIGH ✓": [
-   "mir/timeline/audio-kind.js"
-  ],
   "ENVELOPE · LEVEL": [
-   "mir/timeline/audio-kind.js"
-  ],
-  "ENVELOPE · LEVEL ✓": [
    "mir/timeline/audio-kind.js"
   ],
   "ENVELOPE · LOW": [
    "mir/timeline/audio-kind.js"
   ],
-  "ENVELOPE · LOW ✓": [
-   "mir/timeline/audio-kind.js"
-  ],
   "ENVELOPE · MID": [
-   "mir/timeline/audio-kind.js"
-  ],
-  "ENVELOPE · MID ✓": [
    "mir/timeline/audio-kind.js"
   ],
   "ERROR": [
@@ -3547,9 +3531,6 @@
   "MOVE LATER": [
    "mir/timeline/shortcuts.js"
   ],
-  "MOVE TO": [
-   "mir/folders/gallery.js"
-  ],
   "MP4 unavailable at this size/FPS. Choose PNG frames or a smaller size.": [
    "mir/render/panel.js"
   ],
@@ -3688,6 +3669,9 @@
   ],
   "NOISE GATE": [
    "mir/modulation/window.js"
+  ],
+  "NORMALIZED MIN / MAX": [
+   "mir/timeline/editor.js"
   ],
   "NORTH": [
    "mir/panels/camera.js"

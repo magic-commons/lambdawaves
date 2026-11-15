@@ -36,11 +36,11 @@ export const walk = (n, at, d) => (n ? (at < 0 ? (d > 0 ? 0 : n - 1) : (at + d +
 
 /** where the pane goes: below the anchor while there is room, else above, clamped to the viewport (pure, for tests) */
 export function placePane(a, pane, view, gap = 4, margin = 8) {
-  const room = (view.h - a.bottom) - margin, above = a.top - margin;
+  const room = (view.h - a.bottom) - margin - gap, above = a.top - margin - gap;   // the gap is taken from the ROOM, never from the pane (1.6.0-alpha.64: a list that fitted lost 4 px and scrolled by them)
   const down = pane.h <= room || room >= above;
-  const h = Math.min(pane.h, down ? room : above);
+  const h = Math.max(88, Math.min(pane.h, down ? room : above));
   const w = Math.max(pane.w, a.width);
-  return { top: down ? a.bottom + gap : Math.max(margin, a.top - gap - h), left: Math.max(margin, Math.min(view.w - w - margin, a.left)), maxHeight: Math.max(88, h - gap), minWidth: a.width, down };
+  return { top: down ? a.bottom + gap : Math.max(margin, a.top - gap - h), left: Math.max(margin, Math.min(view.w - w - margin, a.left)), maxHeight: h, minWidth: a.width, down };
 }
 
 let open = null;                                         // one list pane per page: opening another closes this one

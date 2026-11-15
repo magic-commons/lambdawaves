@@ -5,7 +5,7 @@
  * the app's: every part is an exported builder (play, the modulation power button, the door to the modulation window,
  * the BPM pill, the tempo panel, TAP, a window latch, the dock chip, the seat button, the way back, a plain bar button),
  * and createTransport({ layout }) assembles a bar from an ordered list of parts, groups and the app's own nodes.  With
- * no layout it is BASINS' basic bar (BASINS_LAYOUT); λWAVES' arrangement is LAMBDAWAVES_LAYOUT, from the same parts.
+ * no layout it is the basic bar (BASIC_LAYOUT); THE CONTROL SURFACE is CONTROL_SURFACE_LAYOUT, from the same parts.
  *
  * Every part is BASINS' design where BASINS has the feature (app/transport.js, transport-controls.js/.css,
  * transport-placement.js, tempo-editor.js; its DOM and class names: `#transport.mini`, `.native-play-row`, `.tbtn.play`,
@@ -645,31 +645,28 @@ export function wayBack({ run, signal } = {}) {
 /* ── the layouts ───────────────────────────────────────────────────────────────────────────────────────────── */
 /** named(name, list, { title }) — a layout that carries its own drawing: the bar writes `data-layout="<name>"` and transport.css
  *  keys that layout's values on it; `title` names the rack window it docks into (default TRANSPORT).  A layout with no name
- *  (an app's own list) is drawn as BASINS' is. */
+ *  (an app's own list) is drawn as the basic bar is. */
 const named = (name, list, extra = {}) => Object.freeze(Object.assign(list, { name }, extra));
-/** BASINS' basic bar (app/transport.js): the play row — play, modulation's power, the BPM pill, to-start (BASINS adds its
- *  depth readout after the pill) — then the tempo panel the pill opens, the window latches, the seat button, the dock chip
- *  and the modulation door.  Its drawing is the default (transport.css): the bar as wide as its row, the pill in the row's
- *  order, the docked card a five-column grid. */
-export const BASINS_LAYOUT = named('basins', [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'rewind'] }, 'panel', 'openers', 'seat', 'dock', 'door']);
-/** λWAVES' bar (lab/rack.js §25 + native-ui.js), from the same parts: play, modulation's power, rewind, ‹ ›, then the
- *  app's own scrub, ⟳, readouts and RATE knob (`app:<name>`, from `nodes`), the pill; the panel; then dock and door.
- *  Its own drawing (`data-layout="lambdawaves"`): the 640 px bar, the pill last, the docked row wrapping. */
-export const LAMBDAWAVES_LAYOUT = named('lambdawaves', [{ group: 'native-play-row', items: ['play', 'power', 'rewind', 'app:back', 'app:forward', 'app:scrub', 'app:jump', 'app:time', 'app:period', 'app:rate', 'tempo'] },
-  'panel', 'openers', 'seat', 'dock', 'door']);
+/** THE BASIC BAR (BASINS' app/transport.js; `data-layout="basic"`, the default): the play row — play, modulation's power, the BPM pill, to-start
+ *  (an app adds its own readout after the pill) — then the tempo panel the pill opens, the window latches, the seat button, the dock chip and the
+ *  modulation door.  Its drawing is the default (transport.css): the bar as wide as its row, the pill in the row's order, the docked card a
+ *  five-column grid.  (1.6.0-alpha.69: it was BASINS_LAYOUT, named 'basins'; no kit name carries an app.) */
+export const BASIC_LAYOUT = named('basic', [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'rewind'] }, 'panel', 'openers', 'seat', 'dock', 'door']);
 
-/** THE CONTROL SURFACE (1.5.0-alpha.25, λWAVES iteration 014 A1 · A8; `data-layout="csb"`): three columns.  LEFT the play, large and
- *  centred in the bar's height, with the modulation power under it; MIDDLE two rows — the timing row (to-start, the
- *  window latches, the modulation door, the app's gear, the dock chip, the app's time readout at the right end — 014 A11) over the buttons row (the app's modes, chooser, search and the rack's
- *  add / hide / favourites); RIGHT the app's rate knob over the BPM pill.  The tempo panel opens under the whole bar.  In a rack card (docked,
- *  or the FREE window, one card wide) the same columns become bands: play + power left and rate + pill right, then the timing row, then the
- *  buttons.  `app:<name>` comes from `nodes`; a name the app does not hand in is left out.  Docked, the rack window is CONTROL SURFACE. */
+/** THE CONTROL SURFACE (`data-layout="csb"`; 1.6.0-alpha.69: the bar λWAVES uses, lifted from its lab/shell/transport.js — the 014 three-column
+ *  drawing this name held had no reader).  PLAY alone, floating outside the bar's left edge; LEFT the app's rate knob over the typed BPM pill, the
+ *  power over EXPAND, then a 2 × 2 of seats (the app's two rewinds over the window latches and the modulation door); MIDDLE the app's chooser over a
+ *  row (its modes and FOLDERS); RIGHT a five-wide grid of seats (SEARCH · FINDER · favourites · the rack · settings / NODES · INFORMATIONAL · THEME ·
+ *  FOLDS · the dock chip); the panel (EXPAND's) under or over the whole bar.  In a rack card (docked, or the FREE window one card wide) the same
+ *  order is a seven-column grid.  `app:<name>` comes from `nodes`; a name the app does not hand in is left out, so a smaller app's bar is the same
+ *  bar with fewer seats.  Docked, the rack window is CONTROL SURFACE.  Its drawing — the house's bar seat: 36 px, a 20 px glyph, 4 px apart, lit =
+ *  accent ink — is transport.css'. */
 export const CONTROL_SURFACE_LAYOUT = named('csb', [
-  { group: 'csb-col csb-play', items: ['play', 'power'] },
-  { group: 'csb-mid', items: [
-    { group: 'csb-row csb-clock', items: ['rewind', 'openers', 'door', 'app:gear', 'dock', 'app:time'] },
-    { group: 'csb-row csb-app', items: ['app:modes', 'app:chooser', 'app:search', 'app:add', 'app:rack', 'app:fav'] }] },
-  { group: 'csb-col csb-tempo', items: ['app:rate', 'tempo'] },
+  { group: 'csb-play', items: ['play'] },
+  { group: 'csb-side csb-left', items: [{ group: 'csb-col csb-tempo', items: ['app:rate', 'tempo'] }, { group: 'csb-col csb-mod', items: ['power', 'expand'] },
+    { group: 'csb-ico', items: ['app:begin', 'app:home', 'openers', 'door'] }] },
+  { group: 'csb-mid', items: ['app:chooser', { group: 'csb-row csb-lib', items: ['app:modes', 'app:folders'] }] },
+  { group: 'csb-side csb-right csb-ico', items: ['app:search', 'app:finder', 'app:fav', 'app:rack', 'app:gear', 'app:nodes', 'app:info', 'app:theme', 'app:folds', 'dock'] },
   'panel'], { title: 'CONTROL SURFACE' });
 
 /** layoutNames(layout) — every part name a layout uses, groups opened */
@@ -701,9 +698,9 @@ export const transportDock = (R) => dockOf(R);
 /** createTransport(options) → api
  *    layout      the bar's arrangement: an array of part names ('play', 'power', 'door', 'tempo', 'panel', 'tap',
  *                'rewind', 'openers', 'seat', 'dock', 'back', 'expand' — the panel's own button; the pill then types), `app:<name>` (a node from `nodes`), DOM nodes, and
- *                `{ group: 'class names', items: [...] }`.  Default BASINS_LAYOUT.  A layout's
- *                `name` (BASINS_LAYOUT 'basins', LAMBDAWAVES_LAYOUT 'lambdawaves') is written as data-layout; λWAVES'
- *                has its own drawing, every other layout is drawn as BASINS' is.
+ *                `{ group: 'class names', items: [...] }`.  Default BASIC_LAYOUT.  A layout's
+ *                `name` (BASIC_LAYOUT 'basic', CONTROL_SURFACE_LAYOUT 'csb') is written as data-layout; the CSB
+ *                has its own drawing, every other layout is drawn as the basic bar is.
  *    nodes       { name: Element } — the app's own nodes a layout names
  *    clock       the ONE TRUE PLAY's clock: { play(), pause(), isPlaying(), toggle?(), onChange?(fn), seek?(beat) }
  *    mod         the modulation seam (installModulation's result): the power button, the door, the panel's clock tiles
@@ -720,7 +717,7 @@ export const transportDock = (R) => dockOf(R);
  *                registered with glyph.js); a place left out keeps the kit's (placeGlyph).  The chip's word stays the kit's.  1.5.7-alpha.65
  *    openers, rack, keys, store, key, opener, onRefused, onInterface, host, root, id — as in docs/TRANSPORT.md
  *  The api's mountIn(host | null) moves the one bar into a work lane and back (docs/TRANSPORT.md "The one bar that moves"). */
-export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = globalThis.document && document.body, root = null, id = 'transport',
+export function createTransport({ layout = BASIC_LAYOUT, nodes = {}, host = globalThis.document && document.body, root = null, id = 'transport',
   clock = null, mod = null, model = MOD, setBpm = null, persist = null, openers = [], rack = null, keys = null, store = null,
   key = 'mir.transport', opener = true, onRefused = null, onInterface = null, bar: barKind = 'float', door: doorMark = 'palette', doorIcon = null,
   onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, placeGlyphs = null, onDock = null, freeWidth = null, freeHost = null, seats = '' } = {}) {

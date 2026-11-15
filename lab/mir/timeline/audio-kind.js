@@ -89,8 +89,7 @@ export function patchAudioClip(model, clipId, patch) {
 const WORDS = {   // tr: the audio budget's refusals and the clip menu's words
   clips: { label: 'No room: {n} audio clips is the budget.' },
   minutes: { label: 'No room: {max} minutes of audio is the budget (this would be {now}).' },
-  level: [{ label: 'ENVELOPE · LEVEL' }, { label: 'ENVELOPE · LEVEL ✓' }], low: [{ label: 'ENVELOPE · LOW' }, { label: 'ENVELOPE · LOW ✓' }],   // tr: a clip's menu: the envelope band to follow, the one in use ticked
-  mid: [{ label: 'ENVELOPE · MID' }, { label: 'ENVELOPE · MID ✓' }], high: [{ label: 'ENVELOPE · HIGH' }, { label: 'ENVELOPE · HIGH ✓' }],
+  level: { label: 'ENVELOPE · LEVEL' }, low: { label: 'ENVELOPE · LOW' }, mid: { label: 'ENVELOPE · MID' }, high: { label: 'ENVELOPE · HIGH' },   // tr: a clip's menu: the envelope band to follow (the one in use is the row's radio mark, 1.6.0-alpha.66; it was a typed ✓)
   keep: { label: 'KEEP AUDIO (PLAY THE FILE)' }, signal: { label: 'SIGNAL ONLY (MUTE THE FILE)' }, stretch: { label: 'STRETCH TO CLIP · SHIFT+T' },   // tr: a clip's menu: the file plays / the envelope alone / fit the audio into the clip's length (varispeed)
 };
 export function audioBudgetAdding(doc, adds) {
@@ -159,7 +158,7 @@ export async function setAudioBand(model, clipId, band) {
 // SIGNAL ONLY, and Shift+T.  Labels are English keys, translated where they are shown.
 function menu(curve, clip, { model }) {
   return [
-    ...AUDIO_BANDS.map((band) => [WORDS[band][curve.band === band ? 1 : 0].label, () => { if (curve.band !== band) setAudioBand(model, clip.id, band); }, 'band-' + band]),
+    ...AUDIO_BANDS.map((band) => [WORDS[band].label, () => { if (curve.band !== band) setAudioBand(model, clip.id, band); }, 'band-' + band, curve.band === band, { radio: 'band' }]),
     [(curve.keep ? WORDS.signal : WORDS.keep).label, () => patchAudioClip(model, clip.id, { keep: !curve.keep }), 'keep'],   // tr: a clip's menu: switch between the file playing and the envelope alone
     [WORDS.stretch.label, () => stretchAudioClip(model, clip.id), 'stretch-to-clip'],   // tr: a clip's menu: fit the audio into the clip's length (varispeed)
   ];
