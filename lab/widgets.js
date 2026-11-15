@@ -10,7 +10,7 @@
  *   registerKind({ kind, label, glyph, hint, size: { w, h }, opts, mount(el, api) → { tick(now, force, ctx), set(opts), destroy() }, controls(bar, api) })
  *   api = { app, id, kind, el, opts(), set(patch, name), theme(), ink(), editing(), size() }
  *   createWidgets(app) → { root, add(kind, opts), remove(id), clear(), list(), edit(on), snap(on), tick(now, ctx), restore(rec), serialize(), subscribe(fn) } */
-import { el, hint, onThemeChange } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js'; import { cssZoom } from './mir/core/zoom.js';
+import { el, hint, ariaLabel, onThemeChange } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js'; import { cssZoom } from './mir/core/zoom.js'; import { drag } from './mir/core/pointer.js';
 const KEY = 'lambdawaves.q0.widgets', MIN = 0.06;
 const KINDS = new Map(), heard = new Set();
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v)), r4 = (v) => Math.round(v * 1e4) / 1e4;
@@ -78,6 +78,8 @@ export function createWidgets(app) {
       size: () => ({ w: body.clientWidth, h: body.clientHeight }),
       set: (patch, name = 'WIDGET ' + K.label) => { W.it.opts = { ...W.it.opts, ...patch }; if (W.inst.set) W.inst.set(W.it.opts); kick(W); commit(name); } };
     place(W); live.set(it.id, W); box.tabIndex = editOn ? 0 : -1;
+    box.setAttribute('role', 'application'); box.setAttribute('aria-roledescription', 'widget'); ariaLabel(box, K.label);   // 044 A4 (L51): it says what it is, as the kit's pad does
+    hand(W);
     W.inst = K.mount(body, view) || {};
     W.view = view; if (K.controls) K.controls(bar, view);
     if (sized) sized.observe(body);
@@ -91,7 +93,9 @@ export function createWidgets(app) {
      (≥ MIN each way); SNAP holds the moving edges — a move's left · centre · right and top · middle · bottom, a size's right and bottom — on
      the nearest line within 6 px among every other widget's edges and centres and the stage's edges and centre lines, a 1-px accent guide
      across the stage while it holds, gone on release; the record is written on release (one row: WIDGET MOVE or WIDGET SIZE); arrows nudge
-     1 % (Shift 5 %); Escape leaves EDIT (the escape stack, lab/actions.js) ── */
+     5 % (Shift is fine, as everywhere: 1 %); Delete removes the focused widget; Escape leaves EDIT (the escape stack, lab/actions.js).
+     044 A4 (L41 / L39): the hand is the kit's drag() — 4 px before a press is a drag, and Escape mid-drag, a lost capture or a hidden page
+     put the widget back where the hand found it ── */
   const gx = el('i', 'lw-guide', root), gy = el('i', 'lw-guide lw-guide-y', root); gx.hidden = gy.hidden = true;
   let drop = null;
   function snapped(r, size, own, S) {
@@ -103,26 +107,30 @@ export function createWidgets(app) {
     gx.hidden = !bx; gy.hidden = !by; if (bx) gx.style.left = bx.t * 100 + '%'; if (by) gy.style.top = by.t * 100 + '%';
     return r;
   }
-  root.addEventListener('pointerdown', (e) => {
-    const box = editOn && e.button === 0 && e.target.closest('.lw-widget'), W = box && live.get(box.dataset.id);
-    if (!W || e.target.closest('.lw-widget-bar, .lw-widget-x')) return;   // the kind's controls and × are buttons of their own
-    e.preventDefault(); box.focus({ preventScroll: true }); box.setPointerCapture(e.pointerId);
-    const S = root.getBoundingClientRect(), size = !!e.target.closest('.lw-widget-grip'), o = { ...W.it }, x0 = e.clientX, y0 = e.clientY; let moved = false;
-    const mv = (ev) => {
-      if (!moved && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 3) return; moved = true;
-      const dx = (ev.clientX - x0) / S.width, dy = (ev.clientY - y0) / S.height;
-      const r = snapped(size ? { x: o.x, y: o.y, w: Math.max(MIN, o.w + dx), h: Math.max(MIN, o.h + dy) } : { x: o.x + dx, y: o.y + dy, w: o.w, h: o.h }, size, W.it, S);
-      if (size) { r.w = Math.min(r.w, 1 - r.x); r.h = Math.min(r.h, 1 - r.y); }
-      Object.assign(W.it, fit(r)); place(W);
-    };
-    const end = () => { box.removeEventListener('pointermove', mv); box.removeEventListener('pointerup', end); box.removeEventListener('pointercancel', end); gx.hidden = gy.hidden = true;
-      if (moved) commit(size ? 'WIDGET SIZE' : 'WIDGET MOVE'); };
-    box.addEventListener('pointermove', mv); box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
-  });
+  function hand(W) {
+    const box = W.box; let S = null, size = false, o = null;
+    box.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      if (!editOn || e.target.closest('.lw-widget-bar, .lw-widget-x')) { e.stopImmediatePropagation(); return; }   // the kind's controls and × are buttons of their own
+      box.focus({ preventScroll: true }); S = root.getBoundingClientRect(); size = !!e.target.closest('.lw-widget-grip'); o = { ...W.it };
+    });
+    drag(box, {
+      onMove: (m) => {
+        const dx = m.dx / S.width, dy = m.dy / S.height;
+        const r = snapped(size ? { x: o.x, y: o.y, w: Math.max(MIN, o.w + dx), h: Math.max(MIN, o.h + dy) } : { x: o.x + dx, y: o.y + dy, w: o.w, h: o.h }, size, W.it, S);
+        if (size) { r.w = Math.min(r.w, 1 - r.x); r.h = Math.min(r.h, 1 - r.y); }
+        Object.assign(W.it, fit(r)); place(W);
+      },
+      onEnd: () => { gx.hidden = gy.hidden = true; commit(size ? 'WIDGET SIZE' : 'WIDGET MOVE'); },
+      onCancel: () => { gx.hidden = gy.hidden = true; Object.assign(W.it, o); place(W); },
+    });
+  }
   root.addEventListener('keydown', (e) => {
     const W = editOn && e.target.classList.contains('lw-widget') && live.get(e.target.dataset.id), d = W && { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    if (W && (e.key === 'Delete' || e.key === 'Backspace')) { e.preventDefault(); e.stopPropagation(); api.remove(W.it.id); return; }   // L49: Delete removes the selection
     if (!d) return; e.preventDefault(); e.stopPropagation();
-    const k = e.shiftKey ? 0.05 : 0.01; Object.assign(W.it, fit({ ...W.it, x: W.it.x + d[0] * k, y: W.it.y + d[1] * k })); place(W); commit('WIDGET MOVE');
+    const k = e.shiftKey ? 0.01 : 0.05;                               // L34: Shift is FINE
+    Object.assign(W.it, fit({ ...W.it, x: W.it.x + d[0] * k, y: W.it.y + d[1] * k })); place(W); commit('WIDGET MOVE');
   });
   const api = L = {
     root,
