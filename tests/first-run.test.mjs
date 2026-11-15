@@ -120,7 +120,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const rows = { desktop: firstRunMaterial(false).inner, mobile: firstRunMaterial(true).inner,
     closesAtBoot: src.includes(`if(FIRST_RUN.inner===false)for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]'))b.click();`),
     keyed: fold.includes('b.dataset.fold = key || what;'), shadowKeyed: native.includes("fold(shadowRow,shadowDetails,{what:'shadow details',key:'shadow details'"),   // 044 A3.3: SHADOW's details fold through fold(), keyed by its frozen name
-    recordWrites: src.includes("...(fs.length ? { folds: fs } : {})"), recordReads: src.includes("const want = Array.isArray(c.folds) && c.folds.includes(b.dataset.fold);") };
+    recordWrites: src.includes("...(fs.length ? { folds: fs } : {})"), recordReads: src.includes("const want = (Array.isArray(c.folds) && c.folds.includes(b.dataset.fold))") };
   judge('THE INNER FOLDS (iteration 011 Q2, Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside a window arrives closed on every device; the presses are keyed (`data-fold`), the WORKSPACE record names the open ones (`folds`) and a record without it closes them',
     rows.desktop === false && rows.mobile === false && rows.closesAtBoot && rows.keyed && rows.shadowKeyed && rows.recordWrites && rows.recordReads, rows);
 }

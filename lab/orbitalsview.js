@@ -24,7 +24,7 @@
  * a `refusal()` dance and a push ORDER in the frame loop; the refusal survives only as the sentence the interface
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
-import { el, knob, fader, sw, trig, readout, graphHover, themeInk, accentRGB, chip, hint } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
+import { el, knob, fader, sw, trig, readout, graphHover, themeInk, accentRGB, hint } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js'; import { softCapLevels } from './molecular-register.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
@@ -56,8 +56,8 @@ export function createOrbitals(host, api) {
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
   const head = el('div', 'row tight sp-head', host);
-  /* 044 A3.1 (L109, B13): the kit's trig(); DIALS' face is the sliders glyph (chip, below) until trig() draws a glyph alone */
-  const dialsBtn = head.appendChild(trig({ label: 'DIALS', title: 'Amplitude and phase dials for the selection' }).root);
+  /* 044 A3.1 (L109, B13): the kit's trig(); 044 A8 (L89): DIALS is its glyph form (the sliders alone, named DIALS) */
+  const dialsBtn = head.appendChild(trig({ glyph: 'sliders', word: false, label: 'DIALS', title: 'Amplitude and phase dials for the selection' }).root);
   dialsBtn.setAttribute('aria-expanded', 'false');
   /* iteration 008 U (Josh: "can it become the 'fill all registers' button?") · ONE two-state button: an empty register shows FILL ALL, any
      other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
@@ -68,10 +68,10 @@ export function createOrbitals(host, api) {
   head.appendChild(strokeButton('mol').root);   // 036 P1 · 037 H6: BUTTONS · PAINT, one toggle button; 041 H1: MOLECULES' own mode (home PAINT), ORBITAL and STATES in step
   /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
-     the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
+     the open state is the card's WORKSPACE record (shell/rack-wiring.js `folds`; an older record's `core` is read), never a project's work. */
   let coreOpen = false;
   const coreBtn = head.appendChild(trig({ label: 'CORE', title: 'Fold the frozen-core levels', cls: 'orb-core-toggle' }).root);
-  coreBtn.setAttribute('aria-expanded', 'false'); coreBtn.hidden = true;
+  coreBtn.setAttribute('aria-expanded', 'false'); coreBtn.hidden = true; coreBtn.dataset.fold = 'core';   // 044 A8 (L109): its name in the card's `folds`, as every inner fold's
   const setCoreOpen = (v) => { coreOpen = !!v; coreBtn.setAttribute('aria-expanded', String(coreOpen)); coreBtn.classList.toggle('on', coreOpen); paint(); };
   coreBtn.addEventListener('click', () => setCoreOpen(!coreOpen));
   const nCore = () => (sol && sol.names && sol.names.core) || 0;
@@ -133,7 +133,7 @@ export function createOrbitals(host, api) {
   mrow.appendChild(flowSw.root);
   /* iteration 001 (Josh): PRESET · → A · → B and MORPH · FLOW fold behind the head's chevron (lab/fold.js); DIALS and CLEAR are glyphs */
   { const more = el('div', 'reg-more'); bar.before(more); more.append(bar, mrow); fold(head, more, { what: 'presets, A ↔ B and flow', key: 'presets, A ↔ B and flow' });   // 044 A3.3 (C24): the record's name is frozen as the key; the words are free
-    chip(dialsBtn, 'sliders', 'DIALS'); }
+  }
   function setFlow(v) {
     flowOn = !!v && !!sol; flowSw.set(flowOn);
     if (flowOn && (!flow || flow.n !== sol.nAO)) { flow = createFlow(sol.shells); flowEpoch++; }

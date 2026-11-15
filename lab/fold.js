@@ -5,15 +5,14 @@
  * Iteration 011 Q2 (Josh: "By default make most of the hidable texts and expandable windows minimized for default users"): the press wears
  * `data-fold` (`key`, else `what`) — its name in a card's WORKSPACE record (shell/rack-wiring.js `folds`: the open ones, written only when one
  * is), and the handle the first-visit furniture closes every fold by (rack.js, first-run.js `inner`). */
-import { el, chip, hint } from './mir/kit.js';
+import { trig, hint } from './mir/kit.js';
 let n = 0;
-/** 039 F3 · THE FOLD'S FACE: the chevron, the aria name and the hint every fold press wears (044 A3.3: fold() below is its one caller) */
-function foldFace(b, what) { chip(b, 'chevronDown', 'Show ' + what); hint(b, 'Show or hide {what}', { what }); }
 export function fold(row, bodies, { what = 'details', open = false, cls = '', key = '' } = {}) {
-  const list = [].concat(bodies), b = el('button', 'trig lw-fold' + (cls ? ' ' + cls : ''), row); b.type = 'button'; b.dataset.fold = key || what;
+  /* 044 A8 (L89): the press is the kit's glyph trig (the chevron alone; its name says Show or Hide) */
+  const list = [].concat(bodies), T = trig({ glyph: 'chevronDown', word: false, label: 'Show ' + what, cls: 'lw-fold' + (cls ? ' ' + cls : '') }), b = row.appendChild(T.root); b.dataset.fold = key || what;
   for (const x of list) { x.classList.add('lw-fold-body'); if (!x.id) x.id = 'lw-fold-' + ++n; }
-  b.setAttribute('aria-controls', list.map((x) => x.id).join(' ')); foldFace(b, what);   // 039 V10: a fold row's press names what it does (it had no hint)
-  const set = (v) => { for (const x of list) x.hidden = !v; b.setAttribute('aria-expanded', String(!!v)); b.setAttribute('aria-label', (v ? 'Hide ' : 'Show ') + what); };
+  b.setAttribute('aria-controls', list.map((x) => x.id).join(' ')); hint(b, 'Show or hide {what}', { what });   // 039 V10: a fold row's press names what it does (it had no hint)
+  const set = (v) => { for (const x of list) x.hidden = !v; b.setAttribute('aria-expanded', String(!!v)); T.setLabel((v ? 'Hide ' : 'Show ') + what); };
   b.addEventListener('click', () => set(list[0].hidden)); set(open);
   return { button: b, set, get: () => !list[0].hidden };
 }

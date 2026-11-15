@@ -143,7 +143,7 @@ try {
     const water = { knob: knobText, lane: lane ? lane.textContent : null, sub: lane ? !!lane.querySelector('sub') : false, rungs: O.state().rungs,
       core: O.state().coreOpen, coreBtn: !card('chem').querySelector('.orb-core-toggle').hidden, about: O.ladder()[4].about, ms: __LW.chem.solution().timings.names };
     card('chem').querySelector('.orb-core-toggle').click(); const opened = [O.state().coreOpen, O.state().rungs[0]];
-    const ws = __LW.serialize().presentation.layout.cards.find(c => c.id === 'chem').core;
+    const ws = (__LW.serialize().presentation.layout.cards.find(c => c.id === 'chem').folds || []).includes('core');   /* 044 A8 (L109): CORE is one of the card's folds */
     card('chem').querySelector('.orb-core-toggle').click();
     await __LW.chem.solve('CH4'); await __LW.settle();
     const ch4 = __LW.orbitals.ladder().slice(2, 5).map(r => r.name);

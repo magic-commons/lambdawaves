@@ -27,7 +27,7 @@
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
 import { stateName } from './names.js';
-import { el, knob, sw, seg, fader, trig, readout, graphHover, themeInk, accentRGB, vividInk, nRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
+import { el, knob, sw, seg, fader, trig, readout, graphHover, themeInk, accentRGB, vividInk, nRGB } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
@@ -77,8 +77,8 @@ export function createStates(host, api) {
 
   /* ── the head ─────────────────────────────────────────────────────────────────────────────────── */
   const head = el('div', 'row tight sp-head', host);
-  /* 044 A3.1 (L109, B13): the pane's words are the kit's trig(); HIDE's face is the eye glyph (chip, below) until trig() draws a glyph alone */
-  const hideBtn = head.appendChild(trig({ label: 'HIDE', title: 'Hide or show the lanes' }).root);
+  /* 044 A3.1 (L109, B13): the pane's words are the kit's trig(); 044 A8 (L89): HIDE is its glyph form (the eye alone, named HIDE) */
+  const hideBtn = head.appendChild(trig({ glyph: 'eyeShut', word: false, label: 'HIDE', title: 'Hide or show the lanes' }).root);
   /* iteration 008 U · EMPTY <-> FILL ALL (paint-stroke.js fillButton): S₀ alone shows FILL ALL — every state the ladder shows, up to the eight
      lanes, equal and in phase — anything more shows EMPTY.  NORM is gone: a HAND stroke normalises at its end */
   /* 034 F7 (Josh: "anything that is painted onto the registry switches it to 'mix'"): a HAND's FILL ALL, preset or dial is a stroke — VIEW MIX */
@@ -92,7 +92,7 @@ export function createStates(host, api) {
   const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: PRESETS.map((p) => ({ id: p, label: p })), value: null,
     onChange: (p) => { presetSel.set(null); if (p && preset(p)) { painted(); if (api.announce) api.announce(p); } } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   bar.appendChild(presetSel.root); presetSel.button.title = 'Rule-based presets, for every molecule';
-  const brightT = trig({ label: 'BRIGHT', title: 'Bright valence states only, or every state' }), brightBtn = bar.appendChild(brightT.root); brightBtn.classList.add('on');   // ON is the class alone (accent ink, no lamp), as before
+  const brightT = trig({ label: 'BRIGHT', title: 'Bright valence states only, or every state' }), brightBtn = bar.appendChild(brightT.root); brightT.on = true;   // 044 A8 (L154): ON through the kit's `on` door (the lamp)
   const mrow = el('div', 'row tight fit reg-morph', host);
   /* A ↔ B (register-morph.js, one for both panes): its own target `reg.morph`; a store asks the worker for its states' vectors */
   const M = createMorph({ bar, row: mrow, id: 'reg.morph', key: 'key', lanes: 'lanes', hand, status, rows: () => rowsEl,
@@ -102,7 +102,7 @@ export function createStates(host, api) {
 
   const rowsEl = el('div', 'sp-rows', host);
   hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', rowsEl.hidden); });
-  brightBtn.addEventListener('click', () => { brightOnly = !brightOnly; brightBtn.classList.toggle('on', brightOnly); brightT.setLabel(brightOnly ? 'BRIGHT' : 'ALL'); paint(); });
+  brightBtn.addEventListener('click', () => { brightOnly = !brightOnly; brightT.on = brightOnly; brightT.setLabel(brightOnly ? 'BRIGHT' : 'ALL'); paint(); });
 
   const vr = el('div', 'row tight', host);
   const viewSeg = seg({ label: 'VIEW', value: 'change', options: [{ id: 'change', label: 'CHANGE' }, { id: 'density', label: 'DENSITY' }],
@@ -151,7 +151,7 @@ export function createStates(host, api) {
      and the lanes start hidden as ORBITAL's DIALS do (HIDE shows them) — nothing is lost, the card is the ladder and its foot until asked */
   rowsEl.hidden = true; hideBtn.classList.add('on');
   { const a = el('div', 'reg-more'), b = el('div', 'reg-more'); bar.before(a); a.append(bar, mrow, vr, fr); dr.before(b); b.append(dr, dk, roDrive.root.parentElement, sg, roSong.root.parentElement, songNote);
-    fold(head, [a, b], { what: 'presets, A ↔ B, view, flow, drive and song', key: 'presets, A ↔ B, view, flow, drive and song' });   /* 044 A3.3 (C24): the record's name is frozen as the key */ chip(hideBtn, 'eyeShut', 'HIDE'); }
+    fold(head, [a, b], { what: 'presets, A ↔ B, view, flow, drive and song', key: 'presets, A ↔ B, view, flow, drive and song' });   /* 044 A3.3 (C24): the record's name is frozen as the key */ }
   const rr = el('div', 'row tight', host);
   const roSum = readout({ label: '<m>Σ|b|²</m>', value: '—', sub: '' });
   const roBeat = readout({ label: 'BEAT', value: '—', sub: '' });

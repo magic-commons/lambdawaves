@@ -298,6 +298,9 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean .sp-head { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
 .native-clean .sp-head .trig { padding: 0 3px; font-size: var(--fs-tiny); }
 .native-clean .sp-head .native-info { grid-row: 2; }
+/* 044 A8 (L154) · + MODE WEARS THE LAMP: the lamp, the plus and the word in a quarter of the head — the lamp's own gap closes so the word clears its edge */
+.native-clean .sp-head .trig[aria-pressed] { gap: 3px; padding: 0; }
+.dev.native-clean:not(.mir-modwindow) .sp-head .trig[aria-pressed]::before { margin-right: 0; }
 .native-clean[data-id="settings"] > .dev-body > .segw { margin-bottom: 12px; }
 .native-clean[data-id="settings"] .settings-page > .row { margin: 10px 0 14px; }
 .native-clean[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }

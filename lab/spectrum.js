@@ -85,10 +85,10 @@ export function createSpectrum(host, api) {
     set note(t) { preStep.name.title = t || ''; } };
   users.watch(() => { syncUsers(); preset.value = preStep.get(); });
   const head = el('div', 'row tight sp-head', host);
-  /* 044 A3.1 (L109, B13): the head's two words are the kit's trig() — DIALS shows the lanes, + MODE the 140 states.  ON stays the class alone
-     (accent ink): the kit's `on` door adds aria-pressed, which this skin draws as a lamp, and + MODE has no room for one (A3-BUILD, for Josh's eye) */
+  /* 044 A3.1 (L109, B13): the head's two words are the kit's trig() — DIALS shows the lanes, + MODE the 140 states.  044 A8 (L154, Josh's
+     "Yes to lamp?"): + MODE's ON is the kit's `on` door (aria-pressed, the lamp DIALS wears) */
   const hideBtn = head.appendChild(trig({ label: 'DIALS', title: 'Hide or show the channels' }).root); hideBtn.setAttribute('aria-expanded', 'false');
-  const addBtn = head.appendChild(trig({ glyph: '+', label: 'MODE', title: 'Show or hide the 140 states to add' }).root);
+  const addT = trig({ glyph: '+', label: 'MODE', title: 'Show or hide the 140 states to add' }), addBtn = head.appendChild(addT.root); addT.on = false;
   /* iteration 008 S · EMPTY ↔ FILL ALL (paint-stroke.js fillButton; the register's glyph since iteration 009 F2): a register with anything in it shows EMPTY (c ↦ 0, SPECTRUM's
      old CLEAR), an empty one FILL ALL (all 140 labels, equal and in phase, normalised); one undo row each.  NORM went: a HAND stroke on the grid
      normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
@@ -117,7 +117,7 @@ export function createSpectrum(host, api) {
   const picker = el('div', 'picker', host); picker.hidden = true;
   host.appendChild(psiFx.root);                                                     // the live coefficient readout follows the scale/state controls
   host.appendChild(pre);   // iteration 015 S3 (Josh: "Move the preset thing to the bottom between the 140 picker and above the Hamiltonian"): outside the HAMILTONIAN fold
-  addBtn.addEventListener('click', () => { picker.hidden = !picker.hidden; addBtn.classList.toggle('on', !picker.hidden); });
+  addBtn.addEventListener('click', () => { picker.hidden = !picker.hidden; addT.on = !picker.hidden; });
   const chips = new Map();
   /* iteration 008 A7 · THE SHELL FOLD (Josh: "clicking on the colored 'n=' number … should be able to hide section of all 1, 2, 3, all the way
      to 7").  The number IS the handle — the kit's fold (lab/fold.js: `.lw-fold-body` hidden by the attribute, aria-expanded on the press), no
@@ -474,7 +474,7 @@ export function createSpectrum(host, api) {
   const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); if (spunC) spin(spunC); };
   return { update, rebuild, select, energyText, preset, views, regrid, redraw: paintLadder, get selected() { return selected; }, lanes, get building() { return pending.length; }, get owed() { return pending.length > 0 || fxOwed; },
     get dials() { return !rowsEl.hidden; }, setDials,
-    openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; },
+    openPicker(v = true) { picker.hidden = !v; addT.on = v; }, get pickerOpen() { return !picker.hidden; },
     /** iteration 008 A7: the folded shells (WORKSPACE, read and written by rack-wiring.js through the presses' aria-expanded) */
     get folded() { return [...foldN].sort((p, q) => p - q); }, setFolded(list) { foldN.clear(); for (const n of list) foldN.add(+n); if (byN) for (const n of shellRows.keys()) setShellFold(n, foldN.has(n)); } };
 }

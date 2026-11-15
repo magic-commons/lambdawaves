@@ -12,13 +12,14 @@ import { slerpCoefficients } from './molecular-register.js';
 
 export function createMorph(o) {
   let A = null, B = null, on = false, s = 0;
-  /* 044 A3.1 (L109, B13): → A and → B are the kit's trig(); a filled store lights its word by the class alone (accent ink, no lamp), as before */
-  const aBtn = o.bar.appendChild(trig({ label: '→ A', title: 'Store this register as A', onFire: () => api.store('A') }).root), bBtn = o.bar.appendChild(trig({ label: '→ B', title: 'Store this register as B', onFire: () => api.store('B') }).root);
+  /* 044 A3.1 (L109, B13): → A and → B are the kit's trig(); 044 A8 (L154): a filled store lights through the kit's `on` door (the lamp) */
+  const aT = trig({ label: '→ A', title: 'Store this register as A', onFire: () => api.store('A') }), bT = trig({ label: '→ B', title: 'Store this register as B', onFire: () => api.store('B') });
+  o.bar.append(aT.root, bT.root);
   const morphSw = sw({ label: 'MORPH', value: false, title: `Play the path from A to B instead of the ${o.lanes}`, onChange: (v) => api.set(v, s) });
   const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3), title: o.knobTitle,
     onInput: (v) => { if (o.hand(o.id, v)) return; api.set(on, v); } });   // iteration 007 (MIR check B2): routed, the hand moves the base
   o.row.appendChild(morphSw.root); o.row.appendChild(morphK.root);
-  const lamps = () => { aBtn.classList.toggle('on', !!A); bBtn.classList.toggle('on', !!B); };
+  const lamps = () => { aT.on = !!A; bT.on = !!B; }; lamps();
   const show = (v) => { on = v; morphSw.set(v); o.rows().classList.toggle('reg-morphing', v); };   // MORPH, its switch and the dimmed lanes: one place (X6)
   const pack = (M) => (M ? [...M].map(([k, c]) => ({ [o.key]: k, re: c.re, im: c.im })) : null);
   const unpack = (a) => { if (!Array.isArray(a)) return null; const M = new Map();
