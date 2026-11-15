@@ -68,7 +68,7 @@ try {
     const d = k.querySelector('.k-dial').getBoundingClientRect(); return { x: Math.round(d.left + d.width / 2), y: Math.round(d.top + d.height / 2), dist: __LW.obs.dist };`);
   await hold(zoom.x, zoom.y, 700);
   const held = await ev(`await __w(150); const p = document.querySelector('.mir-ctx'), r = { pop: !!p, create: !!(p && p.querySelector('[data-id="clip"]')), moved: __LW.obs.dist !== ${zoom.dist} };   // 022 P1: the kit's knob menu, CLIP ›
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await __w(100); r.closed = !document.querySelector('.mir-ctx'); return r;`);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true })); await __w(100); r.closed = !document.querySelector('.mir-ctx'); return r;`);
   const yaw = await ev(`const d = document.querySelector('.k[data-param="observer.yaw"] .k-dial').getBoundingClientRect(); return { x: Math.round(d.left + d.width / 2), y: Math.round(d.top + d.height / 2), yaw: __LW.obs.yaw };`);
   await actions(g.s, [{ type: 'pointer', id: 'rc', parameters: { pointerType: 'mouse' }, actions: [
     { type: 'pointerMove', origin: 'viewport', x: yaw.x, y: yaw.y, duration: 0 }, { type: 'pointerDown', button: 2 }, { type: 'pause', duration: 40 }, { type: 'pointerUp', button: 2 }] }]);

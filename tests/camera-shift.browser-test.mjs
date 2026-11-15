@@ -123,9 +123,9 @@ try {
     await actions(g.s, [{ type: 'key', id: 'kk', actions: [...keys.map((k) => ({ type: 'keyDown', value: k })), { type: 'pause', duration: 30 }, ...keys.slice().reverse().map((k) => ({ type: 'keyUp', value: k }))] }]);
     await relActions(g.s);
   }
-  await check('Alt+→, Alt+↑ and Shift+Alt+↑ step the shift 0.05, 0.05 and 0.0125 (and every Alt+Arrow keydown is defaultPrevented — the driver cannot reach Firefox\'s Back, so the href check was vacuous; S2-VERIFY N1)', `
+  await check('Alt+→, Alt+↑ and Shift+Alt+↑ step the shift 0.05, 0.05 and 0.00625 (Shift is an eighth: 044 A4, L36; and every Alt+Arrow keydown is defaultPrevented — the driver cannot reach Firefox\'s Back, so the href check was vacuous; S2-VERIFY N1)', `
     await __LW.settle(); return { shift: __LW.obs.shift, href: location.href, altArrow: window.__altArrow, active: document.activeElement && document.activeElement.id };`, (v) => {
-    assert.ok(Math.abs(v.shift[0] - 0.05) < 1e-12 && Math.abs(v.shift[1] - 0.0625) < 1e-12); assert.equal(v.href, box.href);
+    assert.ok(Math.abs(v.shift[0] - 0.05) < 1e-12 && Math.abs(v.shift[1] - 0.05625) < 1e-12); assert.equal(v.href, box.href);
     assert.equal(v.altArrow.length, 3, 'three Alt+Arrow keydowns were seen'); assert.ok(v.altArrow.every((x) => x === true), 'each one defaultPrevented');
   });
   await check('a double-click (RESET VIEW) brings the pivot home', `
