@@ -65,7 +65,7 @@ export function createLight(app) {
 
   /* ── the verbs: FRAME · RESET · MORE's chevron ── */
   const verbs = el('div', 'row tight fit lw-light-verbs', w.body);
-  const frameSeg = seg({ aria: 'the light’s frame', value: HOME.frame, cls: 'lw-light-frame', options: [
+  const frameSeg = seg({ aria: 'The light’s frame', value: HOME.frame, cls: 'lw-light-frame', options: [
     { id: 'camera', label: 'CAMERA', title: 'A headlight: the light turns with your eye' },
     { id: 'world', label: 'WORLD', title: 'A lamp fixed to the object as you orbit' }], onChange: (f) => reframe(f) });
   verbs.appendChild(frameSeg.root);
@@ -73,7 +73,7 @@ export function createLight(app) {
 
   /* ── the KEY: the SUN pad (the kit's XY pad dressed as a disc, its lattice swelling under the sun) and its dials ── */
   const top = el('div', 'lw-light-key', w.body), hp = padOf(HOME.az, HOME.el);
-  const sun = xyPad({ aria: 'the key light’s direction', cls: 'lw-sun', home: hp, wrap: 'sphere', onInput: fromPad, onChange: fromPad,   // 038 K3: MIR 1.5.7-alpha.13 THE PAD WRAPS
+  const sun = xyPad({ aria: 'The key light’s direction', cls: 'lw-sun', home: hp, wrap: 'sphere', onInput: fromPad, onChange: fromPad,   // 038 K3: MIR 1.5.7-alpha.13 THE PAD WRAPS
     x: { label: 'ACROSS', min: -1, max: 1, value: hp[0] }, y: { label: 'UP', min: -1, max: 1, value: hp[1] } });
   top.appendChild(sun.root);
   sun.pad.querySelector('.xy-lattice').insertAdjacentHTML('afterend', '<svg class="lw-sun-rings" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49"/><circle class="lw-sun-horizon" cx="50" cy="50" r="25"/></svg>');

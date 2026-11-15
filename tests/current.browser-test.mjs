@@ -153,7 +153,7 @@ try {
   __LW.loadPreset('1s+2pz');M.addSource('lfo');__LW.layout.modulation.expand();await __until(()=>__shown('.m2dev.lfo')&&__rest());M.addRoute(M.macroList()[0].id,'material.exposure',0.5,4);
   __LW.layout.reopen('settings','R');__LW.layout.reopen('spectrum','R');await __until(()=>__shown('.dev[data-id=spectrum] .sp-ab .trig')&&__shown('.stage-colour')&&__rest());
   __LW.camera.setAutoRotate(true);__LW.kepler.setOn(true);__LW.vortex.setOn(true);__LW.spectrum.setDials(true);__LW.layout.notebookResize(520,380);
-  const tr=[...document.querySelectorAll('.dev[data-id=spectrum] .sp-ab .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('STORE A').click();__LW.loadPreset('2p+');await __LW.settle();by('STORE B').click();
+  const tr=[...document.querySelectorAll('.dev[data-id=spectrum] .sp-ab .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('→ A').click();__LW.loadPreset('2p+');await __LW.settle();by('→ B').click();
   const sc=document.querySelector('.stage-colour');sc.value='#203040';sc.dispatchEvent(new Event('input',{bubbles:true}));
   __LW.setStage(0);const stage0=__LW.mat.bg.slice();__LW.setStage(1);const stage1=__LW.mat.bg.slice();
   const follow=document.querySelector('.stage-follow');follow.click();const followed=__LW.mat.bg.slice(),retained=sc.value;follow.click();const resumed=__LW.mat.bg.slice();

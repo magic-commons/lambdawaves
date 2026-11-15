@@ -79,7 +79,7 @@ try {
      UNCHECKED), the solve's identity (P1), derivatives UNKNOWN, the engine's limits; the INFORMATIONAL STATUS row reads the same line */
   judge('L1 chem.capability(): water NUMERICAL from its kept status, the solve\'s identity, derivatives UNKNOWN, limits 2 / 36 / 128 / 768, the STATUS row the same line',
     !!l1.cap && l1.cap.kept && l1.cap.identity && l1.cap.word === 'NUMERICAL' && l1.cap.derivatives === 'UNKNOWN' && l1.cap.caps === null && l1.cap.row === l1.cap.line
-    && /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2 % of ρmax$/.test(l1.cap.line)
+    && /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2% of ρmax$/.test(l1.cap.line)
     && JSON.stringify(l1.cap.limits) === JSON.stringify({ lmax: 2, Z: 36, densityAO: 128, orbitalAO: 768 }), l1.cap);
   judge(`L1 H₂O energy = ${H2O.energy} within 1e-8`, near(l1.energy, H2O.energy, 1e-8), { energy: l1.energy, delta: l1.energy - H2O.energy });
   judge('L1 H₂O solve in ≤ 5 s off the frame thread', l1.ms <= 5000 && l1.local === false, { ms: +l1.ms.toFixed(0), local: l1.local, status: l1.status });
@@ -235,7 +235,7 @@ try {
   judge(`L6 the page turner: ${l6.pages.length} sections, each page holds exactly its own molecules and its header names it (${l6.pages.map((p) => p.s + ' ' + p.n).join(' · ')})`,
     l6.turners === 2 && l6.pages.length === SECTIONS.length && l6.pages.every((p) => p.name === p.s && p.head === p.s && p.ids === p.want && p.n > 0),
     { pages: l6.pages.map((p) => ({ s: p.s, name: p.name, head: p.head, n: p.n, same: p.ids === p.want })) });
-  judge('L6 the MOLECULE control is the kit\'s select (its list the menu pane) with an aria-label, and no native <select> is left', l6.exists && l6.tag === 'DIV' && /mir-select/.test(l6.cls) && l6.aria === 'molecule' && l6.natives === 0,
+  judge('L6 the MOLECULE control is the kit\'s select (its list the menu pane) with an aria-label, and no native <select> is left', l6.exists && l6.tag === 'DIV' && /mir-select/.test(l6.cls) && l6.aria === 'Molecule' && l6.natives === 0,
     { tag: l6.tag, cls: l6.cls, aria: l6.aria, natives: l6.natives });
   judge(`L6 ≥ 30 rows over the pages in ${l6.groups.length} groups, ≥ 1 disabled`, l6.count >= 30 && l6.disabled >= 1 && l6.groups.length >= 5,
     { options: l6.count, disabled: l6.disabled, groups: l6.groups, disabledText: l6.disabledText });

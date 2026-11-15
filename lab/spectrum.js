@@ -14,7 +14,7 @@
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, hint, trig } from './mir/kit.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js';
-import { PRESET_BY_ID } from './state.js';
+import { PRESET_BY_ID } from './state.js'; import { setGlyph } from './mir/glyph.js';
 import { createUserPresets, presetSave } from './user-presets.js';
 
 /** iteration 015 S4 · THE READER'S PRESETS: SPECTRUM's PREFERENCE record (settings-store.js FAMILIES), rows `{ name, data: { labels } }` */
@@ -64,12 +64,12 @@ export function createSpectrum(host, api) {
   const itemsFor = (v) => { const U = users.list().filter((u) => PRESET_BY_ID.has(UK + u.name)).map((u) => ({ id: UK + u.name, label: u.name }));
     return [...(U.length ? [HEADS[0], ...U, HEADS[1]] : []), ...PRE, ...(v ? [] : [DASH])]; };
   syncUsers();
-  const preStep = stepper({ aria: 'preset superposition', items: itemsFor(''), value: '', cls: 'mol-step', onChange: (id) => { if (id && api.loadPreset) api.loadPreset(id); } });
+  const preStep = stepper({ aria: 'Preset superposition', items: itemsFor(''), value: '', cls: 'mol-step', onChange: (id) => { if (id && api.loadPreset) api.loadPreset(id); } });
   preStep.name.title = 'Preset superpositions (a re-pick reloads)';
   preStep.name.addEventListener('click', () => { const pane = [...document.querySelectorAll('.mir-pick')].pop(), on = pane && pane.querySelector('.mir-pick-i.on');
     if (on) on.addEventListener('click', () => { if (preStep.get() && api.loadPreset) api.loadPreset(preStep.get()); });   // RELOAD: the stepper ignores a pick of its own value
     if (pane) for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + UK + '"]')) {                                // S4: each reader's row carries its ×
-      const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(UK.length); x.setAttribute('role', 'button'); x.title = 'remove ' + name; x.setAttribute('aria-label', 'remove ' + name);
+      const x = setGlyph(el('span', 'sp-prex', b), 'close', { size: 16 }), name = b.dataset.id.slice(UK.length); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; x.setAttribute('aria-label', 'Delete ' + name);
       x.addEventListener('mousedown', (e) => e.preventDefault());
       x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
         if (!pane.querySelector('.mir-pick-i[data-id^="' + UK + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
@@ -244,10 +244,10 @@ export function createSpectrum(host, api) {
     const pop = fader({ label: '<m>|c|²</m>', aria: '|c|² ' + labelText(a), min: 0, max: 1, value: 0, cls: 'pop', fmt: (v) => v.toFixed(3),
       onInput: (v) => api.setPopulation(a, v), onChange: (v) => api.setPopulation(a, v, true) });
     root.appendChild(pop.root);
-    const ph = knob({ aria: 'phase ' + labelText(a), min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
+    const ph = knob({ aria: 'Phase ' + labelText(a), min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
       onDelta: (d) => api.addPhase(a, d), onReset: () => api.setPhase(a, 0) });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);   // the two knobs stack, half-size
-    const rate = knob({ aria: 'phase rate ' + labelText(a), min: 0.25, max: 4, value: api.rateOf ? api.rateOf(a) : 1, log: true, cls: 'rate', fmt: (v) => v.toFixed(2) + '×', onInput: (v) => { if (api.setRate) api.setRate(a, v); } });
+    const rate = knob({ aria: 'Phase rate ' + labelText(a), min: 0.25, max: 4, value: api.rateOf ? api.rateOf(a) : 1, log: true, cls: 'rate', fmt: (v) => v.toFixed(2) + '×', onInput: (v) => { if (api.setRate) api.setRate(a, v); } });
     rate.root.title = RATE_TITLE;
     kn.appendChild(rate.root);
     const { mute, solo } = laneStrip(root, { name: labelText(a), onMute: () => api.toggleMute(a), onSolo: () => api.toggleSolo(a), onRemove: () => api.remove(a), remove: 'Remove: sets c = 0' });   // 044 A3.2: the one strip (paint-stroke.js)
@@ -372,7 +372,7 @@ export function createSpectrum(host, api) {
       levelLine(g, left, right, yy, c, true);
       names.push({ y: yy, txt: lv.label, col: `rgba(${c[0]},${c[1]},${c[2]},1)`, lit: true, n, pop: pops[n] });
       hovers.push({ kind: 'line', key: 'L' + n, points: [left, yy, right, yy], lw: 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
-        info: `${lv.label}  ·  ${(pops[n] * 100).toFixed(1)} %  ·  E = ${lv.E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` });
+        info: `${lv.label}  ·  ${(pops[n] * 100).toFixed(1)}%  ·  E = ${lv.E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` });
     }
     /* THE GUTTER IS 44 px OF ONE COLUMN, AND E_n = −1/(2n²) BUNCHES (wave 46).  n3 … n6 fall inside 6 px of the
        E = 0 line on a 92 px card, so the names used to print straight over one another — "n3" and "n4" and
@@ -420,7 +420,7 @@ export function createSpectrum(host, api) {
       levelLine(g, left, right, yy, c, true);
       eigenHits.push({ y: yy, k: lv.k, pop: lv.pop });
       hovers.push({ kind: 'line', key: 'E' + lv.k, points: [left, yy, right, yy], lw: 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
-        info: `${lv.label}  ·  ${(lv.pop * 100).toFixed(lv.pop < 0.1 ? 1 : 0)} %  ·  λ = ${lv.E.toFixed(4)} Eh` });
+        info: `${lv.label}  ·  ${(lv.pop * 100).toFixed(lv.pop < 0.1 ? 1 : 0)}%  ·  λ = ${lv.E.toFixed(4)} Eh` });
       if (faint) continue;
       const ty = (lastTy - yy < LEAD) ? lastTy - LEAD : yy;
       if (ty < TOP) continue;                                                // out of room: the line still says it

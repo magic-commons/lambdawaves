@@ -28,7 +28,7 @@
  * `lambdawaves.q0.stroke` { mode, mol } (041 H1: SPECTRUM's and MOLECULES' own, homes BUTTONS and PAINT); `strokeButton` (037 H6: one toggle
  * button) is its seat on each ladder's head, the seats of one family in step.
  */
-import { el, hint, trig } from './mir/kit.js';
+import { el, hint, trig } from './mir/kit.js'; import { setGlyph } from './mir/glyph.js';
 const STROKE_KEY = 'lambdawaves.q0.stroke', MODES = ['buttons', 'paint'];
 /* 041 H1 · PAINT IN MOLECULES, BUTTONS IN SPECTRUM (Josh 11-09: "Let paint be the default for molecules and 'buttons' for default for spectrum"):
    the one record holds a mode per family — `mode` SPECTRUM's (its old field, so an older record is SPECTRUM's choice), `mol` the ORBITAL and
@@ -135,7 +135,7 @@ export function laneStrip(row, { name, onMute, onSolo, onRemove, remove = 'Take 
   const tog = (cls, text, word, tip, run) => { const x = b(cls, text, word, tip, run); x.setAttribute('aria-pressed', 'false'); return x; };
   const mute = onMute ? tog('sp-b mute', 'M', 'mute', 'Mute: leave this lane out of the FIELD', onMute) : null;
   const solo = onSolo ? tog('sp-b solo', 'S', 'solo', 'Solo: play this lane alone', onSolo) : null;
-  const x = b('sp-x', pinned ? '' : '×', 'remove', pinned || remove, onRemove); x.disabled = !!pinned;
+  const x = b('sp-x', '', 'remove', pinned || remove, onRemove); x.disabled = !!pinned; if (!pinned) setGlyph(x, 'close', { size: 16 });
   return { mute, solo, x };
 }
 

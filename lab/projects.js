@@ -104,8 +104,8 @@ export function createProjects(port) {
     } finally { port.busy(-1); }
     if (!ok) {
       if (!rollback) return false;
-      if (back) { if (wasClean) markClean(); pjStatus(meta.failed + ' — the previous state is back', true); }
-      else { currentId = null; pjStatus(meta.failed + ' — the previous state could not be put back; nothing is current, SAVE AS to keep this', true); }
+      if (back) { if (wasClean) markClean(); pjStatus(meta.failed + ': the previous state is back', true); }
+      else { currentId = null; pjStatus(meta.failed + ': the previous state could not be put back; nothing is current, SAVE AS to keep this', true); }
       return false;
     }
     if (meta.land === false) return true;
@@ -119,8 +119,8 @@ export function createProjects(port) {
     port.opened(meta.label);
     return true;
   }
-  const metaOf = (e) => ({ id: e.id, path: pathOf(e), name: e.name, label: 'open · ' + e.name, failed: 'open failed ' + pathOf(e), say: 'opened ' + pathOf(e) });
-  const NEW_META = (file) => ({ name: file.name, label: 'new project', failed: 'new project failed', say: 'new' });
+  const metaOf = (e) => ({ id: e.id, path: pathOf(e), name: e.name, label: 'open · ' + e.name, failed: 'Could not open ' + pathOf(e), say: 'opened ' + pathOf(e) });
+  const NEW_META = (file) => ({ name: file.name, label: 'new project', failed: 'Could not make the new project', say: 'new' });
   async function fetchNew() {
     const r = await fetch('./new-project.lambdawaves.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status);
     return parseProjectFile(await r.text());
@@ -172,7 +172,7 @@ export function createProjects(port) {
       },
       async empty() {
         if (skipped('new')) return 'new';
-        let file; try { file = await fetchNew(); } catch (e) { pjStatus('new project failed — ' + e.message + '; nothing was changed', true); return { ok: false, why: e.message }; }
+        let file; try { file = await fetchNew(); } catch (e) { pjStatus('Could not make the new project: ' + e.message + '; nothing was changed', true); return { ok: false, why: e.message }; }
         return openPayload({ data: file.data, notebook: file.notebook }, NEW_META(file)) ? undefined : { ok: false, why: 'the empty project did not take' };
       },
       signature: () => (pinned !== null ? pinned : projectSignature()),
@@ -191,7 +191,7 @@ export function createProjects(port) {
     onOpened: () => { if (echo) { toast(echo, true); echo = null; } if (landed) { landed = false; folders.close(); cover(); } },   // iteration 015 M4: and the Picker, when its FOLDERS page took the open
     /* FOLDERS' own SAVE / SAVE AS: an untitled notebook takes the project's name, in the file too (λWAVES' save always did) */
     onSaved: (e) => {
-      currentId = e.id; touchRecent(ls, pathOf(e)); status = 'saved ' + pathOf(e);
+      currentId = e.id; touchRecent(ls, pathOf(e)); status = 'Saved ' + pathOf(e);
       const v = valueOf(e.payload);
       if (port.titleAfterSave(e.name) && v) files.overwrite(e.id, { payload: payloadOf({ ...v, notebook: { ...v.notebook, title: e.name } }), thumb: e.thumb, facts: e.facts, at: e.at });
       markClean(); presetOf(e.name);
@@ -211,12 +211,12 @@ export function createProjects(port) {
   const isPng = (f) => /\.png$/i.test(f.name || '') || f.type === 'image/png';
   const tooBig = (f) => !isPng(f) && f.size > MAX_PROJECT_BYTES;
   async function take(f, source) {
-    if (tooBig(f)) { pjStatus('import failed: project file exceeds 8 MiB', true); return { ok: false, why: 'project file exceeds 8 MiB' }; }
+    if (tooBig(f)) { pjStatus('Could not import: project file exceeds 8 MiB', true); return { ok: false, why: 'project file exceeds 8 MiB' }; }
     if (!isJson(f)) return kitIngest(f, { source });
     const text = await f.text();
     let path;
     try { path = api.importText(text); }
-    catch (err) { if (/not a λWAVES project/.test(err.message)) return kitIngest(text, { source, name: f.name }); pjStatus('import failed: ' + err.message, true); return { ok: false, why: err.message }; }
+    catch (err) { if (/not a λWAVES project/.test(err.message)) return kitIngest(text, { source, name: f.name }); pjStatus('Could not import: ' + err.message, true); return { ok: false, why: err.message }; }
     pjStatus('imported ' + path);
     const e = entryAt(path); if (e) { folders.gallery.go(e.folder); return folders.openEntry(e.id); }
     return { ok: true };
@@ -281,9 +281,9 @@ export function createProjects(port) {
       if (store.refusal) { unavailable(store.refusal); return false; }
       const { folder, name } = splitPath(path), e = entryAt(path), payload = payloadOf(port.part.capture(name));
       const r = e && !ro(e) ? files.overwrite(e.id, { payload, thumb: e.thumb, facts: e.facts }) : files.save({ name, folder, payload });
-      if (!r.ok) { pjStatus('save failed — ' + (r.why || 'unknown'), true); return false; }
+      if (!r.ok) { pjStatus('Could not save: ' + (r.why || 'unknown'), true); return false; }
       const saved = pathOf(r.entry);
-      currentId = r.entry.id; touchRecent(ls, saved); pjStatus('saved ' + saved); port.titleAfterSave(name); markClean(); tell(r.entry.id); presetOf(r.entry.name);
+      currentId = r.entry.id; touchRecent(ls, saved); pjStatus('Saved ' + saved); port.titleAfterSave(name); markClean(); tell(r.entry.id); presetOf(r.entry.name);
       return true;
     },
     /** open(path, file) — a stored project, or (`file`, parsed) one that is not in the library: NEW's empty project (0.3.1 · S2: it
@@ -299,7 +299,7 @@ export function createProjects(port) {
     remove(path) {
       sync();
       const e = entryAt(String(path || '')); if (!e) return false;
-      const r = files.remove(e.id); if (!r.ok) { pjStatus('remove failed — ' + (r.why || 'unknown'), true); return false; }
+      const r = files.remove(e.id); if (!r.ok) { pjStatus('Could not delete: ' + (r.why || 'unknown'), true); return false; }
       if (currentId === e.id) currentId = null;
       return true;
     },
@@ -307,7 +307,7 @@ export function createProjects(port) {
        above: restore(…, { project: true }) resets every PROJECT key and the ring, and no PREFERENCE or WORKSPACE key, because the
        file carries none.  A file that cannot be fetched changes nothing. */
     async fresh() {
-      let file; try { file = await fetchNew(); } catch (err) { pjStatus('new project failed — ' + err.message + '; nothing was changed', true); return false; }
+      let file; try { file = await fetchNew(); } catch (err) { pjStatus('Could not make the new project: ' + err.message + '; nothing was changed', true); return false; }
       return api.open(null, file);
     },
     /** resume(session) — the opener's RESUME (0.5.0 C6b): the session's part put back through the open road with its roll-back (021 R1),
@@ -316,7 +316,7 @@ export function createProjects(port) {
      *  with autosave unarmed — the line says so, and nothing else is offered */
     resume(session) {
       unarmed = session;
-      return openPayload(null, { label: 'resume', say: null, clean: false, failed: 'the last session could not be put back (kept as lambdawaves.q0.session.failed; autosave is off until a project opens)' },
+      return openPayload(null, { label: 'resume', say: null, clean: false, failed: 'Could not resume the last session (kept as lambdawaves.q0.session.failed; autosave is off until a project opens)' },
         { rollback: true, take: () => takeResume(session) });
     },
     /** openWith(take, meta) — a restore that is not a stored project (a link, quick LOAD) on the same road: the snapshot, `take()`, the
@@ -344,7 +344,7 @@ export function createProjects(port) {
       let path = starterOfFile(file) ? pathOf(starterOfFile(file)) : null;
       if (!path) {
         try { const r = await fetch('./demos/' + file + '.lambdawaves.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status); path = api.importText(await r.text()); }
-        catch (err) { pjStatus('demo failed: ' + err.message, true); return false; }
+        catch (err) { pjStatus('Could not open the demo: ' + err.message, true); return false; }
       }
       const ok = api.open(path); if (ok) pjStatus('opened demo ' + path);   // M5: a failed open keeps its own status
       return ok;

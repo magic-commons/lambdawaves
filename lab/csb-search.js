@@ -83,9 +83,9 @@ export function createCsbSearch(app, { bar }) {
   root.dataset.keyAction = 'csb.search';
   const pill = el('div', 'lw-menu glass csb-pill', document.body); pill.hidden = true;
   const input = searchField(pill, { cls: 'csb-search-in' }); input.placeholder = 'search λWAVES';   // 044 KV2: the kit's one search field (the FINDER's pill)
-  input.setAttribute('aria-label', 'search λWAVES'); input.setAttribute('role', 'combobox'); input.setAttribute('aria-autocomplete', 'list'); input.setAttribute('aria-expanded', 'false');
+  input.setAttribute('aria-label', 'Search λWAVES'); input.setAttribute('role', 'combobox'); input.setAttribute('aria-autocomplete', 'list'); input.setAttribute('aria-expanded', 'false');
   const count = el('div', 'csb-count', pill); count.setAttribute('aria-live', 'polite');
-  const pane = el('div', 'lw-menu glass csb-suggest', document.body); pane.hidden = true; pane.dataset.mirSurface = 'menu'; pane.setAttribute('role', 'listbox'); pane.setAttribute('aria-label', 'results');
+  const pane = el('div', 'lw-menu glass csb-suggest', document.body); pane.hidden = true; pane.dataset.mirSurface = 'menu'; pane.setAttribute('role', 'listbox'); pane.setAttribute('aria-label', 'Results');
   pane.id = 'csbResults'; input.setAttribute('aria-controls', pane.id);
   const fr = createFrecency(jsonStore('lambdawaves.q0.search'));
   let index = null, mols = [], opts = [], at = -1, gen = 0;

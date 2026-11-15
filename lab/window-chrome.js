@@ -20,13 +20,13 @@ export function installWindowChrome({ KIND, layout, present }) {
     if (d.dataset.id === 'informational' || !d.querySelector('.dev-body .note, .dev-body .ro:not(.lw-status)')) continue;   // 0.5.4 P4 · 012 R1: INFORMATIONAL's one Aa is its STATUS (022 E0: H1's note there lives in its ⓘ, no LEAN Aa)
     const util = d.querySelector('.dev-util'); if (!util) continue;
     const b = el('button', 'dev-lean', null, 'Aa'); b.type = 'button'; b.title = 'Hide or show this window’s notes and readouts';
-    b.setAttribute('aria-label', 'hide or show notes and readouts'); b.setAttribute('aria-pressed', 'false'); util.insertBefore(b, util.firstChild);
+    b.setAttribute('aria-label', 'Hide or show notes and readouts'); b.setAttribute('aria-pressed', 'false'); util.insertBefore(b, util.firstChild);
     b.addEventListener('click', (e) => { e.stopPropagation(); setLean(d, !d.classList.contains('lean')); });
     if (firstLean || leanSet.has(d.dataset.id)) setLean(d, true);
   }
   /* the taxonomy on every card: INFO panels get ⧉ COPY */
   for (const d of document.querySelectorAll('.dev')) {
     const kind = KIND[d.dataset.id] || 'other'; d.dataset.kind = kind;
-    if (kind === 'info') { const util = d.querySelector('.dev-util'); const b = el('button', 'dev-copy', util, '⧉'); b.type = 'button'; b.title = 'Copy this panel as text'; b.setAttribute('aria-label', 'copy this panel as text'); util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); layout.copyDigest(d.dataset.id); }); }
+    if (kind === 'info') { const util = d.querySelector('.dev-util'); const b = el('button', 'dev-copy', util, '⧉'); b.type = 'button'; b.title = 'Copy this panel as text'; b.setAttribute('aria-label', 'Copy this panel as text'); util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); layout.copyDigest(d.dataset.id); }); }
   }
 }

@@ -39,22 +39,22 @@ function levelsStrip(g, v, f) {
 }
 
 export const TABLE_TYPES = {
-  levels: { cls: 'table', label: 'LEVELS', hint: 'input and output black/white, gamma (levels)', menu: false,   // 038 P2: kept for every saved graph; the + menu adds levels2
+  levels: { cls: 'table', label: 'LEVELS', hint: 'Input and output black/white, gamma (levels)', menu: false,   // 038 P2: kept for every saved graph; the + menu adds levels2
     knobs: [{ k: 'inblack', label: 'IN BLACK', min: 0, max: 1, home: 0, hint: 'IN BLACK — the input that turns black' }, { k: 'inwhite', label: 'IN WHITE', min: 0, max: 1, home: 1, hint: 'IN WHITE — the input that turns white' },
       { k: 'gamma', label: 'GAMMA', min: 0.1, max: 10, home: 1, log: true, hint: 'GAMMA — above 1 lifts the middle tones' }, { k: 'outblack', label: 'OUT BLACK', min: 0, max: 1, home: 0, hint: 'OUT BLACK — what black becomes' },
       { k: 'outwhite', label: 'OUT WHITE', min: 0, max: 1, home: 1, hint: 'OUT WHITE — what white becomes' }],
     fn: (v) => (y) => { y = clamp01((y - v.inblack) / Math.max(1e-4, v.inwhite - v.inblack)); if (v.gamma !== 1) y = Math.pow(y, 1 / Math.max(1e-3, v.gamma)); return v.outblack + y * (v.outwhite - v.outblack); } },
-  posterize: { cls: 'table', label: 'POSTERIZE', hint: 'so many flat steps per channel',
+  posterize: { cls: 'table', label: 'POSTERIZE', hint: 'So many flat steps per channel',
     knobs: [{ k: 'steps', label: 'STEPS', min: 2, max: 32, step: 1, home: 4, fmt: (x) => String(Math.round(x)) }], neutral: () => false,
     fn: (v) => { const n = Math.max(2, Math.round(v.steps)); return (y) => Math.min(n - 1, Math.floor(y * n)) / (n - 1); } },
-  threshold: { cls: 'table', label: 'THRESHOLD', hint: 'black below the level, white above it — on the luminance', luma: true,
+  threshold: { cls: 'table', label: 'THRESHOLD', hint: 'Black below the level, white above it — on the luminance', luma: true,
     knobs: [{ k: 'level', label: 'LEVEL', min: 0, max: 1, home: 0.5 }], neutral: () => false, fn: (v) => (y) => (y >= v.level ? 1 : 0) },
-  invert: { cls: 'table', label: 'INVERT', hint: 'the negative', knobs: [AMOUNT()], neutral: (v) => v.amount === 0, fn: (v) => (y) => y + (1 - 2 * y) * v.amount },
-  gamma: { cls: 'table', label: 'GAMMA', hint: 'above 1 lifts the middle tones', knobs: [{ k: 'gamma', label: 'GAMMA', min: 0.1, max: 10, home: 1, log: true }],
+  invert: { cls: 'table', label: 'INVERT', hint: 'The negative', knobs: [AMOUNT()], neutral: (v) => v.amount === 0, fn: (v) => (y) => y + (1 - 2 * y) * v.amount },
+  gamma: { cls: 'table', label: 'GAMMA', hint: 'Above 1 lifts the middle tones', knobs: [{ k: 'gamma', label: 'GAMMA', min: 0.1, max: 10, home: 1, log: true }],
     fn: (v) => (y) => Math.pow(y, 1 / Math.max(1e-3, v.gamma)) },
-  exposure: { cls: 'table', label: 'EXPOSURE', hint: 'stops of light: each one doubles it', knobs: [{ k: 'stops', label: 'STOPS', min: -4, max: 4, home: 0 }],
+  exposure: { cls: 'table', label: 'EXPOSURE', hint: 'Stops of light: each one doubles it', knobs: [{ k: 'stops', label: 'STOPS', min: -4, max: 4, home: 0 }],
     fn: (v) => { const m = Math.pow(2, v.stops); return (y) => y * m; } },
-  contrast: { cls: 'table', label: 'CONTRAST', hint: 'about mid-grey', knobs: [{ k: 'contrast', label: 'CONTRAST', min: 0, max: 3, home: 1 }],
+  contrast: { cls: 'table', label: 'CONTRAST', hint: 'About mid-grey', knobs: [{ k: 'contrast', label: 'CONTRAST', min: 0, max: 3, home: 1 }],
     fn: (v) => (y) => (y - 0.5) * v.contrast + 0.5 },
   /* 038 P2 · LEVELS, Photoshop's (Josh: "design a new layout inspired by photoshop's level controls while still being compact. (no numbers or texts, only
      during knob edit do they show)"): `levels`' five keys and table on a BARE face — IN BLACK · GAMMA · IN WHITE under the strip (the curve as a
@@ -70,7 +70,7 @@ export const TABLE_TYPES = {
   /* 038 P3 · EXPOSURE with SHADOWS and HIGHLIGHTS (Josh: "Photoshop uses 'Shadows' and 'Highlights', perhaps we can add these two knobs independent of the
      main exposure knob?"): the one-knob's y·2^stops, clamped, then two bumps — S·y(1−y)² peaks at ⅓, H·y²(1−y) at ⅔ — scaled .945, so at ±100 each moves
      its tone by ±.14 while black and white stay put and the curve stays monotone (its least slope .055); the tracks sit where they act */
-  exposure2: { cls: 'table', group: 'tone', label: 'EXPOSURE', hint: 'exposure, then the shadows and the highlights apart',
+  exposure2: { cls: 'table', group: 'tone', label: 'EXPOSURE', hint: 'Exposure, then the shadows and the highlights apart',
     knobs: [{ k: 'stops', label: 'EXPOSURE', min: -4, max: 4, home: 0, stops: BW, hint: 'EXPOSURE — stops of light: each one doubles it', fmt: (x) => (x >= 0.005 ? '+' : x <= -0.005 ? '−' : '') + Math.abs(x).toFixed(2) + ' EV' },
       { k: 'shadows', label: 'SHADOWS', min: -100, max: 100, home: 0, stops: ['#000', '#6b6b6b'], hint: 'SHADOWS — the dark tones lifted or deepened', fmt: signed },
       { k: 'highlights', label: 'HIGHLIGHTS', min: -100, max: 100, home: 0, stops: ['#949494', '#fff'], hint: 'HIGHLIGHTS — the light tones raised or dimmed', fmt: signed }],
@@ -79,7 +79,7 @@ export const TABLE_TYPES = {
   /* 038 P6 · BRIGHTNESS & CONTRAST, the classic two (Josh: "Contrast needs to be the classic, 2-param 'Brightness & Contrast'"): y = (y − ½)·c + ½ + b,
      one table — BRIGHTNESS ±100 (b = B/200, half the range at an end), CONTRAST ±100 (c = 1 + C/100 below home, flat grey at −100; 1 + C/50 above,
      the one-knob's 3 at +100) */
-  bc: { cls: 'table', group: 'tone', label: 'BRIGHTNESS & CONTRAST', hint: 'the classic two: brightness and contrast',
+  bc: { cls: 'table', group: 'tone', label: 'BRIGHTNESS & CONTRAST', hint: 'The classic two: brightness and contrast',
     knobs: [{ k: 'brightness', label: 'BRIGHTNESS', min: -100, max: 100, home: 0, stops: BW, hint: 'BRIGHTNESS — every tone lifted or lowered', fmt: signed },
       { k: 'contrast', label: 'CONTRAST', min: -100, max: 100, home: 0, stops: ['hsl(0 0% 50%)', 'var(--fg)'], hint: 'CONTRAST — the tones pushed from mid-grey, or pulled in', fmt: signed }],
     fn: (v) => { const b = v.brightness / 200, c = v.contrast >= 0 ? 1 + v.contrast / 50 : 1 + v.contrast / 100; return (y) => (y - 0.5) * c + 0.5 + b; } },
@@ -89,12 +89,12 @@ const WHEEL = [0, 60, 120, 180, 240, 300, 360].map((h) => `hsl(${h} 100% 50%)`);
 export const MATRIX_TYPES = {
   /* 040 N3 · THE HUE KNOB WRAPS (Josh: "Hue knob should be 360 degree free spinning instead of left and right only"): HUE here and HUE/SATURATION's HUE
      are the kit's free arc (`wrap`) on the colour wheel's track; the value stays −180 … 180 (nodeBody folds the dial's turn back), so a file keeps its bytes */
-  hue: { cls: 'matrix', label: 'HUE', hint: 'turn every colour round the wheel', knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, wrap: true, stops: WHEEL, fmt: (x) => signed(x) + '°' }],
+  hue: { cls: 'matrix', label: 'HUE', hint: 'Turn every colour round the wheel', knobs: [{ k: 'hue', label: 'HUE', min: -180, max: 180, home: 0, wrap: true, stops: WHEEL, fmt: (x) => signed(x) + '°' }],
     neutral: (v) => ((v.hue % 360) + 360) % 360 === 0, matrix: (v) => colourMatrix(1, v.hue) },
   saturation: { cls: 'matrix', label: 'SATURATION', hint: '0 is grey, above 1 is more vivid', knobs: [{ k: 'saturation', label: 'SATURATION', min: 0, max: 3, home: 1 }],
     matrix: (v) => colourMatrix(v.saturation, 0) },
-  luma: { cls: 'matrix', label: 'LUMA', hint: 'the luminance alone: greyscale', knobs: [AMOUNT()], neutral: (v) => v.amount === 0, matrix: (v) => mix(IDENTITY, LUMA, v.amount) },
-  temperature: { cls: 'matrix', label: 'TEMPERATURE', hint: 'warm (amber) ↔ cool (blue)', knobs: [{ k: 'warmth', label: 'WARMTH', min: -1, max: 1, home: 0 }],
+  luma: { cls: 'matrix', label: 'LUMA', hint: 'The luminance alone: greyscale', knobs: [AMOUNT()], neutral: (v) => v.amount === 0, matrix: (v) => mix(IDENTITY, LUMA, v.amount) },
+  temperature: { cls: 'matrix', label: 'TEMPERATURE', hint: 'Warm (amber) ↔ cool (blue)', knobs: [{ k: 'warmth', label: 'WARMTH', min: -1, max: 1, home: 0 }],
     matrix: (v) => { const w = v.warmth * 0.25; return [1 + w, 0, 0, 0, 0, 0, 1 + w * 0.15, 0, 0, 0, 0, 0, 1 - w, 0, 0, 0, 0, 0, 1, 0]; } },
   /* 038 P4 · HUE/SATURATION, Photoshop's (Josh: "For Hue, use photoshop's Hue, Saturation, and Lightness sliders but in knob forms and show the arcs as
      knob wrapped versions of the photoshop sliders"): one matrix — Photoshop's LIGHTNESS (toward white: (1 − L)·c + L; toward black: (1 + L)·c) after
@@ -120,7 +120,7 @@ export const MATRIX_TYPES = {
       return colourMatrix(1 + v.saturation / 100, 0).map((x, i) => (i < 15 ? x * D[Math.floor(i / 5)] : x)); },
     run: (v, id, src) => vibrance(v.vibrance / 100, id, src) },
   /* 038 P11 · TINT has two controls (a colour and its amount), so it is offered in COLOUR, after the full nodes, not among the one-knobbers (the id kept) */
-  tint: { cls: 'matrix', group: 'colour', label: 'TINT', hint: 'the luminance in one colour, sepia\'s way', knobs: [{ k: 'colour', label: 'COLOUR', colour: true, home: [1, 0.78, 0.52], hint: 'COLOUR — the tint\'s colour' },
+  tint: { cls: 'matrix', group: 'colour', label: 'TINT', hint: 'The luminance in one colour, sepia\'s way', knobs: [{ k: 'colour', label: 'COLOUR', colour: true, home: [1, 0.78, 0.52], hint: 'COLOUR — the tint\'s colour' },
     { ...AMOUNT(0.6), hint: 'AMOUNT — how much of the tint' }],
     neutral: (v) => v.amount === 0,
     matrix: (v) => { const c = v.colour; return mix(IDENTITY, [...W.map((w) => w * c[0]), 0, 0, ...W.map((w) => w * c[1]), 0, 0, ...W.map((w) => w * c[2]), 0, 0, 0, 0, 0, 1, 0], v.amount); } },
@@ -143,9 +143,9 @@ function vibrance(V, id, src) {
 
 /** 020 X4 · FADE AND MASK: the foot of every node but a LAYER (whose AMOUNT is its fade) — lab/nodes-compile.js folds FADE; a MASK makes the
  *  node its own run.  FADE and SOFT are knobs, so modulation targets (`nodes.<node>.fade`, `.soft`) */
-export const FOOT = [{ k: 'fade', label: 'FADE', min: 0, max: 1, home: 1, hint: 'the node mixed back with its input: 100 % is all of it', fmt: (x) => Math.round(x * 100) + ' %' },
+export const FOOT = [{ k: 'fade', label: 'FADE', min: 0, max: 1, home: 1, hint: 'The node mixed back with its input: 100% is all of it', fmt: (x) => Math.round(x * 100) + '%' },
   { k: 'mask', label: 'MASK', home: 'none', ordered: true,   /* 044 K3: six short options stay a stepper (kit alpha.24 would set two rows of three) */ hint: 'MASK — only the lights, darks, mids, centre or edges', options: ['none', 'lights', 'darks', 'mids', 'centre', 'edges'].map((id) => ({ id, label: id.toUpperCase() })) },
-  { k: 'soft', label: 'SOFT', min: 0, max: 1, home: 0.5, hint: 'the mask\'s edge: 0 hard, 1 a long ramp' },
+  { k: 'soft', label: 'SOFT', min: 0, max: 1, home: 0.5, hint: 'The mask\'s edge: 0 hard, 1 a long ramp' },
   /* 038 N6 · A NODE HAS A TARGET (nodes-compile.js): BOTH · STAGE (the background) · OBJECT (the orbital and the molecule, 038 F8), appended — a file
      without it reads BOTH */
   { k: 'target', label: 'TARGET', home: 'both', hint: 'OBJECT the orbital and the molecule · STAGE the background', options: ['both', 'stage', 'object'].map((id) => ({ id, label: id.toUpperCase() })) }];

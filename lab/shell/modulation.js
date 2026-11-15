@@ -66,19 +66,19 @@ export function createModSeam(app) {
          raw; the panel registers none of them).  Their dials are the CAMERA panel's (camKnobs: the sphere's two arcs, ZOOM, FOV, the
          pad's X and Y), and a modulator's write is a notice to the port's subscribers (camOut), so the panel follows a route. */
       { id: 'observer.yaw', label: 'YAW', unit: ' rad', map: 'wrap', min: 0, max: 2 * Math.PI, group: 'observer', knob: () => app.state.camKnobs['observer.yaw'],
-        hint: 'the camera azimuth, free-spinning',
+        hint: 'The camera azimuth, free-spinning',
         get: () => obs.yaw, set: (v) => { if (sameCycle(v, obs.yaw, 2 * Math.PI)) return; if (obs.mode === 'free') orbitBy(v - obs.yaw, 0); else obs.yaw = v; camOut('observer.yaw', obs.yaw); } },
       { id: 'observer.pitch', label: 'PITCH', unit: ' rad', map: 'bipolar', min: -CAM.PITCH, max: CAM.PITCH, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.pitch'],
         hint: 'Pitch balance; 50% is level',
         get: () => obs.pitch, set: (v) => { const w = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, v)); if (w === obs.pitch) return; if (obs.mode === 'free') orbitBy(0, w - obs.pitch); else obs.pitch = w; camOut('observer.pitch', obs.pitch); } },
       { id: 'observer.dist', label: 'ZOOM', map: 'log', min: CAM.DIST[0], max: CAM.DIST[1], group: 'observer', knob: () => app.state.camKnobs['observer.dist'],
-        hint: 'the ZOOM dial itself (log)',
+        hint: 'The ZOOM dial itself (log)',
         get: () => obs.dist, set: (v) => { obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); camOut('observer.dist', obs.dist); } },
       { id: 'observer.fov', label: 'FOV', map: 'linear', min: CAM.FOV[0], max: CAM.FOV[1], group: 'observer', knob: () => app.state.camKnobs['observer.fov'],
         get: () => obs.fov, set: (v) => { obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); camOut('observer.fov', obs.fov); } },
-      { id: 'observer.panx', label: 'PAN X', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.panx'], hint: 'the lens shift across: where the pivot sits on the frame',   // 0.4.0 S2
+      { id: 'observer.panx', label: 'PAN X', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.panx'], hint: 'The lens shift across: where the pivot sits on the frame',   // 0.4.0 S2
         get: () => obs.shift[0], set: (v) => { obs.shift = [cameraPort.get('lock') ? 0 : clampShift([v, 0])[0], obs.shift[1]]; camOut('observer.panx', obs.shift[0]); } },   // 0.5.3 M6: a route under the LOCK writes the centre
-      { id: 'observer.pany', label: 'PAN Y', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.pany'], hint: 'the lens shift: where the pivot sits on the frame',
+      { id: 'observer.pany', label: 'PAN Y', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.pany'], hint: 'The lens shift: where the pivot sits on the frame',
         get: () => obs.shift[1], set: (v) => { obs.shift = [obs.shift[0], cameraPort.get('lock') ? 0 : clampShift([0, v])[1]]; camOut('observer.pany', obs.shift[1]); } },
       { id: 'material.stage', label: 'STAGE', map: 'linear', min: 0, max: 1, group: 'material', knob: () => ui.stageK, get: () => ui.stageK.get(), set: (v) => app.hooks.setStage(v) },
       { id: 'material.gamma', label: 'GAMMA', map: 'linear', min: 0.5, max: 2.4, group: 'material', knob: () => ui.gammaK, get: () => mat.gamma, set: (v) => { mat.gamma = v; setKnob(ui.gammaK, v); schedule(TIER.PRESENT); } },
@@ -143,7 +143,7 @@ export function createModSeam(app) {
         set: (v) => { setRotationRate('def', v); } },
       /* 0.6.0 B3a · THE SHELL RATES: a shell's labels on the lanes' own road (api.setRate: rates, setEnergies, the ring, the lanes' knobs); no dial of their own; `n1` because the kit's segment starts with a letter */
       ...Array.from({ length: 7 }, (_, i, at = BASIS.flatMap((s, a) => (s.n === i + 1 ? [a] : []))) => ({ id: `shell.rate.n${i + 1}`, label: `SHELL ${i + 1} RATE`, unit: '×', map: 'log', min: 0.25, max: 4, def: 1, group: 'state', knob: () => null,
-        hint: 'one shell’s per-label RATE (× its energies)',
+        hint: 'One shell’s per-label RATE (× its energies)',
         get: () => { for (const a of at) if (reg.re0[a] ** 2 + reg.im0[a] ** 2 > EPS_POP) return rates[a]; return rates[at[0]]; },   // its first populated label, else its first (017 P2: no populated() array per read — syncBases reads it every modulation tick)
         set: (v) => reg.drive(() => { for (const s of BASIS) if (s.n === i + 1 && rates[s.index] !== v) api.setRate(s.index, v); }) })),   // 039 F1: the lane's re-anchoring is a DRIVE's (Register.drive)
 
@@ -159,13 +159,13 @@ export function createModSeam(app) {
          span (below the install: the kit's HOT RE-REGISTRATION keeps the base and the routes).  Do not move it back out: saved
          projects carry routes and TIMELINE clips on this id.  FIELD RESOLUTION and STEPS stay out — they rebuild the field itself. */
       { id: 'chem.kick', label: 'κ KICK', map: 'log', min: 1e-4, max: 1e-2, def: 1e-3, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.kick() : null),
-        hint: 'the δ-kick strength the next KICK uses',
+        hint: 'The δ-kick strength the next KICK uses',
         get: () => (app.state.chem ? app.state.chem.kappa : 1e-3), set: (v) => { if (app.state.chem) { app.state.chem.setKappa(v); setKnob(app.state.chem.knobs.kick(), app.state.chem.kappa); } } },
       { id: 'chem.speed', label: 'MOLECULES SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.speed() : null),
-        hint: 'real-time propagation steps asked of the worker each frame',
+        hint: 'Real-time propagation steps asked of the worker each frame',
         get: () => (app.state.chem ? app.state.chem.speed : 10), set: (v) => { if (app.state.chem) { app.state.chem.setSpeed(v); setKnob(app.state.chem.knobs.speed(), app.state.chem.speed); } } },
       { id: 'chem.orbital', label: 'MOLECULES ORBITAL', map: 'integer', min: 1, max: MOL_LIMITS.ao, step: 1, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.orbital() : null),
-        hint: 'the orbital VIEW ORBITAL draws, ascending in ε',
+        hint: 'The orbital VIEW ORBITAL draws, ascending in ε',
         get: () => { const k = app.state.chem ? app.state.chem.orbital() : null; return Number.isFinite(k) ? k : NaN; },   // NaN before a molecule: the base is not synced from nothing
         set: (v) => { if (app.state.chem) app.state.chem.stepOrbital(v, app.state.modHost.registry.isModulated('chem.orbital'), !restoring()); } },   // 040 A3: the step speaks (ORBITAL · …) unless a restore parked it
       /* 040 A4 · EVENTS FOR THE BASIS AND THE VIEW (Josh: "Currently I can't make event with basis sets and view mode (orbital, density, mix, etc.)"): MOLECULES'
@@ -186,20 +186,20 @@ export function createModSeam(app) {
          PRESENT-only like every target here: a setter stores a number and the register's own frame push reads it.
          A slot with no lane behind it is a no-op, which is the present-only law for a lane that is not there. */
       { id: 'reg.morph', label: 'REG MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.morph() : null),
-        hint: 'the STATES register on the path A → B (MORPH on)',
+        hint: 'The STATES register on the path A → B (MORPH on)',
         get: () => (app.state.states ? app.state.states.morph : 0), set: (v) => { if (app.state.states) { app.state.states.setMorphValue(v); setKnob(app.state.states.knobs.morph(), app.state.states.morph); } } },
       /* iteration 007 B (ADR-0002): the ORBITAL register's A ↔ B is its OWN target (`reg.omorph`, the id in orbitalsview.js) — a route that
          followed whichever pane is showing would change a saved route's meaning with the pane.  Its knob carries the stamp, so the TIMELINE
          lanes it like any registered dial (a lane AND a route ADD: the kit's host.js livePos samples the lane as the moving base and the
          routes modulate around it — B-BUILD measured their sum). */
       { id: OMORPH, label: 'ORBITAL MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (app.state.orbitals ? app.state.orbitals.knobs.morph() : null),
-        hint: 'the ORBITAL register on the path A → B (MORPH on)',
+        hint: 'The ORBITAL register on the path A → B (MORPH on)',
         get: () => (app.state.orbitals ? app.state.orbitals.morph : 0), set: (v) => { if (app.state.orbitals) { app.state.orbitals.setMorphValue(v); setKnob(app.state.orbitals.knobs.morph(), app.state.orbitals.morph); } } },
       { id: 'reg.e0', label: 'DRIVE E₀', unit: ' a.u.', map: 'log', min: 1e-4, max: 0.2, def: 0.01, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.driveE() : null),
-        hint: 'the STATES drive’s field amplitude, live',
+        hint: 'The STATES drive’s field amplitude, live',
         get: () => (app.state.states ? app.state.states.drive.e0 : 0.01), set: (v) => { if (app.state.states) { app.state.states.setDriveParam('e0', v); setKnob(app.state.states.knobs.driveE(), app.state.states.drive.e0); } } },
       { id: 'reg.w', label: 'DRIVE ω', unit: ' Eh', map: 'log', min: 0.05, max: 3, def: 0.4, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.driveW() : null),
-        hint: 'the STATES drive’s carrier frequency',
+        hint: 'The STATES drive’s carrier frequency',
         get: () => (app.state.states ? app.state.states.drive.omega : 0.4), set: (v) => { if (app.state.states) { app.state.states.setDriveParam('omega', v); setKnob(app.state.states.knobs.driveW(), app.state.states.drive.omega); } } },
       ...Array.from({ length: 8 }, (_, i) => ({ id: `reg.amp${i + 1}`, label: `REG |b|² ${i + 1}`, map: 'linear', min: 0, max: 1, def: 0, group: 'state',
         knob: () => (app.state.states ? app.state.states.knobs.pop(i) : null), hint: `STATES lane ${i + 1} population (lane 1 is S₀)`,
@@ -222,11 +222,11 @@ export function createModSeam(app) {
         set: (v) => { const s = drawStyle(STYLE_NAMES[v | 0]), b = ui.styleSeg && ui.styleSeg.button(s); if (!b || b.hidden || mat.style === STYLE[s]) return; const from = mat.style | 0; mat.style = STYLE[s]; ui.styleRecall(from, mat.style); ui.styleSeg.set(s); schedule(TIER.PRESENT); laneSay('style', 'STYLE · ' + b.textContent); } },   // 038 K1 · 040 A2: a lane's switch saves and recalls as a hand's · 040 A3: and speaks
       { id: 'material.view', label: 'VIEW', map: 'integer', min: 0, max: WAVE_VIEWS.length - 1, step: 1, group: 'material', knob: () => null,
         options: WAVE_VIEWS.map((_, i) => i), seg: () => ui.viewSeg, of: (w) => WAVE_VIEWS.indexOf(w),
-        hint: 'the observable by number: 0 ρ · 1 phase · 2 Re · 3 Im',
+        hint: 'The observable by number: 0 ρ · 1 phase · 2 Re · 3 Im',
         get: () => WAVE_VIEWS.indexOf(waveView(mat.view) || 'density'),
         set: (v) => { const w = WAVE_VIEWS[v | 0], b = ui.viewSeg && ui.viewSeg.button(w); if (!b || b.hidden || b.disabled || mat.view === VIEW[w]) return; mat.view = VIEW[w]; ui.viewSeg.set(w); schedule(TIER.PRESENT); laneSay('view', b.textContent); } },   // 040 A3
       { id: 'palette.index', label: 'PALETTE', map: 'integer', min: 0, max: PALETTES.length - 1, step: 1, group: 'material', knob: () => null, options: PALETTES.map((_, i) => i),
-        hint: 'the palette by number, in the PALETTE menu order',
+        hint: 'The palette by number, in the PALETTE menu order',
         get: () => { const P = app.state.palette, i = P ? PALETTES.findIndex((q) => q.id === P.id) : -1; return i >= 0 ? i : NaN; },
         set: (v) => { const P = app.state.palette, q = PALETTES[v | 0]; if (P && q && P.id !== q.id) P.select(q.id); } },
       { id: 'material.space', label: 'SPACE', map: 'integer', min: 0, max: 1, step: 1, group: 'material', knob: () => null, options: [0, 1], seg: () => ui.spaceSeg, of: (w) => (w === 'p' ? 1 : 0),
@@ -246,7 +246,7 @@ export function createModSeam(app) {
          many states) never empties the register */
       { id: 'state.index', label: 'STATE', map: 'integer', min: 0, max: BASIS.length - 1, step: 1, group: 'state', knob: () => null, options: BASIS.map((_, i) => i),
         seg: () => document.querySelector('.dev[data-id="spectrum"] .picker'),
-        hint: 'the register as one of the 140 states',
+        hint: 'The register as one of the 140 states',
         get: () => { let k = -1; for (let a = 0; a < BASIS.length; a++) if (reg.re0[a] ** 2 + reg.im0[a] ** 2 > EPS_POP) { if (k >= 0) return NaN; k = a; } return k >= 0 ? k : NaN; },   // the one populated state (no populated() array: syncBases reads it every modulation tick)
         set: (v) => { const k = v | 0, p = reg.populated(), H = app.state.modHost, tl = app.state.tl; if ((app.state.chem && app.state.chem.on) || !(k >= 0 && k < BASIS.length) || (p.length === 1 && p[0] === k) || !H || !tl) return;
           const u = tl.model.value('state.index', H.model.transport.beats); if (!Number.isFinite(u) || H.registry.fromNorm('state.index', u) !== k) return;   // a clip says k here, or nothing moves

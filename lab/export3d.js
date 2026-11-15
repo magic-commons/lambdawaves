@@ -18,9 +18,9 @@ import { slug, stamp, uniqueFileName } from './capture.js';
 
 /** the five FILE rows (R6: no dialog; each row is one file and its tooltip names what opens it) */
 export const EXPORTS = Object.freeze([
-  { fmt: 'glb', kind: 'shape', mime: 'model/gltf-binary', tip: 'glTF isosurface, phase colours and the camera' },
+  { fmt: 'glb', kind: 'shape', mime: 'model/gltf-binary', tip: 'GlTF isosurface, phase colours and the camera' },
   { fmt: 'obj', kind: 'shape', mime: 'model/obj', tip: 'The same surface as Wavefront OBJ' },
-  { fmt: 'stl', kind: 'shape', mime: 'model/stl', tip: 'the same surface for printing or any tool' },
+  { fmt: 'stl', kind: 'shape', mime: 'model/stl', tip: 'The same surface for printing or any tool' },
   { fmt: 'npz', kind: 'grid', mime: 'application/zip', tip: "ψ on the grid for NumPy (.npz + meta.json)" },
   { fmt: 'cube', kind: 'grid', mime: 'chemical/x-cube', tip: 'The density as a Gaussian cube (bohr)' },
 ]);
@@ -360,7 +360,7 @@ export function createExporter(env) {
       return last;
     } catch (e) {
       const why = String(e && e.message || e);
-      env.status('EXPORT FAILED · ' + why, 'warn');
+      env.status('Could not export: ' + why, 'warn');
       return (last = { ok: false, fmt, error: why });
     } finally { busy = false; }
   }

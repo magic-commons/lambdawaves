@@ -69,7 +69,7 @@ export function createStaticField(app) {
      real stored number: rotRate.z IS what the registry reads and writes, so `get` cannot lie and
      modSyncBases cannot fight it.  Nothing anywhere accumulates the angle the two of them make. */
   ui.rotZRate = knob({ label: 'SPIN z', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, value: 0, cls: 'rot',
-    title: 'Continuous state rotation about z. Double-click to stop.',
+    title: 'Continuous state rotation about z · double-click to stop',
     fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
     onInput: (v) => { if (modHand('state.rot.z', v)) return; setRotationRate('z', v); } });
   rd.appendChild(ui.rotZRate.root);
@@ -79,12 +79,12 @@ export function createStaticField(app) {
      read a rate that does nothing, and a knob that does not follow the value it owns is a knob
      that lies.  So: clamped here, zeroed and disabled in applySturmian, and ignored in rotStep. */
   ui.kzRate = knob({ label: 'SPIN K_z', min: -ROT_LIMIT.kz, max: ROT_LIMIT.kz, value: 0, cls: 'rot',
-    title: 'Continuous Stark rotation. Double-click to stop.',
+    title: 'Continuous Stark rotation · double-click to stop',
     fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
     onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.kzRate.set(w); if (modHand('state.stark.kz', w)) return; setRotationRate('kz', w); } });
   rd.appendChild(ui.kzRate.root);
   ui.defRate = knob({ label: 'SPIN L²', min: -ROT_LIMIT.def, max: ROT_LIMIT.def, value: 0, cls: 'rot',
-    title: 'Continuous l-dependent phase. Double-click to stop.',
+    title: 'Continuous l-dependent phase · double-click to stop',
     fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
     onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.defRate.set(w); if (modHand('state.defect.l2', w)) return; setRotationRate('def', w); } });
   rd.appendChild(ui.defRate.root);
@@ -106,7 +106,7 @@ export function createStaticField(app) {
   const rq = el('div', 'row tight fit', kBody);   // 0.8.0 G2 · SQUEEZE + CAT, the OSCILLATOR's: r rides in mat.bow.squeeze (PROJECT, absent until moved)
   let catK = 0.2;
   const sqK = knob({ label: 'SQUEEZE', min: 0, max: 0.33, value: mat.bow.squeeze || 0, fmt: (v) => (+v || 0).toFixed(3), title: 'Squeeze r (cap 0.33)', onInput: (v) => { mat.bow.squeeze = v || undefined; } });
-  const catKnob = knob({ label: 'CAT  <m>k</m>', min: 0.01, max: 1.5, value: catK, log: true, fmt: (v) => v.toFixed(3) + ' a.u.', title: 'the ±k of CAT\'s two slaps (STATE\'s old STRENGTH)', onInput: (v) => { catK = v; } });
+  const catKnob = knob({ label: 'CAT  <m>k</m>', min: 0.01, max: 1.5, value: catK, log: true, fmt: (v) => v.toFixed(3) + ' a.u.', title: 'The ±k of CAT\'s two slaps (STATE\'s old STRENGTH)', onInput: (v) => { catK = v; } });
   const axis = () => (app.sh.keyState ? app.sh.keyState.axis : 'z');   // the K key's axis (X · Y · Z): STATE's ALONG
   const osc = [['SQUEEZE-IN', 'S(r) along the K axis (OSCILLATOR only)', () => squeezeIn(sqK.get(), axis())], ['CAT', '|α⟩ + |−α⟩ from two slaps ±k (OSCILLATOR only)', () => cat(catK, axis())]].map(([label, t, onFire]) => trig({ label, title: t, onFire }).root);
   ui.bowKnobs.squeeze = { set: (x) => sqK.set(+x || 0) }; for (const e of [sqK.root, catKnob.root, ...osc]) rq.appendChild(e);

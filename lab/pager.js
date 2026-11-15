@@ -12,7 +12,7 @@ export function pageDots(dots, at, n, onPage) {
   if (n > 16) { dots.dataset.mode = 'count'; dots.textContent = (at + 1) + ' / ' + n; return; }
   if (dots.dataset.mode !== 'dots' || dots.childElementCount !== n) {
     dots.dataset.mode = 'dots'; dots.textContent = '';
-    for (let i = 0; i < n; i++) { const d = el('button', 'mm-dot', dots); d.type = 'button'; d.setAttribute('aria-label', 'page ' + (i + 1)); d.addEventListener('click', () => onPage(i)); }
+    for (let i = 0; i < n; i++) { const d = el('button', 'mm-dot', dots); d.type = 'button'; d.setAttribute('aria-label', 'Page ' + (i + 1)); d.addEventListener('click', () => onPage(i)); }
   }
   [...dots.children].forEach((d, i) => d.classList.toggle('on', i === at));
 }

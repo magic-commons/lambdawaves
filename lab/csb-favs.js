@@ -30,7 +30,7 @@ export function createCsbFavs(app, { panel }) {
   let mini = { on: m0.on !== false, style: typeof m0.style === 'string' ? m0.style : 'ballstick' };
   const offers = new Map();                                            // id → { control, width }
   const move = (id, to) => { items = items.filter((x) => x !== id); items.splice(Math.min(to, items.length), 0, id); save(); };
-  const bank = knobBank({ slots: 8, page: ok && Number.isFinite(st.page) ? st.page : 0, parent: panel, label: 'favourite controls', onMove: move, onPage: () => save() });
+  const bank = knobBank({ slots: 8, page: ok && Number.isFinite(st.page) ? st.page : 0, parent: panel, label: 'Favourite controls', onMove: move, onPage: () => save() });
   const strip = bank.root; strip.classList.add('csb-favs');
   const faces = new Map();                                             // id → { root, destroy }
   let built = false;

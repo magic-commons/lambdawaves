@@ -14,9 +14,9 @@ const fit = (c, g, W, H, d) => { const w = Math.round(W * d), h = Math.floor(H *
 export function createCalculus(host, opt = {}) {
   let on = true, last = null, key = '';
   const r0 = el('div', 'row tight', host);
-  r0.appendChild(sw({ label: 'LIVE', value: true, title: 'recompute every update (throttled while playing)', onChange: (v) => { on = v; if (opt.repaint) opt.repaint(); } }).root);   // 043 P1: LIVE on asks for the frame that catches up
-  const grid = el('div', 'calc-grid', host), ray = readout({ label: 'RAY  Re ψ · Im ψ · |ψ|²  from the origin through the bead', value: '—', cls: 'wide calc-ray' }), foot = el('div', 'calc-foot', host);
-  const cv = el('canvas', '', ray.root), g = cv.getContext('2d'); host.insertBefore(ray.root, foot);   // 0.8.2 P3: ψ ALONG A RAY, 128 closed-form samples, each curve over the ray's max |ψ|
+  r0.appendChild(sw({ label: 'LIVE', value: true, title: 'Recompute every update (throttled while playing)', onChange: (v) => { on = v; if (opt.repaint) opt.repaint(); } }).root);   // 043 P1: LIVE on asks for the frame that catches up
+  const grid = el('div', 'calc-grid', host), ray = readout({ label: 'RAY', value: '—', cls: 'wide calc-ray' }), foot = el('div', 'calc-foot', host);
+  const cv = el('canvas', '', ray.root), g = cv.getContext('2d'); host.insertBefore(ray.root, foot); ray.root.title = 'Re ψ · Im ψ · |ψ|² from the origin through the bead';   // 0.8.2 P3: ψ ALONG A RAY, 128 closed-form samples, each curve over the ray's max |ψ|
   /* 0.8.3 B1 · THE BREATH: P(r, t) over [0, half] in the kit's ink, its scale the register version's running max, and its two integrals against stats' ⟨r⟩; REVIVAL (a hand press, never at boot) is
      ONE verb list, ONE history row: the radial packet `rydberg-s`, RATE = T_cl a.u. a second (the `rate` verb consults the flash law and says why it holds), play */
   const BL = ['BREATH  P(r, t) = r² Σ_lm |Σ_n c_nlm(t) R_nl(r)|²', 'BREATH  P(p, t) = p² Σ_lm |Σ_n c_nlm(t) F_nl(p)|²'], br = readout({ label: BL[0], value: '—', cls: 'wide calc-ray' }), bv = el('canvas', '', br.root), bg = bv.getContext('2d'), rv = el('div', 'row tight', br.root); host.insertBefore(br.root, foot); let bKey = '', bMax = 0, bLab = false;
@@ -30,8 +30,8 @@ export function createCalculus(host, opt = {}) {
   let tiles = [], names = '', footS;
   /* 0.8.3 B2 · THE A(t) TRACE (period.js traceOf): 512 samples over ONE REPEATS period, rebuilt only when its key moves (the register, the field, the operator, the period,
      the equalizer's table; never in a frame); the clock's t the cursor, the revivals dots, the hover t and A.  Its source is readouts.js' `calculus.trace`. */
-  const at = readout({ label: 'A(t)  |⟨ψ(0)|ψ(t)⟩|²  over one REPEATS period · t = 0 the anchor, as REPEATS counts its laps', value: '—', cls: 'wide calc-ray' }), acv = el('canvas', '', at.root), ag = acv.getContext('2d');
-  host.insertBefore(at.root, foot); let tr = null, tk = '', dk = '', tG = null;
+  const at = readout({ label: 'A(t)', value: '—', cls: 'wide calc-ray' }), acv = el('canvas', '', at.root), ag = acv.getContext('2d');
+  host.insertBefore(at.root, foot); at.root.title = '|⟨ψ(0)|ψ(t)⟩|² over one REPEATS period, from t = 0'; let tr = null, tk = '', dk = '', tG = null;
   acv.addEventListener('pointermove', (e) => { if (!tr) return; const N = tr.A.length, w = acv.clientWidth || 1, i0 = Math.round(e.offsetX / w * (N - 1)), j = tr.peaks.find((q) => Math.abs(q - i0) * w / (N - 1) < 6), i = j ?? i0;
     acv.title = `t = ${tr.t[i].toFixed(2)} a.u. (${(tr.t[i] / tr.T).toFixed(3)} T) · A = ${tr.A[i].toFixed(6)}${j === undefined ? '' : ' · a revival'}`; });
   function trace(src, reg, t, mol) {
@@ -77,7 +77,7 @@ export function createCalculus(host, opt = {}) {
     for (const [f, col, a] of [[() => 0, ink, 0.15], [(q) => q.re / m, ink, 1], [(q) => q.im / m, ink, 0.4], [(q) => (q.re * q.re + q.im * q.im) / (m * m), acc, 1]]) { g.strokeStyle = col; g.globalAlpha = a; g.beginPath(); S.forEach((q, i) => g[i ? 'lineTo' : 'moveTo'](i * W / (S.length - 1), Hh / 2 - f(q) * (Hh / 2 - 2))); g.stroke(); }
     ray.set(`0 → ${half.toFixed(1)} ${p ? 'ħ/a₀' : H.lengthUnit}`); ray.setSub(`along (${u.map((v) => v.toFixed(2)).join(', ')}) · ${p ? '⟨p⟩' : '⟨r⟩'} = (${r.map((v) => v.toFixed(3)).join(', ')}) · max |ψ| ${m.toExponential(2)}`);
   }
-  const ell = readout({ label: 'ELLIPSOID  σ_k = √λ_k of Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩', value: '—', cls: 'wide calc-ray' }); host.insertBefore(ell.root, foot);   // 0.8.3 B3: tr Σ against ⟨r²⟩ − |⟨r⟩|² (⟨r²⟩ by its own road); one hydrogen label prints its exact n²(5n² + 1 − 3l(l + 1))/2Z²
+  const ell = readout({ label: 'ELLIPSOID', value: '—', cls: 'wide calc-ray' }); ell.root.title = 'σ_k = √λ_k of Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩'; host.insertBefore(ell.root, foot);   // 0.8.3 B3: tr Σ against ⟨r²⟩ − |⟨r⟩|² (⟨r²⟩ by its own road); one hydrogen label prints its exact n²(5n² + 1 − 3l(l + 1))/2Z²
   function ellLine(reg, t, p, mol, H) { const E = !mol && !p && covariance(reg, t), ids = reg.populated(), s = E && ids.length === 1 && H.id === 'hydrogen' && BASIS[ids[0]], tr = E && E.S[0][0] + E.S[1][1] + E.S[2][2], o = E && E.r2 - E.mean.reduce((q, v) => q + v * v, 0);
     ell.set(E ? `σ = (${[...E.lam].sort((a, b) => a - b).map((l) => Math.sqrt(Math.max(0, l)).toFixed(2)).join(', ')}) ${H.lengthUnit}` : '—'); ell.setSub(E ? `tr Σ = ${tr.toFixed(3)} ${Math.abs(tr - o) < 1e-8 ? '=' : '≠'} ⟨r²⟩ − |⟨r⟩|² = ${o.toFixed(3)} (Δ ${Math.abs(tr - o).toExponential(0)})` + (s ? ` · exact ${+(s.n * s.n * (5 * s.n * s.n + 1 - 3 * s.l * (s.l + 1)) / 2 / (H.k || 1) ** 2).toPrecision(6)}` : '') : mol ? 'a molecule: the ellipsoid stands down (its density\'s quadrupole is a later row)' : 'momentum space: the ellipsoid is the position\'s'); }
   function breath(reg, t, half, p, mol) {   // 0.8.3 B1 · 0.9.2 F2: momentum space draws P(p, t) for hydrogen and the oscillator; the box, ATOM and CENTRAL say so and draw P(r, t)

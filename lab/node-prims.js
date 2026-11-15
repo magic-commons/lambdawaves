@@ -23,11 +23,11 @@ const screen = (v, id) => { const b = +(+v.blur || 0).toFixed(2), on = b > 0;
     ['feColorMatrix', { in: '$IN', type: 'matrix', values: CH(0, 1, 0), result: id + 'g' }],
     ['feBlend', { in: id + (on ? 'rs' : 'r'), in2: id + 'g', mode: 'screen', result: id + 'rg' }], ['feBlend', { in: id + 'rg', in2: id + (on ? 'bs' : 'b'), mode: 'screen' }]]; };
 export const PRIM_TYPES = {
-  blur: { cls: 'prim', label: 'BLUR', hint: 'a gaussian blur', knobs: [{ k: 'radius', label: 'RADIUS', min: 0, max: 24, home: 2, unit: ' px' }], neutral: (v) => v.radius === 0,
+  blur: { cls: 'prim', label: 'BLUR', hint: 'A gaussian blur', knobs: [{ k: 'radius', label: 'RADIUS', min: 0, max: 24, home: 2, unit: ' px' }], neutral: (v) => v.radius === 0,
     prim: (v) => [['feGaussianBlur', { stdDeviation: v.radius, edgeMode: 'duplicate' }]] },
-  sharpen: { cls: 'prim', label: 'SHARPEN', hint: 'edges crisper', knobs: [{ k: 'amount', label: 'AMOUNT', min: 0, max: 2, home: 0.5 }], neutral: (v) => v.amount === 0,
+  sharpen: { cls: 'prim', label: 'SHARPEN', hint: 'Edges crisper', knobs: [{ k: 'amount', label: 'AMOUNT', min: 0, max: 2, home: 0.5 }], neutral: (v) => v.amount === 0,
     prim: (v) => { const a = -v.amount; return [['feConvolveMatrix', { order: 3, kernelMatrix: `0 ${a} 0 ${a} ${1 + 4 * v.amount} ${a} 0 ${a} 0`, preserveAlpha: 'true', edgeMode: 'duplicate' }]]; } },
-  aberration: { cls: 'prim', label: 'CHROMATIC ABERRATION', hint: 'red and blue pulled apart, as a cheap lens does',
+  aberration: { cls: 'prim', label: 'CHROMATIC ABERRATION', hint: 'Red and blue pulled apart, as a cheap lens does',
     knobs: [{ k: 'shift', label: 'AMOUNT', min: 0, max: 16, home: 2, unit: ' px', hint: 'AMOUNT — how far red and blue part, in px' },
       { k: 'angle', label: 'ANGLE', min: 0, max: 360, home: 0, unit: '°', hint: 'ANGLE — which way they part' },
       { k: 'blur', label: 'BLUR BLEND', min: 0, max: 8, home: 0, unit: ' px', hint: 'BLUR BLEND — the parted red and blue softened, in px' }],
@@ -35,11 +35,11 @@ export const PRIM_TYPES = {
     prim: (v, id) => { const a = (v.angle * Math.PI) / 180, dx = +(v.shift * Math.cos(a)).toFixed(2), dy = +(v.shift * Math.sin(a)).toFixed(2);
       return [['feOffset', { in: '$IN', dx, dy, result: id + 'o1' }], ['feColorMatrix', { in: id + 'o1', type: 'matrix', values: CH(1, 0, 0), result: id + 'r' }],
         ['feOffset', { in: '$IN', dx: -dx, dy: -dy, result: id + 'o2' }], ['feColorMatrix', { in: id + 'o2', type: 'matrix', values: CH(0, 0, 1), result: id + 'b' }], ...screen(v, id)]; } },
-  bloom: { cls: 'prim', label: 'BLOOM', hint: 'the highlights glow · ' + H, heavy: true,
+  bloom: { cls: 'prim', label: 'BLOOM', hint: 'The highlights glow · ' + H, heavy: true,
     knobs: [{ k: 'radius', label: 'RADIUS', min: 1, max: 40, home: 10, unit: ' px', hint: 'RADIUS — how far the glow spreads, in px' }, { k: 'amount', label: 'AMOUNT', min: 0, max: 2, home: 0.6, hint: 'AMOUNT — how bright the glow' }], neutral: (v) => v.amount === 0,
     prim: (v, id) => [['feComponentTransfer', { in: '$IN', result: id + 'h' }, lin(2, -1)], ['feGaussianBlur', { in: id + 'h', stdDeviation: v.radius, result: id + 'g' }],
       ['feComposite', { in: '$IN', in2: id + 'g', operator: 'arithmetic', k1: 0, k2: 1, k3: v.amount, k4: 0 }]] },
-  displace: { cls: 'prim', label: 'DISPLACE', hint: 'the picture pushed about by noise · ' + H, heavy: true,
+  displace: { cls: 'prim', label: 'DISPLACE', hint: 'The picture pushed about by noise · ' + H, heavy: true,
     knobs: [{ k: 'scale', label: 'SCALE', min: 0, max: 80, home: 12, unit: ' px', hint: 'SCALE — how far the noise pushes, in px' }, { k: 'freq', label: 'FREQUENCY', min: 0.001, max: 0.1, home: 0.01, log: true, hint: 'FREQUENCY — how fine the noise' },
       { k: 'seed', label: 'SEED', min: 0, max: 99, step: 1, home: 1, fmt: (x) => String(Math.round(x)), hint: 'SEED — another noise of the same kind' }], neutral: (v) => v.scale === 0,
     prim: (v, id) => [['feTurbulence', { type: 'fractalNoise', baseFrequency: v.freq, numOctaves: 2, seed: Math.round(v.seed), result: id + 't' }],

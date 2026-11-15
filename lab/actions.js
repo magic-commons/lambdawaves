@@ -42,7 +42,7 @@ export function createActions(app) {
   const at = (a) => (a && a.el) || document.activeElement || document.body, eventAt = (a) => { const t = at(a); return t.closest ? t.closest('[data-event]') : null; }, knobAt = (a) => at(a).closest && at(a).closest('.k'), tileAt = (a) => at(a).closest && at(a).closest('.mm-tile');
   /* 039 W6 EVERY ROW ANSWERS: a row's result is said where it is seen — the toast — and kept on SPECTRUM's status line */
   const tell = (line, ok = true) => { W().wState.setStatus(line, ok ? 'live' : 'warn'); notice(line, { kind: ok ? 'ok' : 'warn' }); };
-  const said = (ok, what) => tell(ok ? what + ' copied' : 'the clipboard refused the copy', ok);
+  const said = (ok, what) => tell(ok ? what + ' copied' : 'Could not copy: the clipboard refused', ok);   // 044 A9 (L84): {What} copied · Could not {verb}: {why}
   const copyOut = (text, what) => { if (!text) return false; copyText(String(text)).then((ok) => said(ok, what)); return true; };
   const wordOf = (k, a) => { const t = tileAt(a); if (t) return k === 'name' ? (t.getAttribute('aria-label') || '').split(' — ')[0] : (t.querySelector('.mm-lbl, .mm-sym') || {}).textContent;
     const q = (s) => (document.querySelector(s) || {}).textContent; return k === 'name' ? q('.mol-pick .mir-step-name') : q('.lw-stage .mir-info-text'); };
@@ -135,7 +135,7 @@ export function createActions(app) {
     { id: 'modArm', group: CS, short: 'mod arm', label: 'MOD', hint: 'MOD — routes on or bypassed', keys: ['Ctrl+Space'], kind: 'toggle', get: () => !!app.state.modArm, run: () => S().setModArm(!app.state.modArm), surface: true },
     { id: 'modBar', group: CS, short: 'bar lock', label: 'BAR LOCK', hint: 'Lock the tempo to the state; again: the tempo back', keys: ['KeyG'], get: () => !!(S().barLock && S().barLock.on && S().barLock.on()), run: () => S().barLock(), surface: true },
     { id: 'csb.expand', group: CS, short: 'expand', label: 'EXPAND', hint: 'The CONTROL SURFACE’s expander', kind: 'toggle', get: () => { const p = S().transport && S().transport.bar.parts.panel; return !!(p && p.isOpen()); }, run: () => { const p = S().transport.bar.parts.panel; if (p) p.toggle(); }, surface: true },
-    ...[['rate.up', 'RATE ×1.25', 1.25], ['rate.down', 'RATE ÷1.25', 0.8]].map(([id, label, k]) => ({ id: 'csb.' + id, group: CS, short: label, label, hint: label + ' (the flash law may refuse it)', run: () => { const r = ran('rate')({ value: clock.rate * k }); if (typeof r === 'string') tell(r, false); else tell('RATE ' + (+app.ui.rateKnob.get()).toFixed(2)); }, surface: true })),   // 039 F1 (WALK-C #16)
+    ...[['rate.up', 'RATE 1.25×', 1.25], ['rate.down', 'RATE 0.8×', 0.8]].map(([id, label, k]) => ({ id: 'csb.' + id, group: CS, short: label, label, hint: label + ' (the flash law may refuse it)', run: () => { const r = ran('rate')({ value: clock.rate * k }); if (typeof r === 'string') tell(r, false); else tell('RATE ' + (+app.ui.rateKnob.get()).toFixed(2)); }, surface: true })),   // 039 F1 (WALK-C #16)
     ...[['tempo.up', 'TEMPO +1 BPM', 1], ['tempo.down', 'TEMPO −1 BPM', -1]].map(([id, label, d]) => ({ id: 'csb.' + id, group: CS, short: label, label, run: () => { const h = app.state.modHost; if (h) { h.clock.setBpm(h.model.transport.bpm + d); S().saveSettings(); } }, surface: true })),
     { id: 'folds', group: CS, short: 'folds', label: 'FOLD ALL', hint: 'FOLD ALL / UNFOLD ALL', kind: 'toggle', icon: () => (foldable().some((w) => w.folded) ? 'unfoldAll' : 'foldAll'), lit: false, get: () => foldable().some((w) => w.folded), surface: true,   // 020 T2; 021 V2: the glyph at the word's read
       word: () => (foldable().some((w) => w.folded) ? 'UNFOLD ALL — open every folded window' : 'FOLD ALL — fold every open window'),
@@ -153,28 +153,28 @@ export function createActions(app) {
     { id: 'open', group: PJ, short: 'open', label: 'OPEN…', hint: 'Open a project (FOLDERS)', keys: ['Mod+KeyO'], exact: true, run: () => proj().show(), surface: true },   // 021 call 6
     /* 021 I1 · ONE ROAD TO NEW: FOLDERS asks its own "Save this first?" (SAVE & NEW · NEW WITHOUT SAVING); the key, the menu and the verb take it */
     { id: 'new', group: PJ, short: 'new', label: 'NEW', hint: 'NEW — the empty project', keys: ['Mod+Alt+KeyN'], exact: true, surface: true,
-      async run() { proj().show(); const r = await proj().folders.fresh(); return r && r.ok ? undefined : r && r.asked ? 'NEW asks first: FOLDERS holds the question' : 'NEW did not open: the empty project could not be fetched'; } },
-    { id: 'quick.save', group: PJ, short: 'quick save', label: 'QUICK SAVE', hint: 'Keep the experiment as the one quick save', run: () => { const ok = S().save(); tell(ok ? 'Quick save kept — QUICK › LOAD brings it back' : 'quick save failed', ok); }, surface: true },
+      async run() { proj().show(); const r = await proj().folders.fresh(); return r && r.ok ? undefined : r && r.asked ? 'NEW asks first: FOLDERS holds the question' : 'Could not open NEW: the empty project could not be fetched'; } },
+    { id: 'quick.save', group: PJ, short: 'quick save', label: 'QUICK SAVE', hint: 'Keep the experiment as the one quick save', run: () => { const ok = S().save(); tell(ok ? 'Quick save kept — QUICK › LOAD brings it back' : 'Could not quick save', ok); }, surface: true },
     { id: 'quick.load', group: PJ, short: 'quick load', label: 'QUICK LOAD', hint: 'Load the last quick save', when: quickSaved,
-      run: () => { if (proj().openWith(() => S().restore() === true, 'quick load failed')) tell('Quick save loaded'); }, surface: true },
+      run: () => { if (proj().openWith(() => S().restore() === true, 'Could not load the quick save')) tell('Quick save loaded'); }, surface: true },
     { id: 'export.json', group: PJ, label: 'EXPORT .json', hint: 'The project as a .json file', run: () => proj().download(), gesture: true, surface: true },
     { id: 'export.mir', group: PJ, label: 'EXPORT .mir', hint: 'The project as a .mir file', run: () => proj().folders.exportProject('mir'), gesture: true, surface: true },
     { id: 'export.png', group: PJ, label: 'EXPORT .png', hint: 'The project as a picture that carries it', run: () => proj().folders.exportProject('png'), gesture: true, surface: true },
-    { id: 'export.picture', icon: 'gallery', group: PJ, short: 'picture', label: 'EXPORT PICTURE', hint: 'A picture of the stage (×2)', keys: ['Mod+KeyE'], exact: true, gesture: true, surface: true,   // 021 call 6
+    { id: 'export.picture', icon: 'gallery', group: PJ, short: 'picture', label: 'EXPORT PICTURE', hint: 'A picture of the stage (2×)', keys: ['Mod+KeyE'], exact: true, gesture: true, surface: true,   // 021 call 6
       async run() { const C = app.state.capApi && app.state.capApi.capture; if (!C) return; const r = await C.picture({ scale: 2 }); if (r && r.blob) C.save(r); } },
     ...EXPORTS.map((s) => ({ id: 'export.' + s.fmt, group: PJ, label: 'EXPORT ' + s.fmt.toUpperCase(), hint: s.tip, gesture: true, surface: true, when: () => !!(app.state.exporter3d && !app.state.exporter3d.busy && app.ctl.field.ok), run: () => app.state.exporter3d.run(s.fmt) })),
     { id: 'import', group: PJ, label: 'IMPORT…', hint: 'Import a project (.json · .mir · picture)', run: () => proj().pick(), gesture: true, surface: true },
     { id: 'copy.latex', group: PJ, label: 'COPY LaTeX', hint: 'The populated states in chemistry order, as LaTeX', run: () => W().copyLatex(), gesture: true, surface: true },
     { id: 'copy.json', group: PJ, label: 'COPY JSON', hint: 'The experiment and its presentation as JSON', run: () => S().copyJSON(), gesture: true, surface: true },
-    { id: 'copy.link', icon: 'link', group: PJ, label: 'COPY LINK', hint: 'A URL that reopens this exact state', run: () => S().copyLink().then((e) => { if (e) tell(e.copied ? 'Link copied — ' + e.chars + ' characters' : 'the clipboard refused the link — SPECTRUM shows it to copy', e.copied); return e; }), gesture: true, surface: true },
+    { id: 'copy.link', icon: 'link', group: PJ, label: 'COPY LINK', hint: 'A URL that reopens this exact state', run: () => S().copyLink().then((e) => { if (e) tell(e.copied ? 'Link copied — ' + e.chars + ' characters' : 'Could not copy the link: SPECTRUM shows it to copy', e.copied); return e; }), gesture: true, surface: true },
     { id: 'copy.picture', group: PJ, short: 'copy picture', label: 'COPY PICTURE', hint: 'Copy the stage picture (PNG)', gesture: true, surface: true, undo: 'none',
       run: () => { const C = app.state.capApi && app.state.capApi.capture; if (!C || !globalThis.ClipboardItem) return false;
-        navigator.clipboard.write([new ClipboardItem({ 'image/png': C.picture({ scale: 1 }).then((r) => r.blob) })]).then(() => said(true, 'the picture'), () => said(false)); } },
-    ...[['name', 'COPY NAME'], ['formula', 'COPY FORMULA']].map(([k, label]) => ({ id: 'copy.' + k, group: PJ, short: 'copy ' + k, label, hint: 'Copy the ' + k, surface: true, undo: 'none', run: (a) => copyOut(wordOf(k, a), 'the ' + k) })),
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': C.picture({ scale: 1 }).then((r) => r.blob) })]).then(() => said(true, 'Picture'), () => said(false)); } },
+    ...[['name', 'COPY NAME'], ['formula', 'COPY FORMULA']].map(([k, label]) => ({ id: 'copy.' + k, group: PJ, short: 'copy ' + k, label, hint: 'Copy the ' + k, surface: true, undo: 'none', run: (a) => copyOut(wordOf(k, a), k[0].toUpperCase() + k.slice(1)) })),
     ...['reset', 'copy', 'paste', 'fine'].map((v) => ({ id: 'knob.' + v, group: CA, short: 'knob ' + v, label: 'KNOB › ' + (v === 'copy' ? 'COPY VALUE' : v.toUpperCase()), ...(v === 'fine' ? { hint: 'Half the drag gain' } : {}), surface: true, undo: v === 'copy' || v === 'fine' ? 'none' : 'row',
       ...(v === 'fine' ? { kind: 'toggle', get: () => { const k = knobAt(); return !!(k && k.mirKnob && k.mirKnob.fine()); } } : {}), run: (a) => knobAct(knobAt(a), v) })),
     { id: 'knob.copyId', group: CA, short: 'copy id', label: 'COPY ID', hint: 'Copy the control’s id', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-param], [data-key-action], [data-fav], [data-event]');
-      return c ? copyOut(c.dataset.param || c.dataset.keyAction || c.dataset.fav || c.dataset.event, 'the id') : false; } },   // 032 W3: an event target's id too
+      return c ? copyOut(c.dataset.param || c.dataset.keyAction || c.dataset.fav || c.dataset.event, 'ID') : false; } },   // 032 W3: an event target's id too
     { id: 'knob.route', group: CA, short: 'route', label: 'ROUTE THE MACRO', hint: 'Route a macro onto the knob', surface: true, run: (a) => { const k = knobAt(a), id = k && k.dataset.param, M = S().LW && S().LW.mod;
       if (!id || !M) return false; const v = app.state.modView, m = (v && v.api.selected && v.api.selected()) || M.addMacro(); return !!M.route(m, id); } },
     { id: 'control.reset', group: CA, short: 'reset', label: 'RESET', hint: 'The control back to its default', surface: true, run: (a) => { const c = at(a).closest && at(a).closest('[data-param]'), R = app.state.modHost && app.state.modHost.registry, id = c && c.dataset.param;
@@ -188,7 +188,7 @@ export function createActions(app) {
       const e = eventAt(a), tl = app.state.tl, R = app.state.modHost && app.state.modHost.registry, id = e && e.dataset.event; if (!id || !tl || !R || !R.has(id)) return false;
       const d = R.describe(id), b = at(a).closest('[data-v], .pk-c'), sw = at(a).closest('.sw');
       const u = b ? R.toNorm(id, +(b.dataset.v ?? b.dataset.a)) : d.map === 'toggle' ? (sw && sw.getAttribute('aria-pressed') === 'true' ? 0.75 : 0.25) : R.readNorm(id);   // a toggle's two bands' centres (an action's base is 0, never its state)
-      if (!Number.isFinite(u)) return false; tl.editor.copiedValue = u; W().wState.setStatus('value copied · ' + d.label, 'live'); return true; } },
+      if (!Number.isFinite(u)) return false; tl.editor.copiedValue = u; W().wState.setStatus('Value copied · ' + d.label, 'live'); return true; } },
     { id: 'control.learn', group: CA, short: 'learn', label: 'LEARN…', hint: 'Learn a key, MIDI or a route (the MAPPING)', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-key-action]');
       if (!c || !api.mapping) return false; L().keymap.open('MAPPING'); api.mapping.learn(c.dataset.keyAction); return true; } },
     ...[['open', 'OPEN', (t) => t.click()], ['isomers', 'ISOMERS', (t) => t.querySelector('.mm-iso') && t.click()],
@@ -198,7 +198,7 @@ export function createActions(app) {
       get: () => (document.querySelector('#lwMenu .mm-lk.on') || { dataset: {} }).dataset.look, run: (a) => { const b = a && a.id && document.querySelector('#lwMenu .mm-lk[data-look="' + a.id + '"]'); if (b) b.click(); return !!b; } },
     { id: 'esp.side', group: V, short: 'esp side', label: 'ESP BAR SIDE', hint: 'The ESP bar’s side', kind: 'set', args: { id: '?enum right|left|top|bottom' }, get: () => IP.get('espBarSide'), surface: true,
       run: (a) => { const s = ['right', 'left', 'top', 'bottom']; IP.set({ espBarSide: a && s.includes(a.id) ? a.id : s[(s.indexOf(IP.get('espBarSide')) + 1) % 4] }); } },
-    { id: 'notebook.copy', group: PJ, short: 'copy notebook', label: 'COPY TEXT', hint: 'Copy the NOTEBOOK’s text', surface: true, undo: 'none', run: () => copyOut(L().notebook.text, 'the notebook') },
+    { id: 'notebook.copy', group: PJ, short: 'copy notebook', label: 'COPY TEXT', hint: 'Copy the NOTEBOOK’s text', surface: true, undo: 'none', run: () => copyOut(L().notebook.text, 'NOTEBOOK text') },
     { id: 'spectrum.solo', group: WD, short: 'solo spectrum', label: 'SOLO SPECTRUM', hint: 'Fold every other window', surface: true, run: () => api.run('window.spectrum.solo') },
     ...[['film.picture', 'RENDER › CAPTURE IMAGE', '.sr-capture'], ['film.record', 'RENDER › RENDER', '.sv-primary']].map(([id, label, cls]) => ({ id, group: PJ, short: label.split(' › ')[1].toLowerCase(), label, surface: true,
       run: () => { const b = document.querySelector('.dev[data-id="render"] ' + cls); if (b && !b.disabled) b.click(); } })),   // the kit's RENDER card's own buttons (by their class)
@@ -217,9 +217,9 @@ export function createActions(app) {
     { id: 'chem.on', group: CA, short: 'molecules on', label: 'MOLECULES', hint: 'MOLECULES, on or off', kind: 'toggle', get: () => !!(chem() && chem().on), run: () => { const c = chem(); if (c) c.setOn(!c.on); }, surface: true },
     { id: 'chem.vibrate', group: CA, short: 'vibrate', label: 'VIBRATE', hint: 'MOLECULES › VIBRATE', kind: 'toggle', get: () => !!(chem() && chem().vibLine && chem().vibLine()), run: () => { const c = chem(); if (c && c.on) return c.vibrate({ on: !c.vibLine() }); }, surface: true },
     { id: 'chem.breathe', group: CA, short: 'breathe', label: 'BREATHE', hint: 'MOLECULES › BREATHE', run: () => { const c = chem(); if (c && c.on) return c.vibrate({ on: true, breathe: true }); }, surface: true },
-    ...[['chem.kick', 'MOLECULES › KICK'], ['ab.storeA', 'TRANSITION › STORE A'], ['ab.storeB', 'TRANSITION › STORE B'], ['eq.sound', 'EQUALIZER › SOUND'], ['gas.launch', 'BOX › LAUNCH'], ['gas.bounce', 'BOX › BOUNCE'], ['vortex.jump', 'VORTEX › JUMP TO EVENT']]
+    ...[['chem.kick', 'MOLECULES › KICK'], ['ab.storeA', 'SPECTRUM › STORE A'], ['ab.storeB', 'SPECTRUM › STORE B'], ['eq.sound', 'EQUALIZER › SOUND'], ['gas.launch', 'SPECTRUM › LAUNCH'], ['gas.bounce', 'SPECTRUM › BOUNCE'], ['vortex.jump', 'VORTEX › JUMP TO EVENT']]
       .map(([id, label]) => ({ id, group: CA, short: label.split(' › ')[1].toLowerCase(), label, run: () => press(id), surface: true })),   // the act lives in its card: the row presses the card's tagged control
-    ...[['particles', 'VORTEX › PARTICLES', 'pOn'], ['ab.on', 'TRANSITION › TRANSITION', 'abSw'], ['vortex.locate', 'VORTEX › LOCATE', 'vorOn']].map(([id, label, h]) =>
+    ...[['particles', 'VORTEX › PARTICLES', 'pOn'], ['ab.on', 'SPECTRUM › TRANSITION', 'abSw'], ['vortex.locate', 'VORTEX › LOCATE', 'vorOn']].map(([id, label, h]) =>
       ({ id, group: CA, short: label.split(' › ')[1].toLowerCase(), label, kind: 'toggle', get: () => (h === 'vorOn' ? !!(W().vortex && W().vortex.on) : !!(ui[h] && ui[h].get && ui[h].get())), run: () => (h === 'vorOn' ? ui.vorOn && ui.vorOn.click() : tap(ui[h])), surface: true })),
     /* NODES' keys (018 D3's ground map, 021 I1): rows of the one table, live while a graph's ground has the focus (THE FOCUS LAW, the timeline's precedent);
        chords by place (AZERTY and Dvorak keep them); Tab is the kit's again — the add menu is Shift+A */

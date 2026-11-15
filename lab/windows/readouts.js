@@ -23,7 +23,7 @@ export function createReadouts(app) {
   app.w.shadowView = shadowView;
   {
     const r = wSh.row();
-    ui.shadowSeg = seg({ aria: 'shadow picture', value: 'phasors', options: [{ id: 'phasors', label: 'PHASORS' }, { id: 'oscillators', label: 'OSC', title: 'Oscillators' }, { id: 'lissajous', label: 'LISSA', title: 'Lissajous' }], onChange: (v) => { shadowView.setMode(v); schedule(TIER.PRESENT); } });
+    ui.shadowSeg = seg({ aria: 'Shadow picture', value: 'phasors', options: [{ id: 'phasors', label: 'PHASORS' }, { id: 'oscillators', label: 'OSC', title: 'Oscillators' }, { id: 'lissajous', label: 'LISSA', title: 'Lissajous' }], onChange: (v) => { shadowView.setMode(v); schedule(TIER.PRESENT); } });
     r.appendChild(ui.shadowSeg.root);
     ui.hc = readout({ label: 'H_C = ½qᵀAq + ½pᵀAp = ⟨H⟩', value: '—' });
     r.appendChild(ui.hc.root);
@@ -83,7 +83,7 @@ export function createReadouts(app) {
     ui.pN = knob({ label: 'COUNT', min: 20, max: 600, value: 160, log: true, step: 10, fmt: (v) => v.toFixed(0), onChange: () => { if (ui.pOn.get()) seed(); } });
     ui.pTrail = knob({ label: 'TRAIL', min: 0, max: 120, value: 24, step: 1, fmt: (v) => v.toFixed(0), onInput: (v) => { particles.setTrail(Math.round(v)); schedule(TIER.PRESENT); } });
     for (const c of [ui.pOn, ui.pN, ui.pTrail]) r.appendChild(c.root);
-    r.appendChild(trig({ label: 'RESEED', title: 'sample a fresh cloud from |ψ|² at the current time', onFire: () => { if (ui.pOn.get()) seed(); } }).root);
+    r.appendChild(trig({ label: 'RESEED', title: 'Sample a fresh cloud from |ψ|² at the current time', onFire: () => { if (ui.pOn.get()) seed(); } }).root);
     el('div', 'note', gP).innerHTML = '<b>Particles.</b> Seeds follow |ψ|² and move with the probability current; a path never crosses a nodal line. Paths stop at the domain edge or near a node; speed is capped for display.';
   }
   /* FLOW (MOLECULAR WAVES stage 6): the SAME tracer view on its own canvas, riding a molecule's current v = j/ρ —
@@ -140,7 +140,7 @@ export function createReadouts(app) {
     ui.govRo = readout({ label: 'GOVERNOR  state · median · grid', value: 'nominal', cls: 'wide', sub: 'budget 22 ms · the window median' }); rp.appendChild(ui.govRo.root);
     /* iteration 008 S · LAST IMPULSE left STATE for this one line: escaped norm · Δp, and under it k, λ = 2π/k and the axis (the K key, the
        Ctrl+drag bow, SQUEEZE-IN; written by static-field.js and kepler.js through `ui.kickRo`) */
-    ui.kickRo = readout({ label: 'IMPULSE  escaped · Δp', value: '—', cls: 'wide', sub: 'no impulse yet · Ctrl + drag on the stage, or K' }); wMet.row('tight').appendChild(ui.kickRo.root);
+    ui.kickRo = readout({ label: 'IMPULSE  escaped · Δp', value: '—', cls: 'wide', sub: 'No impulse yet — Ctrl-drag on the stage, or IMPULSE' }); wMet.row('tight').appendChild(ui.kickRo.root);
   el('div', 'note', wMet.body).innerHTML = '<b>Frame profile.</b> Times are moving averages measured in this browser. READERS (SETTINGS › FIELD QUALITY) at 120 Hz updates visible CPU readers every fourth frame while the field continues to present each frame.';
     /* 039 V9 · METERS SHOWS ITS READINGS, AND IS NEVER TALL (C #21: LEAN hid every readout and left an empty strip; shown whole the card is 888 px in a
        626-px page): the state's five (NORM · ⟨E⟩ · t · AUTOCORR · MODES) and the last IMPULSE stand open; the engine's — FIELD CACHE · CLOCKS · LAST

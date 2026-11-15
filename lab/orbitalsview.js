@@ -108,7 +108,7 @@ export function createOrbitals(host, api) {
   };
   const bar = el('div', 'row tight reg-bar', host);
   /* 022 P3: the kit's select (its list the menu pane, never the platform's); a pick runs the preset and the list goes back to PRESET… */
-  const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: Object.keys(ORB_PRESETS).map((p) => ({ id: p, label: p })), value: null,
+  const presetSel = listSelect({ aria: 'Register preset', placeholder: 'PRESET…', cls: 'sel', items: Object.keys(ORB_PRESETS).map((p) => ({ id: p, label: p })), value: null,
     onChange: (p) => { presetSel.set(null); if (p && preset(p)) { painted(); if (api.announce) api.announce(presetMd(p)); } } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   bar.appendChild(presetSel.root);
   presetSel.button.title = 'Register preset';
@@ -370,10 +370,10 @@ export function createOrbitals(host, api) {
     id.addEventListener('click', () => { selected = k; paint(); markSel(); });
     /* 044 A3.4 (L58, REVIEW-B B16; Josh's control language: a thing's one own parameter is a slider): a lane's amplitude is the slider SPECTRUM's
        and STATES' lanes carry (`.fd.pop`), in the knob's seat; the quantity stays |c| and its road setAmp */
-    const amp = fader({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp, cls: 'pop',
+    const amp = fader({ label: '<m>|c|</m>', aria: 'Amplitude ' + label(k), min: 0, max: 1, value: c.amp, cls: 'pop',
       fmt: (v) => v.toFixed(3), onInput: (v) => { setAmp(k, v); painted(); } });
     hint(amp.root, 'Amplitude |c_k| in the register');
-    const ph = knob({ label: '<m>arg c</m>', aria: 'phase ' + label(k), min: 0, max: TAU, value: c.phase, wrap: true,
+    const ph = knob({ label: '<m>arg c</m>', aria: 'Phase ' + label(k), min: 0, max: TAU, value: c.phase, wrap: true,
       title: 'Phase arg c_k at t = 0',
       fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => { setPhase(k, v); painted(); } });
     root.appendChild(amp.root); root.appendChild(ph.root);

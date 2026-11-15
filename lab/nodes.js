@@ -17,7 +17,7 @@
  *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field, mat, present, onEdit }) → { model, filter, nodes(), add(type), remove(id),
  *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on), graph(), load(graph) } */
 import { el, ariaLabel, chip, hint, placeholder } from './mir/kit.js';
-import { createWindow } from './mir/window/window.js';
+import { createWindow } from './mir/window/window.js'; import { setGlyph } from './mir/glyph.js';
 import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
 import { frame } from './mir/core/frame.js';
@@ -74,7 +74,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const panel = createCurvesPanel({ port: { setTable() { const q = nodes.find((n) => n.type === 'curves'); if (q) { q.v++; for (const v of views) v.strip(q); } recompile(); } }, project: false, presets }), model = panel.model;
   const curveTables = () => Object.fromEntries(model.channels.map((ch) => [ch, isIdentity(model.points(ch)) || model.amount() === 0 ? null : Float32Array.from(model.table(ch))]));
   const TYPES = {
-    curves: { cls: 'table', group: 'tone', label: 'CURVES', hint: 'a transfer curve per channel, as Photoshop draws it', knobs: [],   // 038 P9: a full TONE node
+    curves: { cls: 'table', group: 'tone', label: 'CURVES', hint: 'A transfer curve per channel, as Photoshop draws it', knobs: [],   // 038 P9: a full TONE node
       neutral: () => model.amount() === 0 || model.channels.every((ch) => isIdentity(model.points(ch))),
       fn: () => { const T = curveTables(); return (y, ch) => { if (T.MASTER) y = lookup(T.MASTER, y); if (T[ch]) y = lookup(T[ch], y); return y; }; } },
     ...TABLE_TYPES, ...MATRIX_TYPES, ...PRIM_TYPES, ...LAYER_TYPES, ...SHADER_TYPES,
@@ -237,7 +237,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       keep: (n) => users.add(n, { points: model.points().map((q) => ({ t: q.t, v: q.v, tension: q.tension || 0 })) }) });
     nm.addEventListener('click', () => { const pane = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!pane) return;
       for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + CU + '"]')) {
-        const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'remove ' + name; ariaLabel(x, 'remove {name}', { name });
+        const x = setGlyph(el('span', 'sp-prex', b), 'close', { size: 16 }), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; ariaLabel(x, 'Delete {name}', { name });
         x.addEventListener('mousedown', (e) => e.preventDefault());
         x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
           if (!pane.querySelector('.mir-pick-i[data-id^="' + CU + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
@@ -265,9 +265,9 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const T = () => vWin.tools, chips = () => { const { off, folded } = T().state(); win.setChip('off', off); win.setChip('folds', folded); };   // a press flips the chip first: the model says what it reads
   win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'both', gripAt: 'first', chips: [
     { name: 'add', kind: 'action', glyph: 'plus', label: 'ADD NODE', hint: 'ADD NODE', press: () => T().add() },
-    { name: 'fit', kind: 'action', glyph: 'home', label: 'FIT', hint: 'FIT — every card in view (Home)', press: () => T().fit() },
+    { name: 'fit', kind: 'action', glyph: 'home', label: 'FIT', hint: 'FIT — every card in view', press: () => T().fit() },
     { name: 'folds', kind: 'toggle', glyph: 'compact', label: 'FOLD ALL', hint: 'FOLD ALL', states: { true: { glyph: 'expand', label: 'UNFOLD ALL', hint: 'UNFOLD ALL', pressed: false } }, press: () => { T().fold(); chips(); } },
-    { name: 'off', kind: 'toggle', glyph: 'power', label: 'BYPASS ALL', hint: 'BYPASS ALL — the picture without the graph (\\)', press: () => { T().off(); chips(); } }], resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
+    { name: 'off', kind: 'toggle', glyph: 'power', label: 'BYPASS ALL', hint: 'BYPASS ALL — the picture without the graph', press: () => { T().off(); chips(); } }], resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
     persist: { read: () => rec().win || null, write: (st) => put({ win: st }) },
     onOpen: () => { onWin(true); requestAnimationFrame(() => vWin.place()); }, onClose: () => onWin(false), onMoved: () => occlusion.dirty() });   // 021 I1: the bar's NODES seat lights on these
   /* 038 N3 · THE BAR (Josh: "Move the dock to rack button besides the 'x' button and make the icon slightly smaller and match the styling of the nodes
@@ -275,7 +275,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      card's OPEN AS A WINDOW door before × in its head (× 's own look) — the ground keeps no door */
   const door = (cls, glyph, word, run) => { const b = el('button', cls); b.type = 'button'; chip(b, glyph, word); b.addEventListener('click', run); return b; };
   vWin.anchor(win.rail.chip('add')); vWin.onTools = chips; chips();
-  win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'DOCK IN THE RACK', () => M.door('win')));
+  win.tools.prepend(door('mir-win-btn nodes-door', 'rackIn', 'Dock in the rack', () => M.door('win')));
   /* 040 N4 · THE NODES' PRESETS (Josh: "I want to add the modulation window's preset saving thing into Nodes and put it into the window title bar"):
      MOD's bar — the save glyph · PRESET NAME · ◀ ▶ — on the left after the title.  A preset is the graph: every node but CURVES (whose grade keeps its
      own presets), the shipped FILM · POSTER · PRINT then the reader's — the GRAPHS › list, `lambdawaves.q0.nodePresets` (PREFERENCE).  ◀ ▶ step through
@@ -285,7 +285,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     let cur = '';
     const save = door('mir-win-btn nodes-prebtn', 'save', 'SAVE THE GRAPH AS A PRESET', () => keep()); bar.append(save);
     const name = el('input', 'nodes-prename', bar); name.type = 'text'; name.maxLength = 40; name.spellcheck = false; name.setAttribute('autocapitalize', 'characters');
-    placeholder(name, 'PRESET NAME'); ariaLabel(name, 'preset name'); hint(name, 'PRESET NAME — type one, then SAVE');
+    placeholder(name, 'PRESET NAME'); ariaLabel(name, 'Preset name'); hint(name, 'PRESET NAME — type one, then SAVE');
     const nav = (d, glyph, word) => { const b = door('mir-win-btn nodes-prebtn', glyph, word, () => step(d)); hint(b, word); bar.append(b); };
     nav(-1, 'dirPrev', 'PREVIOUS PRESET'); nav(1, 'dirNext', 'NEXT PRESET'); hint(save, 'SAVE THE GRAPH AS A PRESET');
     showPreset = (n) => { cur = n || ''; name.value = cur; name.classList.remove('dirty'); };
@@ -313,11 +313,12 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       const m = e.type === 'pointerup' && hit && hit.captured; hit = null; prox.end();
       if (m) { win.close(); rk.open('nodes', { side: m.id, index: m.index }); rk.reveal('nodes'); } };
     const on = [['pointermove', move], ['pointerup', done], ['pointercancel', done]];
+    for (const [n, id] of [['fit', 'nodes.fit'], ['off', 'nodes.off']]) { const c = win.rail.el.querySelector('[data-mir-chip="' + n + '"]'); if (c) c.dataset.keyAction = id; }   // 044 A9 (L82): the tip writes the live key
     win.head.addEventListener('pointerdown', (e) => { if (e.button !== 0 || drag !== null) return; drag = e.pointerId; hit = null; for (const [t, f] of on) addEventListener(t, f, { passive: true }); });
     /* the hand's drag only (the kit's `dragging` let go while the card floats): a card floated by a road of its own (popOut, the header's Enter) stays a card */
     new MutationObserver((recs) => { const c = card.root.classList; if (!c.contains('floating') || c.contains('dragging') || !recs.some((m) => / dragging( |$)/.test(' ' + m.oldValue))) return;
       const r = card.root.getBoundingClientRect(); rk.dock('nodes'); rk.close('nodes'); win.open(); win.place({ x: r.left, y: r.top }); }).observe(card.root, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }); }
-  const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'OPEN AS A WINDOW', () => M.door('card')), util.querySelector('.dev-close'));
+  const util = card.root.querySelector('.dev-util'); util.insertBefore(door('nodes-door', 'rackOut', 'Float as a window', () => M.door('card')), util.querySelector('.dev-close'));
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root), ...[...win.rail.el.querySelectorAll('.mir-chip')].map((c) => paintedRect(c))] : []));   // 041 N1: the rail's chips are painted glass too
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });

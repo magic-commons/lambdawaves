@@ -24,7 +24,7 @@ export function createEqualizerCard(app) {
   const eqStep = stepper({ aria: 'Equalizer preset', items: EQ_PRESETS.map((p) => ({ id: p.id, label: p.label })), value: eq.preset, cls: 'mol-step', onChange: (id) => { eq.setPreset(id); syncEq(true); hNote(); } });
   ui.eqPick = (id) => { eqStep.set(id); eq.setPreset(id); syncEq(true); hNote(); };   // 0.6.6 G1: the stepper's road for THE VERB TABLE's switch
   const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'eq-faders', mix);
-  const eqFd = Array.from({ length: EQ_SHELLS }, (_, i) => i).map((i) => fader({ label: 'n ' + (i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
+  const eqFd = Array.from({ length: EQ_SHELLS }, (_, i) => i).map((i) => fader({ label: 'n ' + (i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + '%', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
   eqHead.append(eqStep.root, eqRo.root); eqFd.forEach((f, i) => { hint(f.root, 'Shell n = {n} · lower it to fade its beats', { n: i + 1 }); rFd.appendChild(f.root); });   // 039 V7: the label is hidden (skin.css), the hint says n
   /* 017 X1 · AN EFFECT SHOWS ITS WINDOW: × or POWER OFF stands the table down (syncEq's `why`); a reopen re-arms it from the knobs */
   for (const t of ['devclose', 'devopen']) wEq.root.addEventListener(t, () => syncEq(false));   // 044 A2: the power press is the card's `onPower`, above
@@ -44,7 +44,7 @@ export function createEqualizerCard(app) {
     const P = reg.populated(), pops = reg.re0.map((r, a) => r * r + reg.im0[a] ** 2), w = new Array(EQ_SHELLS).fill(0); for (const a of P) w[BASIS[a].n - 1] += pops[a];
     const t = why ? null : eq.table({ Z: getZ(), rates, populated: P, pops }), G = t && t.gamma, m = G ? t.mode : 0;
     if (t || eqT) { field.setEqualizer(t); schedule(TIER.RECONSTRUCT); } eqT = eq.last = t;
-    gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'hydrogen only: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why || aud.on); f.set(eq.gains[i]); });
+    gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'Hydrogen only: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why || aud.on); f.set(eq.gains[i]); });
     eqStep.set(eq.preset); eqRo.set(G ? t.purity.toFixed(3) : '1.000'); eqRo.setSub(t && !G ? t.gate : G && t.repaired ? 'repaired' : ['pure', 'mixture · no phase', 'signed · relative floor 2·10⁻⁴'][m]);
     if (hand && m === 2 && eqMode !== 2) { mat.view = VIEW.real; ui.viewSeg.set('real'); wSpec.setStatus('a signed table: VIEW is Re ψ, its lobes in two colours', 'live'); }
     eqMode = m; const nn = app.state.eqNoNodes = !!(G && m === 1 && t.lambdaMin > 1e-3 * t.lambda[t.lambda.length - 1]);   // E4: a positive-definite mixture has no zeros

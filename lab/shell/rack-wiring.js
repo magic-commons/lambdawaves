@@ -11,16 +11,16 @@ export function createRackWiring(app) {
   const { field, look, occlusion, setGovernor, setKeepFrames } = app.ctl;
   const devById = (id) => document.querySelector('.dev[data-id="' + id + '"]');
   /* 039 V8 · THE GRIP SAYS WHAT IT DOES (C #13: the title bar's hint said only "PALETTE"): a card's title bar is its grip — when the hand comes to it the
-     kit's hint (the name, and the status where it is one) gains the gesture, "drag to detach" in a rack and "drag back to dock" floating (the name alone
+     kit's hint (the name, and the status where it is one) gains the gesture, "drag to float" in a rack and "drag back to dock" floating (the name alone
      before it where the whole would pass 60 characters).  The kit's hop has made the title its data-help by then and rewrites it on a status change;
      the next hover says it again */
   document.addEventListener('pointerover', (e) => {
     const h = e.target && e.target.closest ? e.target.closest('.dev-head') : null; if (!h || e.target.closest('button')) return;
     const d = h.parentElement; if (!d || !d.classList.contains('dev')) return;
-    const how = d.classList.contains('floating') ? 'drag back to dock' : 'drag to detach', now = h.dataset.helpEn || h.title || '';
+    const how = d.classList.contains('floating') ? 'drag back to dock' : 'drag to float', now = h.dataset.helpEn || h.title || '';
     if (now.endsWith(how)) return;
     const was = now.startsWith('{what}') ? JSON.parse(h.dataset.tHvars || '{}').what || '' : now.split(' · drag ')[0], name = ((h.querySelector('.dev-title') || {}).textContent || was).trim();
-    hint(h, d.classList.contains('floating') ? '{what} · drag back to dock' : '{what} · drag to detach', { what: (was + ' · ' + how).length <= 60 ? was : name });   // 039 F3 (V-REVIEW 12): through hint(), not a hand-written title
+    hint(h, d.classList.contains('floating') ? '{what} · drag back to dock' : '{what} · drag to float', { what: (was + ' · ' + how).length <= 60 ? was : name });   // 039 F3 (V-REVIEW 12): through hint(), not a hand-written title
   }, true);
   /** a rack card's width, from the RACK's own content box — the scrollbar is already out of clientWidth */
   const rackCardWidth = () => { const cs = getComputedStyle(rack); return Math.max(180, Math.round(rack.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0))); };
@@ -30,8 +30,8 @@ export function createRackWiring(app) {
   function popFace(d) {
     const b = d && d.querySelector('.dev-pop'); if (!b) return;
     const out = d.classList.contains('floating'), g = out ? 'popOut' : layout.docked ? 'north' : 'reopen'; if (b.dataset.gly === g) return;
-    chip(b, g, out ? 'put the bar on the stage' : layout.docked ? 'undock the control surface' : 'dock the control surface');
-    b.title = out ? 'Put the bar on the stage' : 'Dock or undock the control surface';
+    chip(b, g, out ? 'put the bar on the stage' : layout.docked ? 'float the CONTROL SURFACE' : 'dock the CONTROL SURFACE');
+    b.title = out ? 'Put the bar on the stage' : 'Dock or float the CONTROL SURFACE';
   }
   /* ── 0.5.0 C3 · THE RACK IS THE KIT'S (lab/mir/shell/rack.js createRack; research/release-0.5.0/C3-DESIGN.md §2–3) ──────────
    * #rack, #rackL, #floats and the ◧ + ☆ chrome are adopted BY ID (their classes, sheets and listeners kept) and every .dev is
