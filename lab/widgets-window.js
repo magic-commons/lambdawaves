@@ -10,7 +10,7 @@ import { createWidgets, kinds, onKinds } from './widgets.js';
 import './widget-mol.js'; import './widget-clock.js'; import './widget-text.js'; import './widget-views.js';
 export function createWidgetsWindow(app) {
   const L = createWidgets(app), w = app.device({ id: 'widgets', eyebrow: 'WIDGETS', title: 'what stands on the stage', status: '' });
-  w.root.classList.add('native-clean', 'closed', 'lw-widgets-card'); app.host.rack.appendChild(w.root);
+  w.root.classList.add('closed', 'lw-widgets-card'); app.host.rack.appendChild(w.root);
   const gal = el('div', 'wg-gallery', w.body), list = el('div', 'wg-list', w.body), acts = el('div', 'row tight fit wg-acts', w.body);
   const edit = sw({ label: 'EDIT', title: 'Move and size the widgets on the stage', onChange: (v) => L.edit(v) });
   const snap = sw({ label: 'SNAP', value: true, title: 'Snap to edges and centres while dragging', onChange: (v) => L.snap(v) });

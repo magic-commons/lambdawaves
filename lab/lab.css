@@ -459,12 +459,12 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
   background: var(--glass-well); touch-action: none; cursor: grab; image-rendering: auto; }
 .slice-c:active { cursor: grabbing; }
 /* 0.5.3 M12 · PALETTE, SHORTER (material.js): no −π…π ticks, the ARG ψ field hidden, the reader under ROTATE in place of its "turn", the float over the selected stop, INVERT's half disk turned over when ON */
-.native-clean[data-id="palette"] .mir-ramp-ticks:empty, .native-clean[data-id="palette"] .mir-ramp-at { display: none; }
-.native-clean[data-id="palette"] .mir-ramp-verbs .k > .k-val, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-lbl, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-sub { display: none; }
-.dev.lean .dev-body .mir-ramp-verbs .k > .ro, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro { display: block; padding: 0; background: none; border: 0; box-shadow: none; text-align: center; }   /* LEAN hides every .ro; this one is the reader that replaced "turn", so it stays */
-.native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-val { font-size: var(--fs-micro); min-height: 0; }
-.native-clean[data-id="palette"] .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); }
-.native-clean[data-id="palette"] .pal-invert.on svg { transform: rotate(180deg); }
+.dev[data-id="palette"] .mir-ramp-ticks:empty, .dev[data-id="palette"] .mir-ramp-at { display: none; }
+.dev[data-id="palette"] .mir-ramp-verbs .k > .k-val, .dev[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-lbl, .dev[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-sub { display: none; }
+.dev.lean .dev-body .mir-ramp-verbs .k > .ro, .dev[data-id="palette"] .mir-ramp-verbs .k > .ro { display: block; padding: 0; background: none; border: 0; box-shadow: none; text-align: center; }   /* LEAN hides every .ro; this one is the reader that replaced "turn", so it stays */
+.dev[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-val { font-size: var(--fs-micro); min-height: 0; }
+.dev[data-id="palette"] .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); }
+.dev[data-id="palette"] .pal-invert.on svg { transform: rotate(180deg); }
 .pal-float { position: absolute; bottom: 3px; left: clamp(36px, calc(var(--at, 0) * 100%), calc(100% - 36px)); transform: translateX(-50%); padding: 0 4px; border-radius: var(--r-sm); font-style: normal; font-size: var(--fs-micro); font-variant-numeric: tabular-nums; white-space: nowrap; color: hsl(0 0% 100%); background: hsl(0 0% 0% / .6); z-index: 3; cursor: default; }
 .pal-color { width: 46px; height: var(--touch); padding: 2px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); }
 .ladder-c { position: relative; height: 96px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
@@ -772,11 +772,11 @@ body.menu-open #widgets { visibility: hidden; }
 .mir-render[data-seat="card"] .sr-subject-head, .mir-render[data-seat="card"] .sr-verbs { grid-column: 1 / -1; }
 .mir-render[data-seat="card"] .sr-verbs .trig { flex: 1 1 0; }
 
-/* iteration 008 S · FIELD (lab/windows/static-field.js): the IMPULSE fold's head is its label and the one chevron (a native-clean row would
+/* iteration 008 S · FIELD (lab/windows/static-field.js): the IMPULSE fold's head is its label and the one chevron (a card's row would
    stretch the chevron like a trigger); SPECTRUM's ‹ PRESET › head is one whole line */
 .lw-field-head { justify-content: space-between; }
 .lw-field-head > .grp-lbl { flex: 1 1 auto; margin: 0; }
-.native-clean .row > .trig.lw-fold { flex: 0 0 30px; }
+.dev .row > .trig.lw-fold { flex: 0 0 30px; }
 .sp-preset > .mir-step { flex: 1 1 auto; }
 /* 036 P1 · 037 H6 · BUTTONS · PAINT (paint-stroke.js strokeButton) in the head seat VISUALS left: ONE toggle button whose glyph swaps (FILL ALL ↔ EMPTY's law) */
 .sp-head > .trig.sp-stroke { min-width: 0; padding: 0; display: grid; place-items: center; }

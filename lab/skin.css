@@ -270,19 +270,16 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 /* 041 D4: a head's own glyph (rack-wiring.js) shows only as the DRAG HANDLE's ICON (the kit's body.icon-grip) */
 body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 /* 041 D0 · SPACING REACHES THE RACKS, THE WINDOWS AND THE BAR: MIR OPTIONS' SPACING knob writes --rack-gap / --rack-inset (the racks, line 2) and --pad-k (a pane's padding over home's; csb.css the bar); at home, 10 px, it writes nothing */
-.native-clean .ro { min-width: 0; box-shadow:var(--relief-well, var(--neu-inset));border:0;background:var(--glass-well); }
-.native-clean .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-.native-clean .ro-sub { height: 2.6em; overflow: hidden; line-height: 1.3; }
-.native-clean .ro.lw-status .ro-val { white-space: normal; }   /* 0.5.4 P4's seat: INFORMATIONAL's STATUS is the kit's WIDE readout, two lines (base.css Final II) — the nowrap above would cut it mid-number */
+.dev:where(:not([data-id="transport"])) .ro:not(.wide) .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 044 AV1: every card; a WIDE readout keeps its two lines (INFORMATIONAL's STATUS, CALCULUS, METERS) */
 .native-info-button { font: var(--w-bold) var(--fs-lead)/1 var(--font-ui); font-style: normal; }   /* 023 R5 (Josh: "strangely italic"): the ⓘ upright in the UI face (base.css: IT STAYS UPRIGHT), no Georgia slant */
 .native-info-button:hover, .native-info-button:focus-visible, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--glass-raise); outline: none; }
 .native-info .native-info-content { width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); border-radius: var(--r-lg); }
 .control-help { max-width: min(280px, calc(100vw - 16px)); border-radius: var(--r-md); }
-.native-clean[data-id="observer"] .segw { flex: 1 1 100%; }
-.native-clean[data-id="observer"] .row { margin: 4px 0; }
-.native-clean[data-id="settings"] .settings-section { margin-bottom: 18px; }
-.native-clean[data-id="settings"] .segw { flex: 1 1 100%; }
-.native-clean[data-id="settings"] .sw { flex: 1 1 110px; }
+.dev[data-id="observer"] .segw { flex: 1 1 100%; }
+.dev[data-id="observer"] .row { margin: 4px 0; }
+.dev[data-id="settings"] .settings-section { margin-bottom: 18px; }
+.dev[data-id="settings"] .segw { flex: 1 1 100%; }
+.dev[data-id="settings"] .sw { flex: 1 1 110px; }
 .plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }
 body.disconnected:not(.phone) .dev.native-selected > .dev-head,
 body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
@@ -290,50 +287,51 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 /* 021 G6: the transport rules that were copies of the kit's (pre-018) are gone; λWAVES' own values are --xport-* tokens and the rules a token cannot carry live in lab/csb.css. */
 #transport.tempo-open { flex-wrap: wrap; }
 /* Motion can change ink, never the dimensions of the controls around it. */
-.native-clean .formula { white-space: normal; }
-.native-clean .sp-rows[hidden] { display: none !important; }
+.dev:where(:not([data-id="transport"])) .formula { white-space: normal; }
+.dev .sp-rows[hidden] { display: none !important; }
 @media (pointer: coarse) { .native-info-button, .native-tempo .trig { min-width: 44px; min-height: 44px; }
 }
-.native-clean [hidden] { display: none !important; }
-.native-clean .sp-head { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
-.native-clean .sp-head .trig { padding: 0 3px; font-size: var(--fs-tiny); }
-.native-clean .sp-head .native-info { grid-row: 2; }
-.native-clean[data-id="settings"] > .dev-body > .segw { margin-bottom: 12px; }
-.native-clean[data-id="settings"] .settings-page > .row { margin: 10px 0 14px; }
-.native-clean[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }
-.native-clean[data-id="observer"] .segw > .k-lbl { margin-bottom: 5px; }
-.native-clean[data-id="observer"] .row > .segw { width: 100%; flex: 1 1 100%; }
-.native-clean[data-id="observer"] .seg-b { min-height: 32px; }
-.native-clean[data-id="palette"] .grp-lbl, .native-clean[data-id="clip"] .grp-lbl { display: none; }
-.native-clean[data-id="observer"] .wave-row > .segw > .seg { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%; }
-.native-clean[data-id="observer"] .wave-row-0 > .segw > .seg, .lw-dither > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
-.native-clean[data-id="observer"] .wave-row-1 > .segw > .seg { grid-template-columns:repeat(4,minmax(0,1fr)); }   /* iteration 008 W: the four observables on one line */
+.dev:where(:not([data-id="transport"])) [hidden] { display: none !important; }
+.dev .sp-head { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
+.dev .sp-head .trig { padding: 0 3px; font-size: var(--fs-tiny); }
+.dev .sp-head .native-info { grid-row: 2; }
+.dev[data-id="settings"] > .dev-body > .segw { margin-bottom: 12px; }
+.dev[data-id="settings"] .settings-page > .row { margin: 10px 0 14px; }
+.dev[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }
+.dev[data-id="observer"] .segw > .k-lbl { margin-bottom: 5px; }
+.dev[data-id="observer"] .row > .segw { width: 100%; flex: 1 1 100%; }
+.dev[data-id="observer"] .seg-b { min-height: 32px; }
+.dev[data-id="palette"] .grp-lbl, .dev[data-id="clip"] .grp-lbl { display: none; }
+.dev[data-id="observer"] .wave-row > .segw > .seg { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%; }
+.dev[data-id="observer"] .wave-row-0 > .segw > .seg, .lw-dither > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.dev[data-id="observer"] .wave-row-1 > .segw > .seg { grid-template-columns:repeat(4,minmax(0,1fr)); }   /* iteration 008 W: the four observables on one line */
 .lw-dither > .segw { flex:1 1 150px;width:auto; }   /* iteration 008 W: wave-row-6's DITHER row, now under SETTINGS › QUALITY */
-.native-clean[data-id="observer"] .wave-row { margin: 0 0 10px; }
-.native-clean[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
-.native-clean .window-help-book > .note, .native-clean .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
-.native-clean .native-info-content .ro-sub { height:auto; }
+.dev[data-id="observer"] .wave-row { margin: 0 0 10px; }
+.dev[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
+.dev .window-help-book > .note, .dev .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
+.dev .native-info-content .ro-sub { height:auto; }
 .native-info .native-info-content { border:0; }
-.native-clean[data-id="spectrum"] .grp > .row > .segw { flex:1 1 100%; }
-.native-clean[data-id="spectrum"] .grp > .row:first-of-type .seg { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
-.native-clean[data-id="spectrum"] .grp .seg button { padding:0 5px;min-width:0; }
-.native-clean[data-id="spectrum"] .grp .k-lbl { max-width:100%; }
-.native-clean .k-val { position:absolute;top:100%;left:50%;transform:translate(-50%,2px);z-index:2; }
-.native-clean .k:hover .k-val, .native-clean .k:focus-within .k-val, .native-clean .k.drag .k-val, .native-clean .k[data-live] .k-val { transform:translate(-50%,0); }
-.native-clean[data-id="observer"] .wave-row { margin-bottom:8px; }
-.native-clean[data-id="observer"] .wave-row-2 { margin-bottom:18px; }
-.native-clean[data-id="clip"] .grp > .row > .segw .seg { justify-content:center; }
-.native-clean[data-id="clip"] .grp > .row > .clip-on + .segw.clip-kind-off { opacity:.5; }
-.native-clean[data-id="clip"] .grp > .row > .clip-on + .segw .seg { display:flex;flex-wrap:nowrap; }
-.native-clean[data-id="clip"] .grp > .row > .clip-on + .segw .seg-b { flex:1 1 0;min-width:0;padding:0 4px; }
-@media (pointer:coarse) { .native-clean[data-id="observer"] .seg button { min-height:44px; }
+.dev[data-id="spectrum"] .grp > .row > .segw { flex:1 1 100%; }
+.dev[data-id="spectrum"] .grp > .row:first-of-type .seg { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
+.dev[data-id="spectrum"] .grp .seg button { padding:0 5px;min-width:0; }
+.dev[data-id="spectrum"] .grp .k-lbl { max-width:100%; }
+/* 044 AV1: the twelve cards whose knob value floats under the dial keep it so (their rows were built for a 48-px cell); every other card keeps the value's line in the cell (Josh: the value is shown) */
+.dev:where([data-id="spectrum"], [data-id="staticfield"], [data-id="palette"], [data-id="observer"], [data-id="camera"], [data-id="clip"], [data-id="slice"], [data-id="settings"], .lw-info-card, .lw-light, .lw-stage-card, .lw-widgets-card) .k-val { position:absolute;top:100%;left:50%;transform:translate(-50%,2px);z-index:2; }
+.dev:where([data-id="spectrum"], [data-id="staticfield"], [data-id="palette"], [data-id="observer"], [data-id="camera"], [data-id="clip"], [data-id="slice"], [data-id="settings"], .lw-info-card, .lw-light, .lw-stage-card, .lw-widgets-card) .k:is(:hover, :focus-within, .drag, [data-live]) .k-val { transform:translate(-50%,0); }
+.dev[data-id="observer"] .wave-row { margin-bottom:8px; }
+.dev[data-id="observer"] .wave-row-2 { margin-bottom:18px; }
+.dev[data-id="clip"] .grp > .row > .segw .seg { justify-content:center; }
+.dev[data-id="clip"] .grp > .row > .clip-on + .segw.clip-kind-off { opacity:.5; }
+.dev[data-id="clip"] .grp > .row > .clip-on + .segw .seg { display:flex;flex-wrap:nowrap; }
+.dev[data-id="clip"] .grp > .row > .clip-on + .segw .seg-b { flex:1 1 0;min-width:0;padding:0 4px; }
+@media (pointer:coarse) { .dev[data-id="observer"] .seg button { min-height:44px; }
 }
 .plane-model[aria-disabled="true"] { opacity:.35;}
 .native-play-row { display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;min-width:0; }
 #transport.mini .native-play-row { gap:2px; }
 #transport { box-sizing:border-box;max-width:100%;overflow:hidden; }
 #transport .native-play-row { min-width:0;width:100%;overflow:hidden; }
-.native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 44px) 22px;align-items:center; }
+.dev .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 44px) 22px;align-items:center; }
 .plane-model { border-radius: var(--r-md); }
 
 /* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
@@ -369,9 +367,9 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 #floats > .dev { max-height:none; }
 #floats > .dev > .dev-body { overflow:visible; }
 .dev .picker { max-height:none;overflow:visible; }
-.native-clean[data-id="settings"] .settings-viewport { height:auto;overflow:visible; }
-.native-clean .sp-knobs .k-val { max-width:80px; }
-.native-clean[data-id="settings"] .settings-actions > .trig { flex:1 1 70px; }
+.dev[data-id="settings"] .settings-viewport { height:auto;overflow:visible; }
+.dev .sp-knobs .k-val { max-width:80px; }
+.dev[data-id="settings"] .settings-actions > .trig { flex:1 1 70px; }
 /* Spectrum lanes own their compact column sizes; general window knobs never size these stacks. */
 @media (hover:hover) and (pointer:fine) { .dev[data-id="spectrum"] .sp-row { grid-template-columns:4px 48px minmax(42px,1fr) 34px 28px 28px 24px; }
 }
@@ -401,8 +399,8 @@ body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="so
 body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info))),
 body.window-info-off .settings-help { display:none; }
 
-.native-clean[data-id="settings"] .settings-status-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
-.native-clean[data-id="settings"] .settings-status-grid > .sw { width:100%;min-width:0;box-sizing:border-box; }
+.dev[data-id="settings"] .settings-status-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
+.dev[data-id="settings"] .settings-status-grid > .sw { width:100%;min-width:0;box-sizing:border-box; }
 
 .shadow-controls { display:flex;flex-wrap:nowrap;gap:6px; }
 .shadow-controls > .segw { flex:1;min-width:0; }
@@ -436,11 +434,11 @@ body.window-info-off .settings-help { display:none; }
   #transport.docked .dock-btn::after { content: ''; position: absolute; inset: -7px; }   /* 34 px of ink, 46 of finger (an inset runs from the PADDING box: the 1-px edge is paid twice) */
   .dev[data-id="camera"] .k[data-param="observer.panx"] { margin-bottom: 11px; }         /* the kit's route ring is 32 px out: two routed dials need a 64-px pitch, PAN X over PAN Y had 53 */
   .dev[data-id="observer"] .k:is([data-param="material.exposure"], [data-param="material.softness"], [data-param="material.hue"]) { margin-bottom: 8px; }   /* … and these three over ISO / GRAIN / KNEE had 56 */
-  .native-clean .native-rotors { margin-bottom: 14px; }                    /* … and the STATE rotors' ring ran 5 px into the next group before it was cut */
+  .dev .native-rotors { margin-bottom: 14px; }                    /* … and the STATE rotors' ring ran 5 px into the next group before it was cut */
   #transport .k-route-depth.k { width: 22px; min-width: 22px; }           /* `#transport .k` (58 px) stretched the kit's depth dial over the RATE dial's top half */
   .dev .trig { min-height: var(--touch); }                                /* RENDER's and CAMERA's 40-px triggers, SETTINGS' 18-px FOLLOW chip */
-  .native-clean[data-id="observer"] .seg button { min-height: var(--touch); }
-  .native-clean[data-id="spectrum"] .grp .seg button { min-width: var(--touch); }
+  .dev[data-id="observer"] .seg button { min-height: var(--touch); }
+  .dev[data-id="spectrum"] .grp .seg button { min-width: var(--touch); }
   .dev .shadow-controls { grid-template-columns: minmax(0, 1fr) var(--touch); }
   .dev .shadow-controls > .shadow-details-toggle { width: var(--touch); min-width: var(--touch); }
 }
@@ -885,9 +883,9 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 /* CAMERA: the sphere drawn bigger beside its knob column (YAW · PITCH · ZOOM · FOV, material.js).  The kit's drawing is 400 × 280 with the ball
    at R 85, mostly empty sides: the svg is widened by 2 × 64 px past its cell and its sides clipped away (clip-path clips the hit test too), so
    the kit's own pixel ↔ drawing scale (min of the two ratios, camera.js) stays exact and the tip still follows the finger */
-.native-clean[data-id="camera"] .mir-camsphere-body { align-items: center; }
-.native-clean[data-id="camera"] .mir-camsphere .cs-svg { width: calc(100% + 128px); max-width: none; margin: 0 -64px; clip-path: inset(0 64px round var(--r-md)); }
-.native-clean[data-id="camera"] .mir-camsphere-side { position: relative; z-index: 1; row-gap: var(--sp-1); }
+.dev[data-id="camera"] .mir-camsphere-body { align-items: center; }
+.dev[data-id="camera"] .mir-camsphere .cs-svg { width: calc(100% + 128px); max-width: none; margin: 0 -64px; clip-path: inset(0 64px round var(--r-md)); }
+.dev[data-id="camera"] .mir-camsphere-side { position: relative; z-index: 1; row-gap: var(--sp-1); }
 /* 037 L1 · LIGHTING (lab/light-window.js): FRAME · RESET · MORE on one row; the SUN pad — the kit's XY pad as a disc (its lattice clipped round, its
    two hidden knobs the disc's x · y), the horizon dashed at half the radius, the sun its point (the key's colour when tinted, faint behind) — beside
    KEY · RADIUS / HUE · TINT; then AMBIENT · SPECULAR · SHINE · RIM.  The visible body stays near 300 px; FILL and SPOT fold away */
@@ -898,7 +896,7 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .lw-light .lw-light-frame .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; box-sizing: border-box; }
 .lw-light .lw-light-frame .seg-b { min-width: 0; padding: 0 6px; white-space: nowrap; }
 .lw-light .lw-light-reset { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
-.lw-light .lw-light-reset > svg, .native-clean[data-id="palette"] .mir-ramp-reset > svg { width: 18px; height: 18px; }
+.lw-light .lw-light-reset > svg, .dev[data-id="palette"] .mir-ramp-reset > svg { width: 18px; height: 18px; }
 .lw-light .lw-light-key { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 10px; align-items: center; margin: 6px 0; }
 .lw-light .lw-sun { width: 128px; }
 .lw-light .lw-sun .mir-xy-body { display: block; }
@@ -918,13 +916,13 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .mir-camera .cam-light .cam-light-open { flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 /* 018 B3 · 020 S3: the verbs in TWO rows — PAN HOME · HOME, then LOCK · FLIP · AUTO-ROTATE (.cam-switches); each row shares its width evenly */
 /* PALETTE: ADD is the kit's plus, REVERSE (iteration 015 P2) the table's two counter-pointing arrows — 021 V2: SVG glyphs (material.js), no masks */
-.native-clean[data-id="palette"] :is(.pal-add, .pal-rev) > svg { width: 18px; height: 18px; }
-.native-clean[data-id="palette"] .pal-add, .native-clean[data-id="palette"] .pal-rev { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
-.native-clean[data-id="palette"] .mir-ramp-verbs { flex-wrap: nowrap; }
-.native-clean[data-id="palette"] .mir-ramp-verbs > .mir-ramp-sel { flex: 0 0 auto; }
+.dev[data-id="palette"] :is(.pal-add, .pal-rev) > svg { width: 18px; height: 18px; }
+.dev[data-id="palette"] .pal-add, .dev[data-id="palette"] .pal-rev { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
+.dev[data-id="palette"] .mir-ramp-verbs { flex-wrap: nowrap; }
+.dev[data-id="palette"] .mir-ramp-verbs > .mir-ramp-sel { flex: 0 0 auto; }
 /* WAVE: a row whose controls are all hidden goes with them — POSITION | MOMENTUM while MOLECULES owns the field (windows/molecules.js), the molecule
    rows under hydrogen or an atom (018 B1, material.js modeSync) */
-.native-clean[data-id="observer"] .wave-row:not(:has(> :not([hidden]))) { display: none; }
+.dev[data-id="observer"] .wave-row:not(:has(> :not([hidden]))) { display: none; }
 /* iteration 012 R4 · THE PALETTE DROPDOWN: short rows, each palette's strip at the right edge */
 .mir-pick.pal-pick { gap: 0; padding: 6px; scrollbar-gutter: stable; }   /* P1: the scrollbar beside the rows, never out of the names' width (Firefox) */
 .mir-pick.pal-pick .mir-pick-i { min-height: 24px; padding: 0 8px; gap: 14px; justify-content: space-between; text-align: left; }   /* iteration 014 D4: the name left, the strip right */
@@ -944,27 +942,27 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
  * CURVES, the camera's sphere column and PAN pad, SPECTRUM's lanes and their vertical phase/rate stacks, the molecule shelf, the ramp,
  * the EQ faders, NODES' plane and the CONTROL SURFACE. */
 :root { --knob-max: 34px; }
-.native-clean .row.fit, .lw-info-card .grp > .row.fit, .mir-camera .row.fit, .dev[data-id="spectrum"] .sp-ham-body > .row.fit { gap: var(--row-gap, 4px) 4px; }
+.dev:where(:not([data-id="transport"])) .row.fit, .lw-info-card .grp > .row.fit, .mir-camera .row.fit, .dev[data-id="spectrum"] .sp-ham-body > .row.fit { gap: var(--row-gap, 4px) 4px; }
 .mir-camera .row.fit { margin: 0; grid-template-columns: repeat(auto-fit, minmax(min(var(--cell-min, 40px), 100%), 1fr)); }   /* over the panel's 72-px verbs */
 .row.fit > .lw-fold { justify-self: end; width: 30px; }
 .dev .row.fit > .sp-vseg { grid-column: auto; width: 100%; max-width: 58px; justify-self: center; min-width: 0; }
 .row.fit > .wide { grid-column: span 2; }
 /* WAVE: 6 × 40 + 5 × 4 = 260 > the card's 252, so the six material dials stay three over three (72-px cells, every label whole) */
-.native-clean[data-id="observer"] .wave-row-2 { --cell-min: 72px; }
+.dev[data-id="observer"] .wave-row-2 { --cell-min: 72px; }
 /* 023 R3 A ROW IS EVEN: ESP's two rows share three columns — SIZE · RADIUS · MAP ONLY over PROBE · RANGE · LIVE · SLOW, knob over knob,
    the switch in the third; ISO | SAS | SES the whole line between them */
-.native-clean[data-id="observer"] :is(.wave-row-7, .wave-row-8) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); --knob-max: 29px; }   /* LIVE · SLOW whole on one line; the four faces one size, the row no taller */
-.native-clean[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw { padding-inline: 6px; justify-content: flex-start; } .native-clean[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw .sw-lbl { white-space: nowrap; }
-.native-clean[data-id="observer"] .wave-row-7 > .segw { grid-column: 1 / -1; }
+.dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); --knob-max: 29px; }   /* LIVE · SLOW whole on one line; the four faces one size, the row no taller */
+.dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw { padding-inline: 6px; justify-content: flex-start; } .dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw .sw-lbl { white-space: nowrap; }
+.dev[data-id="observer"] .wave-row-7 > .segw { grid-column: 1 / -1; }
 /* SETTINGS: the stage's seat beside STAGE · GAMMA; DITHER's seg and STRENGTH on one line; DOMAIN AUTO beside WIDTH */
-.native-clean[data-id="settings"] .lw-stage-row > .stage-seat { grid-column: span 2; justify-self: center; }
-.native-clean[data-id="settings"] .lw-dither { --cell-min: 56px; }
-.native-clean[data-id="settings"] .lw-dither > .segw { grid-column: span 3; width: auto; }
-.native-clean[data-id="settings"] .lw-domain > .sw { grid-column: span 2; }
+.dev[data-id="settings"] .lw-stage-row > .stage-seat { grid-column: span 2; justify-self: center; }
+.dev[data-id="settings"] .lw-dither { --cell-min: 56px; }
+.dev[data-id="settings"] .lw-dither > .segw { grid-column: span 3; width: auto; }
+.dev[data-id="settings"] .lw-domain > .sw { grid-column: span 2; }
 /* 023 R1 (Josh: "shorten … convert and vivid so that 'P3' can fit in that same row"): P3 beside IN P3's CONVERT · VIVID, one line at 300 px */
-.native-clean[data-id="settings"] .lw-gamut { align-items: end; }
-.native-clean[data-id="settings"] .lw-gamut > .sw { grid-column: span 2; }
-.native-clean[data-id="settings"] .lw-gamut > .segw { grid-column: span 3; width: auto; }
+.dev[data-id="settings"] .lw-gamut { align-items: end; }
+.dev[data-id="settings"] .lw-gamut > .sw { grid-column: span 2; }
+.dev[data-id="settings"] .lw-gamut > .segw { grid-column: span 3; width: auto; }
 /* 037 T1 · STAGE (lab/stage-window.js): FRAME the whole line; AXES · AXIS COLOUR halves; the colour a swatch bar beside FOLLOW THEME; STAGE · GAMMA */
 /* 041 S8 · THE STAGE COMES BACK: RELOAD STAGE, in the middle of a stage whose GPU device was lost (shell/controller.js stageLost) */
 .lw-stage-lost { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: var(--z-stage-lost); zoom: var(--ui-zoom, 1); }
@@ -980,8 +978,8 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-stage-card .stage-pulse { margin-bottom: 2px; }
 .lw-stage-card .stage-fx-head { display: flex; align-items: center; justify-content: space-between; min-height: 26px; }   /* 040 S2: a group's word, and PULSE's chevron (STROBE · BEAM) */
 .lw-stage-card .stage-fx-head > .grp-lbl { margin: 0; }
-.native-clean[data-id="settings"] .lw-edit-stage > .trig { flex: 1 1 100%; }
-.native-clean[data-id="settings"] .lw-edit-more > .trig { flex: 1 1 0; min-width: 0; }   /* 040 M4: INFO · WIDGETS share the row under EDIT STAGE (three never fit 252 px whole; EDIT STAGE keeps its seat); 041 S10: the row splits evenly */
+.dev[data-id="settings"] .lw-edit-stage > .trig { flex: 1 1 100%; }
+.dev[data-id="settings"] .lw-edit-more > .trig { flex: 1 1 0; min-width: 0; }   /* 040 M4: INFO · WIDGETS share the row under EDIT STAGE (three never fit 252 px whole; EDIT STAGE keeps its seat); 041 S10: the row splits evenly */
 /* 037 T2 · THE MITOSIS (lab/summon.js): the two title-bar pills in one fixed layer over the racks, drawn at the UI scale, gone when they land */
 .lw-mitosis { position: fixed; inset: 0; z-index: calc(var(--z-chrome) + 3); pointer-events: none; zoom: var(--ui-zoom, 1); }
 .lw-mitosis > .lw-mitosis-pill { position: absolute; margin: 0; box-sizing: border-box; }
@@ -1014,7 +1012,7 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-widgets-card .wg-acts:has(.wg-bar) { grid-template-columns: repeat(3, minmax(0, 1fr)); }   /* 038 S3 · S6: EDIT · SNAP · CLEAR keep their thirds; BY THE BAR is the row under them */
 .lw-widgets-card .wg-bar { grid-column: 1 / -1; white-space: nowrap; }
 /* CAMERA: AUTO-ROTATE needs two cells */
-.native-clean[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
+.dev[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
 /* SPECTRUM: HYDROGEN's two rows keep ONE column rhythm (017 R4) — three columns for both, filled or not */
 .dev[data-id="spectrum"] .sp-ham-body > :is(.sp-ham-h, .sp-ham-s) { --cell-min: 64px; grid-template-columns: repeat(auto-fill, minmax(var(--cell-min), 1fr)); }
 /* INFORMATIONAL (call 7; 023 R2 A ROW IS EVEN): every row is the same four columns, so a column keeps its place from row to row — the
@@ -1031,9 +1029,9 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-info-card .info-formula > .info-pos { grid-column: 2; justify-self: end; width: 30px; padding: 0; } .lw-info-card .info-formula > .k { grid-column: 3; }
 .lw-info-card .row.fit:not(.info-col) > .k:last-child { grid-column: 4; }
 /* FIELD: the rotors keep their columns (a wheel over its rate); INTER-SHELL takes two cells, NO FIELD and CAT the line */
-.native-clean[data-id="staticfield"] .native-rotors { --cell-min: 72px; }
-.native-clean[data-id="staticfield"] .row.fit > .sw, .native-clean[data-id="staticfield"] .row.fit > .trig { grid-column: span 2; }
-.native-clean[data-id="staticfield"] .row.fit > .trig:last-of-type { grid-column: 1 / -1; }
+.dev[data-id="staticfield"] .native-rotors { --cell-min: 72px; }
+.dev[data-id="staticfield"] .row.fit > .sw, .dev[data-id="staticfield"] .row.fit > .trig { grid-column: span 2; }
+.dev[data-id="staticfield"] .row.fit > .trig:last-of-type { grid-column: 1 / -1; }
 /* EQUALIZER: SOUND beside LEVELS | BEATS, AUDIO IN beside its readout */
 .dev[data-id="equalizer"] .row.fit > .sw { grid-column: span 2; }
 /* MOLECULES: MORPH and FLOW beside A ↔ B; the method's seg, VALENCE and the chevron */

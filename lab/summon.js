@@ -34,7 +34,7 @@ function mitosis(from, to) {
   const z = cssZoom(from), r = from.getBoundingClientRect(), h = fh.offsetHeight, dy = to.offsetTop - from.offsetTop;
   const layer = document.createElement('div'); layer.className = 'lw-mitosis'; layer.setAttribute('aria-hidden', 'true'); layer.inert = true;
   const pill = (card, head) => {
-    const p = document.createElement('section'); p.className = 'dev folded lw-mitosis-pill' + (card.classList.contains('native-clean') ? ' native-clean' : '');
+    const p = document.createElement('section'); p.className = 'dev folded lw-mitosis-pill';
     if (card.dataset.kind) p.dataset.kind = card.dataset.kind;
     const c = head.cloneNode(true); for (const n of c.querySelectorAll('[id]')) n.removeAttribute('id'); p.appendChild(c);
     Object.assign(p.style, { left: r.left / z + 'px', top: r.top / z + 'px', width: from.offsetWidth + 'px' });
