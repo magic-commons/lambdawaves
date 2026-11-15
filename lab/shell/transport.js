@@ -1,7 +1,7 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS, SETTINGS, the loop and the facade; boot() destructures transport. */
-import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp, label } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
+import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp, label } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, transportDock, CONTROL_SURFACE_LAYOUT } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js';
 import { cssZoom } from '../mir/core/zoom.js'; import { notice } from '../mir/shell/notice.js'; import { adopt } from '../widgets.js'; import { STYLES as MOL_STYLES, STYLE_GLYPH } from '../widget-mol.js';
 export function createTransport(app) {
@@ -47,14 +47,9 @@ export function createTransport(app) {
        … a dedicated icon to expand the CSB … Remove the t = n thing from the CSB"): PLAY floats outside the bar's left edge; LEFT = RATE over the
        typed BPM pill, MOD over EXPAND, then ⏮ · TIMELINE / the door · the dock; CENTRE = MOLECULES' chooser over LIBRARY · MOLECULAR · HYDROGEN ·
        FOLDERS (lab.css centres it with two equal side tracks); RIGHT = SEARCH · FINDER · ♥ · ◧ · ⚙ / NODES · INFORMATIONAL · THEME · FOLDS (020 T2; 040 M5, Josh: "swap positions of the expand all windows with the settings knob").  Every seat is one
-       36-px box, its icon one 20-px glyph (021 V2: lab/icons.js through the kit's roads).  t lives in the TIMELINE's TIME reader, its hint (036 W2, keys.js ui.tlTime).  The layout is λWAVES' own array
-       under the kit's 'csb' drawing name, so the docked card keeps the kit's CONTROL SURFACE title. */
-    const CSB = Object.assign([{ group: 'csb-play', items: ['play'] },
-      { group: 'csb-side csb-left', items: [{ group: 'csb-col csb-tempo', items: ['app:rate', 'tempo'] }, { group: 'csb-col csb-mod', items: ['power', 'expand'] },
-        { group: 'csb-ico', items: ['app:begin', 'app:home', 'openers', 'door'] }] },   // 032 T14: ⏮ (bar 1) then ↺ (t → 0), each an action's seat, over TIMELINE · the door
-      { group: 'csb-mid', items: ['app:chooser', { group: 'csb-row csb-lib', items: ['app:modes', 'app:folders'] }] },
-      { group: 'csb-side csb-right csb-ico', items: ['app:search', 'app:finder', 'app:fav', 'app:rack', 'app:gear', 'app:nodes', 'app:info', 'app:theme', 'app:folds', 'dock'] },   // 032 T14: the dock chip takes the right grid's tenth cell (the left 2 × 2 is ⏮ ↺ over TIMELINE · the door), so the bar keeps 674 px and its height
-      'panel'], { name: 'csb', title: 'CONTROL SURFACE' });
+       36-px box, its icon one 20-px glyph (021 V2: lab/icons.js through the kit's roads).  t lives in the TIMELINE's TIME reader, its hint (036 W2, keys.js ui.tlTime).  The layout is the kit's CONTROL_SURFACE_LAYOUT
+       (044 K6; it was λWAVES' own array under the kit's 'csb' drawing name). */
+    /* 044 K6 · THE CSB IS THE KIT'S (MIR 1.6.0-alpha.69): this array moved into the kit as CONTROL_SURFACE_LAYOUT, part for part; the seats' drawing with it (mir/shell/transport.css) */
     /* 021 I1 · THE SEATS READ THE REGISTRY (lab/actions.js): `seat(id)` takes its word (`word()` where it changes, else the label; its hint the action's short `hint`, 022 H1), its icon, its
        light (a toggle's get()) and its key hint (data-key-action) from the action, and a press runs the action — FOLDS, NODES, INFORMATIONAL, THEME
        and ⚙ are actions of their own; a seat repaints when its action says its state moved (notify) and on the hand's hover */
@@ -71,7 +66,7 @@ export function createTransport(app) {
     const chooser = document.querySelector('.dev[data-id="chem"] .mol-pick');
     const byId = (id) => document.getElementById(id);
     const search = createCsbSearch(app, { bar: () => T });   // A2 · THE MINIATURE PICKER (lab/csb-search.js)
-    const bar = createBar({ layout: CSB, root: T, host: dom.stage, seats: 'thin',   // 021 K4: λWAVES' thin seats are a kit door since MIR 1.5.5
+    const bar = createBar({ layout: CONTROL_SURFACE_LAYOUT, root: T, host: dom.stage, seats: 'thin',   // 021 K4: λWAVES' thin seats are a kit door since MIR 1.5.5
       nodes: { rate: ui.rateKnob.root, gear, modes: byId('lwMode'), chooser, search: search.root, folders, finder, info, theme, folds, nodes, begin, home: zero, rack: byId('rackToggle'), fav: byId('rackFav') },
       openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),

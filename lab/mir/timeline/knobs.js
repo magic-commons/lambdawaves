@@ -43,7 +43,7 @@ export function installTimelineKnobs({ registry, editor }) {
   listen(document,'pointerup',end,true);listen(document,'pointercancel',e=>{cancel();if(owned&&owned.id===e.pointerId)owned=null;},true);
   listen(document,'click',e=>{if(performance.now()<suppressUntil&&e.target.closest?.('.k[data-param]')){e.preventDefault();e.stopImmediatePropagation();}},true);
   listen(document,'contextmenu',e=>{const root=e.target.closest?.('.k[data-param]');if(root&&registry.has(root.dataset.param)){e.preventDefault();e.stopImmediatePropagation();abort();root.querySelector('.k-dial')?.dispatchEvent(new PointerEvent('pointercancel'));open(root,e.clientX,e.clientY);}},true);
-  listen(document,'keydown',e=>{if(e.key==='ContextMenu'||e.shiftKey&&e.key==='F10'){const root=document.activeElement?.closest?.('.k[data-param]');if(root&&registry.has(root.dataset.param)){e.preventDefault();const r=root.getBoundingClientRect();open(root,r.right,r.bottom);}}if(e.key==='Escape'){abort();close();}});
+  listen(document,'keydown',e=>{if(e.key==='ContextMenu'||e.shiftKey&&e.key==='F10'){const root=document.activeElement?.closest?.('.k[data-param]');if(root&&registry.has(root.dataset.param)){e.preventDefault();const r=root.getBoundingClientRect();open(root,r.right,r.bottom);}}if(e.key==='Escape')cancel();});   // 1.6.0-alpha.67: Escape only forgets a hold not yet a menu; the menu closes by its own road (the app's stack), a drag by the knob's
   listen(globalThis,'blur',()=>{abort();close();});
   listen(document,'visibilitychange',()=>{if(document.hidden){abort();close();}});
   return ()=>{abort();close();events.abort();knobMenuPart('clip',null);};

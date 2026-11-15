@@ -6,8 +6,8 @@
  * count and CLEAR.  The list is history-list.js; the stack, the keys and the gesture naming are the modules beside it.
  *
  * THE LAWS IT KEEPS
- *   · ONE WINDOW SPECIES.  It is a `createWindow`: the rail, the dock, the grip, the raise and the persistence are the
- *     window's; empty glass (the head, the foot's gap) drags it.  Its size and place are remembered under `storageKey`.
+ *   · ONE WINDOW SPECIES.  It is a `createWindow` with a title bar (`chrome: 'close'`, 1.6.0-alpha.71): the bar, the raise and the persistence are the
+ *     window's; the bar and empty glass (the foot's gap) drag it.  Its size and place are remembered under `storageKey`.
  *   · A VIEW, NOT A STORE.  It draws `history.entries()` and calls `goto`, `undo`, `redo`, `clear`.  It repaints once a
  *     frame and only while it is open; closed, it costs nothing.
  *   · THE KEYS AND THE GESTURES COME WITH IT, ON BY DEFAULT: Ctrl/⌘+Z · Ctrl/⌘+Shift+Z · Ctrl/⌘+Y everywhere except a
@@ -18,7 +18,7 @@
  *     the picture) and `adoptTimeline`.  `history.clear('SESSION')` is the app's, once its domains are in.
  *
  * createHistoryWindow({ history, host, id = 'history', title = 'HISTORY', mod, present, canAct, stage, windows,
- *                       keys = true | a createKeys table, gestures = true, storageKey = 'mir.history.window', persist, dock, chips,
+ *                       keys = true | a createKeys table, gestures = true, storageKey = 'mir.history.window', persist,
  *                       size = { w: 320, h: 440 }, min = { w: 240, h: 200 }, say, onOpen, onClose })
  *   → { win, root, history, list, open(), close(), toggle(), isOpen, rows(), paint(), destroy() }
  *   history   a createHistory()          host   where the window and its rail go (the app's float layer)
@@ -28,6 +28,7 @@
  *   say(text) where "Nothing to undo" is said (default: the kit's notice)
  *   rows()    [{ i, label, state }] as drawn, newest first: what a test or an agent reads */
 import { el, label, ariaLabel, hint } from '../kit.js';
+import { glyphEl } from '../glyph.js';
 import { createWindow } from '../window/window.js';
 import { setText } from '../core/perf.js';
 import { notice } from '../shell/notice.js';
@@ -62,14 +63,6 @@ export function createHistoryWindow(o = {}) {
   let list = null, undo = null, redo = null, count = null;
   const body = (b) => {
     const root = el('div', 'hist-win', b);
-    const head = el('header', 'nb-head', root);
-    label(el('span', 'nb-title hist-title', el('div', 'nb-titles', head)), title);
-    const tools = el('span', 'nb-tools', head);
-    const tool = (cls, glyph, aria, tip, fire, action) => { const x = el('button', cls, tools, glyph); x.type = 'button'; ariaLabel(x, aria); hint(x, tip); x.addEventListener('click', fire); if (action) x.dataset.keyAction = action; return x; };
-    /* the key is the table's, in the user's platform (keys.hints writes data-key-hint; the tooltip shows it after the word) */
-    undo = tool('hist-undo', '↶', 'undo', 'Undo', () => history.undo(), keyOff && 'undo');
-    redo = tool('hist-redo', '↷', 'redo', 'Redo', () => history.redo(), keyOff && 'redo');
-    tool('hist-close', '×', 'close the history', 'Close', () => win.close());
     list = historyList(history, root, { tools: false, count: false });
     const foot = el('div', 'nb-foot', root);
     count = el('span', 'hist-count', foot);
@@ -80,9 +73,17 @@ export function createHistoryWindow(o = {}) {
   };
   const sync = (st) => { undo.disabled = !st.canUndo; redo.disabled = !st.canRedo; setText(count, st.count); };
 
-  const win = createWindow({ id, title, host, size, min, resizable: true, emptyDrag: true, body, persist, dock: o.dock || null, chips: o.chips || [],
+  /* 1.6.0-alpha.71 · HISTORY HAS A TITLE BAR (`chrome: 'close'`, as KEYS, ABOUT and MIR OPTIONS: a list to read): the kit's bar is its head — the title, ↶ ↷ in
+     the bar's own slot as head buttons, the bar's × — and the whole bar drags it.  It stood on a chip rail under a head of its own (BASINS' notebook frame). */
+  const win = createWindow({ id, title, host, size, min, resizable: true, emptyDrag: true, chrome: 'close', body, persist,
     onOpen(w) { list.paint(); sync(list.state()); if (o.onOpen) o.onOpen(w); }, onClose: o.onClose });
   win.body.classList.add('hist-body');
+  const tool = (cls, glyph, mark, aria, tip, fire, action) => { const x = el('button', 'mir-win-btn ' + cls); x.type = 'button'; const g = glyphEl(glyph, 'gly gly-' + glyph); if (g) x.appendChild(g); else x.textContent = mark;
+    ariaLabel(x, aria); hint(x, tip); x.addEventListener('click', fire); if (action) x.dataset.keyAction = action; return x; };
+  /* the key is the table's, in the user's platform (keys.hints writes data-key-hint; the tooltip shows it after the word) */
+  undo = tool('hist-undo', 'undo', '↶', 'undo', 'Undo', () => history.undo(), keyOff && 'undo');
+  redo = tool('hist-redo', 'redo', '↷', 'redo', 'Redo', () => history.redo(), keyOff && 'redo');
+  win.tools.prepend(undo, redo); sync(list.state());
   if (keyOff && keyOff.keys !== o.keys) { const k = keyOff.keys; k.hints(win.root); offs.push(k.onChange(() => k.hints(win.root))); }   // a table of its own: its hints are its own (an app's table hints the whole document)
   const offState = list.onChange((st) => { if (win.isOpen()) sync(st); });
 

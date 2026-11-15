@@ -41,10 +41,13 @@
  * at the edge scrolls it (the wheel listener and the edge pump, below).
  * CHANGED FOR THE KIT: words through label / ariaLabel / t (nothing is found by its words); the keyboard is the app's one
  * key table (keys.js timelineActions: this file only exposes the verbs); toasts through `say`; the frame coalescer is
- * core/frame.js; the popups are the house's menu pane; BASINS' CURVE_VIEW numbers live in geometry.js. */
+ * core/frame.js; a menu is the kit's contextMenu (1.6.0-alpha.66: the ⋯ list, a clip's and a point's menu and every list a row opens — one
+ * renderer, one walk, keycaps, submenus), THE MODE MENU and the three small forms (TITLE / COLOR, TIME / VALUE, OUTPUT RANGE) are panes of
+ * their own (`.tl-pop`: a tool palette and dialogs, not menus); BASINS' CURVE_VIEW numbers live in geometry.js. */
 import { svgPoint, curveHit, curveAction, pointDrag, pointAddValue, tensionDelta, fineGear } from '../modulation/curve-gesture.js';
 import { el, label, ariaLabel, seg, stepper, number, TAP } from '../kit.js';
 import { confirmDialog } from '../shell/dialog.js';
+import { contextMenu, keycaps, escapeLayer } from '../shell/menubar.js';
 import { glyphSvg } from '../glyph.js';
 import { frame } from '../core/frame.js';
 import { isField } from '../core/pointer.js';
@@ -86,9 +89,9 @@ export const SWATCHES=['#a7adb8','#f8858b','#e9b368','#a5cb7b','#6cc1cc','#92a7e
 export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say=()=>{},audio=null,keys=null,moreRows=null}) {
   /* the chord the app's table holds for a timeline action, in the user's platform ('' when none): never typed here */
   const chordOf=id=>{const k=typeof keys==='function'?keys():keys;return k&&k.get&&k.get('timeline.'+id)?k.menuKey('timeline.'+id):'';};
-  const withKey=(node,id)=>{const c=id&&chordOf(id);if(c)el('span','tl-key',node).textContent=' · '+c;return node;};
+  const withKey=(node,id)=>{const c=id&&chordOf(id);if(c)keycaps(el('span','tl-key mb-key',node),c);return node;};   // a row of THE MODE MENU: its key as keycaps (1.6.0-alpha.66; it was typed " · chord")
   let doc=model.state(),selectedLane=doc.lanes[0].id,selected=null,selection=new Set(),pointSelection=null;
-  let px=20,snap=1,range=null,menu=null,drag=null,lastTap=null,rulerTap=null,clipboard=null,lastClip=null;   // lastClip: THE PENCIL's memory, the clip last pressed; rulerTap: the ruler's last press (THE RANGE STAYS)
+  let px=20,snap=1,range=null,menu=null,ctx=null,escPane=null,escDrag=null,drag=null,lastTap=null,rulerTap=null,clipboard=null,lastClip=null;   // lastClip: THE PENCIL's memory, the clip last pressed; rulerTap: the ruler's last press (THE RANGE STAYS)
   let stepMode=false,slideMode=false,drawTension=0,tool='edit',scope='clips',workLane='top';
   const dropHandlers=new Set();
   const transportBeat=()=>mod.host.model.transport.beats;
@@ -102,7 +105,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     b.textContent='';delete b.dataset.t;b.insertAdjacentHTML('beforeend',glyphSvg(glyph,'gly gly-'+glyph,16));b.querySelector('svg')?.setAttribute('aria-hidden','true');b.classList.add('tl-icon');toolButtons.set(name,b);}
   /* THE MODE CHIP (1.5.7-alpha.49): after the four tools, a trigger that wears the mode in force and opens THE MODE MENU under itself — the
      finger's road to it (a mouse has the middle button); it folds behind ⋯ with the rest */
-  const modesButton=button(toolbar,{raw:''},b=>{if(menu?.dataset.pop==='modes'){closeMenu();return;}const r=b.getBoundingClientRect();modeMenu(r.left,r.bottom+4);},'tl-icon tl-modes-chip');
+  const modesButton=button(toolbar,{raw:''},b=>{if(menu?.dataset.pop==='modes'){closeMenu();return;}const r=(b.getClientRects().length?b:moreButton).getBoundingClientRect();modeMenu(r.left,r.bottom+4);},'tl-icon tl-modes-chip');   // folded behind ⋯, it opens under ⋯
   modesButton.dataset.mode='modes';modesButton.setAttribute('aria-haspopup','menu');ariaLabel(modesButton,'Timeline modes');modesButton.dataset.help='MODE';
   /* THE KIT'S OWN CHOOSERS, NEVER A NATIVE <select> (Josh, 2026-10-07, call 19; docs/CONTROLS.md): the scope is one of two
      modes, all visible — a SEGMENT; SNAP is one of five in order — a STEPPER, compact (its name opens the list, ← → ↑ ↓ step
@@ -119,22 +122,25 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   // ACTIVE marks the ruler's range (none: the whole arrangement) as THE ACTIVE RANGE; pressed again on the same span, it clears.
   const activeButton=button(toolbar,'ACTIVE',()=>markActive());activeButton.dataset.mode='active';activeButton.setAttribute('aria-pressed','false');activeButton.title='Mark the selected time range (or the whole arrangement) as the active range';
   // MORE (⋯, a trigger: no lamp) always ends the bar: the tools folded off the bar (in bar order), then the selection's actions.
-  const moreButton=button(toolbar,{raw:''},b=>{const r=b.getBoundingClientRect();pop(r.left,r.bottom,'SELECTION',[
-    ...(audio?.pick?[['ADD AUDIO…',()=>audio.pick({laneId:selectedLane,start:controller.state().beat}),'add-audio']]:[]),['ZOOM TO SELECTION',zoomSelection,'zoom-selection'],['DUPLICATE',duplicateSelection,'duplicate'],['COPY',()=>copySelection(),'copy'],['CUT',()=>copySelection(true),'cut'],['PASTE',pasteSelection,'paste'],['DELETE',deleteSelection,'delete'],['SELECT ALL',selectAll,'select-all'],['DESELECT',deselect,'deselect'],['SHORTCUTS',()=>api.onShortcuts?.(r.left,r.bottom),'shortcuts'],...appRows()],'more');
-    const head=menu.firstChild;for(const f of fold.slice(shown))menu.insertBefore(f.row(r),head);if(shown<fold.length){placeMenu(r.left,r.bottom);menu.querySelector('button')?.focus();}},'tl-icon');
+  const moreButton=button(toolbar,{raw:''},b=>{const r=b.getBoundingClientRect(),folded=fold.slice(shown).map(f=>f.entry());pop(r.left,r.bottom,'SELECTION',[...folded,...(folded.length?[null]:[]),
+    ...(audio?.pick?[['ADD AUDIO…',()=>audio.pick({laneId:selectedLane,start:controller.state().beat}),'add-audio']]:[]),['ZOOM TO SELECTION',zoomSelection,'zoom-selection'],['DUPLICATE',duplicateSelection,'duplicate'],['COPY',()=>copySelection(),'copy'],['CUT',()=>copySelection(true),'cut'],['PASTE',pasteSelection,'paste'],['DELETE',deleteSelection,'delete'],['SELECT ALL',selectAll,'select-all'],['DESELECT',deselect,'deselect'],['SHORTCUTS',()=>api.onShortcuts?.(r.left,r.bottom),'shortcuts'],...appRows()],'more');},'tl-icon');
   moreButton.dataset.mode='more';moreButton.insertAdjacentHTML('beforeend',glyphSvg('more','gly gly-more',16));ariaLabel(moreButton,'More tools and actions');
   /* THE ONE LINE (wave 19, Josh: "never let the timeline's work bars word wrap"): the bar keeps one line; the tools that do
      not fit fold from the END behind MORE, so the first tools never move (the hand law).  A folded tool's row in MORE's list
      acts through the bar's own control (the same press, the same state; the keys never cared where it sits) and shows its
      pressed state.  Space is measured in the kit's frame (read, then write) on ONE ResizeObserver: no loop, no poll. */
-  const mirrorRow=(src,text)=>(r,parent=menu)=>{const row=button(parent,{raw:''},()=>{closeMenu();src.click();},'tl-row');row.dataset.fold=src.dataset.tool||src.dataset.mode;
-    const icon=src.querySelector('svg');if(icon)row.appendChild(icon.cloneNode(true));word(el('span','tl-row-word',row),text);withKey(row,src.dataset.tool&&'tool-'+src.dataset.tool);
+  /* a folded tool's ROW in ⋯'s list (1.6.0-alpha.66: an entry of the kit's menu): its glyph in the row's picture seat, its key as keycaps; a tool in
+     force is the row marked current, a switch (STEP · SLIDE · ACTIVE) a check row; a folded setting (SCOPE · SNAP) opens its choices as a submenu */
+  const mirrorEntry=(src,text,glyph)=>()=>{const on=src.getAttribute('aria-pressed'),name=src.dataset.tool;
+    return [text,()=>src.click(),'fold-'+(name||src.dataset.mode),name||on==null?undefined:on==='true',{...(glyph?{icon:glyph()}:{}),...(name?{key:'tool-'+name}:{}),...(name&&on==='true'?{current:true}:{})}];};
+  const choices=(ctl,rows,id)=>()=>rows.map(([v,w])=>[w,()=>ctl.set(v),id+'-'+v,v===ctl.get(),{radio:id}]);
+  const choiceEntry=(id,ctl,rows,text)=>()=>{const now=rows.find(([v])=>v===ctl.get())||rows[0];return [{raw:text(t(now[1]))},choices(ctl,rows,id),'fold-'+id,undefined,{sub:true}];};
+  /* the same switch as a row of THE MODE MENU's MENU column (a pane of its own): it acts through the bar's own control and shows its state */
+  const mirrorRow=(src,text,parent)=>{const row=button(parent,{raw:''},()=>{closeMenu();src.click();},'tl-row');row.dataset.fold=src.dataset.tool||src.dataset.mode;word(el('span','tl-row-word',row),text);
     const on=src.getAttribute('aria-pressed');if(on){row.setAttribute('aria-pressed',on);row.classList.toggle('on',on==='true');}return row;};
-  const choiceRow=(id,ctl,rows,title,text)=>r=>{const now=rows.find(([v])=>v===ctl.get())||rows[0];
-    const row=button(menu,{raw:text(t(now[1]))},()=>pop(r.left,r.bottom,title,rows.map(([v,w])=>[w,()=>ctl.set(v),id+'-'+v,v===ctl.get()]),id),'tl-row');row.dataset.fold=id;return row;};
-  const fold=[...[...toolButtons].map(([name,b])=>({node:b,row:mirrorRow(b,TOOLS.find(x=>x[0]===name)[1])})),{node:modesButton,row:mirrorRow(modesButton,'MODE')},
-    {node:scopeWrap,row:choiceRow('scope',scopeCtl,SCOPES,'Selection scope',value=>t('SCOPE · {value}',{value}))},{node:snapLabel,row:choiceRow('snap',snapCtl,SNAPS,'SNAP',value=>t('SNAP · {value}',{value}))},   // tr: a folded setting's row in the ⋯ list: its name · the choice in force
-    {node:stepButton,row:mirrorRow(stepButton,'STEP')},{node:slideButton,row:mirrorRow(slideButton,'SLIDE')},{node:activeButton,row:mirrorRow(activeButton,'ACTIVE')}];
+  const fold=[...[...toolButtons].map(([name,b])=>{const tl=TOOLS.find(x=>x[0]===name);return{node:b,entry:mirrorEntry(b,tl[1],()=>tl[2])};}),{node:modesButton,entry:mirrorEntry(modesButton,'MODE',()=>MODES.find(m=>m[0]===tool)[2])},
+    {node:scopeWrap,entry:choiceEntry('scope',scopeCtl,SCOPES,value=>t('SCOPE · {value}',{value}))},{node:snapLabel,entry:choiceEntry('snap',snapCtl,SNAPS,value=>t('SNAP · {value}',{value}))},   // tr: a folded setting's row in the ⋯ list: its name · the choice in force
+    {node:stepButton,entry:mirrorEntry(stepButton,'STEP')},{node:slideButton,entry:mirrorEntry(slideButton,'SLIDE')},{node:activeButton,entry:mirrorEntry(activeButton,'ACTIVE')}];
   let shown=fold.length,fitBooked=false;const widths=new Map();
   function fit(){
     if(!worklane.getClientRects().length)return;   // the lane is hidden or the window is closed: nothing to measure
@@ -146,7 +152,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     for(;k<fold.length;k++){need+=(widths.get(fold[k].node)||0)+gap;if(need>room-(k>=shown?FOLD_SLACK:0)+.5)break;}
     if(k!==shown)frame.write(()=>foldAt(k));
   }
-  function foldAt(k){shown=k;fold.forEach((f,i)=>f.node.classList.toggle('tl-folded',i>=k));moreButton.dataset.folded=String(fold.length-k);if(menu?.dataset.pop==='more')closeMenu();}
+  function foldAt(k){shown=k;fold.forEach((f,i)=>f.node.classList.toggle('tl-folded',i>=k));moreButton.dataset.folded=String(fold.length-k);if(ctx?.pane.dataset.pop==='more')closeMenu();}
   const fitObserver=new ResizeObserver(()=>{if(fitBooked)return;fitBooked=true;frame.read(()=>{fitBooked=false;fit();});});
   for(const n of [worklane,transportHost,moreButton,...fold.map(f=>f.node)])fitObserver.observe(n);
   /* THE EVENT TARGET (1.5.6-alpha.24): how many bands a target has now (registry describe(id).steps: its options, a toggle's two) */
@@ -154,7 +160,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   const view=createTimelineView(surface,{pixels:()=>px,stepsOf,onClipMenu(e,c,curve){finish(null,true);clipMenu(e.clientX,e.clientY,c,curve);}});
   const {viewport,status}=view;
   const headPaint=createTimelinePlayhead({head:view.head,tail:view.tail,controller,clock:{beats:transportBeat,playing:()=>mod.host.clock.isPlaying(),bpm:()=>mod.host.model.transport.bpm},visible:()=>win.isOpen()&&!document.hidden&&!document.body.classList.contains('ui-hidden'),pixels:()=>px,scroll:()=>viewport.scrollLeft});
-  const snapBeat=(beat,e)=>snapTimelineBeat(beat,snap,!!e?.altKey),closeMenu=()=>{const back=menu?.dataset.pop==='modes'&&menu.contains(document.activeElement);menu?.remove();menu=null;if(back)surface.focus({preventScroll:true});};   // THE MODE MENU closed from inside it hands the focus back to the surface: the timeline's keys stay live
+  const snapBeat=(beat,e)=>snapTimelineBeat(beat,snap,!!e?.altKey),closePane=()=>{const back=menu?.dataset.pop==='modes'&&menu.contains(document.activeElement);menu?.remove();menu=null;if(escPane){escPane();escPane=null;}if(back)surface.focus({preventScroll:true});},closeMenu=()=>{ctx?.close();closePane();};   // THE MODE MENU closed from inside it hands the focus back to the surface: the timeline's keys stay live
   function setTool(name){const mode=MODES.find(m=>m[0]===name)||MODES[0];tool=mode[0];surface.dataset.tool=tool;surface.dataset.cursor=mode[4];surface.style.setProperty('--tl-mode-cursor',modeCursor(mode[2],mode[3]));
     surface.classList.toggle('tl-step-mode',stepMode&&PEN.has(tool));for(const[id,b]of toolButtons){b.setAttribute('aria-pressed',String(id===tool));b.classList.toggle('on',id===tool);}
     modesButton.replaceChildren();modesButton.insertAdjacentHTML('beforeend',glyphSvg(mode[2],'gly gly-'+mode[2],16));modesButton.firstChild?.setAttribute('aria-hidden','true');modesButton.dataset.now=tool;paintSelection();}
@@ -188,18 +194,30 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   function deleteSelection(){if(scope==='points'){if(pointSelection?.indices.size){const result=model.removePoints(pointSelection.curveId,[...pointSelection.indices]);if(!result?.removed)say(t('Keep at least two curve points.'));else pointSelection=null;}}else{model.deleteClips([...selection]);selection.clear();selected=null;}paintSelection();}
   function selectAll(){if(scope==='points'){const c=view.getClip(selected),curve=view.getCurve(c?.curveId);if(curve)pointSelection={clipId:c.id,curveId:curve.id,indices:new Set(curve.points.flatMap((p,i)=>p.t*curve.length>=c.offset&&p.t*curve.length<=c.offset+c.duration*c.scale?[i]:[]))};}else{selection=new Set(doc.clips.map(c=>c.id));selected||=doc.clips[0]?.id||null;}paintSelection();}
   function deselect(){selection.clear();pointSelection=null;selected=null;paintSelection();}
+  /* ESCAPE IS THE ONE STACK'S (1.6.0-alpha.67): a pane of the timeline's own (THE MODE MENU, a form) is a layer of the app's Escape stack while it is
+     open, and so is a gesture in flight (escDrag: pushed in begin(), taken off in finish()) — the topmost layer closes, once.  With the focus in a
+     field the stack stands down (an app's rule), so the pane also answers Escape itself, after its field has (a number field takes its own first). */
+  function paneOpen(){escPane=escapeLayer(()=>{escPane=null;closePane();});menu.addEventListener('keydown',e=>{if(e.code!=='Escape'||e.defaultPrevented)return;e.preventDefault();e.stopPropagation();closePane();});}
   function placeMenu(x,y) {
     const r=menu.getBoundingClientRect(),z=cssZoom(menu);menu.style.left=Math.max(8,Math.min(innerWidth-r.width-8,x))/z+'px';menu.style.top=Math.max(8,Math.min(innerHeight-r.height-8,y))/z+'px';   // seen; written ÷ UI SCALE (a .tl-pop is a zoomed root)
   }
-  /* a popup: the house's menu pane; `title` is a word (or { raw } for a clip's own name); each action [word, fn, id, chosen?]
-     (a boolean `chosen` makes the row a choice that shows whether it is the one in force) */
+  /* A MENU IS THE KIT'S (1.6.0-alpha.66): pop() opens the kit's contextMenu at a point.  `title` names it for a screen reader (a word, or { raw } for a
+     clip's own name); each action is [word, fn, id, chosen?, opts?] — a boolean `chosen` makes the row a check row (opts.radio: one of a group),
+     opts.sub a row whose fn returns the actions of its submenu, opts.icon its picture, opts.key the key-table id its keycaps read (default: id).
+     A word is an English key, [key, vars], or { raw }.  The row carries data-id = id; the pane data-pop = the menu's id. */
   /* 1.5.7-alpha.4 · THE APP'S ROWS (λWAVES 036 K4): `moreRows()` hands MORE its own rows, after a separator; nothing passed, nothing shown */
   function appRows(){const rows=typeof moreRows==='function'?(moreRows()||[]).filter(Array.isArray):[];return rows.length?[null,...rows]:[];}
+  const rawOf=w=>w&&typeof w==='object'&&!Array.isArray(w)?w.raw:Array.isArray(w)?t(w[0],w[1]):null;   // the text as it is shown, or null for a plain key (the menu translates it)
+  const entryOf=a=>{if(!a)return null;const[text,fn,id,chosen,more]=a,{sub,key,...o}=more||{},raw=rawOf(text),c=chordOf(key??id);
+    return [(raw??text)+(c?'\t'+c:''),sub?()=>fn().map(entryOf):fn,false,'',{...(id?{id}:{}),...(raw!=null?{raw:true}:{}),...(typeof chosen==='boolean'?{checked:chosen}:{}),...(sub?{sub:true}:{}),...o}];};
   function pop(x,y,title,actions,id='') {
-    closeMenu();menu=el('div','tl-pop glass',document.body);menu.dataset.mirSurface='menu';if(id)menu.dataset.pop=id;menu.setAttribute('role','menu');
-    const head=word(el('div','tl-pop-title',menu),title);ariaLabel(menu,typeof title==='string'?title:'Clip options');if(title&&title.raw)menu.setAttribute('aria-label',head.textContent);
-    for(const a of actions){if(!a){el('div','tl-pop-sep',menu).setAttribute('role','separator');continue;}const [text,fn,id,chosen]=a;const b=withKey(button(menu,text,()=>{closeMenu();fn();}),id);if(id)b.dataset.row=id;if(typeof chosen==='boolean'){b.setAttribute('aria-pressed',String(chosen));b.classList.toggle('on',chosen);}}
-    placeMenu(x,y);menu.querySelector('button')?.focus();
+    closeMenu();const raw=rawOf(title),mine=contextMenu({x,y,entries:actions.map(entryOf),label:raw==null?title:'Clip options',onClose(){if(ctx===mine)ctx=null;}});ctx=mine;
+    if(ctx){if(id)ctx.pane.dataset.pop=id;if(raw!=null)ctx.pane.setAttribute('aria-label',raw);}
+  }
+  /* A SMALL FORM (TITLE / COLOR, TIME / VALUE, OUTPUT RANGE): a pane of its own at the point, a title and the fields its caller adds — a dialog, not a menu */
+  function form(x,y,title,id) {
+    closeMenu();menu=el('div','tl-pop glass',document.body);menu.dataset.mirSurface='menu';menu.dataset.pop=id;menu.setAttribute('role','dialog');
+    label(el('div','tl-pop-title',menu),title);paneOpen();placeMenu(x,y);
   }
   /* THE MODE MENU (1.5.7-alpha.49, λWAVES 041 T1; Josh: "this super cool feature from FL Studio which is 'Middle-mouse click+Right Click' which shows
      cursor 'Mode' controls … To the right side, it could simply have the menus in it's own section called 'Menu' … Make it as large too"): FL's context
@@ -209,7 +227,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
      right in either order (the surface's pointermove, below); the bar's MODE chip opens it for a finger. */
   function modeMenu(x,y){finish(null,true);closeMenu();menu=el('div','tl-pop tl-modes glass',document.body);menu.dataset.mirSurface='menu';menu.dataset.pop='modes';menu.setAttribute('role','menu');ariaLabel(menu,'Timeline modes');
     menu.addEventListener('contextmenu',e=>e.preventDefault());   // the chord's right button comes up over it
-    // by keyboard: ↑ ↓ walk a column (round), ← → cross to the other at the same height; Enter and Space press, Escape closes (the document's)
+    // by keyboard: ↑ ↓ walk a column (round), ← → cross to the other at the same height; Enter and Space press, Escape closes (paneOpen)
     menu.addEventListener('keydown',e=>{const cols=[left,right],at=cols.findIndex(c=>c.contains(document.activeElement));if(at<0||!e.key.startsWith('Arrow'))return;e.preventDefault();e.stopPropagation();
       const rows=c=>[...c.querySelectorAll('button')],list=rows(cols[at]),i=list.indexOf(document.activeElement),other=rows(cols[1-at]);
       (e.key==='ArrowDown'||e.key==='ArrowUp'?list[(i+(e.key==='ArrowDown'?1:-1)+list.length)%list.length]:other[Math.min(i,other.length-1)])?.focus();});
@@ -217,19 +235,18 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     for(const[id,text,glyph]of MODES){const b=button(left,{raw:''},()=>{closeMenu();setTool(id);},'tl-mode');b.dataset.modeRow=id;b.setAttribute('role','menuitemradio');b.setAttribute('aria-checked',String(id===tool));b.classList.toggle('on',id===tool);
       ariaLabel(b,text);b.dataset.help=text;el('span','tl-mode-dot',b);b.insertAdjacentHTML('beforeend',glyphSvg(glyph,'gly gly-'+glyph,24));b.lastChild.setAttribute('aria-hidden','true');}
     const sub=(text,title,rows,id)=>{const b=button(right,text,()=>pop(x,y,title,rows(),id),'tl-row tl-sub');b.dataset.row=id;b.insertAdjacentHTML('beforeend',glyphSvg('chevronRight','gly tl-sub-arrow',12));return b;};
-    const choices=(ctl,rows,id)=>()=>rows.map(([v,w])=>[w,()=>ctl.set(v),id+'-'+v,v===ctl.get()]);
     sub('EDIT','EDIT',()=>[['DUPLICATE',duplicateSelection,'duplicate'],['COPY',()=>copySelection(),'copy'],['CUT',()=>copySelection(true),'cut'],['PASTE',pasteSelection,'paste'],['DELETE',deleteSelection,'delete']],'menu-edit');
     sub('SELECT','SELECT',()=>[['SELECT ALL',selectAll,'select-all'],['DESELECT',deselect,'deselect'],['INVERT SELECTION',act.invert,'invert']],'menu-select');
     sub('ZOOM','ZOOM',()=>[['ZOOM TO SELECTION',zoomSelection,'zoom-selection'],['ZOOM ALL',act.zoomAll,'zoom-all'],['ZOOM IN',()=>act.zoomStep(1),'zoom-in'],['ZOOM OUT',()=>act.zoomStep(-1),'zoom-out']],'menu-zoom');
     sub('SNAP','SNAP',choices(snapCtl,SNAPS,'snap'),'menu-snap');sub('SCOPE','Selection scope',choices(scopeCtl,SCOPES,'scope'),'menu-scope');
     el('div','tl-pop-sep',right).setAttribute('role','separator');
-    for(const[src,text]of[[stepButton,'STEP'],[slideButton,'SLIDE'],[activeButton,'ACTIVE']])mirrorRow(src,text)(null,right);
+    for(const[src,text]of[[stepButton,'STEP'],[slideButton,'SLIDE'],[activeButton,'ACTIVE']])mirrorRow(src,text,right);
     el('div','tl-pop-sep',right).setAttribute('role','separator');
     for(const[text,fn,id]of[...(audio?.pick?[['ADD AUDIO…',()=>audio.pick({laneId:selectedLane,start:controller.state().beat}),'add-audio']]:[]),['SHORTCUTS',()=>api.onShortcuts?.(x,y),'shortcuts']]){const b=withKey(button(right,text,()=>{closeMenu();fn();},'tl-row'),id);b.dataset.row=id;}
     for(const a of appRows()){if(!a){el('div','tl-pop-sep',right).setAttribute('role','separator');continue;}const[text,fn,id,chosen]=a,b=button(right,text,()=>{closeMenu();fn();},'tl-row');if(id)b.dataset.row=id;if(typeof chosen==='boolean'){b.setAttribute('aria-pressed',String(chosen));b.classList.toggle('on',chosen);}}
-    placeMenu(x,y);(left.querySelector('.on')||left.querySelector('button'))?.focus();}
+    paneOpen();placeMenu(x,y);(left.querySelector('.on')||left.querySelector('button'))?.focus();}
   function editIdentity(x,y,curve,clip) {
-    pop(x,y,'CLIP TITLE / COLOR',[],'identity');menu.setAttribute('role','dialog');ariaLabel(menu,'Clip title and color');
+    form(x,y,'CLIP TITLE / COLOR','identity');ariaLabel(menu,'Clip title and color');
     const titleLabel=el('label','tl-field',menu),input=el('input','tl-value-input',titleLabel);titleLabel.prepend(label(el('span','tl-field-word'),'TITLE'));input.value=curve.name;input.maxLength=80;ariaLabel(input,'Clip title');
     const colorLabel=el('label','tl-field tl-color-field',menu),color=el('input','tl-color-input',colorLabel);colorLabel.prepend(label(el('span','tl-field-word'),'TINT'));color.type='color';color.value=curve.color;ariaLabel(color,'Clip color');
     const swatches=el('div','tl-swatches',menu);
@@ -241,7 +258,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   }
   function editPointValues(x,y,clip,curve,index) {
     const p=curve.points[index],sourceBeat=p.t*curve.length;
-    pop(x,y,'POINT TIME / VALUE',[],'point-values');menu.setAttribute('role','dialog');ariaLabel(menu,'Point time and value');
+    form(x,y,'POINT TIME / VALUE','point-values');ariaLabel(menu,'Point time and value');
     /* the kit's NUMBER FIELD, never a native type=number (Josh, 2026-10-07, call 19): drag, type, keys; it opens on the time,
        its number selected, as the input did; Enter in either takes the number and applies, as the form's submit did */
     const form=el('div','tl-point-form',menu);
@@ -257,10 +274,10 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     const p=curve.points[index],hold=index>0&&curve.points[index-1].segment==='hold';
     pop(x,y,'POINT',[
       [['TIME / VALUE · {v}',{v:p.v.toFixed(3)}],()=>editPointValues(x,y,clip,curve,index),'values'],
-      ...(index>0 ? [['SEGMENT BEFORE THIS POINT',()=>pop(x,y,'SEGMENT TYPE',[
-        [hold?'SINGLE CURVE':'✓ SINGLE CURVE',()=>model.setSegment(curve.id,index-1,'single'),'single'],
-        [hold?'✓ HOLD':'HOLD',()=>model.setSegment(curve.id,index-1,'hold'),'hold']
-      ],'segment'),'segment']] : []),
+      ...(index>0 ? [['SEGMENT BEFORE THIS POINT',()=>[
+        ['SINGLE CURVE',()=>model.setSegment(curve.id,index-1,'single'),'single',!hold,{radio:'segment'}],
+        ['HOLD',()=>model.setSegment(curve.id,index-1,'hold'),'hold',hold,{radio:'segment'}]
+      ],'segment',undefined,{sub:true}]] : []),
       ['COPY VALUE',()=>{api.copiedValue=p.v;},'copy-value'],
       ['PASTE VALUE',()=>{if(Number.isFinite(api.copiedValue))model.movePoint(curve.id,index,p.t*curve.length,api.copiedValue);},'paste-value'],
       ['DELETE POINT',()=>model.removePoint(curve.id,index),'delete-point']
@@ -274,7 +291,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       [c.mute?'ENABLE CLIP':'DISABLE CLIP',()=>model.updateClip(c.id,{mute:!c.mute}),'mute'],   // T25: the MUTE row's words (clip.mute, the row id unchanged)
       ['DUPLICATE',()=>{selectOnly(c.id);duplicateSelection();},'duplicate'],
       ...(drives&&typeof mod.view?.api?.armFor==='function'?[['ROUTE NEW PARAMETER…',()=>routeClip(c.id,curve),'route']]:[]),   // T20: arm the controls, the tap re-targets the clip
-      ...(drives?[['OUTPUT RANGE',()=>{pop(x,y,'NORMALIZED MIN / MAX',[],'range');const num=(o)=>{const n=number({min:0,max:1,step:.01,...o});n.root.classList.add('tl-value-num');menu.appendChild(n.root);return n;};const lo=num({aria:'Output minimum',value:curve.min}),hi=num({aria:'Output maximum',value:curve.max});button(menu,'APPLY',()=>{for(const n of [lo,hi])if(n.editing)n.close(true);model.updateCurve(curve.id,{min:lo.get(),max:hi.get()});closeMenu();}).dataset.tlAction='apply';},'output-range']]:[]),   // the kit's number fields (call 19)
+      ...(drives?[['OUTPUT RANGE',()=>{form(x,y,'NORMALIZED MIN / MAX','range');ariaLabel(menu,'NORMALIZED MIN / MAX');const num=(o)=>{const n=number({min:0,max:1,step:.01,...o});n.root.classList.add('tl-value-num');menu.appendChild(n.root);return n;};const lo=num({aria:'Output minimum',value:curve.min}),hi=num({aria:'Output maximum',value:curve.max});button(menu,'APPLY',()=>{for(const n of [lo,hi])if(n.editing)n.close(true);model.updateCurve(curve.id,{min:lo.get(),max:hi.get()});closeMenu();}).dataset.tlAction='apply';placeMenu(x,y);},'output-range']]:[]),   // the kit's number fields (call 19)
       ...(kind?[]:[['ADD MIDPOINT',()=>{const beat=c.offset+c.duration*c.scale/2;model.addPoint(curve.id,beat,evaluateTimelineSource(curve,beat));},'add-midpoint']]),
       ['STRETCH ×2',()=>model.updateClip(c.id,{duration:c.duration*2,scale:c.scale/2}),'stretch'],
       ...(kind?.menu?.(curve,c,{model,editor:api})||[]),
@@ -400,7 +417,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(drag.kind==='tension'){const a=curve.points[drag.index],b=curve.points[drag.index+1],sign=b.v<a.v?-1:1;drawTension=bounded(drag.tension+sign*tensionDelta(drag.y,e.y,e,drag.gear)/TIMELINE_TENSION_TRAVEL,-1,1);model.setTension(curve.id,drag.index,drawTension);}
   });
   function finish(e,cancel=false,rewind=false){
-    if(!drag||e&&e.pointerId!==drag.pointerId)return;pumpStop();updates.flush();if(!drag)return;const held=drag;drag=null;delete surface.dataset.gesture;delete surface.dataset.dragClip;view.marquee.style.display='none';
+    if(!drag||e&&e.pointerId!==drag.pointerId)return;pumpStop();updates.flush();if(!drag)return;const held=drag;drag=null;if(escDrag){escDrag();escDrag=null;}delete surface.dataset.gesture;delete surface.dataset.dragClip;view.marquee.style.display='none';
     try{if(surface.hasPointerCapture(held.pointerId))surface.releasePointerCapture(held.pointerId);}catch(_){}
     if(held.kind==='scrub'){controller.endScrub({cancel:rewind});
       // a scrub released past the loop's end while playing comes home on the next tick (alpha.8): the view goes home with it, so the head is never off-screen (1.5.7-alpha.14)
@@ -418,7 +435,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
       else if(!held.moved&&held.clickedClip&&scope==='clips'){const id=held.clickedClip;selection=held.additive?new Set(held.oldClips):new Set();if(held.additive&&selection.has(id))selection.delete(id);else selection.add(id);selected=selection.values().next().value||null;}
     }
     if(!cancel&&e&&['move','point','tension'].includes(held.kind)&&!held.moved&&!held.copy&&!held.added){const now=performance.now(),id=held.clip.id+':'+held.kind+':'+(held.index??'');
-      if(lastTap?.id===id&&now-lastTap.time<400&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<16){lastTap=null;const current=view.getCurve(held.curve.id);if(held.kind==='move'&&current)editIdentity(e.clientX,e.clientY,current,held.clip);else if(held.kind==='point'&&current)fieldMenu(e.clientX,e.clientY,current,held.index,held.clip);else if(held.kind==='tension'){drawTension=0;model.setTension(held.curve.id,held.index,0);}}
+      if(lastTap?.id===id&&now-lastTap.time<TAP.ms&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<=TAP.px){lastTap=null;const current=view.getCurve(held.curve.id);if(held.kind==='move'&&current)editIdentity(e.clientX,e.clientY,current,held.clip);else if(held.kind==='point'&&current)fieldMenu(e.clientX,e.clientY,current,held.index,held.clip);else if(held.kind==='tension'){drawTension=0;model.setTension(held.curve.id,held.index,0);}}
       else lastTap={id,time:now,x:e.clientX,y:e.clientY};}else lastTap=null;paintSelection();headPaint.reset();
     // THE MODES' releases (1.5.7-alpha.49): SLICE cuts (a click the clip pressed, a drag every clip its line crossed), ZOOM lands on the band (a click:
     // the whole arrangement), and a middle-button click on the lanes — a pan that never moved — opens THE MODE MENU at the pointer
@@ -427,7 +444,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(held.kind==='zoombox'){const a=Math.min(held.startWorld.x,end.x)/px,b=Math.max(held.startWorld.x,end.x)/px;if(held.moved&&b>a){px=bounded(viewport.clientWidth/(b-a),8,100);paint();viewport.scrollLeft=Math.max(0,a*px);paint();}else act.zoomAll();}
     if(held.kind==='pan'&&held.lanes&&!held.moved)modeMenu(e.clientX,e.clientY);
   }
-  function begin(e,value,author=false){drag={...value,x:e.clientX,y:e.clientY,pointerId:e.pointerId,startWorld:view.world(e),author,activeBefore:selected,selectionBefore:new Set(selection)};surface.dataset.gesture=value.kind;if(value.clip)surface.dataset.dragClip=value.clip.id;if(author)model.begin();e.preventDefault();surface.setPointerCapture(e.pointerId);}
+  function begin(e,value,author=false){if(escDrag)escDrag();escDrag=escapeLayer(()=>{escDrag=null;finish(null,true,true);});drag={...value,x:e.clientX,y:e.clientY,pointerId:e.pointerId,startWorld:view.world(e),author,activeBefore:selected,selectionBefore:new Set(selection)};surface.dataset.gesture=value.kind;if(value.clip)surface.dataset.dragClip=value.clip.id;if(author)model.begin();e.preventDefault();surface.setPointerCapture(e.pointerId);}
   /* THE EDGE IS THE EDGE (1.5.7-alpha.41): the clip edge under the pointer — on a title band the tabs', in a lane the bodies' — each zone as wide
      as that clip's own trim element (8 px, 12 px on a tab, 14 px on touch, half a narrow clip), centred on the edge (timelineEdgeAt) */
   function edgeUnder(e){const band=e.target.closest?.('.tl-titleband,.tl-pane');if(!band)return null;const body=band.classList.contains('tl-pane');
@@ -577,9 +594,9 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   listen(document,'pointermove',e=>{if(drag&&e.pointerId===drag.pointerId){e.preventDefault();updates.post(pointer(e));if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6)drag.moved=true;   // the slop, as updates reads it
       if(drag.moved&&PUMPED.includes(drag.kind)){pumpX=e.clientX;if(!pumpId)pumpId=requestAnimationFrame(edgePump);}}},{passive:false});listen(document,'pointerup',e=>finish(e));listen(document,'pointercancel',e=>finish(e,true));
   listen(document,'pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!surface.contains(e.target))closeMenu();});
-  /* ESCAPE is not a table action (the kit keeps it): it only ends what is in flight.  HIDE needs no key of its own here:
+  /* ESCAPE is not a table action (the kit keeps it): it only ends what is in flight, through the app's stack (paneOpen, begin) when there is one.  HIDE needs no key of its own here:
      whatever key the table gives it, the interface going out of paint (body.ui-hidden) ends it (hiddenObserver below) */
-  listen(document,'keydown',e=>{if(e.code==='Escape'){closeMenu();finish(null,true,true);}});
+  listen(document,'keydown',e=>{if(e.code!=='Escape'||e.defaultPrevented||escPane||escDrag||!(menu||drag))return;e.preventDefault();closePane();finish(null,true,true);});   // no stack handed in: the timeline's own listener, and it says it acted
   listen(document,'visibilitychange',()=>{if(document.hidden){closeMenu();finish(null,true);headPaint.reset();}});listen(globalThis,'blur',()=>{closeMenu();finish(null,true);});
   /* THE TIMELINE SCROLLS UNDER THE POINTER (1.5.7-alpha.9, λWAVES 038 T3; Josh: "Scroll on timeline doesn't seem to work"): Ctrl/Cmd +
      wheel zooms about the pointer, as before; a plain wheel scrolls TIME while the lanes fit the height (they fill it, so a vertical

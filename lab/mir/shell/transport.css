@@ -25,7 +25,7 @@
   --xport-w: 640px;                  /* λWAVES' bar's least width (skin.css:456); BASINS' bar is its row's width (basins.css) */
   --xport-glyph: 12px;               /* the dock chip's and the door's glyph (BASINS' `north` glyph at 12; λWAVES lab.css:380 13) */
   --xport-h: 46px;                   /* the bar's height (BASINS: the modulation work bar's) */
-  --xport-seat: 34px;                /* a round seat (BASINS skin.css:78) */
+  --xport-seat: 36px;                /* a round seat: the house's bar seat (1.6.0-alpha.69; it was 34, BASINS skin.css:78) */
   --xport-power: 44px;               /* the power button's seat (BASINS transport-controls.css:17) */
   --xport-pill-w: 72px;              /* the BPM pill's least width; it sizes to its number (BASINS ui-fixes 9: ≈ 90 px) */
   --xport-pill-r: 10px;              /* its corner (BASINS skin.css:87) */
@@ -34,7 +34,7 @@
   --xport-edit-size: var(--xport-num-size);   /* 1.5.7-alpha.3 · the tempo editor's number: the pill's own size unless the seat says (λWAVES' CSB: 12 px) */            /* the tempo's number (BASINS ui-fixes 9, --xport-tempo-size; was 12) */
   --xport-micro: 8px;                /* BPM and the Hz reading (BASINS ui-fixes 9; was 7) */
   --xport-play-size: 32px;           /* play's glyph (BASINS ui-fixes 10, --xport-play-size; was 20); its seat is the glyph + 8 */
-  --xport-work-seat: 34px;           /* a seat inside a work bar: the bar's button (BASINS ui-fixes 8, .tl-action) */
+  --xport-work-seat: 36px;           /* a seat inside a work bar: the bar's button, the house's bar seat (1.6.0-alpha.69; it was 34, BASINS ui-fixes 8) */
   --xport-work-r: 8px;               /* … its corner */
   --xport-work-h: 52px;              /* the transport inside a work bar: the tool bar's height (BASINS ui-fixes 8) */
   --xport-work-pad: 3px 8px;         /* … and its padding (BASINS timeline-window.css: 44 px power seat + border = 52) */
@@ -63,7 +63,6 @@
   --xport-macro-num: 10px;           /* the macro's number (BASINS skin.css:371) */
   --xport-depth-w: 2.2;              /* the depth arc's stroke (BASINS skin.css:373) … */
   --xport-depth-w-drag: 3;           /* … while it is dragged */
-  --xport-rail-thumb: color-mix(in srgb, var(--fg) 22%, transparent);        /* the rail's thin scrollbar (BASINS skin.css:362) */
   --xport-seat-focus: color-mix(in srgb, var(--fg) 72%, transparent);        /* a depth seat's focus line (BASINS skin.css:370) */
   --xport-section: var(--glass-hairline);                                     /* 1.5.6-alpha.7 · a surface section's frame (λWAVES 022 C1) */
   --xport-grid: 44px;                /* … the surface's grid: a knob bank's least cell */
@@ -172,7 +171,7 @@
    seat the panel opens ABOVE the row, toward the free side, so the bar grows away from the row and the row stays put */
 .mir-transport.mini.tempo-open > .native-play-row { height: calc(var(--xport-h) - 5px - 2 * var(--surface-edge-width, var(--glass-border))); }   /* the row keeps the closed bar's line (its 2 + 3 px padding and the glass edge off), so its centre does not move */
 .mir-transport.mini.tempo-open:not([data-seat="top"]) { padding-bottom: 3px; padding-top: 8px; }
-.mir-transport.mini:not([data-layout="lambdawaves"]) .native-tempo.with-macros:not([hidden]) { grid-template-columns: minmax(0, 1fr); }   /* in the row's width the MACROS sit over the CLOCK, as docked (λWAVES' 640 px bar keeps them side by side) */
+.mir-transport.mini .native-tempo.with-macros:not([hidden]) { grid-template-columns: minmax(0, 1fr); }   /* in the row's width the MACROS sit over the CLOCK, as docked (λWAVES' 640 px bar keeps them side by side) */
 .mir-transport[data-form="compact"] .tempo-rail { grid-template-columns: minmax(0, 1fr); }   /* COMPACT's row holds one tile across */
 .mir-transport.mini:not([data-seat="top"]) .native-tempo { order: -1; border-top: 0; border-bottom: 1px solid var(--glass-hairline); border-radius: var(--xport-pill-r) var(--xport-pill-r) 0 0; }
 .mir-transport .native-tempo[hidden] { display: none; }
@@ -197,22 +196,76 @@
 .mir-transport:where([data-seats="thin"]):not(.docked) .ro.period { width: 76px; }
 .mir-transport:where([data-seats="thin"]):not(.docked) .ro-val { color: var(--ink-key, var(--fg-soft)); font-size: var(--fs-micro); line-height: 1.15; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 
-/* ── THE CONTROL SURFACE (CONTROL_SURFACE_LAYOUT, data-layout="csb"; 1.5.0-alpha.25, A8): three columns on the stage — the play over the
-   power, the timing row over the buttons row, the rate over the pill — and the panel under the whole bar; in a rack card (docked, or the
-   FREE window) the columns become bands.  A latch with a glyph shows the glyph alone. ── */
-.mir-transport[data-layout="csb"] { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "play mid tempo" "panel panel panel"; align-items: center; column-gap: 10px; row-gap: 6px; }
-.mir-transport.mini[data-layout="csb"] { width: max-content; min-width: 0; height: auto; }
-.mir-transport[data-layout="csb"] > .csb-play { grid-area: play; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-.mir-transport[data-layout="csb"] > .csb-mid { grid-area: mid; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.mir-transport[data-layout="csb"] > .csb-tempo { grid-area: tempo; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-.mir-transport[data-layout="csb"] .csb-row { display: flex; align-items: center; gap: 4px; min-width: 0; }
-.mir-transport[data-layout="csb"] .csb-row :is(.tbtn.tempo-expand, .transport-tempo-input) { order: 0; }
-.mir-transport[data-layout="csb"] > .native-tempo { grid-area: panel; }
+/* ── THE CONTROL SURFACE (CONTROL_SURFACE_LAYOUT, data-layout="csb"; 1.6.0-alpha.69: the bar λWAVES grew from 018 to 041, lifted whole — the 014
+   three-column drawing is gone).  ON THE STAGE: PLAY floats outside the bar's left edge, a round disc of its own; three tracks, the two sides equal
+   (--csb-side) so the middle is dead centre, a thin stroke in each gap; LEFT = the rate over the typed BPM pill, the power over EXPAND, then a 2 × 2
+   of seats; MIDDLE = the app's chooser over a row; RIGHT = a five-wide grid of seats.  THE SEAT is the house's bar seat: one --csb-seat (36 px) round
+   box, flat until hovered, one --csb-glyph (20 px) picture, --csb-gap (4 px) apart, lit = the accent as ink, never a fill.  IN A RACK CARD (docked,
+   or the FREE window one card wide): one seven-column grid — PLAY · rate over BPM · power over EXPAND on the row's thirds, the middle on subgrids,
+   the seats seven a row.  An app's own nodes (`app:<name>`) wear the seat by sitting in `.csb-ico`; what is an app's alone (its chooser's width,
+   its mode buttons) is the app's sheet's. ── */
+.mir-transport[data-layout="csb"] { --csb-side: 212px; --csb-seat: 36px; --csb-glyph: 20px; --csb-gap: 4px; --csb-seat-text: 18px; --csb-num: 12px; display: grid; grid-template-columns: minmax(var(--csb-side), 1fr) auto minmax(var(--csb-side), 1fr); grid-template-areas: "left mid right" "panel panel panel"; grid-template-rows: auto auto; align-items: center; column-gap: 14px; row-gap: 0; overflow: visible; }
+.mir-transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); min-width: 0; height: auto; min-height: 0; padding: calc(6px * var(--pad-k, 1)) calc(12px * var(--pad-k, 1)); contain: layout; column-gap: 12px; }   /* no paint containment: PLAY floats outside the box */
+.mir-transport[data-layout="csb"] > .csb-left { grid-area: left; justify-self: start; }
+.mir-transport[data-layout="csb"] > .csb-right { grid-area: right; justify-self: end; }
+.mir-transport[data-layout="csb"] > .csb-mid { grid-area: mid; display: flex; flex-direction: column; align-items: center; gap: var(--csb-gap); min-width: 220px; }
+.mir-transport[data-layout="csb"] > .native-tempo { grid-area: panel; margin-top: 8px; }
 .mir-transport[data-layout="csb"] > .tr-back { grid-column: 1 / -1; }
-.mir-transport[data-layout="csb"] .tr-openers { display: flex; gap: 4px; }
+/* THE BAR IN THREE: a stroke of the seats' own drawing (their ink at .3, their line, round caps) in the middle of each gap, the glyphs' height */
+.mir-transport.mini[data-layout="csb"] > .csb-mid { position: relative; }
+.mir-transport.mini[data-layout="csb"] > .csb-mid::before, .mir-transport.mini[data-layout="csb"] > .csb-mid::after { content: ''; position: absolute; top: 7px; bottom: 7px; width: 1.6px; border-radius: var(--r-pill); background: var(--ink-key); opacity: .3; pointer-events: none; }
+.mir-transport.mini[data-layout="csb"] > .csb-mid::before { left: -6.8px; } .mir-transport.mini[data-layout="csb"] > .csb-mid::after { right: -6.8px; }
+/* THE EXPANDER'S DIRECTION: at the stage's foot the panel is the grid's first row and rises above the bar; at the top (.at-top) it hangs below */
+@media (min-width: 861px) {
+  .mir-transport.mini[data-layout="csb"]:not(.at-top) { grid-template-areas: "panel panel panel" "left mid right"; }
+  .mir-transport.mini[data-layout="csb"]:not(.at-top) > .native-tempo { margin-top: 0; margin-bottom: 8px; }
+}
+.mir-transport[data-layout="csb"] .csb-side { display: flex; align-items: center; gap: 8px; }
+.mir-transport[data-layout="csb"] .csb-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--csb-gap); }
+.mir-transport[data-layout="csb"] .csb-ico { display: grid; grid-template-columns: repeat(var(--csb-cols, 2), var(--csb-seat)); grid-auto-rows: var(--csb-seat); gap: var(--csb-gap); }
+.mir-transport[data-layout="csb"] .csb-right { --csb-cols: 5; }
+.mir-transport[data-layout="csb"] .tr-openers { display: contents; gap: var(--csb-gap); }
 .mir-transport[data-layout="csb"] .tr-open.has-glyph .tr-word { display: none; }
-.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "play . tempo" "mid mid mid" "panel panel panel"; }
-.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) > :is(.csb-play, .csb-tempo) { flex-direction: row; }
+.mir-transport[data-layout="csb"] :is(.csb-col, .csb-row, .csb-ico) > * { order: 0; flex-shrink: 0; }
+.mir-transport[data-layout="csb"] .csb-row { display: flex; align-items: center; gap: var(--csb-gap); min-width: 0; height: var(--csb-seat); }
+/* THE SEAT */
+.mir-transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico > button, .tr-expand) {
+  display: inline-grid; place-items: center; width: var(--csb-seat); height: var(--csb-seat); min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: var(--csb-seat-text); transform: none; }
+.mir-transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico > button, .tr-expand):hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
+.mir-transport[data-layout="csb"] :is(.csb-ico, .csb-mod) svg { width: var(--csb-glyph); height: var(--csb-glyph); }
+.mir-transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .tr-open.live, .csb-ico .mod-exp.live, .csb-ico > button[aria-expanded="true"], .tr-expand.on) { color: var(--acc); }
+/* PLAY: a round disc floating outside the bar's left edge, level with the bar's own rows (the panel never moves it); it moves as a chip does */
+.mir-transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; flex-direction: column; justify-content: center; gap: var(--csb-gap); border-radius: 50%; padding: 0; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.mir-transport.mini[data-layout="csb"] > .csb-play { position: absolute; right: calc(100% + 16px); bottom: 15px; grid-area: auto; }
+.mir-transport.mini[data-layout="csb"].at-top > .csb-play { top: 15px; bottom: auto; }
+.mir-transport[data-layout="csb"] .csb-play > .tbtn.play { --state-hover-wash: inset 0 0 0 99px var(--state-hover, var(--glass-raise));
+  width: 56px; height: 56px; min-width: 0; border-radius: 50%; background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--fg); translate: none;
+  transition: background var(--motion-micro) var(--ease-out), box-shadow var(--motion-micro) var(--ease-out), scale var(--motion-micro) var(--ease-out); }
+:where(:root:not(.kbm-touch)) .mir-transport[data-layout="csb"] .csb-play > .tbtn.play:hover { box-shadow: var(--relief-raise, var(--neu-raise)), var(--state-hover-wash); scale: var(--chip-hover-scale); }
+.mir-transport[data-layout="csb"] .csb-play > .tbtn.play:is(:active, .press) { background: var(--state-press, var(--glass-press)); box-shadow: var(--trig-press-relief); scale: var(--chip-press-scale); }
+.mir-transport[data-layout="csb"] .csb-play > .tbtn.play > svg { width: 26px; height: 26px; }
+/* LEFT: the rate over the BPM pill (a click types it: `typed`), the power over EXPAND */
+.mir-transport[data-layout="csb"] .csb-mod > .tbtn.modb { background: transparent; border-color: transparent; box-shadow: none; width: 48px; height: 26px; min-width: 0; min-height: 0; border-radius: var(--r-pill); font-size: var(--fs-tiny); }
+.mir-transport[data-layout="csb"] .csb-tempo > .k { width: 44px; }
+.mir-transport[data-layout="csb"] .csb-tempo > .k .k-lbl { display: none; }
+.mir-transport[data-layout="csb"] .csb-tempo .tempo-expand { flex: 0 0 auto; width: 72px; height: 34px; padding-right: 7px; }
+.mir-transport[data-layout="csb"] .csb-tempo .tempo-expand .tempo-number { font: var(--w-bold) var(--csb-num)/1 var(--font-num); font-variant-numeric: tabular-nums; }
+.mir-transport[data-layout="csb"] .tempo-chevron { display: none; }   /* the pill opens nothing: EXPAND does */
+/* IN A RACK CARD (docked, or the FREE window one card wide) */
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; align-items: center; gap: 4px 2px; padding: 8px; height: auto; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-left, .csb-right, .csb-ico) { display: contents; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-play { grid-area: 1 / 1 / 2 / 3; flex-direction: row; padding: 0; border-radius: 0; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-play > .tbtn.play { width: 48px; height: 48px; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-tempo { grid-area: 1 / 3 / 2 / 6; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-mod { grid-area: 1 / 6 / 2 / 8; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-tempo > .k > .k-val { position: absolute; top: 100%; left: 50%; translate: -50% 0; z-index: 2; white-space: nowrap; }   /* the rate's value is a tooltip under its dial: the card never grows */
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-mid { grid-area: 2 / 1 / 3 / -1; display: grid; grid-template-columns: subgrid; justify-items: center; gap: 4px normal; width: 100%; min-width: 0; margin: 6px 0; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-mid > .csb-row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; justify-items: center; column-gap: normal; width: 100%; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico > button, .tr-expand) { grid-area: auto; order: 2; width: 32px; height: 32px; }   /* auto: the basic drawing's docked grid names cells of its own */
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo { grid-area: auto / 1 / auto / -1; justify-self: stretch; order: 3; }
+.mir-transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo:not([hidden]) { grid-template-columns: minmax(0, 1fr); }
+@media (prefers-reduced-motion: reduce) { .mir-transport[data-layout="csb"] .csb-play > .tbtn.play { transition: none; } }
+:root:is([data-motion="reduced"], [data-motion="off"]) .mir-transport[data-layout="csb"] .csb-play > .tbtn.play { transition: none; }
 
 /* ── THE FREE WINDOW (1.5.0-alpha.25): the bar in a window of its own (data-place="free"), in the window's flow, the window as wide as the
    app's freeWidth() ── */
@@ -238,6 +291,7 @@
   width: var(--xport-work-seat); height: var(--xport-work-seat); min-width: var(--xport-work-seat); min-height: var(--xport-work-seat); padding: 0;
   border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--xport-work-r); background: var(--trig-face); box-shadow: var(--relief-raise, var(--neu-raise)); }   /* the bar's hairline, as BASINS draws its seats beside the tools (1.5.0-alpha.11) */
 .mir-transport[data-bar="work"] .tbtn.tempo-expand { height: var(--xport-work-seat); border-radius: var(--xport-work-r); }
+.mir-transport[data-bar="work"] { --xport-num-size: 12px; --xport-micro: 7px; }   /* 1.6.0-alpha.69 · ONE TYPE ON A BAR: the work bar's tempo wears THE CONTROL SURFACE's setting (12 px over a 7 px unit; it was 18 over 8 beside the CSB's 12 over 7) */
 
 /* ── THE ONE BAR THAT MOVES (1.5.0-alpha.12): in a work lane the bar is the work bar's (data-bar="work" above); the rack
    hiding does not slide it away, as it does on the stage (the window it sits in has its own presence) ──────────── */
@@ -265,7 +319,7 @@ body.no-transport-bar .mir-transport, body.no-transport-bar .dev[data-id="transp
 .mir-transport .native-tempo.with-macros:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 12px; }
 .mir-transport .tempo-pane { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .mir-transport .tempo-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 6px; max-height: var(--xport-rail-h); overflow-y: auto; overflow-x: hidden;
-  scrollbar-width: thin; scrollbar-color: var(--xport-rail-thumb) transparent; align-content: start; }
+  scrollbar-width: thin; scrollbar-color: var(--acc) transparent; align-content: start; }   /* 1.6.0-alpha.68: the one scrollbar (the thumb was a grey of its own) */
 .mir-transport .tempo-tile { position: relative; height: var(--xport-tile); border-radius: var(--xport-tile-r); }
 .mir-transport .tempo-tile.m2reorder { opacity: .55; }
 .mir-transport .tempo-tile .m2slotrow { display: grid; grid-template-columns: var(--xport-tile) var(--xport-tile) 18px; align-items: center; height: var(--xport-tile); }
@@ -328,29 +382,22 @@ body.no-transport-bar .mir-transport, body.no-transport-bar .dev[data-id="transp
              `app:` node, data-tr-app — BASINS' 10ⁿ depth reader); with no app node the pill takes the whole row;
      below · the tempo panel when the pill opens it, then the latches and the seat button when the layout has them.
    Every part has a fixed cell, so nothing moves with state: a part a layout leaves out leaves its cell empty (the hand law). */
-.mir-transport.docked:not([data-layout="lambdawaves"]) { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; gap: 6px 5px; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) > .native-play-row { display: contents; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) > .native-play-row > .tbtn:not(.mir-mod-power) { min-width: 0; width: 100%; height: var(--xport-seat); min-height: var(--xport-seat); border-radius: var(--r-md); }
-.mir-transport.docked:not([data-layout="lambdawaves"]) .play { grid-area: 1 / 1; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) .modb { grid-area: 1 / 2; justify-self: center; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) .transport-home { grid-area: 1 / 3; border-color: var(--glass-hairline); }   /* its ring is the hairline docked (BASINS .08) */
-.mir-transport.docked:not([data-layout="lambdawaves"]) .dock-btn { grid-area: 1 / 4; justify-self: center; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) .mod-exp { grid-area: 1 / 5; justify-self: center; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) :is(.tempo-expand, .transport-tempo-input) { grid-area: 2 / 1 / 3 / 4; width: 100%; min-width: 0; }
-.mir-transport.docked:not([data-layout="lambdawaves"]):not(:has([data-tr-app])) :is(.tempo-expand, .transport-tempo-input) { grid-column: 1 / -1; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) [data-tr-app] { grid-area: 2 / 4 / 3 / 6; justify-self: end; min-width: 0; max-width: 100%; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) .native-tempo { grid-area: 3 / 1 / 4 / -1; order: 0; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) .native-tempo:not([hidden]) { width: 100%; grid-template-columns: minmax(0, 1fr); }
-.mir-transport.docked:not([data-layout="lambdawaves"]) > .tr-openers { grid-area: 4 / 1 / 5 / 5; flex-wrap: wrap; }
-.mir-transport.docked:not([data-layout="lambdawaves"]) > .tr-seat { grid-area: 4 / 5; justify-self: center; }
+.mir-transport.docked { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; gap: 6px 5px; }
+.mir-transport.docked > .native-play-row { display: contents; }
+.mir-transport.docked > .native-play-row > .tbtn:not(.mir-mod-power) { min-width: 0; width: 100%; height: var(--xport-seat); min-height: var(--xport-seat); border-radius: var(--r-md); }
+.mir-transport.docked .play { grid-area: 1 / 1; }
+.mir-transport.docked .modb { grid-area: 1 / 2; justify-self: center; }
+.mir-transport.docked .transport-home { grid-area: 1 / 3; border-color: var(--glass-hairline); }   /* its ring is the hairline docked (BASINS .08) */
+.mir-transport.docked .dock-btn { grid-area: 1 / 4; justify-self: center; }
+.mir-transport.docked .mod-exp { grid-area: 1 / 5; justify-self: center; }
+.mir-transport.docked :is(.tempo-expand, .transport-tempo-input) { grid-area: 2 / 1 / 3 / 4; width: 100%; min-width: 0; }
+.mir-transport.docked:not(:has([data-tr-app])) :is(.tempo-expand, .transport-tempo-input) { grid-column: 1 / -1; }
+.mir-transport.docked [data-tr-app] { grid-area: 2 / 4 / 3 / 6; justify-self: end; min-width: 0; max-width: 100%; }
+.mir-transport.docked .native-tempo { grid-area: 3 / 1 / 4 / -1; order: 0; }
+.mir-transport.docked .native-tempo:not([hidden]) { width: 100%; grid-template-columns: minmax(0, 1fr); }
+.mir-transport.docked > .tr-openers { grid-area: 4 / 1 / 5 / 5; flex-wrap: wrap; }
+.mir-transport.docked > .tr-seat { grid-area: 4 / 5; justify-self: center; }
 
-/* ── λWAVES' OWN LAYOUT (LAMBDAWAVES_LAYOUT writes data-layout="lambdawaves"): its 640 px bar, the pill last in the row,
-   the docked row wrapping, its 13 px glyphs and its pill ink — the arrangement it had before BASINS' became the default ── */
-.mir-transport.mini[data-layout="lambdawaves"] { width: auto; min-width: min(var(--xport-w), calc(calc(100vw / var(--in-zoom, 1)) - 24px)); }
-.mir-transport[data-layout="lambdawaves"] { --xport-glyph: 13px; }
-.mir-transport[data-layout="lambdawaves"] :is(.tbtn.tempo-expand, .transport-tempo-input) { order: 8; }
-.mir-transport[data-layout="lambdawaves"] .tbtn.tempo-expand { color: var(--fg-soft); }
-.mir-transport.docked[data-layout="lambdawaves"] > .native-play-row { flex-wrap: wrap; }
 body.rack-hidden .mir-transport.mir-rack-transport.docked { translate: none; visibility: inherit; }
 
 /* ── the window latches (the kit's: neither app puts window buttons on its bar) ─────────────────────────────── */

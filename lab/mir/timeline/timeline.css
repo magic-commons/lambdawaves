@@ -38,7 +38,7 @@
   --tl-select-pad: 0 22px 0 6px;
   --tl-chevron: 4px;
   --tl-chevron-w: 1.5px;
-  --tl-icon: 16px;
+  --tl-icon: 20px;
   --tl-icon-min: 32px;
   --tl-pill-r: 10px;                                           /* SNAP: a typed pill, as the BPM pill (1.5.6-alpha.24): its corner, its two sizes */
   --tl-pill-num-size: 13px;
@@ -246,7 +246,7 @@
 
 /* ── THE RULER AND THE LANES ── */
 .mir-timeline .tl-view { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; min-width: 0; overflow: hidden; gap: 2px; }
-.mir-timeline .tl-viewport { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.mir-timeline .tl-viewport { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }   /* 1.6.0-alpha.68: the one scrollbar (thin; the thumb was the system's) */
 .mir-timeline .tl-content { position: relative; min-height: 100%; }
 .mir-timeline .tl-ruler { position: relative; display: block; flex: none; width: 100%; min-width: 0; height: var(--tl-ruler-h); min-height: var(--tl-ruler-h); max-height: var(--tl-ruler-h); padding: 0; margin: 0;
   touch-action: none; cursor: crosshair; overflow: hidden; }
@@ -405,7 +405,7 @@
    question) hang on <body>, so each is a UI SCALE root of its own (css/base.css), placed in seen px ÷ the zoom (core/zoom.js) */
 .tl-pop, .tl-confirm { zoom: var(--ui-zoom); --in-zoom: var(--ui-zoom); }
 .tl-pop { position: fixed; z-index: calc(var(--z-veil) + 20); padding: var(--tl-pop-pad); min-width: var(--tl-pop-min); display: flex; flex-direction: column; gap: var(--tl-pop-gap);
-  max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); overflow: auto; color: var(--fg); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
+  max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); overflow: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; color: var(--fg); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
 .tl-pop-title { font-size: var(--tl-pop-title-size); padding: 4px; letter-spacing: var(--tl-pop-title-track); }
 .tl-pop-sep { height: 0; margin: 3px 4px; border-top: 1px solid var(--glass-hairline); }   /* 1.5.7-alpha.4: before the app's rows (moreRows) */
 .tl-pop .trig { min-height: var(--tl-pop-trig-h); font-size: var(--tl-pop-trig-size); }
@@ -437,7 +437,7 @@
 /* THE SHORTCUT SHEET (BASINS' injected sheet, as rules) */
 .tl-pop.tl-shortcuts { width: var(--tl-sheet-w); }
 .tl-shortcuts .tl-shortcuts-section { font-size: var(--fs-micro); letter-spacing: var(--tl-sheet-section-track); opacity: var(--tl-sheet-fade); padding: 6px 4px 2px; }
-.tl-shortcuts .tl-shortcuts-list { display: flex; flex-direction: column; gap: 1px; max-height: var(--tl-sheet-h); overflow: auto; }
+.tl-shortcuts .tl-shortcuts-list { display: flex; flex-direction: column; gap: 1px; max-height: var(--tl-sheet-h); overflow: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
 .tl-shortcuts .tl-shortcut-row { display: grid; grid-template-columns: var(--tl-sheet-cols); gap: 8px; padding: var(--tl-sheet-row-pad); font-size: var(--fs-tiny); align-items: baseline; }
 .tl-shortcuts .tl-shortcut-row:nth-child(odd) { background: var(--tl-sheet-stripe); }
 .tl-shortcuts .tl-shortcut-col:first-child { font-weight: var(--tl-sheet-key-weight); white-space: nowrap; }

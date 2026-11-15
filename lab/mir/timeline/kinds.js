@@ -9,7 +9,7 @@ const kinds = new Map();
 /* impl: { validate(curve) → bool, value(curve, clip, sourceBeat) → 0..1 | null, paint?(svg, curve, clip, ctx),
           slice?(curve, sourceBeat) → { before, after } | null, duration?(curve, bpm) → beats,
           drives?: false (it fires, it never drives: never dormant for want of a target, no OUTPUT RANGE),
-          menu?(curve, clip, { model, editor }) → [[label, fn]] (its rows in the clip menu; labels are English, translated
+          menu?(curve, clip, { model, editor }) → [[label, fn, id?, chosen?, opts?]] (its rows in the clip menu; labels are English, translated
           where they are shown) } */
 export function registerClipKind(kind, impl) { kinds.set(String(kind), Object.freeze({ ...impl })); return kinds.get(String(kind)); }
 export const clipKind = (curve) => (curve && curve.kind && curve.kind !== 'curve') ? kinds.get(curve.kind) || null : null;

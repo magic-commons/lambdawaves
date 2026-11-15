@@ -118,7 +118,7 @@ export function createTimeline(host, port) {
   cursor = createTimelineCursor({ editor, mod });
   function showReadout(on) {
     if (on && !readout && cursor) readout = createReadoutLayer({ mount: editor.view.shell, resolve: (ev) => {
-      if (document.body.classList.contains('ui-hidden') || document.querySelector('.tl-pop, .tl-confirm')) return null;
+      if (document.body.classList.contains('ui-hidden') || document.querySelector('.tl-pop, .tl-confirm, .mir-ctx')) return null;
       return cursor.gesture() || cursor.resolve(ev);
     } });
     else if (!on && readout) { readout.dispose(); readout = null; }

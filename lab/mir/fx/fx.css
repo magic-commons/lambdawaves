@@ -45,12 +45,12 @@ html[data-pointer-light]:not([data-pointer-lift]) [data-light][data-lit]::after 
 
 /* 1.5.7-alpha.60 · THE LIFT (λWAVES 041 W2; Josh: "it doesn't work on the UI, also the pointer glow seems to give a weird color instead of
    boosting the brightness/saturation where it's at"): one disc at the pointer, above every window, rack, bar and the picture, that
-   brightens (× 1.28) and saturates (× 1.6) its backdrop and fades to nothing at its rim (the mask).  No ink of its own.  pointer-light.js makes it only
+   brightens (× 1.6) and saturates (× 2.2; 1.6.0-alpha.72 — it was × 1.28 and × 1.6) its backdrop and fades to nothing at its rim (the mask).  No ink of its own.  pointer-light.js makes it only
    while POINTER GLOW is live and moves it by `translate`. */
 .mir-pointer-lift {
   position: fixed; left: 0; top: 0; z-index: 2147483000; width: calc(2 * var(--light-r, 105px)); height: calc(2 * var(--light-r, 105px));
   margin: calc(-1 * var(--light-r, 105px)) 0 0 calc(-1 * var(--light-r, 105px)); border-radius: 50%; pointer-events: none; contain: strict;
-  -webkit-backdrop-filter: brightness(1.28) saturate(1.6); backdrop-filter: brightness(1.28) saturate(1.6);
+  -webkit-backdrop-filter: brightness(1.6) saturate(2.2); backdrop-filter: brightness(1.6) saturate(2.2);   /* 1.6.0-alpha.72: stronger (Josh, 2026-11-14; it was 1.28 · 1.6) */
   -webkit-mask-image: radial-gradient(circle closest-side, CanvasText 0%, transparent 100%); mask-image: radial-gradient(circle closest-side, CanvasText 0%, transparent 100%);
   opacity: 0; transition: opacity var(--motion-ui) var(--ease-out);
 }

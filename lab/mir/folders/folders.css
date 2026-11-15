@@ -58,7 +58,7 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
    other panel scrolls itself */
 .mir-folders .mir-win-panel { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
 .mir-folders .mir-win-panel[hidden] { display: none; }
-.mir-folders .mir-win-panel:not([data-panel="gallery"]) { display: block; overflow: hidden auto; overscroll-behavior: contain; touch-action: pan-y; }
+.mir-folders .mir-win-panel:not([data-panel="gallery"]) { display: block; overflow: hidden auto; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
 .mir-folders .mir-win-panel:not([data-panel="gallery"])[hidden] { display: none; }
 .mir-folders .fo-head { display: flex; align-items: baseline; gap: var(--sp-3); min-height: 18px; padding: 0 var(--sp-1); touch-action: none; }
 .mir-folders .fo-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -112,13 +112,13 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 /* ── the explorer ─────────────────────────────────────────────────────────────────────────────────────────── */
 .mir-folders .sv-explorer { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; min-width: 0; padding: 9px 9px 0; border-radius: var(--r-lg); }   /* BASINS' geometry */
 .mir-folders .sv-explorer-scroll { flex: 1 1 auto; min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
-  scrollbar-width: thin; scrollbar-color: var(--glass-hairline) transparent; touch-action: pan-y; }
+  scrollbar-width: thin; scrollbar-color: var(--acc) transparent; touch-action: pan-y; }   /* 1.6.0-alpha.68: the one scrollbar */
 .mir-folders .sv-grid { display: flex; flex-direction: column; gap: var(--folders-gap); }
 .mir-folders .sv-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
 .mir-folders .sv-crumb { max-width: 100%; white-space: normal; overflow-wrap: anywhere; min-height: 30px; padding: 4px 6px; border: 0;
   border-radius: var(--r-sm); background: none; color: var(--acc); font: var(--w-semi) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--tr-wide); cursor: pointer; }
 .mir-folders .sv-crumb:hover:not(:disabled) { background: var(--state-hover, var(--glass-raise)); }
-.mir-folders .sv-crumb:disabled { color: var(--fg-soft); cursor: default; }
+.mir-folders .sv-crumb:disabled { opacity: var(--state-disabled, .38); cursor: not-allowed; }   /* 1.6.0-alpha.70: the one disabled fade (it stood at full strength) */
 .mir-folders .sv-crumb:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 .mir-folders .sv-crumb-sep { color: var(--ink-faint); font-size: var(--fs-micro); }
 .mir-folders .sv-folder-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr)); gap: var(--folders-gap); touch-action: pan-y; }
@@ -199,7 +199,6 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 .mir-folders .sv-context { display: flex; flex-direction: column; gap: var(--folders-gap); padding: var(--folders-box-pad); border-radius: var(--r-md); }
 .mir-folders .sv-context[hidden] { display: none; }
 .mir-folders .sv-context-title { font: var(--w-semi) var(--fs-small)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg); }
-.mir-folders .sv-context-label { font: var(--w-semi) var(--fs-micro)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-faint); }
 .mir-folders .sv-context-text { font: var(--w-regular) var(--fs-small)/1.5 var(--font-ui); color: var(--fg-soft); }
 .mir-folders .sv-context-row { display: flex; flex-wrap: wrap; gap: var(--folders-gap); }
 /* the ask ("save this first?") is not a well: BASINS' solid tinted pane at pane height, a .55 accent rim, its own ink */
@@ -214,7 +213,6 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
 .mir-folders .sv-ask .sv-context-row { justify-content: center; }
 .mir-folders .sv-move .sv-input { flex: 1 1 140px; }
 .mir-folders .sv-act.trig { flex: 1 1 auto; min-height: 40px; }
-.mir-folders .sv-moveto .sv-act.trig { flex: 0 1 auto; }
 .mir-folders .sv-primary.trig .trig-l { color: var(--acc); }
 .mir-folders :is(.sv-danger, .armed).trig .trig-l { color: var(--bad); }
 .mir-folders .sv-foot { display: flex; flex-direction: column; gap: var(--sp-1); padding-top: 8px; border-top: 1px solid var(--glass-hairline); }
