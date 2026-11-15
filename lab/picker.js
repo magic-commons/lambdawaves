@@ -532,7 +532,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function deck(host, room = 10) {   // room: the desktop gap between tiles (029 Q: a volume's deck breathes at 16)
     const wrap = el('div', 'mm-pager', host), pagesEl = el('div', 'mm-pages', wrap), foot = el('div', 'mm-dots', host);
     const arrow = (dir) => { const b = el('button', 'mm-arrow ' + (dir < 0 ? 'mm-prev' : 'mm-next'), wrap); b.type = 'button';
-      b.setAttribute('aria-label', dir < 0 ? 'previous page' : 'next page'); icon(b, dir < 0 ? 'arrow-left' : 'arrow-right'); b.addEventListener('click', () => pageTo(page + dir)); return b; };
+      b.setAttribute('aria-label', dir < 0 ? 'Previous page' : 'Next page'); icon(b, dir < 0 ? 'arrow-left' : 'arrow-right'); b.addEventListener('click', () => pageTo(page + dir)); return b; };
     const arrows = [arrow(-1), arrow(1)];
     let list = [], make = null, pages = [], page = 0, per = 1, laid = '';
     const fill = (k) => { const p = pages[k]; if (!p || p.dataset.full) return; p.dataset.full = '1';
@@ -1012,7 +1012,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     function openIsomers(m, isos, from) {
       isoHead.textContent = ''; isoGrid.textContent = ''; isoEl.dataset.of = m.id;
       el('b', 'mm-isof', isoHead, m.formulaM ? mathPlain(m.formulaM) : m.formula); el('span', 'mm-isocount', isoHead, (isos.length + 1) + ' isomers');
-      const x = el('button', 'mm-back mm-isox', isoHead); x.type = 'button'; x.setAttribute('aria-label', 'Close the isomers'); x.textContent = '×'; x.addEventListener('click', closeIsomers);
+      const x = el('button', 'mm-back mm-isox', isoHead); x.type = 'button'; x.setAttribute('aria-label', 'Close the isomers'); setGlyph(x, 'close', { size: 16 }); x.addEventListener('click', closeIsomers);
       isoGrid.style.setProperty('--n', String(isos.length + 1));
       for (const y of [m, ...isos]) { const t = molTile(isoGrid, y, false); if (y === m) t.classList.add('here'); }
       isoEl.style.maxHeight = ''; isoEl.hidden = false; placeIsomers(from); enterTiles([...isoGrid.children]);

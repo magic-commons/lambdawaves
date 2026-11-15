@@ -1,6 +1,6 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
-import { TIER } from '../tier.js';
+import { TIER } from '../tier.js'; import { setGlyph } from '../mir/glyph.js';
 import { el, knob, sw, seg, group, readout, chip, hint, trig, label } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, PROBE_R, ESP_RANGE, atomSizeOf, stickROf, liftAtomStyle, cameraBasis } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
 import { createLight, summonLight } from '../light-window.js';   // 037 L1: THE LIGHTING WINDOW, CAMERA's sibling (lab/, not windows/); L4 its summons
 import { arcKnob } from '../mir/controls/arc.js'; import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName, presetSave } from '../user-presets.js'; import { createCameraPanel, directionSphere } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
@@ -346,7 +346,7 @@ export function createMaterial(app) {
       for (const b of p.querySelectorAll('.mir-pick-i')) { const P = PALETTE_BY_ID.get(b.dataset.id) || mine.get(b.dataset.id); if (!P) continue; const st = [...P.stops].sort((a, c) => a.at - c.at);
         el('span', 'pal-name', b).append(...[...b.childNodes].filter((n) => n.nodeType === 3));   // iteration 015 P1: the name its own flex item, the strip a column
         if (mine.has(b.dataset.id)) {   // P3: a reader's row carries its × between the name and the strip, so the strips stay one column
-          const name = b.dataset.id.slice(PU.length), x = el('span', 'sp-prex', b, '×'); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; x.setAttribute('aria-label', 'Delete ' + name);
+          const name = b.dataset.id.slice(PU.length), x = setGlyph(el('span', 'sp-prex', b), 'close', { size: 16 }); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; x.setAttribute('aria-label', 'Delete ' + name);
           x.addEventListener('mousedown', (e) => e.preventDefault());
           x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); if (palShown === PU + name) palShown = palId; palUsers.remove(name); b.remove();
             if (!p.querySelector('.mir-pick-i[data-id^="' + PU + '"]')) for (const h of p.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); }); }

@@ -17,7 +17,7 @@
  *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, field, mat, present, onEdit }) → { model, filter, nodes(), add(type), remove(id),
  *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on), graph(), load(graph) } */
 import { el, ariaLabel, chip, hint, placeholder } from './mir/kit.js';
-import { createWindow } from './mir/window/window.js';
+import { createWindow } from './mir/window/window.js'; import { setGlyph } from './mir/glyph.js';
 import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
 import { frame } from './mir/core/frame.js';
@@ -237,7 +237,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       keep: (n) => users.add(n, { points: model.points().map((q) => ({ t: q.t, v: q.v, tension: q.tension || 0 })) }) });
     nm.addEventListener('click', () => { const pane = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!pane) return;
       for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + CU + '"]')) {
-        const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; ariaLabel(x, 'Delete {name}', { name });
+        const x = setGlyph(el('span', 'sp-prex', b), 'close', { size: 16 }), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; ariaLabel(x, 'Delete {name}', { name });
         x.addEventListener('mousedown', (e) => e.preventDefault());
         x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
           if (!pane.querySelector('.mir-pick-i[data-id^="' + CU + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });

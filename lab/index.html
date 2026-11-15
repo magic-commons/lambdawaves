@@ -86,7 +86,7 @@
          grid, the half-width, the mode count and the norm.  It carries no clock while the transport
          runs, which is what stops a description that would otherwise rewrite itself ten times a
          second.  It does NOT describe the ray-marched volume: that would be fabrication. -->
-    <canvas id="field" role="img" aria-label="the reconstructed hydrogen wavefunction"></canvas>
+    <canvas id="field" role="img" aria-label="The reconstructed hydrogen wavefunction"></canvas>
     <canvas id="vortex" aria-hidden="true"></canvas>
     <canvas id="particles" aria-hidden="true"></canvas>
     <canvas id="flow" aria-hidden="true"></canvas>
@@ -94,11 +94,11 @@
     <canvas id="skeleton" aria-hidden="true"></canvas>
     <div id="title"><span class="lam">λ</span><span class="word">WAVES</span><svg class="mark" viewBox="0 0 10 10" aria-hidden="true"><g transform="rotate(45 5 5)"><rect x="1.7" y="1.7" width="2.25" height="2.25" fill="#5ee7d8"/><rect x="3.95" y="1.7" width="2.25" height="2.25" fill="#78e1f0"/><rect x="6.2" y="1.7" width="2.25" height="2.25" fill="#f5f7fa"/><rect x="1.7" y="3.95" width="2.25" height="2.25" fill="#d97ce8"/><rect x="3.95" y="3.95" width="2.25" height="2.25" fill="#2b3f7a"/><rect x="6.2" y="3.95" width="2.25" height="2.25" fill="#5ee7d8"/><rect x="1.7" y="6.2" width="2.25" height="2.25" fill="#ffbe5a"/><rect x="3.95" y="6.2" width="2.25" height="2.25" fill="#d97ce8"/><rect x="6.2" y="6.2" width="2.25" height="2.25" fill="#78e1f0"/></g></svg><span class="ms">QWAVE-0 · HYDROGEN SHADOW LAB</span></div>
     <div id="badges"></div>
-    <button id="rackToggle" class="glass" type="button" data-key-action="rack" aria-label="hide or show the rack" title="Hide or show the rack">◧</button>
-    <button id="rackFav" class="glass" type="button" aria-label="favourite layouts" title="Save or load a window layout">☆</button>
+    <button id="rackToggle" class="glass" type="button" data-key-action="rack" aria-label="Hide or show the rack" title="Hide or show the rack"></button>
+    <button id="rackFav" class="glass" type="button" aria-label="Favourite layouts" title="Save or load a window layout"></button>
     <div id="rackFavList" class="glass" hidden data-rack-list="fav"></div>
     <div id="notebookParts" hidden><!-- 044 L102: the NOTEBOOK's title strip and notes face, lent at boot to its kit window (shell/notebook.js) -->
-      <header class="nb-head"><div class="nb-titles"><input class="nb-title" value="NOTEBOOK" spellcheck="false" aria-label="notebook title" title="the notebook's title — type to rename"><input class="nb-subtitle" placeholder="subtitle" spellcheck="false" aria-label="notebook subtitle" title="the notebook's subtitle — type to rename" hidden></div></header>
+      <header class="nb-head"><div class="nb-titles"><input class="nb-title" value="NOTEBOOK" spellcheck="false" aria-label="Notebook title" title="the notebook's title — type to rename"><input class="nb-subtitle" placeholder="subtitle" spellcheck="false" aria-label="Notebook subtitle" title="the notebook's subtitle — type to rename" hidden></div></header>
       <div class="nb-face nb-notes">
         <textarea class="nb-text" spellcheck="false" placeholder="notes — markdown, $inline$ and $$display$$ maths; ctrl+enter previews — kept in this browser and in the project"></textarea>
         <div class="nb-view md"></div>
@@ -143,7 +143,7 @@
          positioned layer over the stage, pointer-transparent itself so the canvas gestures underneath
          are untouched, with each floating card taking its own pointer events back.  It sits ABOVE the
          racks and BELOW the notebook and the menus, so a menu can always be opened over a window. -->
-    <div id="floats" role="group" aria-label="floating windows"></div>
+    <div id="floats" role="group" aria-label="Floating windows"></div>
   </div>
 
 
@@ -155,8 +155,8 @@
   <!-- the second anchor sits BESIDE the mirror rack, not inside it: `raise()` and the TAB cycle both
        `prepend()` a card into a rack, which would push a first-child link out of first place. -->
   <a class="skip" href="#rack">skip the mirror rack</a>
-  <aside id="rackL" tabindex="-1" aria-label="the mirror rack (left)"></aside>
-  <aside id="rack" tabindex="-1" aria-label="device rack"></aside>
+  <aside id="rackL" tabindex="-1" aria-label="The mirror rack (left)"></aside>
+  <aside id="rack" tabindex="-1" aria-label="Device rack"></aside>
 </div>
 <script type="module" src="./main.js"></script>
 </body>

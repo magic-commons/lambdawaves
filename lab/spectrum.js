@@ -14,7 +14,7 @@
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, hint, trig } from './mir/kit.js';
 import { paintStroke, fillButton, levelLine, footLine, strokeMode, strokeButton, watchStroke, laneStrip } from './paint-stroke.js';
-import { PRESET_BY_ID } from './state.js';
+import { PRESET_BY_ID } from './state.js'; import { setGlyph } from './mir/glyph.js';
 import { createUserPresets, presetSave } from './user-presets.js';
 
 /** iteration 015 S4 · THE READER'S PRESETS: SPECTRUM's PREFERENCE record (settings-store.js FAMILIES), rows `{ name, data: { labels } }` */
@@ -69,7 +69,7 @@ export function createSpectrum(host, api) {
   preStep.name.addEventListener('click', () => { const pane = [...document.querySelectorAll('.mir-pick')].pop(), on = pane && pane.querySelector('.mir-pick-i.on');
     if (on) on.addEventListener('click', () => { if (preStep.get() && api.loadPreset) api.loadPreset(preStep.get()); });   // RELOAD: the stepper ignores a pick of its own value
     if (pane) for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + UK + '"]')) {                                // S4: each reader's row carries its ×
-      const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(UK.length); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; x.setAttribute('aria-label', 'Delete ' + name);
+      const x = setGlyph(el('span', 'sp-prex', b), 'close', { size: 16 }), name = b.dataset.id.slice(UK.length); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; x.setAttribute('aria-label', 'Delete ' + name);
       x.addEventListener('mousedown', (e) => e.preventDefault());
       x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
         if (!pane.querySelector('.mir-pick-i[data-id^="' + UK + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
