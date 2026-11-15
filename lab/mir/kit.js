@@ -305,7 +305,7 @@ export function verticalDrag(e, { travel, fine, touchTravel, axis = 'y' } = {}) 
   return d;
 }
 /** the pixels of pointer travel for a full scale under the law, for a drag surface the kit did not build
- *  (the modulation window's dials still carry their own copy: 220, 1760 with a modifier, 320 under a finger).
+ *  (the modulation window's dials read the law too since 1.6.0-alpha.59: verticalDrag on the ring, setKnobLaw() on its sliders).
  *  NO CONTROL KEEPS THE LAW AS A NUMBER (1.6.0-alpha.22): a drag reads gearOf / verticalDrag / dragTravel, an arrow key setKnobLaw().keyFine. */
 export function dragTravel(e, { touch = false, travel, fine } = {}) {
   if (fineHeld(e)) return (travel || KNOB_LAW.travel) * (fine || KNOB_LAW.fine);

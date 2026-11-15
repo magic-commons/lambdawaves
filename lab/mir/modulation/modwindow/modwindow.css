@@ -27,10 +27,8 @@
   --m2-audsreadout-font: 650 var(--fs-tiny) var(--font-num);
   --m2-audtxt-font: 700 6.5px var(--font-num);
   --m2-body-alpha: 0.42;
-  --m2-button-focus-shadow: 0 0 0 1px hsl(0 0% 100% / .20);
   --m2-button-hover-shadow: inset 0 1px 0 hsl(0 0% 100% / .10);
   --m2-button-off-filter: saturate(.34);
-  --m2-button-press-shadow: inset 0 2px 5px hsl(0 0% 0% / .34), inset 0 0 0 1px hsl(0 0% 100% / .13);
   --m2-chev-edge: 5px solid currentColor;
   --m2-chev-edge-2: 4px solid transparent;
   --m2-chip-font: 700 var(--fs-small)/1 ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -182,7 +180,6 @@
   --m2-note-font: 500 var(--fs-tiny) var(--font-sans);
   --m2-num-edge: 1.2px solid rgba(255,255,255,0.55);
   --m2-num-font: 600 var(--fs-small) var(--font-num);
-  --m2-numseat-focus-ring: 1px solid rgba(255,255,255,0.72);
   --m2-pfold-font: 700 9.5px var(--font-sans);
   --m2-pickb-font: 600 12px var(--font-sans);
   --m2-pow-edge: 1.5px solid rgba(255,255,255,0.4);
@@ -311,23 +308,8 @@
 /* @own */ .mir-modwindow .m2prowdel.m2arm {
   --m2-arm-shadow: inset 0 0 0 1px var(--bad);
 }
-/* @own */ .mir-modwindow .m2dev.audio.m2min .m2audminleds:focus-visible {
-  --m2-audio-audminleds-focus-ring: 1px solid var(--acc);
-}
 /* @own */ .mir-modwindow .m2dev.audio.m2min .m2audminleds i::after {
   --m2-audminled-glow: 0 0 4px color-mix(in srgb,var(--acc) 38%,transparent);
-}
-/* @own */ #modwin.mir-modwindow button:focus-visible, #modwin.mir-modwindow input:focus-visible, #modwin.mir-modwindow [role="slider"]:focus-visible {
-  --m2-button-focus-ring: 1px solid var(--fg);
-}
-/* @own */ .mir-modwindow .m2audsrc:focus-visible {
-  --m2-button-focus-ring: 1px solid var(--fg);
-}
-/* @own */ .mir-modwindow .m2audinput:focus-visible {
-  --m2-button-focus-ring: 1px solid var(--fg);
-}
-/* @own */ .crail.crail-float.kwin-chiprail[data-mir-rail="modulation"] .crail-chip:focus-visible {
-  --m2-chip-ring: 1px solid var(--fg-soft);
 }
 /* @own */ .mir-modwindow .m2chk.on .m2dot {
   --m2-dot-on-halo: 0 0 5px var(--acc-soft);
@@ -337,9 +319,6 @@
 }
 /* @own */ .modwin.mir-modwindow .m2hold.held {
   --m2-held-shadow: inset 0 0 0 1px var(--acc), inset 0 0 11px rgba(255,255,255,0.30);
-}
-/* @own */ #modwin.mir-modwindow .kctl.ctl-frozen:focus-visible {
-  --m2-kctl-focus-ring: 1px dashed var(--fg);
 }
 /* @own */ .modwin.mir-modwindow .modxport.on {
   --m2-modxport-on-halo: 0 0 8px var(--acc);
@@ -659,7 +638,7 @@
   backdrop-filter: var(--glass-filter);
 }
 /* index.html:7157-7159   was:  .crail.crail-float.kwin-chiprail .crail-chip:focus-visible  */
-.crail.crail-float.kwin-chiprail[data-mir-rail="modulation"] .crail-chip:focus-visible { outline: var(--m2-chip-ring); }
+/* 1.6.0-alpha.60 · ONE RING IN THE PLUGIN: the chip's own 1 px ring went; modhost.css's one focus rule draws --state-focus on it */
 /* index.html:7158-7160   was:  .crail.crail-float.kwin-chiprail .crail-chip.on  */
 .crail.crail-float.kwin-chiprail[data-mir-rail="modulation"] .crail-chip.on { color: var(--fg); outline: none; }
 /* index.html:7159-7165   was:  .crail.crail-float.kwin-chiprail .crail-chip:active::before, .crail.crail-float.kwin-chiprail .crail-chip.on::before  */
@@ -741,7 +720,7 @@ html:not(.kbm-touch) body .crail.crail-float[data-mir-rail="modulation"] .crail-
 }
 html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active, .press) { color: var(--fg); }
 html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active, .press)::before {
-  background-color: var(--state-press, var(--glass-press)); box-shadow: var(--chip-sink); transform: translate(-50%, -50%) scale(var(--chip-press-scale));
+  background-color: var(--state-press, var(--glass-press)); box-shadow: var(--chip-sink); transform: translate(-50%, -50%) scale(var(--state-press-scale-round, var(--chip-press-scale)));
 }
 
 /* THE RUN SCROLLS HORIZONTALLY AND SHOWS NO BAR. */
@@ -951,7 +930,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   width: 44px; height: 100%; padding: 0; border: 0; border-radius: var(--m2-r-7);
   background: transparent; touch-action: none; cursor: ns-resize; }
 .mir-modwindow .m2numseat:active, .mir-modwindow .m2numseat.drag { background: var(--m2-face-w05); }
-.mir-modwindow .m2numseat:focus-visible { outline: var(--m2-numseat-focus-ring); outline-offset: -3px; }
+.mir-modwindow .m2numseat:focus-visible { outline-offset: -2px; }   /* the house ring (modhost.css), INSIDE: the seat is clipped by its strip */
 .mir-modwindow .m2num { position: relative; z-index: 1; flex: 0 0 auto; pointer-events: none;
   display: flex; align-items: center; justify-content: center;
   width: 24px; height: 24px; border-radius: 50%;
@@ -1028,9 +1007,6 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 .mir-modwindow .m2pad:active, .mir-modwindow .m2pad.m2held { background: var(--acc2-soft); border-color: var(--acc2); }
 /* an EMPTY pad is not dead — it fires nothing yet and says so quietly */
 .mir-modwindow .m2pad.m2empty .m2padin { background: var(--m2-face-w42); }
-/* The macro chooser sheet. */
-.mir-modwindow .m2pick.m2mpick { left: 8px; right: auto; top: auto; bottom: 58px; transform: none;
-  min-width: 124px; }
 /* The macro assignment box. */
 .mir-modwindow .m2macbox { display: flex; align-items: stretch; gap: 3px; margin-top: auto; }
 .mir-modwindow .m2capbox { display: flex; align-items: stretch; gap: 3px; }
@@ -1303,10 +1279,6 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   background: transparent;
   color: var(--acc); font: var(--m2-add-font); line-height: 1; padding: 0; }
 .mir-modwindow .m2add:active { background: var(--acc-soft); }
-/* A chooser sheet: since 1.5.6-alpha.4 a menu pane (`.glass[data-mir-surface="menu"]`, modwindow.js), so its material is the skin's. */
-.mir-modwindow .m2pick { position: absolute; left: 50%; top: 46px; transform: translateX(-50%); z-index: 42;
-  min-width: 200px; border-radius: var(--surface-radius, var(--r-lg)); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
-.mir-modwindow .m2pick[hidden] { display: none; }
 .mir-modwindow .m2pickb { min-height: 46px; border: 0; border-radius: var(--r-md); background: var(--m2-face-w07);
   color: var(--m2-ink-w100); font: var(--m2-pickb-font); letter-spacing: var(--label-tracking, var(--m2-tr-08)); }
 .mir-modwindow .m2pickb:active { background: var(--state-press, var(--glass-press)); }
@@ -1656,10 +1628,6 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
    These rules add no handlers and never alter a control's hit geometry. */
 #modwin.mir-modwindow button, #modwin.mir-modwindow input, #modwin.mir-modwindow [role="slider"] {
   -webkit-tap-highlight-color: transparent; }
-#modwin.mir-modwindow button:focus-visible, #modwin.mir-modwindow input:focus-visible,
-#modwin.mir-modwindow [role="slider"]:focus-visible {
-  outline: var(--m2-button-focus-ring); outline-offset: 2px;
-  box-shadow: var(--m2-button-focus-shadow); }
 #modwin.mir-modwindow .m2chk.on, #modwin.mir-modwindow .m2swb.on, #modwin.mir-modwindow .m2mac.on,
 #modwin.mir-modwindow .m2bus.on, #modwin.mir-modwindow .modsync.on,
 #modwin.mir-modwindow .modcad.on, #modwin.mir-modwindow .m2audsrc.on {
@@ -1672,9 +1640,6 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   opacity: var(--m2-kctl-alpha); cursor: not-allowed;
   background-image: var(--m2-kctl-wash);
   box-shadow: var(--m2-kctl-shadow); }
-#modwin.mir-modwindow .kctl.ctl-frozen:focus-visible {
-  outline: var(--m2-kctl-focus-ring); outline-offset: 2px;
-  box-shadow: var(--m2-button-focus-shadow); }
 #modwin.mir-modwindow .m2numseat.drag .m2deptharc { stroke: var(--fg); }
 #modwin.mir-modwindow .m2val.drag { background: var(--m2-face-w07); }
 #modwin.mir-modwindow .m2val.drag .m2vnum { color: var(--fg); font-weight: var(--m2-w-800); }
@@ -1988,7 +1953,6 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 .mir-modwindow .m2audsrc.on { color: var(--acc2); border-color: var(--m2-edge-acc2-70-58); }
 .mir-modwindow .m2audsrc.m2audbad { color: var(--bad); border-color: var(--bad); }
 .mir-modwindow .m2audsrc:hover, .mir-modwindow .m2audsrc:focus-visible { border-color: var(--m2-edge-w34); }
-.mir-modwindow .m2audsrc:focus-visible { outline: var(--m2-button-focus-ring); outline-offset: 2px; }
 .mir-modwindow .m2audsrc:active { background: var(--state-press, var(--glass-press)); }
 .mir-modwindow .m2dev.m2cmp.audio .m2aud { display: flex; align-items: flex-start; }
 .mir-modwindow .m2dev.m2cmp.audio .m2audsrc { padding: 0 1px; font-size: var(--m2-fs-7); }
@@ -2088,7 +2052,6 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 .mir-modwindow .m2audinput { flex: 1 1 auto; min-width: 0; height: 44px; border-radius: var(--r-md);
   border: var(--glass-border) solid var(--glass-hairline); background: var(--m2-plate);
   color: var(--fg); padding: 0 7px; font: var(--m2-maccap-font); }
-.mir-modwindow .m2audinput:focus-visible { outline: var(--m2-button-focus-ring); outline-offset: 2px; }
 .mir-modwindow .m2audsx { margin-left: auto; width: 44px; height: 44px; min-height: 44px; padding: 0;
   border: 0; border-radius: var(--r-md); background: var(--m2-face-w07); color: var(--m2-ink-w100);
   font: var(--m2-pickb-font); }
@@ -2123,7 +2086,6 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 .mir-modwindow .m2dev.audio.m2min .m2audminleds.is-all i[data-out="high"] { display: none; }
 .mir-modwindow .m2dev.audio.m2min .m2audminleds.is-all i[data-out="level"] { display: block; flex-basis: 6px; width: 6px; }
 .mir-modwindow .m2dev.audio.m2min .m2audminleds:active { background: var(--state-press, var(--glass-press)); }
-.mir-modwindow .m2dev.audio.m2min .m2audminleds:focus-visible { outline: var(--m2-audio-audminleds-focus-ring); outline-offset: 1px; }
 .mir-modwindow .m2dev.audio.m2min.m2off .m2audminleds { opacity: var(--m2-mintdot-alpha); }
 .mir-modwindow .m2dev.audio.m2min .m2audminout { color: var(--m2-ink-w44); }
 .mir-modwindow .m2dev.audio.m2min .m2audminout.on { color: var(--acc2); }
@@ -2258,9 +2220,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 :where(:root:not(.kbm-touch)) #modwin.mir-modwindow button:not(:disabled):hover,
 :where(:root:not(.kbm-touch)) #modwin.mir-modwindow .kctl:not(.ctl-frozen):hover {
     box-shadow: var(--m2-button-hover-shadow); }   /* 1.5.0-alpha.3: the ring went (INTENT: hover is a lighter face, never a ring); the face is modhost.css's */
-#modwin.mir-modwindow button:active:not(:disabled), #modwin.mir-modwindow [role="slider"].drag {
-  background-color: var(--m2-face-k10);
-  box-shadow: var(--m2-button-press-shadow); }
+/* 1.6.0-alpha.60 · A PRESS SHRINKS, ONE WAY: the plugin's inset press shadow went; a press is the house's wash and scale (modhost.css) */
 
 /* M6 signal budget: markers stay brighter than their supporting glow. Ordinary
    selection and transport chrome receive no permanent bloom. */

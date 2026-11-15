@@ -31,6 +31,7 @@
  *     nothing (a route made while the power is off, a restore); the old timer scanned every [data-param] in the document 150 times a minute.
  */
 import { createModHost } from './mir/modulation/host.js';
+const PRESET_KEY = 'lambdawaves.q0.modpresets';   // 044 K5: never renamed (a saved key); the kit no longer defaults to it
 import { createAudioCapture, AUDIO_STATE } from './mir/modulation/audio-capture.js';   // wave 102's capture half, the kit's since 1.5 (0.5.0 C4: lab/audio.js deleted)
 import { createFlashGuard, WCAG } from './mir/shell/flash-guard.js';
 
@@ -134,6 +135,10 @@ export function createModPort({ available, present, view, onCapture, save, say }
     },
     install(defs, roots) {
       host = createModHost({ available, present, presentationActive: false, roots });   // a closed editor has no preview demand
+      /* 044 K5 · THE PRESET KEY IS THE APP'S: the kit's default store is its own name since MIR 1.6.0-alpha.58 (it was this string), so
+         λWAVES names its own, the key every preset this browser saved lives under (settings-store.js RECORDS).  Said here, before any
+         reader (a project SAVE writes its rack through the model with no window open), and again on the port for the window. */
+      host.model.setPresetKey(PRESET_KEY);
       G = routeGuard({ driven: routed, now: () => host.clock.stats().seconds, say, read: host.registry.read, onAdvance: host.clock.onAdvance });   // the modulation's own seconds: wall live, the exact step in a film
       defs = defs.map((d) => (d.id in FLASH_STEP ? G.wrap(d, FLASH_STEP[d.id]) : d.flash > 0 ? G.wrap(d, d.flash) : d));   // 037 T4: an install def may declare its own step, as a runtime target does
       adapters = defs; idOf = null;
@@ -184,7 +189,7 @@ export function createModPort({ available, present, view, onCapture, save, say }
      *  history row), device { read, write } (the remembered input, a PREFERENCE), and the arm (armed, arm). */
     port({ moved, rateControl, persist, note, device, armed, arm, switchWorkspace, dock, onOpen }) {
       const C = host.clock;
-      return { moved, rateControl, persist, armed, arm, switchWorkspace, knobOf: P.knobOf,
+      return { moved, rateControl, persist, armed, arm, switchWorkspace, knobOf: P.knobOf, presetKey: PRESET_KEY,
         M: host.model, registry: host.registry, clock: C,   // 0.5.0 C4: no `targets` — the kit reads it as the routable-control SELECTOR
         dock: dock || false,                                             // iteration 003: it docks at the bottom like BASINS' (the kit rack's span, MIR OPTIONS' DROP GUIDES); 0.5.0 C4 floated it
         opened: () => { C.setPresentationActive(true); present(); if (onOpen) onOpen(); },   // the editor's preview demand only: THE play holds its own (A6); onOpen: 015 T5's magnet

@@ -31,15 +31,18 @@ import * as HOST from '../lab/mir/modulation/host.js';
 /* WAVE 60 · curve.js is imported HERE for the first time — until that wave the file had 430 correct lines, an importer, and NOT
    ONE GATE ON WHAT IT COMPUTES (our own ANTI-PATTERN 17 inside the file Josh asked to be copied); §19 gates it. */
 import * as CV from '../lab/mir/modulation/curve.js';
+/* 044 K5 · λWAVES' own catalogue (labParameters, LAB_PRESETS and their readers) left the kit in MIR 1.6.0-alpha.57 and lives beside
+   this suite, its one reader: tests/lab-catalogue.mjs. */
+import * as CAT from './lab-catalogue.mjs';
 const USES = {
   'registry.js': [REG, ['createRegistry', 'idFault', 'MAP_KINDS']],
-  'host.js': [HOST, ['createModHost', 'createTargetHost', 'createModClock', 'labParameters', 'model', 'MAX_WALL_STEP', 'PAUSE_MODES',
-    'LAB_PRESETS', 'LAB_PRESET_FOLDER', 'labPresetList', 'labPresetFolders', 'labPresetGet', 'labPresetApply', 'foreignPresets',
-    'presetRouteTargets', 'barTempo', 'resumeGrid', 'RESUME_LAWS']] };
+  'host.js': [HOST, ['createModHost', 'createTargetHost', 'createModClock', 'model', 'MAX_WALL_STEP', 'PAUSE_MODES',
+    'labPresetFolders', 'barTempo', 'resumeGrid', 'RESUME_LAWS']],
+  'tests/lab-catalogue.mjs': [CAT, ['labParameters', 'LAB_PRESETS', 'LAB_PRESET_FOLDER', 'labPresetList', 'labPresetGet', 'labPresetApply', 'foreignPresets', 'presetRouteTargets']] };
 const REMOVED = { labPresetFolders: 'MIR 1.5.0-alpha.18 (docs/ADOPTING-1.5.md §10)' };
 const { createRegistry, idFault, MAP_KINDS } = REG;
-const { createModHost, createTargetHost, createModClock, labParameters, model: M, MAX_WALL_STEP, PAUSE_MODES, LAB_PRESETS, LAB_PRESET_FOLDER,
-  labPresetList, labPresetFolders, labPresetGet, labPresetApply, foreignPresets, presetRouteTargets, barTempo, resumeGrid, RESUME_LAWS } = HOST;
+const { createModHost, createTargetHost, createModClock, model: M, MAX_WALL_STEP, PAUSE_MODES, labPresetFolders, barTempo, resumeGrid, RESUME_LAWS } = HOST;
+const { labParameters, LAB_PRESETS, LAB_PRESET_FOLDER, labPresetList, labPresetGet, labPresetApply, foreignPresets, presetRouteTargets } = CAT;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
@@ -348,9 +351,12 @@ function runWindow(r, n, dt) {
   const storage = (readFileSync(resolve(ROOT, 'lab/mir/modulation/registry.js'), 'utf8') +
                    readFileSync(resolve(ROOT, 'lab/mir/modulation/host.js'), 'utf8')).match(/localStorage|sessionStorage|indexedDB/g);
   const keyLine = /^export const PRESET_LS = '([^']+)';$/m.exec(modSrc);
-  judge('...and the only storage in the closure is the vendored model’s own guarded globalThis.localStorage, pointed at the λWAVES namespace by the one forced edit — our two files touch no storage at all',
-    !storage && keyLine && keyLine[1] === 'lambdawaves.q0.modpresets' && M.PRESET_LS === 'lambdawaves.q0.modpresets',
-    { ourStorage: storage, presetKey: M.PRESET_LS });
+  /* 044 K5: the kit's default key is the kit's own since MIR 1.6.0-alpha.58; λWAVES says its key to the model (lab/mod-port.js) */
+  const portSrc = readFileSync(resolve(ROOT, 'lab/mod-port.js'), 'utf8');
+  const appKey = /const PRESET_KEY = 'lambdawaves\.q0\.modpresets';/.test(portSrc) && /host\.model\.setPresetKey\(PRESET_KEY\)/.test(portSrc) && /presetKey: PRESET_KEY/.test(portSrc);
+  judge('...and the only storage in the closure is the vendored model’s own guarded globalThis.localStorage; the kit defaults to its own name and λWAVES points the model at lambdawaves.q0.modpresets (lab/mod-port.js: at the host’s birth and on the port) — our two files touch no storage at all',
+    !storage && keyLine && keyLine[1] === 'mir.modpresets' && M.PRESET_LS === 'mir.modpresets' && appKey,
+    { ourStorage: storage, presetKey: M.PRESET_LS, appKey });
 
   judge('...and node really has no DOM: importing the whole host defined neither document nor window',
     typeof document === 'undefined' && typeof window === 'undefined',
@@ -769,8 +775,8 @@ function runWindow(r, n, dt) {
   judge('16 · THE IMPORT LIST: every name this suite takes is exported by the adopted kit' +
     (noted.length ? ' — NOTE, removed by the kit\'s own guide: ' + noted.map((n) => n + ' (' + REMOVED[n.split(' ')[1]] + ')').join(', ') : ''),
     missing.length === 0, { missing, noted });
-  judge('16 · A λWAVES PROJECT\'S MODULATION STILL READS: MOD_STATE_READS holds 104 (every rack saved since wave 63) and the model\'s own MOD_STATE_V, and the preset store is λWAVES\' namespace (lambdawaves.q0.*)',
-    Array.isArray(M.MOD_STATE_READS) && M.MOD_STATE_READS.includes(104) && M.MOD_STATE_READS.includes(M.MOD_STATE_V) && /^lambdawaves\.q0\./.test(M.PRESET_LS),
+  judge('16 · A λWAVES PROJECT\'S MODULATION STILL READS: MOD_STATE_READS holds 104 (every rack saved since wave 63) and the model\'s own MOD_STATE_V, and the preset store is λWAVES\' namespace (lambdawaves.q0.*; the app says the key, 044 K5)',
+    Array.isArray(M.MOD_STATE_READS) && M.MOD_STATE_READS.includes(104) && M.MOD_STATE_READS.includes(M.MOD_STATE_V) && /^lambdawaves\.q0\./.test(/const PRESET_KEY = '([^']+)'/.exec(readFileSync(resolve(ROOT, 'lab/mod-port.js'), 'utf8'))[1]),
     { reads: M.MOD_STATE_READS, v: M.MOD_STATE_V, store: M.PRESET_LS });
 }
 

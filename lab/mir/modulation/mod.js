@@ -2581,13 +2581,12 @@ export const FACTORY_PRESETS = [
 ];
 
 /* Preset storage key and its format version. */
-/* λWAVES: forced edit 1/8 — the storage namespace.  'mandel.modpresets' is
-   BASINS identity, and the boundary law is that MIR never carries a Card's.
-   Our house namespace is lambdawaves.q0.* (lab/rack.js LS_EXP / SETTINGS_KEY). */
-export const PRESET_LS = 'lambdawaves.q0.modpresets';
-/* MIR 1.5.1 · THE PRESET KEY IS AN OPTION.  PRESET_LS stays the default (every reader shipped with it); an app
-   names its own store with setPresetKey(key) — window.js passes port.presetKey — so two apps on one origin never
-   share presets.  Blocked on the 1.4 line by λWAVES' byte gate on this file; λWAVES is frozen on 1.4. */
+/* 1.6.0-alpha.58 · THE KIT'S NAMES ARE THE KIT'S: the default is the kit's own namespace, as every other kit store's
+   (mir.rack, mir.transport, mir.gui.*).  It was 'lambdawaves.q0.modpresets' (and 'mandel.modpresets' before that): an
+   app that passed no presetKey and has users' presets under that string passes it now, and nothing is lost. */
+export const PRESET_LS = 'mir.modpresets';
+/* MIR 1.5.1 · THE PRESET KEY IS AN OPTION.  PRESET_LS is the default; an app names its own store with
+   setPresetKey(key) — window.js passes port.presetKey — so two apps on one origin never share presets. */
 let presetKey = PRESET_LS;
 /** setPresetKey(key) — the localStorage key of this app's presets; '' or a non-string restores PRESET_LS.  The live
  *  store is re-read from the new key on its next use.  → the key now in force */
@@ -2603,7 +2602,7 @@ export const PRESET_NAME_MAX = 24;
 
 /* The default and factory preset folder names. */
 export const PRESET_FOLDER_DEFAULT = 'Josh\u2019s Collection';
-export const PRESET_FOLDER_FACTORY = 'MANDELBROT';
+export const PRESET_FOLDER_FACTORY = 'FACTORY';   // 1.6.0-alpha.58: it was an app's name ('MANDELBROT'); the word the window's copy already says
 export const PRESET_FOLDER_MAX = 24;
 
 /** The folder a STORED preset is in.  Absence is the default, and so is any

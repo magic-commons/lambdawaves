@@ -155,9 +155,8 @@ export const sizeLaw = {
 };
 
 /** Every literal string the tree carries.  Overridable through host.copy.
- *  `{factory}` is the one host word: BASINS ships the factory preset folder
- *  named MANDELBROT, and the extraction's §5 calls it "a word, not a
- *  mechanism". */
+ *  `{factory}` is the one host word (the factory preset folder's name: "a word,
+ *  not a mechanism"). */
 export const COPY = {
   railHead: phrase('MACROS'),
   tab: phrase('MOD'),
@@ -405,8 +404,6 @@ export function createModWindow(host) {
     addDevice: (src) => buildDevice(rack.run, null, src, copy),
     setDeviceMode, setViewHeight: (px) => setViewHeight(rack.root, px),
     buildRing, buildSpan, buildClear, buildGhost,
-    buildDevicePick: () => buildDevicePick(root, copy),
-    buildMacroPick: () => buildMacroPick(root, copy),
     buildPresetSheet: () => buildPresetSheet(root, copy),
     buildDeadInspector: () => buildDeadInspector(root)
   };
@@ -1285,35 +1282,6 @@ export function buildGhost(text) {
    All four are appended to the WINDOW ROOT (panelWin.root), not to the panel.
    ══════════════════════════════════════════════════════════════════════════ */
 
-
-export function buildDevicePick(windowRoot, copyIn) {
-  const copy = Object.assign({}, COPY, copyIn || {});
-  const root = m2mk('div', 'm2pick glass', windowRoot); root.dataset.mirSurface = 'menu';   // 1.5.6-alpha.4: the menu surface
-  const btns = {};
-  for (const [kind, label] of copy.devicePick) {
-    const b = m2mk('button', 'm2pickb', root);
-    b.type = 'button';
-    kitLabel(b, label);
-    btns[kind] = b;
-  }
-  root.hidden = true;          // born closed, so the first tap SHOWS
-  return { root, btns };
-}
-
-/** anim.js:3949. */
-export function buildMacroPick(windowRoot, copyIn) {
-  const copy = Object.assign({}, COPY, copyIn || {});
-  const root = m2mk('div', 'm2pick m2mpick glass', windowRoot); root.dataset.mirSurface = 'menu';
-  const btns = {};
-  for (const [kind, label] of copy.macroPick) {
-    const b = m2mk('button', 'm2pickb', root);
-    b.type = 'button';
-    kitLabel(b, label);
-    btns[kind] = b;
-  }
-  root.hidden = true;
-  return { root, btns };
-}
 
 /** The preset list.  `.m2ppick glass` — it takes the app's glass rather than
  *  --m2-plate, which is why it does NOT have the .m2pick defect. */

@@ -115,43 +115,43 @@
  },
  {
   "file": "mir/modulation/mod.js",
-  "line": 2665,
+  "line": 2664,
   "why": "fragment",
   "text": "the stored modulation presets are format "
  },
  {
   "file": "mir/modulation/mod.js",
-  "line": 2665,
+  "line": 2664,
   "why": "fragment",
   "text": " and this build reads format "
  },
  {
   "file": "mir/modulation/mod.js",
-  "line": 2666,
+  "line": 2665,
   "why": "fragment",
   "text": " — the file is left untouched and this session runs on the "
  },
  {
   "file": "mir/modulation/modwindow/modwindow.js",
-  "line": 430,
+  "line": 427,
   "why": "fragment",
   "text": " window controls"
  },
  {
   "file": "mir/modulation/modwindow/modwindow.js",
-  "line": 600,
+  "line": 597,
   "why": "textContent",
   "text": "BPM"
  },
  {
   "file": "mir/modulation/modwindow/modwindow.js",
-  "line": 924,
+  "line": 921,
   "why": "textContent",
   "text": "A"
  },
  {
   "file": "mir/modulation/modwindow/modwindow.js",
-  "line": 926,
+  "line": 923,
   "why": "textContent",
   "text": "B"
  },
@@ -175,7 +175,7 @@
  },
  {
   "file": "mir/modulation/window.js",
-  "line": 1893,
+  "line": 1845,
   "why": "fragment",
   "text": " failed to build"
  },

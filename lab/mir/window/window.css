@@ -19,6 +19,10 @@
    the rail and re-pointed seat by seat (theme × card × frost) on the selectors it always had, in the order it always
    had; the rules below read names only. */
 :root { --chip-hover-scale: 1.06; --chip-press-scale: .92; }     /* HOVER grows the disc 6 %, PRESS sinks it to 92 % */
+/* 1.6.0-alpha.63 · THE RAIL CHIP'S SIZE IS WRITTEN ONCE: a rail chip's square (its target; the disc inside is --chrome-chip-disc, 48) was
+   62 px written twice, here on .mir-rail and again in modulation/modhost.css, so the two could only change together by hand.  --rail-chip
+   is the one number both read.  It stays 62: 52 everywhere (λWAVES 044 L24) is one value here, and it is the eye's call. */
+:root { --rail-chip: 62px; }
 /* the title bar of a rail-less window (chrome: 'close') reads THE HEAD SCALE (base.css --head-h, --head-btn, --head-glyph: the
    one a rack card's head reads, 1.6.0-alpha.35); a finger's 44 on a touch tablet (below) */
 /* the resize corner's two hairlines, drawn toward the corner the window grows from: bottom right (135°), or top right
@@ -136,7 +140,7 @@ body.touch-tablet .mir-win { --head-h: var(--touch); --head-btn: var(--touch); }
 /* ── THE RAIL ─────────────────────────────────────────────────────────────────────────────────────────────── */
 .mir-rail {
   --chrome-chip-disc: calc(48px * var(--ui-scale));
-  --chrome-chip-target: max(var(--touch), calc(62px * var(--ui-scale)));
+  --chrome-chip-target: max(var(--touch), calc(var(--rail-chip, 62px) * var(--ui-scale)));
   position: fixed; display: flex; flex-direction: column; align-items: center; gap: var(--sp-3);
   margin: 0; padding: 0; pointer-events: auto;
 }
