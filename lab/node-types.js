@@ -171,12 +171,9 @@ export function nodeBody(parent, node, T, { idOf, hand }) {
     (at[K.k] || at[''] || parent).appendChild(c.root);
     if (c.targets[0]) c.targets[0].root.dataset.param = idOf(K.k);
   }
-  /* 038 P11 · a knob may say when it does nothing (`off(values)`: ANGLE under PERSPECTIVE): it greys, keeps its place and its hint (the kit's disabled law) */
-  const gate = () => { for (const K of T.knobs) if (K.off && ctls[K.k].widget.setDisabled) ctls[K.k].widget.setDisabled(!!K.off(node.values)); };
-  gate();
   return {
     ctls,
     /** paint(k, v, shown): the hand's value (set), or a modulator's painted over the base (show) */
-    paint(k, v, shown) { gate(); const c = ctls[k]; if (!c || c.root.classList.contains('drag')) return; const w = c.targets[0]; if (shown && w && w.show) w.show(v); else c.set(v); },
+    paint(k, v, shown) { const c = ctls[k]; if (!c || c.root.classList.contains('drag')) return; const w = c.targets[0]; if (shown && w && w.show) w.show(v); else c.set(v); },
   };
 }
