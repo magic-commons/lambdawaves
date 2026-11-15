@@ -140,16 +140,6 @@
 .nodes-prename::placeholder { color: var(--fg-soft); opacity: 1; }
 .nodes-prename:focus { outline: 0; border-color: var(--acc); }
 .nodes-prename.dirty { border-color: color-mix(in srgb, var(--acc) 60%, transparent); }
-/* 040 N1 · THE FOCAL POINT (lab/node-focus.js): a ring with a cross-hair on the stage, at z 19 beside the widgets, only while its node is edited; the host
-   takes no pointer, the handle does; H and the menu take it out with the rest */
-.nodes-focus-host { position: absolute; inset: 0; z-index: var(--z-stage-widgets); pointer-events: none; }
-.nodes-focus { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; pointer-events: auto; cursor: move; touch-action: none; box-sizing: border-box;
-  border: 2px solid var(--acc); box-shadow: 0 0 0 1px rgb(0 0 0 / .55), inset 0 0 0 1px rgb(0 0 0 / .55); }
-.nodes-focus::before, .nodes-focus::after { content: ''; position: absolute; left: 50%; top: 50%; background: var(--acc); box-shadow: 0 0 0 1px rgb(0 0 0 / .45); }
-.nodes-focus::before { width: 40px; height: 1px; translate: -50% -50%; }
-.nodes-focus::after { width: 1px; height: 40px; translate: -50% -50%; }
-.nodes-focus:hover, .nodes-focus.drag { border-color: var(--fg); }
-body.ui-hidden .nodes-focus-host, body.menu-open .nodes-focus-host { display: none; }
 /* 019 N3 · the LAYER host (lab/node-layers.js): over the stage canvases, under the atom labels (9), the stage text (20) and the racks; never a pointer */
 /* 038 P8 · THE LAYERS BLEND WITH THE STAGE: the host is no stacking context (z auto), so each layer's mix-blend-mode meets the stage beneath it; the
    layers take the host's old z 8 themselves — above #skeleton (7), under the atom labels (9) */
