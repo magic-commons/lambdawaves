@@ -51,7 +51,7 @@
   position: fixed; inset: 0; width: calc(100vw / var(--in-zoom, 1)); height: calc(100vh / var(--in-zoom, 1)); height: calc(100dvh / var(--in-zoom, 1)); z-index: 2147483647; box-sizing: border-box; padding: 1.5rem;
   display: flex; align-items: flex-start; justify-content: center; overflow: hidden auto; overflow-x: hidden;
   background-color: var(--opener-ground); color: var(--opener-ink); font-family: var(--font-ui, system-ui, sans-serif);
-  opacity: 1; animation: lw-warn-in var(--opener-t-in) forwards; transition: opacity var(--opener-t-in);
+  opacity: 1; animation: mir-warn-in var(--opener-t-in) forwards; transition: opacity var(--opener-t-in);
 }
 .mir-opener:focus { outline: none; }
 .mir-opener[data-fading] { opacity: 0; pointer-events: none; }
@@ -69,7 +69,7 @@
   position: relative; z-index: 1; overflow: visible; display: block; min-width: 0; margin: 0; padding: 0; background: none; border: 0;
   color: inherit; text-align: center; font: inherit; cursor: pointer; touch-action: manipulation;
   opacity: 1; filter: saturate(1); transition: opacity var(--opener-t-dim), filter var(--opener-t-dim);
-  animation: lw-warn-in var(--opener-t-card) backwards; animation-delay: calc(var(--index, 0) * var(--opener-t-stagger));
+  animation: mir-warn-in var(--opener-t-card) backwards; animation-delay: calc(var(--index, 0) * var(--opener-t-stagger));
 }
 .mir-opener-cover {
   position: relative; display: block; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; isolation: isolate;

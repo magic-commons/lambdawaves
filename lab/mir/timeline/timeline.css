@@ -406,7 +406,7 @@
    question) hang on <body>, so each is a UI SCALE root of its own (css/base.css), placed in seen px ÷ the zoom (core/zoom.js) */
 .tl-pop, .tl-confirm { zoom: var(--ui-zoom); --in-zoom: var(--ui-zoom); }
 .tl-pop { position: fixed; z-index: calc(var(--z-veil) + 20); padding: var(--tl-pop-pad); min-width: var(--tl-pop-min); display: flex; flex-direction: column; gap: var(--tl-pop-gap);
-  max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); overflow: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; color: var(--fg); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
+  max-height: calc(calc(100dvh / var(--in-zoom, 1)) - 16px); overflow: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; color: var(--fg); animation: mir-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
 .tl-pop-title { font-size: var(--tl-pop-title-size); padding: 4px; letter-spacing: var(--tl-pop-title-track); }
 .tl-pop-sep { height: 0; margin: 3px 4px; border-top: 1px solid var(--glass-hairline); }   /* 1.5.7-alpha.4: before the app's rows (moreRows) */
 .tl-pop .trig { min-height: var(--tl-pop-trig-h); font-size: var(--tl-pop-trig-size); }
@@ -424,7 +424,7 @@
 @media (pointer: coarse) { .tl-pop.tl-modes .tl-modes-menu .trig { min-height: var(--tl-pop-trig-h); } .tl-pop .trig.tl-mode { min-height: var(--touch); height: var(--touch); } }   /* a finger's rows */
 .tl-pop.tl-modes .tl-modes-menu .trig.tl-sub { justify-content: space-between; }
 .tl-pop .trig.tl-row svg.tl-sub-arrow { width: var(--tl-sub-arrow); height: var(--tl-sub-arrow); opacity: var(--tl-sub-arrow-fade); }
-.tl-confirm { position: fixed; z-index: calc(var(--z-veil) + 21); max-width: var(--tl-confirm-max); padding: var(--tl-confirm-pad); font-size: var(--tl-confirm-size); animation: lw-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
+.tl-confirm { position: fixed; z-index: calc(var(--z-veil) + 21); max-width: var(--tl-confirm-max); padding: var(--tl-confirm-pad); font-size: var(--tl-confirm-size); animation: mir-warn-in var(--tl-pop-t) var(--tl-ease-spring); }
 .tl-confirm .trig { margin: 8px 4px 0 0; }
 .tl-pop .tl-value-input { width: 100%; box-sizing: border-box; color: inherit; background: var(--glass-well); border: 1px solid var(--glass-border-color); border-radius: var(--tl-input-r); padding: var(--tl-input-pad); font: inherit; }
 .tl-pop .tl-field { display: flex; flex-direction: column; gap: var(--tl-field-gap); font-size: var(--tl-field-size); padding: 4px; }

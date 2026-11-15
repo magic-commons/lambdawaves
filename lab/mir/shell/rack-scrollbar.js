@@ -158,7 +158,7 @@ export function createRackScrollbars({ host, racks, span = null, view = globalTh
     const track = el('div', 'rack-scrollbar', host), thumb = el('i', 'rack-scrollbar-thumb', track);
     track.dataset.side = side; track.hidden = true; track.tabIndex = 0;
     track.setAttribute('role', 'scrollbar'); track.setAttribute('aria-orientation', 'vertical'); track.setAttribute('aria-controls', rack.id);
-    ariaLabel(track, side === 'left' ? 'left rack scroll' : 'right rack scroll');   // tr: the scrollbar beside the cards of the left / right RACK (the column of docked windows)
+    ariaLabel(track, side === 'left' ? 'Left rack scroll' : 'Right rack scroll');   // tr: the scrollbar beside the cards of the left / right RACK (the column of docked windows)
     track.setAttribute('aria-valuemin', '0');
     thumb.setAttribute('aria-hidden', 'true');
     entries.push({ rack, side, track, thumb });

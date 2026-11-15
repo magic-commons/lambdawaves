@@ -13,7 +13,7 @@ export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
   let dpr = 0;
   const fitStore = () => { const d = Math.max(1, Math.min(3, globalThis.devicePixelRatio || 1)); if (d === dpr) return false; dpr = d; cv.width = Math.round(400 * d); cv.height = Math.round(280 * d); return true; };
   cv.setAttribute('role', 'application'); cv.setAttribute('aria-label', 'Slice sphere and plane. Drag or use arrow keys to rotate; Home resets.');
-  cv.title = 'Orient the plane. Shift or a second finger gives finer motion; a double-tap or Home resets.';
+  cv.title = 'Orient the plane; Shift is finer, a double-tap resets';
   const unit = a => { const n = Math.hypot(...a) || 1; return a.map(v => v / n); };
   const cross = (a,b) => [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
   const project = p => [200+85*Math.SQRT1_2*(p[0]-p[1]),140+85*((p[0]+p[1])/Math.sqrt(6)-p[2]*Math.sqrt(2/3))];

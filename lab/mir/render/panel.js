@@ -141,7 +141,7 @@ export function createRenderView(parent, o = {}) {
       if (!held) return;
       if (o.picture.stale && o.picture.stale(held)) { held = null; paintPicture(); say(t('The view moved since the picture was made — tap CAPTURE IMAGE again.'), true); return; }
       const via = o.picture.save(held);   // nothing awaited before this line inside the tap
-      say(via === 'share' ? t('Handed to the share sheet — choose Save Image or Save to Files.') : t('Saved — {name}', { name: held.name }));
+      say(via === 'share' ? t('Handed to the share sheet — choose Save Image or Save to Files.') : t('Saved {name}', { name: held.name }));
     } });
     actions.appendChild(saveImg.root);
     picNote = el('div', 'sv-note sr-picture-note', pic);
@@ -402,7 +402,7 @@ export function createRenderView(parent, o = {}) {
       const res = await run; offerFiles(res, preview); say(preview ? t('Preview ready') : t('Render complete'));
     } catch (e) {
       const cancelled = rec.state().phase === 'cancelled';
-      renderStatus.textContent = cancelled ? t('Render cancelled. Completed checkpoints remain available below.') : t('Render failed: {why}', { why: String(e.message || e) });
+      renderStatus.textContent = cancelled ? t('Render cancelled. Completed checkpoints remain available below.') : t('Could not render: {why}', { why: String(e.message || e) });
       say(renderStatus.textContent, !cancelled);
     } finally { starting = false; cancel.root.disabled = true; prog.textContent = ''; paintEstimate(); void paintRecoveries(); }
   }
@@ -423,11 +423,11 @@ export function createRenderView(parent, o = {}) {
     const det = el('details', 'sr-section sr-files', wrap);
     label(el('summary', 'sv-title sr-title sr-files-toggle', det), 'FILES');
     const body = el('div', 'sr-files-body', det);
-    const zipSave = trig({ label: 'SAVE AS ZIP…', cls: 'sv-act sv-wide sr-zip', title: 'Save the current project, with the audio files it uses, as one .zip.', onFire: () => zipVerbs.save() });
+    const zipSave = trig({ label: 'SAVE AS ZIP…', cls: 'sv-act sv-wide sr-zip', title: 'Save the project and its audio files as one .zip', onFire: () => zipVerbs.save() });
     /* OPEN ZIP… asks "save this first?" when what is on screen is unsaved (Josh, 2026-10-07, call 10): FOLDERS' own ask,
        opened in `ask`, below the button (folders.js openZip) */
     const ask = el('div', 'sr-zip-ask mir-folders');
-    const zipOpen = trig({ label: 'OPEN ZIP…', cls: 'sv-act sv-wide sr-zip', title: 'Open a project saved as one .zip (SAVE AS ZIP): its audio comes back with it and it becomes the current project.', onFire: () => zipVerbs.open({ seat: ask }) });
+    const zipOpen = trig({ label: 'OPEN ZIP…', cls: 'sv-act sv-wide sr-zip', title: 'Open a project saved as one .zip, its audio with it', onFire: () => zipVerbs.open({ seat: ask }) });
     zipSave.root.dataset.zip = 'save'; zipOpen.root.dataset.zip = 'open';
     body.append(zipSave.root, zipOpen.root, ask);
   }
@@ -448,7 +448,7 @@ export function createRenderView(parent, o = {}) {
 /** the panel FOLDERS seats: createFolders({ panels: [renderPanel({ recorder, … })] }) */
 export function renderPanel(o = {}) {
   let view = null;
-  return { id: 'render', label: 'RENDER', glyph: 'render', hint: 'Render — this project, and the picture or film you make of it',
+  return { id: 'render', label: 'RENDER', glyph: 'render', hint: 'RENDER — this project and the picture or film you make',
     build(body, api) {   // `files`: FOLDERS' SAVE AS ZIP… / OPEN ZIP… by default when it has its zip; false leaves them out
       const files = o.files === false ? null : (o.files && typeof o.files === 'object' ? o.files : (api && api.zip) || null);
       view = createRenderView(body, { ...o, files, gallery: o.gallery || (api && api.gallery) });

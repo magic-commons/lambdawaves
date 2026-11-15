@@ -122,7 +122,7 @@ export function createAudioCapture(opts) {
       else if (n === 'NotFoundError' || n === 'DevicesNotFoundError') set(AUDIO_STATE.NODEVICE, t('no microphone was found on this device'));   // tr: the microphone's state: no input
       else if (n === 'OverconstrainedError' && deviceId) { deviceId = ''; return start(''); }   // the remembered input is gone: the default
       else if (n === 'OverconstrainedError') { set(AUDIO_STATE.ASKING, t('retrying without the processing constraints')); return startLoose(mine); }   // tr: the microphone's state: a browser that cannot turn AGC off is still worth listening to
-      else set(AUDIO_STATE.ERROR, t('the microphone could not be opened') + (n ? ' (' + n + ')' : ''));   // tr: the microphone's state: a fault
+      else set(AUDIO_STATE.ERROR, t('Could not open the microphone') + (n ? ' (' + n + ')' : ''));   // tr: the microphone's state: a fault
       return state;
     }
     /* the ticket is checked BEFORE the stream is published: a stale winner tears down what it was given */
@@ -137,7 +137,7 @@ export function createAudioCapture(opts) {
     if (deviceId) audio.deviceId = { exact: deviceId };
     let got = null;
     try { got = await navigator.mediaDevices.getUserMedia({ audio, video: false }); }
-    catch (e) { if (!(disposed || mine !== startSeq)) set(AUDIO_STATE.ERROR, t('the microphone could not be opened')); return state; }
+    catch (e) { if (!(disposed || mine !== startSeq)) set(AUDIO_STATE.ERROR, t('Could not open the microphone')); return state; }
     if (disposed || mine !== startSeq) { stopTracks(got); return state; }
     stream = got;
     return build(mine);
@@ -176,7 +176,7 @@ export function createAudioCapture(opts) {
       set(AUDIO_STATE.LIVE, '');
     } catch (e) {
       await teardown();
-      set(AUDIO_STATE.ERROR, t('the audio graph could not be built') + (e && e.name ? ' (' + e.name + ')' : ''));   // tr: the microphone's state: a fault
+      set(AUDIO_STATE.ERROR, t('Could not build the audio graph') + (e && e.name ? ' (' + e.name + ')' : ''));   // tr: the microphone's state: a fault
     }
     return state;
   }

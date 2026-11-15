@@ -2485,8 +2485,7 @@ export function dormantCount() {
 export const FACTORY_PRESETS = [
   {
     id: 'f.breathe', factory: 1, name: 'BREATHE',
-    hint: 'a slow sine opening and closing the colour bands, with the whole palette ' +
-          'turning underneath it — the resting state of the instrument',
+    hint: 'A slow sine on the colour bands over a turning palette',
     rack: {
       seq: { macro: 2, source: 2, route: 2 },
       sources: [
@@ -2515,8 +2514,7 @@ export const FACTORY_PRESETS = [
   },
   {
     id: 'f.pulse', factory: 1, name: 'PULSE',
-    hint: 'a tempo-locked staircase on the colour frequency and an envelope on ' +
-          'brightness — press play, or hit space, and it lands on the beat',
+    hint: 'Staircase on colour, envelope on brightness, on the beat',
     rack: {
       seq: { macro: 2, source: 2, route: 2 },
       sources: [
@@ -2545,8 +2543,7 @@ export const FACTORY_PRESETS = [
   },
   {
     id: 'f.drift', factory: 1, name: 'DRIFT',
-    hint: 'two sample-and-hold wanderers on the first two colour phases — ' +
-          'the palette reshuffles itself, slowly and never the same way twice',
+    hint: 'Two sample-and-holds wander the first two colour phases',
     rack: {
       seq: { macro: 2, source: 2, route: 2 },
       sources: [

@@ -114,7 +114,7 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
   board.setAttribute('role', 'group'); ariaLabel(board, 'The keyboard'); board.translate = false;
   /* MORE KEYS (1.5.6-alpha.2): the board's second page in the same well, one press away */
   const extra = el('div', 'km-keyboard km-extra', colL); extra.hidden = true;
-  extra.setAttribute('role', 'group'); ariaLabel(extra, 'More keys'); extra.translate = false;
+  extra.setAttribute('role', 'group'); ariaLabel(extra, 'MORE KEYS'); extra.translate = false;
   /* 1.5.6-alpha.9: a glyph (`more`, then `keys` for THE BOARD) with the word as its name and hint */
   const moreWord = (w) => { more.setLabel(w); ariaLabel(more.root, w); hint(more.root, w); };
   const more = trig({ label: 'MORE KEYS', glyph: 'more', cls: 'km-btn km-more', onFire: () => {
@@ -130,7 +130,7 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
   rec.on = false; tools.append(rec.root, rst.root);
   const statusEl = el('div', 'km-status', colR); statusEl.setAttribute('role', 'status');   // THE HAND: its seat is kept when it says nothing (keyboard.css), so a key pressed on the board moves no row of the list
   const search = searchField(colR, { cls: 'km-search' }); ariaLabel(search, 'Find a keyboard action');
-  const placeholder = () => { search.placeholder = t('Find an action or key…'); };
+  const placeholder = () => { search.placeholder = t('search actions and keys'); };
   placeholder();
   const list = el('div', 'km-list', colR); list.setAttribute('role', 'listbox'); ariaLabel(list, 'Keyboard actions');
 

@@ -116,7 +116,7 @@ export function describeText({ app = {}, windows = [], params = [], keys = [], p
     if (clock.playing !== undefined) bits.push(clock.playing ? 'playing' : 'paused');
     if (Number.isFinite(clock.tempo)) bits.push(`${num(clock.tempo)} BPM`);
     if (clock.power !== undefined) bits.push(`modulation ${clock.power ? 'on' : 'off (bypassed)'}`);
-    if (bits.length) out.push('', `**Clock:** ${bits.join(' · ')}. One play (Space, the transport's ▶) runs the app's clock; modulation's power only bypasses its routes.`);
+    if (bits.length) out.push('', `**Clock:** ${bits.join(' · ')}. One play (Space, the CONTROL SURFACE's ▶) runs the app's clock; modulation's power only bypasses its routes.`);
   }
   if (windows.length) {
     out.push('', '## Windows', '', '| id | title | state |', '|---|---|---|');

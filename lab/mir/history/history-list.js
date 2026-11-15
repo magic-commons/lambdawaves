@@ -38,13 +38,13 @@ export function historyList(history, host, o = {}) {
   let undo = null, redo = null;
   if (o.tools !== false) {
     const tools = el('div', 'hist-tools', root);
-    undo = trig({ label: 'UNDO', title: 'Undo', onFire: () => history.undo() });
-    redo = trig({ label: 'REDO', title: 'Redo', onFire: () => history.redo() });
+    undo = trig({ label: 'UNDO', title: 'Undo the last edit', onFire: () => history.undo() });
+    redo = trig({ label: 'REDO', title: 'Redo the edit undone', onFire: () => history.redo() });
     undo.root.dataset.keyAction = 'undo'; redo.root.dataset.keyAction = 'redo';   // the key is the table's (keys.hints), never typed here
     tools.append(undo.root, redo.root);
   }
   const list = el('div', 'hist-list', root);
-  list.setAttribute('role', 'listbox'); ariaLabel(list, 'history rows');
+  list.setAttribute('role', 'listbox'); ariaLabel(list, 'History rows');
   const count = o.count === false || o.limitLine === false ? null : el('div', 'hist-count', root);
   list.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('.hist-row'); if (b) history.goto(+b.dataset.i); });
 
@@ -84,7 +84,7 @@ export function historyActions(history, { canAct = () => true, onEmpty, doc = gl
   const live = () => !!canAct() && !editableTarget(doc && doc.activeElement);
   const row = (id, label, hint, redo) => ({ id, label, group: 'EDIT', hint, keys: EDIT_KEYS[id].slice(), inFields: true, repeat: true, when: live,
     run: () => { const ok = redo ? history.redo() : history.undo(); if (!ok && onEmpty) onEmpty(redo); } });
-  return [row('undo', 'UNDO', 'Undo', false), row('redo', 'REDO', 'Redo', true)];
+  return [row('undo', 'UNDO', 'Undo the last edit', false), row('redo', 'REDO', 'Redo the edit undone', true)];
 }
 
 /* UNDO / REDO ARE ROWS OF THE ONE KEY TABLE (wave 19): the old capture-phase listener with stopImmediatePropagation beat

@@ -24,6 +24,7 @@
  * installBanner({ host = #stage or <body>, errors = true }) → { root, report, fail, warn, offerReload, hide(), problems, destroy() }
  *   report() before installBanner() builds the pane in the default host; installing later moves it. */
 import { el, ariaLabel, trig } from '../kit.js';
+import { setGlyph } from '../glyph.js';
 import { registerDumpLines } from '../core/describe.js';
 
 const LIMIT = 30;
@@ -45,8 +46,8 @@ function build(host) {
   host = host || defaultHost(); if (!host) return null;
   pane = el('div', 'mir-banner', host); pane.id = 'mir-banner'; pane.setAttribute('role', 'alert'); pane.hidden = true;
   pane.dataset.kind = kind;
-  const x = el('button', 'mir-banner-x', pane, '×'); x.type = 'button';
-  ariaLabel(x, 'dismiss this message'); x.title = 'dismiss';
+  const x = setGlyph(el('button', 'mir-banner-x', pane), 'close', { size: 16 }); x.type = 'button';
+  ariaLabel(x, 'Dismiss this message'); x.title = 'Dismiss';
   x.addEventListener('click', () => { pane.hidden = true; });
   body = el('div', 'mir-banner-body', pane);
   acts = el('div', 'mir-banner-acts', pane); acts.hidden = true;

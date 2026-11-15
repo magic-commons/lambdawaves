@@ -191,15 +191,15 @@ export async function createApp(o = {}) {
     { id: 'notebook', label: 'NOTEBOOK', group: 'WINDOW', keys: K('notebook'), run: () => notebook && notebook.toggle() },
     { id: 'help', label: 'KEYS', group: 'WINDOW', keys: K('help'), run: () => help && help.toggle() },
     ...(want('keyboard') ? [{ id: 'keyboard', label: 'KEYBOARD', group: 'WINDOW', keys: [], run: () => kb && kb.toggle() }] : []),
-    ...(want('rack') ? [{ id: 'rack', label: 'HIDE / SHOW the rack', group: 'WINDOW', keys: K('rack'), run: () => rack && rack.toggleHidden() }] : []),
-    ...(want('rack') && bar ? [{ id: 'dock', label: 'DOCK / UNDOCK the transport', group: 'WINDOW', keys: K('dock'), run: () => tr && tr.dock(!tr.docked) }] : []),
+    ...(want('rack') ? [{ id: 'rack', label: 'HIDE OR SHOW THE RACK', group: 'WINDOW', keys: K('rack'), run: () => rack && rack.toggleHidden() }] : []),
+    ...(want('rack') && bar ? [{ id: 'dock', label: 'DOCK THE CONTROL SURFACE', group: 'WINDOW', keys: K('dock'), run: () => tr && tr.dock(!tr.docked) }] : []),
     /* EVERY KIT WINDOW IS A ROW, keys or none (wave 19), so the KEYBOARD window can bind it and a menu shows what it holds;
        their keys are Josh's to give, so none is invented here */
     ...(o.history && want('history') && want('mod') ? [{ id: 'history', label: 'HISTORY', group: 'WINDOW', keys: [], run: () => hist && hist.toggle() }] : []),
     ...(o.render && want('mod') && want('rack') && opt(o.render).card !== false ? [{ id: 'render', label: 'RENDER', group: 'WINDOW', keys: [], run: () => rack && rack.toggle('render') }] : []),
     ...(gui ? [{ id: 'gui', label: 'MIR OPTIONS', group: 'WINDOW', keys: [], run: () => gui.toggle() },
-      { id: 'gui-about', label: 'MIR ABOUT', group: 'WINDOW', keys: [], run: () => gui.toggle('about') }] : []),
-    { id: 'hide', label: 'HIDE the interface', group: 'VIEW', keys: K('hide'), run: hideInterface },
+      { id: 'gui-about', label: 'ABOUT MIR', group: 'WINDOW', keys: [], run: () => gui.toggle('about') }] : []),
+    { id: 'hide', label: 'HIDE THE INTERFACE', group: 'VIEW', keys: K('hide'), run: hideInterface },
     { id: 'fullscreen', label: 'FULL SCREEN', group: 'VIEW', keys: K('fullscreen'), run: () => toggleFullscreen(document) },
     ...(want('info') ? infoActions(() => info) : []),
   ] });

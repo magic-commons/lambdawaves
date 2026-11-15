@@ -64,7 +64,7 @@ export function createWindowPicker({ rack = null, open = (id) => { if (rack) rac
   root.dataset.mirSurface = 'menu';   // 1.6.0-alpha.55: a pop-up pane says so — the menu height, floor and edge (css/skin.css)
   root.setAttribute('role', 'dialog'); ariaLabel(root, 'FINDER');   // tr[FINDER]: the finder: a search field over every window of the app; picking one opens it or scrolls the rack to it
   const input = searchField(root, { cls: 'wp-search' });
-  input.placeholder = t('search windows'); ariaLabel(input, 'search windows');   // tr[search windows]: the finder's search field: type part of a window's name
+  input.placeholder = t('search windows'); ariaLabel(input, 'Search windows by name');   // tr[search windows]: the finder's search field: type part of a window's name
   const list = el('div', 'wp-list', root); list.setAttribute('role', 'listbox'); ariaLabel(list, 'FINDER');
   /* 1.6.0-alpha.50 · THE WALK SPEAKS: the focus stays in the field and the mark is said — the field names the marked row (aria-activedescendant), the row is
      aria-selected, and no row is a Tab stop */
@@ -85,7 +85,7 @@ export function createWindowPicker({ rack = null, open = (id) => { if (rack) rac
       if (k) { b.dataset.icon = k; el('span', 'wp-glyph wp-icon', b); }   // the app paints its icon on this seat
       else if (g && hasGlyph(g)) b.appendChild(glyphEl(g, 'wp-glyph', 16)); else el('span', 'wp-glyph wp-none', b);
       el('span', 'wp-name', b, w.title);
-      if (fav && fav.has(w.id)) { const st = el('span', 'wp-fav', b); st.appendChild(glyphEl('starFill', 'gly gly-starFill', 10)); ariaLabel(st, 'in the saved favourite layout'); }
+      if (fav && fav.has(w.id)) { const st = el('span', 'wp-fav', b); st.appendChild(glyphEl('starFill', 'gly gly-starFill', 10)); ariaLabel(st, 'In the saved favourite layout'); }
       if (why) { b.setAttribute('aria-disabled', 'true'); b.classList.add('off'); el('span', 'wp-why', b, why); }
       else if (w.open) b.dataset.open = '';
       b.addEventListener('click', (e) => (e.shiftKey ? pick(b) : go(b)), on);

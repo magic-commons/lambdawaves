@@ -108,7 +108,7 @@ export function createOpener(o = {}) {
     const doc = o.doc || document, host = o.host || doc.body, win = doc.defaultView;
     const life = new AbortController(), on = { signal: life.signal };
     const root = el('div', 'mir-opener', host);
-    root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); ariaLabel(root, o.label || 'starter projects');
+    root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); ariaLabel(root, o.label || 'Starter projects');
     const card = el('div', 'mir-opener-card', root);
     if (o.logo) {
       const l = o.logo;

@@ -159,7 +159,7 @@ try {
     `const k = __show(__knob('EXPOSURE')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -48, 12, 50);`, 'EXPOSURE · WAVE')).undoMs;
   await scene('the stage colour (its colour well)', `await __field(__show(document.querySelector('.stage-colour')), '#305070');`, 'STAGE COLOUR · STAGE');
   await scene('an overlay switch (KEPLER ORBIT)', `const s = __show(__sw('KEPLER ORBIT')); await __w(50); await __press(s.querySelector('button') || s);`, 'KEPLER ORBIT · ORBIT');
-  undoMs.preset = (await scene('a preset (SPECTRUM\'s ‹ PRESET › stepper → loadPreset; iteration 008 S: it left STATE)', `await __press(__show(document.querySelector('.dev[data-id="spectrum"] .sp-preset [aria-label="next"]')));`, 'edit')).undoMs;   // the kit's stepper names no row yet (the palette's RAMP stepper below is 'edit' too)
+  undoMs.preset = (await scene('a preset (SPECTRUM\'s ‹ PRESET › stepper → loadPreset; iteration 008 S: it left STATE)', `await __press(__show(document.querySelector('.dev[data-id="spectrum"] .sp-preset [aria-label="Next"]')));`, 'edit')).undoMs;   // the kit's stepper names no row yet (the palette's RAMP stepper below is 'edit' too)
   undoMs.element = (await scene('an element change (ELEMENT dragged)', `const k = __show(__knob('ELEMENT')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -30);`, 'ELEMENT · SPECTRUM')).undoMs;
   await scene('A/B · STORE A', `await __press(__show(__trig('STORE A')));`, 'STORE A · SPECTRUM');
   await g.ev(`__LW.loadPreset('1s+2pz'); await __w(500); __LW.history.flush(); return 1;`);
@@ -168,7 +168,7 @@ try {
   await g.ev(`const s = __sw('TRANSITION'); await __press(s.querySelector('button') || s); await __w(500); __LW.history.flush(); return 1;`);   /* stood down again: the scenes below need a still register */
   /* 0.5.0 C1: the palette's editor is MIR's RAMP (paletteview.js left) — a preset is the stepper's ›, a stop's colour is the swatch's chooser.
      The row names are what the history's naming (hTouchName) makes of the kit's controls today; C5's kit gesture names replace them. */
-  await scene('a palette choice (the RAMP stepper ›)', `await __press(__show(document.querySelector('.dev[data-id="palette"] .mir-ramp-step [aria-label="next"]')));`, 'edit');
+  await scene('a palette choice (the RAMP stepper ›)', `await __press(__show(document.querySelector('.dev[data-id="palette"] .mir-ramp-step [aria-label="Next"]')));`, 'edit');
   undoMs.palette = (await scene('a custom palette stop (the RAMP swatch\'s colour well)', `await __field(__show(document.querySelector('.dev[data-id="palette"] .mir-ramp-swatch input[type="color"]')), '#a04020');`, 'STOP COLOUR — TAP FOR THE CHOOSER, DRAG UP OR DOWN TO TURN ITS HUE · PALETTE')).undoMs;
 
   /* THE CHEM / MOLECULE OWNER SWITCH IS NOT A SCENE (BRIEF-S3 allows stating why): MOLECULES ON lands its solution asynchronously and

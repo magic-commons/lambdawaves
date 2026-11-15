@@ -23,6 +23,7 @@
  *           app whose transport sits higher passes its own.
  * guarded(fn) → fn's result; a throw (or a rejected promise) becomes an error notice instead (NEBULA's safe()). */
 import { el, label, ariaLabel, trig } from '../kit.js';
+import { setGlyph } from '../glyph.js';
 import { presence } from '../core/motion.js';
 
 /** NOTICE_MS — 1.6.0-alpha.56 · THE NOTICE OWNS ITS TIME, BY KIND: how long a notice stays when its caller names no `ms` (an app need pass none).
@@ -99,7 +100,7 @@ function cornerNotice(text, { kind = 'info', ms, action = null, max = 4 } = {}) 
     presence(root, false).then(() => root.remove());
   }
   if (action && action.label) root.appendChild(actionOf(action, close));
-  const x = el('button', 'mir-notice-x', root, '×'); x.type = 'button'; ariaLabel(x, 'dismiss');   // tr[dismiss]: put the notice away (not close a window)
+  const x = setGlyph(el('button', 'mir-notice-x', root), 'close', { size: 16 }); x.type = 'button'; ariaLabel(x, 'Dismiss');   // tr[Dismiss]: put the notice away (not close a window)
   x.addEventListener('click', () => close(), { signal: life.signal });
   host().appendChild(root);
   live.add(root);

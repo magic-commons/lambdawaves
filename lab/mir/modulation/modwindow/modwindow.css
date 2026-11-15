@@ -25,7 +25,7 @@
   --m2-audslot-font: 700 var(--fs-tiny) var(--font-num);
   --m2-audsrc-edge: 1px solid hsl(0 0% 100% / .14);
   --m2-audsreadout-font: 650 var(--fs-tiny) var(--font-num);
-  --m2-audtxt-font: 700 6.5px var(--font-num);
+  --m2-audtxt-font: 700 7px var(--font-num);
   --m2-body-alpha: 0.42;
   --m2-button-hover-shadow: inset 0 1px 0 hsl(0 0% 100% / .10);
   --m2-button-off-filter: saturate(.34);
@@ -35,7 +35,7 @@
   --m2-chip-on-shadow: inset 0 0 0 1px hsl(0 0% 100% / .22), inset 0 1px 0 hsl(0 0% 100% / .12);
   --m2-chip-shadow: inset 0 1px 0 var(--m2-mat-inner), 0 3px 12px hsl(0 0% 0% / .20);
   --m2-chk-on-line: inset 0 -2px 0 color-mix(in oklch, hsl(var(--hue-acc) var(--sat-acc) 66% / .64), white var(--acc-white, 0%));
-  --m2-colhead-font: 600 8.5px var(--font-sans);
+  --m2-colhead-font: 600 8px var(--font-sans);
   --m2-deadhead-font: 700 var(--fs-tiny) var(--font-sans);
   --m2-deadmeta-font: 600 7px var(--font-sans);
   --m2-deadroute-font: 650 var(--fs-tiny) var(--font-sans);
@@ -89,12 +89,9 @@
   --m2-fill-w50: hsl(0 0% 100% / .50);
   --m2-fill-w58: hsl(0 0% 100% / .58);
   --m2-fill-w075: hsl(0 0% 100% / .075);
-  --m2-flipb-font: 700 8.5px var(--font-sans);
-  --m2-fs-6p5: 6.5px;
+  --m2-flipb-font: 700 8px var(--font-sans);
   --m2-fs-7: 7px;
-  --m2-fs-7p5: 7.5px;
   --m2-fs-8: 8px;
-  --m2-fs-8p5: 8.5px;
   --m2-fs-11: 11px;
   --m2-fs-14: 14px;
   --m2-fs-15: 15px;
@@ -104,7 +101,7 @@
   --m2-glyph-dim: 0.42;
   --m2-glyph-sw: 1.9;
   --m2-grab-dots-art: radial-gradient(circle at 50% 50%, currentColor 1.05px, transparent 1.15px);
-  --m2-gridtxt-font: 8.5px var(--font-num);
+  --m2-gridtxt-font: 8px var(--font-num);
   --m2-head-rule: inset 0 -1px 0 hsl(0 0% 100% / .055);
   --m2-head-wash-2: linear-gradient(180deg, hsl(0 0% 100% / .035), transparent);
   --m2-hero-shadow: inset 0 1px 3px hsl(0 0% 0% / .32), inset 0 1px 0 var(--m2-mat-inner);
@@ -146,21 +143,21 @@
   --m2-kctl-shadow: inset 0 0 0 1px hsl(0 0% 100% / .26);
   --m2-kctl-wash: repeating-linear-gradient(135deg, transparent 0 5px, hsl(0 0% 100% / .085) 5px 6px);
   --m2-kd-wash: repeating-conic-gradient(var(--glass-groove-hot) 0deg 1.6deg, hsl(0 0% 0% / 0) 1.6deg 30deg), var(--glass-raise);
-  --m2-kends-font: 500 7.5px var(--font-sans);
+  --m2-kends-font: 500 7px var(--font-sans);
   --m2-kind-font: 700 var(--fs-lead) var(--font-sans);
   --m2-kpanel-b-alpha: 0.5;
   --m2-ktab-on-shadow: inset 0 0 0 var(--glass-border) var(--glass-border-color);
-  --m2-kval-font: 600 9.5px var(--font-num);
+  --m2-kval-font: 600 9px var(--font-num);
   --m2-lfo-fill-alpha: .07;
-  --m2-lfo-macbox-b-font: 700 6.5px var(--font-sans);
+  --m2-lfo-macbox-b-font: 700 7px var(--font-sans);
   --m2-lfo-play-alpha: .66;
-  --m2-lfo-swb-font: 600 6.8px var(--font-sans);
+  --m2-lfo-swb-font: 600 7px var(--font-sans);
   --m2-lfocmpcap-font: 700 6px/8px var(--font-sans);
   --m2-lfocmpvalue-font: 700 7px/9px var(--font-num);
   --m2-lfostatus-font: 700 7px var(--font-num);
   --m2-lfowave-edge: 1px solid transparent;
   --m2-lfowave-font: 700 7px var(--font-sans);
-  --m2-lfowave-font-2: 700 7.5px var(--font-sans);
+  --m2-lfowave-font-2: 700 7px var(--font-sans);
   --m2-lh-1p4: 1.4;
   --m2-lh-1p25: 1.25;
   --m2-lh-1p35: 1.35;
@@ -175,20 +172,20 @@
   --m2-minstatus-font: 700 6px/18px var(--font-num);
   --m2-mintdot-alpha: 0.32;
   --m2-mintfill-alpha: 0.10;
-  --m2-modtap-font: 700 calc(8.5px * var(--ui-scale)) var(--font-sans);
-  --m2-name-font: 500 9.5px var(--font-sans);
+  --m2-modtap-font: 700 calc(8px * var(--ui-scale)) var(--font-sans);
+  --m2-name-font: 500 9px var(--font-sans);
   --m2-note-font: 500 var(--fs-tiny) var(--font-sans);
   --m2-num-edge: 1.2px solid rgba(255,255,255,0.55);
   --m2-num-font: 600 var(--fs-small) var(--font-num);
-  --m2-pfold-font: 700 9.5px var(--font-sans);
+  --m2-pfold-font: 700 9px var(--font-sans);
   --m2-pickb-font: 600 12px var(--font-sans);
   --m2-pow-edge: 1.5px solid rgba(255,255,255,0.4);
   --m2-pow-ring-sw: 2.2;
   --m2-pow-stem-sw: 2.6;
-  --m2-prename-font: 500 10.5px var(--font-sans);
+  --m2-prename-font: 500 10px var(--font-sans);
   --m2-prename-ph-alpha: 0.94;
   --m2-prenav-font: 600 11px var(--font-sans);
-  --m2-prowtag-font: 600 7.5px var(--font-sans);
+  --m2-prowtag-font: 600 7px var(--font-sans);
   --m2-r-1: 1px;
   --m2-r-4: 4px;
   --m2-r-6: 6px;
@@ -199,7 +196,7 @@
   --m2-r-16: 16px;
   --m2-rail-edge-shadow: inset -1px 0 0 var(--m2-mat-inner);
   --m2-rail-face: hsl(var(--m2-mat-hue) 12% var(--m2-mat-chassis-lum) / calc(.24 + var(--m2-blend) * .20));
-  --m2-railhead-font: 700 10.5px var(--font-sans);
+  --m2-railhead-font: 700 10px var(--font-sans);
   --m2-resizing-shadow: var(--surface-shadow, var(--glass-shadow));
   --m2-resizing-edge: 1px solid color-mix(in oklch, hsl(var(--hue-acc) var(--sat-acc) 68% / 0.55), white var(--acc-white, 0%));   /* the resize ring, an outline beside the pane shadow (1.5.0-alpha.7) */
   --m2-span-alpha: 0.7;
@@ -236,8 +233,8 @@
   --m2-t-240: 240ms;
   --m2-t-300: 300ms;
   --m2-tempo-bpm-font-art: 700 calc(12px * var(--ui-scale)) var(--font-num);
-  --m2-tempo-hz-font-art: 500 calc(8.5px * var(--ui-scale)) var(--font-num);
-  --m2-tempo-unit-font-art: 600 calc(7.5px * var(--ui-scale)) var(--font-sans);
+  --m2-tempo-hz-font-art: 500 calc(8px * var(--ui-scale)) var(--font-num);
+  --m2-tempo-unit-font-art: 600 calc(7px * var(--ui-scale)) var(--font-sans);
   --m2-tr-01: .01em;
   --m2-tr-04: 0.04em;
   --m2-tr-05: 0.05em;
@@ -252,7 +249,7 @@
   --m2-tr-035: .035em;
   --m2-trig-font: 600 var(--fs-small) var(--font-sans);
   --m2-vedge-shadow: 0 0 0 1px rgba(0,0,0,0.48);
-  --m2-vname-font: 600 9.5px var(--font-sans);
+  --m2-vname-font: 600 9px var(--font-sans);
   --m2-w-400: 400;
   --m2-w-800: 800;
   --m2-win-font: 700 11px var(--font-sans);
@@ -291,7 +288,7 @@
   --m2-spanlive-drop: drop-shadow(0 0 2px var(--acc2-soft));
 }
 /* @own */ .m2ringnum {
-  --m2-ringnum-font: 600 7.5px/0.96 var(--font-num);
+  --m2-ringnum-font: 600 7px/0.96 var(--font-num);
 }
 /* @own */ .glass.mir-modwindow, .mir-modwindow .glass {
   --m2-glass-wash: linear-gradient(180deg, var(--gl-fill-a), var(--gl-fill-b));
@@ -1480,7 +1477,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
 /* The knob's number stays inside the disc at every UI scale. */
 #modwin.mir-modwindow .m2knob .ckval, #modwin.mir-modwindow .m2kd .ckval { left: 15%; right: 15%; width: auto; max-width: 70%;
   box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  padding: 0; font-size: var(--m2-fs-7p5); letter-spacing: 0; }
+  padding: 0; font-size: var(--m2-fs-7); letter-spacing: 0; }
 /* the swap indicator: the card a drag would exchange with wears a dashed
    second-accent rim and the SWAP glyph; the carried card wears the glyph too */
 .mir-modwindow .m2swapbadge { display: none; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px;
@@ -1749,8 +1746,8 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   grid-template-columns: 1.24fr repeat(3, minmax(0, 1fr)); gap: 3px; padding: 5px 7px 4px; }
 #modwin.mir-modwindow .m2dev.lfo .m2kd { width: 48px; height: 48px; }
 #modwin.mir-modwindow .m2dev.lfo .m2k[data-knob="rate"] .m2kd { width: 56px; height: 56px; }
-#modwin.mir-modwindow .m2dev.lfo .ckval { font-size: var(--m2-fs-7p5); }
-#modwin.mir-modwindow .m2dev.lfo .m2kval { font-size: var(--m2-fs-8p5); }
+#modwin.mir-modwindow .m2dev.lfo .ckval { font-size: var(--m2-fs-7); }
+#modwin.mir-modwindow .m2dev.lfo .m2kval { font-size: var(--m2-fs-8); }
 
 /* Compact keeps four performable controls in an intentional 2×2 bank. */
 #modwin.mir-modwindow .m2dev.m2cmp.lfo .m2knobs { flex: 1 1 auto; align-self: flex-start;
@@ -1876,7 +1873,7 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active,
   height: 100%; min-height: 0; overflow: visible; }
 .mir-modwindow .m2dev.m2min.lfo .m2lfominshape path { fill: none; stroke: var(--acc);
   stroke-width: var(--m2-sw-4); vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
-.mir-modwindow .m2dev.m2min.lfo .m2lfominout { font-size: var(--m2-fs-6p5); letter-spacing: var(--label-tracking, var(--tr-tight)); }
+.mir-modwindow .m2dev.m2min.lfo .m2lfominout { font-size: var(--m2-fs-7); letter-spacing: var(--label-tracking, var(--tr-tight)); }
 .mir-modwindow .m2dev.m2min.lfo .m2lfominout.on { color: var(--acc2); }
 .mir-modwindow .m2dev.m2min.lfo .m2minnum { order: 6; }
 .mir-modwindow .m2dev.m2min.lfo .m2x { order: 7; }

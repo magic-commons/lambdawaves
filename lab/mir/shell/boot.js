@@ -112,7 +112,7 @@ export function bootCard({ name = 'MIR', steps = [], host = document.body } = {}
       root.setAttribute('role', 'alert');
       const x = explainBoot(error);
       root.dataset.code = x.code;
-      title.translate = true; label(title, '{name} could not start', { name });   // a plain var is written as it is: the name stays
+      title.translate = true; label(title, 'Could not start {name}', { name });   // a plain var is written as it is: the name stays
       line.remove(); count.remove();
       label(el('p', 'mir-boot-what', root), x.what);
       label(el('p', 'mir-boot-todo', root), x.todo);

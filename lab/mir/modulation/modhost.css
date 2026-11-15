@@ -108,7 +108,7 @@
    declared on the very elements that paint them. */
 /* @default */ .mir-modwindow, .kwin-chiprail, .m2ghost {
   --m2-aud-range-name-font: 700 8px/1 var(--font-ui);
-  --m2-aud-range-value-font: 600 7.5px/1 var(--font-num);
+  --m2-aud-range-value-font: 600 7px/1 var(--font-num);
   --m2-chip-ink-drop: drop-shadow(0 1px 0 var(--glass-raise));
   --m2-chk-on-shadow: var(--m2-on-rim), inset 0 -2px 0 color-mix(in oklch, hsl(var(--hue-acc) var(--sat-acc) 66% / .64), white var(--acc-white, 0%));
   --m2-dialink-b-wash: repeating-conic-gradient(var(--glass-groove) 0deg 1.6deg, transparent 1.6deg 30deg), radial-gradient(circle at 35% 30%, hsl(0 0% 100% / .07), transparent 62%), hsl(var(--glass-tint) / 1);
@@ -125,7 +125,7 @@
   --m2-head-wash: linear-gradient(180deg, hsl(0 0% 100% / 0.06), transparent);
   --m2-hero-well: inset 0 1px 2px hsl(0 0% 0% / 0.045);
   --m2-i-alpha: .9;
-  --m2-k-val-font: 600 8.5px var(--font-num, monospace);
+  --m2-k-val-font: 600 8px var(--font-num, monospace);
   --m2-kind-halo: 0 1px 0 var(--glass-raise);
   --m2-kn-shadow: 0 0 0 0.5px hsl(0 0% 0% / 0.38);
   --m2-mac-font-2: 700 var(--fs-lead) var(--font-num);
@@ -133,7 +133,7 @@
   --m2-macadd-font: 700 8px/1 var(--font-sans);
   --m2-mintdot-shadow: 0 0 0 1px hsl(0 0% 0% / 0.38);
   --m2-rail-shadow: var(--surface-shadow, var(--glass-shadow));   /* the pane shadow alone, as BASINS' material (1.5.0-alpha.9) */
-  --m2-say-font: 500 10.5px/1.35 var(--font-sans);
+  --m2-say-font: 500 10px/1.35 var(--font-sans);
   --m2-slotx-alpha: .75;
   --m2-tempo-bpm-font: 700 calc(22px * var(--ui-scale)) var(--font-num);
   --m2-tempo-hz-font: 500 calc(9px * var(--ui-scale)) var(--font-num);

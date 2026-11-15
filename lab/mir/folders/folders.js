@@ -324,7 +324,7 @@ export function createFolders(options = {}) {
     }
     let r;
     try { const c = await capture(); r = files.overwrite(e.id, c); } catch (err) { r = { ok: false, why: String((err && err.message) || err) }; }
-    if (r.ok) { gallery.markClean(); say(t('Saved — {name}', { name: r.entry.name })); gallery.paint(); paintMark(); if (typeof o.onSaved === 'function') { try { o.onSaved(r.entry); } catch (err) { console.warn('folders: onSaved', err); } } }
+    if (r.ok) { gallery.markClean(); say(t('Saved {name}', { name: r.entry.name })); gallery.paint(); paintMark(); if (typeof o.onSaved === 'function') { try { o.onSaved(r.entry); } catch (err) { console.warn('folders: onSaved', err); } } }
     else say(t('Could not save: {why}', { why: r.why || 'unknown' }), true);
     return r;
   }
@@ -409,7 +409,7 @@ export function createFolders(options = {}) {
     gallery.go(r.entry.folder);
     const opened = await gallery.openEntry(r.entry.id, { force: true }), n = put.restored.length, good = !!(opened && opened.ok);
     say([t(good ? 'Opened {name}' : 'Added {name}', { name: r.entry.name }), r.entry.name !== name ? t('renamed beside a project already there') : '',
-      n ? tn(n, '{n} audio asset', '{n} audio assets', { n }) : '', good ? '' : (opened && opened.why) || t('could not open it')].filter(Boolean).join(' · '), !good);
+      n ? tn(n, '{n} audio asset', '{n} audio assets', { n }) : '', good ? '' : (opened && opened.why) || t('Could not open it')].filter(Boolean).join(' · '), !good);
     gallery.paint();
     return { ok: good, entry: r.entry, assets: put };
   }
@@ -426,7 +426,7 @@ export function createFolders(options = {}) {
     const r = files.save({ name: env.name || t('IMPORTED'), folder: gallery.folder(), payload: env.data, thumb: '', facts: {} });
     if (!r.ok) { say(t('Could not keep {name}: {why}', { name: env.name || '', why: r.why || 'unknown' }), true); return r; }
     gallery.go(r.entry.folder);
-    say(t('Imported — {name}', { name: r.entry.name }));
+    say(t('Imported {name}', { name: r.entry.name }));
     return gallery.openEntry(r.entry.id);
   }
   const intake = createIntake({ target: intakeTarget, accept: ['project'], check: { app: o.app }, paste: false,
@@ -467,7 +467,7 @@ export function createFolders(options = {}) {
     state: () => ({ window: win.state(), gallery: gallery.state(), library: files.state(), current, dirty: gallery.dirty() }),
     destroy() { life.abort(); offLang(); if (unsub) unsub(); frame.cancel(MARK); intake.destroy(); for (const v of [...views]) v.destroy(); win.destroy(); },
   };
-  for (const p of extra) if (typeof p.build === 'function') { try { p.build(panelBodies.get(p.id), api); } catch (e) { say(t('The {panel} panel could not be built: {why}', { panel: p.label || p.id, why: String((e && e.message) || e) }), true); } }   // tr: an error notice: {panel} is a panel's name (RENDER …), {why} the program's reason, left as it is
+  for (const p of extra) if (typeof p.build === 'function') { try { p.build(panelBodies.get(p.id), api); } catch (e) { say(t('Could not build the {panel} panel: {why}', { panel: p.label || p.id, why: String((e && e.message) || e) }), true); } }   // tr: an error notice: {panel} is a panel's name (RENDER …), {why} the program's reason, left as it is
   { const tab0 = readPrefs().tab; if (tab0 && tab0 !== 'gallery' && panelSpecs.some((p) => p.id === tab0)) { active = tab0; win.tab(tab0); if (win.rail.chip(tab0)) win.setChip(tab0, true); } }
   return api;
 }

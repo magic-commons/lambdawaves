@@ -92,7 +92,7 @@ export const HOLD_KEY = 'KeyI';
 /** infoActions(get) — the key table's row for hold-still (shell/keys.js; an action with `up`): put it in the app's
  *  table and pass the table as `keys`, so the layer has no listener of its own.  get() → the layer (or null). */
 export function infoActions(get, { keys = ['I'] } = {}) {
-  return [{ id: 'info-hold', label: 'HOLD THE WORDS STILL', group: 'VIEW', keys, hint: 'hold: the words on the picture stay where they are',
+  return [{ id: 'info-hold', label: 'HOLD THE WORDS STILL', group: 'VIEW', keys, hint: 'Hold: the words on the picture stay where they are',
     run: () => { const l = get(); if (l) l.hold(true); }, up: () => { const l = get(); if (l) l.hold(false); } }];
 }
 
