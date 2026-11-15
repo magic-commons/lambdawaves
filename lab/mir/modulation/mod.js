@@ -33,7 +33,7 @@
 /* mod.js — the modulation model: macros, sources, routes and presets. Pure: no DOM, no renderer, no storage. */
 
 import {
-  addPoint, applyPreset, clonePoints, curveInfo, evaluate as curveEval,
+  addPoint, applyPreset, clonePoints, evaluate as curveEval,
   flip as curveFlip, movePoint, normalizePoints, presetPoints, removePoint, setTension
 } from './curve.js';
 
@@ -52,7 +52,7 @@ export const BEATS_PER_WHOLE = 4;
 export const SMOOTH_TAU_MAX = 0.5;
 export const ENV_MAX_S = 8;
 /* Macro counts: how many exist at boot, and the maximum. */
-export const MACRO_BOOT = 2;
+const MACRO_BOOT = 2;
 export const MACRO_MAX = 8;
 /* The modulation model version, and the versions this build can read. */
 /* λWAVES: forced edit 7/8 — THE VERSION HAD TO MOVE, because edits 2/8 and 6/8 changed
@@ -79,7 +79,7 @@ export function modStateReadable(v) {
   return Number.isFinite(v) && MOD_STATE_READS.indexOf(v | 0) >= 0;
 }
 /* Migrates a rack from an older model version to the current one. */
-export function migrateRack(rack, fromV) {
+function migrateRack(rack, fromV) {
   if (!rack || typeof rack !== 'object') return null;
   if (!modStateReadable(fromV)) return null;
   return rack;                      // 3 -> 4: nothing to do, and the gate says so
@@ -198,19 +198,17 @@ export function waveAt(wave, phi, ctx) {
 }
 
 /* The audio outputs a macro may bind. */
-export const AUDIO_OUTPUTS  = Object.freeze(['level', 'low', 'mid', 'high', 'hit', 'beat']);
+const AUDIO_OUTPUTS  = Object.freeze(['level', 'low', 'mid', 'high', 'hit', 'beat']);
 /** The five a macro may bind in v1.  `beat` is RESERVED — present in the
     schema so a save written today needs no renaming the day tempo estimation
     lands, and absent from sourceIds() so nothing can bind it (Sol Q3h: onset-
     interval BPM is not beat and is certainly not downbeat). */
-export const AUDIO_EXPOSED  = Object.freeze(['level', 'low', 'mid', 'high', 'hit']);
-export const AUDIO_RESERVED = Object.freeze(['beat']);
+const AUDIO_EXPOSED  = Object.freeze(['level', 'low', 'mid', 'high', 'hit']);
 /** The four that carry a continuous follower. */
 export const AUDIO_FOLLOWED = Object.freeze(['level', 'low', 'mid', 'high']);
 /** A LABEL the face fills and the engine never reads: which thing is making
     the sound.  Kept in the model so it round-trips through a save. */
-export const AUDIO_SOURCES  = Object.freeze(['mic', 'file', 'device']);
-export const AUDIO_MODES    = Object.freeze(['follow', 'trigger']);
+const AUDIO_SOURCES  = Object.freeze(['mic', 'file', 'device']);
 
 export const AUDIO_DB_FLOOR = -60;      // normalises to 0, exactly
 export const AUDIO_DB_TOP   = -6;       // normalises to 1, exactly
@@ -220,7 +218,7 @@ export const AUDIO_RANGE_GAP = 1;       // dB; endpoints never cross
 export const AUDIO_TIME_MAX = 2000;
 export const AUDIO_DB_SPAN  = AUDIO_DB_TOP - AUDIO_DB_FLOOR;      // 54
 export const AUDIO_GAIN_MAX = 24;       // +/- dB
-export const AUDIO_LEVEL_MIX_DEFAULTS = Object.freeze({ level: 1, low: 1, mid: 1, high: 1 });
+const AUDIO_LEVEL_MIX_DEFAULTS = Object.freeze({ level: 1, low: 1, mid: 1, high: 1 });
 
 /** attack/release TIME CONSTANTS in ms, per output.  See the essay above for
     why MID and LEVEL are the arithmetic midpoint and why 5 ms is a snap. */
@@ -237,17 +235,17 @@ export const AUDIO_FOLLOW_DEFAULTS = Object.freeze({
     REFUSES to write it, because "LOW in TRIGGER mode" would need a per-band
     onset detector this wave does not build and a control that does nothing is
     worse than no control. */
-export const AUDIO_OUT_MODE = Object.freeze({
+const AUDIO_OUT_MODE = Object.freeze({
   level: 'follow', low: 'follow', mid: 'follow', high: 'follow',
   hit: 'trigger', beat: 'follow'
 });
-export const AUDIO_GATE_DEFAULTS = Object.freeze({
+const AUDIO_GATE_DEFAULTS = Object.freeze({
   thresholdDb: -55, hysteresisDb: 3, holdMs: 83
 });
 /** The onset detector's constants.  These are the DETECTOR, not the device:
     a per-device `histN` is generality nobody asked for, and the day one of
     these needs to move it moves for everybody at once. */
-export const AUDIO_ONSET = Object.freeze({
+const AUDIO_ONSET = Object.freeze({
   histN: 45,            // the flux history the threshold is estimated over
   madK: 4,              // T = max(floor, median + madK * MAD)
   floorDb: -55,         // the input must be above this to be an onset at all
@@ -260,7 +258,7 @@ export const AUDIO_ONSET = Object.freeze({
 export const AUDIO_FLUX_FLOOR = 0.02;
 /** No feed is assumed to arrive at this rate — it is what the face's readout
     shows before the first frame and what a dump prints for an unfed device. */
-export const AUDIO_FEED_HZ_DEFAULT = 60;
+const AUDIO_FEED_HZ_DEFAULT = 60;
 
 const clampDb = (v, lo, hi) => (Number.isFinite(v) ? (v < lo ? lo : v > hi ? hi : v) : null);
 /** A linear RMS AMPLITUDE in dBFS.  Silence answers -Infinity, which the
@@ -352,11 +350,11 @@ export const transport = {
 
 /* Tap tempo: the longest gap that still counts, and the early-tap count. */
 export const TAP_GAP_MS = 2600;    // longer than a 23 BPM beat: past this it is a new count
-export const TAP_EARLY  = 4;       // the first window: the average of the last 4
-export const TAP_WIN    = 8;       // the continuing window
-export const TAP_SETTLE = 8;       // taps in the run before the wide window opens
-export const TAP_WILD   = 0.40;    // one interval this far off the run restarts it
-export const TAP_STRAY  = 0.18;    // ...and two in a row this far off, the same way, do too
+const TAP_EARLY  = 4;       // the first window: the average of the last 4
+const TAP_WIN    = 8;       // the continuing window
+const TAP_SETTLE = 8;       // taps in the run before the wide window opens
+const TAP_WILD   = 0.40;    // one interval this far off the run restarts it
+const TAP_STRAY  = 0.18;    // ...and two in a row this far off, the same way, do too
 
 /** +1 if d is that much LONGER than mu, -1 if that much shorter, 0 if neither.
     The reciprocal form rather than a symmetric percentage, because intervals
@@ -705,10 +703,6 @@ function bindableSource(id) {
   return !!s && s.kind !== 'audio';
 }
 
-function clampIndex(v, n, dflt) {
-  const i = v | 0;
-  return (Number.isFinite(v) && i >= 0 && i < n) ? i : dflt;
-}
 /* Clamps a clock multiplier to the ladder. */
 function clampMult(v, dflt) {
   const i = v | 0;
@@ -2926,225 +2920,6 @@ export function presetStoreState() {
                                            p.modV !== MOD_STATE_V).length,
            error: pError, refusedKey: pRefusedKey,
            bytes: raw ? raw.length : 0 };
-}
-
-
-/** Materialize the triple for one target.  Returns {macro, source, route}. */
-export function materialize(targetId, seed, label) {
-  const id = String(targetId);
-  const s0 = seed || {};
-  const src = newSource('lfo', {
-    wave: s0.wave, ratePos: s0.ratePos, phaseOff: s0.phaseOff,
-    on: s0.on === undefined ? true : !!s0.on,
-    label: label || id, seedFrom: id
-  });
-  /* THE SEED IS THE TARGET'S, NOT THE SOURCE'S.  2a hashed the target id, and
-     the S&H/DRIFT sequences a user has already seen must not change under a
-     migration — so the seed is carried explicitly rather than derived from the
-     new source id.  (newSource's `seedFrom` above does exactly this.) */
-  const m = assignMacro(src, label || id);
-  const r = newRoute(m.id, id, s0.lo, s0.hi);
-  syncMacros();
-  return { macro: m, source: src, route: r };
-}
-
-/* Assigns a source to the first free macro. */
-function assignMacro(src, label) {
-  let m = macros.find((q) => !q.sourceId);
-  if (!m) m = newMacro(null, { named: false });
-  m.sourceId = src.id;
-  if (label && !src.label) src.label = String(label).slice(0, 24);
-  m.value = clamp01(src.out);
-  return m;
-}
-
-/* Returns the v2-shaped view of one target's routing, or null. */
-export function legacyOf(targetId) {
-  const r = routeOfTarget(targetId);
-  if (!r) return null;
-  const m = macroById.get(r.macroId);
-  const s = m && m.sourceId ? sourceById.get(m.sourceId) : null;
-  if (!s) return null;
-  const lerped = r.min + (r.max - r.min) * m.value;
-  const live = m.masterDepth === 1 ? lerped : r.min + routeInfluence(m, r, lerped);
-  return {
-    on: !!s.on, wave: s.wave, ratePos: s.ratePos, phaseOff: s.phaseOff,
-    lo: r.min, hi: r.max, phase: s.phase, cycles: s.cycles | 0,
-    /* the TRUE rate, whatever mode the source is in — a BPM-synced source's
-       `ratePos` is a stale free-run dial and the rack must not print it as Hz */
-    hz: lfoHz(s),
-    rseed: s.rseed, live,
-    macroId: m.id, sourceId: s.id, routeId: r.id, curve: s.shapeMode === 'curve'
-  };
-}
-
-/** The v2-shaped WRITE.  Range fields go to the route, everything else to the
-    source; nothing here touches a phase. */
-export function setLegacy(targetId, patch) {
-  const r = routeOfTarget(targetId);          // the primary
-  if (!r || !patch) return null;
-  if (Number.isFinite(patch.lo)) r.min = clamp01(patch.lo);
-  if (Number.isFinite(patch.hi)) r.max = clamp01(patch.hi);
-  const m = macroById.get(r.macroId);
-  const s = m && m.sourceId ? sourceById.get(m.sourceId) : null;
-  if (s) {
-    const p = {};
-    if (patch.wave !== undefined) p.wave = patch.wave;
-    if (patch.ratePos !== undefined) p.ratePos = patch.ratePos;
-    if (patch.phaseOff !== undefined) p.phaseOff = patch.phaseOff;
-    if (patch.on !== undefined) p.on = patch.on;
-    setSource(s.id, p);
-  }
-  syncMacros();
-  return legacyOf(targetId);
-}
-
-/** Takes a target's whole triple down; the macro stays and lets go of its source. */
-export function demolish(targetId) {
-  const list = routeByTarget.get(String(targetId));
-  if (!list || !list.length) return false;
-  for (const r of list.slice()) {
-    const m = macroById.get(r.macroId);
-    const sid = m ? m.sourceId : null;
-    removeRoute(r.id);
-    if (sid && !routes.some((q) => macroById.get(q.macroId) &&
-                                   macroById.get(q.macroId).sourceId === sid)) {
-      removeSource(sid);
-      if (m) m.sourceId = null;
-    }
-  }
-  syncMacros();
-  return true;
-}
-
-/* Rebuilds the model from a legacy v2 rack. */
-export function migrateFromLegacy(legacy, order, labels, fromVersion) {
-  modReset();
-  const seen = new Set();
-  const take = (id) => {
-    const rec = legacy[id];
-    if (!rec || seen.has(id)) return;
-    seen.add(id);
-    materialize(id, rec, (labels && labels[id]) || id);
-  };
-  for (const id of (order || [])) if (legacy[id] && legacy[id].on) take(id);
-  for (const id of Object.keys(legacy || {})) if (legacy[id].on) take(id);
-  modStat.migratedFrom = fromVersion | 0;
-  return { macros: macros.length, sources: sources.length, routes: routes.length };
-}
-
-/* ═══════════════════════════ the instrument ════════════════════════════════ */
-
-export function modState() {
-  return {
-    v: MOD_STATE_V,
-    transport: { bpm: transport.bpm, beats: transport.beats, time: transport.time,
-                 triggers: transport.triggers, plays: transport.plays,
-                 sync: transport.sync, effective: effectiveSyncMode(),
-                 lag: transportLag(), wall: transport.wall,
-                 anchorAt: transport.anchorAt, anchorBeats: transport.anchorBeats,
-                 anchorTime: transport.anchorTime, pending: transport.pending,
-                 reanchors: transport.reanchors,
-                 ext: { name: transport.extName, beats: transport.extBeats,
-                        writes: transport.extWrites, active: externalClockActive() },
-                 hold: { on: transport.hold, note: transport.holdNote, L: transport.holdL,
-                         p: transport.holdP, a: transport.holdA, beat: heldBeat(),
-                         holds: transport.holds },
-                 playing: transport.playing },
-    macros: macros.map((m, i) => ({
-      index: i + 1, id: m.id, name: m.name, named: m.named, value: m.value,
-      masterDepth: m.masterDepth,
-      sourceId: m.sourceId,
-      kind: m.kind,
-      fires: m.kind === 'trigger' ? subsOfTrigger(m.id) : [],
-      targets: routes.filter((r) => r.macroId === m.id).map((r) => r.targetId)
-    })),
-    sources: sources.map((s) => ({
-      id: s.id, kind: s.kind, bank: s.bank, on: s.on, label: s.label,
-      audio: s.kind === 'audio' ? audioReadout(s.id) : null,
-      shapeMode: s.shapeMode, wave: s.wave,
-      curve: s.shapeMode === 'curve' ? curveInfo(s.points) : null,
-      hz: s.kind === 'lfo' ? lfoHz(s) : null,
-      sync: s.sync, mult: s.mult, multLabel: LFO_MULT_LABEL[s.mult],
-      triplet: s.triplet, dotted: s.dotted, beats: s.kind === 'lfo' ? beatsPerCycle(s) : null,
-      ratePos: s.ratePos, phaseOff: s.phaseOff, smooth: s.smooth,
-      smoothTau: smoothTau(s.smooth),
-      steps: s.steps | 0, stepSize: s.steps >= STEPS_MIN ? 1 / (s.steps - 1) : 0,
-      stepSizeCirc: s.steps >= STEPS_MIN ? 1 / s.steps : 0,
-      trig: !!s.trig, mode: modeShadow(s), anchor: s.anchor,
-      /* `out` is what the engine publishes (quantized when the ladder is on);
-         `cont` is what it would have been without the ladder.  Both, so a dump
-         can show the staircase AND the shape under it. */
-      phase: s.phase, cycles: s.cycles | 0, out: s.out, cont: s.cont,
-      a: s.a, hold: s.hold, d: s.d, s: s.s, r: s.r, invert: s.invert,
-      ta: s.ta, td: s.td, tr: s.tr, timeScale: s.timeScale, gateMode: s.gateMode,
-      minimized: !!s.minimized,
-      triggerId: s.triggerId || null,
-      autoHit: !!s.autoHit,
-      envT: s.t, fired: s.fired, gate: s.gate, fires: s.fires,
-      duration: s.kind === 'env' ? envDuration(s) : null,
-      banks: { A: sourceBankFrom(s.banks.A, sourceBankSnapshot(s), s.kind !== 'env'),
-               B: sourceBankFrom(s.banks.B, sourceBankSnapshot(s), s.kind !== 'env') }
-    })),
-    routes: routes.map((r) => {
-      const m = macroById.get(r.macroId);
-      return { id: r.id, macroId: r.macroId, macroName: m ? m.name : '?',
-               targetId: r.targetId, min: r.min, max: r.max,
-               /* `pos` stays the route's legacy absolute reading for dump/gate
-                  continuity; `offset` is what the shipping base law adds. */
-               pos: m ? r.min + (r.max - r.min) * m.value : null,
-               offset: m ? (r.max - r.min) * m.value : null,
-               effectiveOffset: m
-                 ? ((r.max - r.min) * m.value) * m.masterDepth : null,
-               masterDepth: m ? m.masterDepth : null,
-               depth: r.max - r.min,
-               dormant: !!r.dormant };
-    }),
-    stacks: Array.from(routeByTarget.entries()).map(([tid, list]) => ({
-      targetId: tid, count: list.length,
-      routes: list.map((r) => r.id),
-      macros: list.map((r) => r.macroId),
-      offset: list.reduce((a, r) => {
-        const m = macroById.get(r.macroId);
-        if (!m) return a;
-        if (m.sourceId) { const s = sourceById.get(m.sourceId); if (!s || !s.on) return a; }
-        const raw = (r.max - r.min) * m.value;
-        return a + (m.masterDepth === 1 ? raw : raw * m.masterDepth);
-      }, 0)
-    })),
-    needsClock: needsClock(), anyLive: anyLiveRoute(),
-    counts: { macros: macros.length, sources: sources.length, routes: routes.length,
-              stacked: Array.from(routeByTarget.values()).filter((l) => l.length > 1).length,
-              dormant: dormantCount(),
-              triggers: macros.filter((m) => m.kind === 'trigger').length,
-              subscribed: sources.filter((s) => !!s.triggerId).length,
-              hits: sources.filter((s) => !!s.autoHit).length,
-              audio: sources.filter((s) => s.kind === 'audio').length,
-              audioArmed: sources.filter((s) => s.kind === 'audio' && s.armed).length,
-              audioDemand: sources.filter((s) => s.kind === 'audio' && audioDemand(s.id)).length },
-    sourceIds: sourceIds(),
-    dormantRoutes: dormantRoutes(),
-    presets: presetStoreState(),
-    stat: { ...modStat },
-    constants: { BPM_MIN, BPM_MAX, BPM_DEFAULT, LFO_MULTS: LFO_MULTS.slice(),
-                 LFO_MULT_LABEL: LFO_MULT_LABEL.slice(), TRIPLET, DOTTED,
-                 SMOOTH_TAU_MAX, ENV_MAX_S, MACRO_BOOT, MOD_STATE_V,
-                 SYNC_MODES: SYNC_MODES.slice(), SYNC_DEFAULT,
-                 MACRO_MAX, RATE_MIN, RATE_MAX, STEPS_MIN, STEPS_MAX,
-                 STEPS_LADDER: STEPS_LADDER.slice(),
-                 MOD_STATE_READS: MOD_STATE_READS.slice(),
-                 AUDIO_OUTPUTS: AUDIO_OUTPUTS.slice(),
-                 AUDIO_EXPOSED: AUDIO_EXPOSED.slice(),
-                 AUDIO_RESERVED: AUDIO_RESERVED.slice(),
-                 AUDIO_SOURCES: AUDIO_SOURCES.slice(),
-                 AUDIO_MODES: AUDIO_MODES.slice(),
-                 AUDIO_DB_FLOOR, AUDIO_DB_TOP, AUDIO_DB_SPAN, AUDIO_GAIN_MAX,
-                 AUDIO_FLUX_FLOOR, AUDIO_FEED_HZ_DEFAULT,
-                 AUDIO_ONSET: { ...AUDIO_ONSET },
-                 AUDIO_GATE_DEFAULTS: { ...AUDIO_GATE_DEFAULTS },
-                 AUDIO_FOLLOW_DEFAULTS: JSON.parse(JSON.stringify(AUDIO_FOLLOW_DEFAULTS)),
-                 AUDIO_OUT_MODE: { ...AUDIO_OUT_MODE } }
-  };
 }
 
 bootMacros();

@@ -54,8 +54,8 @@ import { t, tn } from '../core/i18n.js';   // a reason the user reads (Could not
 export const FILES_V = 1;
 export const FILES_KIT = 'MIR files';
 export const NAME_MAX = 80;
-export const FOLDER_SEGMENT_MAX = 80;
-export const FOLDER_MAX = 320;
+const FOLDER_SEGMENT_MAX = 80;
+const FOLDER_MAX = 320;
 
 /** normalizeFolder('a//b/./../c\\d ') → 'a/c/d' */
 export function normalizeFolder(value) {

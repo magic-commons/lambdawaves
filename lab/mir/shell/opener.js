@@ -47,7 +47,7 @@
  *   light       an existing createPointerLight(), or false for none; default: one made for the screen's life
  * Pure (node runs them): arrowTarget(count, at, key, columns), nearestSlot(slots, x, y), pointerPose(box, x, y),
  *   footParts(foot), applyChoice(session, id) */
-import { el, label, ariaLabel } from '../kit.js';
+import { el, label, ariaLabel, trapTab, tabStops } from '../kit.js';
 import { frame } from '../core/frame.js';
 import { rect, setVar, setAttr } from '../core/perf.js';
 import { motionPolicy, parseDuration } from '../core/motion.js';
@@ -57,7 +57,6 @@ import { photosensitivityNotice } from './flash-guard.js';
 
 const JOB = 'mir:opener';
 const POSE = ['--art-x', '--art-y', '--label-x', '--label-y', '--tilt-x', '--tilt-y', '--pointer-x', '--pointer-y'];
-const FOCUSABLE = 'button:not([disabled])';
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
 /* ── the pure part ─────────────────────────────────────────────────────────────────────────────────────────── */
@@ -179,16 +178,9 @@ export function createOpener(o = {}) {
       done(id);
     };
 
-    /* the focus is trapped on the screen: Tab cycles its buttons, and focus that leaves is brought back */
-    const buttons = () => [...root.querySelectorAll(FOCUSABLE)];
-    const trap = (e) => {
-      if (e.key !== 'Tab') return;
-      const b = buttons(); if (!b.length) return;
-      const first = b[0], last = b[b.length - 1];
-      if (e.shiftKey && doc.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && doc.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-    const keep = (e) => { if (!root.contains(e.target)) { const b = buttons()[0]; if (b) b.focus(); } };
+    /* the focus is trapped on the screen: Tab cycles its stops (1.6.0-alpha.86: the kit's one trap), and focus that leaves is brought back */
+    const trap = (e) => { trapTab(root, e); };
+    const keep = (e) => { if (!root.contains(e.target)) { const b = tabStops(root)[0]; if (b) b.focus(); } };
     doc.addEventListener('keydown', trap, true); doc.addEventListener('focusin', keep, true);
 
     function release() {

@@ -103,31 +103,31 @@
  },
  {
   "file": "mir/modulation/mod.js",
-  "line": 2494,
+  "line": 2488,
   "why": "fragment",
   "text": "a slow sine opening and closing the colour bands, with the whole palette "
  },
  {
   "file": "mir/modulation/mod.js",
-  "line": 2554,
+  "line": 2548,
   "why": "fragment",
   "text": "two sample-and-hold wanderers on the first two colour phases — "
  },
  {
   "file": "mir/modulation/mod.js",
-  "line": 2664,
+  "line": 2658,
   "why": "fragment",
   "text": "the stored modulation presets are format "
  },
  {
   "file": "mir/modulation/mod.js",
-  "line": 2664,
+  "line": 2658,
   "why": "fragment",
   "text": " and this build reads format "
  },
  {
   "file": "mir/modulation/mod.js",
-  "line": 2665,
+  "line": 2659,
   "why": "fragment",
   "text": " — the file is left untouched and this session runs on the "
  },

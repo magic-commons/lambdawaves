@@ -186,6 +186,20 @@ export function onContext(node, fn, { mouse = false, right = true, ms, slop } = 
   node.addEventListener('contextmenu', ctx); node.addEventListener('keydown', key);
   return () => { offHold(); node.removeEventListener('contextmenu', ctx); node.removeEventListener('keydown', key); node.removeAttribute('data-menu'); };
 }
+/** 1.6.0-alpha.86 · ONE TAB TRAP (λWAVES 044 L51).  FOCUSABLE: what a Tab may land on.  tabStops(root) → root's stops that are drawn and enabled,
+ *  in document order.  trapTab(root, e) → true when it took the key: a Tab (no Ctrl, Alt or Meta) steps the focus to root's next stop, Shift+Tab
+ *  the one before, round; from outside root it lands on the first (Shift: the last); with no stop root itself keeps the focus.  The dialog, the
+ *  opener and an app's own full-screen page (λWAVES' Picker) trap with it. */
+export const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+export const tabStops = (root) => [...root.querySelectorAll(FOCUSABLE)].filter((n) => !n.closest('[inert], [hidden]') && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden');
+export function trapTab(root, e) {
+  if (!root || !e || e.key !== 'Tab' || e.ctrlKey || e.altKey || e.metaKey) return false;
+  e.preventDefault();
+  const f = tabStops(root), i = f.indexOf(document.activeElement);
+  const to = !f.length ? root : f[i < 0 ? (e.shiftKey ? f.length - 1 : 0) : (i + (e.shiftKey ? -1 : 1) + f.length) % f.length];
+  to.focus({ preventScroll: true });
+  return true;
+}
 /** tapWatcher(fn) → (e?) → true when this press is the second of a double-tap (fn(e) has run).  Shared by knobs, faders,
  *  the modulation arc and the colour controls.  Hand it the press event and the 14 px half of the law holds; a caller
  *  that gives none is timed only. */

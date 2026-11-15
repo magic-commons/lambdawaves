@@ -10,7 +10,6 @@
 .mir-window-picker[hidden] { display: none; }
 .mir-window-picker.glass { box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); }   /* the menu height (1.6.0-alpha.55) */
 /* the field is the kit's one search field (.mir-search, shell.css; 1.6.0-alpha.49) */
-.mir-window-picker .wp-search:focus { outline: 0; }   /* no accent ring: the field is the finder's only input */
 .mir-window-picker .wp-list { display: flex; flex-direction: column; gap: 1px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }   /* 1.6.0-alpha.44: the one scrollbar, the racks' (the thumb was grey) */
 .mir-window-picker .wp-row { position: relative; display: flex; align-items: center; gap: var(--pop-row-gap, 10px); flex: 0 0 var(--wp-row); height: var(--wp-row); padding: 0 10px;
   border: 0; border-radius: var(--wp-row-r); background: transparent; color: var(--fg); font: var(--w-bold) var(--fs-mid)/1 var(--font-ui); letter-spacing: var(--tr-wide);

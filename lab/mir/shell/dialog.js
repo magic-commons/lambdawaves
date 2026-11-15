@@ -24,12 +24,11 @@
  *            pressing one resolves `result` with run()'s return (awaited) or else its `value`
  *   result   Promise: the action's value, or null when dismissed
  * confirmDialog(text, { yes = 'OK', no = 'CANCEL', title, danger }) → Promise<boolean> */
-import { el, label, trig } from '../kit.js';
+import { el, label, trig, trapTab } from '../kit.js';
 import { presence } from '../core/motion.js';
 import { escapeLayer } from './menubar.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
-const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const line = [];                                        // dialogs waiting their turn
 let current = null;
 
@@ -98,13 +97,8 @@ function show(job) {
   const inside = (n) => n instanceof Node && root.contains(n);
   /* the trap: Tab cycles inside; Escape dismisses when allowed */
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
-      const f = [...root.querySelectorAll(FOCUSABLE)].filter((n) => !n.hidden && n.offsetParent !== null);
-      if (!f.length) { e.preventDefault(); root.focus(); return; }
-      const i = f.indexOf(document.activeElement);
-      if (e.shiftKey && (i <= 0)) { e.preventDefault(); f[f.length - 1].focus(); }
-      else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
-    } else if (e.key === 'Escape') {
+    if (trapTab(root, e)) return;                         // 1.6.0-alpha.86: the kit's one trap
+    if (e.key === 'Escape') {
       e.preventDefault(); e.stopPropagation();
       if (dismiss) shut(null);
     } else if (!inside(e.target)) { e.stopPropagation(); }
