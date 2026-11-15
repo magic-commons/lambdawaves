@@ -40,7 +40,7 @@ import { slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit q
  * 037 H1 (Josh: "min 5 degrees, max 90 degrees"): FOV spans 5°–90° (radians; the home 0.6 rad stays, so THE LOCK's poses are its own).
  * 037 H2 (Josh: "going clockwise should increase in zoom"): DIST spans [1, 12] (log, home 3.3), and the ZOOM dial is reversed (MIR 1.5.7-alpha.6:
  * the port's range asks `reverse`) — clockwise comes near; `obs.dist`, `observer.dist` and the ×dist readout are still the distance. */
-export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1, 12], FOV: [5 * Math.PI / 180, Math.PI / 2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, shift: Object.freeze([0, 0]) },
+export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 1 / 8, PITCH: 1.52, DIST: [1, 12], FOV: [5 * Math.PI / 180, Math.PI / 2], HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, shift: Object.freeze([0, 0]) },
   GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01, SHIFT: 1 };
 /** THE LENS SHIFT's one bound (0.4.0 S2): obs.shift = [px, py] is where the pivot appears on the frame, in NDC (+y up),
  *  each component in [−SHIFT, SHIFT] — the pivot reaches the frame's edge and never leaves it.  A fresh array; anything

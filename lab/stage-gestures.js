@@ -8,14 +8,14 @@
 // 0.5.0 C9 · THE SCENE GUARD (MIR 1.5 mir/shell/scene-guard.js, `install: false`, as BASINS' gestures.js): `ui()` is UI space, and
 // a press or a double-click there starts nothing on the stage and its wheel goes to that region's scroller.  The table is the law
 // for every press that does reach the stage; a drag begun on the stage keeps its pointer across the UI.
-import { createSceneGuard } from './mir/shell/scene-guard.js';
+import { createSceneGuard } from './mir/shell/scene-guard.js'; import { TAP } from './mir/core/tap.js';
 const frozen = (o) => Object.freeze(Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v && typeof v === 'object' ? frozen(v) : v])));
 export const STAGE_BINDINGS = frozen({
-  pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' }, // one finger or the mouse: these modifiers slide; else the instrument's special; else orbit (`fine` × law.FINE)
+  pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' }, // one finger or the mouse: these modifiers slide; else the instrument's special; else orbit (`fine` × law.FINE, the kit's ⅛: 044 A4, L36)
   wheel: { line: 16, page: null, base: 1.1, per: 100, atCursor: false }, // CSS px a line (a page: null = the canvas' height); distance × base^(px / per); 041 S6: no anchor — the wheel never pans
   pinch: { slide: true, atCentroid: true }, // two fingers slide the picture and zoom at their centroid
   tap: { ms: 300, px: 8 }, // a touch tap is shorter and stiller than this
-  doubleTap: { ms: null, px: 40 }, // a second tap this soon (null: the law's TAP_MS) and this near resets the view
+  doubleTap: { ms: TAP.ms, px: TAP.px }, // a second tap this soon and this near resets the view: the kit's one double-tap law (300 ms, 14 px; 044 A4, L37 — it was 320 / 40)
   dblclick: true, // a double-click resets the view
   nudge: 0.05, // Alt+Arrows: the lens shift a press, of the half-frame (Shift × the key's fine factor)
 });
@@ -130,7 +130,7 @@ export function bindStageGestures(canvas, {
       && Math.hypot(e.clientX - down.x, e.clientY - down.y) < B.tap.px;
     down = null;
     if (tap) {
-      if (lastTap && t - lastTap.t < (B.doubleTap.ms ?? law.TAP_MS) && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < B.doubleTap.px) {
+      if (lastTap && t - lastTap.t < B.doubleTap.ms && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < B.doubleTap.px) {
         lastTap = null; resetView();
       } else lastTap = { t, x: e.clientX, y: e.clientY };
     } else lastTap = null;

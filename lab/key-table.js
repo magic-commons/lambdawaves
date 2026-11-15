@@ -2,7 +2,7 @@
  * The table is the kit's: the one keydown listener, the chord spelling (`Mod` is Ctrl or ⌘, `Ctrl` the Control key alone), the
  * field and control laws, recording and saving the difference.  What stays λWAVES' is here:
  *   · the rows are rack.js ACTIONS (A9): `ctrl: true` → Mod, `ctrl: 'Ctrl'` → Ctrl (⌘⇧Q never runs the dolly zoom); a row with no
- *     `shift` answers its chord AND Shift+chord, and every run reads Shift as the fine step (0.25), but the pan, Alt(+Shift)+Drag (stage-gestures.js, not a row), is 1:1, no fine step (0.5.3 R8); held keys repeat; a `stage`
+ *     `shift` answers its chord AND Shift+chord, and every run reads Shift as the fine step (⅛: `fineOf`, 044 A4), but the pan, Alt(+Shift)+Drag (stage-gestures.js, not a row), is 1:1, no fine step (0.5.3 R8); held keys repeat; a `stage`
  *     row runs only while the stage has the focus (THE TAB RULE); 039 W1 THE KEY PRESSES THE FOCUSED CONTROL: a control the KEYBOARD
  *     brought the focus to keeps the keys it operates by (the kit's ownsKey: a button its Enter and Space, a slider its arrows) and
  *     acts; one the POINTER focused (a click leaves the focus on its button) hands them to the rows, so Space still plays after a
@@ -23,6 +23,8 @@ const keyStore = jsonStore(LS_KEYS);
 const local = { get() { const r = keyStore.get(); if (!r || typeof r !== 'object') return null; if (r.v === 1) return r.keys || null; keyStore.set({ v: 1, keys: r }); return r; },
   set(o) { if (o && Object.keys(o).length) keyStore.set({ v: 1, keys: o }); else keyStore.remove(); } };
 
+/** THE KEY ROWS' FINE STEP, written once (044 A4, L36): Shift is the kit's ⅛ (setKnobLaw's keyFine; it was a quarter here and in shell/keys.js) */
+export const fineOf = (e) => (e && e.shiftKey ? 1 / 8 : 1);
 /** chordsOf({ key, ctrl, alt, shift }) → the kit's chords; no `shift` is both the chord and its Shift (the fine step) */
 export function chordsOf(b) {
   if (!b || !b.key) return [];
@@ -47,7 +49,7 @@ export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus =
   const table = createKeys({ platform, target, reserved, storage:   /* 021 I2: the browser's own chords refused by the binder (kit 1.5.6-alpha.2) */ { get: () => liftSaved(storage.get(), rows), set: (o) => storage.set(o) },
     actions: [...rows].sort((x, y) => ORDER.indexOf(group(x)) - ORDER.indexOf(group(y))).map((a) => ({ id: a.id, label: a.label, group: group(a), short: a.short,
       keys: keysOf(a), inFields: !!a.inFields, repeat: true, when: a.when || (a.stage ? stageHasFocus : undefined),
-      run: (e) => edit(a, () => a.run(e && e.shiftKey ? 0.25 : 1)), up: a.up && (() => a.up()) })) });   // `up`: a HELD row (the kit's: its release, or leaving the page, runs it)
+      run: (e) => edit(a, () => a.run(fineOf(e))), up: a.up && (() => a.up()) })) });   // `up`: a HELD row (the kit's: its release, or leaving the page, runs it)
   const P = table.platform, row = (id) => table.list().find((x) => x.id === id);
   const view = target || (typeof window !== 'undefined' ? window : null);   // wave 88: a focused <select> yields Space (the kit counts it a field)
   if (view) view.addEventListener('keydown', (e) => { const t = e.target; if (e.code !== 'Space' || e.defaultPrevented || !t || t.tagName !== 'SELECT') return;
