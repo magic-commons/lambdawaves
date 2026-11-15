@@ -24,8 +24,9 @@
 .km-legend-sample.km-badge-ctrl { background: var(--acc); color: var(--acc-ink); }
 
 
-/* 044 AF: a key's border, hover, press and ring are the kit's (keyboard.css: the hairline, the lighter face, the press wash and scale, the ring
-   outside); these rules give only the faces, as background-color, so the kit's hover image shows over them */
+/* 044 AF: a key's hover, press and ring are the kit's (keyboard.css: the lighter face, the press wash and scale, the ring outside); these rules
+   give only the faces, as background-color, so the kit's hover image shows over them.  No hard border (044 KV2's law: in KEYBOARD only the search wears one) */
+.km-key { border: 0; }
 .km-key-bound { background-color: hsl(var(--glass-tint) / .96); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--ink-key); }
 .km-key-unbound { background-color: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 :where(body[data-theme="dark"]) :is(.km-col, .km-platform .seg, .km-key-unbound) {   /* weighs no more than the press below */
