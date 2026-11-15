@@ -76,11 +76,11 @@ export function createContextMenus(app) {
     if (!t.closest || c('input, textarea, select, [contenteditable="true"], .mir-ctx')) return null;    // a field keeps the browser's own (paste)
     if ((e = c('.wp-row[data-win]'))) return finder(e);
     if ((e = c('#lwMenu'))) return (e = c('.mm-tile')) ? tile(e) : pickerPage();
-    if (c('#notebook')) return notebook();
+    if (c('[data-mir-window="notebook"]')) return notebook();
     if ((e = c('.k, .fd'))) return { control: e };
     if ((e = c('[data-fav]'))) return { control: e };
     if (c('.mir-transport')) return bar();
-    if ((e = c('.dev .sw, .dev .segw, .dev .trig, .dev .mir-step'))) return { control: e };
+    if ((e = c('.dev .sw, .dev .segw, .dev .trig, .dev .mir-step, .dev .mir-select, .dev .mir-num'))) return { control: e };   // 044 L45: the select and the number too (the number's value door is the kit's knobOf)
     if ((e = c('.dev[data-id] > .dev-head'))) return title(e.parentElement.dataset.id);
     if ((e = c(LANES))) return lanes(e);
     if (t === app.dom.canvas || t.matches('#stage, #stage > canvas')) return wordsAt(x, y) ? words() : stage();   // the stage, or its words

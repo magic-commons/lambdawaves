@@ -9,7 +9,7 @@ import { el, sw, trig, label } from './mir/kit.js'; import { glyphEl } from './m
 import { createWidgets, kinds, onKinds } from './widgets.js';
 import './widget-mol.js'; import './widget-clock.js'; import './widget-text.js'; import './widget-views.js';
 export function createWidgetsWindow(app) {
-  const L = createWidgets(app), w = app.device({ id: 'widgets', eyebrow: 'WIDGETS', title: 'what stands on the stage', status: '' });
+  const L = createWidgets(app), w = app.device({ id: 'widgets', eyebrow: 'WIDGETS', status: '' });
   w.root.classList.add('closed', 'lw-widgets-card'); app.host.rack.appendChild(w.root);
   const gal = el('div', 'wg-gallery', w.body), list = el('div', 'wg-list', w.body), acts = el('div', 'row tight fit wg-acts', w.body);
   const edit = sw({ label: 'EDIT', title: 'Move and size the widgets on the stage', onChange: (v) => L.edit(v) });
@@ -25,7 +25,7 @@ export function createWidgetsWindow(app) {
       n[it.kind] = (n[it.kind] || 0) + 1; const r = el('div', 'wg-row', list); r.dataset.id = it.id;
       const K = kinds().find((k) => k.kind === it.kind), g = K && glyphEl(K.glyph, 'wg-gly', 16); if (g) r.append(g);   // 044 AV2 (L18): the FINDER's row — its kind's glyph, its word, its number
       label(el('span', 'wg-word', r), it.label); el('span', 'wg-n', r, String(n[it.kind]));
-      r.append(trig({ label: '', glyph: 'close', title: 'Remove this widget', cls: 'wg-x', onFire: () => L.remove(it.id) }).root);
+      r.append(trig({ label: 'Remove this widget', glyph: 'close', word: false, title: 'Remove this widget', cls: 'wg-x', onFire: () => L.remove(it.id) }).root);
     }
     w.setStatus(items.length ? String(items.length) : '', 'live'); edit.set(L.edit()); snap.set(L.snap());
   };

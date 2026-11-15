@@ -208,7 +208,7 @@ export function createRackWiring(app) {
     /** THE ARRANGEMENT, and nothing else.  Order is the ARRAY's order — restoring appends in it, which reproduces
      *  the order exactly — and the three per-card states are read off the classes that carry them. */
     captureLayout() {
-      const nb = document.getElementById('notebook');
+      const nb = document.querySelector('[data-mir-window="notebook"]');   // 044 L102: the NOTEBOOK's kit window
       /* WAVE 55: `v: 2` adds ONE optional key per card — `float` — and nothing else moved, so a v1 layout
          saved before this wave still loads: it simply has no card with a `float`, which is exactly what
          "nothing was floating" means.  A floating card keeps its HOME side and index in the record, not

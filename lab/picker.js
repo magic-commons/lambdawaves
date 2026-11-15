@@ -397,8 +397,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   let hueShown = 0;   // iteration 014 D2: the CSS sees an unwrapped turn (the nearest twin of the hue to the last one shown), so 359 → 0 glides one degree, never back round the wheel
   /* iteration 014 B4 · 015 M1 · THE PICTURES' STYLE: the Picker's PREFERENCE `look`, turned by THE HUE ring like every picture.  THE LOOK DROP
      (Josh: "a fancy drop down … a 2x3 layout of buttons … center aligned and is allowed to overlap the main menu"): a pane of six tiles under
-     the LOOK button, each glyph in the math face and its word the hint — ρ · arg ψ · Im ψ / ● · ⊸ · φ; the Gol note's spring open and 120 ms
-     close, ← → ↑ ↓ move, Enter or a press picks and closes, Escape or a press elsewhere closes; the look in use is lit.  The molecular looks
+     the LOOK button, each glyph in the math face and its word the hint — ρ · arg ψ · Im ψ / ● · ⊸ · φ; it opens and closes still (044 L22: a menu does
+     not spring), ← → ↑ ↓ move, Enter or a press picks and closes, Escape or a press elsewhere closes; the look in use is lit.  The molecular looks
      are greyed on the ATOMIC deck (a lone atom has no bonds, and its potential is a monopole). */
   /* iteration 016 L1 · THE SEVENTH TILE, ATOM LABELS (Josh, call 1: "the element letters drawn over the picture, very small, barely readable,
      overlaps allowed"): Aa in STIX, the density picture with each nucleus' symbol (menu-thumbs --style labels); the drop is two centred rows,
@@ -419,7 +419,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = glyphSvg(SHAPES[g], 'gly'); else host.textContent = g; return host; };
   const lookOf = () => { const l = lookFor(false); return l !== 'density' ? l : null; };   // a volume tile's style (V.picture), a molecule's look
   const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu'; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');   // 022 P3: a menu pane
-  const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio'); b.style.setProperty('--i', String(i));
+  const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio');
     b.style.gridRow = i < 3 ? '1' : '2'; b.style.gridColumn = (i < 3 ? 2 + 2 * i : 1 + 2 * (i - 3)) + ' / span 2';   // L1: the bricks, each row centred
     glyph(el('b', 'mm-lk-g', b), glyph_); b.addEventListener('click', () => { if (b.getAttribute('aria-disabled') === 'true') return; setLook(id); closeDrop(true); }); return b; });
   function paintLooks() {
@@ -434,23 +434,21 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) volPic(i, u); }, () => {});
     for (const i of root.querySelectorAll('img.mm-pic[data-menu]')) { const { src } = picOf(i.dataset.menu); if (i.getAttribute('src') !== src) setPic(i, src); }   // M2: every deck of ours
   }
-  let dropT = 0;
   const outside = (e) => { if (!drop.contains(e.target) && !lookB.contains(e.target)) closeDrop(); };
   function openDrop() {
-    if (!drop.hidden && !drop.classList.contains('out')) return;
-    clearTimeout(dropT); paintLooks(); drop.classList.remove('out'); drop.hidden = false;
+    if (!drop.hidden) return;
+    paintLooks(); drop.hidden = false;
     const r = lookB.getBoundingClientRect(); drop.style.left = Math.round(r.left + r.width / 2) + 'px'; drop.style.top = Math.round(r.bottom + 10) + 'px';
-    drop.classList.remove('in'); void drop.offsetWidth; drop.classList.add('in'); lookB.setAttribute('aria-expanded', 'true');
+    lookB.setAttribute('aria-expanded', 'true');
     addEventListener('pointerdown', outside, true);
     (lookTiles.find((b) => b.classList.contains('on')) || lookTiles[0]).focus({ preventScroll: true });
   }
   function closeDrop(refocus) {
     if (drop.hidden) return; removeEventListener('pointerdown', outside, true); lookB.setAttribute('aria-expanded', 'false');
-    drop.classList.remove('in'); drop.classList.add('out'); clearTimeout(dropT);
-    dropT = setTimeout(() => { drop.hidden = true; drop.classList.remove('out'); }, RM.matches ? 0 : 120);
+    drop.hidden = true;   // 044 L22: a menu opens and closes still; only a picker (the FINDER) springs
     if (refocus) lookB.focus({ preventScroll: true });
   }
-  lookB.addEventListener('click', () => (drop.hidden || drop.classList.contains('out') ? openDrop() : closeDrop()));
+  lookB.addEventListener('click', () => (drop.hidden ? openDrop() : closeDrop()));
   drop.addEventListener('keydown', (e) => {
     const k = lookTiles.indexOf(document.activeElement), d = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 3, ArrowUp: -3 }[e.key];
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeDrop(true); return; }

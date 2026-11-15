@@ -27,7 +27,7 @@ export function createInformational(app) {
   /* 022 H1 · A GLYPH REPLACES THE WORDS: the button wears the side it is on (icons.js sideRight · sideLeft · sideTop · sideBottom); the word is its name */
   /* 040 I3 (Josh 11-09: "make the 'position: top/bottom' switch … into a toggle"): POSITION is the same press, TOP ⇄ BOTTOM, wearing the side it is on */
   const cycle = (key, cls, aria) => { const r = INFO_ROWS.find((q) => q.key === key), word = (v) => r.options.find((o) => o.id === v).label, gly = (v) => 'side' + v[0].toUpperCase() + v.slice(1); let shown = P.get(key);
-    const b = trig({ label: '', glyph: gly(shown), title: r.hint, cls, onFire: () => P.set(key, r.values[(r.values.indexOf(P.get(key)) + 1) % r.values.length]) });
+    const b = trig({ label: aria, glyph: gly(shown), word: false, title: r.hint, cls, onFire: () => P.set(key, r.values[(r.values.indexOf(P.get(key)) + 1) % r.values.length]) });
     const name = (v) => { b.root.dataset.side = v; ariaLabel(b.root, aria, { side: { t: word(v) } }); }; name(shown);
     ctl[key] = { root: b.root, get: () => shown, set: (v) => { shown = v; b.setGlyph(gly(v)); name(v); } }; };
   cycle('espBarSide', 'info-side', 'ESP bar side: {side}'); cycle('infoPos', 'info-pos', 'Formula position: {side}');

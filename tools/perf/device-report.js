@@ -1016,7 +1016,7 @@ function notebookPut(S) {
  *  longer (rack.js projectKey reads the textarea's value), then the text as found, its selection (when it has the focus) and
  *  scroll — no input event, so nothing is stored.  → whether the mark now reads dirty */
 function armDirty(P0) {
-  const ta = document.querySelector('#notebook .nb-text'); if (!ta) return false;
+  const ta = document.querySelector('[data-mir-window="notebook"] .nb-text'); if (!ta) return false;
   const v = ta.value, top = ta.scrollTop, sel = document.activeElement === ta ? [ta.selectionStart, ta.selectionEnd, ta.selectionDirection] : null;
   try { ta.value = v + '\u2063'; P0.markClean(); }
   finally { ta.value = v; if (sel) { try { ta.setSelectionRange(sel[0], sel[1], sel[2]); } catch (_) {} } ta.scrollTop = top; }
@@ -1067,7 +1067,7 @@ async function runProjectOpen(LW, found, S, scene, say, err, force) {
   const stored = Object.fromEntries(KEYS.map((k) => [k, safe(() => localStorage.getItem(k))]));
   const nbFound = notebookSnapshot(), ringFound = historyState(LW);
   const snap = JSON.stringify(LW.serialize());
-  const preview = document.querySelector('#notebook .nb-view');
+  const preview = document.querySelector('[data-mir-window="notebook"] .nb-view');
   const P = gridProbe(LW), T = tapRecorder(LW), prof = profiler(), WIN = 2000;
   const ev = { click: null, importText: null, open: null, restore: null };
   let opened = null; const openDone = new Promise((r) => { opened = r; });

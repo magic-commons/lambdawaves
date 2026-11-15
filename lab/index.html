@@ -97,15 +97,14 @@
     <button id="rackToggle" class="glass" type="button" data-key-action="rack" aria-label="hide or show the rack" title="Hide or show the rack">◧</button>
     <button id="rackFav" class="glass" type="button" aria-label="favourite layouts" title="Save or load a window layout">☆</button>
     <div id="rackFavList" class="glass" hidden data-rack-list="fav"></div>
-    <section id="notebook" class="nb" hidden aria-label="notebook" data-face="notes" data-mir-window="notebook">
-      <header class="nb-head"><div class="nb-titles"><input class="nb-title" value="NOTEBOOK" spellcheck="false" aria-label="notebook title" title="the notebook's title — type to rename"><input class="nb-subtitle" placeholder="subtitle" spellcheck="false" aria-label="notebook subtitle" title="the notebook's subtitle — type to rename" hidden></div><span class="nb-tools"><button class="nb-mode" type="button" aria-label="edit or preview the notes" title="Edit or preview the notebook">◐</button><button class="nb-projects-btn" type="button" data-key-action="folders" aria-label="projects" title="projects: save, open, folders, recent">▤</button><button class="nb-close" type="button" data-key-action="notebook" aria-label="close the notebook" title="close (J)">×</button></span></header>
+    <div id="notebookParts" hidden><!-- 044 L102: the NOTEBOOK's title strip and notes face, lent at boot to its kit window (shell/notebook.js) -->
+      <header class="nb-head"><div class="nb-titles"><input class="nb-title" value="NOTEBOOK" spellcheck="false" aria-label="notebook title" title="the notebook's title — type to rename"><input class="nb-subtitle" placeholder="subtitle" spellcheck="false" aria-label="notebook subtitle" title="the notebook's subtitle — type to rename" hidden></div></header>
       <div class="nb-face nb-notes">
         <textarea class="nb-text" spellcheck="false" placeholder="notes — markdown, $inline$ and $$display$$ maths; ctrl+enter previews — kept in this browser and in the project"></textarea>
         <div class="nb-view md"></div>
         <div class="nb-foot"><span class="nb-count"></span><button class="nb-copy" type="button" title="copy the notes as text">COPY</button></div>
       </div>
-      <div class="nb-grip" title="Drag to resize the notebook" aria-hidden="true"></div>
-    </section>
+    </div>
     <div id="aboutFace" class="nb-face nb-aboutface" hidden><!-- 034 N1: ABOUT's λWAVES face — the ABOUT window (shell/notebook.js) takes it at boot -->
       <div class="nb-logo" aria-label="λWAVES"></div>
       <div class="ab-eyebrow">ABOUT</div>

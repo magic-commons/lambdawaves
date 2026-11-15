@@ -64,19 +64,14 @@ body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
 .mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
 .mb-item:hover .fav-x { color: var(--acc2); }
 body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
-/* ── the NOTEBOOK: a free glass — real blur, no colour overlay ── */
-#notebook { min-width: 280px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); border-radius: 16px;
-  border: 1px solid hsl(0 0% 100% / .45); background: transparent; -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%);
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); }   /* 039 F3: min-width 280 — the seat beside a docked TIMELINE (the 286-px column at 1300 × 850) */
-body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); }
-body[data-theme="dark"] #notebook::before { background: hsl(0 0% 0% / .22); }   /* a shade behind the blur on DARK, the glass itself stays clear */
-.nb-head { padding: 16px 10px 12px 14px; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title") */
+/* ── the NOTEBOOK (044 L102): a kit window (shell/notebook.js), its glass, head, corner and edge the window's ── */
+.nb-head { padding: 16px 26px 20px; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title"); 044 (Josh 11-15: "more margins"): 16 kept above the title, the sides 14 → 26 and the title to the first line 12 → 20 */
+.nb-notes { padding: 0 26px 14px; }   /* 044: the page's sides as the title strip's (the kit's .nb-face was 0 14 12) */
 .nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; }
 .nb-title:focus { color: var(--acc); }
 .nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; }
 .nb-subtitle:focus { color: var(--acc); }
 .nb-subtitle::placeholder { opacity: .6; }
-#notebook[data-face="projects"] .nb-titles, #notebook[data-face="projects"] .nb-title, #notebook[data-face="projects"] .nb-subtitle { visibility: hidden; }
 .nb-view { font: 14px/1.6 var(--font-ui); }
 .nb-view h1, .nb-view h2, .nb-view h3 { font-weight: var(--w-heavy); }
 .nb-view h1 { font-size: 22px; } .nb-view h2 { font-size: 18px; } .nb-view h3 { font-size: 15px; }
@@ -86,7 +81,6 @@ body[data-theme="dark"] #notebook::before { background: hsl(0 0% 0% / .22); }   
 .nb-view th, .nb-view td { border-bottom: 1px solid hsl(0 0% 50% / .25); }
 .nb-view hr { background: hsl(0 0% 50% / .3); }
 .nb-view .katex { font-size: 1.08em; } .nb-view .katex-display { margin: .5em 0; overflow-x: auto; }
-.nb-mode, .nb-projects-btn { font-size: 12px; }
 /* ══ WAVE 106 · THE HISTORY LIST ═══════════════════════════════════════════════════════════════
    Newest at the top, the way a stack reads.  Three states, and only ONE of them is a colour trick:
      · PAST     the ordinary ink — these happened and they hold.
@@ -104,15 +98,20 @@ body[data-theme="dark"] #notebook::before { background: hsl(0 0% 0% / .22); }   
 .hist-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
 .hist-actions > .trig { width: 100%; min-width: 0; padding-inline: 5px; }
 
-.nb-tools button { font-size: var(--fs-lead); }
 .nb-text { font: var(--fs-lead)/1.5 var(--font-ui); }
 .nb-foot { letter-spacing: var(--tr-wide); }
 .nb-foot button, .nb-dump, .ab-home { border-radius: var(--r-md); font: var(--w-heavy) var(--fs-small) var(--font-ui); letter-spacing: var(--tr-wider); }
 .nb-dump, .ab-home { line-height: 28px; }
-/* 034 N1 · the ABOUT window (shell/notebook.js): the notebook's button ink, its two faces filling the body */
-.mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); }
-body[data-theme="dark"] .mir-win.lw-about { --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
-.mir-win.lw-about > .mir-win-body { display: flex; flex-direction: column; }
+/* 034 N1 · the ABOUT window and (044 L102) the NOTEBOOK's (shell/notebook.js): the notebook's button ink, the faces filling the body */
+.mir-win:is(.lw-about, .lw-notebook) { --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); }
+body[data-theme="dark"] .mir-win:is(.lw-about, .lw-notebook) { --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
+.mir-win:is(.lw-about, .lw-notebook) > .mir-win-body { display: flex; flex-direction: column; }
+.mir-win.lw-notebook[data-mode="view"] .nb-text, .mir-win.lw-notebook[data-mode="edit"] .nb-view { display: none; }   /* the kit's rules key on the old #notebook */
+@media (hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px) {   /* the phone (skin.css' breakpoint): the NOTEBOOK is the whole screen, opaque, as #notebook was */
+  .mir-win.lw-notebook { left: 0 !important; top: 0 !important; width: calc(100vw / var(--in-zoom, 1)) !important; height: calc(100dvh / var(--in-zoom, 1)) !important; max-width: none; max-height: none;
+    border-radius: 0; -webkit-backdrop-filter: none; backdrop-filter: none; background: hsl(var(--glass-tint) / 1); }
+  .mir-win.lw-notebook > .mir-win-resize { display: none; }
+}
 .mir-win.lw-about .nb-face { padding: 0 14px 12px; }
 .lw-about-mir { align-items: stretch; }
 .nb-logo { font-size: 35px; }
@@ -507,9 +506,6 @@ body.rack-hidden #transport.mini { visibility: hidden; transition: transform var
 body.rack-hidden.transport-peek #transport.mini { visibility: visible; transition: transform var(--lw-reveal) ease, opacity var(--lw-reveal) ease, visibility 0s linear 0s; }
 
 
-.nb-grip::before { opacity: .85;
-  border-bottom-right-radius: 3px; }
-.nb-grip:hover::before { opacity: 1; }
 
 
 #busyMark { position: fixed; left: 0; top: 0; width: 22px; height: 22px; z-index: calc(var(--z-banner) + 20);

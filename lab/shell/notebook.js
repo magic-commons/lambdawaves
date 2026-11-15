@@ -4,9 +4,9 @@
 import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el, hint, label, ariaLabel } from '../mir/kit.js'; import { hoverable } from '../mir/core/kbm.js'; import { createMenubar, contextMenu } from '../mir/shell/menubar.js'; import { createShelf } from '../mir/notes/shelf.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle, quatFromYawPitch } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js'; import { WINDOW_WORDS } from '../search-index.js';   // 042 Q: the FINDER's words are the search's
-import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
+import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js'; import { finderMatch } from '../csb-search.js';
-import { createWindow, windowOf } from '../mir/window/window.js'; import { glyphEl, glyphSvg } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
+import { createWindow, windowOf } from '../mir/window/window.js'; import { glyphEl } from '../mir/glyph.js'; import { mirGui } from '../mir-gui.js';   // 034 N1: ABOUT's own window
 import { MODE } from './settings.js';   // 021 R5: ONE MODE (the FINDER's greys)
 import { NOTEBOOK_KEYS } from '../settings-store.js';   // 021 R4: the notebook's 0.4 keys, read once and retired
 export function createNotebook(app) {
@@ -165,7 +165,7 @@ export function createNotebook(app) {
         ['timeline', 'TIMELINE', 'timeline', 'Open the TIMELINE, or raise it', () => !!(app.state.tl && app.state.tl.isOpen()), () => rise(document.querySelector('[data-mir-window="timeline"]')), () => A.run('timeline')],
         ['transport', 'CONTROL SURFACE', 'controlSurface', 'Show the CONTROL SURFACE where it sits', () => !!bar() && !bar().closed,
           () => { const b = bar(); if (b.docked) reveal('transport'); else if (b.el.play) b.el.play.focus({ preventScroll: true }); }, () => mirGui().prefs.set('transportBar', true)],
-        ['notebook', 'NOTEBOOK', 'notebook', 'Open the NOTEBOOK, or bring it forward', () => layout.notebook.isOpen, () => { const n = document.getElementById('notebook'); rise(n); if (n) n.focus({ preventScroll: true }); }, () => layout.notebook.open()],
+        ['notebook', 'NOTEBOOK', 'notebook', 'Open the NOTEBOOK, or bring it forward', () => layout.notebook.isOpen, () => layout.notebook.win.raise(), () => layout.notebook.open()],
         ['nodes', 'NODES', 'nodes', 'Open NODES, or raise it', () => !!A.get('nodes').get() || !!document.querySelector('.dev[data-id="nodes"]:not(.closed)'), () => { reveal('nodes'); rise(document.querySelector('[data-mir-window="nodes"]')); }, () => reveal('nodes')]]
         .map(([id, title, glyph, hint, open, up, run]) => ({ id, title, glyph, hint, open, run: () => (open() ? up : run)() }));
       layout.special = special;   // 044 A2 (L19): THE ONE TABLE of the special windows — the FINDER's section and the search's window rows (csb-search.js) read it
@@ -177,9 +177,18 @@ export function createNotebook(app) {
     installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });
     for (const t of ['devclose', 'devopen']) document.addEventListener(t, () => saveSettings());   // C3: the kit's + opens a window itself
     layout.favMenu = rk.favMenu;   // 0.5.0 C3: the ☆ list is the kit's (createRack chrome); 018 E5: the + list left for the FINDER
-    /* ── THE NOTEBOOK: a free glass over the stage (034 N1: ABOUT is its own window, below) ── */
-    const nb = document.getElementById('notebook');
-    if (nb) {
+    /* ── THE NOTEBOOK (044 L102): a kit window like ABOUT — createWindow in #floats with the 38 px title bar (its glyph, NOTEBOOK, the tools, ×),
+       resizable at the kit's corner, moved by its bar or its empty glass; its body the title strip and the notes face that index.html lends
+       (#notebookParts).  Its size is the WORKSPACE nbW / nbH, as before; its id `notebook`; the project's notebook part is unchanged. ── */
+    const parts = document.getElementById('notebookParts');
+    const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
+    if (parts) {
+      const nbSize = (w, h) => { const S = readSettings(), W = Math.round(w), H = Math.round(h); if (!(W > 0 && H > 0) || (W === (S.nbW ?? NOTES_DEF_W) && H === (S.nbH ?? NOTES_DEF_H))) return; settingsStore.write({ ...S, nbW: W, nbH: H }); };   // W129: the size it was given; nothing written at the default size
+      const win = createWindow({ id: 'notebook', title: 'NOTEBOOK', host: floats || document.body, chrome: 'close', glyph: 'notebook', resizable: true, emptyDrag: true,
+        size: { w: NOTES_DEF_W, h: NOTES_DEF_H }, min: { w: 320, h: 240 }, body: (b) => { b.append(...parts.children); },
+        persist: { read: () => { const S = readSettings(); return { w: S.nbW, h: S.nbH }; }, write: (sh) => { if (sh) nbSize(sh.w, sh.h); } } });
+      parts.remove();
+      const nb = win.root; nb.classList.add('lw-notebook'); nb.dataset.face = 'notes';
       const [NB_KEY, NB_TITLE, NB_SUBTITLE] = NOTEBOOK_KEYS;   // 021 R4: RETIRED — read once below, then the session part is the notebook's one record
       const ta = nb.querySelector('.nb-text'), view = nb.querySelector('.nb-view'), titleIn = nb.querySelector('.nb-title'), subIn = nb.querySelector('.nb-subtitle'), faces = { notes: nb.querySelector('.nb-notes'), about: document.getElementById('aboutFace') };
       /* the ABOUT face's version line is BUILD_LINE, never hand-written markup: the copy dump reads this same text back out of the face */
@@ -196,8 +205,6 @@ export function createNotebook(app) {
         for (const k of NOTEBOOK_KEYS) localStorage.removeItem(k);
       } catch (e) {}
       /* 2026-09-11: a synchronous localStorage write per keystroke became one write 300 ms after the last key; pagehide flushes */
-      /* 2026-09-11: the notebook's move and resize write style once per FRAME, not once per pointer event */
-      const nbPaint = coalesce(paint => paint());
       /* the title, subtitle and text are the part's: each input tells the session (projects.changed, the part's subscribe) */
       const nbStore = () => { if (layout.projects) layout.projects.changed(); };
       /* the text keeps its keys from the app's rows; Ctrl+S and Ctrl+, travel on, and Escape (039 W4: the notebook's layer of THE ESCAPE STACK) */
@@ -226,9 +233,15 @@ export function createNotebook(app) {
          limit only hid valid Markdown while leaving usable space empty. Render the complete note
          here and let the pane's own geometry decide how much is visible at once. */
       function render() { const src = ta.value || '*empty — press ◐ to write*'; view.innerHTML = renderMarkdown(src.length > 200000 ? src.slice(0, 200000) + '\n\n*… preview truncated at 200 000 characters; the notes are kept whole*' : src); }   // 2026-09-11: a pasted book previews its first 200 k instead of one huge synchronous innerHTML
-      const setMode = (m) => { nb.dataset.mode = m; if (m === 'view') render(); else ta.focus(); };
+      const setMode = (m) => { nb.dataset.mode = m; const v = m === 'view'; modeB.dataset.glyph = v ? 'edit' : 'preview'; modeB.replaceChildren(...[glyphEl(v ? 'edit' : 'preview', 'gly')].filter(Boolean)); ariaLabel(modeB, v ? 'EDIT' : 'PREVIEW'); hint(modeB, v ? 'EDIT — back to the text' : 'PREVIEW — the notes as they read'); if (v) render(); else ta.focus(); };
       nb.dataset.mode = 'edit';
-      nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
+      /* the head's tools (044 L102: the kit's head buttons, before its ×): NEW NOTE, OPEN NOTE, EDIT ↔ PREVIEW, PROJECTS */
+      const tool = (cls, glyph, tip) => { const b = el('button', 'mir-win-btn ' + cls); b.type = 'button'; b.dataset.glyph = glyph; const g = glyphEl(glyph, 'gly gly-' + glyph); if (g) b.append(g); hint(b, tip); ariaLabel(b, tip.split(' — ')[0]); return b; };
+      const newB = tool('nb-new', 'plus', 'NEW NOTE — keeps this one on the shelf'), openB = tool('nb-open', 'folder', 'OPEN NOTE — a note from the shelf');
+      const modeB = tool('nb-mode', 'preview', 'PREVIEW — the notes as they read'), projB = tool('nb-projects-btn', 'folders', 'PROJECTS — save, open, folders, recent'); projB.dataset.keyAction = 'folders';
+      win.tools.prepend(newB, openB, modeB, projB);
+      { const x = win.tools.querySelector('.mir-win-x'); if (x) x.dataset.keyAction = 'notebook'; }   // the key table writes its J on the × (it was the old head's)
+      modeB.addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
         if (!travels(e)) e.stopPropagation(); });
       /* 0.5.1 D8 · `lw:` LINKS in the VIEW (R6-K): `[water](lw:molecule=h2o)` runs a WHITELIST of hand verbs — preset (STATE's), molecule
@@ -388,15 +401,12 @@ export function createNotebook(app) {
       { const { root, rail } = projects.folders.win;
         occlusion.register('folders', () => projects.folders.isOpen() ? [paintedRect(root), ...(rail.el ? [...rail.el.querySelectorAll('.mir-chip')].map((c) => paintedRect(c)) : [])] : []);
         for (const el of [root, rail.el]) occlusion.watch(el, { attributes: true, attributeFilter: ['hidden'] }); }
-      nb.querySelector('.nb-projects-btn').addEventListener('click', () => projects.toggle());
+      projB.addEventListener('click', () => projects.toggle());
       /* ── 034 N3 · NEW NOTE · OPEN NOTE (Josh: "Have new controls like 'new note', 'open note'"): the kit's notes shelf (mir/notes/shelf.js, key
          `mir.notes`, apart from every project) holds the notes; the notebook shows one live sheet, the project's page 0 as before.  NEW keeps the
          sheet on the shelf (when it has text) and clears into a new one; OPEN lists the shelf, newest first, and opens a note into the sheet
          (the sheet kept first).  A project open puts its own text in the sheet, as always. ── */
-      const shelf = createShelf({ key: 'mir.notes' }), nbTools = nb.querySelector('.nb-tools');
-      const tool = (cls, glyph, tip) => { const b = el('button', cls); b.type = 'button'; b.innerHTML = glyphSvg(glyph, 'gly', 14); b.title = tip; b.setAttribute('aria-label', tip.split(' — ')[0]); return b; };
-      const newB = tool('nb-new', 'plus', 'NEW NOTE — keeps this one on the shelf'), openB = tool('nb-open', 'folder', 'OPEN NOTE — a note from the shelf');
-      nbTools.prepend(newB, openB);
+      const shelf = createShelf({ key: 'mir.notes' });
       const sayNb = (t) => { const c = nb.querySelector('.nb-count'); if (c) { c.textContent = t; setTimeout(count, 2400); } };
       const keepSheet = () => {
         if (!ta.value.trim()) return null;
@@ -417,7 +427,6 @@ export function createNotebook(app) {
       const count = () => { const c = nb.querySelector('.nb-count'); if (c) c.textContent = ta.value.trim() ? ta.value.trim().split(/\s+/).length + ' words · kept in this browser' : 'empty · kept in this browser'; };
       ta.addEventListener('input', () => { nbStore(); count(); });
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
-      const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
       /* ── 034 N1 · ABOUT IS ITS OWN WINDOW (Josh: "Notebook should be it's own window apart from the About page. About page's controls can just
          simply be the 'x' icon to close and the 'i' icon to toggle between the app's about page and the general MIR about page"): the kit's
          createWindow in #floats with a title bar — ⓘ and × — whose body is the λWAVES face (index.html #aboutFace) or, on ⓘ, MIR ABOUT's own
@@ -472,24 +481,15 @@ export function createNotebook(app) {
          ABOUT closes wherever the focus is; the notebook's text gives the keyboard back first, then the notebook closes */
       const escLayer = (close, alive, fields) => { let drop = null; return () => { if (drop) drop(); drop = app.sh.ACTIONS.escape.push(close, { alive, fields }); }; };
       const abEsc = escLayer(() => abWin.close(), () => abWin.isOpen());
-      const nbEsc = escLayer(() => { const f = document.activeElement; if (nb.contains(f) && f.matches('textarea, input')) { f.blur(); nbEsc(); } else nb.hidden = true; }, () => !nb.hidden, true);
+      const nbEsc = escLayer(() => { const f = document.activeElement; if (nb.contains(f) && f.matches('textarea, input')) { f.blur(); nbEsc(); } else win.close(); }, () => win.isOpen(), true);
       layout.about = { open(f = 'lw') { abShow(f); abWin.open(); abWin.raise(); abFit(); abEsc(); return true; }, close() { abWin.close(); }, toggle(f) { if (abWin.isOpen() && (!f || f === abFace)) abWin.close(); else layout.about.open(f || abFace); },
         get isOpen() { return abWin.isOpen(); }, get face() { return abFace; }, win: abWin };
       const show = (face) => {
         if (face === 'projects') { projects.show(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS' (iteration 004: the front page put away first)
         if (face === 'about') { layout.about.open('lw'); return; }   // 034 N1: ABOUT left the notebook for its own window
-        nb.hidden = false; nb.dataset.face = 'notes';
-        const S = readSettings();
-        const w = typeof S.nbW === 'number' ? S.nbW : NOTES_DEF_W;
-        const h = typeof S.nbH === 'number' ? S.nbH : NOTES_DEF_H;
-        nbResize(w, h);
-        if (!nbMoved) {
-          nb.style.left = 'calc(50% - ' + Math.round(w / 2) + 'px)';
-          nb.style.top = '12%';
-        }
+        nb.dataset.face = 'notes'; win.open(); win.raise();
         ta.focus(); nbEsc();
       };
-      nb.querySelector('.nb-close').addEventListener('click', () => { nb.hidden = true; });
       nb.querySelector('.nb-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ta.value); } catch (e) {} });
       const dump = nb.querySelector('.nb-dump');
       const dumpText = () => {
@@ -497,36 +497,13 @@ export function createNotebook(app) {
         return info.replace(/\n{3,}/g, '\n\n') + '\n\nsettings ' + JSON.stringify(readSettings()) + '\nfield ' + JSON.stringify({ resolution: field.resolution, half: field.half, adapter: field.adapterInfo || null }) + '\n' + navigator.userAgent;
       };
       if (dump) dump.addEventListener('click', async () => { try { await navigator.clipboard.writeText(dumpText()); } catch (e) {} });
-      const NB_MIN_W = 320, NB_MIN_H = 240;
-      const nbClamp = (w, h) => [Math.max(NB_MIN_W, Math.min(w, window.innerWidth - 16)), Math.max(NB_MIN_H, Math.min(h, window.innerHeight - 16))];
-      function nbResize(w, h) { const [cw, ch] = nbClamp(w, h); nb.style.width = cw + 'px'; nb.style.height = ch + 'px'; return [cw, ch]; }
-      function nbSaveSize() {
-        const w = Math.round(parseFloat(nb.style.width)), h = Math.round(parseFloat(nb.style.height)); if (!(w > 0 && h > 0)) return;   // W129 · the size it was GIVEN (nbResize, the grip, the CSS resize all write the inline style; captureLayout reads it too), never its layout box: a closed notebook's box is 0 × 0, a phone's is its screen
-        const S = readSettings();
-        if (S.nbW === w && S.nbH === h) return;
-        settingsStore.write({ ...S, nbW: w, nbH: h });
-      }
-      { const grip = nb.querySelector('.nb-grip');
-        if (grip) { let gd = null;
-          grip.addEventListener('pointerdown', (e) => { if (e.button !== 0 || gd) return; e.preventDefault(); e.stopPropagation(); const r = nb.getBoundingClientRect(); gd = { id: e.pointerId, x: e.clientX, y: e.clientY, w: r.width, h: r.height };
-            try { grip.setPointerCapture(e.pointerId); } catch (_) {} });   // a capture that cannot be taken (a synthesised pointer, a stale id) must not throw into the page — the drag works without it
-          grip.addEventListener('pointermove', (e) => { if (!gd || e.pointerId !== gd.id) return; e.preventDefault(); const w = gd.w + (e.clientX - gd.x), h = gd.h + (e.clientY - gd.y); nbPaint.post(() => nbResize(w, h)); });
-          const gend = (e) => { if (!gd || e.pointerId !== gd.id) return; nbPaint.flush(); gd = null; if (e && e.pointerId !== undefined && grip.hasPointerCapture && grip.hasPointerCapture(e.pointerId)) grip.releasePointerCapture(e.pointerId); nbSaveSize(); };
-          for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) grip.addEventListener(type, gend);
-        }
-        /* the desktop's own CSS resize ends in a pointerup over the notebook — the same two numbers, the same key */
-        nb.addEventListener('pointerup', () => nbSaveSize());
-        const S0 = readSettings(); if (typeof S0.nbW === 'number' && typeof S0.nbH === 'number') nbResize(S0.nbW, S0.nbH);
-        layout.notebookResize = (w, h) => { const r = nbResize(w, h); nbSaveSize(); return r; };
-        layout.notebookSize = () => { const w = Math.round(parseFloat(nb.style.width) || NOTES_DEF_W), h = Math.round(parseFloat(nb.style.height) || NOTES_DEF_H); return { w, h, custom: w !== NOTES_DEF_W || h !== NOTES_DEF_H }; };
-      }
-      let nd = null, nbMoved = false; const nhead = nb.querySelector('.nb-head');
-      nhead.addEventListener('pointerdown', (e) => { if (e.button !== 0 || nd || e.target.closest('button, input')) return; const r = nb.getBoundingClientRect(); nd = { id: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top }; try { nhead.setPointerCapture(e.pointerId); } catch (_) {} });
-      nhead.addEventListener('pointermove', (e) => { if (!nd || e.pointerId !== nd.id) return; nbMoved = true; const L = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - nd.dx)) + 'px', T = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - nd.dy)) + 'px'; nbPaint.post(() => { nb.style.left = L; nb.style.top = T; }); });
-      const nend = (e) => { if (!nd || e.pointerId !== nd.id) return; nbPaint.flush(); nd = null; };
-      for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) nhead.addEventListener(type, nend);
+      /* the size: the kit's corner and resize() (044 L102); a facade's resize is clamped to the screen as before, and the WORKSPACE keys are persist's */
+      const nbClamp = (w, h) => [Math.max(320, Math.min(w, window.innerWidth - 16)), Math.max(240, Math.min(h, window.innerHeight - 16))];
+      layout.notebookResize = (w, h) => { const r = nbClamp(w, h); win.resize({ w: r[0], h: r[1] }); return r; };
+      layout.notebookSize = () => { const { w, h } = win.state(); return { w, h, custom: w !== NOTES_DEF_W || h !== NOTES_DEF_H }; };
+      occlusion.register('notebook', () => (win.isOpen() ? [paintedRect(nb)] : [])); occlusion.watch(nb, { attributes: true, attributeFilter: ['hidden', 'style'] });
       count();
-      layout.notebook = { open: (face = 'notes') => show(face), close: () => { nb.hidden = true; }, toggle: () => { if (nb.hidden) show('notes'); else nb.hidden = true; }, get isOpen() { return !nb.hidden; }, get face() { return nb.dataset.face; }, moveTo(x, y) { nbMoved = true; nb.style.left = x + 'px'; nb.style.top = y + 'px'; }, dump: dumpText, get text() { return ta.value; }, set text(v) { ta.value = v; ta.dispatchEvent(new Event('input')); }, get title() { return titleIn.value; }, set title(v) { titleIn.value = v; titleIn.dispatchEvent(new Event('input')); }, get subtitle() { return subIn ? subIn.value : ''; }, set subtitle(v) { if (subIn) { subIn.value = v; subIn.hidden = !v; subIn.dispatchEvent(new Event('input')); } }, get mode() { return nb.dataset.mode; }, setMode, render: renderMarkdown, get html() { return view.innerHTML; } };
+      layout.notebook = { open: (face = 'notes') => show(face), close: () => win.close(), toggle: () => { if (win.isOpen()) win.close(); else show('notes'); }, get isOpen() { return win.isOpen(); }, get face() { return nb.dataset.face; }, moveTo(x, y) { win.place({ x, y }); }, win, dump: dumpText, get text() { return ta.value; }, set text(v) { ta.value = v; ta.dispatchEvent(new Event('input')); }, get title() { return titleIn.value; }, set title(v) { titleIn.value = v; titleIn.dispatchEvent(new Event('input')); }, get subtitle() { return subIn ? subIn.value : ''; }, set subtitle(v) { if (subIn) { subIn.value = v; subIn.hidden = !v; subIn.dispatchEvent(new Event('input')); } }, get mode() { return nb.dataset.mode; }, setMode, render: renderMarkdown, get html() { return view.innerHTML; } };
     }
     /* the hidden rack's peeks: the kit's pointer law (createRack); the bar's own is rack-wiring.js' (015 H3; 020 S1 retired wave 108's second copy here,
        which peeked the bar again under the very pointer that had just hidden it) */

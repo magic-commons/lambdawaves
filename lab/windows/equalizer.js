@@ -34,8 +34,8 @@ export function createEqualizerCard(app) {
   const chord = app.state.chord = createChord({ reg, clock, motion: MOTION, onPlay: appPlay.onChange }), snd = el('div', null, gEq), sndCap = el('div', 'note', null), paintChord = () => { sndCap.textContent = chord.caption; };
   const sndSw = sw({ label: 'SOUND', value: false, title: 'SOUND · the populated levels as tones', onChange: (v) => { chord.set({ on: v }); paintChord(); } });
   sndSw.root.dataset.keyAction = 'eq.sound';   // 021 I1: the action presses it
-  el('div', 'row tight fit', snd).append(sndSw.root, seg({ label: '', value: 'levels', options: [{ id: 'levels', label: 'LEVELS' }, { id: 'beats', label: 'BEATS' }], onChange: (v) => { chord.set({ mode: v }); paintChord(); } }).root); snd.append(sndCap); snd.hidden = sndSw.root.disabled = true;
-  ui.setAudio = (v) => { snd.hidden = sndSw.root.disabled = !v; if (!v && sndSw.get()) { sndSw.set(false); chord.set({ on: false }); } chord.retune(); paintChord(); };
+  el('div', 'row tight fit', snd).append(sndSw.root, seg({ label: '', value: 'levels', options: [{ id: 'levels', label: 'LEVELS' }, { id: 'beats', label: 'BEATS' }], onChange: (v) => { chord.set({ mode: v }); paintChord(); } }).root); snd.append(sndCap); snd.hidden = true; sndSw.setDisabled(true);
+  ui.setAudio = (v) => { snd.hidden = !v; sndSw.setDisabled(!v); if (!v && sndSw.get()) { sndSw.set(false); chord.set({ on: false }); } chord.retune(); paintChord(); };
   let eqKey = '', eqT = null, eqMode = 0;
   function syncEq(hand) {
     if (chord.retune() && !snd.hidden) paintChord();   // S2: keyed on version, RATE, mode — the bank moves only on change
@@ -48,7 +48,8 @@ export function createEqualizerCard(app) {
     eqStep.set(eq.preset); eqRo.set(G ? t.purity.toFixed(3) : '1.000'); eqRo.setSub(t && !G ? t.gate : G && t.repaired ? 'repaired' : ['pure', 'mixture · no phase', 'signed · relative floor 2·10⁻⁴'][m]);
     if (hand && m === 2 && eqMode !== 2) { mat.view = VIEW.real; ui.viewSeg.set('real'); wSpec.setStatus('a signed table: VIEW is Re ψ, its lobes in two colours', 'live'); }
     eqMode = m; const nn = app.state.eqNoNodes = !!(G && m === 1 && t.lambdaMin > 1e-3 * t.lambda[t.lambda.length - 1]);   // E4: a positive-definite mixture has no zeros
-    for (const b of [ui.vorOn, ui.pOn && ui.pOn.root]) if (b) { b.disabled = nn; b.classList.toggle('disabled', nn); keepT(b, nn, `the equalized picture has no nodes (λ_min = ${nn ? t.lambdaMin.toPrecision(3) : ''})`); }
+    if (ui.vorOn) ui.vorOn.disabled = nn; if (ui.pOn) ui.pOn.setDisabled(nn);   // VORTEX's switch is its module's (no handle here)
+    for (const b of [ui.vorOn, ui.pOn && ui.pOn.root]) if (b) { keepT(b, nn, `the equalized picture has no nodes (λ_min = ${nn ? t.lambdaMin.toPrecision(3) : ''})`); }
     const K = EQ_SHELLS, cell = Array.from({ length: K * K }, (_, i) => (G ? Math.hypot(G[2 * i], G[2 * i + 1]) : 1) * Math.sqrt(w[i / K | 0] * w[i % K])), top = Math.max(...cell) || 1;
     drawGrid(cell, top);
   }
