@@ -11,9 +11,7 @@
 .km-col-left { min-width: 0; }
 
 .km-platform .seg { display: flex; flex: 0 0 auto; gap: 2px; padding: 3px; border-radius: 24px; background: var(--glass-well); border: 0; box-shadow: var(--relief-well, var(--neu-inset)); }
-.km-platform .seg-b { width: 28px; height: 28px; min-width: 0; min-height: 0; border-radius: 50%; border: 0; background: transparent;
-  color: var(--ink-key); cursor: pointer; box-shadow: none; }
-.km-platform .seg-b:focus-visible { box-shadow: 0 0 0 2px var(--acc); outline: 0; }
+.km-platform .seg-b { width: 28px; height: 28px; min-width: 0; min-height: 0; border-radius: 50%; border: 0; color: var(--ink-key); cursor: pointer; }
 .km-platform .seg-b.on { background: var(--glass-press); color: var(--fg-soft); box-shadow: var(--relief-raise, var(--neu-raise)); }
 .km-os-mac { font: 20px / 1 system-ui, sans-serif; }
 .km-os-windows { width: 14px; height: 14px; }
@@ -26,20 +24,16 @@
 .km-legend-sample.km-badge-ctrl { background: var(--acc); color: var(--acc-ink); }
 
 
-.km-key { min-height: 52px; border: 0;
-  font: var(--font-ui); overflow: hidden; }
-/* the 44-px finger over smaller ink, the way every other control in this lab does it */
-.km-key-bound { background: hsl(var(--glass-tint) / .96); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--ink-key); }
-.km-key-unbound { background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
-body[data-theme="dark"] .km-col,
-body[data-theme="dark"] .km-platform .seg,
-body[data-theme="dark"] .km-key-unbound {
-  background: hsl(var(--glass-hue) var(--glass-sat-tint) calc(var(--glass-lum) - 2%));
+/* 044 AF: a key's border, hover, press and ring are the kit's (keyboard.css: the hairline, the lighter face, the press wash and scale, the ring
+   outside); these rules give only the faces, as background-color, so the kit's hover image shows over them */
+.km-key-bound { background-color: hsl(var(--glass-tint) / .96); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--ink-key); }
+.km-key-unbound { background-color: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+:where(body[data-theme="dark"]) :is(.km-col, .km-platform .seg, .km-key-unbound) {   /* weighs no more than the press below */
+  background-color: hsl(var(--glass-hue) var(--glass-sat-tint) calc(var(--glass-lum) - 2%));
 }
-.km-key-selected { background: var(--acc-soft); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 14px var(--acc-soft); }
-.km-key-hovered, .km-key:hover { background: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)); }
-.km-key:focus-visible { background: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 2px var(--acc); outline: 0; }
-.km-key-recording { background: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 14px var(--bad); }
+.km-key-selected { background-color: var(--acc-soft); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 14px var(--acc-soft); }
+.km-key:active { background-color: var(--state-press, var(--glass-press)); }   /* the kit's press wash, over the faces above */
+.km-key-recording { background-color: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 14px var(--bad); }
 .km-key-shift-char { font-size: var(--fs-micro); opacity: .55; }
 .km-key-cap { font-size: var(--fs-base); letter-spacing: var(--tr-tight); text-align: center; }
 .km-key-sub { font-size: var(--fs-micro); letter-spacing: var(--tr-tight); }
@@ -48,13 +42,7 @@ body[data-theme="dark"] .km-key-unbound {
 .km-badge-alt { background: color-mix(in oklch, var(--acc) 50%, var(--acc2)); }
 
 .km-editor-actions .km-btn { padding: 5px 7px; }
-.km-search {
-  outline: none; }
 .km-list { overflow-y: auto; }
-.km-action-row { grid-template-columns: minmax(0,1fr) 118px;
-  background: transparent; text-align: left; }
-.km-action-row-hovered, .km-action-row:hover { background: var(--glass-press); }
-.km-action-row:focus-visible { background: var(--glass-press); box-shadow: 0 0 0 2px var(--acc); outline: 0; }
 .km-action-row-recording { background: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 12px var(--bad); }
 .km-chip { font: var(--w-semi) var(--fs-small) / 1 var(--font-mono); border-radius: 4px; border: 0; }
 .km-chip-mod { background: var(--glass-raise); color: var(--fg-soft); box-shadow: var(--relief-raise, var(--neu-raise)); }
@@ -66,9 +54,7 @@ body[data-theme="dark"] .km-key-unbound {
 .km-action-desc { font-size: var(--fs-tiny); font-weight: var(--w-regular); }
 
 .km-btn { min-height: 34px; padding: 7px 11px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; text-align: center;
-  background: var(--glass-raise); border: 0; box-shadow: var(--relief-raise, var(--neu-raise)); cursor: pointer; translate: none; }
-.km-btn:hover { background: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)); translate: none; }
-.km-btn:focus-visible { background: var(--glass-press); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 2px var(--acc); outline: 0; }
+  border: 0; cursor: pointer; }   /* its face, hover, press and ring are the kit's trig's */
 .km-btn .trig-l { font: var(--w-bold) 12px / 1 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--fg-soft); }
 .km-editor-actions .km-btn .trig-l { font-size: var(--fs-small); }
 .km-btn-record .trig-l { color: var(--acc); }
