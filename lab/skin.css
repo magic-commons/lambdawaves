@@ -277,7 +277,6 @@ body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 .native-info .native-info-content { width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); border-radius: var(--r-lg); }
 .control-help { max-width: min(280px, calc(100vw - 16px)); border-radius: var(--r-md); }
 .dev[data-id="observer"] .segw { flex: 1 1 100%; }
-.dev[data-id="observer"] .row { margin: 4px 0; }
 .dev[data-id="settings"] .settings-section { margin-bottom: 18px; }
 .dev[data-id="settings"] .segw { flex: 1 1 100%; }
 .dev[data-id="settings"] .sw { flex: 1 1 110px; }
@@ -299,7 +298,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev .sp-head .trig[aria-pressed] { gap: 3px; padding: 0; }
 .dev.dev:not(.mir-modwindow) .sp-head .trig[aria-pressed]::before { margin-right: 0; }
 .dev[data-id="settings"] > .dev-body > .segw { margin-bottom: 12px; }
-.dev[data-id="settings"] .settings-page > .row { margin: 10px 0 14px; }
 .dev[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }
 .dev[data-id="observer"] .segw > .k-lbl { margin-bottom: 5px; }
 .dev[data-id="observer"] .row > .segw { width: 100%; flex: 1 1 100%; }
@@ -309,8 +307,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev[data-id="observer"] .wave-row-0 > .segw > .seg, .lw-dither > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .dev[data-id="observer"] .wave-row-1 > .segw > .seg { grid-template-columns:repeat(4,minmax(0,1fr)); }   /* iteration 008 W: the four observables on one line */
 .lw-dither > .segw { flex:1 1 150px;width:auto; }   /* iteration 008 W: wave-row-6's DITHER row, now under SETTINGS › QUALITY */
-.dev[data-id="observer"] .wave-row { margin: 0 0 10px; }
-.dev[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
+.dev[data-id="observer"] .seg button { padding:0 4px; }
 .dev .window-help-book > .note, .dev .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
 .dev .native-info-content .ro-sub { height:auto; }
 .native-info .native-info-content { border:0; }
@@ -336,8 +333,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 44px) 22px;align-items:center; }
 .plane-model { border-radius: var(--r-md); }
 
-/* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
-.dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--ctl-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
+/* Shared control relief: native redesign uses the same kit as PULSE and the other instruments.  044 AF (L101): the track is 44, its padding 2 as MIR OPTIONS' and the switches beside it */
+.dev:not(.mir-modwindow) .seg { padding:2px;gap:2px;border:1px solid var(--ctl-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
 .dev:not(.mir-modwindow) .seg-b { border:0;border-radius:6px;background:transparent;color:var(--ink-key); }
 .dev:not(.mir-modwindow) .seg-b:hover { background: var(--state-hover, var(--glass-raise)); }
 .dev:not(.mir-modwindow) .seg-b.on { background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise, var(--neu-raise));color:var(--acc); }
@@ -967,7 +964,6 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 /* 037 T1 · STAGE (lab/stage-window.js): FRAME the whole line; AXES · AXIS COLOUR halves; the colour a swatch bar beside FOLLOW THEME; STAGE · GAMMA */
 /* 041 S8 · THE STAGE COMES BACK: RELOAD STAGE, in the middle of a stage whose GPU device was lost (shell/controller.js stageLost) */
 .lw-stage-lost { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: var(--z-stage-lost); zoom: var(--ui-zoom, 1); }
-.lw-stage-card .row { margin: 0 0 8px; }
 .lw-stage-card .stage-frame > .segw { flex: 1 1 100%; }
 .lw-stage-card .stage-axes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; }
 .lw-stage-card .stage-axes > .segw > .seg { display: flex; flex-wrap: nowrap; width: 100%; box-sizing: border-box; }

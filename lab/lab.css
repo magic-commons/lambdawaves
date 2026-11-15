@@ -791,7 +791,7 @@ body.menu-open #widgets { visibility: hidden; }
    tight row per system — 52-px knobs, a knob-sized seg (`.sp-vseg`: its options in a column) and LAUNCH / BOUNCE as two small trigs in one column */
 .dev[data-id="spectrum"] .sp-ham > .lw-field-head { margin: 2px 0; }
 .dev[data-id="spectrum"] .sp-ham > .lw-field-head > .lw-fold { min-height: 30px; height: 30px; }
-.dev[data-id="spectrum"] .sp-ham-body > .row { margin: 4px 0; gap: 6px; flex-wrap: nowrap; justify-content: center; align-items: flex-start; }
+.dev[data-id="spectrum"] .sp-ham-body > .row { flex-wrap: nowrap; justify-content: center; align-items: flex-start; }
 .dev[data-id="spectrum"] .sp-ham-body .k-lbl { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 /* THE KNOB-SIZED SEG (`.sp-vseg`, 015 S1; one rule for every window since 017 R4 — SPECTRUM, EMISSION's RANGE): its options in a column, a
    knob's width, and its top on the dials' line — an unlabelled one keeps the label's line empty (a knob's `.k-lbl` is one micro line + 2 px) */
