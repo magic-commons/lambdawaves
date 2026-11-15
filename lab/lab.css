@@ -65,7 +65,8 @@ body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
 .mb-item:hover .fav-x { color: var(--acc2); }
 body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
 /* ── the NOTEBOOK (044 L102): a kit window (shell/notebook.js), its glass, head, corner and edge the window's ── */
-.nb-head { padding: 16px 10px 12px 14px; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title") */
+.nb-head { padding: 16px 26px 20px; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title"); 044 (Josh 11-15: "more margins"): 16 kept above the title, the sides 14 → 26 and the title to the first line 12 → 20 */
+.nb-notes { padding: 0 26px 14px; }   /* 044: the page's sides as the title strip's (the kit's .nb-face was 0 14 12) */
 .nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; }
 .nb-title:focus { color: var(--acc); }
 .nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; }
