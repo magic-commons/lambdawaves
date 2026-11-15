@@ -14,10 +14,10 @@
    readers' own notes are one hover away, which is where a caveat belongs. */
 
 /* ── 9. rails, rows, chips, canvases — the same two depths, nothing louder ── */
-.ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .atm-c, .atm-r, .picker { border-color: transparent; box-shadow: var(--relief-well, var(--neu-inset)); }
+.ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .atm-c, .atm-r, .wig-c, .rad-c, .picker { border-color: transparent; box-shadow: var(--relief-well, var(--neu-inset)); }
 .sp-row, .orbit-row { border-color: transparent; background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
 .sp-row.sel { background: var(--acc-soft); box-shadow: var(--neu-flat), 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent); }
-.sp-b, .pk-c, .pal-color { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--ink-key); }
+.sp-b, .pk-c, .pal-color { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--ink-key); transition: background-color var(--t-fast), box-shadow var(--t-fast); }   /* 044 AF (L66): a pressable's duration */
 .sp-b:active, .pk-c:active { box-shadow: var(--relief-well, var(--neu-inset)); background: var(--glass-well); }
 .sp-b.on { background: var(--acc-soft); color: var(--acc); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 1px color-mix(in srgb, var(--acc) 35%, transparent); }
 .sp-b.solo.on { color: var(--acc2); box-shadow: var(--relief-well, var(--neu-inset)), 0 0 0 1px color-mix(in srgb, var(--acc2) 40%, transparent); }
@@ -277,7 +277,6 @@ body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 .native-info .native-info-content { width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); border-radius: var(--r-lg); }
 .control-help { max-width: min(280px, calc(100vw - 16px)); border-radius: var(--r-md); }
 .dev[data-id="observer"] .segw { flex: 1 1 100%; }
-.dev[data-id="observer"] .row { margin: 4px 0; }
 .dev[data-id="settings"] .settings-section { margin-bottom: 18px; }
 .dev[data-id="settings"] .segw { flex: 1 1 100%; }
 .dev[data-id="settings"] .sw { flex: 1 1 110px; }
@@ -299,7 +298,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev .sp-head .trig[aria-pressed] { gap: 3px; padding: 0; }
 .dev.dev:not(.mir-modwindow) .sp-head .trig[aria-pressed]::before { margin-right: 0; }
 .dev[data-id="settings"] > .dev-body > .segw { margin-bottom: 12px; }
-.dev[data-id="settings"] .settings-page > .row { margin: 10px 0 14px; }
 .dev[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }
 .dev[data-id="observer"] .segw > .k-lbl { margin-bottom: 5px; }
 .dev[data-id="observer"] .row > .segw { width: 100%; flex: 1 1 100%; }
@@ -309,8 +307,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev[data-id="observer"] .wave-row-0 > .segw > .seg, .lw-dither > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .dev[data-id="observer"] .wave-row-1 > .segw > .seg { grid-template-columns:repeat(4,minmax(0,1fr)); }   /* iteration 008 W: the four observables on one line */
 .lw-dither > .segw { flex:1 1 150px;width:auto; }   /* iteration 008 W: wave-row-6's DITHER row, now under SETTINGS › QUALITY */
-.dev[data-id="observer"] .wave-row { margin: 0 0 10px; }
-.dev[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
+.dev[data-id="observer"] .seg button { padding:0 4px; }
 .dev .window-help-book > .note, .dev .window-help-book > .sturm-note { display:block !important;position:static;margin:0; }
 .dev .native-info-content .ro-sub { height:auto; }
 .native-info .native-info-content { border:0; }
@@ -336,8 +333,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 44px) 22px;align-items:center; }
 .plane-model { border-radius: var(--r-md); }
 
-/* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
-.dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--ctl-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
+/* Shared control relief: native redesign uses the same kit as PULSE and the other instruments.  044 AF (L101): the track is 44, its padding 2 as MIR OPTIONS' and the switches beside it */
+.dev:not(.mir-modwindow) .seg { padding:2px;gap:2px;border:1px solid var(--ctl-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
 .dev:not(.mir-modwindow) .seg-b { border:0;border-radius:6px;background:transparent;color:var(--ink-key); }
 .dev:not(.mir-modwindow) .seg-b:hover { background: var(--state-hover, var(--glass-raise)); }
 .dev:not(.mir-modwindow) .seg-b.on { background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise, var(--neu-raise));color:var(--acc); }
@@ -488,14 +485,14 @@ body.no-mol-formula .lw-pop { display: none; }
  * (windows/spectrum.js): the grid's canvas at device pixels beside its six faders, one per shell row; its colours are tokens here. */
 #lwMode { position: absolute; left: calc(var(--rack-w) + 24px); top: 46px; z-index: var(--z-chrome); width: auto; display: flex; flex-direction: column; gap: 4px; }
 /* 013 H4: LIBRARY · MOLECULAR · HYDROGEN, a column of icons (021 V2: the table's library · molecule · atom, SVG in the ink); the pressed mode wears the seg's ON face */
-#lwMode .lw-stage-b { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--r-md); background: none; color: var(--fg); opacity: .6; cursor: pointer; }
+#lwMode .lw-stage-b { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--r-md); background: none; color: var(--fg); opacity: .6; cursor: pointer; transition: opacity var(--t-fast), color var(--t-fast), background-color var(--t-fast); }
 #lwMode .lw-stage-b:hover, #lwMode .lw-stage-b:focus-visible { opacity: 1; }
 #lwMode .lw-stage-b[aria-pressed="true"] { opacity: 1; color: var(--acc); background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
 body.ui-hidden #lwMode { display: none; }
 @media (hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px) {
   #lwMode { left: max(env(safe-area-inset-left), 8px); top: calc(env(safe-area-inset-top) + 48px); } }
 .eq-grid, .eq-mix { --eq-size: 152px; }   /* the shell grid's side, once (iteration 010 X6) */
-.eq-grid { --eq-near: hsl(291 72% 56%); --eq-mid: hsl(33 100% 50%); --eq-far: hsl(48 100% 46%); width: var(--eq-size); height: var(--eq-size); margin: 0; image-rendering: auto; border-radius: 0; color: var(--ink-faint, currentColor); }
+.eq-grid { --eq-near: hsl(291 72% 56%); --eq-mid: hsl(33 100% 50%); --eq-far: hsl(48 100% 46%); width: var(--eq-size); height: var(--eq-size); margin: 0; image-rendering: auto; border-radius: var(--r-md); color: var(--ink-faint, currentColor); }
 body[data-theme="dark"] .eq-grid { --eq-near: hsl(291 85% 68%); --eq-mid: hsl(33 100% 60%); --eq-far: hsl(50 100% 58%); }
 .eq-mix { display: grid; grid-template-columns: var(--eq-size) minmax(0, 1fr); gap: 10px; align-items: start; }
 .eq-faders { display: grid; grid-auto-rows: minmax(0, 1fr); gap: 2px; height: var(--eq-size); padding-top: 14px; box-sizing: border-box; }
@@ -526,7 +523,7 @@ body.no-transport-bar #transport { display: none; }
 /* 022 P3: the Picker is a PAGE, so its sheet stays its own; the popups that wore `.lw-menu` (the palette list, the FINDER, CSB search, the look
    drop) are menu panes and take the skin (the kit's surface law and --surface-menu-floor) */
 #lwMenu { background: hsl(var(--glass-tint) / .985); }
-body.frost #lwMenu { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
+body.frost #lwMenu { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }   /* 044 AF (L131): the kit's blur and its switches (QUALITY, reduced transparency) */
 body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #transport { visibility: hidden; opacity: 0; }   /* opacity too: the kit's block sets its own visibility */
 #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *)), #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *))::before, #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *))::after { outline: none; border: 0; box-shadow: none; }
 #lwMenu button:where(:not(.mm-folders *, .mm-sheet-body *)) { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }   /* iteration 015 M4: the kit's gallery keeps its own look */
@@ -549,7 +546,7 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-pill { position: absolute; top: -2px; bottom: -2px; left: 0; width: var(--pw, 0); translate: var(--px, 0) 0; border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .5); z-index: -1; pointer-events: none;
   transition: translate var(--t-relocate) var(--ease), width var(--t-relocate) var(--ease); }
 #lwMenu .mm-tab { --on: 0; position: relative; display: inline-flex; align-items: center; gap: 8px; font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; padding: 5px 2px; opacity: calc(.45 + .55 * max(var(--approach, 0), var(--on)));
-  color: color-mix(in srgb, var(--acc) calc(max(var(--approach, 0), var(--on)) * 100%), var(--fg)); transition: opacity .12s ease; }
+  color: color-mix(in srgb, var(--acc) calc(max(var(--approach, 0), var(--on)) * 100%), var(--fg)); transition: opacity var(--t-fast) ease; }
 #lwMenu .mm-tab.on { --on: 1; }
 #lwMenu .mm-scroll { overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; overscroll-behavior: contain; }
 #lwMenu .mm-scroll::-webkit-scrollbar { display: none; }
@@ -577,7 +574,7 @@ img.pic-ink { object-position: -9999px 0; background: currentColor; -webkit-mask
 img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no-repeat; }   /* D6: a volume page's sheet, one cell filling the box */
 /* "the element underneath": the name, under the tile, on a hover or a focus */
 #lwMenu .mm-under { position: absolute; left: 50%; top: 100%; translate: -50% 0; white-space: nowrap; pointer-events: none; font-size: 12px; letter-spacing: .06em; opacity: 0;
-  text-shadow: 0 0 6px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 160ms ease, translate 160ms var(--ease); }
+  text-shadow: 0 0 6px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity var(--motion-ui) ease, translate var(--motion-ui) var(--ease); }
 #lwMenu .mm-tile:hover .mm-under, #lwMenu .mm-tile:focus-visible .mm-under { opacity: 1; translate: -50% 4px; }
 /* the periodic table: 18 columns, 7 periods, a gap row, the two f rows; the picture full, the symbol and Z in its corners */
 #lwMenu .mm-table { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 270px) / 10.3), var(--fit, 100vh)); display: grid; grid-template-columns: repeat(18, var(--t)); grid-template-rows: repeat(7, var(--t)) calc(var(--t) * .35) repeat(2, var(--t)); gap: 2px; }
@@ -608,16 +605,16 @@ img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no
 #lwMenu .mm-pages::-webkit-scrollbar { display: none; }
 #lwMenu .mm-page { flex: 0 0 100%; scroll-snap-align: start; display: grid; grid-template-columns: repeat(var(--cols), var(--t)); grid-auto-rows: var(--t); gap: var(--gap); align-content: start; }
 #lwMenu .mm-arrow { --near: 0; position: absolute; top: calc(50% - 11px); margin-top: -22px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--fg);
-  background: hsl(var(--glass-tint) / .4); opacity: calc(.18 + .82 * var(--near)); transition: opacity .18s ease, scale .16s var(--ease), color .12s ease; }
-body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25); backdrop-filter: blur(14px) saturate(1.25); }
+  background: hsl(var(--glass-tint) / .4); opacity: calc(.18 + .82 * var(--near)); transition: opacity .18s ease, scale var(--motion-ui) var(--ease), color var(--t-fast) ease; }
+body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }
 #lwMenu .mm-prev { right: calc(100% + 14px - var(--fade)); } #lwMenu .mm-next { left: calc(100% + 14px - var(--fade)); }
-#lwMenu .mm-arrow .mm-ico { width: 22px; height: 22px; transform: scale(var(--glyph-scale, 1)); transition: transform .16s cubic-bezier(.2,.7,.25,1); }
+#lwMenu .mm-arrow .mm-ico { width: 22px; height: 22px; transform: scale(var(--glyph-scale, 1)); transition: transform var(--motion-ui) cubic-bezier(.2,.7,.25,1); }
 #lwMenu .mm-arrow:hover { scale: 1.08; color: var(--acc); } #lwMenu .mm-arrow:active { scale: .94; } #lwMenu .mm-arrow:focus-visible { opacity: 1; color: var(--acc); }
 @media (hover: none) { #lwMenu .mm-arrow { opacity: 1; } }
 #lwMenu .mm-arrow[disabled] { opacity: 0; pointer-events: none; }
 #lwMenu .mm-dots, .lw-pager .mm-dots { display: flex; gap: 8px; justify-content: center; align-items: center; height: 18px; font-size: 12px; letter-spacing: var(--tr-wider); font-variant-numeric: tabular-nums; opacity: .8; }
 #lwMenu .mm-dots[hidden] { display: none; }
-#lwMenu .mm-dot, .lw-pager .mm-dot { width: 7px; height: 7px; border-radius: 4px; background: currentColor; opacity: .28; transition: width 160ms, opacity 160ms; }
+#lwMenu .mm-dot, .lw-pager .mm-dot { width: 7px; height: 7px; border-radius: 4px; background: currentColor; opacity: .28; transition: width var(--motion-ui), opacity var(--motion-ui); }
 #lwMenu .mm-dot.on, .lw-pager .mm-dot.on { width: 22px; opacity: 1; background: var(--acc); }
 /* the caption: much larger — the formula in STIX, the name in LW Title, the line under; R6's swap is one line in flight (iteration 008 P: the old line leaves and is gone before the newest rises) */
 /* 041 P2 · THE READER'S ROOM IS ALWAYS THERE (Josh 11-09: "let the content of the page assume the informational/reader in the bottom is always there"):
@@ -659,9 +656,9 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 #lwMenu .mm-vol-wip .mm-ico { width: 14px; height: 14px; }   /* 030: the cone — under construction, amber like a site sign */   /* iteration 014 C4: a volume still filling */
 #lwMenu .mm-vol.filling .mm-vol-open { cursor: default; } #lwMenu .mm-vol.filling .mm-vol-num { opacity: .55; } #lwMenu .mm-vol.filling .mm-vol-open:hover .mm-vol-num { color: inherit; }   /* iteration 015 M5: VOL. II · WIP, FILLING */
 #lwMenu .mm-vol-meta { font-size: 12px; letter-spacing: .08em; opacity: .7; font-variant-numeric: tabular-nums; }
-#lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: var(--fs-base); letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: var(--r-pill); font-variant-numeric: tabular-nums; transition: color 120ms; }
+#lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: var(--fs-base); letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: var(--r-pill); font-variant-numeric: tabular-nums; transition: color var(--t-fast); }
 #lwMenu .mm-install:hover, #lwMenu .mm-install:focus-visible { color: var(--acc); }
-#lwMenu .mm-install-alt { font-size: var(--fs-small); letter-spacing: .2em; opacity: .55; padding: 2px 8px; margin-top: -8px; transition: opacity 120ms, color 120ms; }   /* 030: a site volume's .lwv from disk */
+#lwMenu .mm-install-alt { font-size: var(--fs-small); letter-spacing: .2em; opacity: .55; padding: 2px 8px; margin-top: -8px; transition: opacity var(--t-fast), color var(--t-fast); }   /* 030: a site volume's .lwv from disk */
 #lwMenu .mm-install-alt:hover, #lwMenu .mm-install-alt:focus-visible { opacity: 1; color: var(--acc); } #lwMenu .mm-install-alt[hidden] { display: none; }
 #lwMenu .mm-ring-host { position: relative; width: 30px; height: 30px; flex: none; }
 #lwMenu .mm-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
@@ -672,18 +669,17 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 /* iteration 008 P: the volume's head is ONE row (‹ LIBRARY · ‹ VOL. I › · the count · the tags · the search · INSTALL), so the deck under it
    takes a row more; the tags are one line that scrolls sideways under a feathered edge, each a pill in the seg's manner (the lit one the accent) */
 #lwMenu .mm-vhead { display: flex; align-items: center; gap: 8px 14px; flex-wrap: nowrap; width: min(calc(var(--t, 170px) * var(--cols, 10) + var(--gap, 10px) * (var(--cols, 10) - 1)), calc(100vw - 60px)); min-height: 40px; }
-#lwMenu .mm-back { flex: none; font-size: var(--fs-base); letter-spacing: .22em; opacity: .55; white-space: nowrap; transition: opacity 120ms, color 120ms; } #lwMenu .mm-back:hover, #lwMenu .mm-back:focus-visible { opacity: 1; color: var(--acc); }
+#lwMenu .mm-back { flex: none; font-size: var(--fs-base); letter-spacing: .22em; opacity: .55; white-space: nowrap; transition: opacity var(--t-fast), color var(--t-fast); } #lwMenu .mm-back:hover, #lwMenu .mm-back:focus-visible { opacity: 1; color: var(--acc); }
 #lwMenu .mm-vstep { flex: none; } #lwMenu .mm-vstep .mir-step-row { gap: 0; }
 #lwMenu .mm-vstep .mir-step-name { min-width: 0; min-height: 34px; padding: 0 6px; font-family: 'LW Title', var(--font-ui); font-size: 26px; letter-spacing: var(--tr-tight); line-height: 1; white-space: nowrap; }
 #lwMenu .mm-vstep .mir-step-b { width: 26px; height: 34px; min-width: 0; min-height: 0; font-size: 18px; border-radius: var(--r-md); } #lwMenu .mm-vstep .mir-step-b:disabled { opacity: var(--state-disabled, .38); }
 #lwMenu .mm-count { flex: none; font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; white-space: nowrap; }
-#lwMenu .mm-search { flex: none; font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); border-radius: var(--r-pill); padding: 6px 12px; width: 150px; }
-#lwMenu .mm-search::placeholder { color: var(--fg); opacity: .45; }
+#lwMenu .mm-search::placeholder { color: var(--ink-faint); }   /* 044 AF (L3): the field is the kit's .mir-search (its height, well, pill and 14 px); its seat below gives the width */
 #lwMenu .mm-vhead .mm-install { flex: none; white-space: nowrap; padding: 2px 10px 2px 2px; } #lwMenu .mm-vhead .mm-ring-host { width: 26px; height: 26px; }
 #lwMenu .mm-tags { flex: 1 1 auto; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; overscroll-behavior-x: contain; padding: 2px 14px;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); mask-image: linear-gradient(90deg, transparent, #000 14px, #000 calc(100% - 14px), transparent); }
 #lwMenu .mm-tags::-webkit-scrollbar { height: 4px; } #lwMenu .mm-tags::-webkit-scrollbar-thumb { background: var(--acc); border-radius: 2px; }   /* 029 Q: the rack's bar (lab.css), turned sideways */
-#lwMenu .mm-tag { flex: none; white-space: nowrap; font-size: 12px; letter-spacing: .06em; padding: 5px 10px; border-radius: var(--r-pill); opacity: .6; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 120ms, color 120ms, background-color 120ms; }
+#lwMenu .mm-tag { flex: none; white-space: nowrap; font-size: 12px; letter-spacing: .06em; padding: 5px 10px; border-radius: var(--r-pill); opacity: .6; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity var(--t-fast), color var(--t-fast), background-color var(--t-fast); }
 #lwMenu .mm-tag i { font-style: normal; opacity: .6; margin-left: 5px; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-tag:hover, #lwMenu .mm-tag:focus-visible { opacity: .95; } #lwMenu .mm-tag.on { opacity: 1; color: var(--acc); background: color-mix(in srgb, var(--acc) 16%, transparent); }
 /* iteration 011 Q4: the MOLECULAR deck is molecules only — a record not yet on this device keeps its picture and wears the kit's download glyph */
@@ -719,7 +715,7 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 #lwMenu .mm-ph { position: absolute; inset: 0; display: grid; place-items: center; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: var(--w-regular); font-size: calc(var(--t) * .17); opacity: .75; transition: scale 280ms var(--ease); }
 #lwMenu .mm-tile:hover .mm-ph { scale: 1.1; }
 @media (max-width: 700px) {
-  #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
+  #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; }
   #lwMenu .mm-tabs { gap: 14px; } #lwMenu .mm-tab { font-size: 12px; letter-spacing: .08em; } #lwMenu .mm-tab .mm-ico { display: none; }
   #lwMenu .mm-caption { height: 92px; }   /* 038 close: the page arrows stay outside the deck (picker.js size() keeps 60 px a side for them) */
   #lwMenu .mm-shelf { gap: 16px; } #lwMenu .mm-vol { --vol-h: min(clamp(190px, calc(100dvh - 432px), 540px), calc((100vw - 56px) * 8 / 9)); } }   /* 032: two portraits a row */
@@ -742,7 +738,7 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 #lwMenu .mm-lookb[aria-expanded="true"] { opacity: 1; color: var(--acc); }
 #lwMenu .mm-lookdrop { --ease-spring: cubic-bezier(.2, 1.4, .4, 1); position: absolute; z-index: 20; translate: -50% 0; transform-origin: 50% 0; display: grid; grid-template-columns: repeat(8, 33px); grid-auto-rows: 72px; gap: 6px; padding: 8px; border-radius: 16px; }   /* 016 L1: two brick rows (picker.js places each tile over two 33 px columns), 3 over 4 */
 #lwMenu .mm-lookdrop[hidden] { display: none; }
-#lwMenu .mm-lk { display: grid; place-items: center; border-radius: var(--r-lg); opacity: .6; transition: opacity 140ms, color 140ms, background-color 140ms, scale 160ms var(--ease); }
+#lwMenu .mm-lk { display: grid; place-items: center; border-radius: var(--r-lg); opacity: .6; transition: opacity 140ms, color 140ms, background-color 140ms, scale var(--motion-ui) var(--ease); }
 #lwMenu .mm-lk-g { font: var(--w-regular) 26px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
 #lwMenu :is(.mm-lk-g, .mm-lookg) svg { display: block; width: 1em; height: 1em; }   /* ● and ⊸, drawn at the glyph's em */
 #lwMenu .mm-lk:hover, #lwMenu .mm-lk:focus-visible { opacity: 1; background: color-mix(in srgb, var(--fg) 7%, transparent); }
@@ -770,7 +766,7 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
    turned by --mol-hue so its tick points at the hue in use); the molecules' pictures turn with it (a hue-rotate filter that glides); the install's
    eye is DOWNLOAD or TRASH; a volume's tags are two rows in one sideways strip, the head's other controls centred between them in height */
 #lwMenu .mm-nav { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: -2px; }
-#lwMenu .mm-navb { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; opacity: .55; transition: opacity 140ms, color 140ms, scale 160ms var(--ease); }
+#lwMenu .mm-navb { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; opacity: .55; transition: opacity 140ms, color 140ms, scale var(--motion-ui) var(--ease); }
 #lwMenu .mm-navb .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-navb:hover, #lwMenu .mm-navb:focus-visible { opacity: 1; color: var(--acc); scale: 1.1; } #lwMenu .mm-navb:active { scale: .94; }
 /* 036 G3 · THE BIG ARROW (picker.js backB): ← pinned to the menu's top-left corner, the glyph 46 px in a 56-px hit, no plate; .72 → 1 and the
@@ -781,7 +777,7 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 #lwMenu.at-face > .mm-backb { visibility: hidden; }
 @media (max-width: 700px) { #lwMenu .mm-backb { top: 8px; left: 6px; width: 48px; height: 48px; } #lwMenu .mm-backb .mm-ico { width: 40px; height: 40px; } }
 #lwMenu .mm-hue { opacity: .55; cursor: ns-resize; touch-action: none; }
-#lwMenu .mm-hue-ring { display: block; width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; transition: rotate 120ms var(--ease); }
+#lwMenu .mm-hue-ring { display: block; width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; transition: rotate var(--t-fast) var(--ease); }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-hue-ring { transition: none; }
 /* iteration 015 M6 · THE HUE BUTTON (Josh: "grey like the rest but then mouse over shows the colors avail"): the ring in the ink at rest, as its
    neighbours' icons are, and the wheel's colours fading in on a hover, a focus or a drag.  021 V2: the ring is the table's `hueRing` (an SVG); the
@@ -796,15 +792,15 @@ body.frost #lwMenu :is(.mm-isos, .mm-iso-tail) { background-color: hsl(var(--sur
 html.mono #lwMenu .mm-mol .mm-pic, html.mono .csb-suggest .mm-pic, html.mono .mol-pick .mol-thumb { filter: hue-rotate(var(--mol-hue, 0deg)) grayscale(1); }
 html.mono #lwMenu .mm-mol:not(.off):hover .mm-pic, html.mono #lwMenu .mm-mol:not(.off):focus-visible .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)) grayscale(1) brightness(1.06); }
 html.mono #lwMenu .mm-hue-ring::after { opacity: 1; background: conic-gradient(from 0deg, hsl(0 0% 14%), hsl(0 0% 90%), hsl(0 0% 14%)); }
-#lwMenu .mm-tab .mm-ico { width: 18px; height: 18px; transition: translate 160ms var(--ease); } #lwMenu .mm-tab:hover .mm-ico { translate: 0 -1px; }
-#lwMenu .mm-ring-host > .mm-ico { position: absolute; left: 50%; top: 50%; width: 52%; height: 52%; translate: -50% -50%; opacity: .7; transition: opacity 160ms; }
+#lwMenu .mm-tab .mm-ico { width: 18px; height: 18px; transition: translate var(--motion-ui) var(--ease); } #lwMenu .mm-tab:hover .mm-ico { translate: 0 -1px; }
+#lwMenu .mm-ring-host > .mm-ico { position: absolute; left: 50%; top: 50%; width: 52%; height: 52%; translate: -50% -50%; opacity: .7; transition: opacity var(--motion-ui); }
 #lwMenu .mm-install[data-state="installed"] .mm-ring-host > .mm-ico { opacity: 1; } #lwMenu .mm-install[data-state="busy"] .mm-ring-host > .mm-ico { opacity: 0; }
 #lwMenu .mm-tags { display: flex; flex-direction: column; justify-content: center; gap: 3px; padding-top: 1px; padding-bottom: 4px; }
 #lwMenu .mm-tags .mm-tag { font-size: var(--fs-base); padding: 3px 9px; }   /* iteration 014 C3 · 029 Q: two rows over the rail's bar */
 #lwMenu .mm-tagrow { display: flex; gap: 4px; flex-wrap: nowrap; width: max-content; }
 #lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { display: none; }   /* inside a volume its head's twin is the one */
 /* iteration 014 D1: inside a volume the seat under the tabs is the search; the head's old seat holds NAME and MASS (3-state, as-is unpressed) */
-#lwMenu .mm-opts .mm-search { display: none; width: 240px; text-align: center; padding-block: 3px; line-height: 16px; }   /* 041 P14: 22 px, the seat's own height — entering a volume no longer grows the head 8 px */ #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
+#lwMenu .mm-opts .mm-search { display: none; flex: none; width: 240px; text-align: center; } #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
 #lwMenu .mm-sort { flex: none; display: inline-flex; align-items: center; gap: 4px; min-width: 30px; height: 26px; padding: 0 8px; border-radius: var(--r-pill); font-size: var(--fs-base); letter-spacing: .08em; white-space: nowrap; opacity: .45; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-sort:hover, #lwMenu .mm-sort:focus-visible { opacity: .8; } #lwMenu .mm-sort.on { opacity: 1; color: var(--acc); }
 #lwMenu .mm-sort .mm-ico { width: 14px; height: 14px; } #lwMenu .mm-sort[data-sort="name"] span { min-width: 2.4em; text-align: center; }
@@ -939,12 +935,12 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 /* ═══ 022 F2 · A ROW FITS (MIR 1.5.6-alpha.6 `.row.fit`; research/iteration-022/F-BUILD.md) ═══════════════════════════════════════════
  * The control rows of SETTINGS, PALETTE, WAVE, CAMERA, CLIP, SPECTRUM's Hamiltonian (and GAS), MOLECULES, INFORMATIONAL, FIELD, EQUALIZER and
  * the NODES cards are the kit's fit row: auto-fit cells of --cell-min, a knob's face scaled to its cell.  λWAVES caps the face at the plain
- * knob's 34 px, so a fit row never adds height; a row whose labels are long, or whose columns mean something, sets its own --cell-min, so
+ * knob's 34 px and floors it there (044 AF, L73: one dial in every card, 34; a bar's is 30); a row whose labels are long, or whose columns mean something, sets its own --cell-min, so
  * every label stays whole (022 H2).  A switch or a seg that needs more than one cell spans them here.  The exceptions keep their own grids:
  * CURVES, the camera's sphere column and PAN pad, SPECTRUM's lanes and their vertical phase/rate stacks, the molecule shelf, the ramp,
  * the EQ faders, NODES' plane and the CONTROL SURFACE. */
 :root { --knob-max: 34px; }
-.dev:where(:not([data-id="transport"])) .row.fit, .lw-info-card .grp > .row.fit, .mir-camera .row.fit, .dev[data-id="spectrum"] .sp-ham-body > .row.fit { gap: var(--row-gap, 4px) 4px; }
+.dev:where(:not([data-id="transport"])) .row.fit, .lw-info-card .grp > .row.fit, .mir-camera .row.fit, .dev[data-id="spectrum"] .sp-ham-body > .row.fit { --knob-min: var(--knob, 34px); gap: var(--row-gap, 4px) 4px; }
 .mir-camera .row.fit { margin: 0; grid-template-columns: repeat(auto-fit, minmax(min(var(--cell-min, 40px), 100%), 1fr)); }   /* over the panel's 72-px verbs */
 .row.fit > .lw-fold { justify-self: end; width: 30px; }
 .dev .row.fit > .sp-vseg { grid-column: auto; width: 100%; max-width: 58px; justify-self: center; min-width: 0; }
@@ -953,7 +949,7 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .dev[data-id="observer"] .wave-row-2 { --cell-min: 72px; }
 /* 023 R3 A ROW IS EVEN: ESP's two rows share three columns — SIZE · RADIUS · MAP ONLY over PROBE · RANGE · LIVE · SLOW, knob over knob,
    the switch in the third; ISO | SAS | SES the whole line between them */
-.dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); --knob-max: 29px; }   /* LIVE · SLOW whole on one line; the four faces one size, the row no taller */
+.dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); }   /* LIVE · SLOW whole on one line */
 .dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw { padding-inline: 6px; justify-content: flex-start; } .dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw .sw-lbl { white-space: nowrap; }
 .dev[data-id="observer"] .wave-row-7 > .segw { grid-column: 1 / -1; }
 /* SETTINGS: the stage's seat beside STAGE · GAMMA; DITHER's seg and STRENGTH on one line; DOMAIN AUTO beside WIDTH */
@@ -968,7 +964,6 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 /* 037 T1 · STAGE (lab/stage-window.js): FRAME the whole line; AXES · AXIS COLOUR halves; the colour a swatch bar beside FOLLOW THEME; STAGE · GAMMA */
 /* 041 S8 · THE STAGE COMES BACK: RELOAD STAGE, in the middle of a stage whose GPU device was lost (shell/controller.js stageLost) */
 .lw-stage-lost { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: var(--z-stage-lost); zoom: var(--ui-zoom, 1); }
-.lw-stage-card .row { margin: 0 0 8px; }
 .lw-stage-card .stage-frame > .segw { flex: 1 1 100%; }
 .lw-stage-card .stage-axes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; }
 .lw-stage-card .stage-axes > .segw > .seg { display: flex; flex-wrap: nowrap; width: 100%; box-sizing: border-box; }
@@ -1004,9 +999,12 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .lw-widgets-card .wg-kind { flex-direction: column; justify-content: center; gap: 5px; height: 58px; min-width: 0; min-height: 0; padding: 4px 0; }
 .lw-widgets-card .wg-kind .trig-g .gly { width: 22px; height: 22px; }
 .lw-widgets-card .wg-kind .trig-l { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-micro); letter-spacing: var(--tr-tight); }
-.lw-widgets-card .wg-list { max-height: 157px; margin: 0 0 8px; overflow: hidden auto; overscroll-behavior: contain; border-top: var(--glass-border) solid var(--glass-hairline); }
+/* 044 AF (AV2's L18): the placed list's row is the FINDER's row — 34 px, radius 9, bold 12 px, the kind's glyph dim at its start, the hover plate */
+.lw-widgets-card .wg-list { display: flex; flex-direction: column; gap: 1px; max-height: 209px; margin: 0 0 8px; overflow: hidden auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
 .lw-widgets-card .wg-list[hidden] { display: none; }
-.lw-widgets-card .wg-row { display: flex; align-items: center; gap: 6px; height: 26px; border-bottom: 1px solid var(--glass-hairline); font-size: var(--fs-base); letter-spacing: .06em; }
+.lw-widgets-card .wg-row { display: flex; align-items: center; gap: var(--pop-row-gap, 10px); flex: 0 0 var(--pop-row, 34px); padding: 0 4px 0 10px; border-radius: var(--pop-row-r, 9px); font: var(--w-bold) var(--fs-mid)/1 var(--font-ui); letter-spacing: var(--tr-wide); }
+.lw-widgets-card .wg-row:hover { background: var(--state-hover, var(--glass-raise)); }
+.lw-widgets-card .wg-gly { flex: none; color: var(--dim); }
 .lw-widgets-card .wg-word { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-widgets-card .wg-n { opacity: .6; font-variant-numeric: tabular-nums; }
 .lw-widgets-card .wg-x { flex: 0 0 24px; width: 24px; height: 22px; min-width: 0; min-height: 0; padding: 0; }
@@ -1051,14 +1049,14 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 #lwMenu .mm-tip-art .mm-lit { padding: 7px; box-sizing: border-box; animation: mm-tip-spin 10s linear infinite;
   background: conic-gradient(from var(--tip-a), var(--hl-1), var(--hl-2), var(--hl-3), var(--hl-4), var(--hl-1)); }
 #lwMenu .mm-tip-art img { position: relative; display: block; width: 100%; height: 100%; border-radius: 24px; background: #fff; }
-#lwMenu .mm-tip-word { font-size: var(--fs-base); letter-spacing: .24em; opacity: .75; transition: color 160ms, opacity 160ms; }
+#lwMenu .mm-tip-word { font-size: var(--fs-base); letter-spacing: .24em; opacity: .75; transition: color var(--motion-ui), opacity var(--motion-ui); }
 #lwMenu .mm-tip:hover .mm-tip-word, #lwMenu .mm-tip:focus-visible .mm-tip-word { color: var(--acc); opacity: 1; }
 #lwMenu .mm-tip-back { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; }
 #lwMenu .mm-tip-sheet { display: grid; gap: 14px; justify-items: center; padding: 26px 28px 22px; border-radius: 28px; animation: mm-tip-in 300ms cubic-bezier(.3, 1.4, .5, 1); }
 #lwMenu .mm-tip-sheet .mm-tip-art { width: 200px; }
 #lwMenu .mm-tip-free { font-size: var(--fs-small); letter-spacing: .26em; opacity: .6; }
 #lwMenu .mm-tip-row { display: flex; gap: 10px; }
-#lwMenu .mm-tip-yes, #lwMenu .mm-tip-no { font-size: var(--fs-base); letter-spacing: .18em; padding: 9px 18px; border-radius: var(--r-pill); color: inherit; text-decoration: none; transition: transform 160ms, color 120ms; }
+#lwMenu .mm-tip-yes, #lwMenu .mm-tip-no { font-size: var(--fs-base); letter-spacing: .18em; padding: 9px 18px; border-radius: var(--r-pill); color: inherit; text-decoration: none; transition: transform var(--motion-ui), color var(--t-fast); }
 #lwMenu .mm-tip-yes { color: #fff; background: linear-gradient(120deg, #168878, #5b4bc4 55%, #a52eab); }
 #lwMenu .mm-tip-no { background: color-mix(in srgb, var(--fg) 8%, transparent); }
 #lwMenu .mm-tip-yes:hover, #lwMenu .mm-tip-yes:focus-visible { transform: scale(1.06); }
@@ -1087,7 +1085,7 @@ body[data-theme="light"] #lwMenu .mm-holo .mm-lit::before { mix-blend-mode: colo
   background: linear-gradient(var(--holo-angle, 30deg), transparent 34%, color-mix(in srgb, var(--hl-3) 30%, transparent) 43%, var(--hl-2) 49%, color-mix(in srgb, var(--hl-3) 45%, transparent) 52%, transparent 59%) var(--mx, 50%) var(--my, 50%) / 240% 240%;
   -webkit-mask: var(--grain) 0 0 / 160px repeat; mask: var(--grain) 0 0 / 160px repeat; }
 body[data-theme="light"] #lwMenu .mm-foil { mix-blend-mode: soft-light; opacity: calc(var(--pointer-on, 0) * .48); }
-#lwMenu .mm-holo :is(.mm-halo, .mm-rim) { position: absolute; pointer-events: none; opacity: calc(var(--glow-active, 0) * (.18 + .82 * var(--border-activation, 0))); transition: opacity .16s ease; }
+#lwMenu .mm-holo :is(.mm-halo, .mm-rim) { position: absolute; pointer-events: none; opacity: calc(var(--glow-active, 0) * (.18 + .82 * var(--border-activation, 0))); transition: opacity var(--motion-ui) ease; }
 #lwMenu .mm-halo { inset: -76px; z-index: -1; filter: blur(28px) saturate(1.8); -webkit-mask: var(--grain) 0 0 / 160px repeat; mask: var(--grain) 0 0 / 160px repeat; }
 body[data-theme="light"] #lwMenu .mm-halo { filter: blur(26px) saturate(1.4); opacity: calc(.75 * var(--glow-active, 0) * (.18 + .82 * var(--border-activation, 0))); }
 #lwMenu .mm-rim { inset: -3px; z-index: 8; border-radius: 21px; filter: drop-shadow(0 0 3px var(--hl-2)) drop-shadow(0 0 8px var(--hl-3)); }
@@ -1117,7 +1115,7 @@ body[data-theme="light"] #lwMenu .mm-themeb .gly-moon, body:not([data-theme="lig
 #lwMenu .mm-doors { display: flex; gap: clamp(16px, 3vw, 40px); }
 #lwMenu .mm-door { display: block; width: clamp(210px, 21vw, 330px); aspect-ratio: 16 / 10; border-radius: 18px; }
 #lwMenu .mm-door-word { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-#lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: var(--w-regular); font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color 160ms; }
+#lwMenu .mm-door-word b { font-family: 'LW Title', var(--font-ui); font-weight: var(--w-regular); font-size: clamp(24px, 2.4vw, 38px); letter-spacing: .1em; margin-right: -.1em; transition: color var(--motion-ui); }
 /* 037 M4 · THE DOORS' INK (Josh 11-05: "Don't use drop shadow for 'Tutorial' and 'Library' … let a copy underneath the text be inverted. So top
    layer is the text, next layer is … 4px right, 4px down, and then set to invert"): no shadow; the word's copy (the span's ::after, its
    data-word) 1 px right and 1 px down (Josh 11-05, later: "maybe just be 1px to the right, 1px down. instead of 4px") in white ink under `difference`, so it inverts the art beneath it.  The span is no stacking context (z
@@ -1217,7 +1215,7 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
 #lwMenu .mm-tut-head { display: flex; justify-content: center; margin: 0 0 18px; }
 #lwMenu .mm-tut-head .seg { gap: 8px; padding: 0; background: none; }
 #lwMenu .mm-tut-head .seg-b { min-width: 52px; min-height: 0; padding: 5px 16px; border-radius: var(--r-pill); font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; color: var(--fg); opacity: .45;
-  transition: opacity .12s ease, color .12s ease, background-color var(--t-relocate) var(--ease); }
+  transition: opacity var(--t-fast) ease, color var(--t-fast) ease, background-color var(--t-relocate) var(--ease); }
 #lwMenu .mm-tut-head .seg-b:is(:hover, :focus-visible) { opacity: .8; }
 #lwMenu .mm-tut-head .seg-b.on { opacity: 1; color: var(--acc); background: hsl(var(--glass-tint) / .5); }
 /* 037 U2 THE PLAYER (picker.js tutPlayer): a deck's face fills the seat off the racks and is a size container — the clip as tall as the seat
@@ -1239,7 +1237,7 @@ body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-
 #lwMenu.mm-moving .mm-player-list { --mm-edge: 40px; }
 #lwMenu .mm-player-tile { position: relative; display: block; aspect-ratio: 9 / 16; border-radius: 10px; overflow: hidden; background: hsl(var(--glass-tint) / .5); }
 #lwMenu .mm-player-title { position: absolute; inset: auto 0 0; z-index: 2; padding: 24px 6px 8px; font-size: var(--fs-small); line-height: 1.2; letter-spacing: var(--tr-wider); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
-  background: linear-gradient(to top, hsl(var(--glass-tint) / .85), transparent); opacity: 0; transition: opacity 120ms ease; pointer-events: none; }
+  background: linear-gradient(to top, hsl(var(--glass-tint) / .85), transparent); opacity: 0; transition: opacity var(--t-fast) ease; pointer-events: none; }
 #lwMenu .mm-player-tile:is(:hover, :focus-visible) .mm-player-title { opacity: 1; }
 @media (max-width: 1000px) {
   #lwMenu .mm-tut { padding: 4px 12px 16px; }
