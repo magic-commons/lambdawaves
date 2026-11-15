@@ -59,9 +59,7 @@ export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus =
      logo, a role=button div); after a key moved the focus there, the kit's table has already let the control have it */
   if (view) {
     let byKey = false, keyFocus = null; const taken = new Set();
-    /* a tapped knob takes the focus (the kit's dial prevents the press's default, so it never did): its arrows turn it, never the camera */
-    view.addEventListener('pointerdown', (e) => { byKey = false; keyFocus = null; const d = e.target.closest && e.target.closest('.k-dial'), k = d && d.closest('.k');
-      if (k && k.tabIndex >= 0 && k !== document.activeElement) k.focus({ preventScroll: true }); }, true);
+    view.addEventListener('pointerdown', () => { byKey = false; keyFocus = null; }, true);   // a pressed knob or fader takes the focus itself (the kit's wheelTurn, 1.6.0-alpha.3)
     view.addEventListener('keydown', () => { byKey = true; }, true);
     view.addEventListener('focusin', (e) => { keyFocus = byKey ? e.target : null; }, true);
     const pressable = (n) => /^(BUTTON|SUMMARY|INPUT)$/.test(n.tagName) || (n.tagName === 'A' && n.hasAttribute('href'));
