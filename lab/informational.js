@@ -10,7 +10,7 @@ import { el, readout, group, trig, ariaLabel } from './mir/kit.js'; import { con
 import { statusOf } from './status.js'; import { getHamiltonian } from './hamiltonian.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
 export function createInformational(app) {
   const { ui, device, isPhone } = app, P = infoPrefs();
-  const w = device({ id: 'informational', eyebrow: 'INFORMATIONAL', title: 'what the stage writes', status: '' });
+  const w = device({ id: 'informational', eyebrow: 'INFORMATIONAL', status: '' });
   w.root.classList.add('native-clean', 'closed', 'lw-info-card'); app.host.rack.appendChild(w.root);
   /* one control per row, its value the record's: a hand sets the row (a dial live, as before), nothing else is written */
   const ctl = {};

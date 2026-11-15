@@ -51,7 +51,7 @@ export const stageTargets = (ui, mat, setKnob) => FX.map(([, k, , title, o, labe
   get: () => (mat.stage ? mat.stage[k] : HOME[k]), set: (v) => { ui.setPulse({ [k]: v }); setKnob(ui.stageFx[k], v); } }));
 export function createStageWindow(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { modHand } = app.ctl;
-  const w = device({ id: 'stage', eyebrow: 'STAGE', title: 'the stage and its effects', status: '' });
+  const w = device({ id: 'stage', eyebrow: 'STAGE', status: '' });
   w.root.classList.add('native-clean', 'closed', 'lw-stage-card'); app.host.rack.appendChild(w.root);
   const row = (cls, parent, ...cs) => { const r = el('div', 'row tight ' + cls, parent); for (const c of cs) r.appendChild(c.root); return r; };
   row('stage-frame', w.body, ui.frameSw);                  // native-ui.js turns FRAME and AXIS into their honest segs where they stand
