@@ -77,7 +77,7 @@ export function createKeys(app) {
     /* 025 C2 · THE TIMELINE'S DOOR: a RENDER chip on the work bar (the rail takes no app chip — its chips are fixed when the window is made —
        so it rides the bar's own `app:` seat, as TIME does): the RENDER card in front on SELECTION when one is marked, else ACTIVE */
     const tlRender = el('button', 'tbtn tl-render'); tlRender.type = 'button'; tlRender.dataset.keyAction = 'render.timeline';
-    setGlyph(tlRender, 'render', { label: 'render this range' }); hint(tlRender, 'render this range'); tlRender.addEventListener('click', () => app.sh.ACTIONS.run('render.timeline'));
+    setGlyph(tlRender, 'film', { label: 'render this range' }); hint(tlRender, 'render this range'); tlRender.addEventListener('click', () => app.sh.ACTIONS.run('render.timeline'));
     const tlRows = timelineRows(app);   // 036 K4: FOLLOW PLAYHEAD and AUTO-COLOR at the foot of the timeline's ⋯ (lab/timeline-follow.js)
     app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'), moreRows: () => tlRows.rows(),
       mod: { host: app.state.modHost, registry: app.state.modHost.registry, get view() { return app.state.modView; },   // 032 T20: view.api.armFor → the clip menu's ROUTE NEW PARAMETER…
