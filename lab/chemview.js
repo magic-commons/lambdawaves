@@ -1475,7 +1475,7 @@ export function createChem(host, api) {
     setActive(v) { const next = !!v; if (next === active) return active; active = next; if (active) paint(); return active; },
     get on() { return on; }, setOn, get half() { return sol && Number.isFinite(sol.half) ? sol.half : 10.3; },
     /** what the worker needs to find this solution again — the STATES register asks it for the canonical ladder */
-    setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; }, get said() { return said; },
+    setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn && rt ? flow : null; }, get said() { return said; },   // 044 RD: no run, no source — a still molecule's j = 0, and the rack seeds once per source, so a zero seed before KICK kept the tracers away for good
     query() { return sol && !uhf() ? { atoms: chemAtoms(preset), basis, charge: chemCharge(preset), ...(lda() ? { model: 'lda' } : {}) } : null; },   // 0.7.1: an open shell has no ladder to ask for; 0.7.3: an LDA one is asked so, and refused with its sentence
     /** the names an export carries (0.4.0 S1): the group and configuration, and the ORBITAL on the field when VIEW is one */
     exportNames() {
