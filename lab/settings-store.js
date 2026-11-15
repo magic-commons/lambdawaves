@@ -42,7 +42,7 @@ export const RECORDS = Object.freeze([
   row('lambdawaves.q0.midi', P, 'v 1', true, 'mapping.js (kit shell/midi.js): the learned notes and CCs { v, map }'),
   row('lambdawaves.q0.render.', P, '—', true, 'film-card.js: the RENDER card’s choices', { prefix: true }),
   row('lw.lean.v1', P, 'v 1 (name)', true, 'window-chrome.js: LEAN (window notes)'),
-  row('lambdawaves.q0.modpresets', P, 'modV', false, 'kit mod.js PRESET_LS; a project SAVE also writes its rack here'),
+  row('lambdawaves.q0.modpresets', P, 'modV', false, 'the kit\'s modulation presets under the app\'s own key (mod-port.js PRESET_KEY); a project SAVE also writes its rack here'),
   row('lambdawaves.q0.session', J, 'v 1', false, 'main.js createSession: the live project (the one part, notebook included)'),
   row('lambdawaves.q0.session.failed', J, 'v 1', false, 'kit 1.5.6: a resume that did not take, kept beside the session'),
   row('lambdawaves.q0.experiment', J, '—', false, 'shell/persist.js quick SAVE (with .presentation)'),

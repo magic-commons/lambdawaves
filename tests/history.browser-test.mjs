@@ -179,7 +179,7 @@ try {
   /* the modulation window: a source added through its own menu, a dial moved, a route dragged from a macro's grip onto a knob */
   await g.ev(`__LW.layout.modulation.expand(); await __w(400); return 1;`);
   const modAdd = await scene('modulation · ADD DEVICE → ADD LFO (the window\'s own menu)', `await __press(document.querySelector('[data-mir-window="modulation"] .m2devadd')); await __w(150);
-      await __press([...document.querySelectorAll('[data-mir-window="modulation"] button')].find((b) => b.textContent.trim() === 'ADD LFO'));`, 'ADD LFO · MODULATION',
+      await __press(document.querySelector('.mir-pick .mir-pick-i[data-id="lfo"]'));`, 'ADD LFO · MODULATION',
     (r) => assert.equal(r.rebuilds, 1, 'undoing a modulation edit rebuilt the window ' + r.rebuilds + '×'));
   undoMs.modulation = (await scene('modulation · an LFO dial dragged (RATE)', `await __drag(document.querySelector('[data-mir-window="modulation"] .m2dev.lfo .m2kd'), 0, -30);`, 'LFO RATE · MODULATION')).undoMs;
   /* S4 · a REAL right-drag on LFO 1's curve (MIR: right-drag on empty space adds a point and places it).  The capture holds button 2

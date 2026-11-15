@@ -230,7 +230,6 @@
   "DISCARD RENDER": "DISCARD RENDER",
   "DISCARD STORED RENDER": "DISCARD STORED RENDER",
   "DISCONNECTED": "DISCONNECTED",
-  "DIST": "DIST",
   "DISTANCE": "DISTANCE",
   "DOCK / UNDOCK the transport": "DOCK / UNDOCK the transport",
   "DOTTED": "DOTTED",
@@ -437,7 +436,6 @@
   "GLASS": "GLASS",
   "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license}": "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license}",
   "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license} and {notice}": "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license} and {notice}",
-  "GRAIN": "GRAIN",
   "GRIP": "GRIP",
   "Gallery — browse saved projects": "Gallery — browse saved projects",
   "H": "H",
@@ -481,7 +479,6 @@
   "INVERT": "INVERT",
   "INVERT SELECTION": "INVERT SELECTION",
   "INVERT — the negative of the picture": "INVERT — the negative of the picture",
-  "ISO": "ISO",
   "Image format": "Image format",
   "Imported — {name}": "Imported — {name}",
   "Include {what} in the next save": "Include {what} in the next save",
@@ -494,7 +491,6 @@
   "KEEP AUDIO (PLAY THE FILE)": "KEEP AUDIO (PLAY THE FILE)",
   "KEYBOARD": "KEYBOARD",
   "KEYS": "KEYS",
-  "KNEE": "KNEE",
   "KNOB": "KNOB",
   "Keep at least two curve points.": "Keep at least two curve points.",
   "Keep the menu bar visible": "Keep the menu bar visible",
@@ -503,7 +499,6 @@
   "Knob": "Knob",
   "LANE DOWN": "LANE DOWN",
   "LANE UP": "LANE UP",
-  "LAP": "LAP",
   "LENGTH {len} · {n} BARS": {
    "one": "LENGTH {len} · {n} BAR",
    "other": "LENGTH {len} · {n} BARS"
@@ -675,7 +670,6 @@
   "OUT": "OUT",
   "OUTPUT": "OUTPUT",
   "On · {lane}": "On · {lane}",
-  "One camera orbit per bar, with a vertical sweep.": "One camera orbit per bar, with a vertical sweep.",
   "Open THE MODE MENU: the nine modes (the left button’s tool) and this window’s menus": "Open THE MODE MENU: the nine modes (the left button’s tool) and this window’s menus",
   "Open a project file (.mir) or a picture that carries one — or drop it on this window.": "Open a project file (.mir) or a picture that carries one — or drop it on this window.",
   "Open a project saved as one .zip (SAVE AS ZIP): its audio comes back with it and it becomes the current project.": "Open a project saved as one .zip (SAVE AS ZIP): its audio comes back with it and it becomes the current project.",
@@ -793,7 +787,6 @@
   "RELIEF ANGLE — where the controls’ light is: their raise and wells turn with it (the panes follow {:ANGLE})": "RELIEF ANGLE — where the controls’ light is: their raise and wells turn with it (the panes follow {:ANGLE})",
   "REMOVE": "REMOVE",
   "RENDER": "RENDER",
-  "RES": "RES",
   "RESET": "RESET",
   "RESET LAYOUT": "RESET LAYOUT",
   "RESET LOOK": "RESET LOOK",
@@ -804,7 +797,6 @@
   "RETRY": "RETRY",
   "REVERSE": "REVERSE",
   "RIBBON": "RIBBON",
-  "RISE": "RISE",
   "ROLL": "ROLL",
   "ROLL — turn the picture about the look direction": "ROLL — turn the picture about the look direction",
   "ROOT": "ROOT",
@@ -866,7 +858,6 @@
   "Right-click a tension handle": "Right-click a tension handle",
   "Right-click or tap: FILL · CLEAR · LENGTH · PATTERN ON/OFF": "Right-click or tap: FILL · CLEAR · LENGTH · PATTERN ON/OFF",
   "Right-drag empty clip space": "Right-drag empty clip space",
-  "Rotate phase colour once per bar without moving the state.": "Rotate phase colour once per bar without moving the state.",
   "Route {band} to a macro": "Route {band} to a macro",
   "Route {name} to a control first — its clip needs a target": "Route {name} to a control first — its clip needs a target",
   "Run the ramp backwards": "Run the ramp backwards",
@@ -1028,7 +1019,6 @@
   "Source: {link}": "Source: {link}",
   "Space": "Space",
   "Starter projects": "Starter projects",
-  "Step through twelve density levels to reveal shells.": "Step through twelve density levels to reveal shells.",
   "Stop colour — tap for the chooser, drag up or down to turn its hue": "Stop colour — tap for the chooser, drag up or down to turn its hue",
   "Stop inspecting {name} and describe the live view again": "Stop inspecting {name} and describe the live view again",
   "Stop place": "Stop place",
@@ -1067,7 +1057,6 @@
   "TRIG IN": "TRIG IN",
   "TRIGGER": "TRIGGER",
   "TRIPLET": "TRIPLET",
-  "TURN": "TURN",
   "TURNTABLE": "TURNTABLE",
   "Tab is kept for moving the focus.": "Tab is kept for moving the focus.",
   "Tap a corner (A · B · C · D) first, then a snapshot's number.": "Tap a corner (A · B · C · D) first, then a snapshot's number.",
@@ -1516,7 +1505,6 @@
   "this place takes {accept}; that is a {kind}": "this place takes {accept}; that is a {kind}",
   "this project": "this project",
   "this shape is its own mirror — nothing to flip": "this shape is its own mirror — nothing to flip",
-  "time span::WINDOW": "WINDOW",
   "twilight": "twilight",
   "type a name first — the field beside {:SAVE}": "type a name first — the field beside {:SAVE}",
   "ukiyo": "ukiyo",
@@ -1673,7 +1661,6 @@
   "{why}, and putting back what was open before failed too ({back})": "{why}, and putting back what was open before failed too ({back})",
   "{word} — the {menus} menus": "{word} — the {menus} menus",
   "© 2026 MAGIC COMMONS. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).": "© 2026 MAGIC COMMONS. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).",
-  "λWAVES": "λWAVES",
   "“{action}” already has {chord}": "“{action}” already has {chord}",
   "“{action}” is now bound to {chord}": "“{action}” is now bound to {chord}",
   "… preview truncated at 200 000 characters; the notes are kept whole": "… preview truncated at 200 000 characters; the notes are kept whole",
@@ -1701,7 +1688,6 @@
   "EVT": "short for EVENT: this output fires on a hit (an onset), it does not carry a level",
   "Each label’s ink from the picture under it (this app’s sampler)": "the app's own sampler reads the picture behind each word and picks white or black ink",
   "FINDER": "the finder: a search field over every window of the app; picking one opens it or scrolls the rack to it",
-  "FOV": "field of view: how wide the camera sees",
   "FRAME": "the time to draw one frame of the screen, in milliseconds (not a picture frame)",
   "FREE": "the clock counts frame time (it slows when the picture slows), as opposed to WALL, which follows real elapsed time",
   "GALLERY": "the panel of saved projects shown as pictures (an art gallery of the user's work)",
@@ -1714,11 +1700,10 @@
   "Hold and repeat {note}; release to resume the original clock": "{note} is a note value, 1/4 or 1 (a beat or a bar)",
   "Include {what} in the next save": "{what} is the name of a part of the project (LAYOUT, PICTURE …), as its switch is labelled",
   "KEEP AUDIO (PLAY THE FILE)": "a clip's menu: the file plays / the envelope alone / fit the audio into the clip's length (varispeed)",
-  "KNEE": "the bend in the picture's tone curve where the highlights start to roll off (as in a compressor's knee)",
   "KNOB": "the two kinds of macro: KNOB (a value you turn) and TRIGGER (a button that fires)",
-  "LAP": "a demo LFO's name: it moves the camera one lap round per bar (the user can rename it)",
   "LINK": "a switch that joins the controls' light to the panes' light (link = tie together, not a web link)",
   "LIVE": "the microphone is open and being listened to right now",
+  "MIR": "the kit's name: keep it exactly as written.  1.6.0-alpha.58: the label was an app's ('λWAVES'); the id stays (saved looks name it)",
   "MOD off": "MOD: modulation as a whole, switched on or off by its power button",
   "MOD on": "MOD: modulation as a whole, switched on or off by its power button",
   "MULTI-SAW": "waveform names (saw up, saw down, sine, triangle, square, sample-and-hold, a slow random drift); most languages keep these as written",
@@ -1730,7 +1715,6 @@
   "RELIEF": "the controls' relief (their raised and sunken look), here the angle of its light",
   "RELIEF ANGLE": "the direction the controls' light comes from, in degrees",
   "RELIEF ANGLE — where the controls’ light is: their raise and wells turn with it (the panes follow {:ANGLE})": "raise = a control standing out; wells = sunken tracks and fields; ANGLE is the panes' light angle",
-  "RISE": "a demo LFO's name: it moves the camera up and down (the user can rename it)",
   "ROOT": "ROOT: the top of the folder tree, the projects in no folder (not a route)",
   "ROUTE {name}: tap a lit control, Escape cancels": "ROUTE: the clip waits for a tap on a control to drive it",
   "S&H": "waveform names (saw up, saw down, sine, triangle, square, sample-and-hold, a slow random drift); most languages keep these as written",
@@ -1751,7 +1735,6 @@
   "STROKE": "the thin outline drawn around each control (not a brush stroke)",
   "STUTTER {note} latched — applies to BPM-synced LFOs; press again to release": "STUTTER: the clock holds the current beat and repeats it at the note value {note} (1/4 or 1)",
   "Selection scope": "what a selection picks: whole clips or curve points",
-  "Step through twelve density levels to reveal shells.": "shells: the nested surfaces of equal density in the picture (like the layers of an onion)",
   "Stutter: hold the beat at this note value": "STUTTER: hold the current beat and repeat it at this note value (a quarter note, a whole beat) while held",
   "THEME": "THEME: LIGHT, DARK or SYSTEM, the light or dark mode (not the SKIN)",
   "TIME": "the head of a device's left column: the shape PRESETs, the envelope TIME, the audio SOURCE",
@@ -1759,7 +1742,6 @@
   "TRI": "waveform names (saw up, saw down, sine, triangle, square, sample-and-hold, a slow random drift); most languages keep these as written",
   "TRIG": "short for TRIGGER: restart the curve on a trigger",
   "TRIGGER": "the two kinds of macro: KNOB (a value you turn) and TRIGGER (a button that fires)",
-  "TURN": "a demo LFO's name: it turns the picture once per bar (the user can rename it)",
   "The controls take the panes’ light: one {:ANGLE} for everything": "the relief follows the pane light's ANGLE: one light for the whole interface",
   "The {panel} panel could not be built: {why}": "an error notice: {panel} is a panel's name (RENDER …), {why} the program's reason, left as it is",
   "This device’s tier, measured once: A and B are {:FULL}, C is {:BALANCED}": "a short benchmark sorts this device into tier A, B or C",
@@ -1815,7 +1797,6 @@
   "this browser has no Web Audio, so there is nothing to analyse with": "why the microphone cannot start",
   "this page — markdown, {inline} and {display} maths — saved in the project": "{inline} and {display} are the maths syntax, shown exactly as typed",
   "this place takes {accept}; that is a {kind}": "{accept} and {kind} are kinds of MIR file (project, page …), written as their ids",
-  "time span::WINDOW": "a span of time (in seconds) the view looks across, not an interface window",
   "waiting for permission to use the microphone": "the microphone's state: the permission prompt is up",
   "window {s} s": "a window of time: the envelope graph now spans {s} seconds",
   "{band} · A {a} · R {r} · H {h} ms": "A, R and H are the initials of ATTACK, RELEASE and HOLD (the peak hold), each in milliseconds: use the initials of your own labels",
@@ -1826,7 +1807,6 @@
   "{verb} — {what}": "a button's name: its label, then what it acts on (SAVE — this project)",
   "{what} {i} name — type your own": "the name field of a macro or a trigger: {what} is Macro or Trigger, {i} its number",
   "{what} · TIMELINE": "a history row: what was done, then the window it was done in",
-  "λWAVES": "the app's name: keep it exactly as written",
   "→TL": "→ TL: send to the timeline"
  },
  "names": [
@@ -2511,9 +2491,6 @@
   "DISCONNECTED": [
    "mir/shell/gui.js"
   ],
-  "DIST": [
-   "mir/modulation/host.js"
-  ],
   "DISTANCE": [
    "mir/shell/gui.js"
   ],
@@ -2763,7 +2740,6 @@
    "mir/notes/face.js"
   ],
   "EXPOSURE": [
-   "mir/modulation/host.js",
    "mir/panels/grade.js"
   ],
   "EXPOSURE — the picture multiplied, before the levels; double-tap for 1×": [
@@ -3007,7 +2983,6 @@
    "mir/render/panel.js"
   ],
   "FOV": [
-   "mir/modulation/host.js",
    "mir/panels/camera-rig.js"
   ],
   "FOV — the vertical field of view": [
@@ -3122,9 +3097,6 @@
   "GNU GPL v3.0 only — no warranty. You may redistribute and modify {name} under its terms — {license} and {notice}": [
    "mir/shell/about.js"
   ],
-  "GRAIN": [
-   "mir/modulation/host.js"
-  ],
   "GRIP": [
    "mir/shell/gui.js"
   ],
@@ -3199,7 +3171,6 @@
    "mir/palette.js"
   ],
   "HUE": [
-   "mir/modulation/host.js",
    "mir/panels/grade.js",
    "mir/panels/lanes.js",
    "mir/shell/gui.js"
@@ -3266,9 +3237,6 @@
   "INVERT — the negative of the picture": [
    "mir/panels/grade.js"
   ],
-  "ISO": [
-   "mir/modulation/host.js"
-  ],
   "Image format": [
    "mir/render/panel.js"
   ],
@@ -3308,9 +3276,6 @@
    "mir/app.js",
    "mir/keyboard/keyboard.js"
   ],
-  "KNEE": [
-   "mir/modulation/host.js"
-  ],
   "KNOB": [
    "mir/modulation/modwindow/modwindow.js"
   ],
@@ -3335,14 +3300,10 @@
   "LANE UP": [
    "mir/timeline/shortcuts.js"
   ],
-  "LAP": [
-   "mir/modulation/host.js"
-  ],
   "LENGTH {len} · {n} BARS": [
    "mir/pattern/window.js"
   ],
   "LEVEL": [
-   "mir/modulation/host.js",
    "mir/modulation/modwindow/modwindow.js",
    "mir/modulation/window.js"
   ],
@@ -3452,6 +3413,7 @@
    "mir/modulation/modwindow/modwindow.js"
   ],
   "MIR": [
+   "mir/palette.js",
    "mir/timeline/shortcuts.js"
   ],
   "MIR ABOUT": [
@@ -3860,9 +3822,6 @@
   "On · {lane}": [
    "mir/panels/lanes.js"
   ],
-  "One camera orbit per bar, with a vertical sweep.": [
-   "mir/modulation/host.js"
-  ],
   "Open THE MODE MENU: the nine modes (the left button’s tool) and this window’s menus": [
    "mir/timeline/shortcuts.js"
   ],
@@ -3990,7 +3949,6 @@
    "mir/shell/flash-guard.js"
   ],
   "PITCH": [
-   "mir/modulation/host.js",
    "mir/panels/camera-rig.js"
   ],
   "PITCH — the look direction up or down": [
@@ -4173,7 +4131,6 @@
    "mir/timeline/shortcuts.js"
   ],
   "RATE": [
-   "mir/modulation/host.js",
    "mir/modulation/modwindow/modwindow.js"
   ],
   "RECALL": [
@@ -4225,9 +4182,6 @@
    "mir/app.js",
    "mir/render/panel.js"
   ],
-  "RES": [
-   "mir/modulation/host.js"
-  ],
   "RESET": [
    "mir/panels/curves.js",
    "mir/panels/ramp.js"
@@ -4259,9 +4213,6 @@
   "RIBBON": [
    "mir/modulation/modwindow/modwindow.js",
    "mir/modulation/window.js"
-  ],
-  "RISE": [
-   "mir/modulation/host.js"
   ],
   "ROLL": [
    "mir/panels/camera-rig.js"
@@ -4438,9 +4389,6 @@
   "Right-drag empty clip space": [
    "mir/timeline/shortcuts.js"
   ],
-  "Rotate phase colour once per bar without moving the state.": [
-   "mir/modulation/host.js"
-  ],
   "Route {band} to a macro": [
    "mir/modulation/window.js"
   ],
@@ -4581,7 +4529,6 @@
    "mir/timeline/editor.js"
   ],
   "SOFTNESS": [
-   "mir/modulation/host.js",
    "mir/shell/gui.js"
   ],
   "SOLID": [
@@ -4628,7 +4575,6 @@
    "mir/timeline/editor.js"
   ],
   "STEPS": [
-   "mir/modulation/host.js",
    "mir/modulation/modwindow/modwindow.js"
   ],
   "STILL": [
@@ -4934,9 +4880,6 @@
   "Starter projects": [
    "mir/shell/opener.js"
   ],
-  "Step through twelve density levels to reveal shells.": [
-   "mir/modulation/host.js"
-  ],
   "Stop colour — tap for the chooser, drag up or down to turn its hue": [
    "mir/panels/ramp.js"
   ],
@@ -5055,9 +4998,6 @@
   ],
   "TRIPLET": [
    "mir/modulation/modwindow/modwindow.js"
-  ],
-  "TURN": [
-   "mir/modulation/host.js"
   ],
   "TURNTABLE": [
    "mir/panels/camera-rig.js"
@@ -5427,7 +5367,6 @@
    "mir/panels/xy.js"
   ],
   "YAW": [
-   "mir/modulation/host.js",
    "mir/panels/camera-rig.js"
   ],
   "YAW — the look direction about the vertical; drag the sphere or turn this": [
@@ -6469,9 +6408,6 @@
   "this shape is its own mirror — nothing to flip": [
    "mir/modulation/window.js"
   ],
-  "time span::WINDOW": [
-   "mir/modulation/host.js"
-  ],
   "twilight": [
    "mir/palette.js"
   ],
@@ -6833,9 +6769,6 @@
   ],
   "© 2026 MAGIC COMMONS. Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).": [
    "mir/shell/gui.js"
-  ],
-  "λWAVES": [
-   "mir/palette.js"
   ],
   "“{action}” already has {chord}": [
    "mir/keyboard/keyboard.js"

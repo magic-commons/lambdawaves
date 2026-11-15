@@ -798,7 +798,7 @@ export async function boot(dom) {
    * gesture. Absolute coefficient targets remain excluded. The original boundary explains why:
    *   · Every offered setter is a PRESENT — the contract forbids anything above it, so a target
    *     whose setter needs a REBUILD is not a target here.  That is why FIELD RESOLUTION and STEPS
-   *     (in host.js's labParameters as the SHAPE of a catalogue) are NOT offered: an LFO on the grid
+   *     (in tests/lab-catalogue.mjs's labParameters, once the kit's, as the SHAPE of a catalogue) are NOT offered: an LFO on the grid
    *     would rebuild an N³ volume sixty times a second, and the governor owns that number anyway.
    *   · state.mode.<n:l:m>.amp / .phase are NOT offered either, and the reason is a real one found
    *     here: every register write bumps reg.version, which is the UNDO ring's trigger and the

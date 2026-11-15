@@ -102,7 +102,7 @@ BASINS uses nine: `mandel.anim`, `mandel.animPlay`, `mandel.animPanel`, `mandel.
 persistence at all. Rename the prefix in whatever the host's own store is, and remember
 what the window's presentation state actually is: the work-bar lane (top / bottom / hidden), each
 device's mode (F / C / M), and the window geometry. *(The one key the kit itself writes is the
-model's preset store, `mod.js` `PRESET_LS` — λWAVES' `lambdawaves.q0.modpresets`, shared by every reader
+model's preset store, `mod.js` `PRESET_LS` — `mir.modpresets` since 1.6.0-alpha.58 (it was λWAVES' `lambdawaves.q0.modpresets`), the default of every reader that names no key
 because each app has its own origin; it is not injectable yet, see PORT-NOTES 1/8.)*
 
 ---
@@ -276,7 +276,7 @@ below, the four edges and the model.)*
   control, wherever it lives**, and their CSS is deliberately unscoped for that reason.
   Rings stack at a 44 px pitch with the CLEAR button 46 px past the end, all by inline
   `translateY(calc(-50% + Npx))`.
-- **the sheets** — `mw.buildDevicePick()`, `mw.buildMacroPick()`, `mw.buildPresetSheet()`,
+- **the sheets** — `mw.buildPresetSheet()` (the two choosers are the kit's `listPane` since 1.6.0-alpha.62),
   `mw.buildDeadInspector()`, `buildAudioSheet(dev)`. All four live on the window root and
   are born `hidden` so the first tap shows rather than hides.
 

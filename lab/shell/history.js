@@ -37,7 +37,9 @@ export function createHistory(app) {
        "EXPOSURE · SPACE · DRAW · WHAT IS DRAWN OVER THE FIELD", which is a paragraph in a list column.
        This is the same `nameOf` the WINDOW menu already uses for the same reason. */
     const txt = (e) => (e && (e.textContent || '').trim().replace(/\s+/g, ' ')) || '';
-    const dev = t.closest('.dev'), mw = !dev && t.closest('#modwin');   // S3: a float, titled by its .kwin-title
+    /* 044 K5: MODULATION's two choosers (ADD DEVICE, ADD MACRO) are the kit's list pane since MIR 1.6.0-alpha.62, on the page and not in
+       the window: a press on one of their rows is still the window's (ADD LFO · MODULATION) */
+    const dev = t.closest('.dev'), mw = !dev && (t.closest('#modwin') || (t.closest('.mir-pick.m2addlist') && document.getElementById('modwin')));   // S3: a float, titled by its .kwin-title
     const win = dev ? ((dev.querySelector('.dev-eyebrow') || {}).textContent || dev.dataset.id || '') : mw ? txt(mw.querySelector('.kwin-title')) : '';
     let what = '';
     const k = t.closest('.k');

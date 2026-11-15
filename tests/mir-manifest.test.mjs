@@ -118,6 +118,8 @@ const ACCEPTED = {
   '1.6.0-alpha.34': '4364a358239a9bed21b41944cb6fb72ccb933f77963ca1e9720b5394fd0fc5a0',
   /* 044 KV1 + KV2 · MIR 1.6.0-alpha.56 (kit main: KV1 alpha.35–42 THE FACES — one head scale 38, the clean body, light headings, the small corner 6, one disabled fade, a press shrinks, one ring, the stronger ground; KV2 alpha.43–56 THE PANES AND THE LISTS — corners follow CORNERS, the accent scrollbar, the wash, menu rows, the popup row, keycaps, the fields, the FINDER's matcher and Escape, the walks, the Escape stack, one edge) */
   '1.6.0-alpha.56': 'eefb315f3dfe9ac6696d206227917b9ed512f21e52f73aa7b95ef99408d3672a',
+  /* 044 K5 · MIR 1.6.0-alpha.63 MODULATION AND THE RAILS (kit main @ cb57891: alpha.57 THE KIT HOLDS NO APP'S CATALOGUE · 58 THE KIT'S NAMES ARE THE KIT'S · 59 THE WINDOW'S DIALS READ THE ONE KNOB LAW · 60 ONE RING AND ONE PRESS IN THE PLUGIN · 61 THE CURVE TAKES THE KEYS · 62 THE CHOOSERS ARE THE KIT'S LIST · 63 THE RAIL CHIP'S SIZE IS WRITTEN ONCE) */
+  '1.6.0-alpha.63': '4fc94999790205614736790ad5b6ebc3cdca9b37c89c872009f70cdc58d1a0c1',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

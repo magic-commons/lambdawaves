@@ -28,6 +28,10 @@ if (!PRESET_BY_ID.has(JET_BLACK.id)) {   // silent once the kit carries the row 
   PRESET_GROUPS.find((g) => g.points === JET_BLACK.points).items.push(JET_BLACK);   // the kit has four 3-point rows
 }
 
+/* 044 K5 · THE HOUSE PALETTE KEEPS ITS NAME HERE: the kit's row `lambda` is labelled MIR since 1.6.0-alpha.58 (no kit name carries an
+   app); in λWAVES it is still λWAVES until Josh says otherwise.  The id, the stops and every saved look are untouched. */
+if (PRESET_BY_ID.has('lambda')) PRESET_BY_ID.get('lambda').label = 'λWAVES';
+
 /* THE POTENTIAL MAP's ramp (iteration 014 B3; Josh's answer 3: the standard, RED negative … BLUE positive): five stops, the colours field.js'
    espColour draws (keep the two equal) and the colour bar paints.  As the PALETTE row ESP the five ride 0 … 0.8 of the wheel; since iteration 015 W2
    ESP reads a palette from its first stop to its last, so the row paints the standard map exactly, and B's magenta stop (which closed the circle for

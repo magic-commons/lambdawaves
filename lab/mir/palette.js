@@ -165,7 +165,7 @@ export const PRESETS = [
     note: 'the fire scale, closed through indigo', stops: [{ at: 0, rgb: hexToRgb('#fff0c8') }, { at: 0.25, rgb: hexToRgb('#ff8a3d') }, { at: 0.5, rgb: hexToRgb('#8c1f4a') }, { at: 0.75, rgb: hexToRgb('#2a1b4a') }] },
   { id: 'sea', label: 'sea', points: 4, constL: false, harsh: false, cvd: false,
     note: 'foam · shallows · deep · violet', stops: [{ at: 0, rgb: hexToRgb('#eafff4') }, { at: 0.25, rgb: hexToRgb('#37c1a8') }, { at: 0.5, rgb: hexToRgb('#0b3d63') }, { at: 0.75, rgb: hexToRgb('#7a5cc0') }] },
-  { id: 'lambda', label: 'λWAVES', points: 5, constL: false, harsh: false, cvd: true,   // tr[λWAVES]: the app's name: keep it exactly as written
+  { id: 'lambda', label: 'MIR', points: 5, constL: false, harsh: false, cvd: true,   // tr[MIR]: the kit's name: keep it exactly as written.  1.6.0-alpha.58: the label was an app's ('λWAVES'); the id stays (saved looks name it)
     note: 'the house palette', stops: [{ at: 0, rgb: hexToRgb('#5ee7d8') }, { at: 0.2, rgb: hexToRgb('#f5f7fa') }, { at: 0.45, rgb: hexToRgb('#d97ce8') }, { at: 0.62, rgb: hexToRgb('#2b3f7a') }, { at: 0.82, rgb: hexToRgb('#ffb35c') }] },
   { id: 'bipolar', label: 'bipolar (Re/Im legible)', points: 4, constL: false, harsh: false, cvd: true,
     note: 'the real axis white↔black, the imaginary axis blue↔orange', stops: [{ at: 0, rgb: hexToRgb('#2b7fff') }, { at: 0.25, rgb: hexToRgb('#f2f2f2') }, { at: 0.5, rgb: hexToRgb('#ff8a29') }, { at: 0.75, rgb: hexToRgb('#111417') }] },

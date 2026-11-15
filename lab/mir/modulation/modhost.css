@@ -119,8 +119,6 @@
   --m2-face-w10: hsl(0 0% 100% / .10);
   --m2-face-w18: hsl(0 0% 100% / 0.18);
   --m2-fill-tint-100: hsl(var(--glass-tint) / 1);
-  --m2-focus-shadow: 0 0 0 3px color-mix(in oklch, hsl(var(--hue-acc) var(--sat-acc) 66% / 0.30), white var(--acc-white, 0%));   /* the focus ring's soft halo (the ring itself is --m2-focus-ring, an outline) */
-  --m2-focus-ring: 1px solid color-mix(in oklch, hsl(var(--hue-acc) var(--sat-acc) 52%), white var(--acc-white, 0%));          /* the focus ring: an OUTLINE, like --state-focus, which a skin may set */
   --m2-grab-dots: radial-gradient(circle at 50% 50%, currentColor 1px, transparent 1.1px);
   --m2-grab-dots-frost: radial-gradient(circle at 50% 50%,currentColor 1.1px,transparent 1.3px);
   --m2-head-shadow: inset 0 -1px 0 hsl(0 0% 100% / 0.09);
@@ -261,9 +259,6 @@
 /* @own */ .k.has-ring.mod-selected > .k-dial {
   --m2-ring-dial-sel-shadow: var(--relief-raise, var(--neu-raise)),0 0 0 1px color-mix(in srgb,var(--acc2) 75%,transparent);
 }
-/* @own */ #modwin .aud-level-mix-dial:focus-visible {
-  --m2-aud-mix-focus-shadow: 0 0 0 1px color-mix(in srgb,var(--acc) 50%,transparent);
-}
 /* @own */ #modwin .aud-range-high {
   --m2-aud-range-high-face: color-mix(in srgb,var(--acc) 30%,transparent);
 }
@@ -275,9 +270,6 @@
 }
 /* @own */ #modwin.mir-modwindow .m2dev.audio .m2audout.on .m2audled {
   --m2-audled-on-glow: 0 0 6px color-mix(in srgb,var(--acc) 55%,transparent);
-}
-/* @own */ :where(.crail.crail-float).kwin-chiprail[data-mir-rail="modulation"] .crail-chip:where(:focus-visible) {
-  --m2-chip-ring: 1px solid var(--fg-soft);
 }
 /* @own */ #modwin.mir-modwindow .m2dialink.drag::before, #modwin.mir-modwindow .m2kd.drag .m2dialink::before {
   --m2-dialink-drag-shadow: var(--relief-raise, var(--neu-raise)), 0 0 0 1px var(--acc);
@@ -459,7 +451,7 @@ body.frost .glass:where(.mir-modwindow, .mir-modwindow *, .kwin-chiprail, .kwin-
   --z-win: 12;
   --kwin-bar-h:          calc(26px * var(--ui-scale));
   --chrome-chip-disc:    calc(48px * var(--ui-scale));
-  --chrome-chip-target:  max(44px, calc(62px * var(--ui-scale)));
+  --chrome-chip-target:  max(44px, calc(var(--rail-chip, 62px) * var(--ui-scale)));   /* the one number, window/window.css (1.6.0-alpha.63) */
 }
 /* (1.5.0-alpha.8: --m2-mat-frost and the plugin's --glass-hairline are shared with the window material: mir/css/skin.css) */
 
@@ -627,18 +619,12 @@ body[data-card="solid"] .mir-modwindow, body[data-card="solid"] #modwin.mir-modw
 #modwin.mir-modwindow [role="slider"].drag {
   background-color: var(--state-press, var(--m2-st-press)); }
 /* 1.5.0-alpha.3 · INTENT S1: ONE press scale for every plugin button (a slider being dragged does not shrink) */
-#modwin.mir-modwindow button:active:not(:disabled),
-.kwin-chiprail[data-mir-rail] button:active:not(:disabled),
-.kwin-chiprail[data-mir-rail] .crail-chip:active {
+#modwin.mir-modwindow button:active:not(:disabled) {
   scale: var(--state-press-scale, .96); }
+/* 1.6.0-alpha.60: a rail's chip no longer takes the word's .96 on top of its disc's own .92 (it shrank to .88): its disc sinks to the
+   house's round amount alone, as window.css's .mir-chip (--state-press-scale-round) */
 
 
-/* 16 · D1 · `.m2pick`, the ADD LFO / ADD ENV / ADD AUDIO sheet, and the macro sheet beside it.  Both
-   are appended to the WINDOW root — a sibling subtree of `.m2root`, where the alias is declared — so
-   `var(--m2-plate)` was invalid and the sheet painted transparent over the cards.  The fallback names
-   the ladder's own chassis, which IS declared in this file's seat block and IS themed, so the sheet
-   now wears exactly the plate it was written for.  A `.m2pick` inside `.m2root` would be unchanged. */
-/* SUPERSEDED BY 21 (wave 70): the sheet now wears the house glass, not the ladder's chassis. */
 /* 17 · D2 · `.m2clr`, the CLEAR button on a routed control.  `m2ensureClear()` appends it INTO the
    control, which for a host-registered control is outside `.m2root` AND outside `.mir-modwindow`, so
    no seat of ours can reach it by inheritance either.  The fallback is therefore the HOUSE recess —
@@ -718,19 +704,20 @@ body[data-card="solid"] .mir-modwindow, body[data-card="solid"] #modwin.mir-modw
   transform: rotate(45deg); transform-origin: 50% 50%; }                                              /* 20b */
 
 
-/* 21 · the three sheets are menu panes since 1.5.6-alpha.4 (`.glass[data-mir-surface="menu"]`): the skin draws them, the floor holds them */
-#modwin.mir-modwindow .m2pick,
+/* 1.6.0-alpha.62 · the two choosers' list (controls/select.js listPane, on the page, not in the window): as wide as its longest word.  A
+   list pane is born as wide as its button; ADD DEVICE's is narrower than "ADD AUDIO", which then ended in an ellipsis.  The gutter is
+   kept for the scrollbar: a list pane's max-height is its own height less the 4 px gap (select.js placePane), so it always scrolls by
+   4 px, and Firefox seats its 8 px bar INSIDE the width, over the words (measured in λWAVES: scrollHeight 110, clientHeight 106). */
+.mir-pick.m2addlist { width: max-content; scrollbar-gutter: stable; }
+/* 21 · the two sheets (the preset list, the dead-send inspector; the two choosers are the kit's listPane since 1.6.0-alpha.62) are menu panes since 1.5.6-alpha.4 (`.glass[data-mir-surface="menu"]`): the skin draws them, the floor holds them */
 #modwin.mir-modwindow .m2ppick.glass,
 #modwin.mir-modwindow .m2deadpick.glass { color: var(--fg); }                                        /* 21 */
-#modwin.mir-modwindow .m2pick .m2pickb,
 #modwin.mir-modwindow .m2ppick .m2pickb,
 #modwin.mir-modwindow .m2deadpick .m2pickb {
   background-color: var(--glass-raise); color: var(--fg); }
-#modwin.mir-modwindow .m2pick .m2pickb:hover,
 #modwin.mir-modwindow .m2ppick .m2pickb:hover,
 #modwin.mir-modwindow .m2deadpick .m2pickb:hover {
   background-color: var(--state-hover, var(--glass-press)); }
-#modwin.mir-modwindow .m2pick .m2prowtag,
 #modwin.mir-modwindow .m2ppick .m2prowtag,
 #modwin.mir-modwindow .m2deadpick .m2prowtag { color: var(--fg-soft); }
 
@@ -996,15 +983,14 @@ body[data-theme="dark"] .mir-modwindow .m2audout { background-color: transparent
    float, and they are the only things a finger can land on. */
 /* 1.5.0-alpha.7 · the pickers under REFRACTIVE with FROST are BASINS' glass: the theme's .10 frost veil (or VEIL) and the
    blur; FROST · STILL holds them like a pane */
-body.frost[data-card="refractive"] #modwin.mir-modwindow :is(.m2pick, .m2ppick, .m2deadpick) {
+body.frost[data-card="refractive"] #modwin.mir-modwindow :is(.m2ppick, .m2deadpick) {
   background-color: var(--surface-veil, var(--frost-veil-light)); -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }
-body.frost[data-card="refractive"][data-theme="dark"] #modwin.mir-modwindow :is(.m2pick, .m2ppick, .m2deadpick) { background-color: var(--surface-veil, var(--frost-veil-dark)); }
-body.frost.frost-hold[data-card="refractive"] #modwin.mir-modwindow :is(.m2pick, .m2ppick, .m2deadpick) {
+body.frost[data-card="refractive"][data-theme="dark"] #modwin.mir-modwindow :is(.m2ppick, .m2deadpick) { background-color: var(--surface-veil, var(--frost-veil-dark)); }
+body.frost.frost-hold[data-card="refractive"] #modwin.mir-modwindow :is(.m2ppick, .m2deadpick) {
   background-color: var(--surface-fill, var(--m2-face-tint-97)); -webkit-backdrop-filter: none; backdrop-filter: none; }
 #modwin.mir-modwindow .m2workbar,
 #modwin.mir-modwindow .m2rail,
 #modwin.mir-modwindow .m2dev,
-#modwin.mir-modwindow .m2pick,
 #modwin.mir-modwindow .m2ppick,
 #modwin.mir-modwindow .m2deadpick {
   visibility: visible; pointer-events: auto;
@@ -1050,15 +1036,6 @@ body.frost[data-card="refractive"][data-theme="dark"] #modwin.mir-modwindow { --
 /* and the window's own pane follows the same three, so a TINTED window is a tinted window */
 /* RETIRED wave 105 — the two FROST pane fills: --m2-pane has no reader. */
 
-/* 30 · THE PICKER, OPENED FROM THE RAIL.  The artifact anchors `.m2pick` to the WINDOW —
-   `position: absolute; left: 50%; transform: translateX(-50%)` — which is right for a button in the
-   device run and wrong for a chip on a rail that is a DOM SIBLING of the window: the sheet would
-   open half a window away from the press.  This class is what `lab/modwindow.js` switches on; the
-   two coordinates are inline because only the script can know where the chip is this frame.
-   Everything else about the sheet — its glass, its border, its shadow, its ink — is reach-list 21's
-   and is not repeated here. */
-#modwin.mir-modwindow .m2pick.m2pick-at-chip {
-  position: fixed; right: auto; bottom: auto; transform: none; z-index: calc(var(--z-banner) + 6); }   /* 30 */
 
 
 .kwin-chiprail[data-mir-rail] .crail-chip::before {
@@ -1233,9 +1210,10 @@ body.frost[data-card="refractive"][data-theme="dark"] #modwin.mir-modwindow { --
      Measured, then written as the accent's own hue at an alpha, which cannot be re-pointed.
      1.5.0-alpha.5: THE RING IS AN OUTLINE.  `--state-focus` is an outline shorthand (INTENT: one accent ring outside
      the control), so reading it as a box-shadow made it invalid wherever a skin set it, and the ring vanished.  The
-     ring is drawn where the 1 px shadow ring was (outline-offset 0 sits on the same edge); the soft halo stays. */
-  outline: var(--state-focus, var(--m2-focus-ring)); outline-offset: 0;
-  box-shadow: var(--m2-focus-shadow); }                                                          /* 50 */
+     ring is drawn where the 1 px shadow ring was (outline-offset 0 sits on the same edge); the soft halo stays.
+     1.6.0-alpha.60 · ONE RING IN THE PLUGIN: the house's ring, two pixels outside the control, and nothing else: the 1 px rings of
+     modwindow.css (white on a button, soft on a chip, dashed on a frozen control, accent on the audio LEDs) and the 3 px halo went. */
+  outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }                                                          /* 50 */
 
 
 #modwin.mir-modwindow .m2kval {
@@ -1474,6 +1452,7 @@ body.frost.frost-hold #modwin.mir-modwindow .m2workbar {
 
 
 #modwin.mir-modwindow .m2pt { fill: var(--acc); stroke: none; }
+#modwin.mir-modwindow .m2pt.ksel, #modwin.mir-modwindow .m2dev.env .m2pt.ksel { stroke: var(--fg); stroke-width: 1.6; }   /* the point the keys hold (1.6.0-alpha.61) */
 #modwin.mir-modwindow .m2dev.env .m2pt { fill: var(--m2-env-ink); stroke: none; }
 /* RETIRED wave 105 — 84's two .m2playdot arms: entry 95 (wave 108's playhead recipe) sets --m2-rule on all three, later. */
 #modwin.mir-modwindow .m2dev.env .m2pt.sel { fill: var(--acc); }                        /* 84 */
@@ -1867,7 +1846,6 @@ body.frost.frost-hold #modwin.mir-modwindow .m2workbar {
 #modwin .aud-level-mix-dial .m2depthtrack,#modwin .aud-level-mix-dial .m2deptharc { stroke-width:var(--m2-sw-2p2); }
 #modwin .aud-level-mix-dial .m2deptharc { stroke:var(--acc); }
 #modwin .aud-level-mix-core.m2num { width:14px;height:14px;border-color:transparent;background:transparent; }
-#modwin .aud-level-mix-dial:focus-visible { outline:0;box-shadow:var(--m2-aud-mix-focus-shadow); }
 #modwin .aud-level-mix-value { position:absolute;left:50%;bottom:calc(100% + 3px);z-index:5;transform:translate(-50%,2px);padding:2px 4px;border-radius:var(--m2-r-3);background:var(--m2-face-tint-96);color:var(--fg-soft);font:var(--m2-aud-level-mix-value-font);opacity:0;pointer-events:none;white-space:nowrap; }
 #modwin .aud-level-mix:hover .aud-level-mix-value,
 #modwin .aud-level-mix:focus-within .aud-level-mix-value,
@@ -2209,8 +2187,7 @@ body[data-theme="light"] #modwin.mir-modwindow .m2devadd {
    less the (0,3,0) the ladders gave this sheet — the class-weights moved into :where() — and sits LAST, because
    modwindow.css followed modhost.css and so won every tie. */
 /* modwindow.css:316 (0,6,0) → (0,3,0), and :318 after it, which beat it on a chip that is both .on and focused */
-:where(.crail.crail-float).kwin-chiprail[data-mir-rail="modulation"] .crail-chip:where(:focus-visible) { outline: var(--m2-chip-ring); }
-:where(.crail.crail-float).kwin-chiprail[data-mir-rail="modulation"] .crail-chip:where(.on) { color: var(--fg); outline: none; }
+:where(.crail.crail-float).kwin-chiprail[data-mir-rail="modulation"] .crail-chip:where(.on) { color: var(--fg); }   /* 1.6.0-alpha.60: it also wrote outline: none, so a lit chip showed no focus ring */
 /* modwindow.css:320 (0,6,1) → (0,3,1) */
 :where(.crail.crail-float).kwin-chiprail[data-mir-rail="modulation"] .crail-chip:where(:active)::before {
   background-color: var(--state-press, var(--bar-raise));

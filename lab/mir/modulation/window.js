@@ -33,9 +33,10 @@
  * Kept as they were: every law in modwindow/ACCEPTANCE.md and host-contract.md, the FL curve gestures
  * (curve-gesture.js), Sol's automation / exact resume / runtime capture in host.js and mod.js.
  */
-import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, watchTouches, wheelTurn, TAP } from '../kit.js';
+import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, verticalDrag, setKnobLaw, watchTouches, wheelTurn, TAP } from '../kit.js';
 import { bindSliderKeys } from '../slider-keys.js';
 import { contextMenu, knobMenu, knobMenuPart, knobAct } from '../shell/menubar.js';
+import { listPane } from '../controls/select.js';
 import { createModWindow, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          buildGhost, buildAudioSheet, COPY } from './modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
@@ -62,10 +63,9 @@ import { createLayoutMotion, wireReorder as reorderEngine } from './layout-motio
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const pct = (u) => (100 * clamp01(u)).toFixed(2) + '%';
 const SVGNS = 'http://www.w3.org/2000/svg';
-/* the house drag ladder, from kit.js's own knob: 220 px is a full scale, 900 with Shift, 320
-   under a finger.  Reused rather than re-chosen so the artifact's dials feel like the lab's.  Shift is 1/8 (1760), as BASINS
-   has it (Josh 09-12: "currently holding shift gives a 1/4 fine tuning, can we make this 1/8?"). */
-const TRAVEL = (e, touch) => (e.shiftKey ? 1760 : touch ? 320 : 220);
+/* 1.6.0-alpha.59 · THE WINDOW'S DIALS READ THE ONE KNOB LAW: the private TRAVEL ladder (220 · 320 · 1760, Shift only) is gone.
+   The ring's depth and every wireSlider surface read kit.js's law (setKnobLaw: the travel, the finger's travel, the fine gear
+   on ANY modifier or a second finger, as the knob), so setKnobLaw({ travel, fine }) reaches them too. */
 const TENSION_PX = 114, GRAB = 20;
 
 /** the controls a macro may route onto: a knob, a fader and a range slider's thumb, each carrying the registry id in data-param */
@@ -182,7 +182,7 @@ export function moveMacro(macroId, to) { if (!liveApi) return false; liveApi.mov
  *   moved(rect | null)     where the window now is (null when it closes), for a transport dodge
  *   opened(), closed()     presentation demand
  *   presetKey              this app's preset storage key (mod.js setPresetKey); absent keeps the model's
- *   copy                   words of the window (modwindow.js COPY), e.g. { factory: 'MANDELBROT' }
+ *   copy                   words of the window (modwindow.js COPY), e.g. { factory: 'FACTORY' }
  *   dock                   { span: observeSpan(…), guide: () => bool } · false: never docks · absent: the viewport
  *   targets                the selector of routable controls (default ROUTABLE)
  */
@@ -298,20 +298,20 @@ export function createModulation(host, port) {
     return '';
   }
 
-  const pick = mw.buildDevicePick();
-  const mpick = mw.buildMacroPick();
   const psheet = mw.buildPresetSheet();
   const dead = mw.buildDeadInspector();
 
-  /* ADD AUDIO is offered when the host supplies an audio edge (port.audio) and refused out loud otherwise: a
-     control that changes nothing is not offered, and the button stays in the sheet so the sheet keeps its
-     geometry.  Adding the device does not touch the microphone; its own AUDIO IN button does, once, on a press. */
-  if (pick.btns.audio && !port.audio) {
-    pick.btns.audio.disabled = true;
-    pick.btns.audio.setAttribute('aria-disabled', 'true');
-    pick.btns.audio.title = 'Audio input is unavailable in this browser';
-  } else if (pick.btns.audio) {
-    pick.btns.audio.title = 'Add an audio follower; {:AUDIO IN} uses the microphone';
+  /* 1.6.0-alpha.62 · THE CHOOSERS ARE THE KIT'S LIST: ADD DEVICE and ADD MACRO open controls/select.js's listPane (the popup row, the
+     arrows, a typed letter, Home / End, Escape on the one stack, placed under its button and kept in the viewport) where the window
+     built two sheets of its own (.m2pick: 46 px buttons, no keys).  One is open at a time; the window closing closes it. */
+  let pickPane = null;
+  function openPick(anchor, name, items, onPick) {
+    if (pickPane) { const mine = pickPane.anchor === anchor; pickPane.pane.close(false); if (mine) return null; }
+    anchor.setAttribute('aria-expanded', 'true'); anchor.classList.add('on');
+    const pane = listPane({ anchor, label: name, items, onPick, cls: 'm2addlist',
+      onClose: () => { anchor.setAttribute('aria-expanded', 'false'); anchor.classList.remove('on'); if (pickPane && pickPane.pane === pane) pickPane = null; } });
+    pickPane = { anchor, pane };
+    return pane;
   }
 
   /* ── PRESENTATION STATE.  The window's own, never the model's, never the project's. ────── */
@@ -665,7 +665,7 @@ export function createModulation(host, port) {
 
   /* THE TEMPO FIELD — the house's one inline BPM editor (shell/transport.js bindTempoField; BASINS tempo-editor.js, shared
      by the modulation and timeline work bars): a click types it (8 characters, decimals; Enter or blur commits, Escape
-     cancels and gives the focus back), a vertical drag turns it (220 px for the whole range, a finger 320, Shift 1760);
+     cancels and gives the focus back), a vertical drag turns it (the knob law's travel and fine gear);
      a drag is not a click. */
   hintTo(transport.tempo, 'Set the modulation clock in beats per minute');
   const tempoField = bindTempoField({ button: transport.tempo, input: transport.tempoIn, drag: true, paint: () => paint(true),
@@ -1323,7 +1323,7 @@ export function createModulation(host, port) {
       const r = editRouteOf(id);
       if (!r) { openPop(id, e.clientX, e.clientY); return; }
       try { hit.setPointerCapture(e.pointerId); } catch (_) {}
-      drag = { r, y0: e.clientY, x0: e.clientX, d0: r.max - r.min, touch: e.pointerType === 'touch' };
+      drag = { r, y0: e.clientY, x0: e.clientX, d0: r.max - r.min, touch: e.pointerType === 'touch', v: verticalDrag(e) };   // the law's accumulator: engaging the gear mid-drag moves nothing
       moved = false;
       rec.host.classList.add('ring-drag');
       hold = setTimeout(() => { hold = 0; if (drag && !moved) { const p = [drag.x0, drag.y0]; endDrag(); openPop(id, p[0], p[1]); } }, TAP.hold);
@@ -1334,7 +1334,7 @@ export function createModulation(host, port) {
       if (!moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) <= TAP.slop) return;   // the hold's stillness is the drag's start: TAP.slop
       if (!moved) { moved = true; cancelHold(); }
       /* a rise grows the arc clockwise, as a rise turns the dial — on a reversed dial (`k-rev`, 1.5.7-alpha.12) that is toward the lower values */
-      let d = drag.d0 + (rec.host.classList.contains('k-rev') ? -1 : 1) * (drag.y0 - e.clientY) / TRAVEL(e, drag.touch);
+      let d = drag.d0 + (rec.host.classList.contains('k-rev') ? -1 : 1) * drag.v.move(e);
       d = d < -1 ? -1 : d > 1 ? 1 : d;
       M.setRouteRange(drag.r.id, { min: Math.max(0, -d), max: Math.max(0, d) });
       apply(); paintRings();
@@ -1399,36 +1399,17 @@ export function createModulation(host, port) {
   }
 
 
-  const pickAway = (e) => {
-    const tg = e.target;
-    if (devPickOpen && !pick.root.contains(tg) && !rackEl.devadd.contains(tg)) setDevPick(false);
-    if (macroPickOpen && !mpick.root.contains(tg) && !(rackEl.macadd && rackEl.macadd.contains(tg))) {
-      macroPickOpen = false; mpick.root.hidden = true; rackEl.macadd.setAttribute('aria-expanded', 'false');
-    }
-  };
-  document.addEventListener('pointerdown', pickAway, true);
 
   /* ═══════════════════════════════════════════════════════════════════════════════════════
    *  THE MACRO RAIL — the artifact's slots, wired
    * ═══════════════════════════════════════════════════════════════════════════════════════ */
   const macRows = new Map();
-  let macroPickOpen = false;
   rackEl.macadd.title = 'Add a macro';
   rackEl.macadd.setAttribute('aria-expanded', 'false');
   rackEl.macadd.addEventListener('click', () => {
     if (M.macroList().length >= M.MACRO_MAX) { status(t('eight macros is the model’s ceiling'), 'warn'); return; }
-    macroPickOpen = !macroPickOpen; mpick.root.hidden = !macroPickOpen;
-    rackEl.macadd.setAttribute('aria-expanded', String(macroPickOpen));
+    openPick(rackEl.macadd, 'Add a macro', mw.copy.macroPick.map(([id, word]) => ({ id, label: word })), (kind) => { M.addMacro(null, { kind }); rebuild(); });
   });
-  for (const kind of ['knob', 'trigger']) {
-    if (!mpick.btns[kind]) continue;
-    mpick.btns[kind].addEventListener('click', () => {
-      mpick.root.hidden = true; macroPickOpen = false;
-      rackEl.macadd.setAttribute('aria-expanded', 'false');
-      M.addMacro(null, { kind });
-      rebuild();
-    });
-  }
 
   /* Reordering has a dedicated grip. The value face is therefore only a value
      control, and compact mode can hide that face without losing rearranging. */
@@ -1589,8 +1570,8 @@ export function createModulation(host, port) {
     elm.addEventListener('pointermove', (e) => {
       if (!d || e.pointerId !== d.id) return;
       /* THE ONE KNOB LAW (kit.js): the gear (⅛ on any modifier or a second finger) multiplies the step since the last move, so engaging it
-         moves nothing; the travel is the plain 220 px (320 under a finger) */
-      const span = d.touch ? 320 : 220, g = gearOf(e, d.id);
+         moves nothing; the travel is the law's (220 px, 320 under a finger, unless setKnobLaw retuned it) */
+      const law = setKnobLaw(), span = d.touch ? law.touchTravel : law.travel, g = gearOf(e, d.id);
       d.p += g * (o.axis === 'x' ? e.clientX - d.lx : o.axis === 'y' ? d.ly - e.clientY : (d.ly - e.clientY) + (e.clientX - d.lx)) / span;
       d.lx = e.clientX; d.ly = e.clientY;
       if (!d.moved && Math.abs(e.clientX - d.x) < 3 && Math.abs(e.clientY - d.y) < 3) return;
@@ -1610,56 +1591,27 @@ export function createModulation(host, port) {
   /* WAVE 105 · per-SOURCE audio state that must outlive a card rebuild — the 96-frame level ring, the
      onset count the lamp compares against, and when it last flashed. */
   const audRings = new Map();
-  let devPickOpen = false;
   rackEl.devadd.title = 'Add an LFO, envelope, or audio follower';
   rackEl.devadd.setAttribute('aria-expanded', 'false');
-  /* The picker opens beside the explicit ADD DEVICE button and flips to its
-     other side when the viewport has no room. */
-  function placeDevicePicker() {
-    const r = rackEl.devadd.getBoundingClientRect();
-    pick.root.classList.add('m2pick-at-chip');
-    /* ⚠ `position: fixed` HERE IS NOT THE VIEWPORT'S, AND THAT IS THE ARTIFACT'S OWN DOING:
-       `#modwin.mir-modwindow.modwin` declares `contain: layout` (modwindow.css:499), and a layout
-       containment box is a containing block for FIXED descendants — so the window itself is the
-       origin.  Measured, not reasoned: the first cut of this wrote a correct viewport left of 207 px
-       and the sheet painted at 417, off by the window's own x.  Rather than special-case that one
-       cause, the ORIGIN IS MEASURED — park the sheet at (0,0), read where that lands, and offset by
-       the difference.  It is then right whatever creates the containing block, today or later (a
-       transform on an ancestor, a filter, FROST's backdrop-filter, another `contain`). */
-    pick.root.style.left = '0px'; pick.root.style.top = '0px';
-    const o = pick.root.getBoundingClientRect();
-    const w = o.width || 200, h = o.height || 120;
-    let x = r.right + 8;
-    if (x + w > window.innerWidth - 8) x = Math.max(8, r.left - 8 - w);   // no room to the right: the chip's other side
-    let y = r.top;
-    if (y + h > window.innerHeight - 8) y = Math.max(8, window.innerHeight - 8 - h);
-    const z = zoom();                                                // seen; written in the window's px
-    pick.root.style.left = Math.round((x - o.left) / z) + 'px';
-    pick.root.style.top = Math.round((y - o.top) / z) + 'px';
-  }
-  function setDevPick(on) {
-    devPickOpen = !!on;
-    pick.root.hidden = !devPickOpen;
-    rackEl.devadd.setAttribute('aria-expanded', String(devPickOpen));
-    rackEl.devadd.classList.toggle('on', devPickOpen);
-    if (devPickOpen) placeDevicePicker();
-    else { pick.root.classList.remove('m2pick-at-chip'); pick.root.style.left = ''; pick.root.style.top = ''; }
-  }
-  rackEl.devadd.addEventListener('click', () => setDevPick(!devPickOpen));
 
 
   const rackMode = () => compactMode();
-  for (const kind of ['lfo', 'env', 'audio']) {
-    if (!pick.btns[kind]) continue;
-    pick.btns[kind].addEventListener('click', () => {
-      setDevPick(false);
-      const src = M.addSource(kind);
-      const id = src && (src.id !== undefined ? src.id : src);
-      const mode = rackMode();
-      if (id !== undefined && id !== null && mode !== 'F') P.modes[String(id)] = mode;
-      rebuild();
-    });
-  }
+  /* ADD AUDIO is offered when the host supplies an audio edge (port.audio) and stands down, said, otherwise: the row stays in the
+     list so the list keeps its shape.  Adding the device does not touch the microphone; its own AUDIO IN button does, once, on a press. */
+  rackEl.devadd.addEventListener('click', () => {
+    const pane = openPick(rackEl.devadd, 'Add an LFO, envelope, or audio follower',
+      mw.copy.devicePick.map(([id, word]) => ({ id, label: word, coming: id === 'audio' && !port.audio })),
+      (kind) => {
+        const src = M.addSource(kind);
+        const id = src && (src.id !== undefined ? src.id : src);
+        const mode = rackMode();
+        if (id !== undefined && id !== null && mode !== 'F') P.modes[String(id)] = mode;
+        rebuild();
+      });
+    const aud = pane && pane.root.querySelector('[data-id="audio"]');
+    if (aud && !port.audio) aud.title = 'Audio input is unavailable in this browser';
+    else if (aud) aud.title = 'Add an audio follower; {:AUDIO IN} uses the microphone';
+  });
 
   /** F / C / M is the window's own PRESENTATION state and it rides in the settings key, exactly as
    *  host-contract.md §6 says.  But the MODEL has one boolean of its own — `minimized` — and it
@@ -2476,7 +2428,7 @@ export function createModulation(host, port) {
     ed.gPts.replaceChildren(); ed.gTens.replaceChildren();
     if (pts) {
       for (let i = 0; i < pts.length; i++) {
-        const c = svgEl('circle', 'm2pt', ed.gPts);
+        const c = svgEl('circle', 'm2pt' + (rec.ksel === i ? ' ksel' : ''), ed.gPts);   // ksel: the point the keys hold (1.6.0-alpha.61)
         c.setAttribute('cx', X(pts[i].t).toFixed(2)); c.setAttribute('cy', Y(pts[i].v).toFixed(2)); c.setAttribute('r', '3.4');
       }
       const tens = s.kind === 'env' ? envMapOf(s).tens : null;
@@ -2710,6 +2662,52 @@ export function createModulation(host, port) {
       say(rec, t('tension reset'));
     });
     svg.addEventListener('contextmenu', (e) => e.preventDefault());
+    /* 1.6.0-alpha.61 · THE CURVE TAKES THE KEYS: the CURVES panel's map (panels/curves.js) on this editor, which had no Tab stop.
+       + and − pick a point (round the curve), the arrows move it by a hundredth (Page by a tenth; Shift is the law's fine key),
+       Delete removes it, Escape lets go.  An envelope's point is a stage: ← → write its seconds, ↑ ↓ the sustain on DECAY's. */
+    if (s.kind !== 'audio') {
+      svg.tabIndex = 0; svg.setAttribute('role', 'application'); svg.setAttribute('aria-roledescription', 'curve');
+      svg.setAttribute('aria-keyshortcuts', '+ - ArrowLeft ArrowRight ArrowUp ArrowDown PageUp PageDown Delete Escape');
+      const mark = () => { const c = rec.dev.ed.gPts.children; for (let i = 0; i < c.length; i++) c[i].classList.toggle('ksel', i === rec.ksel); };
+      svg.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey || pid !== null) return;
+        const pts = g.pts, k = e.key;
+        if (!pts || !pts.length) return;
+        const take = () => { e.preventDefault(); e.stopPropagation(); };
+        const sel = Number.isInteger(rec.ksel) && rec.ksel >= 0 && rec.ksel < pts.length ? rec.ksel : -1;
+        if (k === 'Escape') { if (sel < 0) return; rec.ksel = -1; mark(); take(); return; }
+        if (k === '+' || k === '=' || k === '-' || k === '_') {
+          const back = k === '-' || k === '_';
+          rec.ksel = sel < 0 ? (back ? pts.length - 1 : 0) : (sel + (back ? pts.length - 1 : 1)) % pts.length;
+          mark(); take(); return;
+        }
+        if (sel < 0) return;
+        const step = (e.code.startsWith('Page') ? 0.1 : 0.01) * (e.shiftKey ? setKnobLaw().keyFine : 1);
+        const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, step], ArrowDown: [0, -step], PageUp: [0, step], PageDown: [0, -step] }[e.code];
+        if (mv) {
+          take();
+          const p = pts[sel];
+          if (s.kind === 'env') {
+            const ek = envMapOf(s).keys[sel];
+            if (!ek) return;
+            down = { key: ek, t: p.t, v: s[ek] };
+            if (envMove(p.t + mv[0], clamp01(p.v + mv[1]))) syncKnobs(rec);
+          } else {
+            if (!ensureCurve()) return;
+            M.curveEdit(s.id, 'move', { index: sel, t: clamp01(p.t + mv[0]), v: clamp01(p.v + mv[1]) });
+          }
+          apply(); paint(true);
+        } else if (k === 'Delete' || k === 'Backspace') {
+          take();
+          if (s.kind === 'env') { say(rec, t('an envelope has fixed stages — drag a stage to zero instead')); return; }
+          const n0 = s.points.length;
+          M.curveEdit(s.id, 'remove', { index: sel });
+          say(rec, s.points.length < n0 ? t('point removed') : t('a curve keeps at least two points'));
+          if (s.points.length < n0) rec.ksel = Math.min(sel, s.points.length - 1);
+          apply(); paint(true);
+        }
+      });
+    }
     ariaLabel(svg, 'Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it (Shift is fine, Ctrl locks its time); left-drag a tension handle to bend it (Shift is fine); right-click or double-click a tension handle resets it; Alt-click a point deletes it.');
   }
 
@@ -3301,8 +3299,7 @@ export function createModulation(host, port) {
     if (was) { presence(root, false); presence(rail.el, false); } else { root.hidden = true; rail.el.hidden = true; }
     /* WAVE 105 · a closed window may not leave a sheet floating.  The two PICKERS were the pair
        `closePop/closePresets/closeDead` never covered. */
-    devPickOpen = false; if (pick && pick.root) pick.root.hidden = true;
-    macroPickOpen = false; if (mpick && mpick.root) mpick.root.hidden = true;
+    if (pickPane) pickPane.pane.close(false);
     closePop(); closePresets(); closeDead();
     if (was && port.moved) { try { port.moved(null); } catch (_) {} }
     if (cancelReorder) cancelReorder(); tempoField.close(false);
@@ -3498,7 +3495,7 @@ export function createModulation(host, port) {
       for (const rec of devRows.values()) if (rec.readout) rec.readout.dispose();
       off(); offLanguage(); if (ro) { ro.disconnect(); ro = null; } if (boxRO) boxRO.disconnect();
       document.removeEventListener('pointerdown', armTap, true);
-      document.removeEventListener('pointerdown', pickAway, true);
+      if (pickPane) pickPane.pane.close(false);
       document.removeEventListener('pointerdown', focusAway, true);
       window.removeEventListener('keydown', armKey, true);
       window.removeEventListener('resize', onResize);
