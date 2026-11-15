@@ -113,7 +113,7 @@ export function createNotebook(app) {
           item('invert'),
           sub('STAGE', () => [item('view.captions'), item('view.formula'), item('view.labels'), item('ballStick')], 'stage'),
           sub('INTERFACE', () => [item('view.badges'), item('view.hints'), item('notes'), null, item('hide')], 'eye'),
-          sub('CAMERA', () => [item('camReset'), item('camera.panHome'), null, item('camera.lock'), item('camera.flip'), item('camera.autoRotate')], 'lens'),
+          sub('CAMERA', () => [item('camReset'), item('camera.panHome'), null, item('camera.lock'), item('camera.flip'), item('camera.autoRotate')], 'camera'),
           sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get()), 'moon'),
           item('fullscreen')],
         PLAY: () => [item('transport.play'), item('home'), item('stepBack'), item('stepFwd'), null,

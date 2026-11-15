@@ -3,7 +3,8 @@
  * menubar's `opts.icon`.  THE LAW: the inner markup of a 24-unit box, live area 2–22, stroke 1.9, round caps and joins, `currentColor`; a solid is
  * `fill-rule: evenodd`; a 16-unit drawing (NODES') is drawn through the kit's own precedent `<g transform="scale(1.5)">` at stroke 1.267; rendered
  * at 16, 20 or 24 px only; named for its MEANING in camelCase, never for the character it replaced.  A kit name is never redrawn here (the door
- * refuses it): the same idea uses the kit's drawing (info, settings, folder, home, plus, download, save, curves, render, chevron*).
+ * refuses it): the same idea uses the kit's drawing (info, settings, folder, home, plus, download, save, curves, render, camera, keys, chevron*) —
+ * 044 AV2 (L95, E16): RENDER, CAMERA and KEYBOARD wear the kit's `render`, `camera` and `keys`; the app's second drawings (film, lens, keyboard) are gone.
  * WINDOW_GLYPH is ONE glyph per window, declared at its register (rack-wiring.js) or its createWindow (kit factories through `windowGlyphs`).
  * 022 E2: every window wears λWAVES' own drawing of its MEANING (V-BUILD.md's DRAWING LIST, drawn: no BORROWED name is left); Gemini may redraw
  * them from research/iteration-022/E-shots/glyphs-*.png on Josh's word (research/iteration-022/ICONS-FOR-GEMINI.md). */
@@ -99,7 +100,6 @@ const ICONS = {
   equalizer: fill(3.5, 12, 3.2, 8.5, .8) + fill(8, 5.5, 3.2, 15, .8) + fill(12.5, 14, 3.2, 6.5, .8) + fill(17, 8, 3.2, 12.5, .8),   // bars
   controlSurface: p('M7 3.5v17') + fill(4.3, 12, 5.4, 3.6, 1) + c(16.5, 9, 4) + p('M16.5 9V5') + dot(16.5, 18.2, 1.5),   // a fader and a knob
   history: p('M4.5 12a7.5 7.5 0 1 0 2.2-5.3') + p('M6.7 3.6v3.1h3.1') + p('M12 8v4.5l3 2'),                       // the clock turned back
-  keyboard: box(2.5, 6, 19, 12, 2) + p('M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8'),                    // keys
   mapping: box(3, 11, 10, 9.5, 2) + p('M6.5 16h3') + p('M13 15.5h3a2.5 2.5 0 0 0 2.5-2.5V8.5') + c(18.5, 6, 2.5),   // 023 D2: a key cap and its route (KEYBOARD's MAPPING face)
   notebook: box(6, 3, 13, 18, 2) + p('M9.5 8h6M9.5 12h6M9.5 16h3.5') + p('M6 7H4M6 12H4M6 17H4'),                // a bound, lined page
   informational: p('M4.5 4h15A1.5 1.5 0 0 1 21 5.5v10a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17h-1A1.5 1.5 0 0 1 3 15.5v-10A1.5 1.5 0 0 1 4.5 4Z') +
@@ -109,7 +109,6 @@ const ICONS = {
   palette: solid('M16.28 6.89A8.2 8.2 0 1 0 10.54 20.59Z M3.8 12.4a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0Z M5.92 8.42a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0Z ' +
     'M10.4 7.95a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0Z M16.39 11.29 15.65 13.04 14.97 13.52Q13.91 16.05 14.5 18.9 16.95 17.32 18.01 14.79L17.86 13.97 18.6 12.22Z') +
     p('M21.2 2.9 17.34 12.12'),
-  lens: p('M3 8.5A1.5 1.5 0 0 1 4.5 7h3L9 4.5h6L16.5 7h3A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z') + c(12, 13, 3.6),   // CAMERA: a lens
   stage: box(3, 4.5, 18, 15, 2.5) + c(12, 12, 2.6) + p('M7 8.5 8.8 10M17 8.5 15.2 10M7 15.5 8.8 14M17 15.5 15.2 14'),   // 037 T1 STAGE: the frame, its centre and the wash between
   widgets: box(3, 3, 8, 8, 2) + box(13, 3, 8, 8, 2) + box(3, 13, 8, 8, 2) + c(17, 17, 4),   // 037 W3 WIDGETS: a home screen's tiles, one of them round
   clock: c(12, 12, 9) + p('M12 7v5l3.5 2.2'),   // 037 W5 CLOCK: ψ's time
@@ -121,7 +120,6 @@ const ICONS = {
   timeline: fill(3.5, 4.5, 9, 3.2, 1) + fill(8.5, 10.4, 11, 3.2, 1) + fill(5.5, 16.3, 7, 3.2, 1) + p('M15.5 2.5v19'),   // lanes of clips and the playhead
   pattern: fill(2.5, 5.5, 5, 5, 1.2) + box(10.45, 6.45, 3.1, 3.1, .8) + fill(16.5, 5.5, 5, 5, 1.2) +
     box(3.45, 14.45, 3.1, 3.1, .8) + fill(9.5, 13.5, 5, 5, 1.2) + box(17.45, 14.45, 3.1, 3.1, .8),                     // 036 P6: step pads, some lit (the PATTERN window)
-  film: box(3, 5, 18, 14, 2.5) + solid('M10 9v6l5.2-3Z'),                                                        // RENDER: a frame with a play
   picker: box(3.5, 3.5, 7.5, 7.5, 1.5) + box(13, 3.5, 7.5, 7.5, 1.5) + box(3.5, 13, 7.5, 7.5, 1.5) + fill(13, 13, 7.5, 7.5, 1.5),   // a shelf of tiles, one picked
   /* ── the Picker's look tiles (picker.js SHAPES) and the ladders' FILL ALL / EMPTY (paint-stroke.js, Gemini's 008 U drawings) ── */
   /* 044 AV2 · A PICTURE ON EVERY MENU ROW (Josh's tick 4): the drawings of the ideas that had none — each named for its meaning, one row or family each */
@@ -204,13 +202,13 @@ export const nodeGlyph = (type) => 'node' + type[0].toUpperCase() + type.slice(1
 
 /** ONE glyph per window, by the window's id (its saved id, which never changes): a rack card's at its register, a kit window's at its make */
 export const WINDOW_GLYPH = {
-  informational: 'informational', spectrum: 'spectrum', settings: 'settings', palette: 'palette', observer: 'wave', camera: 'lens', clip: 'clip',
+  informational: 'informational', spectrum: 'spectrum', settings: 'settings', palette: 'palette', observer: 'wave', camera: 'camera', clip: 'clip',
   history: 'history', transport: 'controlSurface', chem: 'molecule', atoms: 'atom', equalizer: 'equalizer',
   staticfield: 'field', lattice: 'lattice', emission: 'emission', bloch: 'bloch', slice: 'plane',
   calculus: 'calculus', ladder: 'ladder', wigner: 'wigner', shadow: 'shadow', orbit: 'orbit', vortex: 'vortex', meters: 'meters',
-  radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film', stage: 'stage', widgets: 'widgets', light: 'sun',   // 037 L1: LIGHTING wears the sun (the KEY)
+  radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'render', stage: 'stage', widgets: 'widgets', light: 'sun',   // 037 L1: LIGHTING wears the sun (the KEY)
   /* the kit factories' windows (windowGlyphs) */
-  gui: 'mirOptions', 'gui-about': 'about', keyboard: 'keyboard', timeline: 'timeline', modulation: 'modulation',
+  gui: 'mirOptions', 'gui-about': 'about', keyboard: 'keys', timeline: 'timeline', modulation: 'modulation',
   'transport-free': 'controlSurface', folders: 'folders', pattern: 'pattern',
 };
 
