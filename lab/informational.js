@@ -11,7 +11,7 @@ import { statusOf } from './status.js'; import { getHamiltonian } from './hamilt
 export function createInformational(app) {
   const { ui, device, isPhone } = app, P = infoPrefs();
   const w = device({ id: 'informational', eyebrow: 'INFORMATIONAL', title: 'what the stage writes', status: '' });
-  w.root.classList.add('native-clean', 'closed', 'lw-info-card'); app.host.rack.appendChild(w.root);
+  w.root.classList.add('closed', 'lw-info-card'); app.host.rack.appendChild(w.root);
   /* one control per row, its value the record's: a hand sets the row (a dial live, as before), nothing else is written */
   const ctl = {};
   for (const r of INFO_ROWS) {

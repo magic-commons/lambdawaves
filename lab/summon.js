@@ -34,7 +34,7 @@ function mitosis(from, to) {
   const z = cssZoom(from), r = from.getBoundingClientRect(), h = fh.offsetHeight, dy = to.offsetTop - from.offsetTop;
   const layer = document.createElement('div'); layer.className = 'lw-mitosis'; layer.setAttribute('aria-hidden', 'true'); layer.inert = true;
   const pill = (card, head) => {
-    const p = document.createElement('section'); p.className = 'dev folded lw-mitosis-pill' + (card.classList.contains('native-clean') ? ' native-clean' : '');
+    const p = document.createElement('section'); p.className = 'dev folded lw-mitosis-pill';
     if (card.dataset.kind) p.dataset.kind = card.dataset.kind;
     const c = head.cloneNode(true); for (const n of c.querySelectorAll('[id]')) n.removeAttribute('id'); p.appendChild(c);
     Object.assign(p.style, { left: r.left / z + 'px', top: r.top / z + 'px', width: from.offsetWidth + 'px' });
@@ -48,21 +48,4 @@ function mitosis(from, to) {
     ...[th, to.querySelector(':scope > .dev-body')].filter(Boolean).map((n) => n.animate([{ opacity: 0 }, { opacity: 0, offset: 0.55 }, { opacity: 1 }], { duration: T })),   // the window materialises where the pill lands
   ];
   Promise.all(runs.map((a) => a.finished.catch(() => {}))).then(() => layer.remove());
-}
-/** 039 V2 · A SUMMONED WINDOW CLEARS THE BAR, THE LOGO AND THE OPEN WORK BAR (the walks: NODES over the logo and 17 bar buttons, RENDER over the bar's
- *  right half, FOLDERS over CAMERA and the timeline).  clearSeat(box, { avoid, view, top, gap }) — the seat NEAREST the one a window opened in (`box`,
- *  its seen rect, its rail included) that meets none of the rects in `avoid`, `gap` px clear of each and of the screen's edges, never above `top` (the
- *  menu row's band); a window already clear stays where it is.  → { left, top } (seen px), or null when no seat on the screen clears them.  Pure. */
-export function clearSeat(box, { avoid = [], view, top = 52, gap = 8 }) {
-  const w = box.right - box.left, h = box.bottom - box.top, hiX = view.width - gap - w, hiY = view.height - gap - h;
-  if (hiX < gap || hiY < top) return null;
-  const cx = (x) => Math.min(hiX, Math.max(gap, x)), cy = (y) => Math.min(hiY, Math.max(top, y));
-  const meets = (a, b) => a.left < b.right + gap && a.right > b.left - gap && a.top < b.bottom + gap && a.bottom > b.top - gap;
-  const xs = new Set([box.left, ...avoid.flatMap((o) => [o.right + gap, o.left - gap - w])].map(cx)), ys = new Set([box.top, ...avoid.flatMap((o) => [o.bottom + gap, o.top - gap - h])].map(cy));
-  let best = null, d = Infinity;
-  for (const x of xs) for (const y of ys) {
-    const r = { left: x, top: y, right: x + w, bottom: y + h }, e = Math.hypot(x - box.left, y - box.top);
-    if (e < d && !avoid.some((o) => meets(r, o))) { d = e; best = { left: Math.round(x), top: Math.round(y) }; }
-  }
-  return best;
 }

@@ -6,7 +6,7 @@ export { planeModel };   // sliceview.js' road to the kit's plane
 
 export function reworkNative({ ui, mat, repaint }) {
   const ids=['spectrum','staticfield','palette','observer','camera','clip','slice','settings'];
-  for(const id of ids){const d=document.querySelector(`.dev[data-id="${id}"]`);if(!d)continue;d.classList.add('native-clean');
+  for(const id of ids){const d=document.querySelector(`.dev[data-id="${id}"]`);if(!d)continue;
     for(const l of d.querySelectorAll('.grp-lbl')) { l.title=l.textContent;l.textContent=l.textContent.split(/·|  |\(/)[0].trim(); }
   }
   const wave=ui.spaceSeg.root.closest('.dev-body');
@@ -40,7 +40,7 @@ export function reworkNative({ ui, mat, repaint }) {
   const rows=[...settings.querySelectorAll(':scope > .grp')];
   for(const g of rows){g.classList.add('settings-section');}
   // Honest enum controls replace switches that secretly cycle through three/four modes.
-  function enumControl(old,label,options,get,set){const control=seg({label,value:get(),options:options.map(([id,title])=>({id,label:id.toUpperCase(),title})),onChange:set});old.root.replaceWith(control.root);const write=old.set;old.set=v=>{write(v);control.set(get());};return control;}
+  function enumControl(old,label,options,get,set){const control=seg({label,value:get(),options:options.map(([id,title])=>({id,label:id.toUpperCase(),title})),onChange:set});if(old.root.dataset.event)control.root.dataset.event=old.root.dataset.event;/* 044 AV1 (L156): the seg the hand meets carries the switch's event mark (shell/modulation.js), so its menu offers CREATE EVENT */old.root.replaceWith(control.root);const write=old.set;old.set=v=>{write(v);control.set(get());};return control;}
   ui.frameModeSeg=enumControl(ui.frameSw,'FRAME',[['box','An outline round the field’s box'],['lattice','The box as a grid of lines'],['dots','The box as a grid of dots'],['off','No frame round the field']],()=>mat.frame===false?'off':mat.frameMode||'box',v=>{mat.frame=v!=='off';if(v!=='off')mat.frameMode=v;ui.frameSw.set(mat.frame);repaint();ui.saveNative();});
   ui.axisModeSeg=enumControl(ui.axisSw,'AXES',[['box','The x, y and z axes through the field’s box'],['corner','A small x, y, z compass in the stage’s corner'],['off','No axes']],()=>mat.axis===false?'off':mat.axisMode||'box',v=>{mat.axis=v!=='off';if(v!=='off')mat.axisMode=v;ui.axisSw.set(mat.axis);repaint();ui.saveNative();});
   // A binary, deliberately stubborn switch: an unsupported canvas cannot claim P3.

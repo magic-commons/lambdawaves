@@ -36,7 +36,7 @@
   background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
 .nodes-x, .nodes-rm { width: 18px; height: 18px; margin-right: -4px; }
 .nodes-x[aria-pressed="true"] { color: var(--dim); opacity: .6; }   /* 036 P3: ⏻ MUTE — a muted node's power reads OFF (dim), a live one the bar's ink */
-:is(.nodes-tools button, .nodes-x, .nodes-rm):is(:hover, :focus-visible) { color: var(--acc); }
+:is(.nodes-tools button, .nodes-x, .nodes-rm):is(:hover, :focus-visible) { color: var(--fg); }
 :is(.nodes-tools button, .nodes-x, .nodes-rm) svg { width: 16px; height: 16px; }
 .nodes-tools { position: absolute; top: 6px; left: 6px; z-index: 1; display: flex; gap: 2px; }
 .nodes-tools button { border-radius: var(--r-sm); background: var(--glass-tint); }
@@ -48,7 +48,7 @@
 .dev-util > .nodes-door:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
 .dev-util > .nodes-door > svg { width: var(--head-glyph); height: var(--head-glyph); }
 /* 020 X1 · the ground: focus, the selection's accent outline, the shift-drag box */
-.nodes-ground:focus-visible { outline: 1px solid color-mix(in srgb, var(--acc) 50%, transparent); outline-offset: -1px; }
+.nodes-ground:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -2px; }
 .nodes-card.sel { outline: 2px solid var(--acc); outline-offset: 2px; }
 /* 020 X2 · the card: the chevron, collapsed (the bar + the PREVIEW strip), the strip, a title being renamed, the right-click menu */
 .nodes-chev { display: grid; place-items: center; width: 16px; height: 16px; margin-left: -4px; padding: 0; border: 0; background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
@@ -111,7 +111,7 @@
 /* 020 X4 · the foot fold: FADE · MASK · SOFT under the knobs; lit while either is off home */
 .nodes-foot { margin-top: 6px; border-top: 1px solid var(--glass-hairline); }
 .nodes-foot-t { display: block; width: 100%; padding: 5px 0 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
-.nodes-foot-t.on, .nodes-foot-t:hover { color: var(--acc); }
+.nodes-foot-t:hover { color: var(--fg); } .nodes-foot-t.on { color: var(--acc); }
 .nodes-foot > .nodes-knobs { padding-top: 4px; }
 .nodes-foot > .nodes-knobs > :is(.seg, .segw) { grid-column: 1 / -1; }   /* 038 N6: TARGET's three words on one line (two cells wrap OBJECT) */
 .nodes-card.fold > .nodes-foot { display: none; }

@@ -40,8 +40,11 @@
 #transport[data-layout="csb"] .csb-row { display: flex; align-items: center; gap: 4px; height: 36px; }
 /* THE SEATS: one 36-px round box, flat until hovered, the icon a 20-px glyph (the kit's and lab/icons.js' alike) */
 #transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand) {
-  display: inline-grid; place-items: center; width: 36px; height: 36px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none; }
+  display: inline-grid; place-items: center; width: 36px; height: 36px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none;
+  transition: scale var(--t-fast), background var(--t-fast), color var(--t-fast); }
 #transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand):hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
+/* 044 AV1 (L65, Josh's tick 17 "a press shrinks"): a seat presses as the kit's round glyph buttons do (alpha.40), with its fill */
+#transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand):active { background: var(--state-press, var(--glass-press)); scale: var(--state-press-scale-round, .92); }
 #transport[data-layout="csb"] :is(.csb-ico, .csb-mod) svg { width: 20px; height: 20px; }
 #transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .tr-open.live, .csb-ico .mod-exp.live, .csb-search-b[aria-expanded="true"], #rackFav[aria-expanded="true"], .csb-info.on, .csb-nodes.on, .tr-expand.on) { color: var(--acc); }
 /* 021 V2 · every seat's icon is an SVG from the one table (lab/icons.js through the kit's setGlyph): no masks.  THEME carries the moon and the sun;

@@ -52,7 +52,7 @@ export const stageTargets = (ui, mat, setKnob) => FX.map(([, k, , title, o, labe
 export function createStageWindow(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { modHand } = app.ctl;
   const w = device({ id: 'stage', eyebrow: 'STAGE', title: 'the stage and its effects', status: '' });
-  w.root.classList.add('native-clean', 'closed', 'lw-stage-card'); app.host.rack.appendChild(w.root);
+  w.root.classList.add('closed', 'lw-stage-card'); app.host.rack.appendChild(w.root);
   const row = (cls, parent, ...cs) => { const r = el('div', 'row tight ' + cls, parent); for (const c of cs) r.appendChild(c.root); return r; };
   row('stage-frame', w.body, ui.frameSw);                  // native-ui.js turns FRAME and AXIS into their honest segs where they stand
   /* 041 S3 · THE FRAME CAN STAY (Josh: "have an option in stage where the either box or frame remains in UI full Hide mode (not hide/mouse-reveal)"):

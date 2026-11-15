@@ -59,7 +59,7 @@ body.rack-hidden #rackToggle { color: var(--acc); }
 #rackFav { top: 80px; font-size: 15px; line-height: 1; transition: opacity .28s ease; }
 body.rack-hidden #rackFav, body.rack-hidden #rackFavList { opacity: 0; pointer-events: none; }
 body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
-#rackFav:hover { color: var(--acc); }
+#rackFav:hover { color: var(--fg); }
 #rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
 .mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
 .mb-item:hover .fav-x { color: var(--acc2); }
@@ -71,9 +71,9 @@ body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* w
 body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); }
 body[data-theme="dark"] #notebook::before { background: hsl(0 0% 0% / .22); }   /* a shade behind the blur on DARK, the glass itself stays clear */
 .nb-head { padding: 16px 10px 12px 14px; }   /* 034 N2 (Josh: "padding from the top and a space between the body and the title") */
-.nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; outline: 0; }
+.nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; }
 .nb-title:focus { color: var(--acc); }
-.nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; outline: 0; }
+.nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; }
 .nb-subtitle:focus { color: var(--acc); }
 .nb-subtitle::placeholder { opacity: .6; }
 #notebook[data-face="projects"] .nb-titles, #notebook[data-face="projects"] .nb-title, #notebook[data-face="projects"] .nb-subtitle { visibility: hidden; }
@@ -97,23 +97,14 @@ body[data-theme="dark"] #notebook::before { background: hsl(0 0% 0% / .22); }   
                 that deleted them would be lying about what the next click can still do.
    0.3.1 · S4 listed every row the ring keeps (≤ 61) in a 250 px scroller; since 017 R2 the card shows twelve rows a page
    and the rack pager (pager.js) turns the rest — no window in a rack scrolls (Josh). */
-.hist-list { gap: 1px; overflow: visible; }   /* the kit sheet's `overflow: auto` (its floating window) is not a rack card's */
-.hist-row { display: flex; gap: 8px;
-  border-left: 2px solid transparent; background: transparent;
-  padding: 3px 6px; color: var(--fg); font: 12px/1.4 var(--font-ui); }
-.hist-row:hover { background: hsl(0 0% 50% / .12); }
-.hist-i { flex: 0 0 auto; min-width: 1.6em;
-  font: var(--fs-micro)/1.4 var(--font-mono); font-variant-numeric: tabular-nums; }
-.hist-lbl { flex: 1 1 auto; }
-.hist-current { border-left-color: var(--acc); color: var(--acc); }
+/* 044 AV1 (L10, L139): the row is the kit's whole (mir/history/history.css: its box, its hover, the standing row's frost face with accent ink, the future's fade) */
+.hist-list { overflow: visible; }   /* the kit sheet's `overflow: auto` (its floating window) is not a rack card's */
 /* the stepped-back future: still there, still clickable, and visibly spent */
-.hist-future { opacity: .42; }
 .hist-future .hist-lbl { text-decoration: line-through; text-decoration-thickness: 1px; }
 .hist-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
 .hist-actions > .trig { width: 100%; min-width: 0; padding-inline: 5px; }
 
 .nb-tools button { font-size: var(--fs-lead); }
-.nb-tools button:hover { color: var(--acc); }
 .nb-text { font: var(--fs-lead)/1.5 var(--font-ui); }
 .nb-foot { letter-spacing: var(--tr-wide); }
 .nb-foot button, .nb-dump, .ab-home { border-radius: var(--r-md); font: var(--w-heavy) var(--fs-small) var(--font-ui); letter-spacing: var(--tr-wider); }
@@ -202,13 +193,12 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
    It is `display: none`, so the pill still has exactly twelve seats and B74's claim stays true. */
 #transport.mini .fx { display: none; }
 .mb-btn { border-radius: 7px; letter-spacing: var(--tr-wider); }
-.mb-btn:hover { background: transparent; color: var(--acc); }
 .mb-item { text-align: left; background: transparent; color: var(--fg-soft); border-radius: 6px; cursor: pointer; }
 .mb-key { letter-spacing: var(--tr-wide); }
 /* 044 KV2 · the menu row is the kit's whole (MIR 1.6.0-alpha.45 the wash on the cursor row, alpha.46 a picture's seat in every row): the hover face, the check
    gutter and 039 X8's ONE COLUMN OF WORDS that stood here are the kit's now, and went */
 
-.mb-item:disabled { color: var(--dim); opacity: .45; cursor: default; }                    /* nothing to UNDO / REDO: the item is there and says so */
+.mb-item:disabled { color: var(--dim); opacity: var(--state-disabled, .38); cursor: default; }                    /* nothing to UNDO / REDO: the item is there and says so */
 .mb-item:disabled:hover { background: transparent; color: var(--dim); }
 .sp-head .note { display: none; }
 .sp-head .trig { flex: 1 1 0; min-width: 0; padding: 0 6px; }
@@ -459,12 +449,12 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
   background: var(--glass-well); touch-action: none; cursor: grab; image-rendering: auto; }
 .slice-c:active { cursor: grabbing; }
 /* 0.5.3 M12 · PALETTE, SHORTER (material.js): no −π…π ticks, the ARG ψ field hidden, the reader under ROTATE in place of its "turn", the float over the selected stop, INVERT's half disk turned over when ON */
-.native-clean[data-id="palette"] .mir-ramp-ticks:empty, .native-clean[data-id="palette"] .mir-ramp-at { display: none; }
-.native-clean[data-id="palette"] .mir-ramp-verbs .k > .k-val, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-lbl, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-sub { display: none; }
-.dev.lean .dev-body .mir-ramp-verbs .k > .ro, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro { display: block; padding: 0; background: none; border: 0; box-shadow: none; text-align: center; }   /* LEAN hides every .ro; this one is the reader that replaced "turn", so it stays */
-.native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-val { font-size: var(--fs-micro); min-height: 0; }
-.native-clean[data-id="palette"] .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); }
-.native-clean[data-id="palette"] .pal-invert.on svg { transform: rotate(180deg); }
+.dev[data-id="palette"] .mir-ramp-ticks:empty, .dev[data-id="palette"] .mir-ramp-at { display: none; }
+.dev[data-id="palette"] .mir-ramp-verbs .k > .k-val, .dev[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-lbl, .dev[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-sub { display: none; }
+.dev.lean .dev-body .mir-ramp-verbs .k > .ro, .dev[data-id="palette"] .mir-ramp-verbs .k > .ro { display: block; padding: 0; background: none; border: 0; box-shadow: none; text-align: center; }   /* LEAN hides every .ro; this one is the reader that replaced "turn", so it stays */
+.dev[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-val { font-size: var(--fs-micro); min-height: 0; }
+.dev[data-id="palette"] .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); }
+.dev[data-id="palette"] .pal-invert.on svg { transform: rotate(180deg); }
 .pal-float { position: absolute; bottom: 3px; left: clamp(36px, calc(var(--at, 0) * 100%), calc(100% - 36px)); transform: translateX(-50%); padding: 0 4px; border-radius: var(--r-sm); font-style: normal; font-size: var(--fs-micro); font-variant-numeric: tabular-nums; white-space: nowrap; color: hsl(0 0% 100%); background: hsl(0 0% 0% / .6); z-index: 3; cursor: default; }
 .pal-color { width: 46px; height: var(--touch); padding: 2px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); }
 .ladder-c { position: relative; height: 96px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
@@ -674,8 +664,8 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 /* 018 C1 · SPECTRUM's A ↔ B (lab/windows/transition.js): ONE CLEAR, the bare trash glyph after B (the .sp-presave way: no chrome), dim while nothing is stored */
 .native-ab > .sp-abclear { display: grid; place-items: center; width: 22px; height: 22px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: none; color: var(--fg); opacity: .6; cursor: pointer; }
 .native-ab > .sp-abclear > svg { width: 16px; height: 16px; }   /* 021 V2: the table's trash, an SVG */
-.native-ab > .sp-abclear:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
-.native-ab > .sp-abclear:disabled { opacity: .2; cursor: default; color: var(--fg); }
+.native-ab > .sp-abclear:is(:hover, :focus-visible) { opacity: 1; }
+.native-ab > .sp-abclear:disabled { opacity: var(--state-disabled, .38); cursor: not-allowed; }
 
 /* THE STAGE TEXT (INFORMATIONAL since 0.5.3 M9; 0.5.1 D1: one block of the kit's INFORMATIONAL layer, lab/shell/stage-words.js initStageText) wears the kit's ink,
    shade and serif at the kit's seat; beneath every window (z 20 < rack 30 < #floats 32: the kit's root has none), never a pointer
@@ -772,11 +762,11 @@ body.menu-open #widgets { visibility: hidden; }
 .mir-render[data-seat="card"] .sr-subject-head, .mir-render[data-seat="card"] .sr-verbs { grid-column: 1 / -1; }
 .mir-render[data-seat="card"] .sr-verbs .trig { flex: 1 1 0; }
 
-/* iteration 008 S · FIELD (lab/windows/static-field.js): the IMPULSE fold's head is its label and the one chevron (a native-clean row would
+/* iteration 008 S · FIELD (lab/windows/static-field.js): the IMPULSE fold's head is its label and the one chevron (a card's row would
    stretch the chevron like a trigger); SPECTRUM's ‹ PRESET › head is one whole line */
 .lw-field-head { justify-content: space-between; }
 .lw-field-head > .grp-lbl { flex: 1 1 auto; margin: 0; }
-.native-clean .row > .trig.lw-fold { flex: 0 0 30px; }
+.dev .row > .trig.lw-fold { flex: 0 0 30px; }
 .sp-preset > .mir-step { flex: 1 1 auto; }
 /* 036 P1 · 037 H6 · BUTTONS · PAINT (paint-stroke.js strokeButton) in the head seat VISUALS left: ONE toggle button whose glyph swaps (FILL ALL ↔ EMPTY's law) */
 .sp-head > .trig.sp-stroke { min-width: 0; padding: 0; display: grid; place-items: center; }
@@ -796,7 +786,7 @@ body.menu-open #widgets { visibility: hidden; }
 .mir-pick-i.coming[data-id="#user"], .mir-pick-i.coming[data-id="#built"] { font-size: var(--fs-micro); letter-spacing: var(--tr-wider, .12em); opacity: .6; cursor: default; }
 .mir-pick-i:has(> .sp-prex) { display: flex; align-items: center; gap: 14px; }
 .mir-pick-i > .sp-prex { margin-left: auto; padding: 0 4px; font-size: 14px; line-height: 1; opacity: .55; cursor: pointer; }
-.mir-pick-i > .sp-prex:hover { opacity: 1; color: var(--acc); }
+.mir-pick-i > .sp-prex:hover { opacity: 1; }
 /* § iteration 015 S1 · THE COMPACT HAMILTONIAN (windows/spectrum.js): the group's head is its label and the fold's chevron; inside, ‹ SYSTEM › and one
    tight row per system — 52-px knobs, a knob-sized seg (`.sp-vseg`: its options in a column) and LAUNCH / BOUNCE as two small trigs in one column */
 .dev[data-id="spectrum"] .sp-ham > .lw-field-head { margin: 2px 0; }
