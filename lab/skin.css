@@ -938,12 +938,12 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 /* ═══ 022 F2 · A ROW FITS (MIR 1.5.6-alpha.6 `.row.fit`; research/iteration-022/F-BUILD.md) ═══════════════════════════════════════════
  * The control rows of SETTINGS, PALETTE, WAVE, CAMERA, CLIP, SPECTRUM's Hamiltonian (and GAS), MOLECULES, INFORMATIONAL, FIELD, EQUALIZER and
  * the NODES cards are the kit's fit row: auto-fit cells of --cell-min, a knob's face scaled to its cell.  λWAVES caps the face at the plain
- * knob's 34 px, so a fit row never adds height; a row whose labels are long, or whose columns mean something, sets its own --cell-min, so
+ * knob's 34 px and floors it there (044 AF, L73: one dial in every card, 34; a bar's is 30); a row whose labels are long, or whose columns mean something, sets its own --cell-min, so
  * every label stays whole (022 H2).  A switch or a seg that needs more than one cell spans them here.  The exceptions keep their own grids:
  * CURVES, the camera's sphere column and PAN pad, SPECTRUM's lanes and their vertical phase/rate stacks, the molecule shelf, the ramp,
  * the EQ faders, NODES' plane and the CONTROL SURFACE. */
 :root { --knob-max: 34px; }
-.dev:where(:not([data-id="transport"])) .row.fit, .lw-info-card .grp > .row.fit, .mir-camera .row.fit, .dev[data-id="spectrum"] .sp-ham-body > .row.fit { gap: var(--row-gap, 4px) 4px; }
+.dev:where(:not([data-id="transport"])) .row.fit, .lw-info-card .grp > .row.fit, .mir-camera .row.fit, .dev[data-id="spectrum"] .sp-ham-body > .row.fit { --knob-min: var(--knob, 34px); gap: var(--row-gap, 4px) 4px; }
 .mir-camera .row.fit { margin: 0; grid-template-columns: repeat(auto-fit, minmax(min(var(--cell-min, 40px), 100%), 1fr)); }   /* over the panel's 72-px verbs */
 .row.fit > .lw-fold { justify-self: end; width: 30px; }
 .dev .row.fit > .sp-vseg { grid-column: auto; width: 100%; max-width: 58px; justify-self: center; min-width: 0; }
@@ -952,7 +952,7 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .dev[data-id="observer"] .wave-row-2 { --cell-min: 72px; }
 /* 023 R3 A ROW IS EVEN: ESP's two rows share three columns — SIZE · RADIUS · MAP ONLY over PROBE · RANGE · LIVE · SLOW, knob over knob,
    the switch in the third; ISO | SAS | SES the whole line between them */
-.dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); --knob-max: 29px; }   /* LIVE · SLOW whole on one line; the four faces one size, the row no taller */
+.dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); }   /* LIVE · SLOW whole on one line */
 .dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw { padding-inline: 6px; justify-content: flex-start; } .dev[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw .sw-lbl { white-space: nowrap; }
 .dev[data-id="observer"] .wave-row-7 > .segw { grid-column: 1 / -1; }
 /* SETTINGS: the stage's seat beside STAGE · GAMMA; DITHER's seg and STRENGTH on one line; DOMAIN AUTO beside WIDTH */
