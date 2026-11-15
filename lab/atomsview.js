@@ -144,7 +144,7 @@ export function createAtoms(host, api) {
     const D = rel.get(cache.A.Z) || null;                                 // RELATIVITY Δ, once pressed for this element: a column at the right
     const wD = D ? Math.ceil(Math.max(...[...D.values()].map((d) => g.measureText(relFmt(d)).width), g.measureText('Δrel').width)) : 0;
     const left = 6, occX = left + 30, dX = W - 4, evX = D ? dX - wD - 8 : dX;
-    const wEh = Math.ceil(Math.max(...sh.map((s) => g.measureText(s.eps.toFixed(5)).width), g.measureText('ε hartree').width));
+    const wEh = Math.ceil(Math.max(...sh.map((s) => g.measureText(s.eps.toFixed(5)).width), g.measureText('ε Eh').width));
     const wEv = Math.ceil(Math.max(...sh.map((s) => g.measureText((s.eps * HARTREE_EV).toFixed(1)).width), 14));
     const ehX = evX - wEv - 8, barX = occX + 6, barW = Math.max(16, ehX - wEh - 6 - barX);
     const head = 8, bot = H - 12, rowH = Math.min(19, (bot - head - 4) / Math.max(1, n)), y0 = head + 4 + ((bot - head - 4) - rowH * n) / 2;
@@ -152,7 +152,7 @@ export function createAtoms(host, api) {
     const lg = sh.map((s) => Math.log10(Math.max(1e-6, Math.abs(s.eps))));
     const lo = Math.min(...lg), hi = Math.max(...lg), span = Math.max(1e-9, hi - lo);
     g.fillStyle = rgba(dim, 0.75); g.textAlign = 'left';
-    g.fillText('SHELL', left, head); g.textAlign = 'right'; g.fillText('ε hartree', ehX, head); g.fillText('eV', evX, head); if (D) g.fillText('Δrel', dX, head);
+    g.fillText('SHELL', left, head); g.textAlign = 'right'; g.fillText('ε Eh', ehX, head); g.fillText('eV', evX, head); if (D) g.fillText('Δrel', dX, head);
     const bars = [];
     for (let i = 0; i < n; i++) {
       const j = n - 1 - i, s = sh[j], y = y0 + rowH * (i + 0.5), c = mix(A, B, n < 2 ? 0 : j / (n - 1));

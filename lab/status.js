@@ -36,7 +36,7 @@ export function statusOf({ owner = 'molecule', record = null, sol = null, oracle
   const o = oracle || (record && record.oracle) || null, st = record && record.status ? record.status.energy : o ? 'MEASURED' : 'UNKNOWN', word = STATE_WORD[st] || 'UNCHECKED';
   const d = o && Number.isFinite(o.delta) ? o.delta : o && sol ? Math.max(Math.abs(sol.energy - o.energy), Math.abs(o.energy) * Number.EPSILON) : NaN, geometry = (record && record.geometry) || null;
   const energy = join(st === 'IMPORTED' ? 'energy is PySCF\'s own' : Number.isFinite(d) ? `energy agrees with PySCF to ${up(Math.abs(d))} Eh` : '', lda && `∫ρ = ${sol.intRho.toFixed(6)}`);
-  const out = said(word, view === 'density' ? join(energy, `picture good to ${+(FIELD_LAW.density.worst * 100).toPrecision(1)} % of ρmax`)
+  const out = said(word, view === 'density' ? join(energy, `picture good to ${+(FIELD_LAW.density.worst * 100).toPrecision(1)}% of ρmax`)
     : view === 'esp' && esp ? join(`${esp.N}³ grid`, VIEW.esp[1], `${esp.min < 0 ? '−' : ''}${Math.abs(esp.min).toFixed(2)} a.u. min`) : VIEW[view][1],
     join(word, energy, geometry && geometry !== 'experimental' ? 'geometry computed, not measured' : ''), geometry);
   if (lda) out.lda = 'RKS LDA' + (Number.isFinite(d) ? ' · PySCF ' + up(Math.abs(d)) : '');   // the export caption's method words

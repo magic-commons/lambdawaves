@@ -143,7 +143,7 @@ function vibrance(V, id, src) {
 
 /** 020 X4 · FADE AND MASK: the foot of every node but a LAYER (whose AMOUNT is its fade) — lab/nodes-compile.js folds FADE; a MASK makes the
  *  node its own run.  FADE and SOFT are knobs, so modulation targets (`nodes.<node>.fade`, `.soft`) */
-export const FOOT = [{ k: 'fade', label: 'FADE', min: 0, max: 1, home: 1, hint: 'The node mixed back with its input: 100 % is all of it', fmt: (x) => Math.round(x * 100) + ' %' },
+export const FOOT = [{ k: 'fade', label: 'FADE', min: 0, max: 1, home: 1, hint: 'The node mixed back with its input: 100% is all of it', fmt: (x) => Math.round(x * 100) + '%' },
   { k: 'mask', label: 'MASK', home: 'none', ordered: true,   /* 044 K3: six short options stay a stepper (kit alpha.24 would set two rows of three) */ hint: 'MASK — only the lights, darks, mids, centre or edges', options: ['none', 'lights', 'darks', 'mids', 'centre', 'edges'].map((id) => ({ id, label: id.toUpperCase() })) },
   { k: 'soft', label: 'SOFT', min: 0, max: 1, home: 0.5, hint: 'The mask\'s edge: 0 hard, 1 a long ramp' },
   /* 038 N6 · A NODE HAS A TARGET (nodes-compile.js): BOTH · STAGE (the background) · OBJECT (the orbital and the molecule, 038 F8), appended — a file

@@ -618,7 +618,7 @@ export function createChem(host, api) {
       const net = P.recordOnly || !!wantRef, o = P.recordOnly ? optOf(P.id) : null;
       if (press && net && !have.get(hash)) persistOnce().then(storageNote);      // the user's install press: persist() asked once (lab/library.js)
       const got = await fetchRecord(hash, { network: net, onProgress: (n, t) => {
-        const pc = t ? Math.round(100 * n / t) + ' %' : Math.round(n / 1024) + ' KB';
+        const pc = t ? Math.round(100 * n / t) + '%' : Math.round(n / 1024) + ' KB';
         if (seq === solveSeq) status(`downloading ${P.name}'s record… ${pc}`, 'warn');
         if (dlBusy) ringTo(t ? n / t : 0.5);   // iteration 008 V: the glyph's press — the kit's ring follows the record's bytes
         if (o) { o.label = optionLabel(P, false).replace('DOWNLOAD', 'downloading ' + pc); mList.setItems(mRows); } } });
@@ -1027,7 +1027,7 @@ export function createChem(host, api) {
     if (why || !flowOn) { conP = null; roCon.set('—'); roCon.setSub(why); conCv.width = 0; return; }
     if (P === conP) return; conP = P;
     roCon.set(P.defect.toFixed(3));
-    roCon.setSub(roCon.root.title = `Basis defect · ${P.M} pts · ${Math.round(100 * P.core)} % near nuclei · ${P.ms.toFixed(0)} ms` + (F ? ` · K ${F.w.length}` : ''));
+    roCon.setSub(roCon.root.title = `Basis defect · ${P.M} pts · ${Math.round(100 * P.core)}% near nuclei · ${P.ms.toFixed(0)} ms` + (F ? ` · K ${F.w.length}` : ''));
     const N = Math.round(Math.sqrt(P.M)), W = conCv.clientWidth || 240, Hh = 112, d = Math.min(2, window.devicePixelRatio || 1), A = accentRGB(conG, 1), B = accentRGB(conG, 2);
     let mx = 0; for (let k = 0; k < P.M; k++) mx = Math.max(mx, Math.abs(P.r[k]));
     const img = new ImageData(N, N); for (let k = 0; k < P.M; k++) { const v = P.r[k], c = v > 0 ? A : B, i = ((N - 1 - Math.floor(k / N)) * N + (k % N)) * 4; img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = Math.round(255 * Math.sqrt(Math.abs(v) / (mx || 1))); }

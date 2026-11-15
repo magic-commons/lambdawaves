@@ -24,7 +24,7 @@ export function createEqualizerCard(app) {
   const eqStep = stepper({ aria: 'Equalizer preset', items: EQ_PRESETS.map((p) => ({ id: p.id, label: p.label })), value: eq.preset, cls: 'mol-step', onChange: (id) => { eq.setPreset(id); syncEq(true); hNote(); } });
   ui.eqPick = (id) => { eqStep.set(id); eq.setPreset(id); syncEq(true); hNote(); };   // 0.6.6 G1: the stepper's road for THE VERB TABLE's switch
   const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'eq-faders', mix);
-  const eqFd = Array.from({ length: EQ_SHELLS }, (_, i) => i).map((i) => fader({ label: 'n ' + (i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
+  const eqFd = Array.from({ length: EQ_SHELLS }, (_, i) => i).map((i) => fader({ label: 'n ' + (i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + '%', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
   eqHead.append(eqStep.root, eqRo.root); eqFd.forEach((f, i) => { hint(f.root, 'Shell n = {n} · lower it to fade its beats', { n: i + 1 }); rFd.appendChild(f.root); });   // 039 V7: the label is hidden (skin.css), the hint says n
   /* 017 X1 · AN EFFECT SHOWS ITS WINDOW: × or POWER OFF stands the table down (syncEq's `why`); a reopen re-arms it from the knobs */
   for (const t of ['devclose', 'devopen']) wEq.root.addEventListener(t, () => syncEq(false));   // 044 A2: the power press is the card's `onPower`, above

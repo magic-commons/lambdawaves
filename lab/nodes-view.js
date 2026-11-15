@@ -193,7 +193,7 @@ export function createView(parent, kind, M) {
   const SV = (tag, a, parent) => { const e = document.createElementNS(NS, tag); for (const n in a) e.setAttribute(n, a[n]); parent.appendChild(e); return e; };
   const paintHand = (q, v) => { const h = H.get(q.id); if (!h) return; const k = mixOf(T[q.type]), x = k ? clamp01(+(v === undefined ? q.values[k] : v)) : 0, arc = h.querySelector('.v');
     h.classList.toggle('nomix', !k); arc.setAttribute('stroke-dasharray', (x * 300).toFixed(1) + ' 360'); arc.style.visibility = x > 0.004 ? '' : 'hidden';
-    if (k) label(h.querySelector('.nodes-hand-val'), k === 'amount' ? 'AMOUNT {v} %' : 'MIX {v} %', { v: Math.round(x * 100) }); };   // 038 N8: the readout's words through label()
+    if (k) label(h.querySelector('.nodes-hand-val'), k === 'amount' ? 'AMOUNT {v}%' : 'MIX {v}%', { v: Math.round(x * 100) }); };   // 038 N8: the readout's words through label()
   function handOf(q) {
     const id = q.id; let h = H.get(id); if (h) return h;
     h = el('div', 'nodes-hand'); h.dataset.wire = id; h.title = 'The wire\'s MIX: drag · press, then wheel · Delete unplugs';

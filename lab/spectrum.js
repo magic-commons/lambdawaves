@@ -372,7 +372,7 @@ export function createSpectrum(host, api) {
       levelLine(g, left, right, yy, c, true);
       names.push({ y: yy, txt: lv.label, col: `rgba(${c[0]},${c[1]},${c[2]},1)`, lit: true, n, pop: pops[n] });
       hovers.push({ kind: 'line', key: 'L' + n, points: [left, yy, right, yy], lw: 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
-        info: `${lv.label}  ·  ${(pops[n] * 100).toFixed(1)} %  ·  E = ${lv.E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` });
+        info: `${lv.label}  ·  ${(pops[n] * 100).toFixed(1)}%  ·  E = ${lv.E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` });
     }
     /* THE GUTTER IS 44 px OF ONE COLUMN, AND E_n = −1/(2n²) BUNCHES (wave 46).  n3 … n6 fall inside 6 px of the
        E = 0 line on a 92 px card, so the names used to print straight over one another — "n3" and "n4" and
@@ -420,7 +420,7 @@ export function createSpectrum(host, api) {
       levelLine(g, left, right, yy, c, true);
       eigenHits.push({ y: yy, k: lv.k, pop: lv.pop });
       hovers.push({ kind: 'line', key: 'E' + lv.k, points: [left, yy, right, yy], lw: 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
-        info: `${lv.label}  ·  ${(lv.pop * 100).toFixed(lv.pop < 0.1 ? 1 : 0)} %  ·  λ = ${lv.E.toFixed(4)} Eh` });
+        info: `${lv.label}  ·  ${(lv.pop * 100).toFixed(lv.pop < 0.1 ? 1 : 0)}%  ·  λ = ${lv.E.toFixed(4)} Eh` });
       if (faint) continue;
       const ty = (lastTy - yy < LEAD) ? lastTy - LEAD : yy;
       if (ty < TOP) continue;                                                // out of room: the line still says it

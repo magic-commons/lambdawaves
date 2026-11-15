@@ -410,7 +410,7 @@ export function createStates(host, api) {
       if (r && r.laneRe && drive.laneKeys) {
         let kept = 0;
         drive.laneKeys.forEach((k, i) => { const c = lanes.get(k); if (!c) return; const a = Math.hypot(r.laneRe[i], r.laneIm[i]); c.amp = Math.min(1, a); c.phase = (((Math.atan2(r.laneIm[i], r.laneRe[i]) + energyOf(k) * r.t) % TAU) + TAU) % TAU; kept += a * a; });
-        status(`drive off — the lanes keep ${(100 * kept).toFixed(1)} % of the driven state; ${(100 * Math.max(0, 1 - kept)).toFixed(1)} % had leaked to states without a lane`, 'ok');
+        status(`drive off — the lanes keep ${(100 * kept).toFixed(1)}% of the driven state; ${(100 * Math.max(0, 1 - kept)).toFixed(1)}% had leaked to states without a lane`, 'ok');
       }
       drive.last = null; version++; pushedV = -1; syncLanes(); paint(); refreshDrive(); publishPopulations();
       if (on) push(now(), true);
@@ -450,7 +450,7 @@ export function createStates(host, api) {
     if (!song.samples) { roSong.set(m ? 'track missing · drop it again' : 'no track', m ? 'warn' : ''); roSong.setSub(m ? `${m.name} · the project keeps its name and hash, never the track` : 'FILE, or drop an audio file on this row: its waveform becomes the field E_z(t) on hydrogen'); return; }
     let best = null;
     if (c && song.omega > 0) for (const a of BASIS) if (c.re[a.index] ** 2 + c.im[a.index] ** 2 > 1e-3) for (const b of BASIS) if (b.m === a.m && Math.abs(b.l - a.l) === 1 && b.n !== a.n) { const dE = Math.abs(b.E - a.E); if (!best || Math.abs(dE - song.omega) < Math.abs(best.dE - song.omega)) best = { lo: a.E < b.E ? a : b, hi: a.E < b.E ? b : a, dE }; }
-    roSong.set(best ? `tuned: ${hz(song.omega)} Hz → ${best.lo.label}–${best.hi.label} (${song.omega >= best.dE ? '+' : ''}${((song.omega / best.dE - 1) * 100).toFixed(1)} %)` : m.name, song.on ? 'live' : '');
+    roSong.set(best ? `tuned: ${hz(song.omega)} Hz → ${best.lo.label}–${best.hi.label} (${song.omega >= best.dE ? '+' : ''}${((song.omega / best.dE - 1) * 100).toFixed(1)}%)` : m.name, song.on ? 'live' : '');
     roSong.setSub(m.name + (r ? ` · ‖c‖² − 1 = ${(r.norm - 1).toExponential(0)}` + (r.lag > song.dt && song.speed > 0 && rate > song.speed ? ` · the song runs at 1/${(rate / song.speed).toFixed(1)} of real time` : '') : ''));
   }
   function setDriveParam(name, v) {
@@ -510,7 +510,7 @@ export function createStates(host, api) {
     const rate = api.rate ? api.rate() : 0, lag = r && Math.abs(r.lag) > 1e-9;
     const pitch = (nk >= 0 ? ` · nearest ${label(nk)}, ${(drive.omega - ladder.omega[nk]).toFixed(4)} Eh off` : '') + ` · ${(drive.omega * rate / TAU).toFixed(0)} Hz · ${String(ladder && ladder.basis || '').toUpperCase().replace('-STAR', '*')}`
       + (lag && drive.speed > 0 && rate > drive.speed ? ` · the drive runs at 1/${(rate / drive.speed).toFixed(1)} of real time` : '');
-    roDrive.setSub(r ? `${rabi} · norm − 1 ${(r.norm - 1).toExponential(1)} · outside the lanes ${(100 * Math.max(0, 1 - held)).toFixed(2)} %` + (lag ? ` · catching up ${r.lag.toFixed(1)} a.u.` : '') + pitch : rabi + pitch);
+    roDrive.setSub(r ? `${rabi} · norm − 1 ${(r.norm - 1).toExponential(1)} · outside the lanes ${(100 * Math.max(0, 1 - held)).toFixed(2)}%` + (lag ? ` · catching up ${r.lag.toFixed(1)} a.u.` : '') + pitch : rabi + pitch);
   }
 
   /* ── the lanes: hydrogen's .sp-row, over the same kit nodes ───────────────────────────────────── */

@@ -92,7 +92,7 @@ async function work({ sw = null }, release) {
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches || /^(reduced|off)$/.test(document.documentElement.dataset.motion || '');
   const root = el('div', 'lw-loader', document.body); root.id = 'lwLoader'; root.setAttribute('role', 'progressbar'); root.setAttribute('aria-label', 'Loading λWAVES');
   root.setAttribute('aria-valuemin', '0'); root.setAttribute('aria-valuemax', '100'); root.setAttribute('aria-valuenow', '0');
-  const cv = el('canvas', 'ld-flag', root), pct = el('b', 'ld-pct', root, '0 %'), line = el('span', 'ld-line', root), skip = el('button', 'ld-skip', root, 'CONTINUE');
+  const cv = el('canvas', 'ld-flag', root), pct = el('b', 'ld-pct', root, '0%'), line = el('span', 'ld-line', root), skip = el('button', 'ld-skip', root, 'CONTINUE');
   skip.type = 'button'; skip.hidden = true; document.body.classList.add('lw-loading');
   const order = defrag(), at = new Float64Array(576).fill(-1);   // at[k]: when cell k was lit (its write-head brightness fades over 320 ms from there)
   let shown = 0, raf = 0, frac = 0, ended = false, gone = false;
@@ -125,7 +125,7 @@ async function work({ sw = null }, release) {
   const say = () => {
     const appB = P.app.done ? appW : P.app.of ? appW * Math.min(1, P.app.n / P.app.of) : 0;
     frac = Math.min(ended ? 1 : 0.995, (done + appB) / Math.max(1, total));
-    const p = Math.floor(frac * 100); pct.textContent = p + ' %'; root.setAttribute('aria-valuenow', String(p));
+    const p = Math.floor(frac * 100); pct.textContent = p + '%'; root.setAttribute('aria-valuenow', String(p));
     line.textContent = [P.app.done ? 'APP ✓' : 'APP ' + P.app.n + ' / ' + (P.app.of || '…'), P.faces.n < P.faces.of ? 'FONTS ' + P.faces.n + ' / ' + P.faces.of : 'FONTS ✓',
       'THE MENU ' + MB(P.wall.b), 'TUTORIAL ' + P.tut.n + ' / ' + P.tut.of, 'MOLECULES ' + P.mol.n + ' / ' + P.mol.of].join(' · ');
   };

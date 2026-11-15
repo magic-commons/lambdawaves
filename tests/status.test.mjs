@@ -26,7 +26,7 @@ function numerals(t, what) {
   rest = rest.replace(/^(\S+ · )?UHF ⟨S²⟩ (\d\.\d{3})/, (_, l, v) => { out.s2 = Number(v); return l || ''; });   // 0.7.1: the line's ⟨S²⟩ …
   rest = rest.replace(/⟨S²⟩ (\d\.\d{3}) \(exact (\d+(?:\.\d+)?)\)/, (_, v, x) => { out.s2 = Number(v); out.exact = Number(x); return ''; });   // … and the head's, with S(S+1)
   rest = rest.replace(/energy agrees with PySCF to (\de-\d+) Eh/, (_, v) => { out.dE = Number(v); return ''; });
-  rest = rest.replace(/picture good to (\d+(?:\.\d+)?) % of ρmax/, (_, v) => { out.rho = Number(v); return ''; });
+  rest = rest.replace(/picture good to (\d+(?:\.\d+)?)% of ρmax/, (_, v) => { out.rho = Number(v); return ''; });
   rest = rest.replace(/picture good to (\de-\d+) RMS \(worst voxel (\de-\d+)\)/, (_, a, b) => { out.rms = Number(a); out.worst = Number(b); return ''; });
   assert.ok(!/\d/.test(rest), `${what}: a numeral outside a sourced phrase: "${t}"`);
   return out;
@@ -42,7 +42,7 @@ assert.deepEqual({ ...STATE_WORD }, { MEASURED: 'NUMERICAL', IMPORTED: 'NUMERICA
 assert.equal(statusOf({}).word, 'UNCHECKED', 'no record and no oracle is UNCHECKED');
 assert.equal(statusOf({ record: { status: { energy: 'UNKNOWN' } } }).word, 'UNCHECKED');
 assert.equal(statusOf({ record: { status: { energy: 'CERTIFIED' } } }).word, 'UNCHECKED', 'a word the map does not know is not promoted');
-assert.equal(statusOf({ sol: { energy: -76.02 }, oracle: null }).line, 'DENSITY · UNCHECKED · picture good to 0.2 % of ρmax', 'a 6-31+G* solve: the catalogue carries no oracle for it');
+assert.equal(statusOf({ sol: { energy: -76.02 }, oracle: null }).line, 'DENSITY · UNCHECKED · picture good to 0.2% of ρmax', 'a 6-31+G* solve: the catalogue carries no oracle for it');
 assert.equal(statusOf({ owner: 'qho' }), null, 'an owner it cannot speak for gets no line');
 
 /* 3 · HYDROGEN (Q13): EXACT, its picture read from the law in its two metrics (§J-2: the RMS, not the 99.8 %-of-voxels 2e-5); PLAN §B's target, its state named */
@@ -84,7 +84,7 @@ for (const m of [...MOLECULES, ...RECORD_ONLY]) {
 assert.deepEqual(geo, { experimental: 2, 'optimised-here': 26, 'computed-reference': 9, draft: 1 }, 'the geometry classes: ' + JSON.stringify(geo));
 assert.equal(computed, 36, 'the heads that say "geometry computed, not measured"'); assert.equal(imported, 1, 'C₆₀ alone is IMPORTED');
 assert.equal(MOLECULES.length + RECORD_ONLY.length, 98);   // 0.7.1: + the seven open shells
-assert.match(live.H2O, /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2 % of ρmax$/, 'water: ' + live.H2O);
+assert.match(live.H2O, /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2% of ρmax$/, 'water: ' + live.H2O);
 assert.ok(statusCalls() > 0);
 
 /* 5 · THE CERTIFICATES (0.9.0 Z3): a sentence the glass prints from a solve's own fields, its typed bound held to the tolerance that made the field.

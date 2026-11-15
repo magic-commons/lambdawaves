@@ -83,7 +83,7 @@ export function createFilmCard(o) {
   made = createRenderCard({ id: 'render', recorder, loadingMark: false, prefix: PREFIX, defaults: { fps: 30, motion: 'still' }, say, even: true, ranges: [period],
     ...(o.files ? { files: o.files } : {}), ...(o.gallery && o.here ? { gallery: o.gallery, subject: subjectOf(o.here) } : {}),
     save: (blob, name) => handOver(blob, film.nameFor(name)),
-    picture: { formats: SCALES.map((s) => ({ id: s, label: '×' + s })), format: () => scale, setFormat: (v) => { scale = v; ls.set('scale', v); },
+    picture: { formats: SCALES.map((s) => ({ id: s, label: s + '×' })), format: () => scale, setFormat: (v) => { scale = v; ls.set('scale', v); },
       size: () => ({ w: Math.round(cv.width * scale), h: Math.round(cv.height * scale) }), save: (held) => handOver(held.blob, held.name), stale: (held) => held.key !== o.key(),
       async capture() { const r = await o.capture.picture({ scale: +scale }); if (!r || r.ok === false) throw new Error(String((r && r.error) || 'no picture')); r.key = o.key(); return r; } },
     sections(wrap) {

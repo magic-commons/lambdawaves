@@ -102,8 +102,8 @@ export function createFlow(fieldShellsList, call = null) {
     /** the REPAIR and GATED readouts: [value, sub, value, sub] */
     said() {
       if (!info) return ['—', mode === 'balanced' ? 'BALANCED · solving' : 'AS COMPUTED', '—', ''];
-      const g = [Math.round(100 * info.gated) + ' %', `of tracer steps refused by the floor ρ > ${+floor.toPrecision(2)} (${floorWhy}); a trail fades over the decade above it`];
-      return rep ? [(100 * info.kinetic).toFixed(1) + ' %', 'of the current’s kinetic energy · BALANCED · continuity closed on the grid · residual ' + info.residual.toExponential(1) + ' (relative)', ...g]
+      const g = [Math.round(100 * info.gated) + '%', `of tracer steps refused by the floor ρ > ${+floor.toPrecision(2)} (${floorWhy}); a trail fades over the decade above it`];
+      return rep ? [(100 * info.kinetic).toFixed(1) + '%', 'of the current’s kinetic energy · BALANCED · continuity closed on the grid · residual ' + info.residual.toExponential(1) + ' (relative)', ...g]
         : [info.defect.toFixed(2), 'the finite-basis defect ‖∂ρ/∂t + ∇·j‖/‖∂ρ/∂t‖ on the grid (not an identity in a finite basis)', ...g];
     },
   };

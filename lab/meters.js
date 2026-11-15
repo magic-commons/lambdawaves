@@ -8,7 +8,7 @@ export function createMeters(host, src = null, measure = null) {
   const norm = readout({ label: 'NORM', value: '—' }); grid.appendChild(norm.root);
   /* 039 F3 (V-REVIEW 10, X5's road): in the 274-px card NORM's, t's and MODES' labels were cut ("NORM ⟨ψ|ψ⟩^…") — the word that fits, the hint the whole */
   hint(norm.root, 'The norm ⟨ψ|ψ⟩^½: 1 while nothing is lost');
-  const energy = readout({ label: '⟨E⟩  hartree', value: '—', sub: '' }); grid.appendChild(energy.root);
+  const energy = readout({ label: '⟨E⟩  Eh', value: '—', sub: '' }); grid.appendChild(energy.root);
   const tlog = readout({ label: 't  a.u.', value: '—', sub: '' }); grid.appendChild(tlog.root); hint(tlog.root, 'The logical time t in atomic units; below it in attoseconds');
   const auto = readout({ label: '|⟨ψ(0)|ψ(t)⟩|  AUTOCORR', value: '—', cls: 'two' }); grid.appendChild(auto.root);
   const abar = el('div', 'abar', auto.root); const abarI = el('i', '', abar);
@@ -36,7 +36,7 @@ export function createMeters(host, src = null, measure = null) {
     const side = r.above ? `ρ > exact at ${r.above} (${r.aboveF32 ? r.aboveF32 + ' past' : 'within'} f32)` : 'ρ ≤ exact everywhere';   // the one-sided law, as read
     floor.set(psi ? `MEASURED ${r.N}³ · RMS ${x1(r.rms)} · worst ${x1(r.worst)}` : `PROBE ${r.probe} · ${r.N}³ · |Δρ|/ρ RMS ${x1(r.rms)} · worst ${x1(r.worst)}`, 'ok');
     floor.setSub(`${psi ? x1(r.relToMax) + ' of max|ψ|' : caught ? `the frame it caught (t ${r.t.toFixed(2)})` : r.normal + ' f16-normal'} · ${r.mode} · ${side} · ${ms}\n${CERT}`);
-    floor.root.title = `${TITLE} — measured: ${r.voxels} voxels${psi ? '' : `, ${r.normal} with an f16-normal √ρ`} · 99.8 % ≤ ${x1(r.p998)} · rounding: of ${led.disc} components where the modes disagree, ${led.rtz} toward zero, ${led.rne} to nearest`
+    floor.root.title = `${TITLE} — measured: ${r.voxels} voxels${psi ? '' : `, ${r.normal} with an f16-normal √ρ`} · 99.8% ≤ ${x1(r.p998)} · rounding: of ${led.disc} components where the modes disagree, ${led.rtz} toward zero, ${led.rne} to nearest`
       + ` · largest (ρ − stored ρ)/ρ ${x1(r.deficit)} where the components are f16-normal (the law: 2·2⁻¹⁰ = 2.0e-3)${caught ? ` · t ${r.t.toFixed(2)}` : ''} · readback ${r.readMs} ms of ${r.ms} ms`;
   }
   const status = readout({ label: 'STATUS', value: '—', cls: 'wide' }); grid.appendChild(status.root);

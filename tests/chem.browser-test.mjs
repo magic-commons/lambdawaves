@@ -79,7 +79,7 @@ try {
      UNCHECKED), the solve's identity (P1), derivatives UNKNOWN, the engine's limits; the INFORMATIONAL STATUS row reads the same line */
   judge('L1 chem.capability(): water NUMERICAL from its kept status, the solve\'s identity, derivatives UNKNOWN, limits 2 / 36 / 128 / 768, the STATUS row the same line',
     !!l1.cap && l1.cap.kept && l1.cap.identity && l1.cap.word === 'NUMERICAL' && l1.cap.derivatives === 'UNKNOWN' && l1.cap.caps === null && l1.cap.row === l1.cap.line
-    && /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2 % of ρmax$/.test(l1.cap.line)
+    && /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2% of ρmax$/.test(l1.cap.line)
     && JSON.stringify(l1.cap.limits) === JSON.stringify({ lmax: 2, Z: 36, densityAO: 128, orbitalAO: 768 }), l1.cap);
   judge(`L1 H₂O energy = ${H2O.energy} within 1e-8`, near(l1.energy, H2O.energy, 1e-8), { energy: l1.energy, delta: l1.energy - H2O.energy });
   judge('L1 H₂O solve in ≤ 5 s off the frame thread', l1.ms <= 5000 && l1.local === false, { ms: +l1.ms.toFixed(0), local: l1.local, status: l1.status });

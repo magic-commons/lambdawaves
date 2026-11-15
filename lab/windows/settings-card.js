@@ -68,7 +68,7 @@ export function createSettingsCard(app) {
     }
     app.hooks.setStageColour = setStageColour;
     app.hooks.setStageFollow = setStageFollow;
-    ui.stageK = knob({ label: 'STAGE', title: 'How much of your colour the stage wears; 0 % is the theme', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
+    ui.stageK = knob({ label: 'STAGE', title: 'How much of your colour the stage wears; 0% is the theme', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
     app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); if (x === app.state.stageMix) return x; ui.stageK.set(x); setStageMix(x); return x; };   // 029 M1: the value in force writes nothing
     { const seat = el('div', 'stage-seat'); ui.stageSeat = { root: seat };   // 037 T1: the seat, STAGE and GAMMA are seated in STAGE (lab/stage-window.js)
       /* 044 A3.5 (L55, REVIEW-B B10; Josh's control language: a picked colour is the kit's swatch): the STAGE colour was the platform's bare colour
@@ -258,7 +258,7 @@ export function createSettingsCard(app) {
     /* 036 G5b (chain K's FOR-SOS): STROKE — the kit's look key `stroke` (0–1 by .05; MIR OPTIONS › CONTROLS' 0–100 % knob; λWAVES' home 0), a
        second face of the look store as the rows above; shown only where the kit carries the key (MIR 1.5.7-alpha's door) */
     if (look.get('stroke') !== undefined) {
-      const k = knob({ label: 'STROKE', title: 'The controls’ outline: 0 % none', min: 0, max: 100, step: 5, value: Math.round((look.get('stroke') || 0) * 100), fmt: (v) => Math.round(v) + ' %',
+      const k = knob({ label: 'STROKE', title: 'The controls’ outline: 0% none', min: 0, max: 100, step: 5, value: Math.round((look.get('stroke') || 0) * 100), fmt: (v) => Math.round(v) + '%',
         onChange: (v) => look.set({ stroke: Math.round(v / 5) * 5 / 100 }) });
       paints.push(() => { const v = Math.round((look.get('stroke') || 0) * 100); if (k.get() !== v) k.set(v); }); row(more, k); }
     const Q = (...ks) => row(more, ...ks.map((k) => face(ui[k])));

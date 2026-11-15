@@ -61,7 +61,7 @@ export function createBadges({ dom, accept, field, reg, mat, clock, domain, qual
        governed one is already on the NUMERICAL badge and in the PERFORMANCE readouts, where a number
        that moves by itself belongs. */
     const where = getSpace() === 'p' ? `momentum space, ${quality.res}³ grid` : `${quality.res}³ grid over ±${half} ${H.lengthUnit}`;
-    const modes = `${rs.rendered} of ${rs.populated} modes, ${(rs.coveredFraction * 100).toFixed(0)} % of the norm` + (rs.masked ? ` (${rs.masked} muted)` : '');
+    const modes = `${rs.rendered} of ${rs.populated} modes, ${(rs.coveredFraction * 100).toFixed(0)}% of the norm` + (rs.masked ? ` (${rs.masked} muted)` : '');
     const law = reg.field.Fz !== 0 ? `${H.short} + F z, F = ${reg.field.Fz.toExponential(1)}, ${reg.P && reg.P.stark ? 'across shells' : 'within each shell'}`
       : reg.field.Bz !== 0 ? `${H.short} + (B/2) L_z, B = ${reg.field.Bz.toFixed(4)}, diagonal` : H.label;
     const when = clock.playing ? 'playing' : `paused at t = ${clock.t.toFixed(2)} a.u.`;
