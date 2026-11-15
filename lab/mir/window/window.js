@@ -214,6 +214,9 @@ export function clearSeat(box, { avoid = [], view, top = 0, gap = 8 }) {
  *  factory, as windowGlyphs names their glyphs.  createWindow({ avoid }) is one window's own answer and wins; `avoid: false` opts one out. */
 let AVOID = null;
 export function windowAvoid(fn) { AVOID = typeof fn === 'function' ? fn : null; }
+/** avoidOf(win) (1.6.0-alpha.87) → the seen rects the app's windowAvoid names for `win`, or [] — for a window that keeps its own seat
+ *  (PATTERN, anchored on its ENV device) and still stops above what the app keeps clear */
+export function avoidOf(win) { let r = null; try { r = AVOID ? AVOID(win) : null; } catch (err) { console.warn('window: avoid', err); } return Array.isArray(r) ? r.filter(Boolean) : []; }
 export function windowGlyphs(table) { for (const [id, g] of Object.entries(table || {})) if (typeof g === 'string' && g) NAMED.set(id, g); }
 
 function titleBar(doc, root, title, onClose, glyph) {

@@ -479,8 +479,8 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
 .k:focus-visible .k-dial { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 .k:focus-visible { outline: none; }
 /* 1.6.0-alpha.41 · THE RING REACHES THE FINDER (λWAVES 044, L62): its rows showed the browser's own ring and its search none.  Both wear the
-   house ring, drawn inside the box (the list clips its rows, the field is the pane's edge).  `:focus:focus-visible` weighs one more than the
-   picker's own `.wp-search:focus { outline: 0 }`, which loads later. */
+   house ring, drawn inside the box (the list clips its rows, the field is the pane's edge).  1.6.0-alpha.83 · THE FINDER'S FIELD WEARS THE RING:
+   window-picker.css is in no layer, so its `.wp-search:focus { outline: 0 }` beat this rule whatever its weight; that line is gone. */
 .mir-window-picker :is(.wp-row, .wp-search):focus:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -2px; }
 @media (prefers-reduced-motion: reduce) { .k:hover .k-dial, .trig:hover { translate: none; } }   /* the hover keeps its lighter face; the lift is travel */
 

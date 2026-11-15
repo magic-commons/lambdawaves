@@ -211,7 +211,8 @@
   font-size: var(--tl-action-size); letter-spacing: var(--tl-action-track); }
 .mir-win.mir-timeline .tl-toolbar .trig:not(.on) { color: var(--ink-key); }   /* BASINS: the bar's words are the key ink (.86), as the transport's */
 .mir-win.mir-timeline .tl-action.tl-icon { display: inline-flex; align-items: center; justify-content: center; min-width: var(--tl-icon-min); }
-.mir-win.mir-timeline .tl-action.tl-icon svg { width: var(--tl-icon); height: var(--tl-icon); display: block; flex: none; }
+.mir-win.mir-timeline .tl-action.tl-icon svg,
+.tl-pop .trig.tl-row svg { width: var(--tl-icon); height: var(--tl-icon); display: block; flex: none; }
 /* ONE SEAT LAW FOR THE BAR (1.5.6-alpha.24, T15): EDIT · SELECT · SCRUB · SLICE are round discs of one size; every button of the
    bar moves as the kit's chips do (THE CHIPS' MOTION, 1.5.6-alpha.9): hover 6 % larger, a press sinks to 92 % */
 .mir-win.mir-timeline button.tl-action:is(.tl-tool, .tl-modes-chip) { width: var(--tl-action-h); min-width: var(--tl-action-h); padding: 0; border-radius: 50%; }
@@ -411,7 +412,6 @@
 .tl-pop .trig { min-height: var(--tl-pop-trig-h); font-size: var(--tl-pop-trig-size); }
 /* a folded tool's row in ⋯'s list: its icon (when it has one), then its word */
 .tl-pop .trig.tl-row { display: flex; align-items: center; gap: var(--tl-pop-row-gap); }
-.tl-pop .trig.tl-row svg { width: var(--tl-icon); height: var(--tl-icon); display: block; flex: none; }
 /* THE MODE MENU (1.5.7-alpha.49, λWAVES 041 T1): FL's context tool-menu — MODE, nine large icon rows with a radio dot; MENU, the window's menus, the rest empty */
 .tl-pop.tl-modes { flex-direction: row; align-items: stretch; gap: var(--tl-modes-gap); }
 .tl-modes .tl-modes-col { display: flex; flex-direction: column; gap: var(--tl-pop-gap); }

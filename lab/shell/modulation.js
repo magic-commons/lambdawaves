@@ -18,6 +18,14 @@ export function liftBands(doc, registry) {
   });
   return moved ? { ...doc, curves } : doc;
 }
+/** the bar on the stage and its columns: its box with PLAY beside its left edge and the mini-viewer beside its right (each when drawn), or null
+ *  (the summons' doors below, and PATTERN's floor: 044 K8, the kit's 1.6.0-alpha.87 installPattern({ avoid })) */
+function barSpan() {
+  const t = document.getElementById('transport');
+  if (!t || !t.classList.contains('mini') || t.dataset.place === 'free' || document.body.classList.contains('rack-hidden') || !t.offsetWidth) return null;
+  const rs = [t, t.querySelector(':scope > .csb-play'), t.querySelector(':scope > .csb-mini')].filter((e) => e && e.offsetWidth).map((e) => e.getBoundingClientRect());
+  return { left: Math.min(...rs.map((r) => r.left)), right: Math.max(...rs.map((r) => r.right)), top: Math.min(...rs.map((r) => r.top)), bottom: Math.max(...rs.map((r) => r.bottom)) };
+}
 export function createModSeam(app) {
   const { ui, hNote, clock, obs, mat, settingsStore, reg, rates, dom } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings, powered } = app.sh, { wChem } = app.w,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
@@ -311,13 +319,6 @@ export function createModSeam(app) {
        resize ask again, once a frame */
     const racksEl = ['rackL', 'rack'].map((id) => document.getElementById(id)).filter(Boolean); let clearPx = 0, clearBooked = 0;
     const shownCard = (d) => d.classList.contains('dev') && !d.hidden && !d.classList.contains('closed') && !d.classList.contains('floating');
-    /** the bar on the stage and its columns: its box with PLAY beside its left edge and the mini-viewer beside its right (each when drawn), or null */
-    const barSpan = () => {
-      const t = document.getElementById('transport');
-      if (!t || !t.classList.contains('mini') || t.dataset.place === 'free' || document.body.classList.contains('rack-hidden') || !t.offsetWidth) return null;
-      const rs = [t, t.querySelector(':scope > .csb-play'), t.querySelector(':scope > .csb-mini')].filter((e) => e && e.offsetWidth).map((e) => e.getBoundingClientRect());
-      return { left: Math.min(...rs.map((r) => r.left)), right: Math.max(...rs.map((r) => r.right)), top: Math.min(...rs.map((r) => r.top)), bottom: Math.max(...rs.map((r) => r.bottom)) };
-    };
     /* 039 V1 · THE BAR IS ON TOP AND THE RACKS STOP ABOVE IT (the walks: the Play disc's click landed on MOLECULES' chevron; one unfolded rack window
        covered six bar buttons at 1000 × 700, EXPAND ALL ten): the bar never goes under a rack (038 M7's `rackOver` is gone); instead every rack whose
        columns the bar, its PLAY or its mini-viewer share stops 10 px above the bar's top — `--rack-stop` on the rack, its max-height (lab.css), in the
@@ -653,7 +654,7 @@ export function installEnvelopeTrigger(app) {
   if (!host || !app.state.modView) return null;
   const pat = installPattern({ mount: document.getElementById('floats') || document.getElementById('lab'), project: false, storageKey: 'lambdawaves.q0.patternwin',
     history: H ? { hold: (n) => H.hold(n), release: () => H.release(), register: (d, io) => H.stack.register(d, io) } : null,
-    dock: { span: dockSpan, guide: () => app.ctl.look.get('dropGuides') },
+    dock: { span: dockSpan, guide: () => app.ctl.look.get('dropGuides') }, avoid: () => { const b = barSpan(); return b ? [b] : []; },   // 044 K8 · L67: PATTERN stops above the CSB
     mod: { host, view: app.state.modView, onTick: (fn) => host.clock.onAdvance(() => fn()), open: () => layout.modulation.expand(),
       timeline: () => (app.state.tl ? { model: app.state.tl.model } : null) } });
   pat.model.subscribe((why) => { if (why === 'edit' && layout.projects) layout.projects.changed(); });

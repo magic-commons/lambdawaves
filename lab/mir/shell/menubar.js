@@ -372,7 +372,9 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
     if (focusIt) { const first = bar.querySelector('.mb-btn'); if (first) first.focus(); }
   };
   const hide = () => { closeLists(); barShown(false); };
-  const hideBarSoon = () => { clearTimeout(barTimer); barTimer = setTimeout(() => { if (!openList) barShown(false); }, 400); };
+  /* 1.6.0-alpha.84 · THE BAR STAYS WHILE THE KEYS WALK IT: a list that closes under a resting pointer (Escape) sends the bar a pointerleave the
+     hand never made; while the focus is inside the bar the keys own it, and a press outside or Escape closes it */
+  const hideBarSoon = () => { clearTimeout(barTimer); barTimer = setTimeout(() => { if (!openList && !bar.contains(document.activeElement)) barShown(false); }, 400); };
   opener.addEventListener('pointerenter', (e) => { if (hoverable(e)) showBar(); }, on);
   opener.addEventListener('click', () => { if (bar.hidden) showBar(); else hide(); }, on);
   opener.addEventListener('keydown', (e) => {

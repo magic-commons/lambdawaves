@@ -1065,7 +1065,9 @@ body.frost[data-card="refractive"][data-theme="dark"] #modwin.mir-modwindow { --
 #modwin.mir-modwindow .m2dev .m2swb,
 #modwin.mir-modwindow .m2dev .m2chk,
 #modwin.mir-modwindow .m2dev .m2flipb,
-#modwin.mir-modwindow .m2dev .m2sw .m2trig {
+#modwin.mir-modwindow .m2dev .m2sw .m2trig,
+#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle.on,
+#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle:active {
   background: transparent; border-color: transparent; box-shadow: none; }                              /* 34 */
 #modwin.mir-modwindow .m2dev .m2swb:active,
 #modwin.mir-modwindow .m2dev .m2chk:active,
@@ -1113,7 +1115,8 @@ body.frost[data-card="refractive"][data-theme="dark"] #modwin.mir-modwindow { --
 #modwin.mir-modwindow .m2dev .m2flipb {
   display: flex; align-items: center; justify-content: flex-start; gap: 5px; padding: 0 3px; }
 #modwin.mir-modwindow .m2dev .m2swb::before,
-#modwin.mir-modwindow .m2dev .m2flipb::before {
+#modwin.mir-modwindow .m2dev .m2flipb::before,
+#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle::before {
   content: ""; flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%;
   background: var(--m2-mat-recess); border: 0;
   transition: background var(--m2-motion-micro, var(--t-fast)), box-shadow var(--m2-motion-micro, var(--t-fast)); }
@@ -1581,16 +1584,9 @@ body.frost.frost-hold #modwin.mir-modwindow .m2workbar {
 #modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle {
   display: flex; align-items: center; justify-content: flex-start; gap: 5px; padding: 0 4px;
   background: transparent; border-color: transparent; box-shadow: none; }
-#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle::before {
-  content: ""; flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%;
-  background: var(--m2-mat-recess); border: 0;
-  transition: background var(--m2-motion-micro, var(--t-fast)), box-shadow var(--m2-motion-micro, var(--t-fast)); }
 #modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle.on::before {
   background: var(--acc); box-shadow: var(--m2-dot-on-glow); }
 /* the artifact's own ON treatment stands down — the lamp is the state now, as it is in FULL */
-#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle.on,
-#modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle:active {
-  background: transparent; border-color: transparent; box-shadow: none; }
 /* AND THE LABEL NEVER CHANGES COLOUR — reach 38's law, which was written for FULL and is the same
    law here: the lamp says on or off, and hover is the only other thing that moves. */
 #modwin.mir-modwindow .m2dev.m2cmp.lfo .m2lfocmptoggle,

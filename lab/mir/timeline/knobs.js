@@ -1,7 +1,8 @@
 /* timeline/knobs.js — A HELD KNOB MAKES A CLIP (harvested from BASINS app/timeline-knobs.js, 2026-10-02).
  * Participate in the existing knob lifecycle; a stationary hold (500 ms) on any routable knob (`.k[data-param]`, a
  * registered parameter) cancels its owned drag and opens TIMELINE CLIP: CREATE AUTOMATION CLIP · LOCATE CLIPS.  A right
- * click, ContextMenu or Shift+F10 on a focused knob opens it at once.  BASINS' sentence "Hold a camera or colour knob…" is
+ * click, ContextMenu or Shift+F10 on a focused knob opens it at once (1.6.0-alpha.85: the two keys reach it as the browser's own
+ * `contextmenu` on the focused knob, which the listener below already takes; the hold kept a second key listener of its own).  BASINS' sentence "Hold a camera or colour knob…" is
  * in the shortcut sheet.  Changed for the kit: the popup is the house's menu pane; since 1.5.6-alpha.4 it is THE KNOB MENU
  * (shell/menubar.js controlMenu: RESET · COPY VALUE · PASTE · FINE · ROUTES › · CLIP › · the app's rows), TIMELINE CLIP its CLIP › part.
  *   installTimelineKnobs({ registry, editor, root = document }) → dispose */
@@ -43,7 +44,7 @@ export function installTimelineKnobs({ registry, editor }) {
   listen(document,'pointerup',end,true);listen(document,'pointercancel',e=>{cancel();if(owned&&owned.id===e.pointerId)owned=null;},true);
   listen(document,'click',e=>{if(performance.now()<suppressUntil&&e.target.closest?.('.k[data-param]')){e.preventDefault();e.stopImmediatePropagation();}},true);
   listen(document,'contextmenu',e=>{const root=e.target.closest?.('.k[data-param]');if(root&&registry.has(root.dataset.param)){e.preventDefault();e.stopImmediatePropagation();abort();root.querySelector('.k-dial')?.dispatchEvent(new PointerEvent('pointercancel'));open(root,e.clientX,e.clientY);}},true);
-  listen(document,'keydown',e=>{if(e.key==='ContextMenu'||e.shiftKey&&e.key==='F10'){const root=document.activeElement?.closest?.('.k[data-param]');if(root&&registry.has(root.dataset.param)){e.preventDefault();const r=root.getBoundingClientRect();open(root,r.right,r.bottom);}}if(e.key==='Escape')cancel();});   // 1.6.0-alpha.67: Escape only forgets a hold not yet a menu; the menu closes by its own road (the app's stack), a drag by the knob's
+  listen(document,'keydown',e=>{if(e.key==='Escape')cancel();});   // 1.6.0-alpha.67: Escape only forgets a hold not yet a menu; the menu closes by its own road (the app's stack), a drag by the knob's
   listen(globalThis,'blur',()=>{abort();close();});
   listen(document,'visibilitychange',()=>{if(document.hidden){abort();close();}});
   return ()=>{abort();close();events.abort();knobMenuPart('clip',null);};

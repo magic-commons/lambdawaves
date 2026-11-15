@@ -19,7 +19,7 @@
 @layer mir.kit.house {
 
 /* FROST · values (BASINS' numbers) ─────────────────────────────────────────────────────────────────────────────── */
-.mir-transport, .mir-transport-seats {
+.mir-transport {
   --xport-top: 52px;                 /* the top seat (the rack's RACK.seatTop; BASINS / λWAVES `.at-top`) */
   --xport-bottom: 60px;              /* the bottom seat (RACK.seatBottom; BASINS skin.css:64) */
   --xport-w: 640px;                  /* λWAVES' bar's least width (skin.css:456); BASINS' bar is its row's width (basins.css) */
@@ -406,12 +406,7 @@ body.rack-hidden .mir-transport.mir-rack-transport.docked { translate: none; vis
 .mir-transport .tr-open.on .tr-word { text-shadow: var(--state-on-light, var(--acc-glow)); }
 .mir-transport .tbtn.tr-seat { width: var(--xport-seat); }
 
-/* ── the seat menu: a menu (height 4) beside the bar (the kit's) ───────────────────────────────────────────── */
-.mir-transport-seats { position: fixed; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 180px; padding: 4px; border-radius: var(--r-lg);
-  box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); }
-.mir-transport-seats[hidden] { display: none; }
-.mir-transport-seats .mb-item.on { background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); color: var(--acc); }
-.mir-transport-seats .mb-item:disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+/* the seat menu is the kit's contextMenu (1.6.0-alpha.88): its pane is the menus' own */
 
 /* ── the way back: under H, on a touch screen, the main opener keeps this one button (the kit's) ────────────── */
 .mir-transport > .tr-back { display: none; width: var(--touch, 44px); height: var(--touch, 44px); padding: 0; border: 0; border-radius: 50%;

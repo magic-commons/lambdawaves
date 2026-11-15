@@ -16,7 +16,7 @@
  * Under the logo (iteration 012 L2): RETURN HOME (the lab), FOLDERS (the projects and the demos) and THE HUE ring (a dial that turns the
  * molecules' pictures round the colour wheel), THEME (032) and LOOK.  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
-import { el, chip, mathPlain, stepper, seg, hint, wheelTurn, verticalDrag, setKnobLaw, TAP } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
+import { el, chip, mathPlain, stepper, seg, hint, wheelTurn, verticalDrag, setKnobLaw, TAP, trapTab } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
 import { pageDots } from './pager.js';
 import { searchField } from './mir/shell/window-picker.js'; import { chordFromEvent } from './mir/shell/keys.js';   // 039 R5: the menu's own chord passes to the key table while the menu holds the keys
@@ -1108,16 +1108,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* 039 R5 · THE FACE KEEPS THE FOCUS (M-REVIEW #7, WALK-D #10): while the menu is up it is the page's one keyboard.  Tab and Shift+Tab cycle its
      own controls — on the face the logo (ABOUT) through the credits and round; ABOUT's window while it stands over the menu — never the lab
      behind; and no other key reaches the lab (the window's key table) but the menu's own chord (L) and Escape, which steps back.  A kit dialog
-     over the menu keeps its own trap */
-  const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+     over the menu keeps its own trap.  044 K8 (L51): the trap is the kit's one, `trapTab` (1.6.0-alpha.86), on this page's scope */
   const keyScope = () => { const A = aboutOver() && aboutOf(), w = A && A.win && A.win.root; return w && !w.hidden ? w : root; };
-  document.addEventListener('keydown', (e) => {
-    if (root.hidden || e.defaultPrevented || e.key !== 'Tab' || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.mir-dialog')) return;
-    const f = [...keyScope().querySelectorAll(FOCUSABLE)].filter((n) => !n.disabled && !n.closest('[inert], [hidden]') && n.getClientRects().length && getComputedStyle(n).visibility !== 'hidden');
-    if (!f.length) return;
-    e.preventDefault(); const i = f.indexOf(document.activeElement);
-    f[i < 0 ? (e.shiftKey ? f.length - 1 : 0) : (i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus({ preventScroll: true });
-  }, true);
+  document.addEventListener('keydown', (e) => { if (!root.hidden && !e.defaultPrevented && !document.querySelector('.mir-dialog')) trapTab(keyScope(), e); }, true);
   document.addEventListener('keydown', (e) => {
     if (root.hidden || e.key === 'Escape' || e.key === 'Tab' || document.querySelector('.mir-dialog')) return;
     const T = app.sh.kt && app.sh.kt.table; if (T && T.holders(chordFromEvent(e, T.platform)).includes('menu')) return;

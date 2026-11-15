@@ -53,6 +53,7 @@ import * as MOD from '../modulation/mod.js';
 import { jsonStore } from '../core/prefs.js';
 import { createWindow, CLAMP } from '../window/window.js';
 import { cssZoom } from '../core/zoom.js';
+import { contextMenu } from './menubar.js';
 
 /** the numbers the bar keeps (BASINS transport.js measured them) */
 export const TRANSPORT = Object.freeze({
@@ -179,10 +180,6 @@ export function firstRun(...stores) {
     if (v !== null && v !== undefined && v !== '') return false;
   }
   return true;
-}
-export function localSeatStore(key = 'mir.transport') {
-  const s = jsonStore(key);
-  return { get: s.get, set: s.set };
 }
 /** menuRow(row) — a WINDOW-menu row ([label, run, disabled, hint]) read back as { label, key, hint } */
 export function menuRow(row) {
@@ -723,7 +720,7 @@ export function createTransport({ layout = BASIC_LAYOUT, nodes = {}, host = glob
   onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, placeGlyphs = null, onDock = null, freeWidth = null, freeHost = null, seats = '' } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView, body = doc.body;
   const life = new AbortController(), on = { signal: life.signal }, signal = life.signal;
-  const S = store || localSeatStore(key);
+  const S = store || jsonStore(key);
   const rackOf = () => (typeof rack === 'function' ? rack() : rack) || null;
   const tempo = createTempo({ model, setBpm, mod, persist });
   const made = [], parts = [];
@@ -899,29 +896,27 @@ export function createTransport({ layout = BASIC_LAYOUT, nodes = {}, host = glob
 
   /* ── the seats on the stage (BOTTOM, TOP, COMPACT: ruled 2026-10-01), remembered; the rack's dodge moves the bar ── */
   let seat = 'bottom', lastRect = null;
-  const menu = el('div', 'glass mb-list mir-transport-seats', host); menu.hidden = true; menu.setAttribute('role', 'menu'); menu.dataset.mirSurface = 'menu'; made.push(menu);
-  ariaLabel(menu, 'Where the transport sits');
-  const seatItems = SEATS.map((s) => {
-    const it = el('button', 'mb-item', menu); it.type = 'button'; it.dataset.seatChoice = s; it.setAttribute('role', 'menuitemradio');
-    label(el('span', 'mb-lbl', it), SEAT_WORD[s]); it.title = SEAT_HINT[s];
-    return it;
-  });
+  /* 1.6.0-alpha.88 · THE SEAT MENU IS THE KIT'S MENU (λWAVES 044 L13): BOTTOM · TOP · COMPACT are radio rows of `contextMenu` (the menubar's
+     rows, keys, the one Escape stack), placed where the bar's own list stood: centred on the press (or the bar), on the bar's open side */
+  let seatPop = null, seatWasOpen = false;
   function seatMenu(show, at) {
-    const want = !!show; if (want === !menu.hidden) return;
-    if (seatB) seatB.setAttribute('aria-expanded', String(want));
-    if (!want) { menu.hidden = true; return; }
+    const want = !!show; if (want === !!seatPop) return;
+    if (!want) { seatPop.close(); return; }
     const R = rackOf();
-    for (const it of seatItems) {
-      const s = it.dataset.seatChoice, chosen = s === seat;
-      it.classList.toggle('on', chosen); it.setAttribute('aria-checked', String(chosen));
-      it.disabled = s === 'top' && !!R && typeof R.setHome !== 'function';    // a rack without setHome cannot keep a top seat
-    }
-    menu.hidden = false;
-    const b = bar.getBoundingClientRect(), m = menu.getBoundingClientRect(), vw = view.innerWidth, vh = view.innerHeight;
-    const x = Math.max(8, Math.min(vw - m.width - 8, (at ? at.x : b.left + b.width / 2) - m.width / 2));
-    const y = menuSide(seat) === 'below' ? Math.min(vh - m.height - 8, b.bottom + 8) : Math.max(8, b.top - m.height - 8);
-    const z = cssZoom(menu); menu.style.left = x / z + 'px'; menu.style.top = y / z + 'px';
-    (seatItems.find((it) => it.classList.contains('on')) || seatItems[0]).focus({ preventScroll: true });
+    const rows = SEATS.map((s) => [SEAT_WORD[s], () => { applySeat(s, { save: true }); if (seatB) seatB.focus({ preventScroll: true }); },
+      s === 'top' && !!R && typeof R.setHome !== 'function', SEAT_HINT[s], { id: 'seat-' + s, checked: s === seat, radio: 'seat' }]);   // a rack without setHome cannot keep a top seat
+    let back = false;
+    const m = contextMenu({ x: 0, y: 0, entries: rows, label: 'Where the transport sits', onClose: () => {
+      if (seatPop === m) seatPop = null; if (seatB) seatB.setAttribute('aria-expanded', 'false');
+      if (back && seatB) seatB.focus({ preventScroll: true }); } });   // Escape gives the keys back to ⠿ (a row does, in its run)
+    if (!m) return;
+    m.host.addEventListener('keydown', (e) => { if (e.key === 'Escape') back = true; }, true);
+    seatPop = m; if (seatB) seatB.setAttribute('aria-expanded', 'true');
+    const pane = m.pane, b = bar.getBoundingClientRect(), r = pane.getBoundingClientRect(), vw = view.innerWidth, vh = view.innerHeight;
+    const x = Math.max(8, Math.min(vw - r.width - 8, (at ? at.x : b.left + b.width / 2) - r.width / 2));
+    const y = menuSide(seat) === 'below' ? Math.min(vh - r.height - 8, b.bottom + 8) : Math.max(8, b.top - r.height - 8);
+    const z = cssZoom(pane); pane.style.left = Math.round(x / z) + 'px'; pane.style.top = Math.round(y / z) + 'px';
+    const on = pane.querySelector('.mb-item[aria-checked="true"]:not(:disabled)'); if (on) on.focus({ preventScroll: true });
   }
   function applySeat(s, { save = false } = {}) {
     seat = seatOf(s);
@@ -933,18 +928,10 @@ export function createTransport({ layout = BASIC_LAYOUT, nodes = {}, host = glob
     rove(null);
     return seat;
   }
-  if (seatB) seatB.addEventListener('click', (e) => { e.stopPropagation(); seatMenu(menu.hidden); }, on);
-  menu.addEventListener('click', (e) => {
-    const it = e.target.closest('[data-seat-choice]'); if (!it || it.disabled) return;
-    e.stopPropagation(); applySeat(it.dataset.seatChoice, { save: true }); seatMenu(false); if (seatB) seatB.focus({ preventScroll: true });
-  }, on);
-  menu.addEventListener('keydown', (e) => {
-    const list = seatItems.filter((it) => !it.disabled), i = list.indexOf(doc.activeElement);
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); seatMenu(false); if (seatB) seatB.focus({ preventScroll: true }); return; }
-    const d = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0;
-    if (d) { e.preventDefault(); list[(i + d + list.length) % list.length].focus({ preventScroll: true }); }
-  }, on);
-  doc.addEventListener('pointerdown', (e) => { if (!menu.hidden && !menu.contains(e.target) && !(seatB && seatB.contains(e.target))) seatMenu(false); }, { capture: true, signal });
+  if (seatB) {
+    view.addEventListener('pointerdown', (e) => { if (seatB.contains(e.target)) seatWasOpen = !!seatPop; }, { capture: true, signal });   // read before the menu's own press-outside closes it (the window's capture runs first): ⠿ then only toggles
+    seatB.addEventListener('click', (e) => { e.stopPropagation(); const was = seatWasOpen || !!seatPop; seatWasOpen = false; seatMenu(!was); }, on);
+  }
   if (seatMenuOn) bar.addEventListener('contextmenu', (e) => { if (e.target.tagName === 'INPUT') return; e.preventDefault(); seatMenu(true, { x: e.clientX }); }, on);   // `seatMenu: false`: no BOTTOM / TOP / COMPACT menu (an app that seats the bar itself; its controls keep their own right click)
   let hold = null, swallow = false;
   const endHold = () => { if (hold) { view.clearTimeout(hold.timer); hold = null; } };
@@ -1018,7 +1005,7 @@ export function createTransport({ layout = BASIC_LAYOUT, nodes = {}, host = glob
   return {
     root: bar, layout, parts: { play: playPart, pill: pillP, panel },
     el: { expand: bar.querySelector('.tr-expand'), play: playPart.root, power: bar.querySelector('.mir-mod-power'), door: bar.querySelector('.mod-exp'), pill: pillP && pillP.pill, field: pillP && pillP.field,
-      panel: panel && panel.root, seat: seatB, dock: dockB, back: back.root, menu, openers: openBox },
+      panel: panel && panel.root, seat: seatB, dock: dockB, back: back.root, get menu() { return seatPop ? seatPop.pane : null; }, openers: openBox },
     sync, refresh: soon, moved, toggle: () => playPart.toggle(),
     play: () => (clock && !clock.isPlaying() ? playPart.toggle() : null),
     pause: () => (clock && clock.isPlaying() ? playPart.toggle() : null),

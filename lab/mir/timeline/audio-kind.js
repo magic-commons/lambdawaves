@@ -18,7 +18,8 @@ import { assets, toBase64, fromBase64 } from '../core/assets.js';
 export { toBase64, fromBase64 };
 
 export const AUDIO_ENV_HZ = 100, AUDIO_BANDS = AUDIO_FOLLOWED, AUDIO_CLIP_MAX = 64, AUDIO_SECONDS_MAX = 20 * 60;
-export const AUDIO_TINT = '#7bbfc8', AUDIO_CANVAS_MAX = 8192;
+export const AUDIO_TINT = '#7bbfc8';
+const AUDIO_CANVAS_MAX = 8192;
 export const envelopeFrames = (seconds) => Math.max(1, Math.ceil(seconds * AUDIO_ENV_HZ));
 // The source's own beat length at the tempo it was measured at (curve.length is the model's, set from the drop's duration).
 export const sourceBeats = (curve) => curve.seconds * curve.bpm / 60;

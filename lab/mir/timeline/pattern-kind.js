@@ -3,8 +3,8 @@
 // null (the hits are the sequencer's, through activeClips(beat,'pattern')), and it slices as two instances of one row.
 import { registerClipKind } from './kinds.js';
 import { svgNode } from '../kit.js';
+import { PATTERN_LENGTHS } from '../pattern/model.js';   // 1.6.0-alpha.89: the one list (this file kept a second)
 
-export const PATTERN_LENGTHS = [16, 32, 64];
 export const PATTERN_STEP_BEATS = .25; // one step = a sixteenth note: 16 steps = one 4/4 bar
 
 // Steps are Uint8 values (0 off, 1–127 velocity) as a plain array or base64; a typed array is refused (JSON would mangle it).

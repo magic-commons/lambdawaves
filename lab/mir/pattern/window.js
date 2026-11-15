@@ -16,6 +16,8 @@
  *                the viewport.  The window always also docks on its ENV device (an anchor).
  *     store      { read, write } for the window's own shape (default localStorage 'mir.pattern')
  *     say(msg)   where a refusal is said (default: the modulation window's status line)
+ *     avoid      () → seen rects the docked window and its rail stop above (the app's bar: 1.6.0-alpha.87); default the app's
+ *                windowAvoid answer (window/window.js avoidOf); false: none
  *   pat = { win, root, rail, model, sequencer, open, close, toggle, isOpen, show(envId), rows(), seat(), docked(), height(),
  *           menu(), sync(), paintMarkers(force), closeMenu(), destroy() }
  *
@@ -39,7 +41,7 @@
 import { el, trig, label, ariaLabel } from '../kit.js';
 import { contextMenu } from '../shell/menubar.js';
 import { t, tn } from '../core/i18n.js';
-import { createWindow } from '../window/window.js';
+import { createWindow, avoidOf } from '../window/window.js';
 import { registerProjectPart } from '../core/project.js';
 import { frame } from '../core/frame.js';
 import { cssZoom } from '../core/zoom.js';
@@ -63,6 +65,7 @@ export function installPattern(o) {
   const store = o.store || localStore(o.storageKey || 'mir.pattern');
   const history = o.history || null;
   const uid = ++ids;
+  const avoid = o.avoid === false ? null : typeof o.avoid === 'function' ? () => { try { const r = o.avoid(); return Array.isArray(r) ? r.filter(Boolean) : []; } catch (_) { return []; } } : () => (win ? avoidOf(win) : []);
   const doc = mount.ownerDocument, win0 = doc.defaultView;
 
   /* ── THE SEQUENCER, on the clock's one advance notice ── */
@@ -96,11 +99,19 @@ export function installPattern(o) {
        sits flush on the content once its size is its own px, alpha.68, and the cap and the first steps were under it) */
     const mr = view.rail && !view.rail.hidden ? view.rail.getBoundingClientRect() : null;
     const roof = mr && mr.height > 0 && mr.bottom <= g.content.top + 1 && mr.right > d.left && mr.left < d.right ? Math.min(g.content.top, mr.top) : g.content.top;
-    const vh = win0.innerHeight, above = roof - gap - H, below = g.content.bottom + gap;
-    const flip = above - railH < gap && (below + H <= vh - gap || above < gap);
+    /* 1.6.0-alpha.87 · PATTERN STOPS ABOVE THE BAR (λWAVES 044 L67, REVIEW-H H23: under its content it lay over the CSB's right-hand seats,
+       its rail too): a rect the app keeps clear (`avoid`, else its windowAvoid answer) in the device's column, below the content's roof, is the
+       floor, and the pane keeps its rail's height above it — THE BAR IS ON TOP AND THE RACKS STOP ABOVE IT.  The flip is law 1's (below when
+       the screen's top leaves no room for the pane and a rail) unless the pane and its rail fit whole on one side: over the content, else
+       under it above the bar.  When neither side has room it stays law 1's side, lifted off the bar over the modulation window's foot.
+       With no such rect the floor is the screen's foot and the seat is what it was */
+    const bars = (avoid ? avoid() : []).map((b) => ({ left: b.left, top: b.top, right: b.right ?? b.left + b.width })).filter((b) => b.right > d.left && b.left < d.right && b.top >= roof);
+    const vh = win0.innerHeight, floor = Math.min(vh, ...bars.map((b) => b.top - railH)), above = roof - gap - H, below = g.content.bottom + gap;
+    const law1 = above - railH < gap && (below + H <= vh - gap || above < gap);
+    const flip = !bars.length ? law1 : above - railH >= gap ? false : below + H <= floor - gap ? true : law1;
     /* outer: the edge facing away from the modulation window; avoid: its glass — the rail seats in a clear lane only
        (window/rail.js seatClear, BASINS snap-window.js seat) */
-    return { left: Math.round(d.left), width: Math.round(d.width), top: Math.round(Math.max(gap, Math.min(flip ? below : above, vh - gap - H))), height: H,
+    return { left: Math.round(d.left), width: Math.round(d.width), top: Math.round(Math.max(gap, Math.min(flip ? below : above, floor - gap - H))), height: H,
       outer: flip ? 'bottom' : 'top', avoid: g.content };
   }
   /* docked, the window is cut where the device run cuts the device (the window set clips the pane; the rail is cut here) */
