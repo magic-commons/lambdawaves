@@ -30,18 +30,13 @@
  * createShareLink(opts) → { encode, decode, read(), write(state), copy(state) → Promise<url>, url(state), destroy() } */
 
 import { copyText } from './clipboard.js';
+import { crc32 as crcBytes } from '../core/png.js';              // the kit's one CRC-32 table
 
 export const LINK_CEILING = 2000;           // what a URL should stay under to survive browsers, chat apps and mail (λWAVES)
 const EPS = 1e-9;
 
-/* ── CRC32 (the PNG one), over a string's UTF-8 ───────────────────────────────────────────────────────── */
-let TABLE = null;
-export function crc32(str) {
-  if (!TABLE) { TABLE = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; TABLE[n] = c >>> 0; } }
-  const b = new TextEncoder().encode(String(str));
-  let c = 0xffffffff; for (let i = 0; i < b.length; i++) c = TABLE[(c ^ b[i]) & 0xff] ^ (c >>> 8);
-  return ((c ^ 0xffffffff) >>> 0).toString(36);
-}
+/* ── the link's checksum: core/png.js crc32 over a string's UTF-8, in base 36 ─────────────────────────── */
+const crc32 = (str) => crcBytes(new TextEncoder().encode(String(str))).toString(36);
 
 const isObj = (o) => o !== null && typeof o === 'object' && !Array.isArray(o);
 const same = (a, b) => (typeof a === 'number' && typeof b === 'number' ? Math.abs(a - b) < EPS

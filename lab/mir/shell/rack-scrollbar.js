@@ -74,7 +74,7 @@ export function thumbOf({ height, client, scrollHeight, scrollTop }) {
 export const PILL = Object.freeze({ linger: 900, gap: 8 });
 /** inkOn(rgb, theme) — the theme's ink first: a LIGHT theme prefers 'light' (white) text, a DARK theme 'dark' (black) text; it flips only when
  *  the fill would leave it under 3:1 (WCAG relative luminance L: white needs L ≤ 0.3, black needs L ≥ 0.1) — λWAVES 018 A5, Josh */
-export function inkOn(rgb, theme = 'light') {
+function inkOn(rgb, theme = 'light') {
   const m = String(rgb).match(/[\d.]+/g); if (!m || m.length < 3) return 'light';
   const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
   const L = 0.2126 * lin(+m[0]) + 0.7152 * lin(+m[1]) + 0.0722 * lin(+m[2]);

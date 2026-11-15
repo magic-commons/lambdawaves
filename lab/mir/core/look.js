@@ -13,7 +13,7 @@
  *     left).  A shadow falls away from it, the shine sits toward it.  The sheets draw both with CSS sin()/cos() from
  *     `--light-angle`; lightOffset() is the same arithmetic for a test or a script.
  *
- * Exports: THEME_GLASS, hslRgb, glassTint, glassVeil, paneShadow, lightOffset, lightIsHome, paneLightness, solidInk, SPACING, SPACING_PX, SPACING_MAX, spacingPx,
+ * Exports: THEME_GLASS, hslRgb, glassTint, glassVeil, paneShadow, lightOffset, lightIsHome, paneLightness, solidInk, SPACING_PX, SPACING_MAX, spacingPx,
  *          LIGHT_HOME, autoInk; the device (alpha.12): isMobile, isIPad, TOUCH_TABLET_MQ, BLUR_DESKTOP, BLUR_TOUCH,
  *          firstRunBlur, DEVICE_BLUR, TIER_LAW, classifyTier, qualityOfTier.  The device tests read `navigator` and
  *          `matchMedia` only when they are not handed them. */
@@ -86,7 +86,7 @@ export function solidInk(o, theme) { return paneLightness(o, theme) > 55 ? 'dark
  *  windows, the rack's inset from the screen's edge, the padding inside a pane, the gap in a docked chip rail].  A pane's
  *  padding never goes under 6 px, so no control touches its edge.  0 is flush (square panes, no shadow inside the slab).
  *  AIRY is this kit's invention, after DEFAULT.  The kit before SPACING was 10 · 10 · 7–10. */
-export const SPACING = Object.freeze({ 0: [0, 0, 6, 0], tight: [3, 3, 6, 2], default: [6, 6, 8, 4], airy: [16, 16, 9, 6] });
+const SPACING = Object.freeze({ 0: [0, 0, 6, 0], tight: [3, 3, 6, 2], default: [6, 6, 8, 4], airy: [16, 16, 9, 6] });
 /** 1.5.7-alpha.57 SPACING IS A KNOB: the levels as px (the gap between rack windows) — what a stored level opens as */
 export const SPACING_PX = Object.freeze({ 0: 0, tight: 3, default: 6, airy: 16 });
 export const SPACING_MAX = 24;

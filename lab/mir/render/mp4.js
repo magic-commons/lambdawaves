@@ -47,7 +47,7 @@
  * earlier), one track, no audio — until 1.5.6-alpha.12: an `audio` option
  * adds the second trak (THE AUDIO TRACK, below).
  */
-export const MP4_TIMESCALE = 90000;
+const MP4_TIMESCALE = 90000;
 
 class ByteWriter {
   constructor() { this.chunks = []; this.length = 0; }

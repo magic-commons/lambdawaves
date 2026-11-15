@@ -24,7 +24,7 @@ export function midiSupport() {
   if (typeof window !== 'undefined' && window.isSecureContext === false) return { ok: false, why: 'MIDI needs a secure page (HTTPS or localhost)' };
   return { ok: true, why: '' };
 }
-export const MIDI_MODES = Object.freeze(['trigger', 'toggle', 'hold']);
+const MIDI_MODES = Object.freeze(['trigger', 'toggle', 'hold']);
 
 export function createMidi({ storage = null, run = () => {}, up = () => {}, source = null, onState = null } = {}) {
   let access = null, state = 'idle', learning = null, entries = read();

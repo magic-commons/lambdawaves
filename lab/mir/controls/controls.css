@@ -48,7 +48,7 @@
 .sw.sw-glyph:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -3px; }
 
 /* ── the stepper: ‹ NAME › (and the page turner) ── */
-.mir-step { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+.mir-step, .mir-num, .mir-xy { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }   /* a control under its name: the stepper, the number field, the XY pad */
 .mir-step-row { display: inline-flex; align-items: center; gap: var(--sp-1); }
 .mir-step-name { min-width: 6em; min-height: var(--step-b); padding: 0 var(--sp-3); border: 0; border-radius: var(--r-md); background: transparent; text-align: center; font: inherit; font-size: var(--fs-small);
   letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--fg); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); }
@@ -117,7 +117,6 @@ button.mir-step-name:disabled { cursor: default; }
 .mir-pick-i:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 0; }
 
 /* ── the number field: a well; drag it, type it, key it ── */
-.mir-num { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
 .mir-num-box { display: inline-flex; }
 .mir-num-face, .mir-num-in { box-sizing: border-box; min-width: var(--num-w); min-height: var(--touch); padding: 0 var(--sp-4); border: var(--glass-border) solid transparent; border-radius: var(--r-md);
   background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); color: var(--fg); font: inherit; font-size: var(--fs-small); font-variant-numeric: tabular-nums; text-align: center; }
@@ -150,7 +149,6 @@ button.mir-step-name:disabled { cursor: default; }
 .mir-range.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
 
 /* ── the XY pad: a well with a dot, beside its two knobs ── */
-.mir-xy { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
 .mir-xy-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-4); align-items: start; width: 100%; }
 .xy-pad { position: relative; aspect-ratio: 1; width: 100%; max-width: var(--xy-size); box-sizing: border-box; overflow: hidden; border-radius: var(--r-md);
   border: var(--glass-border) solid transparent; background: transparent; box-shadow: none; touch-action: none; cursor: crosshair; }   /* no well: the lattice is the tint (2026-10-06) */

@@ -59,7 +59,7 @@ export function boardRows(platform = 'other') {
     R('ArrowLeft', '←', '', 'arrow'), R('ArrowDown', '↓', '', 'arrow'), R('ArrowRight', '→', '', 'arrow')]];
 }
 /** extraRows() → MORE KEYS' five rows (1.5.6-alpha.2): every bindable key the ANSI board has no cap for */
-export function extraRows() {
+function extraRows() {
   const F = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => R('F' + (a + i), 'F' + (a + i)));
   return [F(1, 12), F(13, 24),
     [R('Insert', 'INS'), R('Delete', 'DEL'), R('Home', 'HOME'), R('End', 'END'), R('PageUp', 'PGUP'), R('PageDown', 'PGDN'), R('ArrowUp', '↑'), R('ArrowDown', '↓'), R('ArrowLeft', '←'), R('ArrowRight', '→')],

@@ -97,7 +97,7 @@
  },
  {
   "file": "mir/glyph.js",
-  "line": 650,
+  "line": 595,
   "why": "fragment",
   "text": " — known: "
  },
@@ -481,7 +481,7 @@
  },
  {
   "file": "mir/shell/gui.js",
-  "line": 313,
+  "line": 310,
   "why": "fragment",
   "text": "the bench threw: "
  }

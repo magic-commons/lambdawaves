@@ -485,7 +485,7 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
 @media (prefers-reduced-motion: reduce) { .k:hover .k-dial, .trig:hover { translate: none; } }   /* the hover keeps its lighter face; the lift is travel */
 
 /* ── 7. fader: a well with a thin fill; the value appears on touch ─────── */
-.fd { border-color: transparent; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); border-radius: var(--r-md); }
+.fd, .ro { border-color: transparent; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); border-radius: var(--r-md); }   /* the well: the fader's and the readout's (8) */
 .fd-fill { background: var(--fd-fill-color); }
 .fd-edge { width: 2px; background: var(--fg-soft); box-shadow: var(--fd-edge-shadow); }
 .fd.drag .fd-edge, .fd.active .fd-edge { background: var(--acc); box-shadow: var(--acc-glow); }
@@ -495,7 +495,6 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
 .fd.drag .fd-val, .fd.active .fd-val { color: var(--acc); }
 
 /* ── 8. readouts: terse — a value, a whisper of a label, the sub-line on hover ── */
-.ro { border-color: transparent; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); border-radius: var(--r-md); }
 .ro-lbl { color: var(--ink-faint); }
 .ro-sub { transition: opacity var(--t-soft); }   /* its reserved lane and its fade are base.css's (Final II) */
 .ro:hover .ro-sub, .dev:hover .ro.wide .ro-sub { opacity: 1; }
@@ -798,13 +797,12 @@ body.frost.frost-hold :is(.native-info .native-info-content, .control-help) { -w
 body.frost.frost-hold[data-card="refractive"] :is(.native-info .native-info-content, .control-help) { background: var(--surface-fill, var(--popover-fill)); }
 /* 1.5.6-alpha.5 · the hover hint and the ⓘ panel are popovers at menu height: the menu floor, its tint and its edge reach them too */
 body[data-card] :is(.native-info .native-info-content, .control-help):not([hidden]) { background-color: hsl(var(--surface-menu-tint) / var(--surface-menu-floor)); border-color: var(--surface-menu-edge); }
-.plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
+.plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; object-fit: contain; background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); border-radius: var(--r-md); }
 .plane-model:active { cursor: grabbing; }
 @media (pointer: coarse) { .native-info-button { min-width: var(--touch, 44px); min-height: var(--touch, 44px); } }
 .native-info .native-info-content { position:fixed !important; inset:auto; margin:0; }   /* the border is the pane's, above */
 .native-info .native-info-content:popover-open { display:block !important; }
 .plane-model[aria-disabled="true"] { opacity:var(--state-disabled, .38);cursor:not-allowed; }
-.plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));border-radius:var(--r-md); }
 body.window-info-off .native-info, body.window-info-off .native-info-content { display:none !important; }
 body.window-info-off .row:has(> .native-info):not(:has(> :not(.native-info))) { display:none; }
 

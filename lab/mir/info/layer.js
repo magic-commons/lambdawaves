@@ -72,7 +72,7 @@ const px = (v) => Math.round(v * 100) / 100;
 
 /** springEasing(k, c) — a damped spring (mass 1) as a CSS linear() easing, and the time it takes to settle.
  *  Draft 1 §1.6: stiffness 300, damping 22 → ζ ≈ 0.64, about 7 % overshoot. */
-export function springEasing(k = 300, c = 22, n = 36) {
+function springEasing(k = 300, c = 22, n = 36) {
   let x = 0, v = 0; const dt = 1 / 1000, xs = [0]; let t = 0, still = 0;
   while (t < 2) { v += (k * (1 - x) - c * v) * dt; x += v * dt; t += dt; xs.push(x); if (Math.abs(1 - x) < 0.002 && Math.abs(v) < 0.02) { if (++still > 30) break; } else still = 0; }
   const pts = []; for (let i = 0; i <= n; i++) pts.push(+xs[Math.round((i / n) * (xs.length - 1))].toFixed(4));

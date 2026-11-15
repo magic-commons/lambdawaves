@@ -57,7 +57,7 @@ export function searchField(parent, { cls = '' } = {}) {
 export function emptyLine(parent) { const n = label(el('div', 'mir-empty', parent), 'Nothing matches'); n.setAttribute('role', 'status'); return n; }
 
 /** the motion's numbers: the stagger between rows and the row past which they all enter together */
-export const WINDOW_PICKER = Object.freeze({ stagger: 30, cap: 12, close: 120 });
+const WINDOW_PICKER = Object.freeze({ stagger: 30, cap: 12, close: 120 });
 
 export function createWindowPicker({ rack = null, open = (id) => { if (rack) rack.reveal(id); }, can = () => true, icon = () => null, cls = '', host = document.body, sections = null, words = null, match = null } = {}) {
   const root = el('div', ('mir-window-picker glass ' + cls).trim(), host); root.hidden = true;
@@ -193,12 +193,7 @@ export function createWindowPicker({ rack = null, open = (id) => { if (rack) rac
     get queued() { return queue.slice(); },
     /** open the SHIFT queue now, in pick order (the old + list's commit) */
     commit: flush,
-    destroy() { life.abort(); clearTimeout(shut); root.remove(); if (rack && Object.getOwnPropertyDescriptor(rack, 'addMenu')?.get === alias) delete rack.addMenu; },
+    destroy() { life.abort(); clearTimeout(shut); root.remove(); },
   };
-  /* THE addMenu SHIM (1.5.5, deprecated; it leaves at the next line): the rack's old + list was `rack.addMenu` { open, close, shown, queued, commit };
-     the FINDER answers the same five, so an app that still calls rack.addMenu reaches it (a warning once) */
-  let warned = false;
-  const alias = () => { if (!warned) { warned = true; console.warn('MIR 1.5.5: rack.addMenu is gone; it answers as the FINDER (createWindowPicker) until the next line'); } return api; };
-  if (rack && typeof rack === 'object' && !('addMenu' in rack)) Object.defineProperty(rack, 'addMenu', { get: alias, configurable: true });
   return api;
 }

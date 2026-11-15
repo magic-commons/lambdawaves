@@ -62,7 +62,7 @@ import { setMotionPolicy } from '../core/motion.js';
 import { frame } from '../core/frame.js';
 import { setText, setAttr } from '../core/perf.js';
 import { registerProjectPart } from '../core/project.js';
-import { glassTint as lookTint, glassVeil, autoInk, solidRelief, spacingPx, SPACING_PX, SPACING_MAX, DEVICE_BLUR, TIER_LAW, classifyTier, qualityOfTier, isIPad, TOUCH_TABLET_MQ } from '../core/look.js';
+import { glassTint, glassVeil, autoInk, solidRelief, spacingPx, SPACING_PX, SPACING_MAX, DEVICE_BLUR, TIER_LAW, classifyTier, qualityOfTier, isIPad, TOUCH_TABLET_MQ } from '../core/look.js';
 import { createAccent, accentPart } from './accent.js';
 import { notice } from './notice.js';
 import { richText, safeHref } from './about.js';
@@ -78,9 +78,6 @@ export { THEMES };
 export const MIR_WORDS = phrase('MIR is the shared Magic Commons interface kit behind its controls, window system, gestures, and modulation. MIR is an open source platform and will continuously be updated, allowing for ‘LLM Mods’ support and customizable skins.');
 const ZERO_SHADOW = '0 0 0 0 transparent';                       // the off shadow: never `none` (a list with none drops)
 const HOME = Object.freeze({ veil: 10, saturation: 1, corners: 14 });   // where nothing is written: the dark frost veil · no saturate · skin.css --card-r
-/** glassTint(bright, hue, tint, theme, saturation = 1) — BASINS skin.js applyGlass (core/look.js): the `H S% L%` triple
- *  the kit reads as --glass-tint, or null at home (BRIGHT 0, TINT 0, SATURATION 100 %) */
-export function glassTint(bright, hue, tint, theme, saturation = 1) { return lookTint({ bright, hue, tint, saturation }, theme); }
 
 /* ── THE LOOK, as one schema: what each option is, and the hook it drives ───────────────────────────────────────────
    Rows are applied in this order inside one frame job, so THEME is on <body> before the accent reads it, and the tier
@@ -132,7 +129,7 @@ export function lookSchema({ tier = () => null, spacingHome = SPACING_PX.default
        solid face); SATURATION multiplies the tint's chroma, as BASINS' does */
     { key: 'bright', type: 'number', step: 0.01, min: -1, max: 1, default: 0 },
     { key: 'hue', type: 'number', step: 1, min: 0, max: 360, wrap: true, default: 0 },
-    { key: 'tint', type: 'number', step: 0.01, min: 0, max: 1, default: 0, apply: [{ on: 'body', prop: '--glass-tint', map: (v, s, e) => lookTint(s, e.theme) },
+    { key: 'tint', type: 'number', step: 0.01, min: 0, max: 1, default: 0, apply: [{ on: 'body', prop: '--glass-tint', map: (v, s, e) => glassTint(s, e.theme) },
       /* SOLID's relief mixes and the shine's gain follow the pane's lightness (core/look.js solidRelief) */
       { on: 'body', prop: '--solid-lift', map: (v, s, e) => (s.card === 'solid' ? solidRelief(s, e.theme).lift + '%' : null) },
       { on: 'body', prop: '--solid-sink', map: (v, s, e) => (s.card === 'solid' ? solidRelief(s, e.theme).sink + '%' : null) },
@@ -237,7 +234,7 @@ export const LOOK_PRESETS = Object.freeze(Object.fromEntries(THEMES.map((t) => [
 
 /** migrateShadow(key, win) — alpha.4 stored SHADOW as a switch: `false` becomes 0 %; `true` becomes the amount of the
  *  theme the rest of the stored look matches (FROST: 200 %), or 100 % (the kit's own shadows) when it matches none */
-export function migrateShadow(key = 'mir.gui', win = globalThis) {
+function migrateShadow(key = 'mir.gui', win = globalThis) {
   try {
     const S = win.localStorage, raw = S && S.getItem(key), o = raw && JSON.parse(raw);
     if (!o || typeof o.shadow !== 'boolean') return null;

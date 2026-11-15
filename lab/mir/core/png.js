@@ -19,7 +19,7 @@
 import { unwrap, stringify } from './envelope.js';
 
 export const SIGNATURE = Object.freeze([137, 80, 78, 71, 13, 10, 26, 10]);
-export const KEYWORD = 'mir';
+const KEYWORD = 'mir';
 
 const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; } return t; })();
 /** crc32(bytes) — the PNG/zlib CRC-32 (same table and framing as λWAVES lab/capture.js) */

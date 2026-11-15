@@ -209,11 +209,6 @@ export function layoutLabel(L, slot) {
   return slot + '  ·  ' + open.length + ' window' + (open.length === 1 ? '' : 's') + '  ·  ' + (sides.size > 1 ? 'both racks' : sides.has('left') ? 'left rack' : 'right rack')
     + (fl ? '  ·  ' + fl + ' floating' : '') + '  ·  ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 }
-/** localStore(key) — the default store: one JSON value in localStorage under `key`; a failing storage is a no-op */
-export function localStore(key, view = globalThis) {
-  const s = jsonStore(key, view);
-  return { get: s.get, set: s.set };
-}
 
 /* ── THE RACK'S MOTION: BASINS' app/rack-motion.js createRackMotion, harvested (Josh, 2026-10-02: "Yes to basins
  *    animated drag and drop") ─────────────────────────────────────────────────────────────────────────────────────
@@ -380,7 +375,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
   scrollbar = false, tabletClamp = true, retired = null, notebook = null, persist: keep = 'all' } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView, body = doc.body;
   const life = new AbortController(), on = { signal: life.signal }, passive = { passive: true, signal: life.signal };
-  const S = store || localStore(key, view);
+  const S = store || jsonStore(key, view);                         // the default store: one JSON value under `key` (core/prefs.js)
   const isPhone = phone || (() => body.classList.contains('phone') || (parseFloat(view.getComputedStyle(doc.documentElement).getPropertyValue('--phone')) || 0) >= 1);
   const made = [];                                                  // nodes this rack created, removed by destroy()
   /* ADOPTION: a node the app already has (BASINS' #rack, #rackL, #floats, #rackFav …) is used AS IT IS — same element,

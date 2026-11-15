@@ -23,8 +23,3 @@ export function ownRect(el, r = el.getBoundingClientRect()) {
   const z = cssZoom(el);
   return z === 1 ? r : { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z, width: r.width / z, height: r.height / z, x: r.left / z, y: r.top / z };
 }
-/** viewIn(el, view) — the viewport in el's px */
-export function viewIn(el, view = globalThis) {
-  const z = cssZoom(el);
-  return { width: view.innerWidth / z, height: view.innerHeight / z };
-}

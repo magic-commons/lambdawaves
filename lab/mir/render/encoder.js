@@ -245,7 +245,7 @@ export async function pngBytes(rgba, w, h, canvas, ctx, colorSpace) {
  *     sample past its delay, and a file whose packets do not cover priming + N is refused.  `priming` is the OpusHead pre-skip
  *     when the encoder hands one (bytes 10–11), else the measured delay.  Back-pressure as the video's (the queue ≤ 8).
  * The muxer takes the result verbatim as `mp4Parts({ audio })`; the store keeps it beside the video (store.saveAudio). */
-export const AUDIO_LADDER = Object.freeze([{ codec: 'mp4a.40.2', label: 'AAC', bitrate: 256000 }, { codec: 'opus', label: 'Opus', bitrate: 192000 }]);
+const AUDIO_LADDER = Object.freeze([{ codec: 'mp4a.40.2', label: 'AAC', bitrate: 256000 }, { codec: 'opus', label: 'Opus', bitrate: 192000 }]);
 const audioConfig = (p, sampleRate, numberOfChannels) => ({ codec: p.codec, sampleRate, numberOfChannels, bitrate: p.bitrate });
 const bytesOfView = (d) => (d instanceof Uint8Array ? d.slice() : ArrayBuffer.isView(d) ? new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength)) : new Uint8Array(d.slice(0)));
 const nextDequeue = (coder) => new Promise((r) => {
@@ -331,7 +331,7 @@ export function peakIndex(x, from = 0, to = x.length) {
 }
 
 const primings = new Map();
-export async function verifyAudioEncoder(path, check = () => {}) {
+async function verifyAudioEncoder(path, check = () => {}) {
   const key = [path.codec, path.sampleRate, path.channels, path.bitrate].join(':');
   if (primings.has(key)) return primings.get(key);
   const n = path.sampleRate, at = n / 2, pcm = Array.from({ length: path.channels }, () => new Float32Array(n));

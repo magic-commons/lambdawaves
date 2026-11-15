@@ -1,7 +1,5 @@
-
-
-/* λWAVES: forced edit 1/2 — overlay.js is MANDELBROT's M4 diagnostics sink and has no counterpart here; our gate reads the DOM. */
-// import { publishM4 } from './overlay.js';
+/* glyph.js — the kit's one icon library (docs/ICONS.md): every drawing a name for its MEANING, on a 24-unit box, in currentColor.
+ * An app's own drawings are the app's: it registers them beside the set (registerGlyphs). */
 
 import { t } from './core/i18n.js';   // 1.5.4: a chip's accessible name is a label, translated here and kept in data-t-aria (kit.js relabel)
 
@@ -204,35 +202,6 @@ const GLYPHS = {
     '<circle cx="12" cy="12" r="8.4" ' + STROKE + '/>' +
     '<path ' + STROKE + ' d="M12 7.2 L12 16.8 M7.2 12 L16.8 12"/>',
 
-  /* ── Julia restore.  This is not a spiral or a hand-drawn fractal sign.
-     The path is the largest filled-boundary contour of the actual quadratic
-     Julia set z² + c at c = -0.123 + 0.745i, traced on a 384² grid at 160
-     iterations and simplified from 3,467 to 105 vertices for icon weight.
-     The contour is a solid mark: currentColor carries the surface's ink and
-     evenodd keeps the traced folds deterministic at icon scale. */
-  juliaRestore:
-    '<path fill="currentColor" fill-rule="evenodd" stroke="none" d="' +
-    'M2.5 8.03 L3.25 7.65 L2.87 7.16 L3.37 7.59 L3.74 6.78 L5.11 7.03 ' +
-    'L4.49 6.16 L4.98 5.73 L4.55 5.36 L5.17 5.36 L5.67 6.35 L5.11 7.09 ' +
-    'L6.35 6.35 L7.34 6.41 L7.22 5.67 L9.95 8.4 L9.83 6.35 L10.2 5.92 ' +
-    'L9.83 5.67 L11.63 5.48 L11.07 4.74 L11.5 4.42 L11.69 5.36 ' +
-    'L12.62 5.05 L12.31 5.6 L11.69 5.48 L12.12 6.1 L12 7.59 L10.01 8.52 ' +
-    'L11.69 9.08 L12 8.71 L12.75 9.39 L12.99 8.77 L13.12 9.7 L14.42 10.45 ' +
-    'L14.42 9.39 L15.1 9.45 L15.04 9.02 L15.35 9.39 L14.48 10.7 ' +
-    'L14.67 12.25 L15.29 12.19 L14.61 12.75 L14.05 15.48 L15.48 14.36 ' +
-    'L16.28 14.48 L16.16 13.99 L17.46 14.61 L17.71 13.68 L17.71 14.48 ' +
-    'L18.21 14.48 L17.65 14.61 L18.15 15.42 L18.4 15.17 L18.71 16.84 ' +
-    'L19.2 15.79 L20.13 15.6 L20.69 16.35 L20.82 15.73 L21.44 15.54 ' +
-    'L21.5 16.04 L20.75 16.35 L21.07 16.91 L20.63 16.41 L20.07 17.28 ' +
-    'L18.64 16.91 L17.65 17.65 L16.66 17.59 L16.78 18.33 L14.05 15.6 ' +
-    'L13.99 17.77 L13.3 18.52 L12.37 18.52 L12.93 18.83 L12.5 19.58 ' +
-    'L12.31 18.64 L11.38 18.83 L11.57 18.4 L12.31 18.52 L11.88 17.9 ' +
-    'L12 16.41 L13.99 15.48 L11.25 14.61 L11.01 15.23 L10.88 14.3 ' +
-    'L9.45 13.55 L9.39 11.88 L8.77 11.32 L9.39 11.25 L9.95 8.52 ' +
-    'L8.96 9.33 L7.72 9.52 L7.78 9.95 L6.54 9.39 L6.66 10.01 ' +
-    'L6.29 10.08 L6.29 9.52 L5.73 9.52 L6.29 9.21 L5.29 7.16 ' +
-    'L4.61 8.15 L3.68 8.15 L3.37 7.65 L3.12 8.21 L2.5 8.03 Z"/>',
-
   /* ── lock.  A CLOSED padlock: body, shackle, keyhole stem.  The same body
      and stem colors.js draws for its rail lock (nameIconButton, kind 'lock'),
      with the shackle brought home because this one means LOCKED, not "lock
@@ -244,30 +213,6 @@ const GLYPHS = {
     '<rect x="5.5" y="10.5" width="12" height="9" rx="2" ' + STROKE + '/>' +
     '<path ' + STROKE + ' d="M8 10.5 V7.5 a4 4 0 0 1 8 0 V10.5"/>' +
     '<path ' + STROKE + ' d="M12 14 V16.2"/>',
-
-  /* ── Mandelbrot, vertical.  Moved verbatim from settings.js so the SAVE
-     FRACTAL action and the dual-view edge control spend one mathematical
-     drawing.  The boundary is the real cardioid, followed by the period-2
-     disc, p3/p4 bulbs and antenna, all already rotated so minus-x points up. */
-  mandelbrot:
-    '<path fill="currentColor" stroke="none" d="M12.00 20.35 L12.00 20.38 L12.02 20.45 ' +
-    'L12.08 20.57 L12.18 20.72 L12.33 20.88 L12.56 21.05 L12.85 21.20 L13.21 21.31 ' +
-    'L13.62 21.37 L14.09 21.36 L14.59 21.26 L15.11 21.06 L15.62 20.76 L16.10 20.35 ' +
-    'L16.53 19.84 L16.89 19.23 L17.15 18.55 L17.30 17.80 L17.32 17.01 L17.20 16.20 ' +
-    'L16.95 15.40 L16.55 14.64 L16.03 13.94 L15.38 13.33 L14.63 12.83 L13.80 12.46 ' +
-    'L12.92 12.23 L12.00 12.15 L11.08 12.23 L10.20 12.46 L9.37 12.83 L8.62 13.33 ' +
-    'L7.97 13.94 L7.45 14.64 L7.05 15.40 L6.80 16.20 L6.68 17.01 L6.70 17.80 ' +
-    'L6.85 18.55 L7.11 19.23 L7.47 19.84 L7.90 20.35 L8.38 20.76 L8.89 21.06 ' +
-    'L9.41 21.26 L9.91 21.36 L10.38 21.37 L10.79 21.31 L11.15 21.20 L11.44 21.05 ' +
-    'L11.67 20.88 L11.82 20.72 L11.92 20.57 L11.98 20.45 L12.00 20.38 L12.00 20.35 Z"/>' +
-    '<circle cx="12.00" cy="10.10" r="2.05" fill="currentColor" stroke="none"/>' +
-    '<circle cx="12.00" cy="7.57" r="0.48" fill="currentColor" stroke="none"/>' +
-    '<circle cx="18.10" cy="17.28" r="0.77" fill="currentColor" stroke="none"/>' +
-    '<circle cx="5.90" cy="17.28" r="0.77" fill="currentColor" stroke="none"/>' +
-    '<circle cx="16.35" cy="20.61" r="0.36" fill="currentColor" stroke="none"/>' +
-    '<circle cx="7.65" cy="20.61" r="0.36" fill="currentColor" stroke="none"/>' +
-    '<path class="ant" fill="none" stroke="currentColor" stroke-width="1.1" ' +
-    'stroke-linecap="round" d="M12.00 1.90 L12.00 7.08"/>',
 
   /* ── morph.  One period of a sine, the LFO's own shape.  Drawn rather than
      borrowed from U+223F, which most faces do not carry at all. */
@@ -650,18 +595,3 @@ function missing(name) {
                  ' — known: ' + Object.keys(GLYPHS).concat(Object.keys(APP)).join(', '));
   } catch (e) { /* a console that refuses is not worth a second failure */ }
 }
-
-/* ── THE INSTRUMENT.  A gate must be able to ask the RUNNING app which glyphs
-   it knows and which names a call site got wrong, so the sweep is verifiable
-   from the browser instead of from the source.
-
-   ⟡ THROUGH publishM4, NOT BY ASSIGNING window.__M4 DIRECTLY.  The direct form
-   was written first and measured ABSENT from the live page: the app installs
-   its own __M4 sink, and overlay.js's armM4() intercepts that assignment, so a
-   plain `window.__M4 = window.__M4 || {}` here is simply overwritten by the
-   real sink arriving later.  publishM4 QUEUES until the sink exists and then
-   merges — which is the app's convention precisely because module order is not
-   something any one module gets to know. */
-/* λWAVES: forced edit 2/2 — the same sink, at its one call site.  Kept commented rather than deleted so the diff stays two lines. */
-// try { publishM4({ glyphNames, glyphMissing: () => [...told] }); }
-// catch (e) { /* a page without the overlay is still a page that can draw */ }

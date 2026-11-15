@@ -31,7 +31,7 @@
 
 .mir-ramp { display: flex; flex-direction: column; gap: var(--ramp-gap); min-width: 0; }
 .mir-ramp [hidden] { display: none; }
-.mir-ramp-presets { display: flex; align-items: center; gap: var(--ramp-gap); min-width: 0; }
+.mir-ramp-presets, .mir-ramp-sel { display: flex; align-items: center; gap: var(--ramp-gap); min-width: 0; }   /* the preset row and the selected stop's */
 .mir-ramp-step { flex: 1 1 auto; min-width: 0; align-items: stretch; }
 .mir-ramp-step .mir-step-row { width: 100%; justify-content: space-between; }
 .mir-ramp-step .mir-step-name { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -67,7 +67,6 @@
 .mir-ramp-ring::after { content: ''; position: absolute; left: 0; top: 50%; width: var(--ramp-ring-w); border-top: var(--ramp-seam-mark); }
 
 /* the selected stop */
-.mir-ramp-sel { display: flex; align-items: center; gap: var(--ramp-gap); min-width: 0; }
 .mir-ramp-sel[data-empty="true"] { display: none; }
 .mir-ramp-swatch { flex: 0 0 auto; margin: 0 4px; }
 .mir-ramp-at { flex: 1 1 auto; min-width: 0; }
