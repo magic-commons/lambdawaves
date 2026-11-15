@@ -6,6 +6,15 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 PERSPECTIVE IS GONE (044 A4, L151; Josh 11-14, the sheet's tick 15: "We can take it out"). CHROMATIC ABERRATION is SHIFT alone: AMOUNT · ANGLE · BLUR BLEND. The MODE knob, FOCUS X · FOCUS Y, the stage's focal handle (`lab/node-focus.js`, deleted with the model's `editing`) and the ramp left together; `off(values)` has no user and left `lab/node-types.js`. An older graph still opens: a saved node keeps `mode: 'perspective'`, `fx`, `fy` in its values, unread, and draws SHIFT; a route to `nodes.<id>.fx` / `.fy` finds no target, as a route to a removed node does. The ids `mode`, `perspective`, `fx`, `fy` are spent on this kind: a later knob takes other names. This RETIRES 040's THE FOCAL POINT (its PERSPECTIVE and handle lines; BLUR BLEND stays), 041's ONE RAMP, and 038's "ANGLE greys under PERSPECTIVE" (below). No LOCK leaf names the kind; none moved.
 
+NODES' HANDS ARE THE KIT'S (044 A4, `lab/nodes-view.js`).
+- **A card's drag is the kit's `drag()`** (L41, L39): 4 px before a press is a drag, so a click that trembles moves nothing and writes no undo step; Escape, a lost capture or a hidden page put the cards back. THE FOCUS LAW hands Escape to `nodes.escape` first, so that row is the abort (a card mid-drag, a wire mid-turn), then the menu, then the selection.
+- **The double press is the kit's `TAP`** (L37: 300 ms, 14 px; it was 350 on a title and 300 on a wire, with no distance): a title renames, a wire's hand goes home.
+- **The wire's hand is the kit knob's drag** (L54: `verticalDrag`): the kit's travel (a finger's too), the ⅛ gear on any modifier or a second finger, Escape puts it back. Its arrows are its wheel's step: 1/100, Shift an eighth of it.
+- **Shift is fine** (L34): the arrows move the selected cards 10 px, Shift 1 px (it was 1 and 10).
+- **Mod+B duplicates, Mod+D deselects** (L53, the TIMELINE's pair): `nodes.duplicate` moved from Mod+D; `nodes.deselect` is a new row. A reader's own saved chord for `nodes.duplicate` stays his.
+- **The wheel zooms at the TIMELINE's rate** (L60): e^(−δ · 0.003), ±120 px an event, on the ground (with Ctrl, 038 N2) and on the minimap.
+- **The ground says what it is** (L51): `role=application`, `aria-roledescription` "node graph", the name NODES — the kit pad's pattern.
+
 ## The laws of 042
 
 A FILM'S SHADER RECORDS END WITH THE TAKE (042 X4): the SHADER host keeps one film record per node id while a take runs (`bake`, stepped from black at frame 0) and frees them all at the take's end (`release()`, through `lab/film-bake.js` `end()` in render-exact's `after()`); a road that bakes outside the recorder ends with `bake.end()` too. `drop()` stays the stage's, never mid-film.

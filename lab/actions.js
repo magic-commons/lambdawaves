@@ -224,7 +224,7 @@ export function createActions(app) {
     /* NODES' keys (018 D3's ground map, 021 I1): rows of the one table, live while a graph's ground has the focus (THE FOCUS LAW, the timeline's precedent);
        chords by place (AZERTY and Dvorak keep them); Tab is the kit's again — the add menu is Shift+A */
     ...[['nodes.left', 'nudge left', 'ArrowLeft', (k, a) => k.nudge(-1, 0, a)], ['nodes.right', 'nudge right', 'ArrowRight', (k, a) => k.nudge(1, 0, a)], ['nodes.up', 'nudge up', 'ArrowUp', (k, a) => k.nudge(0, -1, a)],
-      ['nodes.down', 'nudge down', 'ArrowDown', (k, a) => k.nudge(0, 1, a)], ['nodes.delete', 'delete', ['Delete', 'Backspace'], (k) => k.remove()], ['nodes.duplicate', 'duplicate', 'Mod+KeyD', (k) => k.duplicate()],
+      ['nodes.down', 'nudge down', 'ArrowDown', (k, a) => k.nudge(0, 1, a)], ['nodes.delete', 'delete', ['Delete', 'Backspace'], (k) => k.remove()], ['nodes.duplicate', 'duplicate', 'Mod+KeyB', (k) => k.duplicate()], ['nodes.deselect', 'deselect', 'Mod+KeyD', (k) => k.none()],   // 044 A4 (L53): the TIMELINE's pair
       ['nodes.all', 'select all', 'Mod+KeyA', (k) => k.all()], ['nodes.undo', 'undo (the graph’s own)', 'Mod+KeyZ', (k) => k.undo()], ['nodes.redo', 'redo (the graph’s own)', ['Mod+Shift+KeyZ', 'Mod+KeyY'], (k) => k.redo()],
       ['nodes.bypass', 'bypass the selection', 'KeyM', (k) => k.bypass()], ['nodes.solo', 'solo the first selected', 'KeyS', (k) => k.solo()], ['nodes.off', 'BYPASS ALL', 'Backslash', (k) => k.off()],
       ['nodes.fold', 'fold the selection', 'KeyH', (k) => k.fold()], ['nodes.add', 'ADD NODE — the + menu', 'Shift+KeyA', (k) => k.add()], ['nodes.fit', 'FIT — every card in view', 'Home', (k) => k.fit()],
