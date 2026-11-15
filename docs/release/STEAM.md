@@ -106,7 +106,8 @@ unprivileged user namespaces (`kernel.apparmor_restrict_unprivileged_userns = 1`
 stops at launch with "No usable sandbox!" — every run here used `--no-sandbox`. Not known: whether Steam's own runtime (scout by default;
 the "Steam Linux Runtime 3.0 (sniper)" container if you pick it) allows the user-namespace sandbox, and what SteamOS on the Deck does. Test:
 install from Steam on Ubuntu and on the Deck, launch; if it does not start, the Linux launch option gets the argument `--no-sandbox` (the
-page process then runs unsandboxed; it loads only the app's own files and the https pictures a notebook names).
+page process then runs unsandboxed; it loads only the app's own files: since MIR 1.6.0-alpha.5 a notebook's picture is its own origin's or its own
+`data:` bytes, and any other picture is replaced by its alt words).
 
 ## 5. Steam Deck
 

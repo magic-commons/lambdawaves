@@ -57,7 +57,8 @@
    Test new and returning clients.
 4. **Protect data before changing formats.** Older project and share files keep loading; export a project before destructive storage
    tests. Browser storage is not a backup. Do not clear storage as a migration shortcut or put credentials in static JS.
-5. **State privacy accurately.** The app bundles its dependencies, but notebook content can include remote images and links. Do not
+5. **State privacy accurately.** The app bundles its dependencies, but notebook content can include links (a remote image is replaced by its alt
+   words since MIR 1.6.0-alpha.5; a picture is this origin's or a `data:` image). Do not
    promise zero network traffic because the app's assets are local. Add no telemetry.
 6. **Harden headers through browser testing.** The build sends revalidation, `nosniff`, a referrer policy and `noindex`. A strict CSP
    needs an inventory of inline scripts and styles, workers, media and blob URLs and notebook images; stage and test it before

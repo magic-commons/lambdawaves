@@ -4,6 +4,8 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ## The laws of 044
 
+FLOW WAITS FOR THE KICK (044 RD; register R9's flake): CHEMISTRY's FLOW has a source only while a run exists — `lab/chemview.js` `flowSource() { return flowOn && rt ? flow : null; }`. A still molecule has j = 0 (the continuity tile says "KICK and RUN first"), and the rack seeds the tracers once per source object (`lab/rack.js` `app.state.flowEpoch !== src`), so a frame between FLOW on and the kick's reply used to seed zero tracers and mark the source seen, and no later kick or RUN reseeded: FLOW on, then KICK, showed no tracers ever. Now the rack seeds from the kicked current (the kick's `.then` sets `rt` and feeds the flow in the same task); a RESET (`rt = null`) takes the tracers away until the next kick.
+
 A HELD VOLUME IS STILL A VOLUME (044 S3): `lab/volumes.js` `HELD` keeps VOL. III off the offered shelf; its entry, its id and every by-id read are as they were. docs/laws/picker.md, The laws of 044.
 
 ## The laws of 042
