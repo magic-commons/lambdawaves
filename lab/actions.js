@@ -164,7 +164,7 @@ export function createActions(app) {
       async run() { const C = app.state.capApi && app.state.capApi.capture; if (!C) return; const r = await C.picture({ scale: 2 }); if (r && r.blob) C.save(r); } },
     ...EXPORTS.map((s) => ({ id: 'export.' + s.fmt, group: PJ, label: 'EXPORT ' + s.fmt.toUpperCase(), hint: s.tip, gesture: true, surface: true, when: () => !!(app.state.exporter3d && !app.state.exporter3d.busy && app.ctl.field.ok), run: () => app.state.exporter3d.run(s.fmt) })),
     { id: 'import', group: PJ, label: 'IMPORT…', hint: 'Import a project (.json · .mir · picture)', run: () => proj().pick(), gesture: true, surface: true },
-    { id: 'copy.latex', group: PJ, label: 'COPY LaTeX', hint: 'The populated states as LaTeX', run: () => W().copyLatex(), gesture: true, surface: true },
+    { id: 'copy.latex', group: PJ, label: 'COPY LaTeX', hint: 'The populated states in chemistry order, as LaTeX', run: () => W().copyLatex(), gesture: true, surface: true },
     { id: 'copy.json', group: PJ, label: 'COPY JSON', hint: 'The experiment and its presentation as JSON', run: () => S().copyJSON(), gesture: true, surface: true },
     { id: 'copy.link', icon: 'link', group: PJ, label: 'COPY LINK', hint: 'A URL that reopens this exact state', run: () => S().copyLink().then((e) => { if (e) tell(e.copied ? 'Link copied — ' + e.chars + ' characters' : 'the clipboard refused the link — SPECTRUM shows it to copy', e.copied); return e; }), gesture: true, surface: true },
     { id: 'copy.picture', group: PJ, short: 'copy picture', label: 'COPY PICTURE', hint: 'Copy the stage picture (PNG)', gesture: true, surface: true, undo: 'none',

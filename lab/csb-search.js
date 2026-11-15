@@ -44,8 +44,8 @@ const PROVIDERS = {
     docs(app) { const rk = app.sh.rk; if (!rk) return [];
       const special = app.sh.layout && app.sh.layout.special ? app.sh.layout.special() : [], named = new Set(special.map((r) => r.id));
       const wins = rk.windows().filter((w) => !w.card && !named.has(w.id)).map((w) => ({ id: 'window:' + w.id, kind: 'window', key: w.id, title: w.title,
-        alias: WINDOW_WORDS[w.id] || '', glyph: WINDOW_GLYPH[w.id], prior: 0.5, off: !!w.hidden }));   // 044 AV2: an act named as its window (RENDER, TIMELINE) ties with it, and the window leads   // a window the mode hides is greyed (the FINDER's)
-      return wins.concat(special.map((r) => ({ id: 'window:' + r.id, kind: 'window', key: r.id, title: r.title, alias: WINDOW_WORDS[r.id] || '', glyph: WINDOW_GLYPH[r.id] || r.glyph, prior: 0.5, run: r.run }))); },
+        alias: WINDOW_WORDS[w.id] || '', glyph: WINDOW_GLYPH[w.id], prior: 0.5, off: !!w.hidden, open: !!w.open && !w.hidden }));   // 044 AV2: an act named as its window (RENDER, TIMELINE) ties with it, and the window leads   // a window the mode hides is greyed (the FINDER's)
+      return wins.concat(special.map((r) => ({ id: 'window:' + r.id, kind: 'window', key: r.id, title: r.title, alias: WINDOW_WORDS[r.id] || '', glyph: WINDOW_GLYPH[r.id] || r.glyph, prior: 0.5, run: r.run, open: !!(r.open && r.open()) }))); },
     run: (app, d) => (d.run ? d.run() : app.sh.ACTIONS.reveal(d.key)) },
   molecule: {
     async docs(app) { const P = app.state.picker; if (!P || !P.rows) return [];
@@ -121,7 +121,7 @@ export function createCsbSearch(app, { bar }) {
   function open() { pill.hidden = false; root.setAttribute('aria-expanded', 'true'); build(); place(); input.focus(); find(); }
   function row(d, q, sec, top) {
     const b = el('div', 'mb-item csb-row' + (top ? ' csb-top' : '') + (d.off ? ' off' : ''), pane); b.setAttribute('role', 'option'); b.id = 'csb-o' + opts.length;
-    if (d.off) b.setAttribute('aria-disabled', 'true');
+    if (d.off) b.setAttribute('aria-disabled', 'true'); else if (d.open) b.dataset.open = '';   // 044 AV2 (L147): an open window's row wears the FINDER's dot
     const pic = d.kind === 'molecule' && app.state.picker ? app.state.picker.suggestTile(b, d.r) : null;
     if (!pic) { const g = el('i', 'mb-icon', b); if (d.glyph) setGlyph(g, d.glyph); }
     const lbl = el('span', 'mb-lbl', b); let i = 0; b.title = d.hint || d.title;   // 044 KV2: a long name ends in an ellipsis; 044 AV2: the hint is the act's sentence, else the whole name

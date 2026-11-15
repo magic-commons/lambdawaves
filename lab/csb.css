@@ -149,6 +149,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 .csb-suggest .csb-row .csb-m { color: var(--acc); font-weight: var(--w-bold); }
 .csb-suggest .csb-row.on { background: var(--state-wash, var(--state-hover, var(--glass-raise))); color: var(--fg); }   /* the cursor: THE WASH */
 .csb-suggest .csb-row.off { opacity: var(--state-disabled, .38); cursor: default; }
+.csb-suggest .csb-row[data-open] { position: relative; } .csb-suggest .csb-row[data-open]::before { content: ""; position: absolute; left: 3px; top: 50%; width: 4px; height: 4px; margin-top: -2px; border-radius: 50%; background: var(--acc); }   /* 044 AV2 (L147): the FINDER's open dot */
 .csb-suggest .csb-top { height: 44px; font-size: var(--fs-large); color: var(--fg); }   /* TOP HIT: the one larger row */
 .csb-suggest .csb-top .mb-icon { width: 22px; height: 22px; }
 .csb-suggest .csb-kind { flex: none; color: var(--dim); font: var(--w-regular) var(--fs-tiny) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wide)); }
