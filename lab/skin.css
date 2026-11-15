@@ -43,7 +43,7 @@
 #transport.mini { left: 50%; right: auto; bottom: 60px; transform: translateX(-50%); height: 46px; gap: 2px; padding: 2px 7px 3px;   /* wave 92: the work bar's own height, gap and padding (modwindow.css .m2workbar) */
 
 
-  border-radius: 16px; border: var(--glass-border) solid var(--glass-border-color);
+  border-radius: var(--surface-radius, 16px); border: var(--glass-border) solid var(--glass-border-color);   /* 044 AV1 (L21, tick 6): the bar follows CORNERS */
   box-shadow: var(--glass-shadow);                       /* the pane itself comes from CARD STYLE below, like every window */
 
 
@@ -272,7 +272,8 @@ body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 /* 041 D0 · SPACING REACHES THE RACKS, THE WINDOWS AND THE BAR: MIR OPTIONS' SPACING knob writes --rack-gap / --rack-inset (the racks, line 2) and --pad-k (a pane's padding over home's; csb.css the bar); at home, 10 px, it writes nothing */
 .dev:where(:not([data-id="transport"])) .ro:not(.wide) .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 044 AV1: every card; a WIDE readout keeps its two lines (INFORMATIONAL's STATUS, CALCULUS, METERS) */
 .native-info-button { font: var(--w-bold) var(--fs-lead)/1 var(--font-ui); font-style: normal; }   /* 023 R5 (Josh: "strangely italic"): the ⓘ upright in the UI face (base.css: IT STAYS UPRIGHT), no Georgia slant */
-.native-info-button:hover, .native-info-button:focus-visible, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--glass-raise); outline: none; }
+.native-info-button:hover, .native-info-button:focus-visible, .native-info-button[aria-expanded="true"] { color: var(--fg); border-color: var(--glass-hairline); background: var(--state-hover, var(--glass-raise)); }
+.native-info-button[aria-expanded="true"] { color: var(--acc); }   /* 044 AV1 (L105, L62): hover brightens, accent means open; the ring is the kit's */
 .native-info .native-info-content { width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); border-radius: var(--r-lg); }
 .control-help { max-width: min(280px, calc(100vw - 16px)); border-radius: var(--r-md); }
 .dev[data-id="observer"] .segw { flex: 1 1 100%; }
@@ -280,7 +281,6 @@ body:not(.icon-grip) .dev-head .dev-glyph { display: none; }
 .dev[data-id="settings"] .settings-section { margin-bottom: 18px; }
 .dev[data-id="settings"] .segw { flex: 1 1 100%; }
 .dev[data-id="settings"] .sw { flex: 1 1 110px; }
-.plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }
 body.disconnected:not(.phone) .dev.native-selected > .dev-head,
 body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
 #transport .tempo-expand { order: 8; }
@@ -326,7 +326,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .dev[data-id="clip"] .grp > .row > .clip-on + .segw .seg-b { flex:1 1 0;min-width:0;padding:0 4px; }
 @media (pointer:coarse) { .dev[data-id="observer"] .seg button { min-height:44px; }
 }
-.plane-model[aria-disabled="true"] { opacity:.35;}
 .native-play-row { display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;min-width:0; }
 #transport.mini .native-play-row { gap:2px; }
 #transport { box-sizing:border-box;max-width:100%;overflow:hidden; }
@@ -382,11 +381,11 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 /* 041 D0 · EVERY FACE CAN BE GLASS, THE APP'S FACES (Josh 11-09: "The 'faces' from glass to solid doesn't seem to work with all the faces"): the
    kit's GLASS rule (mir/css/skin.css, alpha.61) is layered, and the rules above and §9's are not, so λWAVES' own triggers, segments and cells
    kept their fill.  The same law here, unlayered: under FACES · GLASS on a glass card every neutral face is clear and wears the hairline; ON
-   keeps its own face.  The swatches, the power disc and PLAY's accent stay filled, as in the kit.  041 X5 (F-REVIEW FIX 6): NODES' cards and the
-   Picker's arrows and tab pill are faces too */
+   keeps its own face.  The swatches, the power disc and PLAY's accent stay filled, as in the kit.  041 X5 (F-REVIEW FIX 6): the
+   Picker's arrows and tab pill are faces too.  044 AV1 (L149, Josh's tick 10): a NODES card keeps its tint under GLASS (040 N5, lab/nodes.css) */
 body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.dev:not(.mir-modwindow) :is(.trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]), .seg, .seg-b),
   .sp-b:not(.on), .pk-c:not(.on), .sp-row:not(.sel), .orbit-row, .plane-model, .dev-copy, #transport[data-layout="csb"] .csb-play > .tbtn.play:not(:active, .press),
-  .nodes-card, #lwMenu .mm-arrow, #lwMenu .mm-pill) { background-color: transparent; background-image: none; }
+  #lwMenu .mm-arrow, #lwMenu .mm-pill) { background-color: transparent; background-image: none; }
 body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.dev:not(.mir-modwindow) .trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]):not(.lw-fold), .sp-b:not(.on), .pk-c:not(.on)) { border-color: var(--ctl-hairline); }
 /* 044 M4 · THE STATE BUTTONS FOLLOW THE STROKE (Josh 11-12: "When in glass faces mode, can the 140nlm state buttons not have an extreme outline
    and be tied to the MIR options param?"): the kit declares --ctl-hairline on ITS controls (mir/css/base.css), so on λWAVES' cells the rule above
@@ -673,7 +672,7 @@ body[data-theme="light"] #lwMenu .mm-art-still[data-theme="dark"], body:not([dat
 #lwMenu .mm-back { flex: none; font-size: var(--fs-base); letter-spacing: .22em; opacity: .55; white-space: nowrap; transition: opacity 120ms, color 120ms; } #lwMenu .mm-back:hover, #lwMenu .mm-back:focus-visible { opacity: 1; color: var(--acc); }
 #lwMenu .mm-vstep { flex: none; } #lwMenu .mm-vstep .mir-step-row { gap: 0; }
 #lwMenu .mm-vstep .mir-step-name { min-width: 0; min-height: 34px; padding: 0 6px; font-family: 'LW Title', var(--font-ui); font-size: 26px; letter-spacing: var(--tr-tight); line-height: 1; white-space: nowrap; }
-#lwMenu .mm-vstep .mir-step-b { width: 26px; height: 34px; min-width: 0; min-height: 0; font-size: 18px; border-radius: var(--r-md); } #lwMenu .mm-vstep .mir-step-b:disabled { opacity: .18; }
+#lwMenu .mm-vstep .mir-step-b { width: 26px; height: 34px; min-width: 0; min-height: 0; font-size: 18px; border-radius: var(--r-md); } #lwMenu .mm-vstep .mir-step-b:disabled { opacity: var(--state-disabled, .38); }
 #lwMenu .mm-count { flex: none; font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; white-space: nowrap; }
 #lwMenu .mm-search { flex: none; font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); border-radius: var(--r-pill); padding: 6px 12px; width: 150px; }
 #lwMenu .mm-search::placeholder { color: var(--fg); opacity: .45; }
@@ -1301,7 +1300,7 @@ body.frost #lwMenu .mm-sheet-fx { display: block; }
 #lwMenu .mm-sh-row.two .k { grid-template-columns: auto minmax(0, 1fr) auto; }
 #lwMenu .mm-sh-row .k > .k-lbl { grid-area: 1 / 1; } #lwMenu .mm-sh-row .k > .k-dial { grid-area: 1 / 3; width: 26px; height: 26px; }
 #lwMenu .mm-sh-row .k > .k-val { grid-area: 1 / 2; justify-self: end; position: static; opacity: 1; transform: none; padding: 0; background: transparent; box-shadow: none; font-size: var(--fs-base); }
-#lwMenu .mm-sh-row .k.disabled { opacity: .35; } #lwMenu .mm-sh-row .k.disabled > .k-dial { visibility: hidden; }   /* a dead knob (STRENGTH under DITHER OFF, WIDTH under DOMAIN AUTO) reads dim, its needle never a stray glyph */
+#lwMenu .mm-sh-row .k.disabled { opacity: var(--state-disabled, .38); } #lwMenu .mm-sh-row .k.disabled > .k-dial { visibility: hidden; }   /* a dead knob (STRENGTH under DITHER OFF, WIDTH under DOMAIN AUTO) reads dim, its needle never a stray glyph */
 #lwMenu .mm-sh-row .ro { display: grid; grid-template-columns: var(--lab-w) minmax(0, 1fr); align-items: baseline; gap: 0 8px; padding: 0; background: none; border: 0; box-shadow: none; }
 #lwMenu .mm-sh-row .ro-val { padding-left: 6px; font-size: 12px; min-height: 0; } #lwMenu .mm-sh-row .ro-sub { display: none; }
 @media (prefers-reduced-motion: reduce) { #lwMenu .mm-sheet { transition: none; } }
