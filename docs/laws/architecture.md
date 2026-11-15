@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 043
+
+A STILL FRAME RUNS NO REGISTER READER (043 P1, the paused frame; the vault's iteration-043 `P-BUILD.md`): `lab/rack.js` `schedule(tier, camera)` counts every ask for a frame in `asks` but the camera's (its two edges, camera-law's present and the stage gestures pass `camera` true: a turn moves only obs). Paused, a frame nothing but the camera asked for, at the same `reg.version` and t, is STILL: the register readers (SPECTRUM, SHADOW, PLANE, ATOMS, WIGNER, RADIATION, EMISSION, CALCULUS, METERS) keep what they drew and the camera's readers run as ever; playing, nothing changes; a frame that threw clears the mark. So a control that changes what one of those windows shows must ask for its frame (`schedule(tier)`), never ride the camera's. The soak's three leaks were the kit's (1.5.7-alpha.69…71, docs/laws/kit.md, The laws of 043).
+
 ## The laws of 042
 
 THE SEAT NAMES WHAT boot() READS (042 A3, X1): a seat destructure names only what `boot()` itself reads, and the module returns only those; every other name it makes is registered on `app.<ns>`, where its readers read it (`rack-deps --classes`' fwd + shared did not move, only the informational `backward`).
