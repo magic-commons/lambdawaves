@@ -126,7 +126,7 @@ body[data-theme="dark"] .mir-win:is(.lw-about, .lw-notebook) { --nb-btn: hsl(0 0
 .ab-tag { text-transform: uppercase; }
 .ab-tagline { font-size: var(--fs-lead); }
 .ab-credit { font-size: 12px; }
-.ab-fine { font-size: 10.5px; }
+.ab-fine { font-size: var(--fs-small); }
 
 /* 033 THE UPDATER · ABOUT's build line (sw-client.js paintBuild) and the diagnostics' text (COPY DIAGNOSTICS) */
 .ab-build { font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); opacity: .85; word-break: break-word; }
@@ -177,7 +177,7 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
  * tabular figures, so the mathematics reads as mathematics and the numbers substituted into it can
  * never dance.  The slot is also the brightest ink on the line, which is how the eye finds the values
  * that are moving WITHOUT anything having to move decoratively (MOTION-LAW gate 3). */
-.fx-v { font-size: .92em; }
+.fx-v { font-size: var(--fs-tiny); }
 /* SPECTRUM's live law never reflows the window: a number that grows (t, arg c) cannot wrap the line or
    change the card's height. Each slot holds its widest value; the line clips instead of wrapping. */
 .sp-fx .fx-l { white-space: nowrap; overflow: hidden; text-overflow: clip; }
@@ -185,7 +185,7 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 .sp-fx .fx-v[data-s="lab"] { text-align: left; }
 .sp-fx .fx-v[data-s="t"] { min-width: 7ch; }      /* t grows to four figures; E, |c| are fixed-format, arg c is at most 5 */
 .sp-fx .fx-v[data-s="arg"] { min-width: 6ch; }
-.sp-fx .fx-l + .fx-l { font-size: calc(var(--fs-small) * .93); }   /* the numbers line fits the card at its narrowest without clipping |c| */
+.sp-fx .fx-l + .fx-l { font-size: var(--fs-tiny); }   /* the numbers line fits the card at its narrowest without clipping |c| */
 /* THE PILL IS A 32-px STRIP AND A DERIVATION HAS NO PLACE IN IT.  The transport's REPEATS formula
    lives on the DOCKED card; undocked, the same DOM is restyled as a 560 x 32 pill with twelve seats
    in one flex row, and a two-line expression there would either be clipped or would break the row.
