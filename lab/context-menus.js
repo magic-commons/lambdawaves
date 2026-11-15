@@ -16,27 +16,28 @@ export function createContextMenus(app) {
   const A = app.sh.ACTIONS, mat = app.mat, ui = app.ui;
   setMenuEscape((close) => A.escape.push(close));                     // the menus are layers of THE ESCAPE STACK
   const keyOf = (id) => { try { const k = app.sh.kt.keyText(id); return k && k !== '—' ? '\t' + k : ''; } catch (_) { return ''; } };
-  /** row(id, word?, o?) — an action as a menu entry: its word (the label's head), its key, ✓ from get(), its icon; o.args run it with arguments,
-   *  o.radio / o.on make a choice, o.off greys it; the pressed element always rides along */
+  /** row(id, o?) — an action as a menu entry, ITS WORDS THE REGISTRY'S (044 AV2 · ONE NAME PER THING): the row's `label` (its `word()` where it changes; of
+   *  `A › B` the B), its key, ✓ from get() (`menuOn` where the tick is the thing shown), its icon; o.word is a choice's own word, o.args run it with
+   *  arguments, o.radio / o.on make a choice, o.off greys it; the pressed element always rides along */
   let pressed = null;
-  const row = (id, word, o = {}) => {
+  const row = (id, o = {}) => {
     const a = A.get(id); if (!a) return null;
-    let on; try { on = o.on ? o.on() : a.kind === 'toggle' && a.get ? !!a.get() : undefined; } catch (_) { on = undefined; }
+    let on; try { on = o.on ? o.on() : a.kind === 'toggle' && (a.menuOn || a.get) ? !!(a.menuOn || a.get)() : undefined; } catch (_) { on = undefined; }
     const icon = typeof a.icon === 'function' ? a.icon() : a.icon, el = pressed;
-    return [(word || a.label.split(' — ')[0]) + (o.args ? '' : keyOf(id)), () => A.run(id, { el, ...(o.args || {}) }), !!o.off, a.hint || a.label,
-      { id, ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(icon ? { icon } : {}) }];
+    return [(o.word || (a.word ? a.word() : a.label).split(' — ')[0].split(' › ').pop()) + (o.args ? '' : keyOf(id)), () => A.run(id, { el, ...(o.args || {}) }), !!o.off, a.hint || a.label,
+      { id, ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(icon && !o.radio ? { icon } : {}) }];
   };
   const sub = (word, rows, icon) => [word, rows, null, '', { sub: true, ...(icon ? { icon } : {}) }];
-  const radio = (id, group, list, cur) => list.map(([v, w]) => row(id, w, { args: { id: v }, radio: group, on: () => cur() === v }));
+  const radio = (id, group, list, cur) => list.map(([v, w]) => row(id, { word: w, args: { id: v }, radio: group, on: () => cur() === v }));
   const win = (id) => (app.sh.rk ? app.sh.rk.windows().find((w) => w.id === id) : null) || {};
 
   /* ── THE MENUS (RESEARCH-U §1's table) ── */
   const VIEWS = [['density', 'ρ  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']];
-  const stage = () => [sub('VIEW', () => radio('view', 'view', VIEWS, () => VIEW_NAMES[mat.view]), 'psi'),
+  const stage = () => [sub('OBSERVABLE', () => radio('view', 'view', VIEWS, () => VIEW_NAMES[mat.view]), 'psi'),
     sub('STYLE', () => radio('style', 'style', ui.styleList(), () => drawStyle(mat.style)), 'paint'),   // 032 O1: the seg's own visible set (it listed five)
-    row('palette', 'PALETTE'), row('camReset', 'CAMERA HOME'), row('camera.flip', 'FLIP'), row('camera.lock', 'LOCK'), row('camera.autoRotate', 'AUTO-ROTATE'), null, row('copy.picture', 'COPY PICTURE'), row('hide', 'HIDE THE INTERFACE')];   // 038 K4 (Josh: "add 'Auto-rotate' … perhaps under 'lock'"): the ninth row
-  const title = (id) => [row(`window.${id}.fold`, 'FOLD'), row(`window.${id}.float`, 'FLOAT'), row(`window.${id}.side`, win(id).side === 'right' ? 'TO THE LEFT RACK' : 'TO THE RIGHT RACK'),
-    row(`window.${id}.reset`, 'RESET PLACE'), row(`window.${id}.solo`, 'SOLO'), row('notes', 'WINDOW HELP'), null, row(`window.${id}.close`, 'CLOSE')];
+    row('palette'), row('camReset'), row('camera.flip'), row('camera.lock'), row('camera.autoRotate'), null, row('copy.picture'), row('hide')];   // 038 K4 (Josh: "add 'Auto-rotate' … perhaps under 'lock'"): the ninth row
+  const title = (id) => [row(`window.${id}.fold`), row(`window.${id}.float`), row(`window.${id}.side`),
+    row(`window.${id}.reset`), row(`window.${id}.solo`), row('notes'), null, row(`window.${id}.close`)];
   const favRows = (el) => { const f = el.closest('[data-fav]'), F = app.sh.csb, id = f ? f.dataset.fav : el.matches('.k, .fd') ? el.dataset.param : '';   // ADD TO / REMOVE FROM the CONTROL SURFACE
     return id && F ? F.rowsFor(id).map((r) => [r.label, r.run, false, '', { icon: /^REMOVE/.test(r.label) ? 'minus' : 'plus' }]) : []; };
   /* 044 R1 · THE APP'S ROWS BY SLOT (the kit's CONTROL_MENU): RESET on a registered parameter, COPY VALUE on an event target's pressed option or
@@ -44,25 +45,25 @@ export function createContextMenus(app) {
      A value door (a knob, a fader) has the kit's own RESET · COPY VALUE · PASTE; the kit leaves these out there. */
   const evOff = (el) => { const e = el.closest('[data-event]'), R = app.state.modHost && app.state.modHost.registry; return !e || !R || !R.has(e.dataset.event) || !app.state.tl; };
   const slots = (el) => { const ev = !evOff(el), value = el.closest('.k, .fd'); return {
-    reset: el.closest('[data-param]') ? [row('control.reset', 'RESET')] : [],
-    copy: ev && (pressed || el).closest('[data-v], .pk-c, .sw') ? [row('event.copy', 'COPY VALUE')] : [],   // the pressed button, not its row
-    routes: value && value.dataset.param ? [row('knob.route', 'ROUTE THE MACRO')] : [],
-    learn: el.closest('[data-key-action]') ? [row('control.learn', 'LEARN…')] : [],
-    event: ev ? [row('event.create', 'CREATE EVENT')] : [] }; };
-  const events = (el) => [row('event.create', 'CREATE EVENT', { off: evOff(el) }), row('event.copy', 'COPY VALUE', { off: evOff(el) || !(pressed || el).closest('[data-v], .pk-c, .sw') })];   // the 140 grid's menu (lanes)
-  const bar = () => [row('dock', 'DOCK'), row('csb.expand', 'EXPAND'), sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get()), 'moon'),
-    row('folds', A.get('folds') && A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'FOLD ALL', { on: () => undefined }), row('modArm', 'MOD'), row('gui', 'MIR OPTIONS'), null, row('hide', 'HIDE THE INTERFACE')];
-  const tile = (el) => [row('picker.open', 'OPEN'), row('picker.isomers', 'ISOMERS', { off: !el.querySelector('.mm-iso') }), row('picker.keep', 'KEEP ON THIS DEVICE', { off: !el.querySelector('img[data-vol]') }), null,
-    row('copy.name', 'COPY NAME'), row('copy.formula', 'COPY FORMULA')];
+    reset: el.closest('[data-param]') ? [row('control.reset')] : [],
+    copy: ev && (pressed || el).closest('[data-v], .pk-c, .sw') ? [row('event.copy')] : [],   // the pressed button, not its row
+    routes: value && value.dataset.param ? [row('knob.route')] : [],
+    learn: el.closest('[data-key-action]') ? [row('control.learn')] : [],
+    event: ev ? [row('event.create')] : [] }; };
+  const events = (el) => [row('event.create', { off: evOff(el) }), row('event.copy', { off: evOff(el) || !(pressed || el).closest('[data-v], .pk-c, .sw') })];   // the 140 grid's menu (lanes)
+  const bar = () => [row('dock'), row('csb.expand'), sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get()), 'moon'),
+    row('folds', { on: () => undefined }), row('modArm'), row('gui'), null, row('hide')];
+  const tile = (el) => [row('picker.open'), row('picker.isomers', { off: !el.querySelector('.mm-iso') }), row('picker.keep', { off: !el.querySelector('img[data-vol]') }), null,
+    row('copy.name'), row('copy.formula')];
   const looks = () => [...document.querySelectorAll('#lwMenu .mm-lk')].map((b) => [b.dataset.look, (b.getAttribute('aria-label') || b.title || b.dataset.look).split(' · ')[0]]);
-  const pickerPage = () => [sub('LOOK', () => radio('picker.look', 'look', looks(), () => A.get('picker.look').get()), 'eye'), row('csb.search', 'SEARCH'), row('folders', 'FOLDERS'), row('open', 'OPEN…')];
-  const lanes = (el) => [row('state.clear', 'CLEAR'), row('state.normalize', 'NORMALIZE'), row('preset.next', 'NEXT SYSTEM'), ...events(el), null, row('copy.latex', 'COPY LaTeX'), row('spectrum.solo', 'SOLO SPECTRUM')];   // 032 W3: the 140 grid's EVENT (state.index); PREVIOUS SYSTEM left (≤ 8 rows), the stepper keeps it
-  const notebook = () => [row('notebook', 'NOTEBOOK'), row('notebook.copy', 'COPY TEXT'), row('copy.link', 'COPY LINK'), row('copy.latex', 'COPY LaTeX'), row('export.json', 'EXPORT .json')];
-  const finder = (el) => { const id = el.dataset.win, w = win(id); return [w.open ? row(`window.${id}.close`, 'CLOSE') : row(`window.${id}.open`, 'OPEN'), row(`window.${id}.fold`, 'FOLD', { off: !w.open }),
-    row(`window.${id}.float`, 'FLOAT', { off: !w.open }), row('notes', 'WINDOW HELP')]; };
-  const words = () => [row('view.formula', 'FORMULA'), row('view.labels', 'ATOM LABELS'), row('view.captions', 'CAPTIONS'), row('view.badges', 'STATUS TAGS'),
+  const pickerPage = () => [sub('LOOK', () => radio('picker.look', 'look', looks(), () => A.get('picker.look').get()), 'eye'), row('csb.search'), row('folders'), row('open')];
+  const lanes = (el) => [row('state.clear'), row('state.normalize'), row('preset.next'), ...events(el), null, row('copy.latex'), row('spectrum.solo')];   // 032 W3: the 140 grid's EVENT (state.index); PREVIOUS SYSTEM left (≤ 8 rows), the stepper keeps it
+  const notebook = () => [row('notebook'), row('notebook.copy'), row('copy.link'), row('copy.latex'), row('export.json')];
+  const finder = (el) => { const id = el.dataset.win, w = win(id); return [w.open ? row(`window.${id}.close`) : row(`window.${id}.open`), row(`window.${id}.fold`, { off: !w.open }),
+    row(`window.${id}.float`, { off: !w.open }), row('notes')]; };
+  const words = () => [row('view.formula'), row('view.labels'), row('view.captions'), row('view.badges'),
     sub('ESP BAR SIDE', () => radio('esp.side', 'side', [['right', 'RIGHT'], ['left', 'LEFT'], ['top', 'TOP'], ['bottom', 'BOTTOM']], () => A.get('esp.side').get()), 'sideRight'), null,
-    row('copy.formula', 'COPY FORMULA'), row('copy.latex', 'COPY LaTeX')];
+    row('copy.formula'), row('copy.latex')];
   /* the app's rows on a registered knob, which the kit's timeline opens itself (part 'app'; the favourites' ADD / REMOVE ride setTimelineKnobRows) */
   knobMenuPart('app', (id, root) => { pressed = root; return { rows: slots(root) }; });
 

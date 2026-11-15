@@ -16,7 +16,7 @@ import { createKeys, parseChord, normalize, chordFromEvent, RESERVED_BY_BROWSER,
 import { jsonStore } from './mir/core/prefs.js';
 
 /** the keyboard window's groups, in λWAVES' order (021 I1: CONTROL SURFACE was missing — indexOf −1 sorted csb.search first — and the registry's groups follow) */
-export const ORDER = ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'CONTROL SURFACE', 'PROJECT', 'VIEW', 'SETTINGS', 'CARDS', 'NODES', 'WINDOWS', 'TIMELINE'];
+export const ORDER = ['PLAY', 'CAMERA', 'STATE', 'WINDOW', 'CONTROL SURFACE', 'FILE', 'VIEW', 'SETTINGS', 'CARDS', 'NODES', 'TIMELINE'];   // 044 AV2 (L80): the menus' names where a group is a menu
 const LS_KEYS = 'lambdawaves.q0.keys';
 /* 021 R4 · the kit's jsonStore, versioned: `{ v: 1, keys: { id: [chords] } }`; an older unversioned record is read once and written back upgraded */
 const keyStore = jsonStore(LS_KEYS);
@@ -43,7 +43,7 @@ export function liftSaved(o, rows) {
 
 export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus = () => false, storage = local, platform, target, reserved = RESERVED_BY_BROWSER } = {}) {
   const byId = new Map(rows.map((a) => [a.id, a])), declared = new Map(rows.map((a) => [a.id, { key: a.key, ctrl: a.ctrl, alt: a.alt, shift: a.shift }]));
-  const group = (a) => a.group || ORDER[3];
+  const group = (a) => a.group || 'WINDOW';
   const table = createKeys({ platform, target, reserved, storage:   /* 021 I2: the browser's own chords refused by the binder (kit 1.5.6-alpha.2) */ { get: () => liftSaved(storage.get(), rows), set: (o) => storage.set(o) },
     actions: [...rows].sort((x, y) => ORDER.indexOf(group(x)) - ORDER.indexOf(group(y))).map((a) => ({ id: a.id, label: a.label, group: group(a), short: a.short,
       keys: keysOf(a), inFields: !!a.inFields, repeat: true, when: a.when || (a.stage ? stageHasFocus : undefined),

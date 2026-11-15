@@ -31,9 +31,9 @@ function capsOf(kt, row) {
 const PROVIDERS = {
   action: {
     docs(app) { const A = app.sh.ACTIONS; if (!A) return []; const kt = app.sh.kt;
-      return A.list().filter((r) => r.group !== 'VERBS' && r.group !== 'WINDOWS' && r.kind !== 'hold' && !r.stage && !SKIP.test(r.id)).map((r) => {
-        const title = r.label.length <= 40 || !r.hint ? r.label : r.hint, caps = capsOf(kt, r);
-        return { id: 'action:' + r.id, kind: 'action', key: r.id, title, alias: r.short || '', keys: caps.join(' '), caps, body: (title === r.label ? r.hint || '' : r.label) + ' ' + r.id,
+      return A.list().filter((r) => r.group !== 'VERBS' && !r.id.startsWith('window.') && r.kind !== 'hold' && !r.stage && !SKIP.test(r.id)).map((r) => {
+        const caps = capsOf(kt, r);   // 044 AV2: the title is the act's one name, its sentence the row's hint
+        return { id: 'action:' + r.id, kind: 'action', key: r.id, title: r.label, hint: r.hint || '', alias: r.short || '', keys: caps.join(' '), caps, body: (r.hint || '') + ' ' + r.id,
           glyph: typeof r.icon === 'string' && r.icon ? r.icon : null, prior: (r.keys ? 0.3 : 0) + (r.short ? 0.1 : 0),
           get off() { try { return !!r.when && !r.when(); } catch (_) { return true; } } };
       }); },
@@ -44,8 +44,8 @@ const PROVIDERS = {
     docs(app) { const rk = app.sh.rk; if (!rk) return [];
       const special = app.sh.layout && app.sh.layout.special ? app.sh.layout.special() : [], named = new Set(special.map((r) => r.id));
       const wins = rk.windows().filter((w) => !w.card && !named.has(w.id)).map((w) => ({ id: 'window:' + w.id, kind: 'window', key: w.id, title: w.title,
-        alias: WINDOW_WORDS[w.id] || '', glyph: WINDOW_GLYPH[w.id], prior: 0.2, off: !!w.hidden }));   // a window the mode hides is greyed (the FINDER's)
-      return wins.concat(special.map((r) => ({ id: 'window:' + r.id, kind: 'window', key: r.id, title: r.title, alias: WINDOW_WORDS[r.id] || '', glyph: WINDOW_GLYPH[r.id] || r.glyph, prior: 0.2, run: r.run }))); },
+        alias: WINDOW_WORDS[w.id] || '', glyph: WINDOW_GLYPH[w.id], prior: 0.5, off: !!w.hidden }));   // 044 AV2: an act named as its window (RENDER, TIMELINE) ties with it, and the window leads   // a window the mode hides is greyed (the FINDER's)
+      return wins.concat(special.map((r) => ({ id: 'window:' + r.id, kind: 'window', key: r.id, title: r.title, alias: WINDOW_WORDS[r.id] || '', glyph: WINDOW_GLYPH[r.id] || r.glyph, prior: 0.5, run: r.run }))); },
     run: (app, d) => (d.run ? d.run() : app.sh.ACTIONS.reveal(d.key)) },
   molecule: {
     async docs(app) { const P = app.state.picker; if (!P || !P.rows) return [];
@@ -124,7 +124,7 @@ export function createCsbSearch(app, { bar }) {
     if (d.off) b.setAttribute('aria-disabled', 'true');
     const pic = d.kind === 'molecule' && app.state.picker ? app.state.picker.suggestTile(b, d.r) : null;
     if (!pic) { const g = el('i', 'mb-icon', b); if (d.glyph) setGlyph(g, d.glyph); }
-    const lbl = el('span', 'mb-lbl', b); let i = 0; b.title = d.title;   // 044 KV2: a long name ends in an ellipsis; the whole name is the row's hint
+    const lbl = el('span', 'mb-lbl', b); let i = 0; b.title = d.hint || d.title;   // 044 KV2: a long name ends in an ellipsis; 044 AV2: the hint is the act's sentence, else the whole name
     for (const [s, e] of q ? marks(d.title, q) : []) { if (s > i) lbl.append(d.title.slice(i, s)); el('b', 'csb-m', lbl, d.title.slice(s, e)); i = e; }
     lbl.append(d.title.slice(i));
     el('span', 'csb-kind', b, d.kind.toUpperCase());

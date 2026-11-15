@@ -73,7 +73,7 @@ try {
   assert.ok(geo.w > 900 && geo.w < 1440 && geo.h <= 416, 'the pane is ' + geo.w + ' × ' + geo.h);
   assert.ok(geo.x >= 8 && geo.y >= 8);
   assert.equal(geo.rows, 5); assert.equal(geo.inWell, true, 'the five rows do not fit the board\'s well');
-  assert.deepEqual(geo.groups, ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'CONTROL SURFACE', 'PROJECT', 'VIEW', 'SETTINGS', 'CARDS', 'NODES', 'WINDOWS', 'TIMELINE']);   // 021 I1: CONTROL SURFACE in ORDER (it sorted first at −1), the registry's groups   // 0.5.0 C7b: the TIMELINE's rows, after λWAVES' own; iteration 014 A8: the CONTROL SURFACE's row (Mod+K, the search)
+  assert.deepEqual(geo.groups, ['PLAY', 'CAMERA', 'STATE', 'WINDOW', 'CONTROL SURFACE', 'FILE', 'VIEW', 'SETTINGS', 'CARDS', 'NODES', 'TIMELINE']);   // 044 AV2 (L80): the menus' names (TRANSPORT → PLAY, PROJECT → FILE, the two WINDOWS groups are WINDOW)   // 021 I1: CONTROL SURFACE in ORDER (it sorted first at −1), the registry's groups   // 0.5.0 C7b: the TIMELINE's rows, after λWAVES' own; iteration 014 A8: the CONTROL SURFACE's row (Mod+K, the search)
   assert.equal(geo.oneRow, true); assert.deepEqual(geo.icons, ['⌘', 4]);
   assert.ok(geo.centred < 2); assert.equal(geo.above, true); assert.deepEqual(geo.bare, ['RECORD INPUT', 'RESET TO DEFAULT'], 'RECORD / RESET carry no subtitle');
   assert.equal(geo.statusShown, false, 'an empty status is shown'); assert.deepEqual(geo.borders, ['0px', '0px', '0px', '0px', '1px', '0px', '0px', '0px', '0px']);   // 044 KV2: the search is the kit's one search field (the FINDER's pill: a well and its hairline); nothing else wears a border
@@ -112,8 +112,8 @@ try {
   const asked = await ev(`const w = document.querySelector('[data-mir-window="keyboard"]'); return { status: w.querySelector('.km-status').textContent, tone: w.querySelector('.km-status').dataset.tone, cam: __LW.keys.table.chords('camReset') };`);
   await press('q');
   const stolen = await ev(`const T = __LW.keys.table; return { cam: T.chords('camReset'), dolly: T.chords('dollyIn'), status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent, errors: __e.slice() };`);
-  assert.match(asked.status, /already bound to “dolly in”/); assert.equal(asked.tone, 'conflict'); assert.deepEqual(asked.cam, ['KeyR', 'Shift+KeyR'], 'the first press of a taken chord bound it');
-  assert.deepEqual(stolen.cam, ['KeyQ']); assert.deepEqual(stolen.dolly, []); assert.match(stolen.status, /taken from “dolly in”/);
+  assert.match(asked.status, /already bound to “DOLLY IN”/); assert.equal(asked.tone, 'conflict'); assert.deepEqual(asked.cam, ['KeyR', 'Shift+KeyR'], 'the first press of a taken chord bound it');
+  assert.deepEqual(stolen.cam, ['KeyQ']); assert.deepEqual(stolen.dolly, []); assert.match(stolen.status, /taken from “DOLLY IN”/);
   assert.deepEqual(stolen.errors, []);
   console.log('PASS recording with real keys: Ctrl+Shift+L binds POV tighter (table, row and lambdawaves.q0.keys say so); Q for cam reset asks, the second Q steals it and names "dolly in"');
 

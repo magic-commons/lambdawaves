@@ -40,16 +40,16 @@ try {
     return 1;`);
 
   /* ── 1 · every key hint is the LIVE binding, and a rebind renames the row ── */
-  const hints = await g.ev(`const want = { PLAY: [['PLAY / PAUSE', 'transport.play']], EDIT: [['STATE › RESEED the particles', 'reseed'], ['UNDO', 'undo'], ['REDO', 'redo'], ['HISTORY UNDO', 'historyUndo'], ['SETTINGS', 'settings']],
-      VIEW: [['CAMERA › HOME', 'camReset'], ['INTERFACE › HIDE the interface', 'hide'], ['INTERFACE › WINDOW HELP', 'notes'], ['FULL SCREEN', 'fullscreen']], WINDOW: [['TOOLS › MODULATION', 'modulation'], ['TOOLS › NOTEBOOK', 'notebook'], ['RACKS › SHOW THE RACK', 'rack'], ['RACKS › DOCK', 'dock']],
-      HELP: [['KEYBOARD SHORTCUTS', 'help']], FILE: [['SAVE AS', 'saveAs'], ['NEW', 'new'], ['OPEN', 'open'], ['EXPORT › PICTURE', 'export.picture'], ['MAIN MENU', 'menu']] };   // 038 M2: MAIN MENU at FILE's foot, L
+  const hints = await g.ev(`const want = { PLAY: [['PLAY', 'transport.play']], EDIT: [['STATE › RESEED THE PARTICLES', 'reseed'], ['UNDO', 'undo'], ['REDO', 'redo'], ['BACK FROM THE JUMP', 'historyUndo'], ['SETTINGS', 'settings']],
+      VIEW: [['CAMERA › HOME', 'camReset'], ['INTERFACE › INTERFACE', 'hide'], ['INTERFACE › WINDOW HELP', 'notes'], ['FULL SCREEN', 'fullscreen']], WINDOW: [['TOOLS › MODULATION', 'modulation'], ['TOOLS › NOTEBOOK', 'notebook'], ['RACKS › RACK', 'rack'], ['RACKS › DOCK', 'dock']],
+      HELP: [['KEYBOARD', 'help']], FILE: [['SAVE AS', 'saveAs'], ['NEW', 'new'], ['OPEN', 'open'], ['EXPORT › PICTURE', 'export.picture'], ['MAIN MENU', 'menu']] };   // 038 M2: MAIN MENU at FILE's foot, L
     const bad = [];
     for (const [menu, rows] of Object.entries(want)) for (const [label, id] of rows) { const k = await __keyAt(menu, label); if (k !== __keyOf(id)) bad.push([menu, label, k, __keyOf(id)]); }
     /* 021 I3: a choice is a radio, and the one in force carries the mark (VIEW › OBSERVABLE: the boot's PHASE) */
     { __LW.layout.menu.open(); const bar = document.getElementById('menubar'), btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === 'VIEW'); btn.click();
       const it = await __find(btn, 'OBSERVABLE › arg ψ'); if (!it || it.getAttribute('aria-checked') !== 'true' || it.getAttribute('role') !== 'menuitemradio') bad.push(['VIEW', 'OBSERVABLE radio', it && it.outerHTML && it.outerHTML.slice(0, 120)]); __LW.layout.menu.close(); }
     const b = __LW.keys.bind('hide', { key: 'KeyU' });
-    const out = { VIEW: await __keyAt('VIEW', 'INTERFACE › HIDE the interface') };
+    const out = { VIEW: await __keyAt('VIEW', 'INTERFACE › INTERFACE') };
     __LW.keys.reset(); __LW.layout.menu.close();
     return { bad, bound: b.ok, rebound: out };`);
   assert.deepEqual(hints.bad, []);
@@ -60,7 +60,7 @@ try {
   /* ── 2 · RESEED seeds the particles and leaves the camera where the hand put it ── */
   const reseed = await g.ev(`__LW.particles.setOn(false); __LW.orbit(0.9, 0.1); await __LW.settle();
     const cam0 = { yaw: __LW.obs.yaw, pitch: __LW.obs.pitch, dist: __LW.obs.dist, fov: __LW.obs.fov, quat: __LW.obs.quat.slice() };
-    const r = await __row('EDIT', 'STATE › RESEED the particles');
+    const r = await __row('EDIT', 'STATE › RESEED THE PARTICLES');
     const cam1 = { yaw: __LW.obs.yaw, pitch: __LW.obs.pitch, dist: __LW.obs.dist, fov: __LW.obs.fov, quat: __LW.obs.quat.slice() };
     const same = Object.keys(cam0).every((k) => k === 'quat' ? cam0.quat.every((v, i) => Object.is(v, cam1.quat[i])) : Object.is(cam0[k], cam1[k]));
     const out = { r, on: __LW.particles.on, n: __LW.particles.points.length, same, errors: __e.slice() };
@@ -93,7 +93,7 @@ try {
     const firstClear = [...document.querySelectorAll('.trig')].find((t) => t.textContent.trim() === 'CLEAR');
     const firstIsHistory = !!firstClear && !!firstClear.closest('.dev[data-id="history"]');
     const sv = __LW.shadowView, orig = sv.clearTrail; let trails = 0; sv.clearTrail = function () { trails++; return orig.call(this); };
-    const r = await __row('EDIT', 'STATE › CLEAR the register');
+    const r = await __row('EDIT', 'STATE › CLEAR THE REGISTER');
     sv.clearTrail = orig;
     __LW.history.flush(); await __LW.settle();
     const tl = document.querySelector('#transport .tr-open'); tl.click(); await __LW.settle();   // 018 E2: t left the CSB; 036 W2: the playhead's t is the TIMELINE's TIME hint (keys.js ui.tlTime)
@@ -124,7 +124,7 @@ try {
     __LW.session.flush();
     localStorage.removeItem(LS_EXP); localStorage.removeItem(LS_PRES);
     const before = snapLS();
-    const rs = await __row('FILE', 'QUICK › SAVE the experiment');
+    const rs = await __row('FILE', 'QUICK › SAVE');
     const after = snapLS();
     const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((k) => before[k] !== after[k]).sort();
     const S = __LW.serialize();
@@ -134,7 +134,7 @@ try {
     __LW.loadPreset('rydberg'); await __LW.settle();
     const moved = __LW.stateDigest() !== digest;
     const beforeLoad = snapLS();
-    const rl = await __row('FILE', 'QUICK › LOAD the last quick save');
+    const rl = await __row('FILE', 'QUICK › LOAD');
     const loaded = __LW.stateDigest() === digest, quickKeysKept = localStorage.getItem(LS_EXP) === beforeLoad[LS_EXP] && localStorage.getItem(LS_PRES) === beforeLoad[LS_PRES];
     /* the clipboard, stubbed: a synthetic click is not a trusted gesture, and what is judged is WHAT the row copies */
     let clip = null; const cb = navigator.clipboard; const orig = cb.writeText; cb.writeText = async (t) => { clip = t; };
@@ -158,18 +158,18 @@ try {
     const st = () => document.querySelector('.dev[data-id="spectrum"] .dev-stat').textContent;   // 018 C1: the lab's status line is SPECTRUM's
     window.confirm = () => true;                                      // NEW project asks before discarding a dirty project
     /* EDIT */
-    { __LW.pause(); const r = await __row('PLAY', 'PLAY / PAUSE'); R.play = ok(r) && __LW.clock.playing; __LW.pause(); }
+    { __LW.pause(); const r = await __row('PLAY', 'PLAY'); R.play = ok(r) && __LW.clock.playing; __LW.pause(); }
     { __LW.loadPreset('1s+2pz'); const r = await __row('EDIT', 'STATE › NORMALIZE'); R.normalize = ok(r) && /‖c‖/.test(st()); }
     { __LW.loadPreset('1s+2pz'); __LW.pause(); let clip = null; const cb = navigator.clipboard, orig = cb.writeText; cb.writeText = async (t) => { clip = t; };   /* 0.3.3 · wave 135 */
       const r = await __row('EDIT', 'COPY › LaTeX'); await new Promise((q) => setTimeout(q, 30)); cb.writeText = orig;
       const L = (clip || '').split(String.fromCharCode(10)); R.latex = ok(r) && L.length === 2 && L[0] === '$1s_{0}$ and $2p_{0}$' && L[1].startsWith('$' + String.fromCharCode(92) + 'psi = 0.71');
       R.latexFlash = document.querySelector('.dev[data-id="spectrum"]').classList.contains('copied'); }
     { __LW.orbit(0.7, 0.2); const r = await __row('VIEW', 'CAMERA › HOME'); R.view = ok(r) && Math.abs(__LW.obs.yaw - 0.65) < 1e-12 && Math.abs(__LW.obs.dist - 3.3) < 1e-12; }
-    { const r = await __row('EDIT', 'UNDO HISTORY'); R.hist = ok(r) && !document.querySelector('.dev[data-id="history"]').classList.contains('closed'); }
+    { const r = await __row('EDIT', 'HISTORY…'); R.hist = ok(r) && !document.querySelector('.dev[data-id="history"]').classList.contains('closed'); }
     { const r = await __row('EDIT', 'SETTINGS'); R.settings = ok(r) && !document.querySelector('.dev[data-id="settings"]').classList.contains('closed'); }
     { __LW.api.setPopulation(0, 0.5); __LW.history.flush(); const u = await __row('EDIT', 'UNDO'); const d = __LW.history.redoDepth; const re = await __row('EDIT', 'REDO'); R.undoRedo = ok(u) && ok(re) && d >= 1 && __LW.history.redoDepth === d - 1; }
     /* VIEW */
-    { const i0 = __LW.mat.invert; const r = await __row('VIEW', 'INVERT the cloud'); R.invert = ok(r) && __LW.mat.invert === !i0; __LW.setInvert(i0); }
+    { const i0 = __LW.mat.invert; const r = await __row('VIEW', 'INVERT'); R.invert = ok(r) && __LW.mat.invert === !i0; __LW.setInvert(i0); }
     { const views = [['ρ = |ψ|²', 0], ['arg ψ', 1], ['Re ψ', 2], ['Im ψ', 3]]; R.views = true;   /* iteration 008 W: Δρ and Re + Im left WAVE */
       for (const [l, v] of views) { const r = await __row('VIEW', 'OBSERVABLE › ' + l); R.views = R.views && ok(r) && __LW.mat.view === v; } __LW.setView('phase'); }
     { const styles = ['CLOUD', 'SOLID', 'SIGNED', 'DUST', 'BANDS']; R.styles = true;   /* iteration 008 G: GRAIN joined DUST (its index 2 retired; DUST is 5) */
@@ -177,11 +177,11 @@ try {
     { const c0 = document.body.classList.contains('no-captions'); const r = await __row('VIEW', 'STAGE › CAPTIONS'); R.captions = ok(r) && document.body.classList.contains('no-captions') === !c0; await __row('VIEW', 'STAGE › CAPTIONS'); }
     { const b0 = document.body.classList.contains('no-badges'); const r = await __row('VIEW', 'INTERFACE › STATUS TAGS'); R.badges = ok(r) && document.body.classList.contains('no-badges') === !b0; await __row('VIEW', 'INTERFACE › STATUS TAGS'); }
     { const h0 = document.body.classList.contains('control-hints-off'); const r = await __row('VIEW', 'INTERFACE › CONTROL HINTS'); R.hints = ok(r) && document.body.classList.contains('control-hints-off') === !h0; await __row('VIEW', 'INTERFACE › CONTROL HINTS'); }
-    { const r = await __row('VIEW', 'INTERFACE › HIDE the interface'); R.hideV = ok(r) && __LW.uiHidden === true; __LW.keys.toggleUI(); R.hideV = R.hideV && __LW.uiHidden === false; }
+    { const r = await __row('VIEW', 'INTERFACE › INTERFACE'); R.hideV = ok(r) && __LW.uiHidden === true; __LW.keys.toggleUI(); R.hideV = R.hideV && __LW.uiHidden === false; }
     /* WINDOW */
     { const m0 = __LW.mod.expanded; const r = await __row('WINDOW', 'TOOLS › MODULATION'); R.mod = ok(r) && __LW.mod.expanded === !m0; await __row('WINDOW', 'TOOLS › MODULATION'); R.mod = R.mod && __LW.mod.expanded === m0; }
     { const n0 = __LW.layout.notebook.isOpen; const r = await __row('WINDOW', 'TOOLS › NOTEBOOK'); R.nb = ok(r) && __LW.layout.notebook.isOpen === !n0 && document.activeElement === document.querySelector('.nb-text'); await __row('WINDOW', 'TOOLS › NOTEBOOK'); }
-    { const k0 = document.body.classList.contains('rack-hidden'); const r = await __row('WINDOW', 'RACKS › SHOW THE RACK'); R.rack = ok(r) && document.body.classList.contains('rack-hidden') === !k0; await __row('WINDOW', 'RACKS › SHOW THE RACK'); }
+    { const k0 = document.body.classList.contains('rack-hidden'); const r = await __row('WINDOW', 'RACKS › RACK'); R.rack = ok(r) && document.body.classList.contains('rack-hidden') === !k0; await __row('WINDOW', 'RACKS › RACK'); }
     { const gw = () => { const w = document.querySelector('[data-mir-window="gui"]'); return !!w && !w.hidden && w.offsetWidth > 0; }; const r = await __row('WINDOW', 'MIR OPTIONS'); R.gui = ok(r) && gw(); __LW.run('gui'); for (let i = 0; i < 40 && gw(); i++) await new Promise((q) => setTimeout(q, 50)); R.gui = R.gui && !gw(); }   // 038 M3 (the kit's window leaves in its own motion)
     { const r = await __row('FILE', 'MAIN MENU'); const M = document.getElementById('lwMenu'); R.mainMenu = ok(r) && !M.hidden; __LW.run('menu'); R.mainMenu = R.mainMenu && M.hidden; }   // 038 M2
     { const d0 = __LW.layout.docked; const r = await __row('WINDOW', 'RACKS › DOCK'); R.dock = ok(r) && __LW.layout.docked === !d0; await __row('WINDOW', 'RACKS › DOCK'); R.dock = R.dock && __LW.layout.docked === d0; }
@@ -192,7 +192,7 @@ try {
     { document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); const r = await __row('WINDOW', 'INFO › WIGNER'); R.raise = ok(r) && !document.querySelector('.dev[data-id="wigner"]').classList.contains('closed'); document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); }   // ATOMS is a hidden LEGACY window since 2026-10
     /* HELP (021 I3: ABOUT renamed; SETTINGS is EDIT's alone) */
     { const r = await __row('HELP', 'ABOUT λWAVES'); R.about = ok(r) && __LW.layout.about.isOpen && __LW.layout.about.face === 'lw'; __LW.layout.about.close(); }   // 034 N1: ABOUT is its own window
-    { const r = await __row('HELP', 'KEYBOARD SHORTCUTS'); R.keymap = ok(r) && __LW.keymap.isOpen && document.querySelector('[data-mir-window="keyboard"]').contains(document.activeElement); __LW.keymap.close(); }
+    { const r = await __row('HELP', 'KEYBOARD'); R.keymap = ok(r) && __LW.keymap.isOpen && document.querySelector('[data-mir-window="keyboard"]').contains(document.activeElement); __LW.keymap.close(); }
     { let reloaded = 0; const rl = __LW.sw.reload; __LW.sw.reload = () => { reloaded++; }; const r = await __row('HELP', 'UPDATE APP'); for (let i = 0; i < 40 && !reloaded; i++) await new Promise((q) => setTimeout(q, 50)); __LW.sw.reload = rl; __LW.sw.state = 'idle'; R.update = ok(r) && reloaded === 1; }
     /* FILE (the project rows) */
     /* 0.5.0 C6: the project rows open FOLDERS (the PROJECTS face left the notebook); the line is the facade's status */
