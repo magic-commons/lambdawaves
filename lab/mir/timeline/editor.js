@@ -97,7 +97,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   const transportBeat=()=>mod.host.model.transport.beats;
   const events=new AbortController(),listen=(target,type,fn,options={})=>target.addEventListener(type,fn,{...options,signal:events.signal});
   const surface=el('div','timeline-surface',win.body);surface.style.setProperty('--tl-tab-height',TIMELINE_TAB_HEIGHT+'px');surface.style.setProperty('--tl-row-gap',TIMELINE_ROW_GAP+'px');ariaLabel(surface,'Timeline workspace');surface.tabIndex=0;
-  const worklane=el('div','tl-worklane',surface),transportHost=el('div','tl-transport-host',worklane);ariaLabel(transportHost,'Timeline transport');
+  const worklane=el('div','tl-worklane',surface),transportHost=el('div','tl-transport-host',worklane);ariaLabel(transportHost,'The timeline’s CONTROL SURFACE');
   const toolbar=el('div','tl-toolbar glass',worklane);toolbar.setAttribute('role','toolbar');ariaLabel(toolbar,'Timeline tools');
   const button=(parent,text,fn,cls='')=>{const b=el('button','trig tl-action '+cls,parent);b.type='button';word(b,text);b.addEventListener('click',()=>{finish(null,true);fn(b);});return b;};
   // The tools keep their word as the accessible name and the hint (data-help) when the icon takes the face.
@@ -120,7 +120,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   const stepButton=modeButton('STEP',()=>stepMode,v=>stepMode=v,'Draw on Snap. Shift draws pulses. Snap OFF uses 1/16 beat.','step');
   const slideButton=modeButton('SLIDE',()=>slideMode,v=>slideMode=v,'Move following point times together.','slide');
   // ACTIVE marks the ruler's range (none: the whole arrangement) as THE ACTIVE RANGE; pressed again on the same span, it clears.
-  const activeButton=button(toolbar,'ACTIVE',()=>markActive());activeButton.dataset.mode='active';activeButton.setAttribute('aria-pressed','false');activeButton.title='Mark the selected time range (or the whole arrangement) as the active range';
+  const activeButton=button(toolbar,'ACTIVE',()=>markActive());activeButton.dataset.mode='active';activeButton.setAttribute('aria-pressed','false');activeButton.title='Mark the selected time range as the active range';
   // MORE (⋯, a trigger: no lamp) always ends the bar: the tools folded off the bar (in bar order), then the selection's actions.
   const moreButton=button(toolbar,{raw:''},b=>{const r=b.getBoundingClientRect(),folded=fold.slice(shown).map(f=>f.entry());pop(r.left,r.bottom,'SELECTION',[...folded,...(folded.length?[null]:[]),
     ...(audio?.pick?[['ADD AUDIO…',()=>audio.pick({laneId:selectedLane,start:controller.state().beat}),'add-audio']]:[]),['ZOOM TO SELECTION',zoomSelection,'zoom-selection'],['DUPLICATE',duplicateSelection,'duplicate'],['COPY',()=>copySelection(),'copy'],['CUT',()=>copySelection(true),'cut'],['PASTE',pasteSelection,'paste'],['DELETE',deleteSelection,'delete'],['SELECT ALL',selectAll,'select-all'],['DESELECT',deselect,'deselect'],['SHORTCUTS',()=>api.onShortcuts?.(r.left,r.bottom),'shortcuts'],...appRows()],'more');},'tl-icon');
@@ -183,14 +183,14 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
   function sliceAt(ids,beat,keep=false){finish(null,true);const cuts=sliceClips(model,ids,beat);if(!cuts){const r=model.lastRefusal;say(r?t(r.why,r.vars):t('Nothing sliced: the cut must fall inside a clip.'));return null;}
     selection=new Set([...(keep?selection:[]),...cuts.flatMap(c=>[c.left,c.right])]);selected=cuts[0].right;pointSelection=null;paintSelection();return cuts;}
   function markActive(){const end=model.extent({unmuted:false})?.end??0,next=range?{...range}:end>0?{start:0,end}:null,now=activeRange();
-    if(!next){say(t('Nothing to mark: drag a time range on the strip or add clips.'));return;}
+    if(!next){say(t('Nothing to mark — drag a range on the strip or add clips'));return;}
     setActiveRange(now&&Math.abs(now.start-next.start)<1e-9&&Math.abs(now.end-next.end)<1e-9?null:next);}
   function zoomSelection(){finish(null,true);const clips=doc.clips.filter(c=>selection.has(c.id));
     const bounds=clips.length?{start:Math.min(...clips.map(c=>c.start)),end:Math.max(...clips.map(c=>c.start+c.duration))}:range||model.extent({unmuted:false});if(!bounds)return;
     px=bounded((viewport.clientWidth-40)/Math.max(.0625,bounds.end-bounds.start),8,100);paint();viewport.scrollLeft=Math.max(0,bounds.start*px-20);paint();}
   function duplicateSelection(){const ids=model.duplicateClips([...selection]);if(!ids){const r=model.lastRefusal;say(r?t(r.why,r.vars):t('No copies made: select clips with room in the arrangement.'));return;}selection=new Set(ids);selected=ids[0];pointSelection=null;paintSelection();}
   function copySelection(cut=false){const value=model.copyClips([...selection]);if(!value)return;clipboard=value;if(cut){model.deleteClips([...selection]);selection.clear();selected=null;}paintSelection();}
-  function pasteSelection(){if(!clipboard)return;const ids=model.pasteClips(clipboard,{start:snapBeat(transportBeat()),laneId:selectedLane});if(!ids){const r=model.lastRefusal;say(r?t(r.why,r.vars):t('No clips pasted: the selected lanes or source budget cannot fit this group.'));return;}selection=new Set(ids);selected=ids[0];pointSelection=null;paintSelection();}
+  function pasteSelection(){if(!clipboard)return;const ids=model.pasteClips(clipboard,{start:snapBeat(transportBeat()),laneId:selectedLane});if(!ids){const r=model.lastRefusal;say(r?t(r.why,r.vars):t('Could not paste: the selected lanes cannot fit this group'));return;}selection=new Set(ids);selected=ids[0];pointSelection=null;paintSelection();}
   function deleteSelection(){if(scope==='points'){if(pointSelection?.indices.size){const result=model.removePoints(pointSelection.curveId,[...pointSelection.indices]);if(!result?.removed)say(t('Keep at least two curve points.'));else pointSelection=null;}}else{model.deleteClips([...selection]);selection.clear();selected=null;}paintSelection();}
   function selectAll(){if(scope==='points'){const c=view.getClip(selected),curve=view.getCurve(c?.curveId);if(curve)pointSelection={clipId:c.id,curveId:curve.id,indices:new Set(curve.points.flatMap((p,i)=>p.t*curve.length>=c.offset&&p.t*curve.length<=c.offset+c.duration*c.scale?[i]:[]))};}else{selection=new Set(doc.clips.map(c=>c.id));selected||=doc.clips[0]?.id||null;}paintSelection();}
   function deselect(){selection.clear();pointSelection=null;selected=null;paintSelection();}
@@ -246,9 +246,9 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     for(const a of appRows()){if(!a){el('div','tl-pop-sep',right).setAttribute('role','separator');continue;}const[text,fn,id,chosen]=a,b=button(right,text,()=>{closeMenu();fn();},'tl-row');if(id)b.dataset.row=id;if(typeof chosen==='boolean'){b.setAttribute('aria-pressed',String(chosen));b.classList.toggle('on',chosen);}}
     paneOpen();placeMenu(x,y);(left.querySelector('.on')||left.querySelector('button'))?.focus();}
   function editIdentity(x,y,curve,clip) {
-    form(x,y,'CLIP TITLE / COLOR','identity');ariaLabel(menu,'Clip title and color');
+    form(x,y,'CLIP TITLE / COLOR','identity');ariaLabel(menu,'Clip title and colour');
     const titleLabel=el('label','tl-field',menu),input=el('input','tl-value-input',titleLabel);titleLabel.prepend(label(el('span','tl-field-word'),'TITLE'));input.value=curve.name;input.maxLength=80;ariaLabel(input,'Clip title');
-    const colorLabel=el('label','tl-field tl-color-field',menu),color=el('input','tl-color-input',colorLabel);colorLabel.prepend(label(el('span','tl-field-word'),'TINT'));color.type='color';color.value=curve.color;ariaLabel(color,'Clip color');
+    const colorLabel=el('label','tl-field tl-color-field',menu),color=el('input','tl-color-input',colorLabel);colorLabel.prepend(label(el('span','tl-field-word'),'TINT'));color.type='color';color.value=curve.color;ariaLabel(color,'Clip colour');
     const swatches=el('div','tl-swatches',menu);
     for(const tint of SWATCHES){const b=el('button','tl-swatch',swatches);b.type='button';b.dataset.tint=tint;b.style.setProperty('--tl-clip-tint',tint);ariaLabel(b,'Tint {tint}',{tint});b.onclick=()=>{color.value=tint;};}
     // THE COPIES WEAR ONE COLOUR (1.5.7-alpha.42): a new tint paints the clip's family (timelineFamily) — one undo
@@ -308,7 +308,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
      the one tapped becomes the clip's target (its curve copied first when other clips share it); Escape or a tap elsewhere ends it */
   function routeClip(clipId,curve){say(t('Tap a lit control to route {clip} to it; Escape cancels.',{clip:curve.name}));
     mod.view.api.armFor({label:curve.name,onPick(tid){const d=mod.registry.has(tid)?mod.registry.describe(tid):null,was=view.getClip(clipId)?.curveId;
-      const to=model.retarget(clipId,tid,{name:d?.label||tid});if(!to){say(t('No room for another curve: remove a curve first.'));return;}
+      const to=model.retarget(clipId,tid,{name:d?.label||tid});if(!to){say(t('No room for another curve — remove one first'));return;}
       say(to===was?t('{clip} now drives {target}',{clip:curve.name,target:d?.label||tid}):t('{clip} now drives {target} (its own copy: the other clips keep {old})',{clip:curve.name,target:d?.label||tid,old:curve.targetId}));}});}
   /* an EVENT clip's bands follow its target: a point edit on a curve drawn for another count takes the target's count (⚠ clears) */
   function syncSteps(curveId){const c=doc.curves.find(x=>x.id===curveId);if(!c||!c.steps)return;const want=stepsOf(c.targetId);if(want&&want!==c.steps)model.updateCurve(curveId,{steps:want});}
@@ -347,7 +347,7 @@ export function buildTimelineEditor(win,{model,mod,controller,present=()=>{},say
     if(viewport.scrollLeft===was&&(depth<0||drag.kind==='scrub'||drag.kind==='range'))return;   // at the start, or a scrub at the content's end: nothing more to scroll (a moved clip grows the content, so it keeps going)
     pumpId=requestAnimationFrame(edgePump);}
   function pumpStop(){if(pumpId)cancelAnimationFrame(pumpId);pumpId=0;pumpX=null;}
-  function drawStep(position,shiftKey){const{clip:c,curve,previous}=drag,grid=(snap||.0625)*c.scale;const samples=timelineStepSamples(previous,position,{step:grid,origin:c.offset-c.start*c.scale,min:c.offset,max:c.offset+c.duration*c.scale}),result=samples&&model.drawPoints(curve.id,samples,{hold:shiftKey,tension:drawTension});if((!samples||result?.full)&&!drag.warned){drag.warned=true;say(t('Curve point limit reached. Use a wider Snap grid or remove points.'));}drag.previous=position;}
+  function drawStep(position,shiftKey){const{clip:c,curve,previous}=drag,grid=(snap||.0625)*c.scale;const samples=timelineStepSamples(previous,position,{step:grid,origin:c.offset-c.start*c.scale,min:c.offset,max:c.offset+c.duration*c.scale}),result=samples&&model.drawPoints(curve.id,samples,{hold:shiftKey,tension:drawTension});if((!samples||result?.full)&&!drag.warned){drag.warned=true;say(t('No room for more points — widen Snap or remove some'));}drag.previous=position;}
   const updates=coalesce(e=>{
     if(!drag)return;drag.last=e;if(Math.hypot(e.x-drag.x,e.y-drag.y)>6)drag.moved=true;
     // A Ctrl press on the strip picks its axis at 6px: horizontal stays a (snapped) scrub, vertical becomes a zoom (up = in).

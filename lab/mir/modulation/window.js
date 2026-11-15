@@ -34,6 +34,7 @@
  * (curve-gesture.js), Sol's automation / exact resume / runtime capture in host.js and mod.js.
  */
 import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, verticalDrag, setKnobLaw, watchTouches, wheelTurn, TAP } from '../kit.js';
+import { setGlyph } from '../glyph.js';
 import { bindSliderKeys } from '../slider-keys.js';
 import { contextMenu, knobMenu, knobMenuPart, knobAct } from '../shell/menubar.js';
 import { listPane } from '../controls/select.js';
@@ -713,8 +714,8 @@ export function createModulation(host, port) {
     /* A NAME THAT IS ALREADY TAKEN IS A REPLACE, not a refusal — the model asks first and
        this window answers yes, because SAVE on a name you just loaded means "keep this". */
     if (r && r.error === 'exists') r = M.presetSave(name, M.serializeRack(), { replace: true });
-    if (r && r.ok) { activePresetId = r.id; foot.name.classList.remove('m2predirty'); status(t('saved “{name}”', { name: r.name }), ''); }
-    else status(r && r.error === 'factory-name' ? t('that name belongs to a factory preset — try “{name}”', { name: r.suggest }) : t('could not save that preset'), 'warn');
+    if (r && r.ok) { activePresetId = r.id; foot.name.classList.remove('m2predirty'); status(t('Saved {name}', { name: r.name }), ''); }
+    else status(r && r.error === 'factory-name' ? t('that name belongs to a factory preset — try “{name}”', { name: r.suggest }) : t('Could not save that preset'), 'warn');
     if (presetOpen) openPresets();
   });
 
@@ -727,7 +728,7 @@ export function createModulation(host, port) {
   const folderLabel = (name) => name === M.PRESET_FOLDER_DEFAULT ? t('MY PRESETS') : name;
   const stepPreset = (dir) => {
     const list = userPresets();
-    if (!list.length) { status(t('no presets yet — type a name and press {:SAVE}'), 'warn'); return; }
+    if (!list.length) { status(t('No presets yet — type a name and press {:SAVE}'), 'warn'); return; }
     let cur = list.findIndex((p) => p.id === activePresetId && p.name === foot.name.value);
     if (cur < 0) cur = list.findIndex((p) => p.name === foot.name.value);
     const next = list[((cur < 0 ? (dir > 0 ? -1 : 0) : cur) + dir + list.length) % list.length];
@@ -744,7 +745,7 @@ export function createModulation(host, port) {
   function loadPreset(id) {
     const bundled = bundledPresets().some((p) => p.id === id);
     const r = bundled && port.applyStarterPreset ? port.applyStarterPreset(id) : M.presetApply(id);
-    if (!r || r.ok === false) { status(r && r.error === 'foreign' ? t('that preset was written by a model this build cannot honour') : t('that preset could not be loaded'), 'warn'); return; }
+    if (!r || r.ok === false) { status(r && r.error === 'foreign' ? t('that preset was written by a model this build cannot honour') : t('Could not load that preset'), 'warn'); return; }
     activePresetId = id;
     foot.name.value = r.name || ''; foot.name.classList.remove('m2predirty');
     M.syncDormant((id2) => registry.has(id2));
@@ -771,12 +772,12 @@ export function createModulation(host, port) {
         row.btn.addEventListener('click', () => { closePresets(); loadPreset(p.id); });
         if (p.bundled) {
           label(row.tag, 'STARTER');   // tr[STARTER]: a preset the app ships (a starter project's modulation), not one the user saved
-          row.btn.title = 'Bundled starter modulation · Save keeps an editable user preset';
+          row.btn.title = 'Starter modulation · SAVE keeps an editable copy';
           if (row.del) row.del.remove();
         }
         if (!p.bundled && row.del) row.del.addEventListener('click', (e) => {
           e.stopPropagation(); M.presetDelete(p.id); openPresets();
-          status(t('deleted “{name}”', { name: p.name }), '');
+          status(t('Deleted {name}', { name: p.name }), '');
         });
       }
     }
@@ -995,8 +996,8 @@ export function createModulation(host, port) {
     /* THE ROUTED CONTROL'S OWN TWO BADGES, AND ONLY ON THE ONE THE HAND IS ON (2026-09-18): touching it gives THAT
        control its range dial at one corner and a × at the other.  × removes the selected macro's route, or opens the
        list when several macros hold the control.  A held press or a right-click opens the pop-over. */
-    const x = el('button', 'k-route-x', hostEl, '×'); x.type = 'button';
-    x.title = 'Remove the macro from this control'; ariaLabel(x, 'remove the macro from this control');
+    const x = setGlyph(el('button', 'k-route-x', hostEl), 'close', { size: 14 }); x.type = 'button';
+    x.title = 'Remove the macro from this control'; ariaLabel(x, 'Remove the macro from this control');
     x.addEventListener('pointerdown', (e) => e.stopPropagation());
     x.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation();
       const rs = M.routesOfTarget(id).filter((r) => !r.dormant);
@@ -1456,14 +1457,14 @@ export function createModulation(host, port) {
         rec.name.focus(); rec.name.select();
       };
       rec.grip.title = 'Drag to route; tap to arm; double-tap to reset';   // tr: route: connect this macro to a control so it moves it; arm: make it wait for a tap on the control to connect to
-      ariaLabel(rec.grip, 'route {macro} — drag onto a control, or tap to arm', { macro: m.name });
+      ariaLabel(rec.grip, 'Route {macro} — drag onto a control, or tap to arm', { macro: m.name });
       wireGrip(rec.grip, m.id);
       rec.reorder.title = 'Drag to reorder; double-tap to rename';
-      ariaLabel(rec.reorder, 'reorder or rename {macro}', { macro: m.name });
+      ariaLabel(rec.reorder, 'Reorder or rename {macro}', { macro: m.name });
       rec.reorder.replaceChildren(gripDots());                  // Josh: the dot grip for reorder; the cross stays the routing grip
       wireMacroReorder(rec, m.id, rename);
-      hintTo(rec.del, 'delete {macro} and its routes', { macro: m.name });
-      ariaLabel(rec.del, 'delete {macro} and its routes', { macro: m.name });
+      hintTo(rec.del, 'Delete {macro} and its routes', { macro: m.name });
+      ariaLabel(rec.del, 'Delete {macro} and its routes', { macro: m.name });
       rec.del.addEventListener('click', (e) => {
         e.stopPropagation();
         M.removeMacro(m.id); clock.recomputeRunning(); apply(); rebuild();
@@ -1481,7 +1482,7 @@ export function createModulation(host, port) {
       };
       wireSlider(rec.numSeat, numberInput);
       bindSliderKeys(rec.numSeat, numberInput);
-      rec.numSeat.title = 'Master depth for this macro. Double-tap for 100%.';
+      rec.numSeat.title = 'Master depth for this macro; double-tap for 100%';
       /* THE ARIA IS THE HOST'S, AND THE ARTIFACT SAYS SO.  `buildMacroSlot` sets role="slider"
          "because that is what it is; the host's registry writes the aria range and value" — so it
          is written here, on all three of the plugin's slider kinds, and B122's document-wide sweep
@@ -1645,7 +1646,7 @@ export function createModulation(host, port) {
         text: () => (s.sync ? M.LFO_MULT_LABEL[s.mult] + ' · ' + M.lfoHz(s).toFixed(2) : M.lfoHz(s).toFixed(3) + ' Hz'),
         hint: 'Set free rate or a loop-clock division' };
       case 'phase': return { get: () => s.phaseOff, set: (u) => M.setSource(s.id, { phaseOff: clamp01(u) }),
-        text: () => (s.phaseOff * 360).toFixed(0) + '°', hint: 'the phase offset' };
+        text: () => (s.phaseOff * 360).toFixed(0) + '°', hint: 'The phase offset' };
       case 'smooth': return { get: () => s.smooth, set: (u) => M.setSource(s.id, { smooth: clamp01(u) }),
         text: () => (s.smooth > 0 ? (M.smoothTau(s.smooth) * 1000).toFixed(s.smooth < 0.2 ? 1 : 0) + ' ms' : t('OFF')),
         hint: 'Smooth the LFO output' };
@@ -1659,7 +1660,7 @@ export function createModulation(host, port) {
         text: () => fmtSec(s[key]),
         hint: 'Set the envelope stage time' };
       case 's': return { get: () => s.s, set: (u) => M.setSource(s.id, { s: clamp01(u) }),
-        text: () => (100 * s.s).toFixed(0) + '%', hint: 'the sustain {:LEVEL} — the one ADSR control that is not a time' };
+        text: () => (100 * s.s).toFixed(0) + '%', hint: 'The sustain {:LEVEL}, the one ADSR control not a time' };
       /* ⚠ WAVE 100 · THESE READ DEFENSIVELY, AND THAT IS NOT TIDINESS.  `M.addSource('audio')` does
          not initialise `gainDb` or `gateDb` — the capture half that would own them was never ported —
          so both of these called `.toFixed` on `undefined` and threw INSIDE `buildCard`, which is the
@@ -1678,12 +1679,12 @@ export function createModulation(host, port) {
         const db = () => ((s.audio && Number.isFinite(s.audio.gainDb)) ? s.audio.gainDb : 0);
         return { get: () => (db() + M.AUDIO_GAIN_MAX) / (2 * M.AUDIO_GAIN_MAX),
           set: (u) => M.setSource(s.id, { audio: { gainDb: (clamp01(u) * 2 - 1) * M.AUDIO_GAIN_MAX } }),
-          text: () => (db() >= 0 ? '+' : '') + db().toFixed(1) + ' dB', hint: 'input gain, ±24 dB before the band response ranges' }; }
+          text: () => (db() >= 0 ? '+' : '') + db().toFixed(1) + ' dB', hint: 'Input gain, ±24 dB before the band response ranges' }; }
       case 'thresh': {
         const db = () => ((s.audio && Number.isFinite(s.audio.thresholdDb)) ? s.audio.thresholdDb : M.AUDIO_DB_FLOOR);
         return { get: () => clamp01((db() - M.AUDIO_DB_FLOOR) / M.AUDIO_DB_SPAN),
           set: (u) => M.setSource(s.id, { audio: { thresholdDb: M.AUDIO_DB_FLOOR + clamp01(u) * M.AUDIO_DB_SPAN } }),
-          text: () => db().toFixed(0) + ' dB', hint: 'the gate opens here and stays open until hysteresis below it' }; }   // tr: hysteresis: a small margin below the opening level, so the gate does not flicker open and shut
+          text: () => db().toFixed(0) + ' dB', hint: 'The gate opens here and stays open until hysteresis below it' }; }   // tr: hysteresis: a small margin below the opening level, so the gate does not flicker open and shut
       default: return { get: () => 0, set: () => {}, text: () => '--', hint: '' };
     }
   }
@@ -1709,7 +1710,7 @@ export function createModulation(host, port) {
     head.setAttribute('role', 'button');
     head.tabIndex = 0;
     head.setAttribute('aria-expanded', 'true');
-  head.title = 'Collapse or expand the macro rail';
+  head.title = 'Fold or unfold the macro rail';
     const chev = document.createElement('i');
     chev.className = 'm2chev';
     head.insertBefore(chev, head.firstChild);
@@ -1860,7 +1861,7 @@ export function createModulation(host, port) {
     /* ── THE HEAD ── */
 
 
-      dev.fold.title = 'Collapse or expand this device';
+      dev.fold.title = 'Fold or unfold this device';
     dev.fold.addEventListener('click', () => {
       const next = modeOf(s.id) === 'M' ? 'F' : 'M';
       layoutMotion.change(() => {
@@ -1876,11 +1877,11 @@ export function createModulation(host, port) {
     dev.x.addEventListener('click', () => { M.removeSource(s.id); delete P.modes[s.id]; delete P.audioMini[s.id]; clock.recomputeRunning(); apply(); rebuild(); });
       dev.bank.btn.title = 'Switch between two saved patches for this device';
     dev.bank.btn.addEventListener('click', () => { M.setSource(s.id, { bank: s.bank === 'A' ? 'B' : 'A' }); apply(); sync(); });
-    dev.cpy.title = 'copy this side\'s whole patch';
-    dev.cpy.addEventListener('click', () => { clip = M.copyBank(s.id); say(rec, t('patch copied — {:PASTE} onto any {kind}', { kind: KIND_WORD[s.kind] || s.kind })); });   // tr: a patch: all of one device’s settings together, as a synth patch; {kind} is the device kind (LFO, ENV, AUDIO)
+    dev.cpy.title = 'Copy this side\'s whole patch';
+    dev.cpy.addEventListener('click', () => { clip = M.copyBank(s.id); say(rec, t('Patch copied — {:PASTE} onto any {kind}', { kind: KIND_WORD[s.kind] || s.kind })); });   // tr: a patch: all of one device’s settings together, as a synth patch; {kind} is the device kind (LFO, ENV, AUDIO)
       dev.pst.title = 'Paste a compatible device patch';
     dev.pst.addEventListener('click', () => {
-      if (!clip) { say(rec, t('nothing copied yet — press {:COPY} on a device first')); return; }
+      if (!clip) { say(rec, t('Nothing copied yet — press {:COPY} on a device first')); return; }
       const w = M.pasteBank(s.id, clip, s.bank);
       if (!w) { say(rec, t('{a} and {b} patches cannot be pasted across — they are different devices', { a: KIND_WORD[clip.kind] || String(clip.kind), b: KIND_WORD[s.kind] || s.kind })); return; }
       apply(); sync();
@@ -1888,7 +1889,7 @@ export function createModulation(host, port) {
     /* → TL (BASINS LANE P): this device as a clip on the timeline at the playhead — only while a timeline is attached */
     if (dev.kind !== 'audio' && timelineOf()) {
       const tl = label(el('button', 'm2ab m2tl'), '→TL'); tl.type = 'button'; dev.pst.after(tl); dev.tl = tl;   // tr: → TL: send to the timeline
-      tl.title = 'Send to the timeline: the LFO\'s whole cycles (a bar at least), the ENV\'s stages, or its live pattern row';   // 1.5.7-alpha.14: alpha.10 sends ⌈bar / period⌉ cycles
+      tl.title = 'Send to the timeline: the LFO’s cycles or the ENV’s stages';   // 1.5.7-alpha.14: alpha.10 sends ⌈bar / period⌉ cycles
       tl.addEventListener('click', () => { const msg = sendToTimeline(s); if (msg) say(rec, msg); });
     }
     /* THE RUN ORDER IS THE FIRE ORDER, and the ◂ ▸ buttons that say so are `display: none` in
@@ -1901,7 +1902,7 @@ export function createModulation(host, port) {
 
     if (dev.trig) {
       dev.trig.hidden=true;dev.trig.disabled=true;
-        dev.trig.title = 'Trigger this envelope. Start modulation to advance it.';
+        dev.trig.title = 'Trigger this envelope; start modulation to advance it';
       /* WAVE 105 · A GATE MUST NOT BE STRANDABLE.  `pointerup` on the BUTTON only fires if the
          finger is still over it; sliding off mid-gate left the envelope held with no way back
          but a second press.  The pointer is captured, and a cancel releases too. */
@@ -1986,7 +1987,7 @@ export function createModulation(host, port) {
       if (patternOf()) {
         const patt = label(el('button', 'm2zoom m2fit m2seat44 m2patt'), 'PATT'); patt.type = 'button'; zout.after(patt); dev.patt = patt;   // tr: PATT: pattern — the ENV's step row
         dev.root.classList.add('m2haspatt');
-        patt.title = 'Pattern: drive this envelope from its step row in the PATTERN window';
+        patt.title = 'Pattern: drive this envelope from its row in PATTERN';
         patt.addEventListener('click', () => {
           const pt = patternOf(); if (!pt) return;
           const on = !pt.model.isLive(s.id); pt.model.setLive(s.id, on);
@@ -2012,7 +2013,7 @@ export function createModulation(host, port) {
          one check that makes an async handler safe here: the record this closure captured must
          still be THE record the rack holds for this source. */
       const stillMine = () => devRows.get(s.id) === rec;
-      A.srcBtn.title = 'Open or close audio input. Audio is analysed locally and is not stored.';
+      A.srcBtn.title = 'Open or close audio input (analysed here, never stored)';
       A.srcBtn.addEventListener('click', async () => {
         if (!port.audio) { say(rec, t('this host supplies no audio capture')); return; }
         const st = port.audio.state();
@@ -2084,7 +2085,7 @@ export function createModulation(host, port) {
     if (dev.bus) {
 
 
-      dev.bus.title = 'Select the envelope trigger; Shift-click selects the {:AUDIO} {:HIT} output';
+      dev.bus.title = 'Select the trigger; Shift-click takes {:AUDIO} {:HIT}';
       dev.bus.addEventListener('click', (e) => {
         const list = fireSources();
         if (e.shiftKey) {                                   // the shortcut, straight to the signal
@@ -2708,7 +2709,7 @@ export function createModulation(host, port) {
         }
       });
     }
-    ariaLabel(svg, 'Curve editor: right-drag empty space to add a point; Shift-right-click adds at the current curve value; left-drag a point to move it (Shift is fine, Ctrl locks its time); left-drag a tension handle to bend it (Shift is fine); right-click or double-click a tension handle resets it; Alt-click a point deletes it.');
+    ariaLabel(svg, 'Curve editor: right-drag adds a point, left-drag moves it');
   }
 
   // Each meter is both an input-level display and a response-range editor.
@@ -3328,7 +3329,7 @@ export function createModulation(host, port) {
         axis: 'y', editable: () => true
       };
       wireSlider(seat, input); bindSliderKeys(seat, input);
-      seat.title = 'Master depth for this macro. Double-tap for 100%.';
+      seat.title = 'Master depth for this macro; double-tap for 100%';
       aria(seat, t('MACRO {i} DEPTH', { i: n }), 0, 100, 100 * input.get(), '100%');
     },
     paintDepth(seat, arc, macroId) {

@@ -23,7 +23,6 @@
  *   ONE STORE.  The window's shape and the work lane persist through `store` ({ read, write }); the arrangement is the
  *     project's (project.js), never the window's. */
 import { createWindow } from '../window/window.js';
-import { glyphSvg } from '../glyph.js';
 import { createTransport } from '../shell/transport.js';
 import { t } from '../core/i18n.js';
 import { buildTimelineEditor } from './editor.js';
@@ -48,7 +47,7 @@ export function createTimeline(host, port) {
   const size = port.size || TIMELINE_SIZE, min = port.min || TIMELINE_MIN;
   const saved = (() => { let r = null; try { r = store.read(); } catch (_) { /* storage refused */ } return r && Object.keys(r).length ? r : { ...(port.initial || {}) }; })();
   const controller = port.controller || createTransportController({ mod, scrubLevel: port.scrubLevel, busy: port.busy,
-    onRefusedPlay: () => say(t('Nothing to run.')) });
+    onRefusedPlay: () => say(t('Nothing to run')) });
   let editor = null, workLane = ['top', 'bottom', 'hidden'].includes(saved.workLane) ? saved.workLane : 'top', transport = null, readout = null, cursor = null;
   const writeShape = (shape) => { try { store.write({ ...shape, workLane }); } catch (_) { /* storage refused */ } };
   /* the shared transport's seat: the work lane while the window is open and the lane shows, else the stage */
@@ -66,14 +65,13 @@ export function createTimeline(host, port) {
         { id: 'hidden', pressed: 'mixed', label: 'Work bars: hidden', glyph: 'barsTop' }],
         press: (state) => { workLane = state; if (editor) editor.setWorkLane(state); writeShape(win.state()); } },
       { name: 'addLane', kind: 'action', label: 'Add automation lane', glyph: 'plus', press: () => editor && editor.addLane() },
-      { name: 'removeLane', kind: 'action', label: 'Remove bottom automation lane', text: '−', press: () => editor && editor.removeLane() },
+      { name: 'removeLane', kind: 'action', label: 'Remove bottom automation lane', glyph: 'minus', press: () => editor && editor.removeLane() },
       { name: 'resetSize', kind: 'action', label: 'FIT', glyph: 'compact', press: () => fit() },   // FIT (1.5.6-alpha.24, T5): the chip keeps its name
     ],
     onOpen: () => { if (editor) editor.paint(); seatBar(); showReadout(true); if (transport) transport.sync(); if (port.onWindow) port.onWindow(true); present(); },
     onClose: () => { if (editor) editor.close(); seatBar(); showReadout(false); if (port.onWindow) port.onWindow(false); present(); },
   });
   win.root.classList.add('mir-timeline');
-  const minus = win.rail.chip('removeLane'); if (minus) { const ink = minus.querySelector('.mir-chip-text'); if (ink) ink.outerHTML = glyphSvg('minus', 'mir-chip-ink gly gly-minus', 26); }   // an action is inked once
 
   editor = buildTimelineEditor({ body: win.body, root: win.root, rail: win.rail, isOpen: win.isOpen, open: win.open }, { model, mod, controller, present, say, audio: port.audio || null, moreRows: port.moreRows || null,
     keys: () => (tl && tl.keys) || port.keys || null });   // the table's chords beside ⋯'s rows (bind.js sets tl.keys: the app's, or the timeline's own)

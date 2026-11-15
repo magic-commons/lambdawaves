@@ -55,7 +55,7 @@ export function stepper(o = {}) {
   const text = el('span', 'mir-step-text', seat); text.setAttribute('aria-live', 'polite');
   const count = o.count ? el('span', 'mir-step-count', name) : null;
   const next = arrow('chevronRight'); next.dataset.step = '1';
-  ariaLabel(prev, 'previous'); ariaLabel(next, 'next');
+  ariaLabel(prev, 'Previous'); ariaLabel(next, 'Next');
   if (o.aria || o.label) ariaLabel(row, o.aria || o.label);
   row.setAttribute('role', 'group');
   let items = o.options || o.items || [], v = o.value, pane = null, dead = false;   // `options` is the list's one name (1.6.0-alpha.23); `items` still reads

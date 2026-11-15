@@ -213,13 +213,13 @@ export function createLanesView(parent, o = {}) {
 
     /* the lane's state: the mute dot (it is the lamp, in the lane's ink), the solo, the fold */
     if (rec.mute) {
-      const m = sw({ label: 'ON', cls: 'mir-lane-mute', value: !isMuted(id), title: 'in or out: the dot is lit while this is on',
+      const m = sw({ label: 'ON', cls: 'mir-lane-mute', value: !isMuted(id), title: 'In or out: the dot is lit while this is on',
         onChange: (on) => { port.set(id, 'mute', !on); commit(id, 'mute'); } });
       ariaLabel(m.root, 'On · {lane}', { lane: name() });
       state.appendChild(m.root); lc.ctl.mute = m;
     }
     if (rec.solo) {
-      const b = trig({ label: 'S', cls: 'mir-lane-solo', title: 'SOLO: this one alone; again, the others come back. Hold to peek', onFire: () => { if (held) { held = false; return; } doSolo(id); } });
+      const b = trig({ label: 'S', cls: 'mir-lane-solo', title: 'SOLO: this one alone; again, all back; hold to peek', onFire: () => { if (held) { held = false; return; } doSolo(id); } });
       ariaLabel(b.root, 'Solo · {lane}', { lane: name() });
       let timer = 0, held = false;
       const over = () => { clearTimeout(timer); timer = 0; if (held) { solo.peek(id, false); delete b.root.dataset.peek; changed(); } };
@@ -233,7 +233,7 @@ export function createLanesView(parent, o = {}) {
     if (more || rec.blend) {
       const f = el('button', 'mir-lane-fold', state); f.type = 'button';
       const g = glyphEl('chevronDown', 'gly gly-chevronDown', 16); if (g) f.appendChild(g);
-      ariaLabel(f, 'Show the controls of {lane}', { lane: name() }); hint(f, 'Show or hide this lane’s arcs and blend (so a thumb zooming the picture cannot turn them)');
+      ariaLabel(f, 'Show the controls of {lane}', { lane: name() }); hint(f, 'Show or hide this lane’s arcs and blend');
       f.setAttribute('aria-expanded', String(opened.has(id)));
       f.addEventListener('click', () => { if (opened.has(id)) opened.delete(id); else opened.add(id); body.toggleAttribute('data-open', opened.has(id)); f.setAttribute('aria-expanded', String(opened.has(id))); }, { signal: life.signal });
       lc.ctl.fold = f;
@@ -400,7 +400,7 @@ export function createLanesPanel(o = {}) {
   if (o.history) offHist = o.history.register(o.historyName || id, { read: () => snapshotLanes(port), write: (s) => { restoreLanes(port, s); if (view) { view.resetSolo(); view.request(); } } });
   const build = (body) => { view = createLanesView(body, o); };
   if (o.rack) {
-    o.rack.register({ id, title: o.title || 'LANES', side: o.side || 'right', open: o.open, glyph: o.glyph || 'lanes', hint: o.hint || 'the lanes: a colour, an amount, a blend and a mute each', action: o.action, eager: o.eager,
+    o.rack.register({ id, title: o.title || 'LANES', side: o.side || 'right', open: o.open, glyph: o.glyph || 'lanes', hint: o.hint || 'The lanes: a colour, an amount, a blend and a mute each', action: o.action, eager: o.eager,
       build, onPresent: (a) => { if (view) view.present(a); }, onPower: (live) => { if (view) view.present(live); } });
   } else if (o.parent) build(o.parent);
   return api;

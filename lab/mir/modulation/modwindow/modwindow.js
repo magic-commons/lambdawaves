@@ -955,9 +955,9 @@ export function buildDevice(run, add, src, copyIn) {
 
   const headr = m2mk('div', 'm2headr', head);
   const mvL = m2mk('button', 'm2move', headr);
-  mvL.type = 'button'; mvL.textContent = '◂';
+  mvL.type = 'button'; setGlyph(mvL, 'chevronLeft', { size: 16 });
   const mvR = m2mk('button', 'm2move', headr);
-  mvR.type = 'button'; mvR.textContent = '▸';
+  mvR.type = 'button'; setGlyph(mvR, 'chevronRight', { size: 16 });
   let trig = null;
   if (kind === 'env') {
     trig = m2mk('button', 'm2trig', headr);
@@ -1175,7 +1175,7 @@ export function buildAudioSheet(dev, copyIn) {
   input.appendChild(opt);
   const x = m2mk('button', 'm2audsx', head);
   x.type = 'button';
-  x.textContent = '×';
+  setGlyph(x, 'close', { size: 16 });
   kitAria(x, 'Close the conditioning sheet');
   const rows = {};
   for (const [key, label] of copy.audioSheetRows) {
@@ -1183,11 +1183,11 @@ export function buildAudioSheet(dev, copyIn) {
     const lab = m2mk('div', 'm2audslab', row);
     kitLabel(lab, label);
     const dn = m2mk('button', 'm2audsbtn', row);
-    dn.type = 'button'; dn.textContent = '−';
+    dn.type = 'button'; setGlyph(dn, 'minus', { size: 16 });
     kitAria(dn, 'Lower {name}', { name: { t: label } });
     const val = m2mk('div', 'm2audsval', row);
     const up = m2mk('button', 'm2audsbtn', row);
-    up.type = 'button'; up.textContent = '+';
+    up.type = 'button'; setGlyph(up, 'plus', { size: 16 });
     kitAria(up, 'Raise {name}', { name: { t: label } });
     const leg = m2mk('div', 'm2audsleg', root);   // ← the sheet root, not `row`
     rows[key] = { row, lab, dn, val, up, leg };
@@ -1347,7 +1347,7 @@ export function buildDeadInspector(windowRoot) {
   const title = m2mk('span', null, head);         // NO class
   const close = m2mk('button', 'm2deadclose', head);
   close.type = 'button';
-  close.textContent = '×';
+  setGlyph(close, 'close', { size: 16 });
   kitAria(close, 'Close dead-send inspector');
   const list = m2mk('div', 'm2deadlist', root);
   list.setAttribute('role', 'list');

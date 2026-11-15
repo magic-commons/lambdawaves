@@ -564,8 +564,8 @@ export function createModSeam(app) {
       blocked = !free(want, w, h); under(blocked);
       if (want === trSeat) return;
       trMoving = true;
-      const leaving = trSeat === 'bottom' ? 'lw-tr-out-down' : 'lw-tr-out-up';
-      const arriving = want === 'bottom' ? 'lw-tr-in-up' : 'lw-tr-in-down';
+      const leaving = trSeat === 'bottom' ? 'mir-tr-out-down' : 'mir-tr-out-up';
+      const arriving = want === 'bottom' ? 'mir-tr-in-up' : 'mir-tr-in-down';
       t.style.animation = leaving + ' 140ms cubic-bezier(.55,0,1,.45) forwards';
       let arrived = false;
       const arrive = () => {

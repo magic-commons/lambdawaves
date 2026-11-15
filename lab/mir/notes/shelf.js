@@ -69,7 +69,7 @@ export function createShelf({ storage = globalThis.localStorage, key = 'mir.note
   let error = '', repaired = null;
 
   const read = () => {
-    let raw = null; try { raw = storage.getItem(key); } catch (e) { error = t('the shelf cannot be read — {why}', { why: e.message }); }
+    let raw = null; try { raw = storage.getItem(key); } catch (e) { error = t('Could not read the shelf: {why}', { why: e.message }); }
     const r = repair(raw);
     if (r.broken) {                                                  // keep the bad text whole, then mend
       const backup = key + '.corrupt';
@@ -80,7 +80,7 @@ export function createShelf({ storage = globalThis.localStorage, key = 'mir.note
     }
     return r.col;
   };
-  const write = (col) => { try { storage.setItem(key, JSON.stringify(col)); error = ''; return true; } catch (e) { error = t('the shelf could not be saved — {why}', { why: e.message }); return false; } };
+  const write = (col) => { try { storage.setItem(key, JSON.stringify(col)); error = ''; return true; } catch (e) { error = t('Could not save the shelf: {why}', { why: e.message }); return false; } };
   const touch = (col, path) => { col.recent = [path, ...col.recent.filter((p) => p !== path)].slice(0, RECENT); };
   const row = (it) => ({ path: it.path, folder: it.folder, name: it.name, title: it.title, saved: it.saved, opened: it.opened });
   const has = (path) => { path = normPath(path); return !!path && !!read().items[path]; };

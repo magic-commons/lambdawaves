@@ -1,8 +1,8 @@
-/* MIR · shell/gui.js — the GUI windows: MIR OPTIONS (every group on one packed grid, no tabs) and MIR ABOUT (its own window,
+/* MIR · shell/gui.js — the GUI windows: MIR OPTIONS (every group on one packed grid, no tabs) and ABOUT MIR (its own window,
  * opened by the circled (i) in MIR OPTIONS' head).
  *
  * WHAT IT IS.  The menubar's GUI entry opens a floating kit window (mir/window/window.js).  MIR OPTIONS holds every LOOK
- * option an app on the kit has, on one page; MIR ABOUT says what MIR is.  The look is a browser preference
+ * option an app on the kit has, on one page; ABOUT MIR says what MIR is.  The look is a browser preference
  * (core/prefs.js, one key, never in a project), so an app's own Settings keeps only its engine's options (ruling 7 of
  * the 1.5 plan).  A VANILLA THEME (shell/themes.js) is a named set of these options and nothing else: the SKIN stepper
  * steps through them and TONE, under it, through the theme's colours.
@@ -418,7 +418,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   const toneStep = stepper({ label: 'TONE', options: toneItems(P.preset()), value: toneOf(P.all(), P.preset()), onChange: (id) => applyTone(id) });   // tr[TONE]: a colour variant of the chosen theme (its tones have names, kept as written)
   skinStep.root.classList.add('gui-skin'); toneStep.root.classList.add('gui-tone');
   line(g, 'gui-pair').append(skinStep.root, toneStep.root);
-  const costNote = el('div', 'gui-note gui-theme-cost', g); costNote.title = 'What this theme cost when it was applied: surfaces that blur, shadows drawn, shine layers, the mean frame time';
+  const costNote = el('div', 'gui-note gui-theme-cost', g); costNote.title = 'What this theme costs: blurs, shadows, shine, frame time';
   line(g).append(segOf('theme', phrase('THEME'), [['light', phrase('LIGHT', 'theme mode')], ['dark', phrase('DARK', 'theme mode')], ['system', phrase('SYSTEM'), phrase('Follow the system')]]).root);   // tr[THEME]: THEME: LIGHT, DARK or SYSTEM, the light or dark mode (not the SKIN)
   const resetB = trig({ label: 'RESET LOOK', onFire: () => { costFor = themes[0].id; P.reset(); } }).root;
   hint(resetB, 'Every look option back home: the {skin} skin', { skin: themes[0].name });
@@ -434,7 +434,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   const kB = knobOf('accentB', phrase('B'), { min: 0, max: 360, wrap: true, fmt: deg, arc: true, ink: 'var(--acc2)' });
   const kV = knobOf('vivid', phrase('VIVID'), hundred);
   /* BRIGHTNESS (BASINS, Josh 2026-10-01): both accents toward white; it rides the project with them */
-  const kBr = knobOf('accentBright', phrase('BRIGHTNESS'), { ...hundred, aria: 'ACCENT BRIGHTNESS', title: 'BRIGHTNESS — shifts both accents toward white. Saved with the project, like the accents.' });   // tr[BRIGHTNESS]: how far both accent colours are mixed toward white (not the glass's BRIGHT)
+  const kBr = knobOf('accentBright', phrase('BRIGHTNESS'), { ...hundred, aria: 'ACCENT BRIGHTNESS', title: 'BRIGHTNESS — both accents toward white; saved per project' });   // tr[BRIGHTNESS]: how far both accent colours are mixed toward white (not the glass's BRIGHT)
   line(g, 'gui-knobs').append(kA.root, kB.root, kV.root, kBr.root);
 
   /* MATERIAL */
@@ -443,9 +443,9 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
     ['solid', phrase('SOLID'), phrase('An opaque pane in the tint’s colour: {:HUE} picks it, {:TINT} is its strength, {:BRIGHT} its lightness')]]).root,
   segOf('frost', phrase('FROST', 'frost setting'), [['off', phrase('OFF'), phrase('Disable backdrop filtering')], ['still', phrase('STILL'), phrase('Apply frost while the picture is still')], ['always', phrase('ALWAYS'), phrase('Apply frost continuously. This can reduce frame rate.')]]).root);
   const kBlur = knobOf('blur', phrase('BLUR'), { min: 0, max: 24, fmt: (v) => Math.round(v) + ' px', title: '{:BLUR} — the blur radius of {:frost setting::FROST}' });
-  const kVeil = knobOf('veil', phrase('VEIL'), { min: 0, max: 60, fmt: pct, title: 'Theme-coloured glass fill. Zero is clear.' });
-  const kSat = knobOf('saturation', phrase('SATURATION'), { min: 0, max: 2, fmt: (v) => Math.round(v * 100) + '%', title: 'Colour intensity across glass surfaces: 0% neutral · 100% original · 200% vivid.' });
-  const kCorner = knobOf('corners', phrase('CORNERS'), { min: 0, max: 24, fmt: (v) => Math.round(v) + ' px', title: 'Corner radius across window panes.' });
+  const kVeil = knobOf('veil', phrase('VEIL'), { min: 0, max: 60, fmt: pct, title: 'Theme-coloured glass fill; zero is clear' });
+  const kSat = knobOf('saturation', phrase('SATURATION'), { min: 0, max: 2, fmt: (v) => Math.round(v * 100) + '%', title: 'Glass colour: 0% neutral · 100% original · 200% vivid' });
+  const kCorner = knobOf('corners', phrase('CORNERS'), { min: 0, max: 24, fmt: (v) => Math.round(v) + ' px', title: 'Corner radius across window panes' });
   line(g, 'gui-knobs').append(kBlur.root, kVeil.root, kSat.root, kCorner.root);
   const signed = (v) => (v > 0.005 ? '+' : v < -0.005 ? '−' : '') + Math.abs(v * 100).toFixed(0);
   const kBright = knobOf('bright', phrase('BRIGHT'), { min: -1, max: 1, fmt: signed, title: '{:BRIGHT} — how light or dark the glass is' });
@@ -467,7 +467,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   g = groupEl('controls', phrase('CONTROLS'));
   line(g).append(segOf('relief', phrase('RELIEF'), [['default', phrase('DEFAULT'), phrase('Raised controls and wells, lit by {:LIGHT ANGLE}')], ['flat', phrase('FLAT'), phrase('Flat control faces: hairlines and accents only')]]).root,
     segOf('faces', phrase('FACES'), [['glass', phrase('GLASS'), phrase('Under refractive or frost the knobs, buttons and fields are clear glass')], ['solid', phrase('SOLID'), phrase('The kit’s filled knobs, buttons and fields')]]).root);
-  const kBlend = knobOf('faceBlend', phrase('BLEND'), { ...hundred, aria: 'Solid to glass control faces', title: '0% solid · 100% glass. The transition uses color burn in dark mode and color dodge in light mode.' });
+  const kBlend = knobOf('faceBlend', phrase('BLEND'), { ...hundred, aria: 'Solid to glass control faces', title: '0% solid · 100% glass; a burn in dark, a dodge in light' });
   const kStroke = knobOf('stroke', phrase('STROKE'), { ...hundred, step: 5, title: 'The 1-px rings around knobs, buttons, switches and fields' });   // tr[STROKE]: the thin outline drawn around each control (not a brush stroke)
   line(g, 'gui-knobs').append(kBlend.root, kStroke.root, seat());
 
@@ -485,7 +485,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   paintTier();
   const roBlur = readout({ label: 'BLUR', value: '—' }), roShadow = readout({ label: 'SHADOW', value: '—' }), roFrame = readout({ label: 'FRAME', value: '—' });   // tr[FRAME]: the time to draw one frame of the screen, in milliseconds (not a picture frame)
   for (const r of [roBlur, roShadow, roFrame]) { r.root.classList.add('gui-ro'); r.root.title = 'What the look costs, measured after the last change'; }
-  roBlur.root.title = 'Surfaces that blur what is behind them: one compositor pass each';
+  roBlur.root.title = 'Surfaces that blur what is behind them, one pass each';
   roShadow.root.title = 'Surfaces that draw a shadow, and shine layers';
   roFrame.root.title = 'The mean frame time over 30 frames after the last change';
   line(g, 'gui-cost').append(roBlur.root, roShadow.root, roFrame.root);
@@ -515,14 +515,14 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
 
   /* LIGHT — one light: where it is, the shadow it casts, the shine across from it */
   g = groupEl('light', phrase('LIGHT', 'light source'));
-  const kAngle = knobOf('lightAngle', phrase('ANGLE'), { min: 0, max: 360, wrap: true, fmt: deg, arc: true, aria: 'LIGHT ANGLE', title: '{:LIGHT ANGLE} — where the light is, clockwise from above: shadows fall away from it, the shine sits toward it, the controls’ relief turns with it' });
-  const kShadow = knobOf('shadow', phrase('SHADOW'), { min: 0, max: 2, fmt: (v) => Math.round(v * 100) + '%', title: 'Strength of the pane shadow. {:DROP SHADOW} can switch it off.' });
-  const kDist = knobOf('shadowDist', phrase('DISTANCE'), { min: 0, max: 24, fmt: px, title: 'How far the shadow falls from its pane (and the shine across from it)' });
+  const kAngle = knobOf('lightAngle', phrase('ANGLE'), { min: 0, max: 360, wrap: true, fmt: deg, arc: true, aria: 'LIGHT ANGLE', title: '{:LIGHT ANGLE} — where the light is, clockwise from above' });
+  const kShadow = knobOf('shadow', phrase('SHADOW'), { min: 0, max: 2, fmt: (v) => Math.round(v * 100) + '%', title: 'Strength of the pane shadow ({:DROP SHADOW} switches it)' });
+  const kDist = knobOf('shadowDist', phrase('DISTANCE'), { min: 0, max: 24, fmt: px, title: 'How far the shadow falls from its pane' });
   const kSoft = knobOf('shadowSoft', phrase('SOFTNESS'), { min: 0, max: 48, fmt: px, title: 'The shadow’s blur' });
   line(g, 'gui-knobs').append(kAngle.root, kShadow.root, kDist.root, kSoft.root);
-  const kShine = knobOf('shine', phrase('SHINE'), { ...hundred, title: '{:SHINE} — the shadow’s opposite: a light across the pane’s edge toward the light, added to what is behind' });
+  const kShine = knobOf('shine', phrase('SHINE'), { ...hundred, title: '{:SHINE} — a light across the pane’s edge, toward the light' });
   const kShineSoft = knobOf('shineSoft', phrase('SHINE SOFT'), { min: 0, max: 48, fmt: px, aria: 'SHINE SOFTNESS', title: 'The shine’s blur' });
-  const kRelief = knobOf('reliefAngle', phrase('RELIEF'), { min: 0, max: 360, wrap: true, fmt: deg, arc: true, aria: 'RELIEF ANGLE', title: 'RELIEF ANGLE — where the controls’ light is: their raise and wells turn with it (the panes follow {:ANGLE})' });   // tr[RELIEF]: the controls' relief (their raised and sunken look), here the angle of its light // tr[RELIEF ANGLE]: the direction the controls' light comes from, in degrees // tr[RELIEF ANGLE — where the controls’ light is: their raise and wells turn with it (the panes follow {:ANGLE})]: raise = a control standing out; wells = sunken tracks and fields; ANGLE is the panes' light angle
+  const kRelief = knobOf('reliefAngle', phrase('RELIEF'), { min: 0, max: 360, wrap: true, fmt: deg, arc: true, aria: 'RELIEF ANGLE', title: 'RELIEF ANGLE — where the controls’ light is' });   // tr[RELIEF]: the controls' relief (their raised and sunken look), here the angle of its light // tr[RELIEF ANGLE]: the direction the controls' light comes from, in degrees // tr[RELIEF ANGLE — where the controls’ light is]: raise = a control standing out; wells = sunken tracks and fields; ANGLE is the panes' light angle
   const swLink = swOf('reliefLink', phrase('LINK'), phrase('The controls take the panes’ light: one {:ANGLE} for everything'));   // tr[LINK]: a switch that joins the controls' light to the panes' light (link = tie together, not a web link) // tr[The controls take the panes’ light: one {:ANGLE} for everything]: the relief follows the pane light's ANGLE: one light for the whole interface
   swLink.root.classList.add('gui-link');
   line(g, 'gui-knobs').append(kShine.root, kShineSoft.root, kRelief.root, swLink.root);
@@ -534,11 +534,11 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   g = groupEl('windows', phrase('WINDOWS'));
   line(g, 'gui-sws').append(swOf('dropShadow', phrase('DROP SHADOW'), phrase('Pane shadows ({:SHADOW} sets their strength)')).root, swOf('edge', phrase('EDGE'), phrase('The pane’s hairline rim')).root);
   line(g, 'gui-sws').append(swOf('disconnected', phrase('DISCONNECTED'), phrase('Separate window headers from their bodies')).root,
-    /* TRANSPORT BAR (BASINS Settings › DISPLAY): the main transport bar in every seat; the transport's sheet reads the class */
-    swOf('transportBar', phrase('TRANSPORT BAR'), phrase('Show the main transport bar, floating or docked')).root);
-  const kScale = knobOf('scale', phrase('UI SCALE'), { min: 50, max: 200, step: 5, fmt: pct, toUi: (v) => v * 100, fromUi: (v) => v / 100, title: 'The size of every window, menu and bar; the picture keeps its resolution' });   // tr[UI SCALE]: the size of the interface (windows, menus, bars), not of the picture
+    /* CONTROL SURFACE (BASINS Settings › DISPLAY; it said TRANSPORT BAR before 1.6.0-alpha.91): the bar in every seat; the bar's sheet reads the class */
+    swOf('transportBar', phrase('CONTROL SURFACE'), phrase('Show the CONTROL SURFACE, floated or docked')).root);
+  const kScale = knobOf('scale', phrase('UI SCALE'), { min: 50, max: 200, step: 5, fmt: pct, toUi: (v) => v * 100, fromUi: (v) => v / 100, title: 'The size of every window, menu and bar, not the picture' });   // tr[UI SCALE]: the size of the interface (windows, menus, bars), not of the picture
   /* 1.5.7-alpha.57: SPACING is a knob with a px reading (it was BASINS' 0 · TIGHT · DEFAULT · AIRY row) */
-  const kSpacing = knobOf('spacing', phrase('SPACING'), { min: 0, max: SPACING_MAX, step: 1, fmt: px, title: 'The air between rack windows and from the screen’s edge, and the padding inside windows, bars and menus; 0 is flush' });
+  const kSpacing = knobOf('spacing', phrase('SPACING'), { min: 0, max: SPACING_MAX, step: 1, fmt: px, title: 'The air between windows and inside windows, bars and menus' });
   line(g, 'gui-knobs').append(kScale.root, kSpacing.root, seat());
   line(g).append(segOf('rackPill', phrase('SCROLL PILL'), [['off', phrase('OFF'), phrase('No name pill while a rack scrolls')],   // tr[SCROLL PILL]: the small coloured label with a window's name shown beside it while the column of windows scrolls
     ['a', phrase('A'), phrase('While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar')],
@@ -607,7 +607,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   }, on);
   logo.addEventListener('pointerleave', () => { for (const a of turning) a.cancel(); turning = []; }, on);
 
-  /* ── THE TWO WINDOWS (1.5.0 wave 19): MIR OPTIONS, a circled (i) in its head; MIR ABOUT, a window of its own.  Both carry
+  /* ── THE TWO WINDOWS (1.5.0 wave 19): MIR OPTIONS, a circled (i) in its head; ABOUT MIR, a window of its own.  Both carry
      a title bar and a plain × (createWindow chrome: 'close'), no chip rail: the whole bar drags, Escape closes.  THE HAND
      LAW: after its first placement a re-fit keeps the window's top-left where the hand left it; a screen too small for it
      scrolls the body. ── */
@@ -616,12 +616,12 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   W.root.classList.add('mir-gui');
   const aboutBtn = el('button', 'mir-win-btn gui-about-btn'); aboutBtn.type = 'button'; aboutBtn.dataset.glyph = 'info';
   const ig = glyphEl('info', 'gly gly-info'); if (ig) aboutBtn.append(ig);
-  ariaLabel(aboutBtn, 'MIR ABOUT'); hint(aboutBtn, 'MIR ABOUT');
+  ariaLabel(aboutBtn, 'ABOUT MIR'); hint(aboutBtn, 'ABOUT MIR');
   W.tools.prepend(aboutBtn);                                        // the circled (i), beside the ×
 
-  const A = createWindow({ id: 'gui-about', title: 'MIR ABOUT', host, chrome: 'close', size: { w: 480, h: 560 }, min: { w: 280, h: 200 }, emptyDrag: true, body: ab });
+  const A = createWindow({ id: 'gui-about', title: 'ABOUT MIR', host, chrome: 'close', size: { w: 480, h: 560 }, min: { w: 280, h: 200 }, emptyDrag: true, body: ab });
   A.root.classList.add('mir-gui', 'mir-gui-about');
-  const abHome = ab.parentElement;                                   // the MIR ABOUT window's body: aboutPage() lends the page out, openAbout takes it back
+  const abHome = ab.parentElement;                                   // the ABOUT MIR window's body: aboutPage() lends the page out, openAbout takes it back
   const openAbout = () => { if (abHome && ab.parentElement !== abHome) abHome.appendChild(ab); if (!A.isOpen()) A.open(); A.raise(); showLogo(); fitTo(A, ab); };
   aboutBtn.addEventListener('click', openAbout, on);
 
@@ -706,19 +706,19 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
 
   return {
     root: W.root, window: W, about: A, prefs: P,
-    /** open(p) — 'about' is the MIR ABOUT window; anything else (the old tab and page names too) MIR OPTIONS */
+    /** open(p) — 'about' is the ABOUT MIR window; anything else (the old tab and page names too) MIR OPTIONS */
     open(p) {
       if (p === 'about') { openAbout(); return; }
       if (!W.isOpen()) { W.open(); fitTo(W, opts); }
       W.raise(); shown();
     },
-    /** aboutPage(host) — MIR ABOUT's page as a page of the app's own ABOUT (λWAVES iteration 014 A1: "MIR about should be a second
-     *  page to the About page"): the one node moves into `host` with its logo; MIR ABOUT's window takes it back when it opens */
+    /** aboutPage(host) — ABOUT MIR's page as a page of the app's own ABOUT (λWAVES iteration 014 A1: "MIR about should be a second
+     *  page to the About page"): the one node moves into `host` with its logo; ABOUT MIR's window takes it back when it opens */
     aboutPage(host) { if (A.isOpen()) A.close(); host.appendChild(ab); showLogo(); return ab; },
     /** close() — both windows */
     close() { W.close(); A.close(); },
     toggle(p) { const w = p === 'about' ? A : W; if (w.isOpen()) w.close(); else this.open(p); },
-    /** page — 'about' while only MIR ABOUT is open, else 'options' */
+    /** page — 'about' while only ABOUT MIR is open, else 'options' */
     get page() { return A.isOpen() && !W.isOpen() ? 'about' : 'options'; },
     /** moving(b) — the app's picture is moving (FROST · STILL holds the frost while it does) */
     moving(b) { ctx.moving = !!b; P.apply(); },

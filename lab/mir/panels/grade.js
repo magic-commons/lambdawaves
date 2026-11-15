@@ -41,14 +41,14 @@ const f2 = (v) => (+v).toFixed(2);
 
 /** the master rows: each id's words, range and format (an app's `ranges` override any of them, in its own units); home is GRADE_HOME's */
 export const GRADE_VOCAB = Object.freeze({
-  exposure: { label: 'EXPOSURE', min: 0.25, max: 4, log: true, fmt: (v) => f2(v) + '×', hint: 'EXPOSURE — the picture multiplied, before the levels; double-tap for 1×' },
+  exposure: { label: 'EXPOSURE', min: 0.25, max: 4, log: true, fmt: (v) => f2(v) + '×', hint: 'EXPOSURE — the picture multiplied; double-tap for 1×' },
   contrast: { label: 'CONTRAST', min: 0.5, max: 2, log: true, fmt: f2, hint: 'CONTRAST — about mid-grey; double-tap for 1' },
-  gamma: { label: 'GAMMA', min: 0.5, max: 2.2, log: true, fmt: f2, hint: 'GAMMA — above 1 lifts the middle tones, below 1 sinks them; double-tap for 1' },
+  gamma: { label: 'GAMMA', min: 0.5, max: 2.2, log: true, fmt: f2, hint: 'GAMMA — above 1 lifts the middle tones; double-tap for 1' },
   saturation: { label: 'SATURATION', min: 0, max: 2, fmt: f2, hint: 'SATURATION — 0 is grey, 1 the picture as it is' },
   hue: { label: 'HUE', min: 0, max: 360, wrap: true, fmt: deg, hint: 'HUE — every colour turned together, all the way round' },
   black: { label: 'BLACK', min: 0, max: 1, fmt: f2, hint: 'BLACK — what is this dark or darker becomes black' },
   white: { label: 'WHITE', min: 0, max: 1, fmt: f2, hint: 'WHITE — what is this bright or brighter becomes white' },
-  opacity: { label: 'OPACITY', min: 0, max: 1, fmt: pct, hint: 'OPACITY — how much of the picture is laid over what is under it' },
+  opacity: { label: 'OPACITY', min: 0, max: 1, fmt: pct, hint: 'OPACITY — how much of the picture lies over what is under' },
   blend: { label: 'BLEND', hint: 'BLEND — how the picture is laid over what is under it' },
   invert: { label: 'INVERT', hint: 'INVERT — the negative of the picture' },
 });
@@ -169,7 +169,7 @@ export function createGradeView(parent, o = {}) {
   if (shown('black') && shown('white')) {
     const db = D('black'), dw = D('white');
     const c = control({ id: modId('levels'), ids: [modId('black'), modId('white')], type: 'range', label: 'BLACK · WHITE',
-      hint: 'BLACK · WHITE — the input levels: below BLACK is black, above WHITE is white; double-tap a thumb to send it home',
+      hint: 'BLACK · WHITE — the input levels; double-tap sends home',
       min: Math.min(db.min, dw.min), max: Math.max(db.max, dw.max), value: [read('black'), read('white')], home: [db.home, dw.home], minGap: o.levelsGap ?? 0.02, fmt: db.fmt,
       set: ([lo, hi]) => { if (lo !== base('black')) write('black', lo); if (hi !== base('white')) write('white', hi); } });
     add(row('grade-levels'), ['black', 'white'], c, () => [read('black'), read('white')]);
@@ -259,7 +259,7 @@ export function createGradePanel(o = {}) {
   };
   const spec = {
     id, title: o.title || 'GRADE', side: o.side || 'right', open: o.open, glyph: o.glyph || 'grade', action: o.action, eager: o.eager,
-    hint: o.hint || 'the master picture: exposure, contrast, gamma, saturation, levels, opacity, hue, invert, blend',
+    hint: o.hint || 'The master picture: exposure, contrast, levels and hue',
     build(body) { view = createGradeView(body, { ...o, id, model }); handle.root = view.root; },
     onWake() { if (view) view.sync(); }, onOpen() { if (view) view.sync(); },
     ...(o.spec || {}),

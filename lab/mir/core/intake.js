@@ -62,7 +62,7 @@ export async function readInput(input, { name = '', type = '', accept = KINDS, c
     if (!accept.includes(env.kind)) return reject(t('this place takes {accept}; that is a {kind}', { accept: accept.join(', '), kind: env.kind }), source, 'kind');   // tr: {accept} and {kind} are kinds of MIR file (project, page …), written as their ids
     const r = typeof check === 'function' ? check(env) : checkEnvelope(env, check);
     return { ok: !!r.ok, envelope: r.ok ? r.envelope || env : null, errors: r.errors || [], warnings: r.warnings || [], source };
-  } catch (e) { return reject(t('could not read it: {why}', { why: String(e && e.message || e).slice(0, 120) }), source); }
+  } catch (e) { return reject(t('Could not read it: {why}', { why: String(e && e.message || e).slice(0, 120) }), source); }
 }
 
 export function createIntake({ target, accept = KINDS, check = {}, onEnvelope, onReject, paste } = {}) {

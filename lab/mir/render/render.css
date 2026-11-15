@@ -26,7 +26,6 @@
   --render-label-w: 72px;
   --render-time-w: 96px;                             /* the number fields: length, start at */
   --render-primary-rim: color-mix(in srgb, var(--acc) 55%, var(--glass-hairline));
-  --render-lines-h: 160px;                           /* the self-test's printout */
   --render-video-h: 220px;                           /* the preview player */
   --render-status-pad: 7px 9px;
   --render-unit-track: .1em;
@@ -167,7 +166,7 @@
 .mir-render .sr-even ~ .sr-prog:has(.sr-value:empty) { display: none; }   /* even: the progress line shows only while it has words (CANCEL is on the buttons' row) */
 
 /* ── the check ── */
-.mir-render .sr-lines { margin: 0; max-height: var(--render-lines-h); overflow: auto; font: var(--w-med) var(--fs-micro)/1.5 var(--font-mono); color: var(--fg-soft); white-space: pre-wrap; }
+.mir-render .sr-lines { margin: 0; font: var(--w-med) var(--fs-micro)/1.5 var(--font-mono); color: var(--fg-soft); white-space: pre-wrap; }
 .mir-render .sr-lines:empty { display: none; }
 
 @container (max-width: 315px) {

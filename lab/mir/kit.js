@@ -823,9 +823,9 @@ export function device(o) {
   const stat = el('div', 'dev-stat', head, o.status || ''); statCaps(stat);
   const util = el('div', 'dev-util', head);
   const power = el('button', 'dev-power', util, ''); power.type = 'button'; power.title = 'Turn this window on or off'; power.setAttribute('aria-pressed', 'true');
-  ariaLabel(power, 'power');                 // it has no content, so that 90-character `title` WAS its accessible name
-  const fold = el('button', 'dev-fold', util); fold.type = 'button'; fold.title = 'Collapse or expand this window';
-  chip(fold, 'chevronDown', 'fold or unfold this window');   // ONE drawing: `.folded` turns it a quarter turn, which is the caret's own idiom (glyph.js, chevronDown)
+  ariaLabel(power, 'Power');                 // it has no content, so that 90-character `title` WAS its accessible name
+  const fold = el('button', 'dev-fold', util); fold.type = 'button'; fold.title = 'Fold or unfold this window';
+  chip(fold, 'chevronDown', 'Fold or unfold this window');   // ONE drawing: `.folded` turns it a quarter turn, which is the caret's own idiom (glyph.js, chevronDown)
   /* ── WAVE 55 · THE POP-OUT, and the rail beside it ──────────────────────────────────────────────
    * Every window gains the control the transport has always had.  device() builds the two chips and
    * NOTHING ELSE: the act itself is the rack's (lab/rack.js `layout.float`), because taking a card off
@@ -833,13 +833,13 @@ export function device(o) {
    * The rail chip is in the DOM for every window and shown by CSS only while the window floats, so the
    * header's box never changes shape when a window comes off the rack. */
   const pop = el('button', 'dev-pop', util); pop.type = 'button';
-  chip(pop, 'popOut', 'take this window off the rack');
-  pop.title = 'Move this window between the rack and stage';
+  chip(pop, 'popOut', 'Float this window');
+  pop.title = 'Float or dock this window';
   const rail = el('button', 'dev-rail', util); rail.type = 'button';
   chip(rail, 'compact', 'narrow this window to its rail');
   rail.title = 'Use the compact window layout';
-  const close = el('button', 'dev-close', util); close.type = 'button'; close.title = 'Close this window';
-  chip(close, 'close', 'close this window');
+  const close = el('button', 'dev-close', util); close.type = 'button'; close.title = 'Close window';
+  chip(close, 'close', 'Close window');
   let off = false;
   /* WAVE 62 · THE ONE `inert` IN THE LAB.  Every other hidden state is already out of the tab order and
      out of the accessibility tree — `.dev.closed` and `.folded .dev-body` and a railed body are
@@ -964,7 +964,7 @@ export function knobBank({ slots = 8, page = 0, onPage, items = [], onEmpty, onM
   function slot(it, i) {
     const s = el('div', 'mir-bank-slot' + (it ? ' filled' : ' empty'));
     if (!it) { const plus = el(onEmpty ? 'button' : 'span', 'mir-bank-plus', s); setGlyph(plus, 'plus', { size: 16 });
-      if (onEmpty) { plus.type = 'button'; ariaLabel(plus, 'Add'); plus.addEventListener('click', () => onEmpty(i)); } return s; }
+      if (onEmpty) { plus.type = 'button'; ariaLabel(plus, 'Add to this slot'); plus.addEventListener('click', () => onEmpty(i)); } return s; }
     s.dataset.slot = keyOf(it, i); s.append(faceOf(it, i)); if (it.span > 1) s.style.gridColumn = 'span ' + it.span;
     if (onMove) { const g = el('button', 'mir-bank-grip', s), id = it.id; g.type = 'button'; gripDots(g, 12); ariaLabel(g, 'Move');
       wireReorder(g, s, { host: grid, selector: ':scope > .mir-bank-slot.filled', axis: 'grid', motion, slop: TAP.slop, commit: (to) => onMove(id, pg * slots + to), settle: () => api.sync() });

@@ -14,7 +14,7 @@
 import { t, setLanguage, language, languages as known } from '../core/i18n.js';
 
 const KEY = 'mir.lang';
-const WORDS = { hint: 'a draft translation: no native reader has checked it yet' };   // a hint: control-help.js translates it
+const WORDS = { hint: 'A draft translation: no native reader has checked it yet' };   // a hint: control-help.js translates it
 const read = (k) => { try { return localStorage.getItem(k); } catch (_) { return null; } };
 const write = (k, v) => { try { localStorage.setItem(k, v); } catch (_) { /* private mode: the choice lasts the visit */ } };
 

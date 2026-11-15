@@ -81,8 +81,8 @@ export function createHistoryWindow(o = {}) {
   const tool = (cls, glyph, mark, aria, tip, fire, action) => { const x = el('button', 'mir-win-btn ' + cls); x.type = 'button'; const g = glyphEl(glyph, 'gly gly-' + glyph); if (g) x.appendChild(g); else x.textContent = mark;
     ariaLabel(x, aria); hint(x, tip); x.addEventListener('click', fire); if (action) x.dataset.keyAction = action; return x; };
   /* the key is the table's, in the user's platform (keys.hints writes data-key-hint; the tooltip shows it after the word) */
-  undo = tool('hist-undo', 'undo', '↶', 'undo', 'Undo', () => history.undo(), keyOff && 'undo');
-  redo = tool('hist-redo', 'redo', '↷', 'redo', 'Redo', () => history.redo(), keyOff && 'redo');
+  undo = tool('hist-undo', 'undo', '↶', 'Undo the last edit', 'Undo the last edit', () => history.undo(), keyOff && 'undo');
+  redo = tool('hist-redo', 'redo', '↷', 'Redo the edit undone', 'Redo the edit undone', () => history.redo(), keyOff && 'redo');
   win.tools.prepend(undo, redo); sync(list.state());
   if (keyOff && keyOff.keys !== o.keys) { const k = keyOff.keys; k.hints(win.root); offs.push(k.onChange(() => k.hints(win.root))); }   // a table of its own: its hints are its own (an app's table hints the whole document)
   const offState = list.onChange((st) => { if (win.isOpen()) sync(st); });

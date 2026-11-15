@@ -48,7 +48,7 @@ import { setVar, setAttr } from '../core/perf.js';
 import { createWindowActivity } from '../window-activity.js';
 import { observeSpan } from '../window/dock.js';
 import { registerWindow } from '../window/window.js';
-import { glyphEl, hasGlyph } from '../glyph.js';
+import { glyphEl, hasGlyph, setGlyph } from '../glyph.js';
 import { createRackScrollbars, createRackPills } from './rack-scrollbar.js';
 import { escapeLayer } from './menubar.js';
 import { jsonStore } from '../core/prefs.js';
@@ -395,7 +395,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
   const racks = {};
   for (const side of SIDES) if (sides.includes(side)) {
     const r = take(RACK_ID[side], 'div', 'mir-rack'); r.dataset.side = side; r.dataset.mirRack = ''; r.tabIndex = -1;
-    r.setAttribute('role', 'region'); ariaLabel(r, side === 'left' ? 'the left rack' : 'the rack');   // tr: the RACK: the column of docked windows at the screen’s edge (not the SHELF, where notes are kept)
+    r.setAttribute('role', 'region'); ariaLabel(r, side === 'left' ? 'The left rack' : 'The rack');   // tr: the RACK: the column of docked windows at the screen’s edge (not the SHELF, where notes are kept)
     racks[side] = r;
   }
   const rackOf = (side) => racks[side] || racks.right || racks.left;
@@ -408,7 +408,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
   let toggleBtn = null, favBtn = null, favList = null;
   if (chrome) {
     toggleBtn = btn('rackToggle', 'toggle', '◧', 'Hide or show the rack');
-    if (favourites > 0) { favBtn = btn('rackFav', 'fav', '☆', 'Save or load a window layout'); favList = list('rackFavList', 'fav'); }
+    if (favourites > 0) { favBtn = btn('rackFav', 'fav', '', 'Save or load a window layout'); if (!favBtn.firstChild) setGlyph(favBtn, 'star'); favList = list('rackFavList', 'fav'); }
   }
   const handles = handle === 'never' ? [] : Object.keys(racks).map((side) => {
     const h = el('button', 'mir-rack-handle', host); made.push(h);
@@ -558,9 +558,9 @@ export function createRack({ host = globalThis.document && document.body, sides 
   function popFace(d) {
     const b = d.querySelector('.dev-pop'); if (!b) return;
     const out = d.classList.contains('floating'), w = reg.get(d.dataset.id);
-    if (w && w.spec.window && !out) { chip(b, 'popOut', 'open this as a window'); b.title = 'Open this as a window'; return; }   // 1.6.0-alpha.31: the twin's door
-    chip(b, out ? 'dock' : 'popOut', out ? 'dock this window back into the rack' : 'take this window off the rack');
-    b.title = out ? 'Return this window to its rack' : 'Move this window onto the stage';
+    if (w && w.spec.window && !out) { chip(b, 'popOut', 'Open this as a window'); b.title = 'Open this as a window'; return; }   // 1.6.0-alpha.31: the twin's door
+    chip(b, out ? 'dock' : 'popOut', out ? 'Dock this window' : 'Float this window');
+    b.title = out ? 'Dock this window in its rack' : 'Float this window off the rack';
   }
   function railFace(d) {
     const b = d.querySelector('.dev-rail'); if (!b) return;
@@ -1020,10 +1020,10 @@ export function createRack({ host = globalThis.document && document.body, sides 
     const s = row('star', 'Save the current window arrangement'); el('span', 'mb-lbl', s, 'SAVE LAYOUT');
     if (saved.length >= favourites) el('span', 'mb-key', s, 'replaces the oldest');
     s.addEventListener('click', (ev) => { ev.stopPropagation(); saveLayout(); drawFav(); });
-    if (saved.length) el('div', 'rack-fav-head', favList, 'LOAD LAYOUT'); else el('div', 'mir-empty', favList, 'No layout saved yet');
+    if (saved.length) el('div', 'rack-fav-head', favList, 'LOAD LAYOUT'); else el('div', 'mir-empty', favList, 'No layouts yet — SAVE LAYOUT keeps this one');
     for (const L of saved) {
       const it = row('starFill', 'Restore this window layout'); el('span', 'mb-lbl', it, L.label).translate = false;
-      const x = el('span', 'fav-x', it); x.title = 'forget this layout'; const xg = glyphEl('close', 'gly gly-close', 12); if (xg) x.appendChild(xg); else x.textContent = '×';
+      const x = el('span', 'fav-x', it); x.title = 'Delete this layout'; const xg = glyphEl('close', 'gly gly-close', 12); if (xg) x.appendChild(xg); else x.textContent = '×';
       it.addEventListener('click', (ev) => { ev.stopPropagation(); if (x.contains(ev.target)) { forgetLayout(L.slot); drawFav(); return; } loadLayout(L.slot); favShown(false); });
     }
   }
@@ -1164,7 +1164,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
     const keyText = (spec) => (spec.action && keyOf ? keyOf(spec.action) || '' : '');
     const rows = [...reg.values()].filter((w) => !w.spec.card).map((w) => [(isOpen(w.spec.id) ? '↑  ' : '⊕  ') + w.spec.title + (keyText(w.spec) ? '\t' + keyText(w.spec) : ''),
       () => raise(w.spec.id), false, w.spec.hint || (isOpen(w.spec.id) ? 'bring it to the top of its rack' : 'open it'), w.spec.glyph ? { icon: w.spec.glyph } : undefined]);
-    if (rackRow) rows.push(null, ['HIDE / SHOW the rack' + (rackKey ? '\t' + rackKey : ''), () => setHidden(!isHidden()), false, '', { icon: 'eye' }]);
+    if (rackRow) rows.push(null, ['HIDE OR SHOW THE RACK' + (rackKey ? '\t' + rackKey : ''), () => setHidden(!isHidden()), false, '', { icon: 'eye' }]);
     return rows;
   }
 

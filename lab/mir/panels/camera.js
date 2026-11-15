@@ -363,7 +363,7 @@ export function createCameraView(parent, o = {}) {
   function home() { if (mode === '3d' && typeof port.home === 'function') { port.home(); schedule(); } else homeAll(); }
   let homeBtn = null, northBtn = null;
   if (mode === '3d' ? (homeIds.length || port.home) : homeIds.length) {
-    homeBtn = trig({ label: mode === '3d' ? 'HOME' : 'PAN HOME', cls: 'cam-home', title: mode === '3d' ? 'HOME — restore the default view' : 'PAN HOME — reset pan and orbit bases; routed modulation continues', onFire: home });
+    homeBtn = trig({ label: mode === '3d' ? 'HOME' : 'PAN HOME', cls: 'cam-home', title: mode === '3d' ? 'HOME — restore the default view' : 'PAN HOME — pan and orbit back home; routes keep running', onFire: home });
     verbs.appendChild(homeBtn.root);
   }
   if (mode === '2d' && has_('rotation')) {
@@ -414,7 +414,7 @@ export function createCameraView(parent, o = {}) {
   if (has_('panX') && has_('panY')) {
     const dx = D('panX'), dy = D('panY');
     const axis = (id, d) => ({ id: modId(id), label: d.label, min: d.min, max: d.max, step: d.step, fmt: d.fmt, hint: d.hint, def: d.home, get: () => port.get(id), set: (v) => write(id, v) });
-    const c = control({ id: modId('pan'), label: 'PAN', pair: [axis('panX', dx), axis('panY', dy)], home: [dx.home, dy.home], wrap: o.panWrap, hint: 'PAN — the view moved along the screen\'s axes, as a share of its width; drag the pad, or turn X and Y; double-tap to come home' });   // 1.5.7-alpha.13: `panWrap`
+    const c = control({ id: modId('pan'), label: 'PAN', pair: [axis('panX', dx), axis('panY', dy)], home: [dx.home, dy.home], wrap: o.panWrap, hint: 'PAN — the view moved along the screen; double-tap goes home' });   // 1.5.7-alpha.13: `panWrap`
     c.widget.x.setDefault(dx.home); c.widget.y.setDefault(dy.home);
     add(row('cam-pan'), ['panX', 'panY'], c, () => [port.get('panX'), port.get('panY')]);
     padEntry = c;
@@ -471,7 +471,7 @@ export function createCameraView(parent, o = {}) {
     if (s === lastNorth) return;
     lastNorth = s;
     northBtn.on = at;
-    hint(northBtn.root, at ? (m === null || m === undefined ? 'NORTH — the view is at north' : 'NORTH — go back to {deg}') : 'NORTH — turn the view to north; press again to go back to {deg}', { deg: fmtDeg(at ? (m || 0) : b) });
+    hint(northBtn.root, at ? (m === null || m === undefined ? 'NORTH — the view is at north' : 'NORTH — go back to {deg}') : 'NORTH — turn the view north; again goes back to {deg}', { deg: fmtDeg(at ? (m || 0) : b) });
     if (o.status) o.status(at ? (m === null || m === undefined ? 'NORTH' : 'NORTH · back to ' + fmtDeg(m)) : fmtDeg(b));
   }
   const offPort = typeof port.subscribe === 'function' ? port.subscribe(schedule) : null;
@@ -515,7 +515,7 @@ export function createCameraPanel(o = {}) {
   let view = null;
   const handle = { id, port, view: () => view, params: () => (view ? view.params() : []), sync: () => view && view.sync(), destroy() { if (view) view.destroy(); view = null; if (!o.port && port.destroy) port.destroy(); } };
   const spec = {
-    id, title: o.title || 'CAMERA', side: o.side || 'right', open: o.open, glyph: o.glyph || 'cameraOrbit', action: o.action, hint: o.hint || 'where the view is',
+    id, title: o.title || 'CAMERA', side: o.side || 'right', open: o.open, glyph: o.glyph || 'cameraOrbit', action: o.action, hint: o.hint || 'Where the view is',
     build(body, api) { view = createCameraView(body, { ...o, port, status: api && api.setStatus ? (s) => api.setStatus(s) : null }); handle.root = view.root; },
     onWake() { if (view) view.sync(); }, onOpen() { if (view) view.sync(); },
     ...(o.spec || {}),

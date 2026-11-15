@@ -50,12 +50,12 @@ export const GALLERY_COPY = {
   duplicate: [phrase('DUPLICATE'), phrase('selected project'), phrase('Duplicate the selected saved project, including its thumbnail and settings.')],
   fresh: [phrase('NEW'), phrase('start over'), phrase('New — back to the start.')],
   partsTitle: phrase('PROJECT COMPONENTS'),
-  name: phrase('NAME'), saveTo: phrase('SAVE TO'), saveToPlaceholder: phrase('{:ROOT} — or type a new folder path'),
+  name: phrase('NAME'), saveTo: phrase('SAVE TO'), saveToPlaceholder: phrase('{:ROOT} or a folder path'),
   root: phrase('ROOT'),   // tr: ROOT: the top of the folder tree, the projects in no folder (not a route)
   factory: phrase('RESTORE FACTORY GALLERY'),
   factoryNote: phrase('puts back what this app shipped with — adds only what is missing, and never touches anything you saved'),
   emptyRoot: phrase('Nothing is saved at {:ROOT} yet.  Open a folder, or save what is on screen here.'),
-  emptyFolder: phrase('This folder is empty.  Move a project here, or save what is on screen into it.')
+  emptyFolder: phrase('No projects here yet — move one in, or save into it')
 };
 
 /** BASINS' SAVE toolbar, in its order: the default `actions` */
@@ -197,8 +197,8 @@ export function buildGallery(panel, opts) {
      the defaults are what the fields always read), and `copy.proposeName: false` leaves NAME empty (its placeholder shows) instead of proposing
      the folder's name, and SAVE TO empty at ROOT and in a folder of read-only starters — a save there lands at ROOT under the proposed name */
   const own = o.copy || {}, proposing = own.proposeName !== false;
-  const nameIn = field(copy.name, 'sv-name-input', 80, own.namePlaceholder || phrase('Name'));
-  const toIn = field(copy.saveTo, 'sv-to-input', 320, own.saveToPlaceholder || phrase('{:ROOT} / folder'));
+  const nameIn = field(copy.name, 'sv-name-input', 80, own.namePlaceholder || phrase('NAME'));
+  const toIn = field(copy.saveTo, 'sv-to-input', 320, own.saveToPlaceholder || phrase('{:ROOT} or a folder path'));
   if (!proposing) nameIn.title = t('Left empty, {:SAVE} names it after its folder');
   kitAria(nameIn, 'Project name');
   kitAria(toIn, 'Save to folder');
@@ -311,7 +311,7 @@ export function buildGallery(panel, opts) {
       S.folder = r.entry.folder;
       revealEntry(r.entry);
       S.selected = null;
-      say(t('Saved — {name}', { name: r.entry.name }));
+      say(t('Saved {name}', { name: r.entry.name }));
       if (typeof o.onSaved === 'function') o.onSaved(r.entry);
       paint();
     } else if (r.full) showFull(Object.assign(r, { name: s.name != null ? s.name : nameIn.value, folder: s.folder != null ? s.folder : toIn.value, captured: cap }));
@@ -347,7 +347,7 @@ export function buildGallery(panel, opts) {
     if (!(oo && oo.force) && (d.dirty || !d.known)) { askBeforeOpen(e, d); return { ok: false, asked: true }; }
     let r;
     try { r = await adapter.restore(e.payload, e); } catch (err) { r = { ok: false, why: String((err && err.message) || err) }; }
-    if (r && r.ok !== false) { markClean(); S.selected = e.id; say(t('Opened — {name}', { name: e.name })); paint(); if (typeof o.onOpened === 'function') o.onOpened(e); return { ok: true, entry: e }; }
+    if (r && r.ok !== false) { markClean(); S.selected = e.id; say(t('Opened {name}', { name: e.name })); paint(); if (typeof o.onOpened === 'function') o.onOpened(e); return { ok: true, entry: e }; }
     say(t('Could not open {name}: {why}', { name: e.name, why: (r && r.why) || 'unknown' }), true);
     return { ok: false, why: r && r.why, rolledBack: r && r.rolledBack };
   }
@@ -361,7 +361,7 @@ export function buildGallery(panel, opts) {
       const held = await adapter.picture();
       if (held) { S.held = held; say(t('Picture made — {w}×{h}. Tap the download icon to keep it.', { w: held.w, h: held.h })); }
     } catch (e) { say(t('Could not make the picture: {why}', { why: String((e && e.message) || e) }), true); }
-    finally { captureBtn.removeAttribute('aria-busy'); captureBtn.disabled = typeof adapter.picture !== 'function'; kitAria(captureBtn, 'Capture image'); paintPicture(); }   // tr: the button that takes a still picture of the current view
+    finally { captureBtn.removeAttribute('aria-busy'); captureBtn.disabled = typeof adapter.picture !== 'function'; kitAria(captureBtn, 'CAPTURE IMAGE'); paintPicture(); }   // tr: the button that takes a still picture of the current view
   }
   function paintPicture() {
     if (!downloadBtn) return;
@@ -377,7 +377,7 @@ export function buildGallery(panel, opts) {
     if (typeof adapter.pictureStale === 'function' && adapter.pictureStale(S.held)) { S.held = null; paintPicture(); say(t('The view moved since the picture was made — capture it again.'), true); return; }
     /* NOTHING awaited before this line inside this tap: a file handed over after an await has lost the gesture */
     const via = adapter.savePicture(S.held);
-    say(via === 'share' ? t('Handed to the share sheet — choose Save Image or Save to Files.') : t('Saved — {name}', { name: S.held.name }));
+    say(via === 'share' ? t('Handed to the share sheet — choose Save Image or Save to Files.') : t('Saved {name}', { name: S.held.name }));
     paintPicture();
   }
 
@@ -409,7 +409,7 @@ export function buildGallery(panel, opts) {
     let b, close = closeContext;
     if (seat) { seat.textContent = ''; b = mk('div', 'sv-context sv-ask', seat); mk('div', 'sv-context-title', b, t('Save this first?')); close = () => { seat.textContent = ''; }; }
     else { b = box(t('Save this first?'), 'sv-ask'); b.style.top = explorer.offsetTop + 'px'; }   // THE HAND: the ask floats in its own place over the explorer (folders.css), so ROOT and the tiles under it do not move
-    ink(btn('sv-ask-close', b, null, t('Cancel')), 'close', 16).addEventListener('click', close);
+    ink(btn('sv-ask-close', b, null, t('CANCEL')), 'close', 16).addEventListener('click', close);
     return { b, close };
   }
   /** askBeforeOpen({ name }, d, go, seat) — "Save this first?" before what is on screen is replaced: SAVE & OPEN (save,
@@ -418,7 +418,7 @@ export function buildGallery(panel, opts) {
     const { b, close } = askBox(seat);
     mk('div', 'sv-context-text', b, t(d.known ? 'Opening "{name}" replaces what is on screen.' : 'Opening "{name}" replaces what is on screen, which may be unsaved.', { name: e.name }));
     const row = mk('div', 'sv-context-row', b);
-    action(row, 'SAVE & OPEN', async () => { const r = await save(); if (r.ok) { close(); go(); } else if (!r.full) say(t('Could not save: {why} — nothing was opened.', { why: r.why || 'unknown' }), true); }, 'sv-primary');
+    action(row, 'SAVE & OPEN', async () => { const r = await save(); if (r.ok) { close(); go(); } else if (!r.full) say(t('Could not save: {why} — nothing was opened', { why: r.why || 'unknown' }), true); }, 'sv-primary');
     action(row, 'OPEN WITHOUT SAVING', () => { close(); go(); });
     if (seat) { b.scrollIntoView({ block: 'nearest' }); const first = row.querySelector('.trig'); if (first) first.focus({ preventScroll: true }); } else scrollIn();
   }
@@ -426,7 +426,7 @@ export function buildGallery(panel, opts) {
     const { b } = askBox();
     mk('div', 'sv-context-text', b, t(d.known ? '{:NEW} starts the empty project.' : '{:NEW} starts the empty project. What is on screen may be unsaved.'));
     const row = mk('div', 'sv-context-row', b);
-    action(row, 'SAVE & NEW', async () => { const r = await save(); if (r.ok) { closeContext(); fresh({ force: true }); } else if (!r.full) say(t('Could not save: {why} — nothing was cleared.', { why: r.why || 'unknown' }), true); }, 'sv-primary');
+    action(row, 'SAVE & NEW', async () => { const r = await save(); if (r.ok) { closeContext(); fresh({ force: true }); } else if (!r.full) say(t('Could not save: {why} — nothing was cleared', { why: r.why || 'unknown' }), true); }, 'sv-primary');
     action(row, 'NEW WITHOUT SAVING', () => { closeContext(); fresh({ force: true }); }, 'sv-danger');
     scrollIn();
   }
@@ -447,7 +447,7 @@ export function buildGallery(panel, opts) {
         if (r.duplicate) S.selected = res.entry.id;
         closeContext();
         say(r.duplicate ? tn(res.evicted.length, 'Duplicated — {name} · made room by deleting {n} project', 'Duplicated — {name} · made room by deleting {n} projects', { name: res.entry.name })
-          : tn(res.evicted.length, 'Saved — {name} · made room by deleting {n} project', 'Saved — {name} · made room by deleting {n} projects', { name: res.entry.name }));
+          : tn(res.evicted.length, 'Saved — {name} · made room by deleting {n} project', 'Saved {name} · made room by deleting {n} projects', { name: res.entry.name }));
         if (!r.duplicate && typeof o.onSaved === 'function') o.onSaved(res.entry);
         paint();
       } else say(t('Could not save: {why}', { why: res.why || 'unknown' }), true);
@@ -484,7 +484,7 @@ export function buildGallery(panel, opts) {
   function moveBox(e) {
     const b = box(e.name);
     const row = mk('div', 'sv-context-row sv-move', b);
-    const inp = mk('input', 'sv-input', row); inp.type = 'text'; inp.value = e.folder; inp.placeholder = t('{:ROOT} or folder path'); inp.spellcheck = false;
+    const inp = mk('input', 'sv-input', row); inp.type = 'text'; inp.value = e.folder; inp.placeholder = t('{:ROOT} or a folder path'); inp.spellcheck = false;
     inp.setAttribute('aria-label', t('Move {name} to folder', { name: e.name }));
     inp.addEventListener('keydown', (ev) => ev.stopPropagation());
     action(row, 'MOVE', () => moveTo(e, inp.value));
@@ -508,8 +508,8 @@ export function buildGallery(panel, opts) {
     const rm = action(b, 'REMOVE FOLDER', () => {
       if (!rm.root.classList.contains('armed')) { rm.root.classList.add('armed'); rm.setLabel('MOVE CONTENTS TO {:ROOT}?'); return; }
       const r = files.deleteFolder(path);
-      if (r.ok) { if (inFolderTree(S.folder, path)) S.folder = ''; say(tn(r.moved, 'Folder removed — {n} project moved to {:ROOT}', 'Folder removed — {n} projects moved to {:ROOT}')); closeContext(); paint(); }
-      else say(t('Could not remove the folder: {why}', { why: r.why }), true);
+      if (r.ok) { if (inFolderTree(S.folder, path)) S.folder = ''; say(tn(r.moved, 'Folder deleted — {n} project moved to {:ROOT}', 'Folder deleted — {n} projects moved to {:ROOT}')); closeContext(); paint(); }
+      else say(t('Could not delete the folder: {why}', { why: r.why }), true);
     }, 'sv-danger');
     action(b, 'CLOSE', closeContext);
     scrollIn();
@@ -653,7 +653,7 @@ export function buildGallery(panel, opts) {
        they stood on page 1 (the hand law: positions never move; a page without its folders lifted the buttons by one row) */
     const seats = pageSize ? Math.min(kids.length, pageSize) : kidsShown.length;
     const folderRow = seats ? mk('section', 'sv-folder-row', grid) : null;
-    if (folderRow) folderRow.setAttribute('aria-label', t('Folders'));
+    if (folderRow) folderRow.setAttribute('aria-label', t('FOLDERS'));
     for (const path of kidsShown) {
       const card = mk('div', 'sv-folder', folderRow);
       card.dataset.folder = path;
@@ -672,7 +672,7 @@ export function buildGallery(panel, opts) {
     for (let i = kidsShown.length; i < seats; i++) { const seat = mk('div', 'sv-folder sv-folder-seat', folderRow); seat.setAttribute('aria-hidden', 'true'); ink(mk('span', 'sv-folder-glyph', mk('span', 'sv-folder-shot', seat)), 'saveFolder', 20); }
 
     const projectSection = mk('section', 'sv-projects', grid);
-    projectSection.setAttribute('aria-label', t('Projects'));
+    projectSection.setAttribute('aria-label', t('PROJECTS'));
     const projectHeading = mk('div', 'sv-projects-heading', projectSection);
     ink(mk('span', 'sv-projects-glyph', projectHeading), 'projectFile', 15);
     mk('span', null, projectHeading, t('PROJECTS'));
@@ -719,7 +719,7 @@ export function buildGallery(panel, opts) {
         if (!del.classList.contains('armed')) { del.classList.add('armed'); del.textContent = t('sure?'); tm = setTimeout(() => { del.classList.remove('armed'); del.textContent = ''; ink(del, 'close', 14); }, ARM_MS); return; }
         clearTimeout(tm);
         const r = files.remove(e.id);
-        if (r.ok) { if (S.selected === e.id) { S.selected = null; if (typeof o.onInspect === 'function') o.onInspect(null, { show: false }); } say(t('Deleted — {name}', { name: e.name })); if (typeof o.onRemoved === 'function') o.onRemoved(e); paint(); }
+        if (r.ok) { if (S.selected === e.id) { S.selected = null; if (typeof o.onInspect === 'function') o.onInspect(null, { show: false }); } say(t('Deleted {name}', { name: e.name })); if (typeof o.onRemoved === 'function') o.onRemoved(e); paint(); }
         else say(t('Could not delete: {why}', { why: r.why }), true);
       });
     }

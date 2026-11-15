@@ -133,7 +133,7 @@ export function createRampView(parent, o = {}) {
   const wrap = el('div', 'mir-ramp-wrap', root);
   const stage = el('div', 'mir-ramp-stage', wrap);
   const strip = el('div', 'mir-ramp-strip', stage); strip.setAttribute('role', 'group');
-  ariaLabel(strip, 'Ramp strip — click to add a stop'); hint(strip, 'Click the strip to add a stop; drag a stop to move it, off the strip to remove it');
+  ariaLabel(strip, 'Ramp strip — click to add a stop'); hint(strip, 'Tap the strip to add a stop; drag one off it to remove it');
   const ticks = el('div', 'mir-ramp-ticks', stage);
   for (const [u, text] of L.ticks) { const t = el('span', 'mir-ramp-tick', ticks, text); t.style.setProperty('--at', String(u)); }
   const ring = cyc && o.ring !== false ? el('div', 'mir-ramp-ring', wrap) : null;
@@ -147,7 +147,7 @@ export function createRampView(parent, o = {}) {
   const atField = number({ label: L.at, aria: 'Stop place', min: 0, max: 1, step: 0.001, digits: 3, fmt: L.fmt, value: 0,
     onInput: (v) => { const s = stopById(sel); if (s) { s.at = posOf(v); push(true); } }, onChange: () => push(false) });
   atField.root.classList.add('mir-ramp-at'); selRow.appendChild(atField.root);
-  const rm = chipStrip({ id: 'ramp', title: 'ramp', flow: 'row', chips: [{ name: 'remove', kind: 'close', glyph: 'close', label: 'Remove this stop', hint: 'Remove the selected stop (tap twice)',
+  const rm = chipStrip({ id: 'ramp', title: 'Ramp', flow: 'row', chips: [{ name: 'remove', kind: 'close', glyph: 'close', label: 'Remove this stop', hint: 'Remove the selected stop (tap twice)',
     confirm: { text: 'sure?', ms: ARM_MS, label: 'Remove this stop — tap again to confirm' } }], onChip: () => removeSel() });
   rm.el.classList.add('mir-ramp-remove'); selRow.appendChild(rm.el);
 
@@ -156,7 +156,7 @@ export function createRampView(parent, o = {}) {
   verbs.appendChild(trig({ label: 'ADD', title: 'Add a stop opposite the selected one', onFire: () => { const s = stopById(sel); addAt(s ? (s.at + 0.5) % 1 : 0.5, true); } }).root);
   verbs.appendChild(trig({ label: 'REVERSE', title: 'Run the ramp backwards', onFire: () => { S = S.map((s, i) => ({ ...s, at: reverseStops([s], cyc)[0].at })); push(false); } }).root);
   if (cyc) {
-    const rot = knob({ label: 'ROTATE', min: 0, max: 2 * Math.PI, value: 0, wrap: true, fmt: () => 'turn', title: 'Carry every stop round the ramp (a jog wheel: it holds no value)',
+    const rot = knob({ label: 'ROTATE', min: 0, max: 2 * Math.PI, value: 0, wrap: true, fmt: () => 'turn', title: 'Carry every stop round the ramp (a jog wheel, no value)',
       onDelta: (d) => { const f = d / (2 * Math.PI); S = S.map((s) => ({ ...s, at: posOf((((s.at + f) % 1) + 1) % 1) })); push(true); } });
     verbs.appendChild(rot.root);
   }
@@ -299,7 +299,7 @@ export function createRampPanel(o = {}) {
   if (o.project !== false) { const reg = o.project && typeof o.project.register === 'function' ? o.project.register : registerProjectPart; offPart = reg(o.projectName || id, api.part()); }
   if (o.history) offHist = o.history.register(o.historyName || id, { read: snap, write: apply });
   const build = (body) => { view = createRampView(body, o); };
-  if (o.rack) o.rack.register({ id, title: o.title || 'RAMP', side: o.side || 'right', open: o.open, glyph: o.glyph || 'grade', hint: o.hint || 'the colour ramp: stops on a strip', action: o.action, eager: o.eager, build });
+  if (o.rack) o.rack.register({ id, title: o.title || 'RAMP', side: o.side || 'right', open: o.open, glyph: o.glyph || 'grade', hint: o.hint || 'The colour ramp: stops on a strip', action: o.action, eager: o.eager, build });
   else if (o.parent) build(o.parent);
   return api;
 }

@@ -97,7 +97,7 @@ export function curveEditor(o = {}) {
   svg.setAttribute('viewBox', '0 0 ' + W + ' ' + W); svg.setAttribute('role', 'application'); svg.tabIndex = 0;
   svg.setAttribute('aria-roledescription', 'curve');
   ariaLabel(svg, o.label || 'CURVE');
-  hint(svg, o.hint || 'CURVE — press to add a point and drag it; drag a point out or double-tap it to remove it; drag a ring to bend; + and − pick a point, the arrows move it');
+  hint(svg, o.hint || 'CURVE — press to add a point; drag one out to remove it');
   const hist = svgEl('path', 'cv-hist', svg);
   const grid = svgEl('path', 'cv-grid', svg);
   grid.setAttribute('d', [1, 2, 3].map((k) => 'M' + (k * W / 4) + ' 0V' + W + 'M0 ' + (k * W / 4) + 'H' + W).join(''));
@@ -317,7 +317,7 @@ export function createCurvesView(parent, o = {}) {
     set: (v) => { const r = extra().find((x) => x.id === v && x.points); if (r) M.set(M.channel(), r.points); else M.preset(M.channel(), v); } });
   const setPresets = () => preset.widget.setItems([...extra(), ...BUILT].map((r) => ({ id: r.id, label: r.label, coming: !!r.coming })), shownOf(M.points()));
   const writeAmount = (v) => { if (!handWrite(mod, M.modId, v)) M.setAmount(v); };
-  const amount = control({ id: M.modId, label: 'AMOUNT', hint: 'AMOUNT — how much of the curves apply: the diagonal at 0, the whole curve at 100 %', min: 0, max: 1, home: 1,
+  const amount = control({ id: M.modId, label: 'AMOUNT', hint: 'AMOUNT — how much of the curves apply, 0 to 100%', min: 0, max: 1, home: 1,
     fmt: (v) => Math.round(v * 100) + ' %', value: M.amount(), get: () => M.amount(), set: writeAmount });
   amount.widget.setDefault(1);
   foot.append(amount.root, preset.root);
@@ -365,7 +365,7 @@ export function createCurvesPanel(o = {}) {
   };
   const spec = {
     id, title: o.title || 'CURVES', side: o.side || 'right', open: o.open, glyph: o.glyph || 'curves', action: o.action, eager: o.eager,
-    hint: o.hint || 'the curves: a transfer curve per channel, as Photoshop draws it',
+    hint: o.hint || 'The curves: a transfer curve per channel',
     build(body) { view = createCurvesView(body, { ...o, id, model }); handle.root = view.root; },
     onWake() { if (view) view.sync(); }, onOpen() { if (view) view.sync(); },
     ...(o.spec || {}),

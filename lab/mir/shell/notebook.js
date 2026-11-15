@@ -77,7 +77,7 @@
  *     Every copy is a copy: the two never share an object, so editing one never changes the other.
  *   api adds: pages, shelf, selected, select(id|'yours'), yours → { title, md }, openNote({ title, md }), flush() */
 import { el, label, ariaLabel, hint } from '../kit.js';
-import { glyphSvg } from '../glyph.js';
+import { glyphSvg, setGlyph } from '../glyph.js';
 import { t as tx, tn, phrase, onLanguage } from '../core/i18n.js';
 /* the maths syntax the hint shows: typed exactly so in every language, so it is a var and never translated */
 const SYNTAX = Object.freeze({ inline: '$inline$', display: '$$display$$' });
@@ -147,19 +147,19 @@ export function createNotebook(options = {}) {
 
   /* ── the DOM, λWAVES' ── */
   const nb = el('section', 'nb', o.host || document.body); nb.id = 'notebook'; nb.hidden = true;
-  ariaLabel(nb, 'notebook'); nb.dataset.face = 'notes';
+  ariaLabel(nb, 'NOTEBOOK'); nb.dataset.face = 'notes';
   const head = el('header', 'nb-head', nb);
   const titles = el('div', 'nb-titles', head);
   const titleIn = el('input', 'nb-title', titles); titleIn.value = tx(o.title); titleIn.spellcheck = false;
-  ariaLabel(titleIn, 'notebook title'); titleIn.title = 'the notebook’s title — type to rename';
+  ariaLabel(titleIn, 'Notebook title'); titleIn.title = 'The notebook’s title — type to rename';
   const subIn = el('input', 'nb-subtitle', titles); subIn.placeholder = tx('subtitle'); subIn.spellcheck = false; subIn.hidden = true;
-  ariaLabel(subIn, 'notebook subtitle'); subIn.title = 'the notebook’s subtitle — type to rename';
+  ariaLabel(subIn, 'Notebook subtitle'); subIn.title = 'The notebook’s subtitle — type to rename';
   const tools = el('span', 'nb-tools', head);
   const tool = (cls, glyph, aria, title, vars) => { const b = el('button', cls, tools, glyph); b.type = 'button'; ariaLabel(b, aria, vars); hint(b, title, vars); return b; };
   const modeBtn = tool('nb-mode', '◐', phrase('edit or preview the notes'), phrase('Edit or preview the notebook'));
   const extra = (o.faces || []).map((f) => ({ ...f, btn: tool('nb-' + f.id + '-btn', f.glyph, f.label || f.id, f.title || f.id) }));
   const aboutBtn = o.about === false ? null : tool('nb-about', 'i', phrase('about {name}'), phrase('about {name} (and back to the notes)'), { name: o.name });
-  tool('nb-close', '×', phrase('close the notebook'), o.keyLabel ? phrase('close ({key})') : phrase('close'), { key: o.keyLabel });   // tr[close ({key})]: {key} is the notebook’s shortcut key, e.g. J
+  setGlyph(tool('nb-close', '', phrase('close the notebook'), o.keyLabel ? phrase('close ({key})') : phrase('close'), { key: o.keyLabel }), 'close', { size: 14 });   // tr[close ({key})]: {key} is the notebook’s shortcut key, e.g. J
 
   const notes = el('div', 'nb-face nb-notes', nb);
   const ta = el('textarea', 'nb-text', notes); ta.spellcheck = false;
@@ -168,7 +168,7 @@ export function createNotebook(options = {}) {
   ta.placeholder = yoursHint();
   const view = el('div', 'nb-view md', notes);
   const foot = el('div', 'nb-foot', notes); const countEl = el('span', 'nb-count', foot);
-  const copyBtn = label(el('button', 'nb-copy', foot), 'COPY'); copyBtn.type = 'button'; copyBtn.title = 'copy the notes as text';
+  const copyBtn = label(el('button', 'nb-copy', foot), 'COPY'); copyBtn.type = 'button'; copyBtn.title = 'Copy the notes as text';
   const faces = { notes };
   for (const f of extra) if (!f.run) { faces[f.id] = el('div', 'nb-face nb-' + f.id + 'face', nb); faces[f.id].hidden = true; }
   if (o.about !== false) { faces.about = el('div', 'nb-face nb-aboutface', nb); faces.about.hidden = true; aboutFace(faces.about, { name: o.name, ...(o.about || {}) }); }
@@ -330,21 +330,21 @@ export function createNotebook(options = {}) {
     const PH = { yours: yoursHint, page: () => tx('this page — markdown, {inline} and {display} maths — saved in the project', SYNTAX) };   // tr: {inline} and {display} are the maths syntax, shown exactly as typed
     notes.id = 'nb-tabpanel'; notes.setAttribute('role', 'tabpanel');
     const strip = el('div', 'nb-tabs'); notes.insertBefore(strip, notes.firstChild);
-    const list = el('div', 'nb-tablist', strip); list.setAttribute('role', 'tablist'); ariaLabel(list, 'pages');
-    const addBtn = el('button', 'nb-tab-add', strip, '+'); addBtn.type = 'button'; ariaLabel(addBtn, 'add a page'); addBtn.title = 'add a page to the project';
+    const list = el('div', 'nb-tablist', strip); list.setAttribute('role', 'tablist'); ariaLabel(list, 'Pages');
+    const addBtn = el('button', 'nb-tab-add', strip, '+'); addBtn.type = 'button'; ariaLabel(addBtn, 'Add a page'); addBtn.title = 'Add a page to the project';
 
     const EYE_OPEN = glyphSvg('eye', 'gly gly-eye', 14);
     const EYE_SHUT = glyphSvg('eyeShut', 'gly gly-eyeShut', 14);
     const mkTab = (key) => {
       const w = el('div', 'nb-tab'); w.setAttribute('role', 'presentation'); w.dataset.tab = key;
       const b = el('button', 'nb-tab-b', w); b.type = 'button'; b.setAttribute('role', 'tab'); b.tabIndex = -1; b.setAttribute('aria-controls', notes.id);
-      const mark = el('span', 'nb-tab-mark', b, '0'); mark.hidden = true; mark.title = 'page 0 — the greeting, shown when the project opens';
+      const mark = el('span', 'nb-tab-mark', b, '0'); mark.hidden = true; mark.title = 'Page 0 — the greeting, shown when the project opens';
       const name = el('span', 'nb-tab-name', b);
       const t = { key, w, b, mark, name };
       b.addEventListener('click', (e) => { select(key); b.focus(); if (e.detail === 2) rename(t); });
       return t;
     };
-    const mine = mkTab('yours'); mine.w.classList.add('nb-tab-mine'); mine.b.title = 'yours — the note open from your shelf, kept in this browser';
+    const mine = mkTab('yours'); mine.w.classList.add('nb-tab-mine'); mine.b.title = 'Yours — the note open from your shelf, kept in this browser';
     list.appendChild(mine.w);
     const div = el('span', 'nb-tab-div', list); div.setAttribute('role', 'none'); div.setAttribute('aria-hidden', 'true');
     const tabFor = new Map();
@@ -352,7 +352,7 @@ export function createNotebook(options = {}) {
       const t = mkTab(id);
       t.eye = el('button', 'nb-tab-eye', t.w); t.eye.type = 'button'; t.eye.tabIndex = -1;
       t.eye.addEventListener('click', () => { const p = P.get(id); if (p) P.update(id, { shared: !p.shared }); });
-      t.x = el('button', 'nb-tab-x', t.w, '×'); t.x.type = 'button'; t.x.tabIndex = -1; ariaLabel(t.x, 'delete this page'); t.x.title = 'delete this page';
+      t.x = setGlyph(el('button', 'nb-tab-x', t.w), 'close', { size: 12 }); t.x.type = 'button'; t.x.tabIndex = -1; ariaLabel(t.x, 'Delete this page'); t.x.title = 'Delete this page';
       t.x.addEventListener('click', () => ask(t));
       t.drag = drag(t.b, { onStart: () => carryStart(t), onMove: (s) => carryMove(t, s), onEnd: (s) => carryEnd(t, s), onCancel: () => carryEnd(t, null) });
       return t;
@@ -373,8 +373,8 @@ export function createNotebook(options = {}) {
         t.mark.hidden = i !== 0; setAttr(t.w, 'data-greeting', i === 0 ? '' : null);
         if (setAttr(t.eye, 'aria-pressed', String(r.shared))) {
           t.eye.innerHTML = r.shared ? EYE_OPEN : EYE_SHUT;
-          if (r.shared) ariaLabel(t.eye, 'shared with a visiting model — hide it'); else ariaLabel(t.eye, 'hidden from a visiting model — share it');
-          t.eye.title = r.shared ? 'shared: a visiting model may read this page' : 'hidden: a visiting model cannot read this page';
+          if (r.shared) ariaLabel(t.eye, 'Shared with a visiting model — hide it'); else ariaLabel(t.eye, 'Hidden from a visiting model — share it');
+          t.eye.title = r.shared ? 'Shared: a visiting model may read this page' : 'Hidden: a visiting model cannot read this page';
         }
       });
       setText(mine.name, (T.sel === 'yours' ? titleIn.value : yours.title) || tx('NOTEBOOK'));
@@ -430,7 +430,7 @@ export function createNotebook(options = {}) {
       if (t.w.dataset.renaming !== undefined) return;
       const cur = t.key === 'yours' ? yoursPage().title : (t.key === T.sel ? titleIn.value : P.get(t.key).title);
       t.w.dataset.renaming = '';
-      const inp = el('input', 'nb-tab-in'); inp.value = cur; inp.spellcheck = false; ariaLabel(inp, 'rename this tab');
+      const inp = el('input', 'nb-tab-in'); inp.value = cur; inp.spellcheck = false; ariaLabel(inp, 'Rename this tab');
       t.w.insertBefore(inp, t.b.nextSibling); inView(t.w); inp.focus(); inp.select();
       let done = false;
       const end = (keep) => {
@@ -448,7 +448,7 @@ export function createNotebook(options = {}) {
     }
     /* delete, after an inline "delete? yes / no" on the tab itself */
     function ask(t) {
-      const no = askInline(t.w, { cls: 'nb-tab', label: 'delete?', then: () => removePage(t.key), back: () => t.b.focus() });
+      const no = askInline(t.w, { cls: 'nb-tab', label: 'DELETE?', then: () => removePage(t.key), back: () => t.b.focus() });
       if (no) { inView(t.w); no.focus(); }
     }
     function removePage(id) {
@@ -517,14 +517,14 @@ export function createNotebook(options = {}) {
       greetBtn.hidden = !onGreet; setAttr(greetBtn, 'aria-pressed', String(P.showOnOpen));
       const toShelf = T.sel !== 'yours';
       if (toShelf && copyTo.dataset.t !== 'COPY TO SHELF') label(copyTo, 'COPY TO SHELF'); else if (!toShelf && copyTo.dataset.t !== 'COPY TO PROJECT') label(copyTo, 'COPY TO PROJECT');
-      copyTo.title = toShelf ? 'copy this page onto your shelf (a copy: the two never change each other)' : 'copy your note into the project as a new page (a copy)';
+      copyTo.title = toShelf ? 'Copy this page onto your shelf (the two stay apart)' : 'Copy your note into the project as a new page (a copy)';
       copyTo.hidden = toShelf && !shelf;
     }
     const say = (s) => setText(countEl, s);
     greetBtn.addEventListener('click', () => { P.showOnOpen = !P.showOnOpen; });
     mdBtn.addEventListener('click', () => {
       flushPage(); const f = pageFile(T.sel === 'yours' ? yoursPage() : P.copyOut(T.sel));
-      saveBlob(new Blob([f.text], { type: 'text/markdown' }), f.name); say(tx('saved {name}', { name: f.name }));
+      saveBlob(new Blob([f.text], { type: 'text/markdown' }), f.name); say(tx('Saved {name}', { name: f.name }));
     });
     const MD = /\.(md|markdown|txt)$/i;
     async function addFiles(files) {
@@ -539,10 +539,10 @@ export function createNotebook(options = {}) {
       f.addEventListener('change', () => { if (f.files) addFiles(f.files); }); f.click();
     });
     copyTo.addEventListener('click', () => {
-      if (T.sel === 'yours') { const y = yoursPage(); addPage({ title: y.title, md: y.md }); say(tx('copied into the project')); return; }
+      if (T.sel === 'yours') { const y = yoursPage(); addPage({ title: y.title, md: y.md }); say(tx('Page copied into the project')); return; }
       flushPage(); const page = P.copyOut(T.sel); if (!shelf || !page) return;
       const path = shelf.save(shelf.freePath(page.title || tx('Untitled')), page);
-      say(path ? tx('copied to the shelf as {path}', { path }) : shelf.error);
+      say(path ? tx('Page copied to the shelf as {path}', { path }) : shelf.error);
     });
     /* a .md dropped anywhere on the notebook becomes a page */
     const isFiles = (e) => !!e.dataTransfer && [...e.dataTransfer.types].includes('Files');

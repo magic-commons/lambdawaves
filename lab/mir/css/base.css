@@ -438,37 +438,37 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
   padding: 4px 8px; border-radius: var(--r-sm); border: var(--surface-edge-width, var(--glass-border)) solid var(--surface-edge, var(--glass-border-color));
   background: var(--surface-fill, var(--tip-fill)); color: var(--fg); box-shadow: var(--surface-shadow-menu, var(--glass-shadow));   /* height 4; TINTED, so no blur (L09, L69) */
   font: var(--fs-tiny)/1.4 var(--font-ui); letter-spacing: var(--tr-tight); white-space: pre-line; }
-@keyframes lw-busy-breathe { from { opacity: .42; } to { opacity: 1; } }
-@keyframes lw-warn-in { from { opacity: 0; } to { opacity: 1; } }   /* the kit's one fade-in: the opener, its cards and the timeline's popups play it too */
-@keyframes lw-tr-out-down { from { transform: translate(-50%, 0);     opacity: 1; }
+@keyframes mir-breathe { from { opacity: .42; } to { opacity: 1; } }
+@keyframes mir-warn-in { from { opacity: 0; } to { opacity: 1; } }   /* the kit's one fade-in: the opener, its cards and the timeline's popups play it too */
+@keyframes mir-tr-out-down { from { transform: translate(-50%, 0);     opacity: 1; }
                             to   { transform: translate(-50%, 96px);  opacity: 0; } }
-@keyframes lw-tr-out-up   { from { transform: translate(-50%, 0);     opacity: 1; }
+@keyframes mir-tr-out-up   { from { transform: translate(-50%, 0);     opacity: 1; }
                             to   { transform: translate(-50%, -96px); opacity: 0; } }
-@keyframes lw-tr-in-up    { from { transform: translate(-50%, 96px);  opacity: 0; }
+@keyframes mir-tr-in-up    { from { transform: translate(-50%, 96px);  opacity: 0; }
                             to   { transform: translate(-50%, 0);     opacity: 1; } }
-@keyframes lw-tr-in-down  { from { transform: translate(-50%, -96px); opacity: 0; }
+@keyframes mir-tr-in-down  { from { transform: translate(-50%, -96px); opacity: 0; }
                             to   { transform: translate(-50%, 0);     opacity: 1; } }
 /* FEWER AND GENTLER, NEVER ZERO: the seat still changes and the pill still fades across it; what
    goes is the 96 px of travel, which is the part that is motion rather than information. */
 @media (prefers-reduced-motion: reduce) {
-  @keyframes lw-tr-out-down { from { opacity: 1; } to { opacity: 0; } }
-  @keyframes lw-tr-out-up   { from { opacity: 1; } to { opacity: 0; } }
-  @keyframes lw-tr-in-up    { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes lw-tr-in-down  { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes mir-tr-out-down { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes mir-tr-out-up   { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes mir-tr-in-up    { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes mir-tr-in-down  { from { opacity: 0; } to { opacity: 1; } }
 }
 
 /* ═══ WAVE 69 · THE WINDOW ENTRANCE ═══════════════════════════════════════════════════════════════
  * The lab's ONE entrance, fired by `layout.reopen()` and by nothing else (rack.js says why).  220 ms,
  * inside the 300 ms ceiling, MOTION-LAW's entrance easing verbatim, opacity and a 7-px slide — chrome,
  * one-shot, in no accent colour, so nothing here can be mistaken for the field. */
-@keyframes lw-dev-enter { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
-@keyframes lw-dev-enter-quiet { from { opacity: 0; } to { opacity: 1; } }
-.dev.dev-enter { animation: lw-dev-enter var(--dev-enter-time) var(--dev-enter-ease); }
+@keyframes mir-dev-enter { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
+@keyframes mir-dev-enter-quiet { from { opacity: 0; } to { opacity: 1; } }
+.dev.dev-enter { animation: mir-dev-enter var(--dev-enter-time) var(--dev-enter-ease); }
 
 @media (prefers-reduced-motion: reduce) {
   :is(.sw, .seg-b, .trig, .badge, .dev-util > button, .native-info-button, .mir-bank-page, .mir-bank-plus):active { scale: none; }   /* the press keeps its wash */
   .k .k-val, .fd .fd-val { transition-property: opacity; }
-  .dev.dev-enter { animation-name: lw-dev-enter-quiet; }         /* the slide goes, the fade stays */
+  .dev.dev-enter { animation-name: mir-dev-enter-quiet; }         /* the slide goes, the fade stays */
   .dev-fold > svg { transition: none; }                           /* 1.4.0: the fold chevron (λWAVES lab.css carried this; the kit did not) */
 }
 .cv-grid { fill: none; stroke: var(--glass-hairline); stroke-width: 1; }
@@ -542,8 +542,8 @@ select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md
 /* Final II: readouts reserve their text lanes as values change. */
 .ro { min-width:0; overflow:hidden; }
 .ro-val { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-height:1.4em; }
-.ro.wide .ro-val { height:2.6em; line-height:1.3; overflow:auto; overflow-wrap:anywhere; scrollbar-width:thin; white-space:normal; }
-.ro-sub { height:2.8em; max-height:2.8em; line-height:1.4; overflow:auto; overflow-wrap:anywhere; scrollbar-width:thin; opacity:var(--ro-sub-fade); }
+.ro.wide .ro-val { height:2.6em; line-height:1.3; overflow:hidden; overflow-wrap:anywhere; white-space:normal; }
+.ro-sub { height:2.8em; max-height:2.8em; line-height:1.4; overflow:hidden; overflow-wrap:anywhere; opacity:var(--ro-sub-fade); }
 .k-val { white-space:nowrap; font-variant-numeric:tabular-nums; }
 
 .corner-axis-hit { position:fixed; width:88px; height:88px; background:transparent; border:0; z-index:5; cursor:ew-resize; }

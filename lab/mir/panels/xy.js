@@ -342,16 +342,16 @@ export function createXYPanel(o = {}) {
       g.appendChild(glyphEl('move', 'xy-grip-g', 18));
       label(el('span', 'trig-l', g), ax.toUpperCase());
       const n = el('span', 'xy-grip-n', g);
-      hint(g, 'Drag {axis} onto any knob to route it there; tap to arm, then tap a knob; double-tap resets it', { axis: ax.toUpperCase() });
-      ariaLabel(g, 'route {axis} — drag onto a control, or tap to arm', { axis: ax.toUpperCase() });
+      hint(g, 'Drag {axis} onto a knob; tap to arm; double-tap resets', { axis: ax.toUpperCase() });
+      ariaLabel(g, 'Route {axis} — drag onto a control, or tap to arm', { axis: ax.toUpperCase() });
       g.addEventListener('pointerdown', () => { ensureMacro(ax); }, { capture: true });   // the macro exists before the window's grip reads it
       if (api) api.wireGrip(g, MAC[ax]); else g.disabled = true;
       g.addEventListener('pointerup', () => frame.coalesce(key + ':route', () => { dropSelf(); syncRoute(); }));
       V.grips[ax] = { root: g, n };
     }
-    if (!api) label(el('p', 'xy-quiet', box), 'The modulation window is not mounted here: X and Y cannot be routed.');
+    if (!api) label(el('p', 'xy-quiet', box), 'Could not route X and Y: no modulation window here');
     for (const ax of ['x', 'y']) if (M && M.macroOf(MAC[ax])) ensureMacro(ax);     // macros a saved rack kept are this panel's again
-    AX.route.forEach((tid, i) => addTarget({ id: tid, label: title + ' ' + 'XY'[i], min: 0, max: 1, step: 0, map: 'linear', def: 0.5, hint: 'the XY controller\'s ' + 'XY'[i],
+    AX.route.forEach((tid, i) => addTarget({ id: tid, label: title + ' ' + 'XY'[i], min: 0, max: 1, step: 0, map: 'linear', def: 0.5, hint: 'The XY controller\'s ' + 'XY'[i],
       get: () => R[2 + i], set: (v) => { R[2 + i] = v; driveMacro(i ? 'y' : 'x', v); }, widget: i ? pad.y : pad.x }));
     syncRoute();
   }
@@ -377,7 +377,7 @@ export function createXYPanel(o = {}) {
     title_(box, 'SNAPSHOTS');
     V.rows = el('div', 'xy-rows', box);
     const sr = el('div', 'xy-row-store', box);
-    V.storeBtn = trig({ label: 'STORE', title: 'Store the window\'s dials as they stand (their bases) into the next empty slot', cls: 'xy-store', onFire: () => store() });
+    V.storeBtn = trig({ label: 'STORE', title: 'Store the dials as they stand in the next empty slot', cls: 'xy-store', onFire: () => store() });
     sr.appendChild(V.storeBtn.root);
     title_(box, 'CORNERS');
     const grid = el('div', 'xy-corners', box);
@@ -399,11 +399,11 @@ export function createXYPanel(o = {}) {
       onInput: (x, y) => morphHand(x, y), onChange: () => { const E = engine(); if (E) { E.bank.x = MX[0]; E.bank.y = MX[1]; } changed(); } },
     () => { pad.set(0.5, 0.5); morphHand(0.5, 0.5); const E = engine(); if (E) { E.bank.x = 0.5; E.bank.y = 0.5; } });
     pad.x.setDefault(0.5); pad.y.setDefault(0.5);
-    V.engage = sw({ label: 'ENGAGE', value: false, cls: 'xy-engage', title: 'The pad drives the dials; off, the pad and its routes do nothing and the dials are the hand\'s', onChange: (on) => engage(on) });
+    V.engage = sw({ label: 'ENGAGE', value: false, cls: 'xy-engage', title: 'The pad drives the dials; off, the dials are the hand’s', onChange: (on) => engage(on) });
     pad.root.querySelector('.mir-xy-side').insertBefore(V.engage.root, pad.root.querySelector('.xy-spring'));
     V.morphPad = pad;
     V.hint = el('p', 'xy-quiet xy-hint', box);
-    AX.morph.forEach((tid, i) => addTarget({ id: tid, label: 'MORPH ' + 'XY'[i], min: 0, max: 1, step: 0, map: 'linear', def: 0.5, hint: 'the morph pad\'s ' + 'XY'[i] + ': A and ' + (i ? 'B at 0, C and D at 1' : 'C at 0, B and D at 1'),
+    AX.morph.forEach((tid, i) => addTarget({ id: tid, label: 'MORPH ' + 'XY'[i], min: 0, max: 1, step: 0, map: 'linear', def: 0.5, hint: 'The morph pad\'s ' + 'XY'[i] + ': A and ' + (i ? 'B at 0, C and D at 1' : 'C at 0, B and D at 1'),
       get: () => MX[2 + i], set: (v) => { MX[2 + i] = v; kick(); }, widget: i ? pad.y : pad.x }));
     engine(); paintMorph();
   }
@@ -416,24 +416,24 @@ export function createXYPanel(o = {}) {
       if (!s) return;
       const row = el('div', 'xy-row', V.rows); row.dataset.slot = String(i);
       const num = el('button', 'xy-num', row); num.type = 'button'; setText(num, String(i + 1));
-      hint(num, morphing.armed >= 0 ? 'Put {name} on corner {c}' : 'Tap a corner first, then this number, to put this snapshot there', { name: s.name, c: CORNERS[Math.max(0, morphing.armed)] });
+      hint(num, morphing.armed >= 0 ? 'Put {name} on corner {c}' : 'Tap a corner, then this number, to put this snapshot there', { name: s.name, c: CORNERS[Math.max(0, morphing.armed)] });
       num.addEventListener('click', () => { if (morphing.armed >= 0) cornerAssign(morphing.armed, i); else { morphing.hint = t('Tap a corner (A · B · C · D) first, then a snapshot\'s number.'); paintHint(); } });
       const name = el('input', 'xy-name', row); name.type = 'text'; name.value = s.name; name.maxLength = NAME_MAX; name.spellcheck = false;
-      ariaLabel(name, 'snapshot {n}\'s name', { n: i + 1 });
+      ariaLabel(name, 'Snapshot {n}\'s name', { n: i + 1 });
       name.addEventListener('change', () => rename(i, name.value)); name.addEventListener('keydown', (e) => { if (e.key === 'Enter') name.blur(); });
       const on = E.bank.corners.map((k, c) => (k === i ? CORNERS[c] : '')).join('');
       if (on) { const tag = el('span', 'xy-on', row); setText(tag, on); }
       const acts = el('div', 'xy-acts', row);
       acts.append(trig({ label: 'RECALL', cls: 'xy-recall', title: 'Set the dials to this snapshot', onFire: () => recall(i) }).root,
         trig({ label: 'STORE', cls: 'xy-over', title: 'Store the dials as they stand over this snapshot', onFire: () => store(i) }).root,
-        trig({ label: '×', cls: 'xy-del', title: 'Delete this snapshot', onFire: () => remove(i) }).root);
+        trig({ glyph: 'close', word: false, label: 'Delete this snapshot', cls: 'xy-del', onFire: () => remove(i) }).root);
     });
-    if (!V.rows.children.length) label(el('p', 'xy-quiet', V.rows), 'No snapshots yet: STORE keeps the dials as they stand.');
+    if (!V.rows.children.length) label(el('p', 'xy-quiet', V.rows), 'No snapshots yet — STORE keeps the dials as they stand');
     for (let c = 0; c < 4; c++) {
       const b = V.corners[c], k = E ? E.bank.corners[c] : null;
       b.setLabel(CORNERS[c] + ' · ' + (k === null || !E.bank.slots[k] ? '—' : E.bank.slots[k].name));
       b.on = morphing.armed === c;
-      hint(b.root, 'Corner {c}: tap, then a snapshot\'s number, to put it here; hold or Shift-click to store the dials straight onto it', { c: CORNERS[c] });
+      hint(b.root, 'Corner {c}: tap, then a snapshot’s number; hold to store', { c: CORNERS[c] });
     }
     if (V.engage && E && V.engage.get() !== E.bank.engaged) V.engage.set(E.bank.engaged);
     if (V.morphPad) V.morphPad.pad.classList.toggle('engaged', !!(E && E.bank.engaged));
@@ -459,7 +459,7 @@ export function createXYPanel(o = {}) {
       V.modeSeg = seg({ aria: 'what the pad does', options: ms.map((m) => ({ id: m, label: WORD[m], title: TIP[m] })), value: S.mode, onChange: (m) => setMode(m) });
       head.appendChild(V.modeSeg.root);
     }
-    if (!ms.length) label(el('p', 'xy-quiet', root), 'Nothing to drive: give the panel pairs, a modulation install, or a window to morph.');
+    if (!ms.length) label(el('p', 'xy-quiet', root), 'Nothing to drive — give the panel pairs, routes or a window');
     for (const m of ms) {
       const box = el('section', 'xy-body', root); box.dataset.mode = m; box.hidden = m !== S.mode; V.bodies[m] = box;
       (m === 'pair' ? buildPair : m === 'route' ? buildRoute : buildMorph)(box);
@@ -539,7 +539,7 @@ export function createXYPanel(o = {}) {
   };
   const spec = {
     id, title, side: o.side || 'right', open: o.open, glyph: o.glyph || 'xy', action: o.action,
-    hint: o.hint || 'the XY controller: a pair of the app\'s, two routable sources, or a morph of four snapshots',
+    hint: o.hint || 'The XY controller: two sources or four snapshots',
     build(body, rackApi) { build(body, rackApi); },
     onOpen() { sync(); }, onWake() { sync(); },
     onPresent(active) { presented = !!active; if (presented) sync(); },

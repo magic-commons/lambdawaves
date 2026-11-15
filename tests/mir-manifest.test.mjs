@@ -126,6 +126,8 @@ const ACCEPTED = {
   '1.6.0-alpha.82': '2b33eaa78bb324716290343b648e6d3da7d237d3d6773b7bb11a31b7cdaa9137',
   /* 044 K8 · MIR 1.6.0-alpha.90 THE KIT'S LEFTOVERS (kit main @ 0052312: alpha.83 THE FINDER'S FIELD WEARS THE RING · 84 THE BAR STAYS WHILE THE KEYS WALK IT · 85 the hold's menu key is the browser's · 86 FOCUSABLE, tabStops, trapTab · 87 PATTERN STOPS ABOVE THE BAR · 88 the seat menu is the kit's · 89 names nothing reads go · 90 ten blocks written once) */
   '1.6.0-alpha.90': 'ad292abf99df4eb238ebab73f79618ea3f1808e5b2671dfa4fb706b21f1887de',
+  /* 044 K9 · MIR 1.6.0-alpha.96 THE KIT'S WORDS AND GLYPHS (kit main @ 14d54dd: alpha.91 MIR'S WORDS — CONTROL SURFACE, ABOUT MIR, FLOAT / DOCK · 92 the hints' one case, ≤ 60 · 93 the notices' shapes, CAPS labels, one empty wording · 94 the close glyph and its kin · 95 whole type steps in MODULATION, no scroller in a readout · 96 the keyframes are mir-) */
+  '1.6.0-alpha.96': 'a91a305ca8ad457de24841e7c1128a1394b5ace73a68960d3e683dc6e829688e',
   /* 021 R1 · the first door on the clone road: MIR 1.5.6-alpha.1 (kit commit 7f052d5bd1e2 — a failed resume never arms, core/session.js) */
   '1.5.6-alpha.1': '753de766e65104997d49e8f5f2e8b472f2e6943be81a01f592116b94e4799c82',
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,

@@ -5,6 +5,7 @@
  * on the node as `data-help-en`, `data-help` is what the tip shows, and a language change rewrites the second from the
  * first.  Tests and selectors that want a control by its hint read `data-help-en`, which never changes. */
 import { el, ariaLabel } from './kit.js';
+import { setGlyph } from './glyph.js';
 import { t, onLanguage } from './core/i18n.js';
 import { cssZoom } from './core/zoom.js';
 const vars = (n) => { try { return n.dataset.tHvars ? JSON.parse(n.dataset.tHvars) : undefined; } catch (_) { return undefined; } };
@@ -22,7 +23,7 @@ export function setHelpClasses(o = {}) { if (o.hintsOff) hintsOffClass = o.hints
 // `label` is the button's English name, or [template, vars] for a composed one (both translate, and re-translate).
 export function infoPanel(content, label = 'Information') {
   const anchor = el('span', 'native-info');
-  const b = el('button', 'native-info-button', anchor, 'ⓘ'); b.type = 'button';
+  const b = setGlyph(el('button', 'native-info-button', anchor), 'info', { size: 20 }); b.type = 'button';
   if (Array.isArray(label)) ariaLabel(b, label[0], label[1]); else ariaLabel(b, label); b.setAttribute('aria-expanded', 'false');
   content.before(anchor); anchor.appendChild(content); content.classList.add('native-info-content');
   content.setAttribute('popover','manual');

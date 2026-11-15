@@ -77,7 +77,7 @@ export const purgeRow = ({ name = 'the app' } = {}) => ['Purge Cache/RAM', () =>
 /** copyDumpRow(dump) — ABOUT › COPY DUMP; dump() → text */
 export const copyDumpRow = (dump, hint = 'the debug dump, to the clipboard') => ['COPY DUMP', async () => {
   const text = String((typeof dump === 'function' ? dump() : dump) || '');
-  if (await copyText(text)) notice('Debug info copied to clipboard.', { kind: 'ok' });
+  if (await copyText(text)) notice('Debug info copied', { kind: 'ok' });
   else { notice('Copy failed — the dump is in the browser console.', { kind: 'warn' }); try { console.log(text); } catch (_) { /* no console */ } }
 }, null, hint, { icon: 'duplicate' }];
 
@@ -251,7 +251,7 @@ export function controlMenu(target, { x, y, rows = null, appRows = null, open = 
   const app = partAt('app', root) || {};
   for (const given of [typeof rows === 'function' ? rows(id, root) : rows, app.rows]) for (const slot of CONTROL_MENU) { if (given && given[slot] && !(k && S[slot] && slot !== 'routes' && slot !== 'clip')) put(slot, given[slot]); }
   put('fav', appRows && appRows(id, root)); put('fav', app.entries);
-  const m = contextMenu({ x, y, entries: CONTROL_MENU.flatMap((slot) => S[slot] || []), onClose, label: k ? 'Knob' : 'Control' });
+  const m = contextMenu({ x, y, entries: CONTROL_MENU.flatMap((slot) => S[slot] || []), onClose, label: k ? 'Knob menu' : 'Control menu' });
   const row = open && m && m.pane.querySelector(`[data-id="${open}"]`); if (row) row.click();
   return m;
 }

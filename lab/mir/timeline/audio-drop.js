@@ -31,7 +31,7 @@ import { createAudioPlayback } from './audio-playback.js';
 
 /* the popup's three answers (`label:` and `hint:` so tools/i18n-extract.mjs reaches them) */
 const CHOICES = [
-  { label: 'KEEP AUDIO', keep: true, hint: 'The envelope drives the target and the file plays with the transport' },
+  { label: 'KEEP AUDIO', keep: true, hint: 'The envelope drives the target; the file plays along' },
   { label: 'SIGNAL ONLY', keep: false, hint: 'The envelope drives the target; the file stays silent' },
   { label: 'CANCEL', keep: null, hint: '' },
 ];
@@ -46,14 +46,14 @@ export function installAudioDrop(editor, { mod, controller, say = () => {}, busy
   const registry = mod?.host?.registry || mod?.registry;
   const targets = () => (registry?.list?.() || []).map((id) => [id, registry.describeOne(id)?.label || id]);
   const sayWhy = (b) => say(t(b.why, b.vars));
-  const decodeFailed = (file, e) => (e instanceof RangeError ? e.message : t('{name} could not be decoded as audio.', { name: file.name }));
+  const decodeFailed = (file, e) => (e instanceof RangeError ? e.message : t('Could not decode {name} as audio', { name: file.name }));
 
   /** choose(file, { x, y, laneId }) — the popup: where the envelope goes and whether the file plays */
   function choose(file, { x = innerWidth / 2, y = innerHeight / 2, laneId } = {}) {
     return new Promise((resolve) => {
       const doc = model.state(), lane = doc.clips.filter((c) => c.laneId === laneId).at(-1), last = lane && doc.curves.find((c) => c.id === lane.curveId)?.targetId;
       const pop = el('div', 'tl-pop glass tl-audio-pop', document.body);
-      pop.dataset.mirSurface = 'menu'; pop.setAttribute('role', 'dialog'); ariaLabel(pop, 'Add audio');
+      pop.dataset.mirSurface = 'menu'; pop.setAttribute('role', 'dialog'); ariaLabel(pop, 'ADD AUDIO');
       label(el('div', 'tl-pop-title', pop), 'AUDIO · {name}', { name: audioBaseName(file.name) });
       /* DRIVES is the kit's select (never the platform's list: no native field in a kit window).  Its list pane opens on the
          body, so the popup counts a press inside it as its own and an Escape that closes the list does not close the popup */
