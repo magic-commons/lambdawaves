@@ -16,7 +16,7 @@ function stage(bindings, ui, over = {}) {   // `over`: callbacks taken from a re
   const travel = { yaw: 0, pitch: 0 }, result = { distance: 3, held: false, resets: 0, flings: [], moved: 0, ended: 0, canceled: 0, anchors: [], pans: [] };
   bindStageGestures(canvas, {
     camera: { dragGain: 1, stop() {}, fling: (...v) => result.flings.push(v) }, travel,
-    law: { HIST_MS: 80, STALE_MS: 120, REST: .003, SENS: .0065, FINE: .25, TAP_MS: 320 },
+    law: { HIST_MS: 80, STALE_MS: 120, REST: .003, SENS: .0065, FINE: .125 },
     getDistance: () => result.distance, zoomAt: (c, v) => { result.anchors.push(c); result.distance = v; },
     pan: (du, dv) => result.pans.push([du, dv]),
     orbitBy: (yaw, pitch) => { travel.yaw += yaw; travel.pitch += pitch; },
@@ -42,8 +42,8 @@ function stage(bindings, ui, over = {}) {   // `over`: callbacks taken from a re
   const s = stage(); s.send('pointerdown'); s.advance(20); s.send('pointermove', 1, 120);
   s.advance(20); s.send('pointermove', 1, 140, 100, { shiftKey: true });
   s.advance(20); s.send('pointermove', 1, 160, 100, { shiftKey: true }); s.send('pointerup', 1, 160);
-  assert.ok(Math.abs(s.travel.yaw + .195) < 1e-12);
-  assert.ok(Math.abs(s.result.flings[0][0] + 1.625) < 1e-12);
+  assert.ok(Math.abs(s.travel.yaw + .1625) < 1e-12);
+  assert.ok(Math.abs(s.result.flings[0][0] + .8125) < 1e-12);
 }
 // Every interruption clears ownership and suppresses fling and tap activation.
 for (const interruption of ['pointercancel', 'lostpointercapture', 'blur', 'pagehide', 'hidden']) {
@@ -122,7 +122,7 @@ console.log('PASS stage gestures: drag, fine gain, fling, interruption, special 
 {
   assert.deepEqual(JSON.parse(JSON.stringify(STAGE_BINDINGS)), { pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' },
     wheel: { line: 16, page: null, base: 1.1, per: 100, atCursor: false }, pinch: { slide: true, atCentroid: true }, tap: { ms: 300, px: 8 },
-    doubleTap: { ms: null, px: 40 }, dblclick: true, nudge: 0.05 });
+    doubleTap: { ms: 300, px: 14 }, dblclick: true, nudge: 0.05 });
   assert.ok(Object.isFrozen(STAGE_BINDINGS) && Object.isFrozen(STAGE_BINDINGS.pointer.slide) && Object.isFrozen(STAGE_BINDINGS.wheel));
   const row = (o) => ({ ...STAGE_BINDINGS, ...o });
   const quick = stage(row({ doubleTap: { ms: 150, px: 40 } })); quick.send('pointerdown'); quick.send('pointerup'); quick.advance(200); quick.send('pointerdown'); quick.send('pointerup');

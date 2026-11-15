@@ -27,7 +27,6 @@ import { TABLE_TYPES, MATRIX_TYPES, homeOf, FOOT } from './node-types.js';
 import { LAYER_TYPES, createLayerHost } from './node-layers.js';
 import { PRIM_TYPES } from './node-prims.js';
 import { SHADER_TYPES, createShaderHost } from './node-shader.js';
-import { createFocusHandles } from './node-focus.js';   // 040 N1: a kind's point on the stage, shown while the node is edited
 import { jsonStore } from './mir/core/prefs.js';
 import { createUserPresets, uniqueName, presetSave } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
@@ -80,19 +79,6 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       fn: () => { const T = curveTables(); return (y, ch) => { if (T.MASTER) y = lookup(T.MASTER, y); if (T[ch]) y = lookup(T[ch], y); return y; }; } },
     ...TABLE_TYPES, ...MATRIX_TYPES, ...PRIM_TYPES, ...LAYER_TYPES, ...SHADER_TYPES,
   };
-  /* 040 N1 · A NODE IS EDITED while a view says so (its card selected in the window, hovered or holding the focus — nodes-view.js) or the hand is on its
-     stage handle: `editing(id, why, on)` keeps the reasons; a reason lets go 600 ms late, so the hand can cross from the card to the handle.  The handles
-     (lab/node-focus.js) follow the graph and every value write */
-  const edits = new Map(), editT = new Map();
-  const edited = (id) => { const s = edits.get(id); return !!s && s.size > 0; };
-  const focus = createFocusHandles(canvas.parentElement, { list: () => nodes, types: TYPES, hand: (q, k, v) => hand(q, k, v), edited });
-  function editing(id, why, on) {
-    const key = id + ':' + why; let s = edits.get(id); if (!s) { if (!on) return; edits.set(id, (s = new Set())); }
-    clearTimeout(editT.get(key)); editT.delete(key);
-    if (on) { if (!s.has(why)) { s.add(why); focus.sync(); } return; }
-    if (s.has(why)) editT.set(key, setTimeout(() => { editT.delete(key); s.delete(why); if (!s.size) edits.delete(id); focus.sync(); }, 600));
-  }
-
   /* THE LIST: the record's nodes as saved (at most one CURVES); else 018's one-node graph, or a reader who graded before NODES kept a
      record; else THE DEFAULT GRAPH, which is EMPTY */
   const fresh = (id, type, o = {}) => ({ id, type, bypass: !!o.bypass, plug: o.plug !== false, at: Array.isArray(o.at) ? o.at : null, name: typeof o.name === 'string' && o.name ? o.name : null, fold: !!o.fold,
@@ -145,7 +131,6 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     recompile();
     const shown = from === 'mod' && routed(ID(q, k));
     for (const view of views) { view.paint(q, k, v, shown); view.strip(q); }
-    if (TYPES[q.type].focus) focus.sync();   // 040 N1: the stage handle follows the point (a hand's or a modulator's write, the MODE flip)
     if (from === 'hand') { saveList(); onEdit(); }
   }
   const hand = (q, k, v) => { undo.touch(); if (routed(ID(q, k))) mod.registry.write(ID(q, k), v); else setValue(q, k, v, 'hand'); };
@@ -157,7 +142,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const many = (x) => (Array.isArray(x) ? x : [x]);
 
   /* THE VERBS: add · remove · bypass · a graph · reorder (by the graph's top → bottom) */
-  const changed = (rebuild) => { saveList(true); recompile(); for (const v of views) v.sync(rebuild); focus.sync(); onEdit(); };   // 036 S1: an edit books the session's save
+  const changed = (rebuild) => { saveList(true); recompile(); for (const v of views) v.sync(rebuild); onEdit(); };   // 036 S1: an edit books the session's save
   function add(type, o) {
     if (!TYPES[type]) return null;
     undo.mark();
@@ -264,7 +249,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   let win = null;
   const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, setPlug, duplicate, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
     setFold, rename, reset, move, tidy, flags, setView: (id) => flag('view', id), setSolo: (id) => flag('solo', id), setOff, off: () => off,
-    undo: () => undo.undo(), redo: () => undo.redo(), editing,
+    undo: () => undo.undo(), redo: () => undo.redo(),
     door: (kind) => { if (kind === 'win') { win.close(); raise('nodes'); } else { rk.close('nodes'); win.open(); } } };
 
   /* the rack card (the CURVES card's seat, after RENDER, closed) and the MIR window, each its own view */

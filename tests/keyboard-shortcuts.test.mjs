@@ -1,7 +1,7 @@
 // 0.5.0 C3 · the keys on MIR's ONE KEY TABLE (lab/mir/shell/keys.js) through λWAVES' rows (lab/key-table.js), on a stub EventTarget: the
 // kit's chord spelling, THE NEW Ctrl-vs-Mod CASE on both platforms (Ctrl+Shift+Q is the Control key alone: on a Mac ⌘⇧Q never runs the dolly
 // zoom; off a Mac Ctrl IS Mod), the binding law (an overlap is refused unless the steal is explicit; reserved keys; a stage row binds on Tab
-// alone; a saved chord another row holds by default is dropped on read), the fine step (a row with no `shift` answers Shift too, as 0.25),
+// alone; a saved chord another row holds by default is dropped on read), the fine step (a row with no `shift` answers Shift too, as 0.125),
 // the 0.4.0 save lifted through `was`, the field passage (only `inFields` rows), R-K1 (S is pitch-down, FOLDERS is O) and the Alt+Arrow quartet.
 import assert from 'node:assert/strict';
 import { parseChord, normalize, chordFromEvent } from '../lab/mir/shell/keys.js';
@@ -65,9 +65,9 @@ function make(platform, saved = null) {
 /* the dispatch: the fine step, the stage rule, the field passage, R-K1, the history's naming road */
 {
   const { press, named, kt } = make('other');
-  assert.deepEqual(press('KeyW'), ['pitch 1']); assert.deepEqual(press('KeyW', { shiftKey: true }), ['pitch 0.25'], 'Shift is the fine step');
+  assert.deepEqual(press('KeyW'), ['pitch 1']); assert.deepEqual(press('KeyW', { shiftKey: true }), ['pitch 0.125'], 'Shift is the fine step');
   assert.deepEqual(press('KeyQ'), ['dolly 1']); assert.deepEqual(press('KeyQ', { shiftKey: true }), ['pov'], 'Shift+Q is its own row, not the fine dolly');
-  assert.deepEqual(press('ArrowLeft', { altKey: true, shiftKey: true }), ['pan 0.25'], 'Shift+Alt+← is the fine pan');
+  assert.deepEqual(press('ArrowLeft', { altKey: true, shiftKey: true }), ['pan 0.125'], 'Shift+Alt+← is the fine pan');
   assert.deepEqual(press('ArrowLeft'), ['step'], 'the bare arrow is still time');
   assert.deepEqual(press('Tab'), [], 'Tab off the stage is the browser\'s');
   assert.deepEqual(press('KeyS'), ['pitchDn'], 'R-K1: S is pitch-down'); assert.deepEqual(press('KeyO'), ['folders'], 'FOLDERS is O');
@@ -82,7 +82,7 @@ function make(platform, saved = null) {
   assert.deepEqual(press('ArrowLeft', {}, role('slider'), true), [], 'wave 68: a control that acted on its key (prevented it) keeps it');
   assert.ok(named.includes('pitchUp') && named.includes('save'), 'every key runs through the host\'s edit (the history names it)');
   assert.equal(kt.keyText('save'), 'Ctrl+S'); assert.equal(kt.keyText('history'), '—'); assert.equal(kt.keyText('pitchUp'), 'W');
-  console.log('PASS the dispatch: Shift is the fine step (W 1 → 0.25, Shift+Alt+← the fine pan), Shift+Q its own row, Tab off the stage free, S pitch-down, O FOLDERS, only inFields rows from a field, every run through the host\'s edit');
+  console.log('PASS the dispatch: Shift is the fine step (W 1 → 0.125, Shift+Alt+← the fine pan), Shift+Q its own row, Tab off the stage free, S pitch-down, O FOLDERS, only inFields rows from a field, every run through the host\'s edit');
 }
 
 /* the binding law, through keys.bind's road */

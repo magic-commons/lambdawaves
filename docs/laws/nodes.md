@@ -2,6 +2,19 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 044
+
+PERSPECTIVE IS GONE (044 A4, L151; Josh 11-14, the sheet's tick 15: "We can take it out"). CHROMATIC ABERRATION is SHIFT alone: AMOUNT · ANGLE · BLUR BLEND. The MODE knob, FOCUS X · FOCUS Y, the stage's focal handle (`lab/node-focus.js`, deleted with the model's `editing`) and the ramp left together; `off(values)` has no user and left `lab/node-types.js`. An older graph still opens: a saved node keeps `mode: 'perspective'`, `fx`, `fy` in its values, unread, and draws SHIFT; a route to `nodes.<id>.fx` / `.fy` finds no target, as a route to a removed node does. The ids `mode`, `perspective`, `fx`, `fy` are spent on this kind: a later knob takes other names. This RETIRES 040's THE FOCAL POINT (its PERSPECTIVE and handle lines; BLUR BLEND stays), 041's ONE RAMP, and 038's "ANGLE greys under PERSPECTIVE" (below). No LOCK leaf names the kind; none moved.
+
+NODES' HANDS ARE THE KIT'S (044 A4, `lab/nodes-view.js`).
+- **A card's drag is the kit's `drag()`** (L41, L39): 4 px before a press is a drag, so a click that trembles moves nothing and writes no undo step; Escape, a lost capture or a hidden page put the cards back. THE FOCUS LAW hands Escape to `nodes.escape` first, so that row is the abort (a card mid-drag, a wire mid-turn), then the menu, then the selection.
+- **The double press is the kit's `TAP`** (L37: 300 ms, 14 px; it was 350 on a title and 300 on a wire, with no distance): a title renames, a wire's hand goes home.
+- **The wire's hand is the kit knob's drag** (L54: `verticalDrag`): the kit's travel (a finger's too), the ⅛ gear on any modifier or a second finger, Escape puts it back. Its arrows are its wheel's step: 1/100, Shift an eighth of it.
+- **Shift is fine** (L34): the arrows move the selected cards 10 px, Shift 1 px (it was 1 and 10).
+- **Mod+B duplicates, Mod+D deselects** (L53, the TIMELINE's pair): `nodes.duplicate` moved from Mod+D; `nodes.deselect` is a new row. A reader's own saved chord for `nodes.duplicate` stays his.
+- **The wheel zooms at the TIMELINE's rate** (L60): e^(−δ · 0.003), ±120 px an event, on the ground (with Ctrl, 038 N2) and on the minimap.
+- **The ground says what it is** (L51): `role=application`, `aria-roledescription` "node graph", the name NODES — the kit pad's pattern.
+
 ## The laws of 042
 
 A FILM'S SHADER RECORDS END WITH THE TAKE (042 X4): the SHADER host keeps one film record per node id while a take runs (`bake`, stepped from black at frame 0) and frees them all at the take's end (`release()`, through `lab/film-bake.js` `end()` in render-exact's `after()`); a road that bakes outside the recorder ends with `bake.end()` too. `drop()` stays the stage's, never mid-film.
@@ -10,12 +23,12 @@ A FILM'S SHADER RECORDS END WITH THE TAKE (042 X4): the SHADER host keeps one fi
 
 NODES' CHIPS (041 N1, on alpha.55): the NODES window wears `chrome: 'both'`, its rail on the left, top to bottom: the drag chip (`gripAt: 'first'`), ADD NODE, FIT, FOLD ALL, BYPASS ALL; the four tools left the window's ground and the chips join the mask (`lab/nodes.js`, `lab/nodes-view.js`); the title bar keeps the presets, the dock door and ×; the rack card, which has no rail, keeps its three in its ground.
 A PRESET CARRIES THE GRADE (041 N2, Josh's call 11): a preset saved since 041 is `{ nodes (CURVES in its place in the chain), curves }` and a pick or the bar's step puts both back; one without `curves` (FILM, POSTER, PRINT, a 040 save) replaces every node but CURVES and leaves the grade. NODES' undo ring does not hold the grade. This amends 040 N4's "every node but CURVES" (below).
-ONE RAMP (041 N3, Josh's call 1): PERSPECTIVE draws one centred 128² ramp, once, and the focal point is an `feOffset` before each displacement map (`lab/node-prims.js`) — the same picture; a FOCUS write changes two numbers. The mode and its handle stay. This replaces 040 N1's ramp per focal point (below).
+ONE RAMP (041 N3, Josh's call 1; RETIRED 044: PERSPECTIVE is gone, above): PERSPECTIVE draws one centred 128² ramp, once, and the focal point is an `feOffset` before each displacement map (`lab/node-prims.js`) — the same picture; a FOCUS write changes two numbers. The mode and its handle stay. This replaces 040 N1's ramp per focal point (below).
 FIT STARTS AT THE MARGIN (041 X3): a box the 0.5 floor leaves bigger than the ground is placed 24 px from its top and left, never centred off the view (`lab/nodes-view.js`).
 
 ## The laws of 040
 
-THE FOCAL POINT (040 N1, Josh: "Chromatic abberation should have a blur blend knob. Perspective chromatic abberation also doesn't work; it's supposed to come with a movable focal point; show focal point when editing the node").
+THE FOCAL POINT (040 N1; RETIRED 044 with PERSPECTIVE, above — BLUR BLEND alone stands; Josh: "Chromatic abberation should have a blur blend knob. Perspective chromatic abberation also doesn't work; it's supposed to come with a movable focal point; show focal point when editing the node").
 - **BLUR BLEND** (0–8 px, home 0) softens the parted red and blue (one feGaussianBlur each) before they screen back over green, SHIFT and PERSPECTIVE alike; at 0 it adds nothing. It is px, so a film's × k holds.
 - **PERSPECTIVE** parts the colours from a FOCAL POINT, FOCUS X · FOCUS Y (stage fractions, home the centre, targets `nodes.<id>.fx` / `.fy`, greyed under SHIFT), and grows LINEARLY with the distance from it: AMOUNT px at the stage's corner from a centred point. 038's r² law hid the effect where the orbital sits. A 128² ramp per focal point (eight kept), read at ±4·AMOUNT (041 N3: one ramp, above).
 - **The handle** (`lab/node-focus.js`): a ring and cross-hair in `#stage` (z 19) while the node is EDITED — its card selected in the window, hovered or holding the focus (`nodes.js editing(id, why, on)`, a 600 ms grace), or the hand on the handle. A drag writes FOCUS X · Y through the node's hand (a routed knob moves its base); two presses bring it home. It stays under every window (a window over the stage's centre covers it at home), out of the occlusion mask, hidden by H and the menu; nothing is drawn while no node is edited, so THE LOCK never sees it.

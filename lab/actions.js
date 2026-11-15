@@ -1,7 +1,7 @@
 /* lab/actions.js — ONE ACTION REGISTRY (021 I1; the DREAM's contract 2, research/iteration-021/REVIEW-B-INPUT.md).  Every act a hand, a key, a menu,
  * a bar seat, a verb (a notebook `lw:` link, the conductor), MIDI or a modulation route can fire is ONE row here, found by id, never by label or a press:
  *   { id, label, group, kind: 'fire' | 'toggle' | 'hold' | 'set', args?, get?(), run(args), keys?: [chords], exact?, surface?, gesture?, undo, was?, … }
- *   · keys: the kit's chords (lab/mir/shell/keys.js); a chord with no Shift answers Shift too as the fine step ({ fine: 0.25 }) unless the row is `exact`
+ *   · keys: the kit's chords (lab/mir/shell/keys.js); a chord with no Shift answers Shift too as the fine step ({ fine: 1 / 8 }) unless the row is `exact`
  *     (key-table.js expands it); `was` names the id (or ids) a saved binding was kept under; `stage` / `when` say when a key may run it (THE FOCUS LAW).
  *   · kind: fire acts once; toggle has get() (a menu draws ✓, the bar lights, MIDI's toggle mode and an `action.<id>` route read it); hold has up();
  *     set takes args (a VERB's argument form, lab/verbs.js: the verb and the key are ONE action — `view` cycles bare and sets with { id }).
@@ -14,7 +14,7 @@ import { infoActions } from './mir/info/layer.js'; import { mirGui } from './mir
 import { EXPORTS } from './export3d.js'; import { isField } from './mir/core/pointer.js';
 import { knobAct } from './mir/shell/menubar.js'; import { copyText } from './mir/shell/clipboard.js'; import { notice } from './mir/shell/notice.js'; import { quickSaved } from './shell/persist.js';
 
-const F = (a) => (a && a.fine) || 1;   // the fine step a key's Shift asks for (1 bare, 0.25 with Shift)
+const F = (a) => (a && a.fine) || 1;   // the fine step a key's Shift asks for (1 bare, ⅛ with Shift)
 
 export function createActions(app) {
   const { ui, reg, clock, obs, mat, appPlay } = app, sch = (t) => app.loop.schedule(t), H = () => app.host, W = () => app.w, S = () => app.sh, L = () => app.sh.layout;
@@ -224,7 +224,7 @@ export function createActions(app) {
     /* NODES' keys (018 D3's ground map, 021 I1): rows of the one table, live while a graph's ground has the focus (THE FOCUS LAW, the timeline's precedent);
        chords by place (AZERTY and Dvorak keep them); Tab is the kit's again — the add menu is Shift+A */
     ...[['nodes.left', 'nudge left', 'ArrowLeft', (k, a) => k.nudge(-1, 0, a)], ['nodes.right', 'nudge right', 'ArrowRight', (k, a) => k.nudge(1, 0, a)], ['nodes.up', 'nudge up', 'ArrowUp', (k, a) => k.nudge(0, -1, a)],
-      ['nodes.down', 'nudge down', 'ArrowDown', (k, a) => k.nudge(0, 1, a)], ['nodes.delete', 'delete', ['Delete', 'Backspace'], (k) => k.remove()], ['nodes.duplicate', 'duplicate', 'Mod+KeyD', (k) => k.duplicate()],
+      ['nodes.down', 'nudge down', 'ArrowDown', (k, a) => k.nudge(0, 1, a)], ['nodes.delete', 'delete', ['Delete', 'Backspace'], (k) => k.remove()], ['nodes.duplicate', 'duplicate', 'Mod+KeyB', (k) => k.duplicate()], ['nodes.deselect', 'deselect', 'Mod+KeyD', (k) => k.none()],   // 044 A4 (L53): the TIMELINE's pair
       ['nodes.all', 'select all', 'Mod+KeyA', (k) => k.all()], ['nodes.undo', 'undo (the graph’s own)', 'Mod+KeyZ', (k) => k.undo()], ['nodes.redo', 'redo (the graph’s own)', ['Mod+Shift+KeyZ', 'Mod+KeyY'], (k) => k.redo()],
       ['nodes.bypass', 'bypass the selection', 'KeyM', (k) => k.bypass()], ['nodes.solo', 'solo the first selected', 'KeyS', (k) => k.solo()], ['nodes.off', 'BYPASS ALL', 'Backslash', (k) => k.off()],
       ['nodes.fold', 'fold the selection', 'KeyH', (k) => k.fold()], ['nodes.add', 'ADD NODE — the + menu', 'Shift+KeyA', (k) => k.add()], ['nodes.fit', 'FIT — every card in view', 'Home', (k) => k.fit()],

@@ -7,9 +7,9 @@
  * 020 X1 THE GROUND (the window only; the rack column never zooms or selects): ctrl/⌘ + wheel and a pinch zoom 0.5–2× about the pointer
  * (`scale` on the plane with the pan; the wires, the ports and the dot grid follow), FIT (the button beside +, Home) fits the cards with a
  * 24 px margin; a click on a title selects (shift adds), shift + drag on the empty ground draws a box (a plain drag still pans), Ctrl-A all,
- * Escape none; a selected title drags the whole selection; arrows nudge 1 px (shift 10).  THE KEYS ARE THE GROUND'S: they fire only with the
- * ground focused (tabindex 0) and stop there, so the kit's one key table never sees them — Delete · Ctrl-D · M · Tab / Shift-A · Home ·
- * Ctrl-Z / Ctrl-Shift-Z (NODES' own ring, lab/nodes-undo.js).
+ * Escape or Ctrl-D none; a selected title drags the whole selection; arrows nudge 10 px (Shift is fine, as everywhere: 1 px).  THE KEYS ARE THE
+ * GROUND'S: rows of the action registry (`nodes.*`, lab/actions.js), live only while the ground has the focus (tabindex 0) — Delete · Ctrl-B
+ * (duplicate) · Ctrl-D (deselect) · M · Shift-A · Home · Ctrl-Z / Ctrl-Shift-Z (NODES' own ring, lab/nodes-undo.js).
  * 020 X2 THE CARD: the chevron (H) folds a card to its bar and its PREVIEW strip, FOLD ALL / UNFOLD ALL at the head (039 X8: one word family); a double-click
  * on the title RENAMES it (Enter / Escape; empty = the type's name); every TABLE and MATRIX card draws a 128 × 10 strip — a grey ramp and a
  * hue ramp through the node's OWN transfer (nodes-compile.js transfer(): the compiler's fn / matrix), redrawn when its values move; the
@@ -24,7 +24,7 @@
  * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
  * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
-import { el, label, ariaLabel, chip, onContext, placeholder, wheelNotches, setKnobLaw } from './mir/kit.js'; import { contextMenu } from './mir/shell/menubar.js'; import { openDialog } from './mir/shell/dialog.js';
+import { el, label, ariaLabel, chip, onContext, placeholder, wheelNotches, setKnobLaw, tapWatcher, verticalDrag } from './mir/kit.js'; import { drag as kitDrag } from './mir/core/pointer.js'; import { contextMenu } from './mir/shell/menubar.js'; import { openDialog } from './mir/shell/dialog.js';
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun, over } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js'; import { setText } from './mir/core/perf.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
@@ -46,18 +46,20 @@ const markOf = (q, T) => MARK[!over(T) && ownRun(q, T) ? 'prim' : T.cls];
 const NS = 'http://www.w3.org/2000/svg';
 const hueAt = (h) => [Math.abs(h * 6 - 3) - 1, 2 - Math.abs(h * 6 - 2), 2 - Math.abs(h * 6 - 4)].map((x) => Math.min(1, Math.max(0, x)));
 const ZOOM = [0.5, 2], clampZ = (z) => Math.min(ZOOM[1], Math.max(ZOOM[0], z));
+/** the wheel's zoom factor — the TIMELINE's rate (044 A4, L60; mir/timeline/editor.js: e^(−δ · 0.003), δ in px, a line 16, held to ±120 an event) */
+const wheelZoom = (e) => Math.exp(-Math.max(-120, Math.min(120, e.deltaY * (e.deltaMode ? 16 : 1))) * 0.003);
 /** a node type's glyph (021 V2: the one table, lab/icons.js `node<Type>` — the sprite retired), first or last in `parent` */
 const icon = (parent, name, first) => { const s = glyphEl(nodeGlyph(name), 'nodes-ico', 14); if (!s) return null; if (first) parent.prepend(s); else parent.appendChild(s); return s; };
 
-/** a press-and-drag on `handle`: start() → the base, move(base, dx, dy), end() — the pointer captured, a cancel ends it too */
-const grab = (handle, ok, start, move, end) => handle.addEventListener('pointerdown', (e) => {
-  if (e.button !== 0 || !ok(e)) return;
-  e.preventDefault(); handle.setPointerCapture(e.pointerId);
-  const x0 = e.clientX, y0 = e.clientY, base = start(e), u = cssZoom(handle);   // 036 K2: the hand in the window's px (UI SCALE)
-  const mv = (ev) => move(base, (ev.clientX - x0) / u, (ev.clientY - y0) / u);
-  const up = () => { for (const [t, f] of [['pointermove', mv], ['pointerup', up], ['pointercancel', up]]) handle.removeEventListener(t, f); end(base); };
-  for (const [t, f] of [['pointermove', mv], ['pointerup', up], ['pointercancel', up]]) handle.addEventListener(t, f);
-});
+/** a press-and-drag on `handle` — the kit's drag() (044 A4, L41 / L39): the pointer that pressed owns it, 4 px before a press is a drag (a click that
+    trembles moves nothing), Escape, a lost capture or a hidden page put it back.  start(e) → the base at the press, move(base, dx, dy) in the
+    window's px (036 K2: UI SCALE), end(base, back) — `back`: the drag was cancelled.  A press `ok` refuses (a button, a field) is its own.
+    → the kit's { cancel(), active } */
+const grab = (handle, ok, start, move, end) => {
+  let base = null, u = 1;
+  handle.addEventListener('pointerdown', (e) => { if (e.button !== 0) return; if (!ok(e)) { e.stopImmediatePropagation(); return; } base = start(e); u = cssZoom(handle); });
+  return kitDrag(handle, { onMove: (s) => move(base, s.dx / u, s.dy / u), onEnd: () => end(base, false), onCancel: () => end(base, true) });
+};
 
 export function createView(parent, kind, M) {
   const W = kind === 'win', T = M.TYPES;
@@ -71,6 +73,7 @@ export function createView(parent, kind, M) {
   const cards = {}, sel = new Set();
   const hands = el('div', 'nodes-hands', plane), H = new Map(), P = new Map();   // 038 N4: the wires' handles and paths, by their downstream node
   let wsel = null;                                                   // the selected wire: its downstream node's id
+  let turn = null;                                                   // a wire's hand mid-turn: its abort (Escape puts it back)
   let map = null, held = false;                                      // 038 N5: the minimap (the window's), and a hand on it (its frame held)
   let pan = [0, 0], z = 1;
   /** the view: the pan (px) and the zoom; the dot grid follows both */
@@ -88,7 +91,7 @@ export function createView(parent, kind, M) {
     const gw = ground.clientWidth, gh = ground.clientHeight, zz = clampZ(Math.min((gw - 48) / (x1 - x0), (gh - 48) / (y1 - y0)));
     setPan([Math.max(24, (gw - (x1 - x0) * zz) / 2) - x0 * zz, Math.max(24, (gh - (y1 - y0) * zz) / 2) - y0 * zz], zz); keep();
   }
-  const paintSel = () => { for (const [id, n] of Object.entries(cards)) { n.c.classList.toggle('sel', sel.has(id)); if (W && id !== 'in' && id !== 'out') M.editing(id, 'sel', sel.has(id)); }   // 040 N1: a selected node is edited
+  const paintSel = () => { for (const [id, n] of Object.entries(cards)) n.c.classList.toggle('sel', sel.has(id));
     for (const [id, h] of H) h.classList.toggle('sel', id === wsel); for (const [id, p] of P) p.classList.toggle('sel', id === wsel); };
   const pick = (ids, add) => { if (!add) sel.clear(); for (const id of ids) sel.add(id); wsel = null; paintSel(); };
   const pickWire = (id) => { sel.clear(); wsel = id; paintSel(); };
@@ -106,17 +109,18 @@ export function createView(parent, kind, M) {
       if (W && id !== 'in' && id !== 'out') { pt.classList.add('live'); pt.title = side === 'in' ? 'drag onto a wire: the node goes there · off: unplugs' : 'drag onto a wire: the node goes there';
         pt.addEventListener('pointerdown', (e) => portDrag(e, id, side)); } }
     /* a press on a title selects it (shift adds or takes it out) and drags the selection with it; STAGE IN / OUT drag alone */
-    let t0 = -1e9;                                                  // a second press within 350 ms is a double-click: RENAME
-    if (W) grab(bar, (e) => !e.target.closest('button, input'), (e) => {
+    const tap = tapWatcher(() => renameAt(id));                     // the kit's double press (TAP: 300 ms, 14 px): RENAME
+    const gr = W && grab(bar, (e) => !e.target.closest('button, input'), (e) => {
       ground.focus({ preventScroll: true });
       if (id === 'in' || id === 'out') return { g: [[c, xy(c)]] };
-      if (e.timeStamp - t0 < 350) { renameAt(id); return { g: [] }; } t0 = e.timeStamp;
+      if (tap(e)) return { g: [] };
       if (e.shiftKey && sel.has(id)) { sel.delete(id); paintSel(); return { g: [] }; }
       if (!sel.has(id)) pick([id], e.shiftKey);
       return { g: [...sel].map((i) => [cards[i].c, xy(cards[i].c)]) };
-    }, (b, dx, dy) => { b.on = true; for (const [n, p] of b.g) { n.style.left = p[0] + dx / z + 'px'; n.style.top = p[1] + dy / z + 'px'; } wires(); }, (b) => { if (b.on) moved(); });
+    }, (b, dx, dy) => { for (const [n, p] of b.g) { n.style.left = p[0] + dx / z + 'px'; n.style.top = p[1] + dy / z + 'px'; } wires(); },
+      (b, back) => { if (!b.g.length) return; if (!back) { moved(); return; } for (const [n, p] of b.g) { n.style.left = p[0] + 'px'; n.style.top = p[1] + 'px'; } wires(); });
     ro.observe(c);
-    return cards[id] = { c, bar, name, mk, body: el('div', 'nodes-body', c) };
+    return cards[id] = { c, bar, name, mk, grab: gr, body: el('div', 'nodes-body', c) };
   };
   label(node('in', 'STAGE IN', false, true, 'in').body, 'the stage picture');
   label(node('out', 'STAGE OUT', true, false, 'out').body, 'the screen');
@@ -126,9 +130,6 @@ export function createView(parent, kind, M) {
   function make(q) {
     const t = T[q.type], n = node(q.id, t.label, true, true, q.type, MARK[t.cls]);
     n.c.dataset.type = q.type; n.c.title = t.hint || '';
-    /* 040 N1 · the node is EDITED while its card is under the pointer or holds the focus (the stage's focal handle shows, lab/node-focus.js) */
-    n.c.addEventListener('pointerenter', () => M.editing(q.id, kind + ':hover', true)); n.c.addEventListener('pointerleave', () => M.editing(q.id, kind + ':hover', false));
-    n.c.addEventListener('focusin', () => M.editing(q.id, kind + ':focus', true)); n.c.addEventListener('focusout', (e) => { if (!n.c.contains(e.relatedTarget)) M.editing(q.id, kind + ':focus', false); });
     const v = el('button', 'nodes-chev', null); v.type = 'button'; chip(v, 'chevronDown', 'FOLD OR UNFOLD'); n.bar.prepend(v); v.addEventListener('click', () => M.setFold(q.id, !q.fold));
     if (!W) n.name.addEventListener('dblclick', () => renameAt(q.id));
     if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip' + (t.draw ? ' nodes-drawn' : '')); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
@@ -183,8 +184,9 @@ export function createView(parent, kind, M) {
   }
   /* 038 N4 · THE WIRE HAS A KNOB (Josh: "The connector wires also need a way to connect and disconnect. Check out FL Studio's 'Patcher' … how they
      design the 'knob' on the wires"): each wire is its downstream node's input, so its knob is that node's MIX — FADE (already folded, already a
-     target), or a LAYER's / SHADER's own 0–1 MIX or AMOUNT (none: no arc).  The kit's hand: 220 px of rise is the whole range, Shift the fine gear
-     (1/8), two presses come home; the wheel turns it once it was pressed (044 K2 THE WHEEL WAITS FOR A CLICK) */
+     target), or a LAYER's / SHADER's own 0–1 MIX or AMOUNT (none: no arc).  The kit knob's hand itself (044 A4, L54: verticalDrag and tapWatcher —
+     the travel, a finger's travel, the fine gear on any modifier or a second finger, the double press home); the wheel turns it once it was pressed
+     (044 K2 THE WHEEL WAITS FOR A CLICK); the arrows are the wheel's step (1/100, Shift an eighth of it) */
   const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
   const mixOf = (t) => (!over(t) ? 'fade' : ['mix', 'amount'].find((k) => t.knobs.some((K) => K.k === k && K.min === 0 && K.max === 1)) || null);
   const homeOf = (t, k) => [...t.knobs, ...FOOT].find((K) => K.k === k).home;
@@ -198,15 +200,15 @@ export function createView(parent, kind, M) {
     const s = SV('svg', { viewBox: '0 0 20 20', 'aria-hidden': 'true' }, h);
     SV('circle', { class: 't', cx: 10, cy: 10, r: 7, pathLength: 360, 'stroke-dasharray': '300 360', transform: 'rotate(120 10 10)' }, s);
     SV('circle', { class: 'v', cx: 10, cy: 10, r: 7, pathLength: 360, transform: 'rotate(120 10 10)' }, s); SV('circle', { class: 'c', cx: 10, cy: 10, r: 2.4 }, s); el('span', 'nodes-hand-val', h);
+    const tap = tapWatcher(() => { const q = M.byId(id), k = q && mixOf(T[q.type]); if (k) M.hand(q, k, homeOf(T[q.type], k)); });
     h.addEventListener('pointerdown', (e) => {
       if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); ground.focus({ preventScroll: true }); pickWire(id);
-      const q0 = M.byId(id), k = q0 && mixOf(T[q0.type]); if (!k) return;
-      if (e.timeStamp - (h.t0 || -1e9) < 300) { h.t0 = -1e9; M.hand(q0, k, homeOf(T[q0.type], k)); return; } h.t0 = e.timeStamp;
-      h.setPointerCapture(e.pointerId); const u = cssZoom(ground); let v0 = clamp01(+q0.values[k]), y0 = e.clientY, fine = e.shiftKey;
-      const mv = (ev) => { const q = M.byId(id); if (!q) return; if (ev.shiftKey !== fine) { fine = ev.shiftKey; v0 = clamp01(+q.values[k]); y0 = ev.clientY; }
-        h.classList.add('turn'); M.hand(q, k, clamp01(v0 - (ev.clientY - y0) / u / (fine ? 1760 : 220))); };
-      const end = () => { for (const [t, f] of on) h.removeEventListener(t, f); h.classList.remove('turn'); };
+      const q0 = M.byId(id), k = q0 && mixOf(T[q0.type]); if (!k || tap(e)) return;
+      h.setPointerCapture(e.pointerId); const v0 = clamp01(+q0.values[k]), vd = verticalDrag(e);
+      const mv = (ev) => { const q = M.byId(id); if (!q || ev.pointerId !== vd.id) return; h.classList.add('turn'); M.hand(q, k, clamp01(v0 + vd.move(ev))); };
+      const end = () => { for (const [t, f] of on) h.removeEventListener(t, f); h.classList.remove('turn'); turn = null; };
       const on = [['pointermove', mv], ['pointerup', end], ['pointercancel', end]]; for (const [t, f] of on) h.addEventListener(t, f);
+      turn = () => { const q = M.byId(id); end(); try { h.releasePointerCapture(e.pointerId); } catch (_) { /* already let go */ } if (q) M.hand(q, k, v0); };   // the knob's abort: back where the hand found it
     });
     /* 044 K2 THE WHEEL WAITS FOR A CLICK: the hand takes no focus of its own (a press picks its wire and gives the ground the keys), so "pressed and
        still holds the focus" is: this wire is the picked one and the ground has the focus.  Then a notch is the knob's arrow step (1/100, Shift an
@@ -318,26 +320,29 @@ export function createView(parent, kind, M) {
     for (const t of ['keydown', 'keyup']) ground.addEventListener(t, (e) => { if (e.key === 'Control' || e.key === 'Meta') ground.classList.toggle('nodes-zkey', t === 'keydown'); });
     ground.addEventListener('pointerleave', () => ground.classList.remove('nodes-zkey'));
     ground.addEventListener('wheel', (e) => { if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault();
-      zoomAt(z * Math.exp(-e.deltaY * (e.deltaMode ? 16 : 1) * 0.002), local(e)); keep(); }, { passive: false });
+      zoomAt(z * wheelZoom(e), local(e)); keep(); }, { passive: false });
     map = el('div', 'nodes-map', ground); map.hidden = true; map.title = 'MAP — drag to look round · the wheel zooms'; map.appendChild(document.createElementNS(NS, 'svg'));
     const look = (e) => { const s = map.firstChild, m = s.getScreenCTM(); if (!m) return; const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
       setPan([ground.clientWidth / 2 - q.x * z, ground.clientHeight / 2 - q.y * z]); };
     map.addEventListener('pointerdown', (e) => { if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); held = true; map.setPointerCapture(e.pointerId); look(e);
       const mv = (ev) => look(ev), end = () => { map.removeEventListener('pointermove', mv); map.removeEventListener('pointerup', end); map.removeEventListener('pointercancel', end); held = false; keep(); drawMap(); };
       map.addEventListener('pointermove', mv); map.addEventListener('pointerup', end); map.addEventListener('pointercancel', end); });
-    map.addEventListener('wheel', (e) => { e.preventDefault(); e.stopPropagation(); zoomAt(z * Math.exp(-e.deltaY * (e.deltaMode ? 16 : 1) * 0.002), [ground.clientWidth / 2, ground.clientHeight / 2]); keep(); }, { passive: false });
+    map.addEventListener('wheel', (e) => { e.preventDefault(); e.stopPropagation(); zoomAt(z * wheelZoom(e), [ground.clientWidth / 2, ground.clientHeight / 2]); keep(); }, { passive: false });
     ro.observe(ground);
     /* THE KEYS ARE THE GROUND'S — 021 I1: rows of THE ACTION REGISTRY (`nodes.*`, lab/actions.js), live while this ground has the focus (THE FOCUS
-       LAW): chords by place (AZERTY, Dvorak), rebindable, on the board; Tab is the kit's again, the add menu is Shift+A.  These are their acts. */
+       LAW): chords by place (AZERTY, Dvorak), rebindable, on the board; Tab is the kit's again, the add menu is Shift+A.  These are their acts.
+       044 A4 (L53): Mod+B duplicates and Mod+D deselects, the TIMELINE's pair.  L51: the ground says what it is, as the kit's pad does */
+    ground.setAttribute('role', 'application'); ground.setAttribute('aria-roledescription', 'node graph'); ariaLabel(ground, 'NODES');
     GROUNDS.set(ground, {
-      nudge(dx, dy, a) { if (wsel) { const q = M.byId(wsel), k = q && mixOf(T[q.type]); if (k) M.hand(q, k, clamp01(+q.values[k] + (dx - dy) * (a && a.shift ? 0.1 : 0.01))); return; }
-        const ids = [...sel]; if (!ids.length) return; const s = a && a.shift ? 10 : 1;
+      nudge(dx, dy, a) { if (wsel) { const q = M.byId(wsel), k = q && mixOf(T[q.type]); if (k) M.hand(q, k, clamp01(+q.values[k] + (dx - dy) * 0.01 * (a && a.shift ? setKnobLaw().keyFine : 1))); return; }   // L34: Shift is FINE, the wheel's step
+        const ids = [...sel]; if (!ids.length) return; const s = a && a.shift ? 1 : 10;
         for (const id of ids) { const n = cards[id].c, p = xy(n); n.style.left = p[0] + dx * s + 'px'; n.style.top = p[1] + dy * s + 'px'; } moved(true); },
-      remove() { if (wsel) { M.setPlug(wsel, false); return; } M.remove([...sel]); sel.clear(); }, duplicate() { pick(M.duplicate([...sel], at())); }, all() { pick(M.list().map((q) => q.id)); },
+      remove() { if (wsel) { M.setPlug(wsel, false); return; } M.remove([...sel]); sel.clear(); }, duplicate() { pick(M.duplicate([...sel], at())); }, all() { pick(M.list().map((q) => q.id)); }, none() { pick([]); },
       undo: () => M.undo(), redo: () => M.redo(), off: () => M.setOff(!M.off()), add: () => openMenu(), fit: () => fit(),
       bypass() { const ids = [...sel]; if (ids.length) M.setBypass(ids, ids.some((id) => !M.byId(id).bypass)); }, solo() { const ids = [...sel]; if (ids.length) M.setSolo(ids[0]); },
       fold() { const ids = [...sel]; if (ids.length) M.setFold(ids, ids.some((id) => !M.byId(id).fold)); },
-      escape() { if (pop) pop.close(); else pick([]); } });
+      /* THE FOCUS LAW hands Escape to this row before the kit's drag hears it, so the row is the abort: a card mid-drag or a wire mid-turn goes back */
+      escape() { const d = Object.values(cards).map((n) => n.grab).find((x) => x && x.active); if (d) d.cancel(); else if (turn) turn(); else if (pop) pop.close(); else pick([]); } });
   }
 
   /* + · THE ADD MENU (038 N1, Josh: "Nodes dropdown seems to be missing it's background"): the kit's contextMenu under the + — a pane on the page,
