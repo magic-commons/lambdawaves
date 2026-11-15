@@ -48,7 +48,6 @@ const ICONS = {
   saveInto: p('M6 3.5h12A1.5 1.5 0 0 1 19.5 5v14a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 19V5A1.5 1.5 0 0 1 6 3.5Z') + p('M9.5 3.5v8l2.5-2 2.5 2v-8') +
     p('M12 13.5v4.5') + p('M9.5 16l2.5 2.5 2.5-2.5'),                            // λWAVES' SAVE: a page filed into the library (012 M1), not the kit's floppy
   saveNew: p('M6.5 3.5H14L19.5 9v10A1.5 1.5 0 0 1 18 20.5H6.5A1.5 1.5 0 0 1 5 19V5a1.5 1.5 0 0 1 1.5-1.5Z') + p('M14 3.5V9h5.5') + p('M12 11.5v6') + p('M9 14.5h6'),   // 039 X9: SAVE NEW, a fresh page with a +
-  heart: solid('M12 21.2 3.9 13.4A5.3 5.3 0 0 1 12 6.1a5.3 5.3 0 0 1 8.1 7.3Z'),   // the ☆ layouts seat (#rackFav)
   hueRing: c(12, 12.5, 8) + p('M12 2.5v3.5') + dot(12, 12.5, 1.5),
   /* 037 M1 · THE COLLAGE SWITCH (Josh: "a video icon and the switches to the icon with a line crossing it out"): the film camera, and it struck through */
   videoOn: box(2.5, 6.5, 13, 11, 2.5) + p('M15.5 10.5 21.5 7v10l-6-3.5'),

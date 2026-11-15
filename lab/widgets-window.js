@@ -5,7 +5,7 @@
  * the stage's centre), the placed list (each its word and its number among its kind; × removes it — the one scroller, inside its own box, past
  * six rows) and EDIT · SNAP · CLEAR.  The layer is lab/widgets.js; the kinds' modules are imported here, so the gallery is whole when the card is
  * built (a kind that registers later joins it).  Returns the layer.  In lab/, not windows/: rack-deps admits only rack.js's planned modules there. */
-import { el, sw, trig, label } from './mir/kit.js';
+import { el, sw, trig, label } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js';
 import { createWidgets, kinds, onKinds } from './widgets.js';
 import './widget-mol.js'; import './widget-clock.js'; import './widget-text.js'; import './widget-views.js';
 export function createWidgetsWindow(app) {
@@ -23,6 +23,7 @@ export function createWidgetsWindow(app) {
     const n = {}, items = L.list(); list.textContent = ''; list.hidden = !items.length;
     for (const it of items) {
       n[it.kind] = (n[it.kind] || 0) + 1; const r = el('div', 'wg-row', list); r.dataset.id = it.id;
+      const K = kinds().find((k) => k.kind === it.kind), g = K && glyphEl(K.glyph, 'wg-gly', 16); if (g) r.append(g);   // 044 AV2 (L18): the FINDER's row — its kind's glyph, its word, its number
       label(el('span', 'wg-word', r), it.label); el('span', 'wg-n', r, String(n[it.kind]));
       r.append(trig({ label: '', glyph: 'close', title: 'Remove this widget', cls: 'wg-x', onFire: () => L.remove(it.id) }).root);
     }

@@ -31,7 +31,9 @@ export function createMapping(app, { kt }) {
     onState: () => { for (const e of Object.values(midi.map())) if (e.mode === 'hold') A.up(e.id); if (root.isConnected) paint(); } });   // a port come or gone lets every HELD row go (an unplugged device sends no note-off)
   const root = el('div', 'mp'), head = el('div', 'mp-head', root);
   const find = searchField(head, { cls: 'mp-find' });   // 044 KV2: the kit's one search field
-   find.placeholder = t('Find an action…'); find.setAttribute('aria-label', t('Find an action'));
+   find.placeholder = t('search actions'); find.setAttribute('aria-label', t('Find an action'));
+  /* 044 AV2 (L43) · ESCAPE CLEARS, THEN CLOSES: a typed query goes first; the next Escape is the window's */
+  find.addEventListener('keydown', (e) => { if (e.key === 'Escape' && find.value) { e.preventDefault(); e.stopPropagation(); find.value = ''; paint(); } });
   const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'ask the browser for MIDI and list the inputs', onFire: () => midi.start() });
   head.appendChild(conn.root); if (!support.ok) conn.root.hidden = true;
   const status = el('div', 'mp-status', root); status.setAttribute('role', 'status');
