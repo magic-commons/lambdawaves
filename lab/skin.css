@@ -523,7 +523,7 @@ body.no-transport-bar #transport { display: none; }
 /* 022 P3: the Picker is a PAGE, so its sheet stays its own; the popups that wore `.lw-menu` (the palette list, the FINDER, CSB search, the look
    drop) are menu panes and take the skin (the kit's surface law and --surface-menu-floor) */
 #lwMenu { background: hsl(var(--glass-tint) / .985); }
-body.frost #lwMenu { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
+body.frost #lwMenu { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }   /* 044 AF (L131): the kit's blur and its switches (QUALITY, reduced transparency) */
 body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #transport { visibility: hidden; opacity: 0; }   /* opacity too: the kit's block sets its own visibility */
 #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *)), #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *))::before, #lwMenu :where(:not(.mm-folders, .mm-folders *, .mm-sheet-body *))::after { outline: none; border: 0; box-shadow: none; }
 #lwMenu button:where(:not(.mm-folders *, .mm-sheet-body *)) { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }   /* iteration 015 M4: the kit's gallery keeps its own look */
@@ -606,7 +606,7 @@ img.pic-cell { object-position: -9999px 0; background: var(--pic) var(--cell) no
 #lwMenu .mm-page { flex: 0 0 100%; scroll-snap-align: start; display: grid; grid-template-columns: repeat(var(--cols), var(--t)); grid-auto-rows: var(--t); gap: var(--gap); align-content: start; }
 #lwMenu .mm-arrow { --near: 0; position: absolute; top: calc(50% - 11px); margin-top: -22px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--fg);
   background: hsl(var(--glass-tint) / .4); opacity: calc(.18 + .82 * var(--near)); transition: opacity .18s ease, scale var(--motion-ui) var(--ease), color var(--t-fast) ease; }
-body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25); backdrop-filter: blur(14px) saturate(1.25); }
+body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }
 #lwMenu .mm-prev { right: calc(100% + 14px - var(--fade)); } #lwMenu .mm-next { left: calc(100% + 14px - var(--fade)); }
 #lwMenu .mm-arrow .mm-ico { width: 22px; height: 22px; transform: scale(var(--glyph-scale, 1)); transition: transform var(--motion-ui) cubic-bezier(.2,.7,.25,1); }
 #lwMenu .mm-arrow:hover { scale: 1.08; color: var(--acc); } #lwMenu .mm-arrow:active { scale: .94; } #lwMenu .mm-arrow:focus-visible { opacity: 1; color: var(--acc); }
