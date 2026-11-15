@@ -318,7 +318,7 @@ body.transport-under #transport.mini { z-index: var(--z-chrome); }
 /* iteration 016 R1 · THE REGISTER'S FOOTNOTE (paint-stroke.js footLine): the law line under SPECTRUM's ladder and MOLECULES' two ladders; reduced motion: no fade.
    037 H7 · THE LAW LINE REVEALS ITSELF (Josh: "should only happen inside that reader thingy"): shown while the pointer is on ITS LADDER — the canvas it
    lies over (the line is pointer-events none, so the ladder's own hover is the line's) — or keyboard focus walks the window; no longer on the window's hover */
-.reg-foot { position: absolute; z-index: 1; height: 11px; font: var(--fs-micro)/11px ui-monospace, monospace; color: var(--fg); opacity: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; transition: opacity 160ms ease; }
+.reg-foot { position: absolute; z-index: 1; height: 11px; font: var(--fs-micro)/11px ui-monospace, monospace; color: var(--fg); opacity: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; transition: opacity var(--motion-ui) ease; }
 canvas:hover + .reg-foot, .dev:has(:focus-visible) .reg-foot { opacity: .8; }
 @media (prefers-reduced-motion: reduce) { .reg-foot { transition: none; } }
 .sp-rows { display: flex; flex-direction: column; gap: 3px; }
@@ -662,7 +662,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .native-ab .ab-slot::after { content: ''; flex: 0 0 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--glass-press); }
 .native-ab .ab-slot.stored::after { background: var(--acc); box-shadow: 0 0 6px color-mix(in srgb, var(--acc) 70%, transparent); }
 /* 018 C1 · SPECTRUM's A ↔ B (lab/windows/transition.js): ONE CLEAR, the bare trash glyph after B (the .sp-presave way: no chrome), dim while nothing is stored */
-.native-ab > .sp-abclear { display: grid; place-items: center; width: 22px; height: 22px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: none; color: var(--fg); opacity: .6; cursor: pointer; }
+.native-ab > .sp-abclear { display: grid; place-items: center; width: 22px; height: 22px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: none; color: var(--fg); opacity: .6; cursor: pointer; transition: opacity var(--t-fast); }
 .native-ab > .sp-abclear > svg { width: 16px; height: 16px; }   /* 021 V2: the table's trash, an SVG */
 .native-ab > .sp-abclear:is(:hover, :focus-visible) { opacity: 1; }
 .native-ab > .sp-abclear:disabled { opacity: var(--state-disabled, .38); cursor: not-allowed; }
@@ -775,7 +775,7 @@ body.menu-open #widgets { visibility: hidden; }
    way), the name asked in the stepper's own seat, and the list's USER / PRESETS headings and each reader's × */
 .dev .row.sp-preset { gap: 4px; flex-wrap: nowrap; }
 .dev .row.sp-preset > .mir-step { min-width: 0; }
-:is(.sp-preset, .mir-ramp-presets, .curves-foot) > .sp-presave { flex: 0 0 26px; display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: none; color: var(--acc); opacity: .8; cursor: pointer; }
+:is(.sp-preset, .mir-ramp-presets, .curves-foot) > .sp-presave { flex: 0 0 26px; display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: none; color: var(--acc); opacity: .8; cursor: pointer; transition: opacity var(--t-fast); }
 :is(.sp-preset, .mir-ramp-presets, .curves-foot) > .sp-presave > svg { width: 20px; height: 20px; }   /* 021 V2: the table's saveInto, an SVG */
 :is(.sp-preset, .mir-ramp-presets, .curves-foot) > .sp-presave:is(:hover, :focus-visible) { opacity: 1; }
 :is(.sp-preset, .mir-ramp-presets, .curves-foot) .mir-step-name[hidden] { display: none; }
@@ -863,7 +863,7 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 
 /* iteration 016 E1 · EMISSION SPECTRA (lab/emissionview.js): the strip is λWAVES' own black canvas, a whole line; ‹ SERIES › and ‹ PAIR › take the
    row, RANGE is a knob-sized seg (its two options in a column, SPECTRUM's `.sp-vseg` look), DECAY and the fold close the third row */
-.dev[data-id="emission"] .em-strip { display: block; width: 100%; height: 92px; border-radius: 6px; background: transparent; cursor: crosshair; touch-action: none; }
+.dev[data-id="emission"] .em-strip { display: block; width: 100%; height: 92px; border-radius: var(--r-md); background: transparent; cursor: crosshair; touch-action: none; }
 .dev[data-id="emission"] .em-strip:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 .dev[data-id="emission"] .em-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .dev[data-id="emission"] .em-step { flex: 1 1 auto; min-width: 0; }

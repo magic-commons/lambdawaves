@@ -24,7 +24,7 @@ import { createGas } from './windows/gas.js'; import { createEqualizerCard } fro
 import { createFolders } from './windows/folders.js';   // 021 G3: the FOLDERS card, out of boot()
 import { createContextMenus } from './context-menus.js';   // 022 P2: ONE MENU DOOR
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
-import { registerIcons } from './icons.js';   // 021 V2: THE ICON TABLE, through the kit's registerGlyphs, before any window
+import { registerIcons, WINDOW_GLYPH } from './icons.js';   // 021 V2: THE ICON TABLE, through the kit's registerGlyphs, before any window
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createSkeleton, centroid } from './skeleton.js'; import { moleculeCharge } from './molecules.js';   // iteration 014 B: the atoms ESP and (032 O1) SIZE / RADIUS > 0 draw (field.setAtoms) and the molecule's charge   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
 import { createMolecules } from './windows/molecules.js'; import { createStageWords, infoPrefs } from './shell/stage-words.js'; import { createModSeam, installEnvelopeTrigger } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
@@ -53,7 +53,7 @@ import { TIER, TIER_NAME } from './tier.js';   // 021 G1: the tiers live in lab/
 
 export async function boot(dom) {
   registerIcons();
-  const DEVICES = new Map(), device = ({ onPower, ...o }) => { const d = kitDevice(o); d.onPower = onPower; DEVICES.set(o.id, d); if (d.foldBtn) hint(d.foldBtn, 'Fold or unfold this window'); return d; };   // 039 X8 · FOLDING'S ONE WORD (the kit's hint says "Collapse or expand": FOR-KIT)   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked · 044 A2: `onPower(live)` is THE HAND'S POWER PRESS, the rack's own door for a card it adopts (rack-wiring.js hands it to rk.register; a restore's setOff never calls it), so no window listens on `.dev-power`
+  const DEVICES = new Map(), device = ({ onPower, ...o }) => { const d = kitDevice({ glyph: WINDOW_GLYPH[o.id], ...o }); d.onPower = onPower; DEVICES.set(o.id, d); if (d.foldBtn) hint(d.foldBtn, 'Fold or unfold this window'); return d; };   // 039 X8 · FOLDING'S ONE WORD (the kit's hint says "Collapse or expand": FOR-KIT)   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked · 044 A2: `onPower(live)` is THE HAND'S POWER PRESS, the rack's own door for a card it adopts (rack-wiring.js hands it to rk.register; a restore's setOff never calls it), so no window listens on `.dev-power`
   const reg = new Register();
   /* UNDO / REDO: the ring (`app.state.history`) is built at the foot of boot(), once every path it writes through exists; hNote() is
      the "an edit may have happened" ping for the few register-side setters that do not bump reg.version */

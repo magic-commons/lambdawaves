@@ -33,7 +33,7 @@
 .nodes-port.in { top: -5px; }
 .nodes-port.out { bottom: -5px; }
 .nodes-tools button, :is(.nodes-x, .nodes-rm) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
-  background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
+  background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; transition: color var(--t-fast), opacity var(--t-fast); }
 .nodes-x, .nodes-rm { width: 18px; height: 18px; margin-right: -4px; }
 .nodes-x[aria-pressed="true"] { color: var(--dim); opacity: .6; }   /* 036 P3: ⏻ MUTE — a muted node's power reads OFF (dim), a live one the bar's ink */
 :is(.nodes-tools button, .nodes-x, .nodes-rm):is(:hover, :focus-visible) { color: var(--fg); }
@@ -110,7 +110,7 @@
 .nodes-column .nodes-card.unplug::before { border-left-style: dashed; }
 /* 020 X4 · the foot fold: FADE · MASK · SOFT under the knobs; lit while either is off home */
 .nodes-foot { margin-top: 6px; border-top: 1px solid var(--glass-hairline); }
-.nodes-foot-t { display: block; width: 100%; padding: 5px 0 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
+.nodes-foot-t { display: block; width: 100%; padding: 5px 0 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); transition: color var(--t-fast); }
 .nodes-foot-t:hover { color: var(--fg); } .nodes-foot-t.on { color: var(--acc); }
 .nodes-foot > .nodes-knobs { padding-top: 4px; }
 .nodes-foot > .nodes-knobs > :is(.seg, .segw) { grid-column: 1 / -1; }   /* 038 N6: TARGET's three words on one line (two cells wrap OBJECT) */
