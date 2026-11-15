@@ -54,7 +54,7 @@ try {
   });
   await check('notebook resize commits its final frame before saving', `
     __LW.layout.notebook.open();__LW.layout.notebookResize(500,350);
-    const nb=document.querySelector('[data-mir-window="notebook"]'),grip=nb.querySelector('.nb-grip');
+    const nb=document.querySelector('[data-mir-window="notebook"]'),grip=nb.querySelector('.mir-win-resize');
     const send=(type,x,y)=>grip.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:6,pointerType:'touch',button:0,clientX:x,clientY:y}));
     send('pointerdown',500,350);send('pointermove',580,410);send('pointerup',580,410);
     await new Promise(r=>requestAnimationFrame(r));
@@ -65,6 +65,7 @@ try {
   // Real browser input also exercises implicit capture and its release events.
   for (const pointerType of ['mouse', 'touch']) {
     const before = await g.ev(`__LW.layout.notebook.close();__LW.layout.modulation.collapse();__LW.camera.setFling(0);__LW.camera.stop();
+      await new Promise((r)=>setTimeout(r,400));   /* 044 L102: the NOTEBOOK is a kit window, its close has the kit's motion */
       return {yaw:__LW.obs.yaw,target:document.elementFromPoint(400,300)?.id};`);
     assert.equal(before.target, 'field');
     await actions(g.s, [{ type: 'pointer', id: 'stage-' + pointerType, parameters: { pointerType }, actions: [
@@ -86,7 +87,7 @@ try {
     });
     assert.equal(response.ok, true);
     assert.equal((await g.waitFor(`__LW.layout.phone.on===${phone}`, 40, 50)).ok, 1);
-    const layout = await g.ev(`__LW.layout.notebook.open();
+    const layout = await g.ev(`__LW.layout.notebook.open(); await new Promise((r)=>setTimeout(r,500));   /* the kit window's entrance motion */
       const nb=document.querySelector('[data-mir-window="notebook"]').getBoundingClientRect();
       return {phone:__LW.layout.phone.on,viewport:[innerWidth,innerHeight],notebook:[nb.width,nb.height],overflow:document.documentElement.scrollWidth>innerWidth};`);
     assert.equal(layout.overflow, false);

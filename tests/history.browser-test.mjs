@@ -380,7 +380,7 @@ try {
   await ev(`__LW.layout.notebook.open('notes'); await __w(150); const ta = document.querySelector('.nb-text'); ta.focus();
     for (const ch of 'a note') { ta.value += ch; ta.dispatchEvent(new Event('input', { bubbles: true })); await __w(20); } return 1;`);
   none.notebook = { rows: (await rows()) - n, text: await ev(`return __LW.notebook.text;`) }; n += none.notebook.rows;
-  await realDrag(await at('[data-mir-window="notebook"] .nb-grip'), 40, 30, 4);
+  await realDrag(await at('[data-mir-window="notebook"] .mir-win-resize'), 40, 30, 4);
   none.nbResize = { rows: (await rows()) - n }; n += none.nbResize.rows;
   Object.assign(none, await ev(`const H = __LW.history, r = {}, count = () => H.entries().length; __LW.layout.notebook.close(); let n = count();
     const grid = __show(document.querySelector('.dev[data-id="settings"]')); const b = [...grid.querySelectorAll('.seg-b')].find((x) => x.textContent.trim() === '96³' && x.closest('.seg')?.getAttribute('aria-label') === 'GRID');   // iteration 013 S1: the GRID seg has no word

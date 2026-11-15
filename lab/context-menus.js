@@ -76,7 +76,7 @@ export function createContextMenus(app) {
     if (!t.closest || c('input, textarea, select, [contenteditable="true"], .mir-ctx')) return null;    // a field keeps the browser's own (paste)
     if ((e = c('.wp-row[data-win]'))) return finder(e);
     if ((e = c('#lwMenu'))) return (e = c('.mm-tile')) ? tile(e) : pickerPage();
-    if (c('#notebook')) return notebook();
+    if (c('[data-mir-window="notebook"]')) return notebook();
     if ((e = c('.k, .fd'))) return { control: e };
     if ((e = c('[data-fav]'))) return { control: e };
     if (c('.mir-transport')) return bar();

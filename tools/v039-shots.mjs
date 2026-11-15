@@ -55,7 +55,7 @@ const COVER = (sel) => `const w = document.querySelector(${JSON.stringify(sel)})
   let rackArea = 0; for (const d of document.querySelectorAll('#rack > .dev:not(.closed), #rackL > .dev:not(.closed)')) { const b = d.getBoundingClientRect(); const ix = Math.max(0, Math.min(r.right, b.right) - Math.max(r.left, b.left)), iy = Math.max(0, Math.min(r.bottom, b.bottom) - Math.max(r.top, b.top)); rackArea += ix * iy; }
   return { sel: ${JSON.stringify(sel)}, rect: [r.left, r.top, r.width, r.height].map(Math.round), page: [innerWidth, innerHeight], bar: bar.length + ' ' + bar.join(','), logo: logo.length, work: work.length + ' ' + work.slice(0, 8).join(','), rackPx: Math.round(rackArea), under: document.body.classList.contains('transport-under') };`;
 const WINS = [['nodes', '[data-mir-window="nodes"]'], ['render.open', '.dev[data-id="render"]'], ['folders', '[data-mir-window="folders"]'], ['help', '[data-mir-window="keyboard"]'],
-  ['notebook', '#notebook'], ['about', '[data-mir-window="about"]'], ['gui', '[data-mir-window="gui"]']];
+  ['notebook', '[data-mir-window="notebook"]'], ['about', '[data-mir-window="about"]'], ['gui', '[data-mir-window="gui"]']];
 const out = { scene, log: [] };
 try {
   if (scene === 'bar') {

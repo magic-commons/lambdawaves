@@ -23,7 +23,7 @@ const handles = () => wd('GET', '/window/handles');
 let failed = false;
 const pass = (m) => console.log('PASS ' + m);
 const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefined && r !== null && !r.E, 'page threw: ' + JSON.stringify(r)); return r; };
-const link = (href) => `#notebook .nb-view a[href="${href}"]`;
+const link = (href) => `[data-mir-window="notebook"] .nb-view a[href="${href}"]`;
 /** one press of a link, by a real pointer, and what it did: the ring's rows, the fades, the opens, the tabs */
 async function press(href, settle = 900) {
   const before = await ev(`return { rows: __LW.history.cursor, n: __LW.history.entries().length, ann: __LW.stageText.stats.announced, heads: __LW.head.shown };`);
@@ -32,7 +32,7 @@ async function press(href, settle = 900) {
   const after = await ev(`await __w(${settle}); __LW.history.flush(); await __w(50);
     const E = __LW.history.entries();
     return { rows: __LW.history.cursor, n: E.length, last: E[E.length - 1].label, labels: E.slice(-4).map((e) => e.label), bottom: E[0].label, ann: __LW.stageText.stats.announced, heads: __LW.head.shown, banner: __LW.stageText.banner,
-      opens: window.__opens, href: location.href, foot: document.querySelector('#notebook .nb-count').textContent, mode: __LW.notebook.mode };`);
+      opens: window.__opens, href: location.href, foot: document.querySelector('[data-mir-window="notebook"] .nb-count').textContent, mode: __LW.notebook.mode };`);
   const h1 = await handles();
   return { ...after, before, rows: after.rows - before.rows, fades: after.ann - before.ann, heads: after.heads - before.heads, tabs: h1.length - h0.length };
 }
@@ -44,12 +44,12 @@ try {
   const t0 = await ev(`__LW.stageText.prefs.set({ sayPreset: true, sayHead: true }); window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__opens = 0; window.open = () => { window.__opens++; return null; };
     __LW.layout.notebook.open('notes'); await __w(200);
-    const ta = document.querySelector('#notebook .nb-text'); ta.focus(); ta.value = ${JSON.stringify(md)}; ta.dispatchEvent(new Event('input', { bubbles: true }));
+    const ta = document.querySelector('[data-mir-window="notebook"] .nb-text'); ta.focus(); ta.value = ${JSON.stringify(md)}; ta.dispatchEvent(new Event('input', { bubbles: true }));
     __LW.setView('density'); const D = __LW.mat.view; __LW.setView('phase'); const P = __LW.mat.view;
     await __w(500); __LW.history.flush(); await __w(500); __LW.history.flush();
     return { D, P, rows: __LW.history.cursor, n: __LW.history.entries().length, bottom: (__LW.history.entries()[0] || {}).label || null };`);
-  assert.deepEqual(await g.tap('#notebook .nb-mode'), { ok: 1 });
-  const v = await ev(`await __w(300); const a = [...document.querySelectorAll('#notebook .nb-view a')];
+  assert.deepEqual(await g.tap('[data-mir-window="notebook"] .nb-mode'), { ok: 1 });
+  const v = await ev(`await __w(300); const a = [...document.querySelectorAll('[data-mir-window="notebook"] .nb-view a')];
     return { mode: __LW.notebook.mode, links: a.map((x) => [x.getAttribute('href'), x.getAttribute('target')]) };`);
   assert.equal(v.mode, 'view');
   assert.deepEqual(v.links.map((l) => l[0]), ['lw:view=density', 'lw:molecule=h2o', 'lw:molecule=nh3&orbital=lumo', 'lw:s=abc', `https://127.0.0.1:${PORT}/lab/manifest.webmanifest`],

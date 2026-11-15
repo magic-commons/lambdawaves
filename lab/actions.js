@@ -198,7 +198,7 @@ export function createActions(app) {
       get: () => (document.querySelector('#lwMenu .mm-lk.on') || { dataset: {} }).dataset.look, run: (a) => { const b = a && a.id && document.querySelector('#lwMenu .mm-lk[data-look="' + a.id + '"]'); if (b) b.click(); return !!b; } },
     { id: 'esp.side', group: V, short: 'esp side', label: 'ESP BAR SIDE', hint: 'The ESP bar’s side', kind: 'set', args: { id: '?enum right|left|top|bottom' }, get: () => IP.get('espBarSide'), surface: true,
       run: (a) => { const s = ['right', 'left', 'top', 'bottom']; IP.set({ espBarSide: a && s.includes(a.id) ? a.id : s[(s.indexOf(IP.get('espBarSide')) + 1) % 4] }); } },
-    { id: 'notebook.copy', group: PJ, short: 'copy notebook', label: 'COPY TEXT', hint: 'Copy the NOTEBOOK’s text', surface: true, undo: 'none', run: () => copyOut((document.querySelector('#notebook .nb-text') || {}).value, 'the notebook') },
+    { id: 'notebook.copy', group: PJ, short: 'copy notebook', label: 'COPY TEXT', hint: 'Copy the NOTEBOOK’s text', surface: true, undo: 'none', run: () => copyOut(L().notebook.text, 'the notebook') },
     { id: 'spectrum.solo', group: WD, short: 'solo spectrum', label: 'SOLO SPECTRUM', hint: 'Fold every other window', surface: true, run: () => api.run('window.spectrum.solo') },
     ...[['film.picture', 'RENDER › CAPTURE IMAGE', '.sr-capture'], ['film.record', 'RENDER › RENDER', '.sv-primary']].map(([id, label, cls]) => ({ id, group: PJ, short: label.split(' › ')[1].toLowerCase(), label, surface: true,
       run: () => { const b = document.querySelector('.dev[data-id="render"] ' + cls); if (b && !b.disabled) b.click(); } })),   // the kit's RENDER card's own buttons (by their class)
