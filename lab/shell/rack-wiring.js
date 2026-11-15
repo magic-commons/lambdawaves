@@ -60,7 +60,7 @@ export function createRackWiring(app) {
       /* 039 R8 · THE DROPPED CARD GOES TO THE TOP (S-REVIEW #9, 018 C4): the kit lays a card dropped into a rack where the hand let go — the
          detached CONTROL SURFACE card too; the docked bar's card is the left rack's top whatever the hand did, so the kit's persisted change re-seats it */
       if (t && layout.docked && !t.classList.contains('floating') && layout.dockHost().querySelector('.dev') !== t) { layout.seatTransport(); saveSettings(); } } });   // a kit-side act moved a window: the mask follows (what is remembered is saveSettings', on its own edges); 038 S1: the TRANSPORT's pop chip says where it is
-  for (const [id, g] of [['rackToggle', 'rackToggle'], ['rackFav', 'heart']]) { const b = document.getElementById(id); if (b) setGlyph(b, g); }
+  for (const [id, g] of [['rackToggle', 'rackToggle'], ['rackFav', 'star']]) { const b = document.getElementById(id); if (b) setGlyph(b, g); }
   /* 040 I6 · THE GHOST: the ◧ wears the ghost before its window, behind it under B — rk.setHidden writes body.rack-hidden alone, so the class is watched */
   let hidAt = -1e9, wasHid = false;   // 041 I8: when B last hid the racks (the bar's peek below arms off it)
   { const t = document.getElementById('rackToggle'), ghost = () => { const h = rk.hidden, g = h ? 'rackHidden' : 'rackToggle'; if (h && !wasHid) hidAt = performance.now(); wasHid = h; if (t && t.dataset.gly !== g) setGlyph(t, g); };

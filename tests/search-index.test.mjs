@@ -39,12 +39,12 @@ const TABLE = [
   ['3d', 'state:h:3:2:0', 2], ['2p0', 'state:h:2:1:0', 1], ['4f-2', 'state:h:4:3:-2', 1], ['4f2', 'state:h:4:3:2', 1], ['3d₋₁', 'state:h:3:2:-1', 1], ['n=3', 'state:h:3:0:0', 3],
   ['tl', 'element:81', 1], ['ep', 'action:export.picture', 5], ['tmln', 'window:timeline', 7],
   ['screenshot', 'action:export.picture', 3], ['screnshot', 'action:export.picture', 6], ['rendr', 'window:render', 6], ['spectrm', 'window:spectrum', 6], ['benzne', 'molecule::C6H6', 6],
-  ['video', 'window:render', 3], ['record', 'window:render', 3], ['fullscreen', 'action:fullscreen', 2], ['> full', 'action:fullscreen', 2], ['@ nodes', 'window:nodes', 1], ['# au', 'element:79', 1], [': 3d', 'state:h:3:2:0', 2],
-  ['spectrum', 'window:spectrum', 1], ['timeline', 'window:timeline', 1], ['undo', 'action:undo', 2], ['mir options', 'action:gui', 2], ['quarkonium', 'system:cornell', 1],
+  ['video', 'window:render', 3], ['record', 'window:render', 3], ['fullscreen', 'action:fullscreen', 1], ['> full', 'action:fullscreen', 2], ['@ nodes', 'window:nodes', 1], ['# au', 'element:79', 1], [': 3d', 'state:h:3:2:0', 2],
+  ['spectrum', 'window:spectrum', 1], ['timeline', 'window:timeline', 1], ['undo', 'action:undo', 1], ['mir options', 'action:gui', 1], ['quarkonium', 'system:cornell', 1],
   ['oscillator', 'system:qho', 1], ['tight binding', 'system:lattice', 3], ['tutorial', 'page:tutorial', 1], ['periodic', 'page:atomic', 3],
   ['water esp', 'project:demo:water-esp', 1], ['wave dancer', 'project:demo:wave-dancer', 2],
-  ['reset camera', 'action:camReset', 3], ['camera reset', 'action:camReset', 4],   // two terms: in order beats any order, the same act
-  ['psi', 'action:turnNeg', 3], ['lambda', 'action:csb.search', 3],
+  ['reset camera', 'action:camReset', 4], ['camera reset', 'action:camReset', 4],   // 044 AV2: the act is named CAMERA HOME; both orders find it by its sentence
+  ['psi', 'action:turnNeg', 4], ['lambda', 'action:about', 3],   // 044 AV2 ONE NAME PER THING: a title is the act's CAPS name (an exact name is tier 1), ψ is in TURN's sentence, λ names ABOUT λWAVES
 ];
 const got = TABLE.map(([q, id, tier]) => { const t = top(q); return { q, id, tier, gotId: t && t.doc.id, gotTier: t && t.tier, title: t && t.doc.title }; });
 const bad = got.filter((r) => r.gotId !== r.id || r.gotTier !== r.tier);

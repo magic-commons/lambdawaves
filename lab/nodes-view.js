@@ -1,8 +1,8 @@
 /* lab/nodes-view.js — NODES' one VIEW (iteration 020 X0, split out of lab/nodes.js; the model is there).  Built twice over one graph: kind
  * 'win' (the MIR window: the free ground — it pans; a card moves by its title bar; the wires are one SVG layer) and kind 'card' (the rack
  * card: the chain as a column, no pan, no drag).  STAGE IN → the nodes → STAGE OUT; THE DEFAULT GRAPH IS EMPTY and says so in one faint line.
- * 038 N1 THE + MENU IS THE KIT'S: contextMenu under the +, on the page (its plate, its blur, never clipped): a search line (typed: the matches,
- * Enter adds the first, Escape closes), the GROUPS (each a submenu: an item is its icon + its name + its cost mark, HEAVY as 019), GRAPHS ›.
+ * 038 N1 · 044 AV2 THE + IS A PICKER OF THE FINDER'S KIND: the kit's rackless createWindowPicker on the page — the field, the GROUPS as sections (a row is
+ * its icon + its name; its cost in the hint), GRAPHS the last section; ↑ ↓ Enter, Escape clears then closes.
  * Icons: the one table's `node<Type>` glyphs (lab/icons.js, 021 V2; the sprite retired).
  * 020 X1 THE GROUND (the window only; the rack column never zooms or selects): ctrl/⌘ + wheel and a pinch zoom 0.5–2× about the pointer
  * (`scale` on the plane with the pan; the wires, the ports and the dot grid follow), FIT (the button beside +, Home) fits the cards with a
@@ -24,7 +24,7 @@
  * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
  * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
-import { el, label, ariaLabel, chip, onContext, placeholder, wheelNotches, setKnobLaw, tapWatcher, verticalDrag } from './mir/kit.js'; import { drag as kitDrag } from './mir/core/pointer.js'; import { contextMenu } from './mir/shell/menubar.js'; import { openDialog } from './mir/shell/dialog.js';
+import { el, label, ariaLabel, chip, onContext, placeholder, wheelNotches, setKnobLaw, tapWatcher, verticalDrag } from './mir/kit.js'; import { drag as kitDrag } from './mir/core/pointer.js'; import { contextMenu } from './mir/shell/menubar.js'; import { createWindowPicker } from './mir/shell/window-picker.js'; import { finderMatch } from './csb-search.js'; import { openDialog } from './mir/shell/dialog.js';
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun, over } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js'; import { setText } from './mir/core/perf.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
@@ -266,7 +266,7 @@ export function createView(parent, kind, M) {
   /* THE RIGHT-CLICK MENUS (022 P2: the kit's contextMenu — a right-click, the ContextMenu key or a still hold, onContext; ✓ where a row is a state) */
   let pop = null;                                                    // the kit menu open from this view (a right-click's, or the + menu)
   let drag = null;                                                   // the ground's press: a pan, a box (shift) or a zoom (ctrl / ⌘)
-  const popup = (x, y, rows) => { const m = pop = contextMenu({ x, y, entries: rows.map((r) => (r ? [r[0], r[1], false, '', r.length > 2 ? { checked: !!r[2] } : {}] : null)), onClose: () => { if (pop === m) pop = null; } }); };
+  const popup = (x, y, rows) => { const m = pop = contextMenu({ x, y, entries: rows.map((r) => (r ? [r[0], r[1], false, '', r[3] || (r.length > 2 ? { checked: !!r[2] } : {})] : null)), onClose: () => { if (pop === m) pop = null; } }); };
   const folded = () => M.list().length > 0 && M.list().every((q) => q.fold);
   const foldAll = () => M.setFold(M.list().map((q) => q.id), !folded());
   const cardRows = (q) => [['VIEW HERE', () => M.setView(q.id), M.flags.view === q.id], ['SOLO', () => M.setSolo(q.id), M.flags.solo === q.id], ['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'UNFOLD' : 'FOLD', () => M.setFold(q.id, !q.fold)],
@@ -274,6 +274,7 @@ export function createView(parent, kind, M) {
     ['MOVE UP', () => M.move(q.id, -1)], ['MOVE DOWN', () => M.move(q.id, 1)], null, ['REMOVE', () => M.remove(q.id)]];
   const wireRows = (q) => { const k = mixOf(T[q.type]); return [[q.plug === false ? 'PLUG IN' : 'UNPLUG', () => M.setPlug(q.id, q.plug === false)], k && ['RESET MIX', () => M.hand(q, k, homeOf(T[q.type], k))]].filter(Boolean); };
   const groundRows = () => [['ADD…', () => openMenu()], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'UNFOLD ALL' : 'FOLD ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()],
+    M.graphs.list().length > 0 && ['REMOVE A GRAPH', () => M.graphs.list().map((u) => [u.name, () => M.graphs.remove(u.name), false, 'Remove this graph', { raw: true }]), false, { sub: true, icon: 'trash' }],
     ...(wsel && M.byId(wsel) ? [null, wireRows(M.byId(wsel))[0]] : [])].filter((r) => r !== false);
   onContext(ground, ({ x, y, target }) => { if (target.closest('input') || (drag && drag.zoom)) return;   // a Mac's ctrl + press is a zoom here, not a menu
     const hd = target.closest('.nodes-hand'), hq = hd && M.byId(hd.dataset.wire); if (hq) { pickWire(hq.id); popup(x, y, wireRows(hq)); return; }
@@ -358,32 +359,22 @@ export function createView(parent, kind, M) {
   const foldB = W ? null : tool('nodes-folds', 'compact', 'FOLD ALL', () => foldAll());
   const offB = W ? null : tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
   const back = () => { if (W) ground.focus({ preventScroll: true }); };   // a pick or an Escape gives the ground its keys back
-  const kindRow = (type, t) => [t.label + '\t' + MARK[t.cls] + (t.heavy ? ' HEAVY' : ''), () => { M.add(type); back(); }, type === 'curves' && M.has(), t.hint, { icon: nodeGlyph(type), id: type }];
+  /* 044 AV2 (L17) · THE + IS A PICKER OF THE FINDER'S KIND (the kit's rackless createWindowPicker, MIR 1.6.0-alpha.54): the FINDER's field, rows, walk and
+     Escape (clear, then close), the search's matcher; the node GROUPS are its sections and GRAPHS the last (the shipped ones, the reader's, SAVE THIS
+     GRAPH).  The focus stays in the field and nothing is rebuilt per keystroke.  A kind's cost is in its hint (the card wears the mark); REMOVE of a
+     saved graph is the ground's right-click row */
+  const kindRow = (type, t) => ({ id: type, title: t.label, glyph: nodeGlyph(type), hint: t.hint + ' · cost ' + MARK[t.cls] + (t.heavy ? ' HEAVY' : ''), can: () => (type === 'curves' && M.has() ? 'ONE ONLY' : true), run: () => { M.add(type); back(); } });
   const kinds = ([g, , , cls = [g]]) => Object.entries(T).filter(([, t]) => t.menu !== false && cls.includes(t.group || t.cls)).map(([type, t]) => kindRow(type, t));
-  const graph = (name, list, hint, raw) => [name, () => { M.applyGraph(list, name); back(); }, false, hint, { id: 'graph:' + name, raw }];   // 040 N4: the bar names it
-  const graphRows = () => { const U = M.graphs.list();
-    return [...Object.entries(M.SHIPPED).map(([name, list]) => graph(name, list, 'a shipped graph: every node but CURVES replaced')),
-      ...(U.length ? [null, ...U.map((u) => graph(u.name, u.data, 'your graph (kept on this device)', true))] : []),
-      null, ['SAVE THIS GRAPH', saveGraph, false, 'the nodes as your own graph (kept on this device)', { icon: 'saveInto', id: 'save' }],
-      ...(U.length ? [['REMOVE', () => U.map((u) => [u.name, () => M.graphs.remove(u.name), false, 'remove this graph', { raw: true, id: 'remove:' + u.name }]), null, '', { sub: true, icon: 'trash', id: 'remove' }]] : [])]; };
-  const found = (s) => { const S = s.toUpperCase();
-    return [...Object.entries(T).filter(([, t]) => t.menu !== false && t.label.includes(S)).map(([type, t]) => kindRow(type, t)),
-      ...Object.entries(M.SHIPPED).filter(([n]) => n.includes(S)).map(([n, list]) => graph(n, list, 'a shipped graph')),
-      ...M.graphs.list().filter((u) => u.name.toUpperCase().includes(S)).map((u) => graph(u.name, u.data, 'your graph', true))].slice(0, 10); };
-  let find = null;
-  /** open the + menu, its caret on the search line; a typed search reopens it with the matches (the line kept, the caret where it was) */
-  function openMenu(s = '') {
-    if (!find) { find = el('input', 'nodes-find'); find.type = 'search'; placeholder(find, 'search'); ariaLabel(find, 'find a node');
-      find.addEventListener('input', () => openMenu(find.value.trim()));
-      find.addEventListener('keydown', (e) => { e.stopPropagation(); const r = pop && pop.pane.querySelector('.mb-item:not(:disabled)');
-        if (r && (e.key === 'Enter' || e.key === 'ArrowDown')) { e.preventDefault(); if (e.key === 'Enter') r.click(); else r.focus(); } }); }
-    if (!s) find.value = '';
-    const at = [find.selectionStart, find.selectionEnd], rows = s ? found(s) : [...GROUPS.filter((G) => kinds(G).length).map((G) => [G[1], () => kinds(G), null, '', { sub: true, icon: G[2], id: 'group:' + G[0] }]),
-      null, ['GRAPHS', graphRows, null, '', { sub: true, icon: 'nodes', id: 'graphs' }]];
-    const m = pop = contextMenu({ anchor: addB, label: 'Add a node', entries: rows.length ? rows : [['NO MATCH', null, true]], onClose: () => { if (pop === m) pop = null; } });
-    if (!m) return;
-    m.pane.classList.add('nodes-add-menu'); m.pane.prepend(find); find.focus({ preventScroll: true }); if (s) find.setSelectionRange(at[0], at[1]);
-    m.host.addEventListener('keydown', (e) => { if (e.key !== 'Escape' || e.target.closest('.mb-sub-list')) return; e.preventDefault(); e.stopPropagation(); m.close(); back(); }, true);
+  const graph = (name, list, hint) => ({ id: 'graph:' + name, title: name, glyph: 'nodes', hint, run: () => { M.applyGraph(list, name); back(); } });   // 040 N4: the bar names it
+  const graphRows = () => [...Object.entries(M.SHIPPED).map(([name, list]) => graph(name, list, 'A shipped graph: every node but CURVES replaced')),
+    ...M.graphs.list().map((u) => graph(u.name, u.data, 'Your graph (kept on this device)')),
+    { id: 'save', title: 'SAVE THIS GRAPH', glyph: 'saveInto', hint: 'The nodes as your own graph (kept on this device)', run: saveGraph }];
+  let adder = null;
+  function openMenu() {
+    if (!adder) { adder = createWindowPicker({ cls: 'lw-menu nodes-picker', match: finderMatch, sections: [...GROUPS.map((G) => ({ id: G[0], title: G[1], rows: () => kinds(G) })), { id: 'graphs', title: 'GRAPHS', rows: graphRows }] });
+      const f = adder.root.querySelector('.wp-search'); placeholder(f, 'search nodes'); ariaLabel(f, 'find a node'); ariaLabel(adder.root, 'Add a node');
+      new MutationObserver(() => { const a = document.activeElement; if (adder.root.hidden && (!a || a === document.body)) back(); }).observe(adder.root, { attributes: true, attributeFilter: ['hidden'] }); }   // an Escape gives the ground its keys back
+    adder.open();
   }
   /** SAVE THIS GRAPH: its name in the kit's dialog (Enter keeps it, Escape does not) */
   function saveGraph() {

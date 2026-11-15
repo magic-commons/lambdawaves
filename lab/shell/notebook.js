@@ -73,56 +73,61 @@ export function createNotebook(app) {
          accordion on a phone).  One road to NEW (FOLDERS asks); HIDE lives in VIEW › INTERFACE and SETTINGS in EDIT, once each.  (N1's law
          stands: nothing is reached by label or by key code.) */
       const A = app.sh.ACTIONS, keyFor = (id) => app.sh.kt.keyText(id);
-      /** item(id, text, opts) — a row for an action: its key after the TAB, a toggle checked from get(), `args` run with arguments */
-      const item = (id, text, o = {}) => { const a = A.get(id); if (!a) return null; const m = !o.args && app.sh.kt.table.menuItem(id, text), k = o.args ? '' : keyFor(id), on = o.on !== undefined ? o.on() : a.kind === 'toggle' && a.get ? !!a.get() : undefined;
-        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), o.run || (m ? m[1] : () => A.run(id, o.args)), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { id, ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon || (a.icon && !o.radio) ? { icon: o.icon || (typeof a.icon === 'function' ? a.icon() : a.icon) } : {}) }]; };   // 022 E2: a row wears its action's glyph (the registry's `icon`); 040 M1: `run` an opener over a toggle's run
+      /** item(id, opts) — a row for an action, ITS WORDS THE REGISTRY'S (044 AV2 · ONE NAME PER THING, L77): the row's `label` (its `word()` where it changes; of
+       *  `A › B` the B), its key after the TAB, its hint, its glyph, a toggle ticked from get() (`menuOn` where the tick is the thing shown) — `args` run it
+       *  with arguments, `tail` is a suffix the menu knows (SAVE's project), `bare` drops the … on a ticked row (E12), `word` a choice's own word */
+      const nameOf = (a) => (a.word ? a.word() : a.label).split(' — ')[0].split(' › ').pop();
+      const item = (id, o = {}) => { const a = A.get(id); if (!a) return null; const m = !o.args && app.sh.kt.table.menuItem(id), k = o.args ? '' : keyFor(id), on = o.on !== undefined ? o.on() : a.kind === 'toggle' && (a.menuOn || a.get) ? !!(a.menuOn || a.get)() : undefined;
+        const text = (o.word || (o.bare ? nameOf(a).replace(/…$/, '') : nameOf(a))) + (o.tail || '');
+        return [text + (k && k !== '—' ? '\t' + k : ''), o.run || (m ? m[1] : () => A.run(id, o.args)), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { id, ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(a.icon && !o.radio ? { icon: typeof a.icon === 'function' ? a.icon() : a.icon } : {}) }]; };   // 022 E2: a row wears its action's glyph (the registry's `icon`); 040 M1: `run` an opener over a toggle's run
       /** 040 M1 · an OPENER row for a toggle action (FILE › FOLDERS…): a plain row (no ✓) that runs the action only while its window is closed, so the row never closes what it names */
-      const opener = (id, text, o = {}) => item(id, text, { ...o, on: () => undefined, run: () => { const a = A.get(id); if (!(a.get && a.get())) A.run(id); } });
-      const sub = (text, entries, icon) => [text, entries, null, '', { sub: true, ...(icon ? { icon } : {}) }];
-      const radio = (id, group, choices, cur) => choices.map(([v, w]) => item(id, w, { args: { id: v }, radio: group, on: () => cur() === v }));
+      const opener = (id, o = {}) => item(id, { ...o, on: () => undefined, run: () => { const a = A.get(id); if (!(a.get && a.get())) A.run(id); } });
+      /** sub(text, entries, icon) — a submenu; a row inside it drops the words its parents already said (EXPORT › PICTURE is the row EXPORT PICTURE) */
+      const strip = (said, rows) => rows.map((r) => (!r || (r[4] && r[4].raw) ? r : r[4] && r[4].sub ? [r[0], () => strip(said, r[1]()), ...r.slice(2)] : [said.reduce((t, w) => (t.startsWith(w + ' ') ? t.slice(w.length + 1) : t), r[0]), ...r.slice(1)]));
+      const sub = (text, entries, icon) => [text, () => strip([text], entries()), null, '', { sub: true, ...(icon ? { icon } : {}) }];
+      const radio = (id, group, choices, cur) => choices.map(([v, w]) => item(id, { word: w, args: { id: v }, radio: group, on: () => cur() === v }));
       const reveal = A.reveal, H = () => app.sh.historyApi, wins = () => [...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')], TOOL_SEAT = new Set(['modulation', 'timeline', 'pattern', 'nodes', 'notebook', 'folders', 'history']);
       const MENUS = {
         /* iteration 004 · FILE GOES THROUGH FOLDERS (BASINS shell.js FILE): NEW, OPEN and a recent project open FOLDERS first and let it ask
            "Save this first?" (SAVE & OPEN · OPEN WITHOUT SAVING, SAVE & NEW · NEW WITHOUT SAVING) — no window.confirm on these rows */
-        FILE: () => [item('new', 'NEW', { icon: 'plus' }), item('open', 'OPEN…', { icon: 'folder' }),
-          sub('OPEN RECENT', () => { const r = layout.projects.recent().slice(0, 8); return r.length ? r.map((p) => [p, () => { const P = layout.projects, e = P.entryOf(p); P.show(e ? { folder: e.folder } : {}); if (e) P.folders.openEntry(e.id); }, null, '', { raw: true }]) : [['nothing yet', null, true]]; }),
-          opener('folders', 'FOLDERS…', { hint: 'Open FOLDERS — the projects, the demos, the saves' }),   // 040 M1 · FILE › FOLDERS (Josh 11-09: "Have an option in 'File' to open the 'Folders' window"): the `folders` action (O), an opener row
-          item('save', 'SAVE' + (layout.projects.current ? '  ' + layout.projects.current : '…'), { icon: 'save' }), item('saveAs', 'SAVE AS…'), null,
-          item('import', 'IMPORT…', { icon: 'upload' }),
-          sub('EXPORT', () => [sub('PROJECT', () => [item('export.json', '.json'), item('export.mir', '.mir'), item('export.png', '.png — the picture carrying the project')]),
-            item('export.picture', 'PICTURE'),
-            sub('SHAPE', () => SHAPE_EXPORTS.filter((s) => s.kind === 'shape').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip }))),
-            sub('GRID', () => SHAPE_EXPORTS.filter((s) => s.kind === 'grid').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip })))], 'download'),
-          item('render.open', 'RENDER…'), item('render.frames', 'EXPORT FRAMES…'),   // 025 C1: the film's rows after EXPORT (the card's FILM… row moved here)
-          null, sub('QUICK', () => [item('quick.save', 'SAVE the experiment'), item('quick.load', 'LOAD the last quick save')]),
-          null, item('menu', 'MAIN MENU', { on: () => undefined })],   // 038 M2 (Josh 11-06; CALLS 4): FILE's foot — it was WINDOW › TOOLS; the id `menu` and L stay
-        EDIT: () => [item('undo', 'UNDO', { dis: () => !H().canUndo }), item('redo', 'REDO', { dis: () => !H().canRedo }),
-          item('historyUndo', 'HISTORY UNDO', { dis: () => !H().canHistoryUndo, hint: 'back to the timeline before the last jump' }), item('history', 'UNDO HISTORY…'), null,
-          sub('COPY', () => [item('copy.latex', 'LaTeX', { hint: 'the populated states in chemistry order, as LaTeX' }), item('copy.json', 'JSON', { hint: 'the experiment and its presentation as JSON' }),
-            item('copy.link', 'LINK', { hint: 'a URL that reopens this exact state' })], 'duplicate'),
-          sub('STATE', () => [item('state.normalize', 'NORMALIZE'), item('state.clear', 'CLEAR the register'), item('reseed', 'RESEED the particles')]), null,
-          item('mapping', 'KEYBOARD & MAPPING…'), item('settings', 'SETTINGS…')],
+        FILE: () => [item('new'), item('open'),
+          sub('OPEN RECENT', () => { const r = layout.projects.recent().slice(0, 8); return r.length ? r.map((p) => [p, () => { const P = layout.projects, e = P.entryOf(p); P.show(e ? { folder: e.folder } : {}); if (e) P.folders.openEntry(e.id); }, null, '', { raw: true, icon: 'projectFile' }]) : [['nothing yet', null, true]]; }, 'projectFile'),
+          opener('folders'),   // 040 M1 · FILE › FOLDERS (Josh 11-09: "Have an option in 'File' to open the 'Folders' window"): the `folders` action (O), an opener row
+          item('save', { tail: layout.projects.current ? '  ' + layout.projects.current : '…' }), item('saveAs'), null,
+          item('import'),
+          sub('EXPORT', () => [sub('PROJECT', () => [item('export.json'), item('export.mir'), item('export.png')], 'projectFile'),
+            item('export.picture'),
+            sub('SHAPE', () => SHAPE_EXPORTS.filter((s) => s.kind === 'shape').map((s) => item('export.' + s.fmt)), 'shape'),
+            sub('GRID', () => SHAPE_EXPORTS.filter((s) => s.kind === 'grid').map((s) => item('export.' + s.fmt)), 'grid')], 'download'),
+          item('render.open'), item('render.frames'),   // 025 C1: the film's rows after EXPORT (the card's FILM… row moved here)
+          null, sub('QUICK', () => [item('quick.save'), item('quick.load')], 'bolt'),
+          null, item('menu', { on: () => undefined })],   // 038 M2 (Josh 11-06; CALLS 4): FILE's foot — it was WINDOW › TOOLS; the id `menu` and L stay
+        EDIT: () => [item('undo', { dis: () => !H().canUndo }), item('redo', { dis: () => !H().canRedo }),
+          item('historyUndo', { dis: () => !H().canHistoryUndo }), item('history'), null,
+          sub('COPY', () => [item('copy.latex'), item('copy.json'), item('copy.link')], 'duplicate'),
+          sub('STATE', () => [item('state.normalize'), item('state.clear'), item('reseed')], 'states'), null,
+          item('mapping'), item('settings')],
         VIEW: () => [sub('MODE', () => radio('mode', 'mode', [['hydrogen', 'HYDROGEN'], ['molecules', 'MOLECULES']], () => (A.get('mode').get() ? 'molecules' : 'hydrogen')), 'atom'),
-          sub('OBSERVABLE', () => radio('view', 'view', [['density', 'ρ = |ψ|²  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']], () => VIEW_NAMES[mat.view])),
-          sub('STYLE', () => radio('style', 'style', ui.styleList(), () => drawStyle(mat.style))),   // 032 O1: WAVE's visible styles, its words
-          item('invert', 'INVERT the cloud — ink, not light'),
-          sub('STAGE', () => [item('view.captions', 'CAPTIONS'), item('view.formula', 'FORMULA'), item('view.labels', 'ATOM LABELS'), item('ballStick', 'BALL AND STICK')]),
-          sub('INTERFACE', () => [item('view.badges', 'STATUS TAGS'), item('view.hints', 'CONTROL HINTS'), item('notes', 'WINDOW HELP'), null, item('hide', 'HIDE the interface')]),
-          sub('CAMERA', () => [item('camReset', 'HOME'), item('camera.panHome', 'PAN HOME'), null, item('camera.lock', 'LOCK'), item('camera.flip', 'FLIP'), item('camera.autoRotate', 'AUTO-ROTATE')], 'lens'),
+          sub('OBSERVABLE', () => radio('view', 'view', [['density', 'ρ = |ψ|²  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']], () => VIEW_NAMES[mat.view]), 'psi'),
+          sub('STYLE', () => radio('style', 'style', ui.styleList(), () => drawStyle(mat.style)), 'paint'),   // 032 O1: WAVE's visible styles, its words
+          item('invert'),
+          sub('STAGE', () => [item('view.captions'), item('view.formula'), item('view.labels'), item('ballStick')], 'stage'),
+          sub('INTERFACE', () => [item('view.badges'), item('view.hints'), item('notes'), null, item('hide')], 'eye'),
+          sub('CAMERA', () => [item('camReset'), item('camera.panHome'), null, item('camera.lock'), item('camera.flip'), item('camera.autoRotate')], 'camera'),
           sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get()), 'moon'),
-          item('fullscreen', 'FULL SCREEN')],
-        PLAY: () => [item('transport.play', 'PLAY / PAUSE'), item('home', 't → 0'), item('stepBack', 'STEP ◂'), item('stepFwd', 'STEP ▸'), null,
-          item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK', { on: A.get('modBar').get }), item('settings.playLock', 'PLAYBACK LOCK'), null,
-          sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
-        WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'mirMark' }), item('gui', 'MIR OPTIONS…'), null,   // 038 M3 (Josh 11-06): the kit's OPTIONS window, a WINDOW row
-          sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'FOLD ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
-          sub('TOOLS', () => [item('modulation', 'MODULATION'), item('timeline', 'TIMELINE'), item('pattern', 'PATTERN'), item('nodes', 'NODES'), item('notebook', 'NOTEBOOK'), item('folders', 'FOLDERS'), item('history', 'HISTORY'), item('help', 'KEYBOARD')]), null,
+          item('fullscreen')],
+        PLAY: () => [item('transport.play'), item('home'), item('stepBack'), item('stepFwd'), null,
+          item('modArm'), item('modBar', { on: A.get('modBar').get }), item('settings.playLock'), null,
+          sub('RATE', () => [item('csb.rate.up'), item('csb.rate.down')], 'faster'), sub('TEMPO', () => [item('csb.tempo.up'), item('csb.tempo.down')], 'metronome')],
+        WINDOW: () => [item('windowPicker'), item('gui'), null,   // 038 M3 (Josh 11-06): the kit's OPTIONS window, a WINDOW row
+          sub('RACKS', () => [item('rack'), item('folds', { on: () => undefined }), item('dock')], 'rackToggle'),
+          sub('TOOLS', () => ['modulation', 'timeline', 'pattern', 'nodes', 'notebook', 'folders', 'history', 'help'].map((id) => item(id, { bare: true })), 'tools'), null,
           /* 018 E6 · one submenu per KIND (window-chrome.js data-kind), each window ✓ while open: a press opens a closed one by the FINDER's road
              (kit rk.reveal) and closes an open one */
-          ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k && !TOOL_SEAT.has(d.dataset.id));   // 039 X8: a window TOOLS seats is listed there alone
-            return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['none', null, true]]; }))],   // 021 V2: each window its one glyph
-        HELP: () => [item('about', 'ABOUT λWAVES'), item('guiAbout', 'ABOUT MIR'), item('help', 'KEYBOARD SHORTCUTS…'),
-          item('photosensitivity', 'PHOTOSENSITIVITY WARNING…', { hint: 'show the photosensitivity notice now and next load' }), null, ...(globalThis.lwavesDesktop ? [] : [item('update', 'UPDATE APP', { hint: 'check for a new build, rebuild the offline cache, and reload' })]), item('diagnostics', 'COPY DIAGNOSTICS', { hint: 'the build, the worker, the stores and the last errors' })],
+          ...[['core', 'core'], ['info', 'info'], ['control', 'sliders'], ['other', 'more']].map(([k, pic]) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k && !TOOL_SEAT.has(d.dataset.id));   // 039 X8: a window TOOLS seats is listed there alone
+            return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { raw: true, checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['none', null, true]]; }, pic))],   // 021 V2: each window its one glyph
+        HELP: () => [item('about'), item('guiAbout'), opener('help'),
+          item('photosensitivity'), null, ...(globalThis.lwavesDesktop ? [] : [item('update')]), item('diagnostics')],
       };
       /* 0.5.0 C3 · THE BAR IS THE KIT'S createMenubar (its port of this app's bar: the disclosure, 400 ms hover hide, the placement,
          Escape → the wordmark, the phone crossing, a row that throws still closes it).  N1's hand-back stays app glue: the kit closes the
@@ -132,18 +137,11 @@ export function createNotebook(app) {
       /* 021 I3: a submenu's entries are wrapped as they open (its run is its list, not an act) */
       const wrap = (rows) => rows.map((r) => (!r ? r : r[4] && r[4].sub ? [r[0], () => wrap(r[1]()), ...r.slice(2)] : [r[0], r[1] && back(r[1]), ...r.slice(2)]));
       const mb = createMenubar({ opener: title, host: document.getElementById('lab'), phone: isPhone,
-        menus: Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => wrap(rows())])) });
+        /* 040 M2 · THE FINDER MENU (Josh 11-09: a group between the logo and FILE that opens the FINDER): the kit's acting entry (MIR 1.6.0-alpha.52) — a press
+           runs `windowPicker`, a cursor arriving closes the list its hover left open; THE MENUS BY KEYBOARD (039 W2) is the kit's walk since the same door */
+        menus: { FINDER: { id: 'windowPicker', hint: A.get('windowPicker').hint, run: () => back(() => A.run('windowPicker'))() },
+          ...Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => wrap(rows())])) } });
       layout.menu = { open: mb.open, close: mb.close, get isOpen() { return mb.isOpen; }, scale: 1.04, get enlarged() { return title.classList.contains('menu-open'); } };
-      /* 040 M2 · THE FINDER MENU (Josh 11-09: "Add a new dropdown menu between the logo and 'File' that is: 'Finder', and it would just automatically
-         open the finder system"): the kit's bar builds a list under every group (FOR-KIT: an acting entry), so the app seats one plain group before
-         FILE — a press opens the FINDER (the `windowPicker` action; its hint the registry's), a cursor arriving on it closes the list its hover left
-         open and opens none; W2's walk (below) reads it as a group with no list: Enter · ↓ · ↑ press it, ← → Home End pass over it */
-      const closeList = () => { const o = mb.bar.querySelector('.mb-btn[aria-expanded="true"]'); if (o) o.click(); };   // the kit's own toggle: a synthetic click (detail 0) closes the list
-      { const grp = el('div', 'mb-group mb-act'), b = el('button', 'mb-btn', grp); b.type = 'button'; b.dataset.menu = 'FINDER'; b.dataset.id = 'windowPicker';
-        label(b, 'FINDER'); hint(b, A.get('windowPicker').hint); b.setAttribute('aria-haspopup', 'dialog');
-        b.addEventListener('click', (e) => { e.stopPropagation(); mb.close(); back(() => A.run('windowPicker'))(); });
-        b.addEventListener('pointerenter', (e) => { if (hoverable(e)) closeList(); });
-        mb.bar.prepend(grp); }
       /* 039 W5 · THE TITLE'S FIRST CLICK: a cursor reaching the logo shows the bar on its hover, so the kit's click toggle hid it again under the
          same hand (A #4: five first clicks of five did nothing) — a cursor's click keeps the bar its hover showed, as the kit's groups keep their
          lists (FOR-KIT); a finger's tap still toggles.  W9 · D #3: its hint names the menus and the MAIN MENU's key */
@@ -156,31 +154,6 @@ export function createNotebook(app) {
         e.stopPropagation(); mb.close(); A.run(away() ? 'rack' : 'windowPicker'); }, true);
       const titleHint = () => hint(title, away() ? 'Click: bring the interface back · hover: the menus' : 'Click: the FINDER · hover: the menus · L: MAIN MENU');
       titleHint(); { let was = away(); new MutationObserver(() => { if (away() !== was) { was = away(); titleHint(); } }).observe(document.body, { attributes: true, attributeFilter: ['class'] }); }   // 040 F1: the words turn with the mode, not a hover late
-      /* 039 W2 · THE MENUS BY KEYBOARD (the kit's bar walks a list's rows ↑ ↓ and opens a submenu on →, but a group takes no arrow and a key's
-         open leaves the focus on the group — FOR-KIT): on a group Enter or ↓ opens it at its first row (↑ its last), ← → Home End walk the
-         groups (an open list follows the focus); in a list ← → step to the next group's list where no submenu takes the key; Escape closes
-         the list back to its group, then the bar (the kit's: the focus back on the logo) */
-      { const groups = () => [...mb.bar.querySelectorAll('.mb-btn')], isOpen = (b) => b.getAttribute('aria-expanded') === 'true';
-        const openAt = (b, last) => { if (!b.nextElementSibling) { closeList(); b.focus({ preventScroll: true }); return; }   // 040 M2: FINDER has no list — the walk lands on it with the lists closed
-          if (!isOpen(b)) mb.openGroup(b.dataset.menu); const rows = [...b.nextElementSibling.querySelectorAll(':scope > .mb-item:not(:disabled)')];
-          (rows[last ? rows.length - 1 : 0] || b).focus({ preventScroll: true }); };
-        mb.bar.addEventListener('keydown', (e) => { if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-          const k = e.code, g = groups(), btn = e.target.closest('.mb-btn'), item = e.target.closest('.mb-item');
-          const step = (b, d) => g[(g.indexOf(b) + d + g.length) % g.length];
-          if (btn) {
-            if (!btn.nextElementSibling && (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === 'NumpadEnter')) { e.preventDefault(); btn.click(); return; }   // 040 M2: the FINDER entry presses
-            if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Enter' || k === 'NumpadEnter') { e.preventDefault(); openAt(btn, k === 'ArrowUp'); }
-            else if (k === 'ArrowRight' || k === 'ArrowLeft') { e.preventDefault(); const to = step(btn, k === 'ArrowRight' ? 1 : -1); if (isOpen(btn)) openAt(to); else to.focus({ preventScroll: true }); }
-            else if (k === 'Home' || k === 'End') { e.preventDefault(); g[k === 'Home' ? 0 : g.length - 1].focus({ preventScroll: true }); }
-            else if (k === 'Escape' && isOpen(btn)) { e.preventDefault(); btn.click(); }
-            return;
-          }
-          if (!item) return;
-          let list = item.parentElement; while (list && list.mbParent) list = list.mbParent;   // a submenu's row belongs to its root list's group
-          const grp = list && list.previousElementSibling; if (!grp || !grp.classList.contains('mb-btn')) return;
-          if (k === 'ArrowLeft' || (k === 'ArrowRight' && !item.mbEntries)) { e.preventDefault(); openAt(step(grp, k === 'ArrowRight' ? 1 : -1)); }
-          else if (k === 'Escape' && item.parentElement === list) { e.preventDefault(); grp.click(); grp.focus({ preventScroll: true }); }
-        }); }
       /* iteration 014 A7 · 018 E5 · THE FINDER (the kit's createWindowPicker; WINDOW's first row, the CSB's window-plus and the key row `windowPicker`):
          every window by name with its one glyph (021 V2: its register's, lab/icons.js WINDOW_GLYPH), a window the mode hides greyed with the mode that shows it;
          a pick of an open window scrolls the rack to it (kit rk.reveal: no reorder), a closed one opens at the top and the rack scrolls up */

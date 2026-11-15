@@ -31,7 +31,9 @@ export function createMapping(app, { kt }) {
     onState: () => { for (const e of Object.values(midi.map())) if (e.mode === 'hold') A.up(e.id); if (root.isConnected) paint(); } });   // a port come or gone lets every HELD row go (an unplugged device sends no note-off)
   const root = el('div', 'mp'), head = el('div', 'mp-head', root);
   const find = searchField(head, { cls: 'mp-find' });   // 044 KV2: the kit's one search field
-   find.placeholder = t('Find an action…'); find.setAttribute('aria-label', t('Find an action'));
+   find.placeholder = t('search actions'); find.setAttribute('aria-label', t('Find an action'));
+  /* 044 AV2 (L43) · ESCAPE CLEARS, THEN CLOSES: a typed query goes first; the next Escape is the window's */
+  find.addEventListener('keydown', (e) => { if (e.key === 'Escape' && find.value) { e.preventDefault(); e.stopPropagation(); find.value = ''; paint(); } });
   const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'ask the browser for MIDI and list the inputs', onFire: () => midi.start() });
   head.appendChild(conn.root); if (!support.ok) conn.root.hidden = true;
   const status = el('div', 'mp-status', root); status.setAttribute('role', 'status');
@@ -57,7 +59,7 @@ export function createMapping(app, { kt }) {
     for (const r of rows) {
       if (r.group !== g) { g = r.group; label(el('div', 'mp-group', list), g); }
       const row = el('div', 'mp-row', list); row.dataset.id = r.id; row.setAttribute('role', 'listitem'); row.classList.toggle('mp-learning', learning === r.id);
-      label(el('span', 'mp-name', row), r.short || r.label).title = r.hint || r.label;
+      label(el('span', 'mp-name', row), r.label).title = r.hint || r.label;
       const k = T.chords(r.id)[0]; chip(row, 'key', k ? displayChord(k, P) : '', () => T.unbind(r.id));
       if (r.gesture) { el('span', 'mp-chip mp-off', row, t('KEY only')); el('span', 'mp-chip mp-off', row, '·'); }
       else { const m = midi.keyOf(r.id); chip(row, 'midi', m ? midiText(m) : '', m && (() => midi.remove(m)));
@@ -74,7 +76,7 @@ export function createMapping(app, { kt }) {
   function stop(msg) { learning = null; cancelAnimationFrame(poll); if (T.recording()) T.stopRecording(); midi.cancelLearn(); if (msg) say(msg); paint(); }
   async function learn(id) {
     if (learning) stop(); learning = id; paint();
-    const r = A.get(id), name = r.short || r.label, gesture = !!r.gesture;
+    const r = A.get(id), name = r.label, gesture = !!r.gesture;
     say(t(gesture ? 'Press a key for “{a}” (Esc cancels)' : 'Press a key, a MIDI note or knob, or move a macro knob for “{a}” (Esc cancels)', { a: name }));
     /* MOD: the first macro knob that moves is routed to the action's target */
     const host = app.state.modHost, macros = () => (host ? host.model.macroList().filter((m) => m.kind !== 'trigger') : []), was = new Map(macros().map((m) => [m.id, m.value]));
@@ -97,7 +99,7 @@ export function createMapping(app, { kt }) {
   function install() {
     const M = app.sh.LW && app.sh.LW.mod; if (!M) return 0; let n = 0;
     const reg = (rows) => M.batch(() => { for (const r of rows) if (r.surface && !r.gesture && r.kind !== 'hold') { const toggle = r.kind === 'toggle' && r.get;
-      M.register(targetOf(r.id), { label: (r.short || r.label).toUpperCase(), group: 'action', map: toggle ? 'toggle' : 'trigger', get: () => 0, set: () => {},   /* 021 D0: an act's base is 0, never its state (a film's resume signature counts every base; MOD and GOVERNOR moved it) */
+      M.register(targetOf(r.id), { label: r.label, group: 'action', map: toggle ? 'toggle' : 'trigger', get: () => 0, set: () => {},   /* 021 D0: an act's base is 0, never its state (a film's resume signature counts every base; MOD and GOVERNOR moved it) */
         fire: (on) => (toggle ? A.fire(r.id, on) : A.run(r.id)) }); n++; } });
     reg(A.list()); A.onAdd(reg);
     resumeMidi(midi, (m) => { say(m, 'warn'); if (app.w.wMet) app.w.wMet.setStatus(m, 'warn'); });   // 027 D4: METERS says a refusal once

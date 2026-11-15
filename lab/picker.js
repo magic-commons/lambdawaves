@@ -19,7 +19,7 @@
 import { el, chip, mathPlain, stepper, seg, hint, wheelTurn, verticalDrag, setKnobLaw, TAP } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
 import { pageDots } from './pager.js';
-import { chordFromEvent } from './mir/shell/keys.js';   // 039 R5: the menu's own chord passes to the key table while the menu holds the keys
+import { searchField } from './mir/shell/window-picker.js'; import { chordFromEvent } from './mir/shell/keys.js';   // 039 R5: the menu's own chord passes to the key table while the menu holds the keys
 import { CHEM_PRESETS } from './chemview.js';
 import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
 import { ATOMS } from './atoms.js';
@@ -942,9 +942,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       tagsEl.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && tagsEl.scrollWidth > tagsEl.clientWidth) { e.preventDefault(); tagsEl.scrollLeft += e.deltaY; } }, { passive: false });
       /* iteration 014 D1 (Josh: "move the search bar to the middle, underneath the atomic, molecular, and library buttons"): the search is
          the seat under the tabs while a volume is open (opts' SHOW LABELS stands aside there); its old seat holds NAME and MASS */
-      if (!vq) { vq = el('input', 'mm-search', opts); vq.type = 'search'; vq.placeholder = 'search';
+      if (!vq) { vq = searchField(opts, { cls: 'mm-search' }); vq.placeholder = 'search';   // 044 AV2 (L3): the kit's one search field
         vq.addEventListener('input', () => { query = vq.value.trim().toLowerCase(); filter(); });
-        vq.addEventListener('keydown', (e) => e.stopPropagation()); }
+        /* 044 AV2 (L43) · ESCAPE CLEARS, THEN CLOSES: a typed query goes first; an empty field lets the key through to the menu's step back (it was swallowed) */
+        vq.addEventListener('keydown', (e) => { if (e.key !== 'Escape') { e.stopPropagation(); return; } if (!vq.value) return; e.preventDefault(); e.stopPropagation(); vq.value = ''; query = ''; filter(); }); }
       vq.value = ''; vq.setAttribute('aria-label', 'search ' + volName(v));
       sortBtn(vhead, 'name'); sortBtn(vhead, 'mass'); paintSort();
       labelToggle(vhead, 'molLabels');
@@ -1022,7 +1023,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     function filter() {
       const list = sorted(mols.filter((m) => [...on].every((t) => wordsOf(m).includes(t))
         && (!query || [m.name, m.formula, m.id, ...wordsOf(m)].some((s) => s && String(s).toLowerCase().includes(query)))));
-      countEl.textContent = list.length === mols.length ? mols.length.toLocaleString('en') : list.length.toLocaleString('en') + ' / ' + mols.length.toLocaleString('en');
+      countEl.textContent = !list.length && query ? 'Nothing matches' : list.length === mols.length ? mols.length.toLocaleString('en') : list.length.toLocaleString('en') + ' / ' + mols.length.toLocaleString('en');   // 044 AV2 (L7): the kit's one wording
       countEl.title = (on.size ? [...on].join(' + ') : query ? '“' + query + '”' : 'all') + ' · ' + list.length.toLocaleString('en') + ' molecules';
       vdeck.set(list, (m, host) => { const t = molTile(host, m, true); t.dataset.iso = m.id; return t; });
       enterTiles(vdeck.tiles);   // iteration 012 L2: a tag or a search deals the page in (animate() stands down under reduced motion)

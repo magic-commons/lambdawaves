@@ -285,16 +285,16 @@ try {
       await __press(__show(${segb('FRAME', 'OFF')}))`, `__LW.setStage(0.61); __LW.history.note()`),
     themeThenKeyC: await pressThen(`await __press(__show([...document.querySelectorAll('.seg-b')].find((b) => b.textContent.trim() === ${themeOther} && b.closest('.segw')?.querySelector('.k-lbl')?.textContent.trim() === 'THEME')))`, () => realKey('c'), 60),
   };
-  assert.deepEqual(table.gridThenKey.rows, ['turn ψ about the axis, + · ]'], 'GRID then ]: ' + JSON.stringify(table.gridThenKey));
+  assert.deepEqual(table.gridThenKey.rows, ['TURN + · ]'], 'GRID then ]: ' + JSON.stringify(table.gridThenKey));
   assert.deepEqual(table.themeThenModApi.rows, ['edit'], 'THEME then LW.mod.addSource: ' + JSON.stringify(table.themeThenModApi));
   assert.deepEqual(table.frameThenStage.rows, ['edit'], 'FRAME then a stage edit: ' + JSON.stringify(table.frameThenStage));
-  assert.deepEqual(table.themeThenKeyC.rows, ['cycle the draw style · C'], 'THEME then C 60 ms later: ' + JSON.stringify(table.themeThenKeyC));
+  assert.deepEqual(table.themeThenKeyC.rows, ['STYLE · C'], 'THEME then C 60 ms later: ' + JSON.stringify(table.themeThenKeyC));
   for (const v of Object.values(table)) assert.deepEqual(v.errs, []);
   await ev(`if (window.__frameWas) await __press(window.__frameWas); await __w(100); return 1;`);   /* the reader's frame back */
-  pass('the verifier\'s mislabelled rows: GRID 96³ then ] → "turn ψ about the axis, + · ]"; THEME then LW.mod.addSource → "edit"; FRAME OFF then a stage edit → "edit"; THEME then C 60 ms later → "cycle the draw style · C"');
+  pass('the verifier\'s mislabelled rows: GRID 96³ then ] → "TURN + · ]"; THEME then LW.mod.addSource → "edit"; FRAME OFF then a stage edit → "edit"; THEME then C 60 ms later → "STYLE · C"');
 
   /* a key's edit is a row of its own, named for its action (C, V, P armed nothing before) */
-  for (const [key, name] of [['c', 'cycle the draw style · C'], ['v', 'cycle the observable · V'], ['p', 'toggle the phase palette · P']]) {
+  for (const [key, name] of [['c', 'STYLE · C'], ['v', 'OBSERVABLE · V'], ['p', 'PALETTE · P']]) {
     await ev(`await __open(); return 1;`); await realKey(key);
     judgeScene(`the ${key.toUpperCase()} key (real input)`, await g.ev(`return await __close();`), name);
   }
