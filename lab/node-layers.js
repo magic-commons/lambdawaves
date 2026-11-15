@@ -23,15 +23,15 @@ export const LAYER_TYPES = {
   /* 038 P8 (Josh: "Film Grain's Kind and Blend switches could be on the same row in the layout. Add a third knob that controls lightness and darkness and
      also affected by the blend mode"): AMOUNT · SIZE · TONE over KIND · BLEND; TONE (appended, −1 … 1, home 0) veils the tile with white or black at
      alpha .85·|tone| before its blend, so SOFT and OVERLAY read it and the grain survives at the ends — the stage's PAINT and the film's paintLayer alike */
-  grain: { cls: 'layer', label: 'FILM GRAIN', hint: 'grain over the picture, fresh every frame', neutral: off, face: [['amount', 'size', 'tone'], ['kind', 'blend']],
+  grain: { cls: 'layer', label: 'FILM GRAIN', hint: 'Grain over the picture, fresh every frame', neutral: off, face: [['amount', 'size', 'tone'], ['kind', 'blend']],
     knobs: [{ ...AMOUNT(0.35), hint: 'AMOUNT — how much grain' }, { k: 'size', label: 'SIZE', min: 0.5, max: 4, home: 1, log: true, hint: 'SIZE — the grain\'s scale' },
       { k: 'kind', label: 'KIND', home: 'mono', hint: 'MONO grey grain · COLOUR grain', options: [{ id: 'mono', label: 'MONO' }, { id: 'colour', label: 'COLOUR' }] },
-      { k: 'blend', label: 'BLEND', home: 'soft-light', hint: 'how the grain meets the picture', options: [{ id: 'soft-light', label: 'SOFT' }, { id: 'overlay', label: 'OVERLAY' }] },
+      { k: 'blend', label: 'BLEND', home: 'soft-light', hint: 'How the grain meets the picture', options: [{ id: 'soft-light', label: 'SOFT' }, { id: 'overlay', label: 'OVERLAY' }] },
       { k: 'tone', label: 'TONE', min: -1, max: 1, home: 0, hint: 'TONE — the grain darker or lighter, through its blend', fmt: (x) => (x >= 0.005 ? '+' : x <= -0.005 ? '−' : '') + Math.round(Math.abs(x) * 100) }] },
-  vignette: { cls: 'layer', label: 'VIGNETTE', hint: 'the edges darkened, as a lens does', neutral: off,
+  vignette: { cls: 'layer', label: 'VIGNETTE', hint: 'The edges darkened, as a lens does', neutral: off,
     knobs: [{ ...AMOUNT(0.6), hint: 'AMOUNT — how dark the edges' }, { k: 'feather', label: 'FEATHER', min: 0, max: 1, home: 0.5, hint: 'FEATHER — where the dark begins' },
       { k: 'round', label: 'ROUNDNESS', min: 0, max: 1, home: 0.5, hint: 'ROUNDNESS — the frame\'s ellipse to a circle' }] },
-  scanlines: { cls: 'layer', label: 'SCANLINES', hint: 'a CRT\'s lines', neutral: off,
+  scanlines: { cls: 'layer', label: 'SCANLINES', hint: 'A CRT\'s lines', neutral: off,
     knobs: [{ k: 'pitch', label: 'PITCH', min: 2, max: 12, step: 1, home: 3, unit: ' px', hint: 'PITCH — the lines\' spacing, in px' }, { ...AMOUNT(0.3), hint: 'AMOUNT — how dark the lines' }] },
 };
 

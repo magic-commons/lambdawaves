@@ -795,7 +795,7 @@ export function createChem(host, api) {
   function views() {
     { const d = !!(sol && sol.D); deltaSw.setDisabled(!d); deltaSw.root.title = d ? dTitle : ORB_ONLY; if (!d && delta) { delta = false; deltaSw.set(false); } }
     for (const [id, t] of vTitle) { const d = id === 'spin' ? !!(sol && sol.Ds) : id === 'dlda' ? !!pair() : !!(sol && (sol.D || (id === 'density' && factor()))), b = vSeg.button(id); b.disabled = !d;
-    b.title = d ? t : id === 'spin' ? 'a closed shell has no spin density: ρα = ρβ' : id === 'dlda' ? 'needs both solves: METHOD LDA (RHF kept)' : ORB_ONLY;
+    b.title = d ? t : id === 'spin' ? 'A closed shell has no spin density: ρα = ρβ' : id === 'dlda' ? 'Needs both solves: METHOD LDA (RHF kept)' : ORB_ONLY;
     if (!d && view === id && !(id === 'dlda' && partner())) { view = id === 'spin' || id === 'dlda' ? 'density' : 'orbital'; vSeg.set(view); } } }
   vSeg.button('spin').disabled = vSeg.button('dlda').disabled = true;   // SPIN lights only on a UHF solve, Δ LDA−RHF on a kept pair (views())
   const uhf = () => !!sol && sol.model === 'UHF', lda = () => !!sol && sol.model === 'RKS LDA', nel = () => (uhf() ? sol.nocc + sol.nBeta : 2 * sol.nocc);   // UHF: nocc is nα
@@ -1027,7 +1027,7 @@ export function createChem(host, api) {
     if (why || !flowOn) { conP = null; roCon.set('—'); roCon.setSub(why); conCv.width = 0; return; }
     if (P === conP) return; conP = P;
     roCon.set(P.defect.toFixed(3));
-    roCon.setSub(roCon.root.title = `basis defect · ${P.M} pts · ${Math.round(100 * P.core)} % near nuclei · ${P.ms.toFixed(0)} ms` + (F ? ` · K ${F.w.length}` : ''));
+    roCon.setSub(roCon.root.title = `Basis defect · ${P.M} pts · ${Math.round(100 * P.core)} % near nuclei · ${P.ms.toFixed(0)} ms` + (F ? ` · K ${F.w.length}` : ''));
     const N = Math.round(Math.sqrt(P.M)), W = conCv.clientWidth || 240, Hh = 112, d = Math.min(2, window.devicePixelRatio || 1), A = accentRGB(conG, 1), B = accentRGB(conG, 2);
     let mx = 0; for (let k = 0; k < P.M; k++) mx = Math.max(mx, Math.abs(P.r[k]));
     const img = new ImageData(N, N); for (let k = 0; k < P.M; k++) { const v = P.r[k], c = v > 0 ? A : B, i = ((N - 1 - Math.floor(k / N)) * N + (k % N)) * 4; img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = Math.round(255 * Math.sqrt(Math.abs(v) / (mx || 1))); }

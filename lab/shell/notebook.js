@@ -152,7 +152,7 @@ export function createNotebook(app) {
       const away = () => document.body.classList.contains('rack-hidden');
       document.addEventListener('click', (e) => { if (!title.contains(e.target) || !(e.detail > 0) || !hoverable(e)) return;
         e.stopPropagation(); mb.close(); A.run(away() ? 'rack' : 'windowPicker'); }, true);
-      const titleHint = () => hint(title, away() ? 'Click: bring the interface back · hover: the menus' : 'Click: the FINDER · hover: the menus · L: MAIN MENU');
+      const titleHint = () => hint(title, away() ? 'Click: bring the interface back · hover: the menus' : 'Click: the FINDER · hover: the menus');
       titleHint(); { let was = away(); new MutationObserver(() => { if (away() !== was) { was = away(); titleHint(); } }).observe(document.body, { attributes: true, attributeFilter: ['class'] }); }   // 040 F1: the words turn with the mode, not a hover late
       /* iteration 014 A7 · 018 E5 · THE FINDER (the kit's createWindowPicker; WINDOW's first row, the CSB's window-plus and the key row `windowPicker`):
          every window by name with its one glyph (021 V2: its register's, lab/icons.js WINDOW_GLYPH), a window the mode hides greyed with the mode that shows it;

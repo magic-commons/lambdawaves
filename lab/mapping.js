@@ -34,7 +34,7 @@ export function createMapping(app, { kt }) {
    find.placeholder = t('search actions'); find.setAttribute('aria-label', t('Find an action'));
   /* 044 AV2 (L43) · ESCAPE CLEARS, THEN CLOSES: a typed query goes first; the next Escape is the window's */
   find.addEventListener('keydown', (e) => { if (e.key === 'Escape' && find.value) { e.preventDefault(); e.stopPropagation(); find.value = ''; paint(); } });
-  const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'ask the browser for MIDI and list the inputs', onFire: () => midi.start() });
+  const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'Ask the browser for MIDI and list the inputs', onFire: () => midi.start() });
   head.appendChild(conn.root); if (!support.ok) conn.root.hidden = true;
   const status = el('div', 'mp-status', root); status.setAttribute('role', 'status');
   const cols = el('div', 'mp-row mp-cols', root);
@@ -65,7 +65,7 @@ export function createMapping(app, { kt }) {
       else { const m = midi.keyOf(r.id); chip(row, 'midi', m ? midiText(m) : '', m && (() => midi.remove(m)));
         const rs = r.kind === 'hold' ? null : routes(r.id); if (rs) chip(row, 'mod', rs.length ? t('ROUTED') + (rs.length > 1 ? ' ×' + rs.length : '') : '', () => { for (const x of routes(r.id)) app.sh.LW.mod.unroute(x.id); });
         else el('span', 'mp-chip mp-off', row, '·'); }
-      const b = trig({ label: learning === r.id ? 'LISTENING…' : 'LEARN', cls: 'mp-learn', title: 'the next key, MIDI or macro move is this action’s', onFire: () => (learning === r.id ? stop() : learn(r.id)) });
+      const b = trig({ label: learning === r.id ? 'LISTENING…' : 'LEARN', cls: 'mp-learn', title: 'The next key, MIDI or macro move is this action’s', onFire: () => (learning === r.id ? stop() : learn(r.id)) });
       b.on = learning === r.id; row.appendChild(b.root);
     }
     if (!rows.length) emptyLine(list);

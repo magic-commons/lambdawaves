@@ -79,12 +79,12 @@ export function createSliceView(host, api) {
 
   const r1 = el('div', 'row tight', host);
   const modeSeg = seg({ label: 'PLANE', value: 'space', options: [
-    { id: 'space', label: 'ℝ³', title: 'a 2-plane through ordinary space' },
+    { id: 'space', label: 'ℝ³', title: 'A 2-plane through ordinary space' },
     { id: 'ks', label: 'KS ℝ⁴', title: 'Map a rotating four-dimensional plane into three dimensions' }],
     onChange: (v) => { mode = v; dirty = true; api.repaint(); } });
   r1.appendChild(modeSeg.root);
-  const curSeg = seg({ label: 'CURRENT', value: 'off', options: [{ id: 'off', label: 'OFF' }, { id: 'arrows', label: 'ARROWS', title: 'the probability current in the plane as a quiver' },
-    { id: 'lines', label: 'LINES', title: 'streamlines of the probability current in the plane' }], onChange: (v) => { current = v; jro.root.style.display = v === 'off' ? 'none' : ''; paint(); } });
+  const curSeg = seg({ label: 'CURRENT', value: 'off', options: [{ id: 'off', label: 'OFF' }, { id: 'arrows', label: 'ARROWS', title: 'The probability current in the plane as a quiver' },
+    { id: 'lines', label: 'LINES', title: 'Streamlines of the probability current in the plane' }], onChange: (v) => { current = v; jro.root.style.display = v === 'off' ? 'none' : ''; paint(); } });
   r1.appendChild(curSeg.root);
   const extentK = knob({ label: 'EXTENT', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1) + ' a₀', onInput: (v) => { half = v; dirty = true; api.repaint(); } });
   const gainK = knob({ label: 'GAIN', min: 0.1, max: 20, value: 1.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { gain = v; regain = true; api.repaint(); } });

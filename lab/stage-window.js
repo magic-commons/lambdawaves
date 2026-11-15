@@ -57,7 +57,7 @@ export function createStageWindow(app) {
   row('stage-frame', w.body, ui.frameSw);                  // native-ui.js turns FRAME and AXIS into their honest segs where they stand
   /* 041 S3 · THE FRAME CAN STAY (Josh: "have an option in stage where the either box or frame remains in UI full Hide mode (not hide/mouse-reveal)"):
      a PREFERENCE (`frameStay`, FIELD_CHROME, absent = off) read by shell/keys.js toggleUI — under H the frame stays drawn, the axes go */
-  ui.frameStaySw = sw({ label: 'KEEP IN HIDE', value: !!mat.frameStay, title: 'Keep the frame drawn while the interface is hidden (H)',
+  ui.frameStaySw = sw({ label: 'KEEP IN HIDE', value: !!mat.frameStay, title: 'Keep the frame drawn while the interface is hidden',
     onChange: (v) => { if (v) mat.frameStay = true; else delete mat.frameStay; app.sh.saveSettings(); } });
   /* 041 S4 · THE FRAME'S BRIGHTNESS: a PREFERENCE (`frameGain`, FIELD_CHROME, absent = 100 %, today's look — THE LOCK's), 25 % … 400 %, read by
      field.js writeLines: the box, the axes, the compass, the lattice and the dots; within 2 % of home it IS home */

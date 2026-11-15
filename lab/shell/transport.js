@@ -68,7 +68,7 @@ export function createTransport(app) {
     const search = createCsbSearch(app, { bar: () => T });   // A2 · THE MINIATURE PICKER (lab/csb-search.js)
     const bar = createBar({ layout: CONTROL_SURFACE_LAYOUT, root: T, host: dom.stage, seats: 'thin',   // 021 K4: λWAVES' thin seats are a kit door since MIR 1.5.5
       nodes: { rate: ui.rateKnob.root, gear, modes: byId('lwMode'), chooser, search: search.root, folders, finder, info, theme, folds, nodes, begin, home: zero, rack: byId('rackToggle'), fav: byId('rackFav') },
-      openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
+      openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'The timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
       rack: () => app.sh.rk, door: 'none', powerWord: 'MOD', seatMenu: false, opener: false,
       macros: { face: 'knob', onAdd: () => { if (app.state.modHost.model.addMacro(null) && app.state.modView) app.state.modView.rebuild(); app.hNote(); } },   // 022 C2: MACROS 1–8 as the kit's knob bank; an empty slot adds one
@@ -105,12 +105,12 @@ export function createTransport(app) {
       P.dataset.mirSurface = 'well'; P.classList.add('csb-surface');
       for (const [k, t] of [['tr', 'TRANSPORT'], ['mac', 'MACROS'], ['fav', 'FAVOURITES'], ['met', 'METERS']]) sec[k] = section({ title: t, parent: P, cls: 'csb-sec csb-sec-' + k });
       const home = seat('home', 'csb-home'); chip(home, 'reload', 't → 0 · the beat stays');   // 032 T14: ↺, as the bar's seat el('span', 'csb-steps', sec.tr.body).append(home, sm, sp, jmp);
-      mt.bpm = readout({ label: 'BPM', value: '—', cls: 'csb-bpm' }); mt.beat = lamp({ parent: mt.bpm.root, cls: 'mir-lamp csb-beat', title: 'the beat' });
+      mt.bpm = readout({ label: 'BPM', value: '—', cls: 'csb-bpm' }); mt.beat = lamp({ parent: mt.bpm.root, cls: 'mir-lamp csb-beat', title: 'The beat' });
       sec.tr.body.append(ui.periodRo.root, mt.bpm.root);
       const tiles = P.querySelector('.tempo-grid'); if (tiles) { sec.tr.body.append(...tiles.children); tiles.parentElement.remove(); }   // the kit's tiles, one strip
       if (PP.rail) sec.mac.body.append(PP.rail.root);
       mt.lev = meter({ bands: ['low', 'mid', 'high'], labels: ['LOW', 'MID', 'HIGH'], led: true, peak: true, parent: sec.met.body });
-      mt.eq = meter({ bands: 7, labels: ['1', '2', '3', '4', '5', '6', '7'], cls: 'mir-meter vertical csb-eqm', parent: sec.met.body }); hint(mt.eq.root, 'the beat equaliser: n 1–7');
+      mt.eq = meter({ bands: 7, labels: ['1', '2', '3', '4', '5', '6', '7'], cls: 'mir-meter vertical csb-eqm', parent: sec.met.body }); hint(mt.eq.root, 'The beat equaliser: n 1–7');
     }
     /* A3 · THE EXPANDER'S FAVOURITES (lab/csb-favs.js): eight slots under the macros; a knob's right-click / hold menu ADDs it, three segments are offered
        (Josh's answer 4: SPECTRUM's HYDROGEN | STURMIAN, WAVE's POSITION | MOMENTUM and its OBSERVABLE); the faces are made when the expander opens */
@@ -127,7 +127,7 @@ export function createTransport(app) {
     const miniEl = el('div', 'csb-mini', T), miniView = adopt('mol', miniEl, { app, opts: () => favs.mini() }), miniB = btn('csb-mini-b', '', '', 'mini-viewer style');
     label(el('span', 'ro-lbl', miniB), 'MINI-VIEWER'); const miniV = el('span', 'ro-val', miniB), miniG = el('i', 'csb-mini-g', miniV), miniW = el('span', '', miniV);
     const paintMini = () => { const m = favs.mini(), i = Math.max(0, MOL_STYLES.findIndex((s) => s.id === m.style)), s = MOL_STYLES[i], n = MOL_STYLES[(i + 1) % MOL_STYLES.length];
-      miniEl.hidden = miniB.hidden = !m.on; setGlyph(miniG, STYLE_GLYPH[s.id]); label(miniW, s.label); ariaLabel(miniB, 'mini-viewer: {s}', { s: { t: s.label } }); hint(miniB, ['The mini-viewer by the bar · press for {b}', { b: { t: n.label } }]); if (miniView) miniView.set(m); };
+      miniEl.hidden = miniB.hidden = !m.on; setGlyph(miniG, STYLE_GLYPH[s.id]); label(miniW, s.label); ariaLabel(miniB, 'Mini-viewer: {s}', { s: { t: s.label } }); hint(miniB, ['The mini-viewer by the bar · press for {b}', { b: { t: n.label } }]); if (miniView) miniView.set(m); };
     miniB.addEventListener('click', () => { const i = MOL_STYLES.findIndex((s) => s.id === favs.mini().style); favs.setMini({ style: MOL_STYLES[(i + 1) % MOL_STYLES.length].id }); });
     favs.onMini(paintMini); paintMini(); if (sec.tr) sec.tr.body.insertBefore(miniB, mt.bpm.root);
     for (const [id, c] of [['spectrum.scale', ui.scaleSeg], ['wave.space', ui.spaceSeg], ['wave.view', ui.viewSeg]]) favs.offer(id, c, { width: 150 });
@@ -237,7 +237,7 @@ export function createTransport(app) {
     function flashSub() {
       if (fk.v === reg.version && fk.r === clock.rate) return fk.sub;
       const w = aliasOf(periodEnergies(), fk.r = clock.rate, stats.fps >= 10 ? Math.round(stats.fps) : 60), on = !!w && w.alias > FLASH_HZ; fk.v = reg.version;
-      ui.rateKnob.root.title = on ? 'beats ' + w.hz.toFixed(1) + ' Hz show at ' + w.alias.toFixed(1) + ' Hz: a flash' : rateTitle;
+      ui.rateKnob.root.title = on ? 'Beats ' + w.hz.toFixed(1) + ' Hz show at ' + w.alias.toFixed(1) + ' Hz: a flash' : rateTitle;
       ui.rateKnob.root.classList.toggle('flash', on); return (fk.sub = on ? ' · beats alias at ' + w.alias.toFixed(1) + ' Hz on screen' : '');
     }
     app.hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer

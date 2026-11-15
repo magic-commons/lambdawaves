@@ -16,7 +16,7 @@ export function createMaterial(app) {
     {
       const r0 = el('div', 'row', gSpace);
       ui.spaceSeg = seg({ label: 'the same state, two exact pictures', value: 'x', options: [
-        { id: 'x', label: 'POSITION ψ(x)', title: 'the wavefunction in space' },
+        { id: 'x', label: 'POSITION ψ(x)', title: 'The wavefunction in space' },
         { id: 'p', label: 'MOMENTUM φ(p)', title: 'Momentum-space view of the state' }],
         onChange: (v) => { app.state.space = v; schedule(TIER.REBUILD); } });
       r0.appendChild(ui.spaceSeg.root);
@@ -30,8 +30,8 @@ export function createMaterial(app) {
        announcement is the observable as LaTeX writes it, set by the page's KaTeX (the stage formula's); the plain line is its fallback */
     const VIEW_SAY = { density: ['ρ = |ψ|²', '\\rho = |\\psi|^2'], phase: ['arg ψ', '\\arg\\psi'], real: ['Re ψ', '\\operatorname{Re}\\psi'], imag: ['Im ψ', '\\operatorname{Im}\\psi'] };
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
-      { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density (palette θ = 0; off: the old blue)' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
-      { id: 'real', label: '<m>Re ψ</m>', title: 'signed: palette 0 and π, or the original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>', title: 'signed: palette ±π/2, a quarter turn from Re' }],   // 038 F4
+      { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density (palette θ = 0; off: the old blue)' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'Phase as hue, density as opacity' },
+      { id: 'real', label: '<m>Re ψ</m>', title: 'Signed: palette 0 and π, or the original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>', title: 'Signed: palette ±π/2, a quarter turn from Re' }],   // 038 F4
       onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('view', VIEW_SAY[v][0], { tex: VIEW_SAY[v][1] }); } });
     r1.appendChild(ui.viewSeg.root).dataset.keyAction = 'view';
     const r2 = el('div', 'row tight', gSpace);
@@ -44,7 +44,7 @@ export function createMaterial(app) {
     const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: DRAW STYLE (window id `style`) merged into WAVE (board #59); this block is the DRAW section of the WAVE window
     const rd = el('div', 'row tight', gd);
     ui.styleSeg = seg({ label: 'STYLE', value: 'cloud', options: [
-      { id: 'cloud', label: 'CLOUD', title: 'the emission/absorption integral' },
+      { id: 'cloud', label: 'CLOUD', title: 'The emission/absorption integral' },
       { id: 'solid', label: 'SOLID', title: 'Render a lit density shell' },
       { id: 'signed', label: 'SIGNED', title: 'Render signed lobes and nodal surfaces' },
       { id: 'dust', label: 'DUST', title: 'Grains fixed in the world, where the field is' },
@@ -233,7 +233,7 @@ export function createMaterial(app) {
     const sliceShow = (v) => { if (v !== 'off') sliceKind = v; clipSw.set(v !== 'off'); kindSeg.set(sliceKind); kindSeg.root.classList.toggle('clip-kind-off', v === 'off'); };
     const clipSw = sw({ label: 'ON', value: false, cls: 'clip-on', title: 'Cut by the plane (CLIP) or keep a slab (SLAB)',
       onChange: (on) => { const v = on ? sliceKind : 'off'; sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
-    const kindSeg = seg({ aria: 'clip kind', value: 'clip', options: [{ id: 'clip', label: 'CLIP', title: 'draw the half of the volume beyond the plane' }, { id: 'slab', label: 'SLAB', title: 'draw a slab THICK wide about the plane' }],
+    const kindSeg = seg({ aria: 'clip kind', value: 'clip', options: [{ id: 'clip', label: 'CLIP', title: 'Draw the half of the volume beyond the plane' }, { id: 'slab', label: 'SLAB', title: 'Draw a slab THICK wide about the plane' }],
       onChange: (v) => { sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
     ui.sliceModeSeg = { root: clipSw.root, kind: kindSeg, get: () => (clipSw.get() ? sliceKind : 'off'), set: sliceShow };
     r3.appendChild(clipSw.root); r3.appendChild(kindSeg.root); sliceShow('off');
@@ -346,7 +346,7 @@ export function createMaterial(app) {
       for (const b of p.querySelectorAll('.mir-pick-i')) { const P = PALETTE_BY_ID.get(b.dataset.id) || mine.get(b.dataset.id); if (!P) continue; const st = [...P.stops].sort((a, c) => a.at - c.at);
         el('span', 'pal-name', b).append(...[...b.childNodes].filter((n) => n.nodeType === 3));   // iteration 015 P1: the name its own flex item, the strip a column
         if (mine.has(b.dataset.id)) {   // P3: a reader's row carries its × between the name and the strip, so the strips stay one column
-          const name = b.dataset.id.slice(PU.length), x = el('span', 'sp-prex', b, '×'); x.setAttribute('role', 'button'); x.title = 'remove ' + name; x.setAttribute('aria-label', 'remove ' + name);
+          const name = b.dataset.id.slice(PU.length), x = el('span', 'sp-prex', b, '×'); x.setAttribute('role', 'button'); x.title = 'Remove ' + name; x.setAttribute('aria-label', 'remove ' + name);
           x.addEventListener('mousedown', (e) => e.preventDefault());
           x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); if (palShown === PU + name) palShown = palId; palUsers.remove(name); b.remove();
             if (!p.querySelector('.mir-pick-i[data-id^="' + PU + '"]')) for (const h of p.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); }); }

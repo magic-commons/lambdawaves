@@ -106,7 +106,7 @@ export function createView(parent, kind, M) {
     const c = el('div', 'nodes-card', plane); c.dataset.node = id;
     const bar = el('div', 'nodes-title', c); icon(bar, glyph); const name = label(el('span', 'nodes-name', bar), title), mk = mark ? el('i', 'nodes-mark', bar, mark) : null;
     for (const [has, side] of [[ins, 'in'], [outs, 'out']]) if (has) { const pt = el('i', 'nodes-port ' + side, c);
-      if (W && id !== 'in' && id !== 'out') { pt.classList.add('live'); pt.title = side === 'in' ? 'drag onto a wire: the node goes there · off: unplugs' : 'drag onto a wire: the node goes there';
+      if (W && id !== 'in' && id !== 'out') { pt.classList.add('live'); pt.title = side === 'in' ? 'Drag onto a wire: the node goes there · off: unplugs' : 'Drag onto a wire: the node goes there';
         pt.addEventListener('pointerdown', (e) => portDrag(e, id, side)); } }
     /* a press on a title selects it (shift adds or takes it out) and drags the selection with it; STAGE IN / OUT drag alone */
     const tap = tapWatcher(() => renameAt(id));                     // the kit's double press (TAP: 300 ms, 14 px): RENAME
@@ -196,7 +196,7 @@ export function createView(parent, kind, M) {
     if (k) label(h.querySelector('.nodes-hand-val'), k === 'amount' ? 'AMOUNT {v} %' : 'MIX {v} %', { v: Math.round(x * 100) }); };   // 038 N8: the readout's words through label()
   function handOf(q) {
     const id = q.id; let h = H.get(id); if (h) return h;
-    h = el('div', 'nodes-hand'); h.dataset.wire = id; h.title = 'the wire\'s MIX: drag · press, then wheel · Delete unplugs';
+    h = el('div', 'nodes-hand'); h.dataset.wire = id; h.title = 'The wire\'s MIX: drag · press, then wheel · Delete unplugs';
     const s = SV('svg', { viewBox: '0 0 20 20', 'aria-hidden': 'true' }, h);
     SV('circle', { class: 't', cx: 10, cy: 10, r: 7, pathLength: 360, 'stroke-dasharray': '300 360', transform: 'rotate(120 10 10)' }, s);
     SV('circle', { class: 'v', cx: 10, cy: 10, r: 7, pathLength: 360, transform: 'rotate(120 10 10)' }, s); SV('circle', { class: 'c', cx: 10, cy: 10, r: 2.4 }, s); el('span', 'nodes-hand-val', h);
@@ -257,7 +257,7 @@ export function createView(parent, kind, M) {
   /** RENAME: the title becomes a line; Enter keeps it, Escape (or leaving it) does not; empty = the type's name */
   function renameAt(id) {
     const n = cards[id], q = M.byId(id); if (!n || !q || n.c.querySelector('.nodes-rename')) return;
-    const f = el('input', 'nodes-rename sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'node name'); f.value = q.name || T[q.type].label;
+    const f = el('input', 'nodes-rename sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'Node name'); f.value = q.name || T[q.type].label;
     n.name.hidden = true; n.name.after(f);
     let done = false; const end = (keep) => { if (done) return; done = true; f.remove(); n.name.hidden = false; if (keep) M.rename(id, f.value === T[q.type].label ? '' : f.value); if (W) ground.focus({ preventScroll: true }); };
     f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true); } else if (e.key === 'Escape') { e.preventDefault(); end(false); } });
@@ -357,7 +357,7 @@ export function createView(parent, kind, M) {
   const tools = W ? null : ground.insertBefore(el('div', 'nodes-tools'), plane), tool = (cls, g, word, run) => { const b = el('button', cls, tools); b.type = 'button'; chip(b, g, word); b.addEventListener('click', run); return b; };
   let addB = W ? null : tool('nodes-add', 'plus', 'ADD NODE', () => openMenu());
   const foldB = W ? null : tool('nodes-folds', 'compact', 'FOLD ALL', () => foldAll());
-  const offB = W ? null : tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
+  const offB = W ? null : tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph', () => M.setOff(!M.off())); if (offB) offB.dataset.keyAction = 'nodes.off';   // 044 A9 (L82): its key in the tip, never typed
   const back = () => { if (W) ground.focus({ preventScroll: true }); };   // a pick or an Escape gives the ground its keys back
   /* 044 AV2 (L17) · THE + IS A PICKER OF THE FINDER'S KIND (the kit's rackless createWindowPicker, MIR 1.6.0-alpha.54): the FINDER's field, rows, walk and
      Escape (clear, then close), the search's matcher; the node GROUPS are its sections and GRAPHS the last (the shipped ones, the reader's, SAVE THIS
@@ -372,13 +372,13 @@ export function createView(parent, kind, M) {
   let adder = null;
   function openMenu() {
     if (!adder) { adder = createWindowPicker({ cls: 'lw-menu nodes-picker', match: finderMatch, sections: [...GROUPS.map((G) => ({ id: G[0], title: G[1], rows: () => kinds(G) })), { id: 'graphs', title: 'GRAPHS', rows: graphRows }] });
-      const f = adder.root.querySelector('.wp-search'); placeholder(f, 'search nodes'); ariaLabel(f, 'find a node'); ariaLabel(adder.root, 'Add a node');
+      const f = adder.root.querySelector('.wp-search'); placeholder(f, 'search nodes'); ariaLabel(f, 'Find a node'); ariaLabel(adder.root, 'Add a node');
       new MutationObserver(() => { const a = document.activeElement; if (adder.root.hidden && (!a || a === document.body)) back(); }).observe(adder.root, { attributes: true, attributeFilter: ['hidden'] }); }   // an Escape gives the ground its keys back
     adder.open();
   }
   /** SAVE THIS GRAPH: its name in the kit's dialog (Enter keeps it, Escape does not) */
   function saveGraph() {
-    const f = el('input', 'sp-prename'); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'graph name'); f.value = 'My graph';
+    const f = el('input', 'sp-prename'); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'Graph name'); f.value = 'My graph';
     const d = openDialog({ title: 'SAVE THIS GRAPH', body: f, actions: [{ label: 'CANCEL', value: null }, { label: 'SAVE', kind: 'primary', run: () => f.value.trim() || null }] });
     f.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); d.close(f.value.trim() || null); } });
     requestAnimationFrame(() => { f.focus(); f.select(); });

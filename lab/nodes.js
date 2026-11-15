@@ -74,7 +74,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const panel = createCurvesPanel({ port: { setTable() { const q = nodes.find((n) => n.type === 'curves'); if (q) { q.v++; for (const v of views) v.strip(q); } recompile(); } }, project: false, presets }), model = panel.model;
   const curveTables = () => Object.fromEntries(model.channels.map((ch) => [ch, isIdentity(model.points(ch)) || model.amount() === 0 ? null : Float32Array.from(model.table(ch))]));
   const TYPES = {
-    curves: { cls: 'table', group: 'tone', label: 'CURVES', hint: 'a transfer curve per channel, as Photoshop draws it', knobs: [],   // 038 P9: a full TONE node
+    curves: { cls: 'table', group: 'tone', label: 'CURVES', hint: 'A transfer curve per channel, as Photoshop draws it', knobs: [],   // 038 P9: a full TONE node
       neutral: () => model.amount() === 0 || model.channels.every((ch) => isIdentity(model.points(ch))),
       fn: () => { const T = curveTables(); return (y, ch) => { if (T.MASTER) y = lookup(T.MASTER, y); if (T[ch]) y = lookup(T[ch], y); return y; }; } },
     ...TABLE_TYPES, ...MATRIX_TYPES, ...PRIM_TYPES, ...LAYER_TYPES, ...SHADER_TYPES,
@@ -237,7 +237,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       keep: (n) => users.add(n, { points: model.points().map((q) => ({ t: q.t, v: q.v, tension: q.tension || 0 })) }) });
     nm.addEventListener('click', () => { const pane = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!pane) return;
       for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + CU + '"]')) {
-        const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'remove ' + name; ariaLabel(x, 'remove {name}', { name });
+        const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'Remove ' + name; ariaLabel(x, 'Remove {name}', { name });
         x.addEventListener('mousedown', (e) => e.preventDefault());
         x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
           if (!pane.querySelector('.mir-pick-i[data-id^="' + CU + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
@@ -265,9 +265,9 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const T = () => vWin.tools, chips = () => { const { off, folded } = T().state(); win.setChip('off', off); win.setChip('folds', folded); };   // a press flips the chip first: the model says what it reads
   win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'both', gripAt: 'first', chips: [
     { name: 'add', kind: 'action', glyph: 'plus', label: 'ADD NODE', hint: 'ADD NODE', press: () => T().add() },
-    { name: 'fit', kind: 'action', glyph: 'home', label: 'FIT', hint: 'FIT — every card in view (Home)', press: () => T().fit() },
+    { name: 'fit', kind: 'action', glyph: 'home', label: 'FIT', hint: 'FIT — every card in view', press: () => T().fit() },
     { name: 'folds', kind: 'toggle', glyph: 'compact', label: 'FOLD ALL', hint: 'FOLD ALL', states: { true: { glyph: 'expand', label: 'UNFOLD ALL', hint: 'UNFOLD ALL', pressed: false } }, press: () => { T().fold(); chips(); } },
-    { name: 'off', kind: 'toggle', glyph: 'power', label: 'BYPASS ALL', hint: 'BYPASS ALL — the picture without the graph (\\)', press: () => { T().off(); chips(); } }], resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
+    { name: 'off', kind: 'toggle', glyph: 'power', label: 'BYPASS ALL', hint: 'BYPASS ALL — the picture without the graph', press: () => { T().off(); chips(); } }], resizable: true, size: { w: 440, h: 640 }, min: { w: 280, h: 280 }, body: wbody,   /* 039 F3: the 280-px floor fits the column beside a docked TIMELINE (1300 × 850, 1000 × 700) */
     persist: { read: () => rec().win || null, write: (st) => put({ win: st }) },
     onOpen: () => { onWin(true); requestAnimationFrame(() => vWin.place()); }, onClose: () => onWin(false), onMoved: () => occlusion.dirty() });   // 021 I1: the bar's NODES seat lights on these
   /* 038 N3 · THE BAR (Josh: "Move the dock to rack button besides the 'x' button and make the icon slightly smaller and match the styling of the nodes
@@ -285,7 +285,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     let cur = '';
     const save = door('mir-win-btn nodes-prebtn', 'save', 'SAVE THE GRAPH AS A PRESET', () => keep()); bar.append(save);
     const name = el('input', 'nodes-prename', bar); name.type = 'text'; name.maxLength = 40; name.spellcheck = false; name.setAttribute('autocapitalize', 'characters');
-    placeholder(name, 'PRESET NAME'); ariaLabel(name, 'preset name'); hint(name, 'PRESET NAME — type one, then SAVE');
+    placeholder(name, 'PRESET NAME'); ariaLabel(name, 'Preset name'); hint(name, 'PRESET NAME — type one, then SAVE');
     const nav = (d, glyph, word) => { const b = door('mir-win-btn nodes-prebtn', glyph, word, () => step(d)); hint(b, word); bar.append(b); };
     nav(-1, 'dirPrev', 'PREVIOUS PRESET'); nav(1, 'dirNext', 'NEXT PRESET'); hint(save, 'SAVE THE GRAPH AS A PRESET');
     showPreset = (n) => { cur = n || ''; name.value = cur; name.classList.remove('dirty'); };
@@ -313,6 +313,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       const m = e.type === 'pointerup' && hit && hit.captured; hit = null; prox.end();
       if (m) { win.close(); rk.open('nodes', { side: m.id, index: m.index }); rk.reveal('nodes'); } };
     const on = [['pointermove', move], ['pointerup', done], ['pointercancel', done]];
+    for (const [n, id] of [['fit', 'nodes.fit'], ['off', 'nodes.off']]) { const c = win.rail.el.querySelector('[data-mir-chip="' + n + '"]'); if (c) c.dataset.keyAction = id; }   // 044 A9 (L82): the tip writes the live key
     win.head.addEventListener('pointerdown', (e) => { if (e.button !== 0 || drag !== null) return; drag = e.pointerId; hit = null; for (const [t, f] of on) addEventListener(t, f, { passive: true }); });
     /* the hand's drag only (the kit's `dragging` let go while the card floats): a card floated by a road of its own (popOut, the header's Enter) stays a card */
     new MutationObserver((recs) => { const c = card.root.classList; if (!c.contains('floating') || c.contains('dragging') || !recs.some((m) => / dragging( |$)/.test(' ' + m.oldValue))) return;

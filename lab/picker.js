@@ -381,7 +381,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const opts = el('div', 'mm-opts', top);
   let labelBtns = [];
   const labelToggle = (host, kind) => { const b = el('button', 'mm-opt', host); b.type = 'button'; b.dataset.labels = kind; icon(b, 'labels'); el('span', '', b, 'SHOW LABELS');
-    b.title = kind === 'atomLabels' ? 'the symbol on every element, the name on every state' : 'the formula on every molecule; the name under it on a hover';
+    b.title = kind === 'atomLabels' ? 'The symbol on every element, the name on every state' : 'The formula on every molecule; the name under it on a hover';
     b.addEventListener('click', () => { prefs[kind] = !prefs[kind]; writePrefs(prefs); paintLabels(); }); labelBtns.push(b); paintLabels(); return b; };
   function paintLabels() {
     root.classList.toggle('labels-atom', !!prefs.atomLabels); root.classList.toggle('labels-mol', !!prefs.molLabels);
@@ -671,7 +671,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const info = { formula: mathPlain(m.formula), name: cap(m.name), sub: m.disabled ? m.reason : m.section };
     const t = tile(host, 'mm-mol', info, () => goMolecule(m.id), !!m.disabled);
     pic(t, null, 'mol:' + m.id); el('b', 'mm-lbl', t, info.formula);
-    if (!m.disabled && dlRec(m)) { const g = el('i', 'mm-dl', t); icon(g, 'download'); g.title = 'not on this device'; g.hidden = true; away.set(m.id, { t, g, info }); paintAway(m); }
+    if (!m.disabled && dlRec(m)) { const g = el('i', 'mm-dl', t); icon(g, 'download'); g.title = 'Not on this device'; g.hidden = true; away.set(m.id, { t, g, info }); paintAway(m); }
   });
 
   /** the install's eye: DOWNLOAD while there is something to fetch, TRASH once it is all here (iteration 012 L2, I1's icons) */
@@ -857,7 +857,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const tipArt = (host) => { const f = el('span', 'mm-tip-art mm-holo', host); el('span', 'mm-halo', f); const lit = el('span', 'mm-lit', f), img = el('img', '', lit); el('span', 'mm-foil', lit); el('span', 'mm-rim', f);   // 032: the album art's light
       img.src = 'img/menu/tip-qr.svg'; img.alt = 'QR code: the tip jar'; img.width = img.height = 196; img.decoding = 'async'; img.draggable = false; return f; };
     const tipLink = (a) => { a.href = TIP_URL; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
-    function tipCard() { const c = tipLink(el('a', 'mm-vol mm-tip', shelfEl)); c.title = 'Everything here is free. A tip keeps it growing.'; tipArt(c); el('span', 'mm-tip-word', c, '♥ TIP JAR'); }
+    function tipCard() { const c = tipLink(el('a', 'mm-vol mm-tip', shelfEl)); c.title = 'Everything here is free: a tip keeps it growing'; tipArt(c); el('span', 'mm-tip-word', c, '♥ TIP JAR'); }
     function tipSheet(go, follow) {
       const back = el('div', 'mm-tip-back', root), s = el('div', 'mm-tip-sheet glass', back); s.dataset.mirSurface = 'menu';
       s.setAttribute('role', 'dialog'); s.setAttribute('aria-modal', 'true'); s.setAttribute('aria-label', 'tip jar');
@@ -930,7 +930,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     async function enter(v) {
       rest(); cur = v; on.clear(); query = ''; shelfEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = ''; root.classList.add('in-volume');   // the head's SHOW LABELS stands for the one under the tabs
       volLooks = ''; paintLooks(); V.looks(v.id).then((ls) => { if (cur !== v) return; volLooks = volName(v) + ': ' + (ls.length ? ls.map((l) => LOOK_WORD[l] || l).join(', ') : 'the plain picture'); paintLooks(); }, () => {});
-      const back = el('button', 'mm-back', vhead); back.type = 'button'; icon(back, 'arrow-left'); back.setAttribute('aria-label', 'back to the volumes'); back.title = 'back to the volumes'; back.addEventListener('click', () => paintShelf());
+      const back = el('button', 'mm-back', vhead); back.type = 'button'; icon(back, 'arrow-left'); back.setAttribute('aria-label', 'Back to the volumes'); back.title = 'Back to the volumes'; back.addEventListener('click', () => paintShelf());
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
       const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).filter((x) => x.count || x.index || x.archive).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
         onChange: (id) => { const x = vols.find((y) => y.id === id); if (x) enter(x); } });
@@ -1117,7 +1117,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
   let escDrop = null; const layer = () => { if (escDrop) escDrop(); escDrop = app.sh.ACTIONS.escape.push(() => { escDrop = null; escape(); if (!root.hidden) layer(); }, { alive: () => !root.hidden }); };
   /* the home button by the title: the kit's grid glyph */
-  const home = el('button', 'lw-home', document.body); home.id = 'lwHome'; home.type = 'button'; chip(home, 'gallery', 'Main menu'); home.title = 'Main menu (L)';
+  const home = el('button', 'lw-home', document.body); home.id = 'lwHome'; home.type = 'button'; chip(home, 'gallery', 'Main menu'); home.title = 'Main menu'; home.dataset.keyAction = 'menu'; if (app.sh.kt) app.sh.kt.table.hints(document.body);   // 044 A9 (L82): the tip writes the live key
   home.addEventListener('click', toggle);
   /** iteration 014 A2 · a suggestion's tile is the Picker's own tile (its picture, its formula, the hue in use) and its press the Picker's road */
   const suggestTile = (host, r) => {

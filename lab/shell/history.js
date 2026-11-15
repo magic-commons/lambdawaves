@@ -128,9 +128,9 @@ export function createHistory(app) {
   let histUndoBtn = null, histRedoBtn = null, histReturnBtn = null;
   {
     const rh = wHist.row('tight hist-actions');
-    histUndoBtn = trig({ label: 'UNDO', title: 'step back one row (Ctrl+Z)', onFire: () => historyApi.undo() }).root; rh.appendChild(histUndoBtn).dataset.keyAction = 'undo';
-    histRedoBtn = trig({ label: 'REDO', title: 'step forward one row (Ctrl+Shift+Z, Ctrl+Y)', onFire: () => historyApi.redo() }).root; rh.appendChild(histRedoBtn).dataset.keyAction = 'redo';
-    histReturnBtn = trig({ label: 'BACK FROM THE JUMP', title: 'back to the timeline before the jump (Ctrl+Alt+Z)', onFire: () => historyApi.historyUndo() }).root; rh.appendChild(histReturnBtn);
+    histUndoBtn = trig({ label: 'UNDO', title: 'Step back one row', onFire: () => historyApi.undo() }).root; rh.appendChild(histUndoBtn).dataset.keyAction = 'undo';
+    histRedoBtn = trig({ label: 'REDO', title: 'Step forward one row', onFire: () => historyApi.redo() }).root; rh.appendChild(histRedoBtn).dataset.keyAction = 'redo';
+    histReturnBtn = trig({ label: 'BACK FROM THE JUMP', title: 'Back to the timeline before the jump', onFire: () => historyApi.historyUndo() }).root; rh.appendChild(histReturnBtn).dataset.keyAction = 'historyUndo';
     rh.appendChild(trig({ label: 'CLEAR', title: 'Clear history without changing the state', onFire: () => { historyApi.clear(); } }).root);
     el('div', 'note', wHist.body).innerHTML = '<b>History.</b> Every edit to the project is a row, newest at the top. The last ' + historyApi.limit + ' are kept for Undo and Redo; older ones fall off the bottom. Select a row to jump there. BACK FROM THE JUMP returns once to the timeline from before that jump, even after a new edit. Preferences, the camera, the windows and the notebook are not edits.';
   }

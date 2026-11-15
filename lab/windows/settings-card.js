@@ -12,7 +12,7 @@ export function createSettingsCard(app) {
        STATUS TAGS, CONTROL HINTS (HINTS) and HELP are TEXT › SHOW there; THEME, CARD STYLE (PANE), FROST, GLASS BLUR (BLUR), DISCONNECTED,
        ACCENT A / B, VIVID, RESET LAYOUT and FORGET too.  SETTINGS keeps λWAVES' own: the stage, its chrome, sound, the gamut, quality. */
     ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
-    ui.capSw = sw({ label: 'CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
+    ui.capSw = sw({ label: 'CAPTIONS', value: false, title: 'The KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
     ui.audioSw = sw({ label: 'AUDIO', value: false, title: 'Levels as tones (SPECTRUM › EQUALIZER › SOUND)', onChange: (v) => { ui.setAudio(v); saveSettings(); } }); ri.appendChild(ui.audioSw.root);   // 0.6.4 S2: a PREFERENCE (`audio`), the consent
     createInformational(app);   // 0.5.3 M9: STAGE FORMULA and ATOM LABELS, each with its SIZE, left DISPLAY for their own window (lab/informational.js)
     /* 037 T1: FRAME · AXIS · AXIS COLOUR are made here as before (their keys FIELD_CHROME, their roads unchanged) and seated in STAGE (lab/stage-window.js) */
@@ -249,8 +249,8 @@ export function createSettingsCard(app) {
       for (const g of ['videoOn', 'videoOff']) f.root.append(glyphEl(g, 'gly gly-' + g, 20));
       paints.push(() => f.set(on())); row(gm, f); }
     row(gm, lookSeg('frost', 'FROST', [['off', 'OFF', 'No backdrop blur'], ['still', 'STILL', 'Blur while the picture is still'], ['always', 'ALWAYS', 'Blur always: it can cost frames']]));
-    { const on = () => !!document.fullscreenElement, f = sw({ label: 'FULL SCREEN', value: on(), title: 'Fill the screen (F)', onChange: () => { app.sh.ACTIONS.run('fullscreen'); setTimeout(paint, 400); } });
-      paints.push(() => f.set(on())); document.addEventListener('fullscreenchange', () => f.set(on())); row(gm, f); }   // the `fullscreen` action's road; the switch mirrors the document
+    { const on = () => !!document.fullscreenElement, f = sw({ label: 'FULL SCREEN', value: on(), title: 'Fill the screen', onChange: () => { app.sh.ACTIONS.run('fullscreen'); setTimeout(paint, 400); } }); f.root.dataset.keyAction = 'fullscreen';
+      paints.push(() => f.set(on())); document.addEventListener('fullscreenchange', () => f.set(on())); row(gm, f); if (app.sh.kt) app.sh.kt.table.hints(gm); }   // the `fullscreen` action's road; the switch mirrors the document
     row(gm, lookSeg('theme', 'THEME', [['light', 'LIGHT', 'Light windows and stage'], ['dark', 'DARK', 'Dark windows and stage'], ['system', 'SYSTEM', 'Follow the system']], (v) => app.hooks.setTheme(v)));
     { const h = sw({ label: 'CONTROL HINTS', value: !!look.get('hints'), title: 'Hover hints on controls', onChange: (v) => look.set({ hints: v }) }); paints.push(() => h.set(!!look.get('hints'))); row(gm, h); }
     const moreRow = el('div', 'mm-sh-more', host), more = group('');

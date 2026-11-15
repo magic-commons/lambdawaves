@@ -21,14 +21,14 @@ export function createTransition(app) {
   const snap = () => ({ re: Float64Array.from(reg.re0), im: Float64Array.from(reg.im0) });
   const recall = (S) => { if (!S) return; if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } reg.re0.set(S.re); reg.im0.set(S.im); reg.version++; touchState(); abStatus(); };
   ui.abRo = readout({ label: '', value: '—  /  —', sub: SUB }); ui.abRo.root.querySelector('.ro-lbl').remove(); ui.abRo.root.setAttribute('aria-label', 'A / B');
-  rab.appendChild(trig({ label: 'STORE A', title: 'keep the register as it is now as state A', onFire: () => { abA = snap(); abLast = 'A'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeA';   // 021 I1: the actions press them
-  const slotA = rab.appendChild(trig({ label: 'A', cls: 'ab-slot', title: 'recall state A', onFire: () => recall(abA) }).root);
-  rab.appendChild(trig({ label: 'STORE B', title: 'keep the register as it is now as state B', onFire: () => { abB = snap(); abLast = 'B'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeB';
-  const slotB = rab.appendChild(trig({ label: 'B', cls: 'ab-slot', title: 'recall state B', onFire: () => recall(abB) }).root);
+  rab.appendChild(trig({ label: 'STORE A', title: 'Keep the register as it is now as state A', onFire: () => { abA = snap(); abLast = 'A'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeA';   // 021 I1: the actions press them
+  const slotA = rab.appendChild(trig({ label: 'A', cls: 'ab-slot', title: 'Recall state A', onFire: () => recall(abA) }).root);
+  rab.appendChild(trig({ label: 'STORE B', title: 'Keep the register as it is now as state B', onFire: () => { abB = snap(); abLast = 'B'; abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeB';
+  const slotB = rab.appendChild(trig({ label: 'B', cls: 'ab-slot', title: 'Recall state B', onFire: () => recall(abB) }).root);
   const clr = chip(el('button', 'sp-abclear', rab), 'trash'); clr.type = 'button'; clr.title = 'CLEAR · empty A and B'; clr.setAttribute('aria-label', 'CLEAR A and B');
   clr.addEventListener('click', () => { if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } abA = abB = abLast = null; touchState(); abStatus(); });
   const rab2 = el('div', 'row tight', gab);
-  ui.abSw = sw({ label: 'TRANSITION', value: false, title: 'play the Rabi mix cos(Ω(t−t₀)/2)·A(t) + sin(Ω(t−t₀)/2)·B(t)', onChange: (v) => {
+  ui.abSw = sw({ label: 'TRANSITION', value: false, title: 'Play the Rabi mix cos(Ω(t−t₀)/2)·A(t) + sin(Ω(t−t₀)/2)·B(t)', onChange: (v) => {
     if (v && sturm.P) { ui.abSw.set(false); ui.abRo.set('off under STURMIAN', 'warn'); ui.abRo.setSub('A / B TRANSITION is a diagonal-phase feature (two exact diagonal evolutions mixed): switch SCALE back to HYDROGEN'); return; }
     if (v) { if (!abA || !abB) { ui.abSw.set(false); ui.abRo.set('store A and B first', 'warn'); return; } reg.setTransition(abA, abB, abOmega, clock.t); if (!clock.playing) { clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); } }
     else if (reg.transition) reg.clearTransition(clock.t);
