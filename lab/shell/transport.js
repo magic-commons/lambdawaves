@@ -92,7 +92,7 @@ export function createTransport(app) {
       btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const z = cssZoom(list), r = btnEl.getBoundingClientRect(), h = list.offsetHeight * z, w = list.offsetWidth * z, up = r.top - h - 8 >= 8;   // 036 K2: seen, written ÷ UI SCALE
         list.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) / z) + 'px'; list.style.right = 'auto';
         list.style.top = Math.round((up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) / z) + 'px'; })); }
-    ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
+    ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'Modulation on or off');
     /* A8 · the door wears the modulation window's own icon (Josh: "a sine wave icon instead of the MIR 3x3 square logo"; 021 V2: the table's
        `modulation`, an SVG); the turning mark is the kit's unplaced logoButton now */
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window'; setGlyph(door, 'modulation');

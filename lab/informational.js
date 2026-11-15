@@ -80,7 +80,7 @@ export function createInformational(app) {
   /* iteration 012 R1 (Josh 10-20: "Status should not be a toggle in the window itself and should be a toggle on the window title bar like the molecules
      window (Icon looks like "Aa")"): the record's `status` is the title bar's Aa — struck through (pressed) while the readout is hidden, as MOLECULES' is */
   const st = readout({ label: 'STATUS', cls: 'wide lw-status', value: '—' }); let was; const stRow = el('div', 'row tight', w.body); stRow.append(st.root);
-  const aa = el('button', 'dev-lean info-aa', null, 'Aa'); aa.type = 'button'; aa.title = 'Hide or show the STATUS readout'; aa.setAttribute('aria-label', 'hide or show the status readout');
+  const aa = el('button', 'dev-lean info-aa', null, 'Aa'); aa.type = 'button'; aa.title = 'Hide or show the STATUS readout'; aa.setAttribute('aria-label', 'Hide or show the status readout');
   const util = w.root.querySelector('.dev-util'); if (util) util.insertBefore(aa, util.firstChild);
   aa.addEventListener('click', (e) => { e.stopPropagation(); P.set('status', !P.get('status')); });
   const showStatus = () => { const on = !!P.get('status'); stRow.hidden = !on; aa.classList.toggle('on', !on); aa.setAttribute('aria-pressed', String(!on)); };

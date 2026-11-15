@@ -64,12 +64,12 @@ export function createSpectrum(host, api) {
   const itemsFor = (v) => { const U = users.list().filter((u) => PRESET_BY_ID.has(UK + u.name)).map((u) => ({ id: UK + u.name, label: u.name }));
     return [...(U.length ? [HEADS[0], ...U, HEADS[1]] : []), ...PRE, ...(v ? [] : [DASH])]; };
   syncUsers();
-  const preStep = stepper({ aria: 'preset superposition', items: itemsFor(''), value: '', cls: 'mol-step', onChange: (id) => { if (id && api.loadPreset) api.loadPreset(id); } });
+  const preStep = stepper({ aria: 'Preset superposition', items: itemsFor(''), value: '', cls: 'mol-step', onChange: (id) => { if (id && api.loadPreset) api.loadPreset(id); } });
   preStep.name.title = 'Preset superpositions (a re-pick reloads)';
   preStep.name.addEventListener('click', () => { const pane = [...document.querySelectorAll('.mir-pick')].pop(), on = pane && pane.querySelector('.mir-pick-i.on');
     if (on) on.addEventListener('click', () => { if (preStep.get() && api.loadPreset) api.loadPreset(preStep.get()); });   // RELOAD: the stepper ignores a pick of its own value
     if (pane) for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + UK + '"]')) {                                // S4: each reader's row carries its ×
-      const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(UK.length); x.setAttribute('role', 'button'); x.title = 'Remove ' + name; x.setAttribute('aria-label', 'remove ' + name);
+      const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(UK.length); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; x.setAttribute('aria-label', 'Delete ' + name);
       x.addEventListener('mousedown', (e) => e.preventDefault());
       x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
         if (!pane.querySelector('.mir-pick-i[data-id^="' + UK + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
@@ -244,10 +244,10 @@ export function createSpectrum(host, api) {
     const pop = fader({ label: '<m>|c|²</m>', aria: '|c|² ' + labelText(a), min: 0, max: 1, value: 0, cls: 'pop', fmt: (v) => v.toFixed(3),
       onInput: (v) => api.setPopulation(a, v), onChange: (v) => api.setPopulation(a, v, true) });
     root.appendChild(pop.root);
-    const ph = knob({ aria: 'phase ' + labelText(a), min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
+    const ph = knob({ aria: 'Phase ' + labelText(a), min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
       onDelta: (d) => api.addPhase(a, d), onReset: () => api.setPhase(a, 0) });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);   // the two knobs stack, half-size
-    const rate = knob({ aria: 'phase rate ' + labelText(a), min: 0.25, max: 4, value: api.rateOf ? api.rateOf(a) : 1, log: true, cls: 'rate', fmt: (v) => v.toFixed(2) + '×', onInput: (v) => { if (api.setRate) api.setRate(a, v); } });
+    const rate = knob({ aria: 'Phase rate ' + labelText(a), min: 0.25, max: 4, value: api.rateOf ? api.rateOf(a) : 1, log: true, cls: 'rate', fmt: (v) => v.toFixed(2) + '×', onInput: (v) => { if (api.setRate) api.setRate(a, v); } });
     rate.root.title = RATE_TITLE;
     kn.appendChild(rate.root);
     const { mute, solo } = laneStrip(root, { name: labelText(a), onMute: () => api.toggleMute(a), onSolo: () => api.toggleSolo(a), onRemove: () => api.remove(a), remove: 'Remove: sets c = 0' });   // 044 A3.2: the one strip (paint-stroke.js)

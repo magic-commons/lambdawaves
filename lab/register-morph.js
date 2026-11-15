@@ -16,7 +16,7 @@ export function createMorph(o) {
   const aT = trig({ label: '→ A', title: 'Store this register as A', onFire: () => api.store('A') }), bT = trig({ label: '→ B', title: 'Store this register as B', onFire: () => api.store('B') });
   o.bar.append(aT.root, bT.root);
   const morphSw = sw({ label: 'MORPH', value: false, title: `Play the path from A to B instead of the ${o.lanes}`, onChange: (v) => api.set(v, s) });
-  const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3), title: o.knobTitle,
+  const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'Morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3), title: o.knobTitle,
     onInput: (v) => { if (o.hand(o.id, v)) return; api.set(on, v); } });   // iteration 007 (MIR check B2): routed, the hand moves the base
   o.row.appendChild(morphSw.root); o.row.appendChild(morphK.root);
   const lamps = () => { aT.on = !!A; bT.on = !!B; }; lamps();

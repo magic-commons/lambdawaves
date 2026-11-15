@@ -45,7 +45,7 @@ import { IDENTITY, expPure, qmul, qnormalize, canonicaliseRotors, classifyManeuv
 import { el, seg, sw, knob, trig, readout, themeInk, graphHover } from './mir/kit.js';
 
 const NAMED = [
-  { key: 'iso', label: 'isoclinic', qL: qnormalize([1, 1, 1, 1]), qR: qnormalize([1, -1, 1, -1]) },
+  { key: 'iso', label: 'ISOCLINIC', qL: qnormalize([1, 1, 1, 1]), qR: qnormalize([1, -1, 1, -1]) },
 ];
 const BUDGET_MS = 2.2;      // ms of sampling per update — the ONE number, and it is set by the READER LAW, not by taste:
                             // rack.js measures what `slice.update()` costs and parks the window over `parkDrop` = 8 ms,

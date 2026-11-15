@@ -89,7 +89,7 @@ export function createStates(host, api) {
 
   const bar = el('div', 'row tight reg-bar', host);
   /* 022 P3: the kit's select (its list the menu pane); a pick runs the preset and the list goes back to PRESET… */
-  const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: PRESETS.map((p) => ({ id: p, label: p })), value: null,
+  const presetSel = listSelect({ aria: 'Register preset', placeholder: 'PRESET…', cls: 'sel', items: PRESETS.map((p) => ({ id: p, label: p })), value: null,
     onChange: (p) => { presetSel.set(null); if (p && preset(p)) { painted(); if (api.announce) api.announce(p); } } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   bar.appendChild(presetSel.root); presetSel.button.title = 'Rule-based presets, for every molecule';
   const brightT = trig({ label: 'BRIGHT', title: 'Bright valence states only, or every state' }), brightBtn = bar.appendChild(brightT.root); brightT.on = true;   // 044 A8 (L154): ON through the kit's `on` door (the lamp)
@@ -121,17 +121,17 @@ export function createStates(host, api) {
   const dr = el('div', 'row tight reg-drive', host);
   const driveSw = sw({ label: 'DRIVE', value: false, title: 'Drive the molecule with the field E(t)·r', onChange: (v) => setDrive(v) });
   dr.appendChild(driveSw.root);
-  const polSel = listSelect({ aria: 'drive polarisation', cls: 'sel', value: drive.pol, onChange: (v) => setDriveParam('pol', v),
+  const polSel = listSelect({ aria: 'Drive polarisation', cls: 'sel', value: drive.pol, onChange: (v) => setDriveParam('pol', v),
     items: [['x', 'x'], ['y', 'y'], ['z', 'z'], ['xy+', 'xy ⟲'], ['xy-', 'xy ⟳'], ['yz+', 'yz ⟲'], ['yz-', 'yz ⟳'], ['zx+', 'zx ⟲'], ['zx-', 'zx ⟳']].map(([id, label]) => ({ id, label })) });
   dr.appendChild(polSel.root); polSel.button.title = 'Polarisation: linear, or circular ⟲ ⟳';
   dr.appendChild(trig({ label: 'ω → LANE', title: 'Tune to the selected lane: its ω and axis', onFire: () => tune() }).root);
   const envSeg = seg({ label: 'ENVELOPE', value: 'cw', options: [{ id: 'cw', label: 'CW' }, { id: 'pulse', label: 'PULSE' }], onChange: (v) => setDriveParam('envelope', v) });
   const dk = el('div', 'row tight fit reg-drive', host);
-  const wK = knob({ label: '<m>ω</m>', aria: 'drive frequency', min: 0.05, max: 3, value: drive.omega, log: true, unit: ' Eh', fmt: (v) => v.toFixed(4),
+  const wK = knob({ label: '<m>ω</m>', aria: 'Drive frequency', min: 0.05, max: 3, value: drive.omega, log: true, unit: ' Eh', fmt: (v) => v.toFixed(4),
     title: 'Carrier frequency (Eh); a stick is resonance', onInput: (v) => { if (hand('reg.w', v)) return; setDriveParam('omega', v); } });
-  const eK = knob({ label: '<m>E₀</m>', aria: 'drive amplitude', min: 1e-4, max: 0.2, value: drive.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2),
+  const eK = knob({ label: '<m>E₀</m>', aria: 'Drive amplitude', min: 1e-4, max: 0.2, value: drive.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2),
     title: 'Field amplitude (a.u.); Rabi Ω = E₀μ', onInput: (v) => { if (hand('reg.e0', v)) return; setDriveParam('e0', v); } });
-  const durK = knob({ label: 'PULSE', aria: 'pulse duration', min: 10, max: 4000, value: drive.duration, log: true, unit: ' a.u.', fmt: (v) => v.toFixed(0),
+  const durK = knob({ label: 'PULSE', aria: 'Pulse duration', min: 10, max: 4000, value: drive.duration, log: true, unit: ' a.u.', fmt: (v) => v.toFixed(0),
     title: 'The sin² pulse’s duration — a π-pulse is π/Ω long', onInput: (v) => setDriveParam('duration', v) });
   dk.appendChild(wK.root); dk.appendChild(eK.root); dk.appendChild(durK.root); dk.appendChild(envSeg.root);
   const roDrive = readout({ label: 'DRIVE', cls: 'wide', value: 'off', sub: 'tune ω to a lane, then DRIVE: the population flops at Ω = E₀μ' });
@@ -142,7 +142,7 @@ export function createStates(host, api) {
   const sg = el('div', 'row tight reg-drive', host), songSw = sw({ label: 'SONG', value: false, title: 'Drive H with the track\'s E_z(t)', onChange: (v) => setSong(v) });
   const songIn = el('input', '', sg); songIn.type = 'file'; songIn.accept = 'audio/*'; songIn.hidden = true; songIn.addEventListener('change', () => { songFile(songIn.files[0]); songIn.value = ''; });
   sg.appendChild(trig({ label: 'FILE', title: 'Choose an audio file — or drop one on this row', onFire: () => songIn.click() }).root);
-  const sE = knob({ label: '<m>E₀</m>', aria: 'song amplitude', min: 1e-4, max: 1e-2, value: song.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2), title: 'The field at the track’s peak, in atomic units', onInput: (v) => setSongE0(v) });
+  const sE = knob({ label: '<m>E₀</m>', aria: 'Song amplitude', min: 1e-4, max: 1e-2, value: song.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2), title: 'The field at the track’s peak, in atomic units', onInput: (v) => setSongE0(v) });
   sg.prepend(songSw.root); sg.appendChild(sE.root); sg.addEventListener('dragover', (e) => e.preventDefault()); sg.addEventListener('drop', (e) => { e.preventDefault(); songFile(e.dataTransfer.files[0]); });
   const roSong = readout({ label: 'SONG', cls: 'wide', value: 'no track' }); el('div', 'row tight', host).appendChild(roSong.root); const songNote = el('div', 'note', host); refreshSong();
 
@@ -530,7 +530,7 @@ export function createStates(host, api) {
     const pop = fader({ label: '<m>|b|²</m>', aria: '|b|² ' + label(key), min: 0, max: 1, value: c.amp * c.amp, cls: 'pop', fmt: (v) => v.toFixed(3),
       onInput: (v) => { painted(); if (hand(slotId('amp', key), v)) return; setAmp(key, Math.sqrt(Math.max(0, v))); }, onChange: (v) => { if (hand(slotId('amp', key), v)) return; setAmp(key, Math.sqrt(Math.max(0, v))); } });   // iteration 007 (MIR check B2)
     root.appendChild(pop.root);
-    const ph = knob({ aria: 'phase ' + label(key), min: 0, max: TAU, value: c.phase, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
+    const ph = knob({ aria: 'Phase ' + label(key), min: 0, max: TAU, value: c.phase, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
       onDelta: (dv) => { const l = lanes.get(key); if (!l) return; painted(); const w = ((l.phase + dv) % TAU + TAU) % TAU; if (hand(slotId('ph', key), w)) return; setPhase(key, w); }, onReset: () => { painted(); if (hand(slotId('ph', key), 0)) return; setPhase(key, 0); } });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);
     const flip = (f) => () => { const l = lanes.get(key); l[f] = !l[f]; touch(); syncLanes(); api.repaint(); };

@@ -39,18 +39,18 @@ export function createEmission(host, api) {
   let catKey = '', cat = [], litV = -1, lit = [], sys = '', range = 'all', series = 'all', hover = -1, picked = null, pairs = [], lastPair = null, dirty = true;
 
   /* ── the strip ── */
-  const cv = el('canvas', 'em-strip', host); cv.tabIndex = 0; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', 'emission lines');
+  const cv = el('canvas', 'em-strip', host); cv.tabIndex = 0; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', 'Emission lines');
   let g = cv.getContext('2d');
   /* ── row 2: ‹ SERIES › · RANGE ── */
   const r2 = el('div', 'row tight em-row', host);
-  const seriesStep = stepper({ aria: 'series', items: [{ id: 'all', label: 'ALL' }], value: 'all', cls: 'em-step', onChange: (id) => { series = id; hover = -1; build(true); update(); } });   // 043 P1: painted now, as the ResizeObserver below does (it waited for a frame nothing asked for)
+  const seriesStep = stepper({ aria: 'Series', items: [{ id: 'all', label: 'ALL' }], value: 'all', cls: 'em-step', onChange: (id) => { series = id; hover = -1; build(true); update(); } });   // 043 P1: painted now, as the ResizeObserver below does (it waited for a frame nothing asked for)
   r2.appendChild(seriesStep.root);
-  const rangeSeg = seg({ aria: 'range', value: 'all', cls: 'sp-vseg em-vseg', options: [{ id: 'visible', label: 'VISIBLE', title: '380–750 nm, linear' }, { id: 'all', label: 'ALL', title: '90 nm – 12.5 µm, logarithmic' }],
+  const rangeSeg = seg({ aria: 'Range', value: 'all', cls: 'sp-vseg em-vseg', options: [{ id: 'visible', label: 'VISIBLE', title: '380–750 nm, linear' }, { id: 'all', label: 'ALL', title: '90 nm – 12.5 µm, logarithmic' }],
     onChange: (v) => { range = v; hover = -1; build(true); update(); } });
   r2.appendChild(rangeSeg.root);
   /* ── row 3: ‹ PAIR › · DECAY · the fold ── */
   const r3 = el('div', 'row tight em-row', host);
-  const pairStep = stepper({ aria: 'pair', items: [{ id: '', label: 'PAIR', coming: true }], value: '', cls: 'em-step', onChange: (id) => { const p = pairs[+id]; if (picked && p) press(picked, p, decaySw.get()); } });
+  const pairStep = stepper({ aria: 'Pair', items: [{ id: '', label: 'PAIR', coming: true }], value: '', cls: 'em-step', onChange: (id) => { const p = pairs[+id]; if (picked && p) press(picked, p, decaySw.get()); } });
   r3.appendChild(pairStep.root);
   const decaySw = sw({ label: 'DECAY', value: false, title: 'Play A ↔ B (Shift: once)' });
   r3.appendChild(decaySw.root);

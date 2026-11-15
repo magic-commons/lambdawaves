@@ -15,7 +15,7 @@ export function createMaterial(app) {
     const gDraw = group(wObs.body, 'DRAW');
     {
       const r0 = el('div', 'row', gSpace);
-      ui.spaceSeg = seg({ label: 'the same state, two exact pictures', value: 'x', options: [
+      ui.spaceSeg = seg({ label: 'The same state, two exact pictures', value: 'x', options: [
         { id: 'x', label: 'POSITION ψ(x)', title: 'The wavefunction in space' },
         { id: 'p', label: 'MOMENTUM φ(p)', title: 'Momentum-space view of the state' }],
         onChange: (v) => { app.state.space = v; schedule(TIER.REBUILD); } });
@@ -72,7 +72,7 @@ export function createMaterial(app) {
     ui.stickK = knob({ label: 'RADIUS', min: 0, max: 1.2, value: 0, fmt: (v) => v.toFixed(2), title: 'RADIUS > 0 draws the bonds (bohr)', onInput: (v) => { mat.stickR = v; ui.sliceCut?.sync(); schedule(TIER.PRESENT); } });
     ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'Probe radius in bohr (2.65 = water)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
     ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 50, value: ESP_RANGE, log: true, fmt: au, title: 'ESP colour span ±RANGE Eh/e', onInput: (v) => { mat.espRange = v; styleSync(); schedule(TIER.PRESENT); } });
-    ui.espSurfSeg = seg({ aria: 'potential surface', value: 'iso', options: [
+    ui.espSurfSeg = seg({ aria: 'Potential surface', value: 'iso', options: [
       { id: 'iso', label: 'ISO', title: 'The density’s own surface, ρ = ISO/30' },
       { id: 'sas', label: 'SAS', title: 'Solvent-accessible surface (vdW + PROBE)' },
       { id: 'ses', label: 'SES', title: 'Solvent-excluded surface (crevices filled)' }],
@@ -233,7 +233,7 @@ export function createMaterial(app) {
     const sliceShow = (v) => { if (v !== 'off') sliceKind = v; clipSw.set(v !== 'off'); kindSeg.set(sliceKind); kindSeg.root.classList.toggle('clip-kind-off', v === 'off'); };
     const clipSw = sw({ label: 'ON', value: false, cls: 'clip-on', title: 'Cut by the plane (CLIP) or keep a slab (SLAB)',
       onChange: (on) => { const v = on ? sliceKind : 'off'; sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
-    const kindSeg = seg({ aria: 'clip kind', value: 'clip', options: [{ id: 'clip', label: 'CLIP', title: 'Draw the half of the volume beyond the plane' }, { id: 'slab', label: 'SLAB', title: 'Draw a slab THICK wide about the plane' }],
+    const kindSeg = seg({ aria: 'Clip kind', value: 'clip', options: [{ id: 'clip', label: 'CLIP', title: 'Draw the half of the volume beyond the plane' }, { id: 'slab', label: 'SLAB', title: 'Draw a slab THICK wide about the plane' }],
       onChange: (v) => { sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
     ui.sliceModeSeg = { root: clipSw.root, kind: kindSeg, get: () => (clipSw.get() ? sliceKind : 'off'), set: sliceShow };
     r3.appendChild(clipSw.root); r3.appendChild(kindSeg.root); sliceShow('off');
@@ -243,7 +243,7 @@ export function createMaterial(app) {
        'camera' or absent, written only by a hand, so NEW, a link and every older file open as OBJECT.  A press keeps the plane where it
        stands now (the normal re-read in the other frame through the same basis the field reads), so only what follows the press differs */
     const sliceN = () => mat.slice.normal || sliceNormals[mat.slice.axis | 0] || sliceNormals[2];
-    ui.sliceFrameSeg = seg({ aria: 'clip frame', cls: 'clip-frame', value: 'object', options: [
+    ui.sliceFrameSeg = seg({ aria: 'Clip frame', cls: 'clip-frame', value: 'object', options: [
       { id: 'camera', label: 'CAMERA', title: 'CAMERA · the plane rides with the eye' },
       { id: 'object', label: 'OBJECT', title: 'OBJECT · the plane stays with the object' }],
       onChange: (v) => { const was = mat.slice.frame === 'camera'; if ((v === 'camera') === was) return;
@@ -346,7 +346,7 @@ export function createMaterial(app) {
       for (const b of p.querySelectorAll('.mir-pick-i')) { const P = PALETTE_BY_ID.get(b.dataset.id) || mine.get(b.dataset.id); if (!P) continue; const st = [...P.stops].sort((a, c) => a.at - c.at);
         el('span', 'pal-name', b).append(...[...b.childNodes].filter((n) => n.nodeType === 3));   // iteration 015 P1: the name its own flex item, the strip a column
         if (mine.has(b.dataset.id)) {   // P3: a reader's row carries its × between the name and the strip, so the strips stay one column
-          const name = b.dataset.id.slice(PU.length), x = el('span', 'sp-prex', b, '×'); x.setAttribute('role', 'button'); x.title = 'Remove ' + name; x.setAttribute('aria-label', 'remove ' + name);
+          const name = b.dataset.id.slice(PU.length), x = el('span', 'sp-prex', b, '×'); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; x.setAttribute('aria-label', 'Delete ' + name);
           x.addEventListener('mousedown', (e) => e.preventDefault());
           x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); if (palShown === PU + name) palShown = palId; palUsers.remove(name); b.remove();
             if (!p.querySelector('.mir-pick-i[data-id^="' + PU + '"]')) for (const h of p.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); }); }

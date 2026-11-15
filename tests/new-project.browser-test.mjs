@@ -165,9 +165,9 @@ try {
     window.fetch = f0;
     return { dirty0, cur0, a, b, errs: __e.slice() };`);
   assert.equal(fail.dirty0, true);
-  assert.equal(fail.a.ok, false); assert.match(fail.a.status, /^new project failed — HTTP 404; nothing was changed$/);
+  assert.equal(fail.a.ok, false); assert.match(fail.a.status, /^Could not make the new project: HTTP 404; nothing was changed$/);
   assert.deepEqual([fail.a.same, fail.a.current, fail.a.dirty, fail.a.nb], [true, fail.cur0, true, true]);
-  assert.equal(fail.b.ok, false); assert.equal(fail.b.status, 'new project failed — the previous state is back');
+  assert.equal(fail.b.ok, false); assert.equal(fail.b.status, 'Could not make the new project: the previous state is back');
   assert.deepEqual([fail.b.same, fail.b.current, fail.b.dirty, fail.b.nb], [true, fail.cur0, true, true]);
   assert.deepEqual(fail.errs, []);
   console.log('PASS a NEW that cannot land changes nothing: an unreachable file leaves serialize() byte-identical and says so; a file whose restore throws half-way is rolled back byte-identical (M5b), current and dirty as they were');

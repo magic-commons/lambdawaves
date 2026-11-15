@@ -83,7 +83,7 @@ export function timelineRows(app) {
   }
   return {
     /** the rows ⋯ shows (read at each open) */
-    rows: () => [['FOLLOW PLAYHEAD', follow, 'follow-playhead', on], ['AUTO-COLOR', autoColor, 'auto-color']],
+    rows: () => [['FOLLOW PLAYHEAD', follow, 'follow-playhead', on], ['AUTO-COLOUR', autoColor, 'auto-color']],
     /** bind(tl): the installed timeline; each present's paintHead also follows */
     bind(t) { tl = t; const paint = t.paintHead; t.paintHead = (...a) => { tick(); return paint(...a); }; leaves(); },   // the lanes move first: the head paints at its pin
   };

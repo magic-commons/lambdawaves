@@ -237,7 +237,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       keep: (n) => users.add(n, { points: model.points().map((q) => ({ t: q.t, v: q.v, tension: q.tension || 0 })) }) });
     nm.addEventListener('click', () => { const pane = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!pane) return;
       for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + CU + '"]')) {
-        const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'Remove ' + name; ariaLabel(x, 'Remove {name}', { name });
+        const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'Delete ' + name; ariaLabel(x, 'Delete {name}', { name });
         x.addEventListener('mousedown', (e) => e.preventDefault());
         x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
           if (!pane.querySelector('.mir-pick-i[data-id^="' + CU + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });

@@ -73,7 +73,7 @@ export function createSettingsCard(app) {
     { const seat = el('div', 'stage-seat'); ui.stageSeat = { root: seat };   // 037 T1: the seat, STAGE and GAMMA are seated in STAGE (lab/stage-window.js)
       /* 044 A3.5 (L55, REVIEW-B B10; Josh's control language: a picked colour is the kit's swatch): the STAGE colour was the platform's bare colour
          input; it is hueSwatch() — a drag turns its hue, a tap opens the chooser.  Its chooser keeps the hook `.stage-colour` */
-      ui.stageColour = hueSwatch({ rgb: mat.stageCustom, label: 'stage colour', title: 'Stage colour at 100%',
+      ui.stageColour = hueSwatch({ rgb: mat.stageCustom, label: 'Stage colour', title: 'Stage colour at 100%',
         onInput: (c) => { setStageColour(c); setStageFollow(false); if (app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); } });
       ui.stageColour.input.classList.add('stage-colour'); seat.appendChild(ui.stageColour.root);
       /* iteration 016 P7 (Josh: "if a user chooses a background color, let that automatically" turn it on): a pick leaves FOLLOW THEME and, when the

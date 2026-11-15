@@ -360,7 +360,7 @@ export function createExporter(env) {
       return last;
     } catch (e) {
       const why = String(e && e.message || e);
-      env.status('EXPORT FAILED · ' + why, 'warn');
+      env.status('Could not export: ' + why, 'warn');
       return (last = { ok: false, fmt, error: why });
     } finally { busy = false; }
   }

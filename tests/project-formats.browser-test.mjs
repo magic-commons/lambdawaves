@@ -67,7 +67,7 @@ try {
     return { json: { ok: out.json.ok, why: out.json.why }, jsonStatus: out.jsonStatus, mir: { ok: out.mir.ok, why: out.mir.why }, mirStatus: out.mirStatus,
       theirs: { ok: out.theirs.ok, why: (out.theirs.errors && out.theirs.errors[0] && out.theirs.errors[0].why) || '' }, same: out.same,
       small: { ok: !!(out.small && out.small.ok) }, current: P.current, text: __LW.notebook.text, errs: __e.slice() };`);
-  assert.deepEqual(door.json, { ok: false, why: 'project file exceeds 8 MiB' }); assert.equal(door.jsonStatus, 'import failed: project file exceeds 8 MiB');
+  assert.deepEqual(door.json, { ok: false, why: 'project file exceeds 8 MiB' }); assert.equal(door.jsonStatus, 'Could not import: project file exceeds 8 MiB');
   assert.deepEqual(door.mir, { ok: false, why: 'project file exceeds 8 MiB' }, 'a 10 MiB .mir got past the door');
   assert.equal(door.theirs.ok, false); assert.match(door.theirs.why, /this project is basins's; this is lambdawaves/);
   assert.equal(door.same, true, 'a refused file moved the store');

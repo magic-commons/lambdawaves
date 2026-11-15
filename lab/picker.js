@@ -154,7 +154,7 @@ async function molRows() {
 }
 
 export function createPicker(app, { open: openAtBoot = true } = {}) {
-  const root = el('div', 'lw-menu', document.body); root.id = 'lwMenu'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'the main menu');
+  const root = el('div', 'lw-menu', document.body); root.id = 'lwMenu'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'The main menu');
   const top = el('div', 'mm-top', root);
   const logo = el('div', 'mm-logo', top);
   /* 034 M1 · THE LANDING FACE (Josh 11-02: "When users open up the app, they will be met with the lambdawaves logo in large with two boxes that
@@ -290,7 +290,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   const closeAbout = () => { const A = aboutOf(); if (A) A.close(); dropAbout(); backFromAbout(); };
   root.addEventListener('pointerdown', (e) => { if (aboutOver() && e.target === root) { e.preventDefault(); closeAbout(); } });   // a press on the face under ABOUT (its veil is the root's own)
-  const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
+  const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'Molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
   /* 032 (Josh 11-01: "a light and dark toggle in the picker in between the hue knob and thumbnail switcher"): THEME, the action's own
      (lab/actions.js `theme`, the transport's sun ↔ moon) — the sun in LIGHT, the moon in DARK (skin.css) */
@@ -390,7 +390,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   /* iteration 015 M3 · ATOMIC MODE (Josh: "In atomic mode, it should show options to pick 'hyrogen' and the periodic table 'atoms'"): HYDROGEN | ATOMS
      beside SHOW LABELS on the ATOMIC deck — ATOMS the periodic table, HYDROGEN THE 140; the Picker's PREFERENCE `atomic` */
-  const amode = el('div', 'mm-amode', opts); amode.setAttribute('role', 'radiogroup'); amode.setAttribute('aria-label', 'the atomic deck');
+  const amode = el('div', 'mm-amode', opts); amode.setAttribute('role', 'radiogroup'); amode.setAttribute('aria-label', 'The atomic deck');
   const amodeBtns = [['hydrogen', 'HYDROGEN', 'every hydrogen state, n ≤ 7: one label each'], ['atoms', 'ATOMS', 'the periodic table']].map(([id, word, tip]) => {
     const b = el('button', 'mm-opt', amode, word); b.type = 'button'; b.dataset.amode = id; b.title = tip; b.setAttribute('role', 'radio'); b.addEventListener('click', () => setAtomic(id)); return b; });
   const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
@@ -418,7 +418,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const SHAPES = { '●': 'balls', '⊸': 'sticks', '◣': 'wedge' };   // 021 V2: the table's `balls` and `sticks` (lab/icons.js) · 037 D2: `wedge`
   const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = glyphSvg(SHAPES[g], 'gly'); else host.textContent = g; return host; };
   const lookOf = () => { const l = lookFor(false); return l !== 'density' ? l : null; };   // a volume tile's style (V.picture), a molecule's look
-  const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu'; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');   // 022 P3: a menu pane
+  const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu'; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'Picture style');   // 022 P3: a menu pane
   const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio');
     b.style.gridRow = i < 3 ? '1' : '2'; b.style.gridColumn = (i < 3 ? 2 + 2 * i : 1 + 2 * (i - 3)) + ' / span 2';   // L1: the bricks, each row centred
     glyph(el('b', 'mm-lk-g', b), glyph_); b.addEventListener('click', () => { if (b.getAttribute('aria-disabled') === 'true') return; setLook(id); closeDrop(true); }); return b; });
@@ -616,7 +616,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const SUBN = '₀₁₂₃₄₅₆₇₈₉', subOf = (m) => (m < 0 ? '₋' : '') + String(Math.abs(m)).split('').map((d) => SUBN[+d]).join('');
   /* iteration 016 L3 · THE 140 ON ONE PAGE (Josh, call 15: "on ONE page, each the size of a periodic-table cell"): one grid of fourteen columns,
      the periodic cells' --t, no pages and no arrows (14 × 10 at 1600 px); built at its first showing, its pictures lazy */
-  const hTable = el('div', 'mm-table mm-htable', sections[0].sec); hTable.setAttribute('role', 'group'); hTable.setAttribute('aria-label', 'every hydrogen state, n ≤ 7');
+  const hTable = el('div', 'mm-table mm-htable', sections[0].sec); hTable.setAttribute('role', 'group'); hTable.setAttribute('aria-label', 'Every hydrogen state, n ≤ 7');
   let hSet = false;
   const hTile = (b, host) => {
     const nl = b.n + L_LETTERS[b.l], info = { formula: nl + subOf(b.m), sub: `n ${b.n} · ℓ ${b.l} · m ${b.m < 0 ? '−' + -b.m : b.m}`, math: true, under: false };
@@ -761,7 +761,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     showView('tutorial');
     if (!tut) {
       const head = el('div', 'mm-tut-head', tutEl), decks = TUTORIAL_DECKS.map((d, n) => tutPlayer(d, TUTORIAL.filter((r) => r.deck === n + 1)));
-      const tabs = seg({ aria: 'tutorial decks', options: TUTORIAL_DECKS, value: TUTORIAL_DECKS[0].id,
+      const tabs = seg({ aria: 'Tutorial decks', options: TUTORIAL_DECKS, value: TUTORIAL_DECKS[0].id,
         onChange: (id) => { for (const p of decks) { p.root.hidden = p.id !== id; if (p.root.hidden) p.stop(); else (tut.cur = p).play(); } } });
       for (const d of TUTORIAL_DECKS) tabs.button(d.id).dataset.deck = d.id;
       head.append(tabs.root); tut = { cur: decks[0] };
@@ -860,7 +860,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     function tipCard() { const c = tipLink(el('a', 'mm-vol mm-tip', shelfEl)); c.title = 'Everything here is free: a tip keeps it growing'; tipArt(c); el('span', 'mm-tip-word', c, '♥ TIP JAR'); }
     function tipSheet(go, follow) {
       const back = el('div', 'mm-tip-back', root), s = el('div', 'mm-tip-sheet glass', back); s.dataset.mirSurface = 'menu';
-      s.setAttribute('role', 'dialog'); s.setAttribute('aria-modal', 'true'); s.setAttribute('aria-label', 'tip jar');
+      s.setAttribute('role', 'dialog'); s.setAttribute('aria-modal', 'true'); s.setAttribute('aria-label', 'Tip jar');
       tipArt(s); el('span', 'mm-tip-free', s, follow ? 'FREE EITHER WAY' : 'THE FILE IS A THANK-YOU');   // Josh 10-31 (B): a file volume comes with the tip jar's thank-you message
       const row = el('div', 'mm-tip-row', s), yes = tipLink(el('a', 'mm-tip-yes', row, '♥ TIP')), no = el('button', 'mm-tip-no', row, follow ? 'NO THANKS' : 'I HAVE THE FILE'); no.type = 'button';
       yes.title = follow ? 'Opens the tip jar in a new tab; the install goes on' : 'Opens the tip jar; its thank-you message has the file'; no.title = follow ? 'Go on without a tip' : 'Open the file you have';
@@ -878,7 +878,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const HERO = './img/menu/vol/', heroArt = (art, id) => artOf(art, HERO, id, HEROES[id]);
     const heroes = new Set(), rest = () => { for (const h of heroes) h.stop(); if (tipOff) tipOff(); };   // a volume opened or the Picker closed: every hero rests
     function card(v, k) {
-      const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
+      const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open mm-holo', c); o.type = 'button'; o.setAttribute('aria-label', 'Open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
       o.style.setProperty('--k', String(k));   // 034 F1 (Josh: "Don't show a mouseover hint for the volume libraries … just let the hero videos play"): no title on the card
       el('span', 'mm-halo', o); const art = el('span', 'mm-lit', o); el('span', 'mm-rim', o);
       const hero = heroArt(art, v.id); el('span', 'mm-foil', art);
@@ -932,19 +932,19 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       volLooks = ''; paintLooks(); V.looks(v.id).then((ls) => { if (cur !== v) return; volLooks = volName(v) + ': ' + (ls.length ? ls.map((l) => LOOK_WORD[l] || l).join(', ') : 'the plain picture'); paintLooks(); }, () => {});
       const back = el('button', 'mm-back', vhead); back.type = 'button'; icon(back, 'arrow-left'); back.setAttribute('aria-label', 'Back to the volumes'); back.title = 'Back to the volumes'; back.addEventListener('click', () => paintShelf());
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
-      const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).filter((x) => x.count || x.index || x.archive).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
+      const step = stepper({ aria: 'Volume', items: (vols.length ? vols : [v]).filter((x) => x.count || x.index || x.archive).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
         onChange: (id) => { const x = vols.find((y) => y.id === id); if (x) enter(x); } });
       step.root.title = [volName(v), size ? fmtBytes(size) : ''].filter(Boolean).join(' · '); vhead.appendChild(step.root); wheelSteps(step.root, (d) => step.step(d));   // L2
       countEl = el('span', 'mm-count', vhead);
-      tagsEl = el('div', 'mm-tags', vhead); tagsEl.setAttribute('role', 'group'); tagsEl.setAttribute('aria-label', 'tags of ' + volName(v));
+      tagsEl = el('div', 'mm-tags', vhead); tagsEl.setAttribute('role', 'group'); tagsEl.setAttribute('aria-label', 'Tags of ' + volName(v));
       tagsEl.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && tagsEl.scrollWidth > tagsEl.clientWidth) { e.preventDefault(); tagsEl.scrollLeft += e.deltaY; } }, { passive: false });
       /* iteration 014 D1 (Josh: "move the search bar to the middle, underneath the atomic, molecular, and library buttons"): the search is
          the seat under the tabs while a volume is open (opts' SHOW LABELS stands aside there); its old seat holds NAME and MASS */
-      if (!vq) { vq = searchField(opts, { cls: 'mm-search' }); vq.placeholder = 'search';   // 044 AV2 (L3): the kit's one search field
+      if (!vq) { vq = searchField(opts, { cls: 'mm-search' }); vq.placeholder = 'search molecules';   // 044 AV2 (L3): the kit's one search field
         vq.addEventListener('input', () => { query = vq.value.trim().toLowerCase(); filter(); });
         /* 044 AV2 (L43) · ESCAPE CLEARS, THEN CLOSES: a typed query goes first; an empty field lets the key through to the menu's step back (it was swallowed) */
         vq.addEventListener('keydown', (e) => { if (e.key !== 'Escape') { e.stopPropagation(); return; } if (!vq.value) return; e.preventDefault(); e.stopPropagation(); vq.value = ''; query = ''; filter(); }); }
-      vq.value = ''; vq.setAttribute('aria-label', 'search ' + volName(v));
+      vq.value = ''; vq.setAttribute('aria-label', 'Search ' + volName(v));
       sortBtn(vhead, 'name'); sortBtn(vhead, 'mass'); paintSort();
       labelToggle(vhead, 'molLabels');
       animate(view, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
@@ -1012,7 +1012,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     function openIsomers(m, isos, from) {
       isoHead.textContent = ''; isoGrid.textContent = ''; isoEl.dataset.of = m.id;
       el('b', 'mm-isof', isoHead, m.formulaM ? mathPlain(m.formulaM) : m.formula); el('span', 'mm-isocount', isoHead, (isos.length + 1) + ' isomers');
-      const x = el('button', 'mm-back mm-isox', isoHead); x.type = 'button'; x.setAttribute('aria-label', 'close the isomers'); x.textContent = '×'; x.addEventListener('click', closeIsomers);
+      const x = el('button', 'mm-back mm-isox', isoHead); x.type = 'button'; x.setAttribute('aria-label', 'Close the isomers'); x.textContent = '×'; x.addEventListener('click', closeIsomers);
       isoGrid.style.setProperty('--n', String(isos.length + 1));
       for (const y of [m, ...isos]) { const t = molTile(isoGrid, y, false); if (y === m) t.classList.add('here'); }
       isoEl.style.maxHeight = ''; isoEl.hidden = false; placeIsomers(from); enterTiles([...isoGrid.children]);

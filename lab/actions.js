@@ -42,7 +42,7 @@ export function createActions(app) {
   const at = (a) => (a && a.el) || document.activeElement || document.body, eventAt = (a) => { const t = at(a); return t.closest ? t.closest('[data-event]') : null; }, knobAt = (a) => at(a).closest && at(a).closest('.k'), tileAt = (a) => at(a).closest && at(a).closest('.mm-tile');
   /* 039 W6 EVERY ROW ANSWERS: a row's result is said where it is seen — the toast — and kept on SPECTRUM's status line */
   const tell = (line, ok = true) => { W().wState.setStatus(line, ok ? 'live' : 'warn'); notice(line, { kind: ok ? 'ok' : 'warn' }); };
-  const said = (ok, what) => tell(ok ? what + ' copied' : 'the clipboard refused the copy', ok);
+  const said = (ok, what) => tell(ok ? what + ' copied' : 'Could not copy: the clipboard refused', ok);   // 044 A9 (L84): {What} copied · Could not {verb}: {why}
   const copyOut = (text, what) => { if (!text) return false; copyText(String(text)).then((ok) => said(ok, what)); return true; };
   const wordOf = (k, a) => { const t = tileAt(a); if (t) return k === 'name' ? (t.getAttribute('aria-label') || '').split(' — ')[0] : (t.querySelector('.mm-lbl, .mm-sym') || {}).textContent;
     const q = (s) => (document.querySelector(s) || {}).textContent; return k === 'name' ? q('.mol-pick .mir-step-name') : q('.lw-stage .mir-info-text'); };
@@ -153,10 +153,10 @@ export function createActions(app) {
     { id: 'open', group: PJ, short: 'open', label: 'OPEN…', hint: 'Open a project (FOLDERS)', keys: ['Mod+KeyO'], exact: true, run: () => proj().show(), surface: true },   // 021 call 6
     /* 021 I1 · ONE ROAD TO NEW: FOLDERS asks its own "Save this first?" (SAVE & NEW · NEW WITHOUT SAVING); the key, the menu and the verb take it */
     { id: 'new', group: PJ, short: 'new', label: 'NEW', hint: 'NEW — the empty project', keys: ['Mod+Alt+KeyN'], exact: true, surface: true,
-      async run() { proj().show(); const r = await proj().folders.fresh(); return r && r.ok ? undefined : r && r.asked ? 'NEW asks first: FOLDERS holds the question' : 'NEW did not open: the empty project could not be fetched'; } },
-    { id: 'quick.save', group: PJ, short: 'quick save', label: 'QUICK SAVE', hint: 'Keep the experiment as the one quick save', run: () => { const ok = S().save(); tell(ok ? 'Quick save kept — QUICK › LOAD brings it back' : 'quick save failed', ok); }, surface: true },
+      async run() { proj().show(); const r = await proj().folders.fresh(); return r && r.ok ? undefined : r && r.asked ? 'NEW asks first: FOLDERS holds the question' : 'Could not open NEW: the empty project could not be fetched'; } },
+    { id: 'quick.save', group: PJ, short: 'quick save', label: 'QUICK SAVE', hint: 'Keep the experiment as the one quick save', run: () => { const ok = S().save(); tell(ok ? 'Quick save kept — QUICK › LOAD brings it back' : 'Could not quick save', ok); }, surface: true },
     { id: 'quick.load', group: PJ, short: 'quick load', label: 'QUICK LOAD', hint: 'Load the last quick save', when: quickSaved,
-      run: () => { if (proj().openWith(() => S().restore() === true, 'quick load failed')) tell('Quick save loaded'); }, surface: true },
+      run: () => { if (proj().openWith(() => S().restore() === true, 'Could not load the quick save')) tell('Quick save loaded'); }, surface: true },
     { id: 'export.json', group: PJ, label: 'EXPORT .json', hint: 'The project as a .json file', run: () => proj().download(), gesture: true, surface: true },
     { id: 'export.mir', group: PJ, label: 'EXPORT .mir', hint: 'The project as a .mir file', run: () => proj().folders.exportProject('mir'), gesture: true, surface: true },
     { id: 'export.png', group: PJ, label: 'EXPORT .png', hint: 'The project as a picture that carries it', run: () => proj().folders.exportProject('png'), gesture: true, surface: true },
@@ -166,15 +166,15 @@ export function createActions(app) {
     { id: 'import', group: PJ, label: 'IMPORT…', hint: 'Import a project (.json · .mir · picture)', run: () => proj().pick(), gesture: true, surface: true },
     { id: 'copy.latex', group: PJ, label: 'COPY LaTeX', hint: 'The populated states in chemistry order, as LaTeX', run: () => W().copyLatex(), gesture: true, surface: true },
     { id: 'copy.json', group: PJ, label: 'COPY JSON', hint: 'The experiment and its presentation as JSON', run: () => S().copyJSON(), gesture: true, surface: true },
-    { id: 'copy.link', icon: 'link', group: PJ, label: 'COPY LINK', hint: 'A URL that reopens this exact state', run: () => S().copyLink().then((e) => { if (e) tell(e.copied ? 'Link copied — ' + e.chars + ' characters' : 'the clipboard refused the link — SPECTRUM shows it to copy', e.copied); return e; }), gesture: true, surface: true },
+    { id: 'copy.link', icon: 'link', group: PJ, label: 'COPY LINK', hint: 'A URL that reopens this exact state', run: () => S().copyLink().then((e) => { if (e) tell(e.copied ? 'Link copied — ' + e.chars + ' characters' : 'Could not copy the link: SPECTRUM shows it to copy', e.copied); return e; }), gesture: true, surface: true },
     { id: 'copy.picture', group: PJ, short: 'copy picture', label: 'COPY PICTURE', hint: 'Copy the stage picture (PNG)', gesture: true, surface: true, undo: 'none',
       run: () => { const C = app.state.capApi && app.state.capApi.capture; if (!C || !globalThis.ClipboardItem) return false;
-        navigator.clipboard.write([new ClipboardItem({ 'image/png': C.picture({ scale: 1 }).then((r) => r.blob) })]).then(() => said(true, 'the picture'), () => said(false)); } },
-    ...[['name', 'COPY NAME'], ['formula', 'COPY FORMULA']].map(([k, label]) => ({ id: 'copy.' + k, group: PJ, short: 'copy ' + k, label, hint: 'Copy the ' + k, surface: true, undo: 'none', run: (a) => copyOut(wordOf(k, a), 'the ' + k) })),
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': C.picture({ scale: 1 }).then((r) => r.blob) })]).then(() => said(true, 'Picture'), () => said(false)); } },
+    ...[['name', 'COPY NAME'], ['formula', 'COPY FORMULA']].map(([k, label]) => ({ id: 'copy.' + k, group: PJ, short: 'copy ' + k, label, hint: 'Copy the ' + k, surface: true, undo: 'none', run: (a) => copyOut(wordOf(k, a), k[0].toUpperCase() + k.slice(1)) })),
     ...['reset', 'copy', 'paste', 'fine'].map((v) => ({ id: 'knob.' + v, group: CA, short: 'knob ' + v, label: 'KNOB › ' + (v === 'copy' ? 'COPY VALUE' : v.toUpperCase()), ...(v === 'fine' ? { hint: 'Half the drag gain' } : {}), surface: true, undo: v === 'copy' || v === 'fine' ? 'none' : 'row',
       ...(v === 'fine' ? { kind: 'toggle', get: () => { const k = knobAt(); return !!(k && k.mirKnob && k.mirKnob.fine()); } } : {}), run: (a) => knobAct(knobAt(a), v) })),
     { id: 'knob.copyId', group: CA, short: 'copy id', label: 'COPY ID', hint: 'Copy the control’s id', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-param], [data-key-action], [data-fav], [data-event]');
-      return c ? copyOut(c.dataset.param || c.dataset.keyAction || c.dataset.fav || c.dataset.event, 'the id') : false; } },   // 032 W3: an event target's id too
+      return c ? copyOut(c.dataset.param || c.dataset.keyAction || c.dataset.fav || c.dataset.event, 'ID') : false; } },   // 032 W3: an event target's id too
     { id: 'knob.route', group: CA, short: 'route', label: 'ROUTE THE MACRO', hint: 'Route a macro onto the knob', surface: true, run: (a) => { const k = knobAt(a), id = k && k.dataset.param, M = S().LW && S().LW.mod;
       if (!id || !M) return false; const v = app.state.modView, m = (v && v.api.selected && v.api.selected()) || M.addMacro(); return !!M.route(m, id); } },
     { id: 'control.reset', group: CA, short: 'reset', label: 'RESET', hint: 'The control back to its default', surface: true, run: (a) => { const c = at(a).closest && at(a).closest('[data-param]'), R = app.state.modHost && app.state.modHost.registry, id = c && c.dataset.param;
@@ -188,7 +188,7 @@ export function createActions(app) {
       const e = eventAt(a), tl = app.state.tl, R = app.state.modHost && app.state.modHost.registry, id = e && e.dataset.event; if (!id || !tl || !R || !R.has(id)) return false;
       const d = R.describe(id), b = at(a).closest('[data-v], .pk-c'), sw = at(a).closest('.sw');
       const u = b ? R.toNorm(id, +(b.dataset.v ?? b.dataset.a)) : d.map === 'toggle' ? (sw && sw.getAttribute('aria-pressed') === 'true' ? 0.75 : 0.25) : R.readNorm(id);   // a toggle's two bands' centres (an action's base is 0, never its state)
-      if (!Number.isFinite(u)) return false; tl.editor.copiedValue = u; W().wState.setStatus('value copied · ' + d.label, 'live'); return true; } },
+      if (!Number.isFinite(u)) return false; tl.editor.copiedValue = u; W().wState.setStatus('Value copied · ' + d.label, 'live'); return true; } },
     { id: 'control.learn', group: CA, short: 'learn', label: 'LEARN…', hint: 'Learn a key, MIDI or a route (the MAPPING)', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-key-action]');
       if (!c || !api.mapping) return false; L().keymap.open('MAPPING'); api.mapping.learn(c.dataset.keyAction); return true; } },
     ...[['open', 'OPEN', (t) => t.click()], ['isomers', 'ISOMERS', (t) => t.querySelector('.mm-iso') && t.click()],
@@ -198,7 +198,7 @@ export function createActions(app) {
       get: () => (document.querySelector('#lwMenu .mm-lk.on') || { dataset: {} }).dataset.look, run: (a) => { const b = a && a.id && document.querySelector('#lwMenu .mm-lk[data-look="' + a.id + '"]'); if (b) b.click(); return !!b; } },
     { id: 'esp.side', group: V, short: 'esp side', label: 'ESP BAR SIDE', hint: 'The ESP bar’s side', kind: 'set', args: { id: '?enum right|left|top|bottom' }, get: () => IP.get('espBarSide'), surface: true,
       run: (a) => { const s = ['right', 'left', 'top', 'bottom']; IP.set({ espBarSide: a && s.includes(a.id) ? a.id : s[(s.indexOf(IP.get('espBarSide')) + 1) % 4] }); } },
-    { id: 'notebook.copy', group: PJ, short: 'copy notebook', label: 'COPY TEXT', hint: 'Copy the NOTEBOOK’s text', surface: true, undo: 'none', run: () => copyOut(L().notebook.text, 'the notebook') },
+    { id: 'notebook.copy', group: PJ, short: 'copy notebook', label: 'COPY TEXT', hint: 'Copy the NOTEBOOK’s text', surface: true, undo: 'none', run: () => copyOut(L().notebook.text, 'NOTEBOOK text') },
     { id: 'spectrum.solo', group: WD, short: 'solo spectrum', label: 'SOLO SPECTRUM', hint: 'Fold every other window', surface: true, run: () => api.run('window.spectrum.solo') },
     ...[['film.picture', 'RENDER › CAPTURE IMAGE', '.sr-capture'], ['film.record', 'RENDER › RENDER', '.sv-primary']].map(([id, label, cls]) => ({ id, group: PJ, short: label.split(' › ')[1].toLowerCase(), label, surface: true,
       run: () => { const b = document.querySelector('.dev[data-id="render"] ' + cls); if (b && !b.disabled) b.click(); } })),   // the kit's RENDER card's own buttons (by their class)

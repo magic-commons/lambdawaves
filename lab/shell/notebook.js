@@ -91,7 +91,7 @@ export function createNotebook(app) {
         /* iteration 004 · FILE GOES THROUGH FOLDERS (BASINS shell.js FILE): NEW, OPEN and a recent project open FOLDERS first and let it ask
            "Save this first?" (SAVE & OPEN · OPEN WITHOUT SAVING, SAVE & NEW · NEW WITHOUT SAVING) — no window.confirm on these rows */
         FILE: () => [item('new'), item('open'),
-          sub('OPEN RECENT', () => { const r = layout.projects.recent().slice(0, 8); return r.length ? r.map((p) => [p, () => { const P = layout.projects, e = P.entryOf(p); P.show(e ? { folder: e.folder } : {}); if (e) P.folders.openEntry(e.id); }, null, '', { raw: true, icon: 'projectFile' }]) : [['nothing yet', null, true]]; }, 'projectFile'),
+          sub('OPEN RECENT', () => { const r = layout.projects.recent().slice(0, 8); return r.length ? r.map((p) => [p, () => { const P = layout.projects, e = P.entryOf(p); P.show(e ? { folder: e.folder } : {}); if (e) P.folders.openEntry(e.id); }, null, '', { raw: true, icon: 'projectFile' }]) : [['No projects yet — SAVE keeps one', null, true]]; }, 'projectFile'),
           opener('folders'),   // 040 M1 · FILE › FOLDERS (Josh 11-09: "Have an option in 'File' to open the 'Folders' window"): the `folders` action (O), an opener row
           item('save', { tail: layout.projects.current ? '  ' + layout.projects.current : '…' }), item('saveAs'), null,
           item('import'),
@@ -125,7 +125,7 @@ export function createNotebook(app) {
           /* 018 E6 · one submenu per KIND (window-chrome.js data-kind), each window ✓ while open: a press opens a closed one by the FINDER's road
              (kit rk.reveal) and closes an open one */
           ...[['core', 'core'], ['info', 'info'], ['control', 'sliders'], ['other', 'more']].map(([k, pic]) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k && !TOOL_SEAT.has(d.dataset.id));   // 039 X8: a window TOOLS seats is listed there alone
-            return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { raw: true, checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['none', null, true]]; }, pic))],   // 021 V2: each window its one glyph
+            return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { raw: true, checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['No windows of this kind', null, true]]; }, pic))],   // 021 V2: each window its one glyph
         HELP: () => [item('about'), item('guiAbout'), opener('help'),
           item('photosensitivity'), null, ...(globalThis.lwavesDesktop ? [] : [item('update')]), item('diagnostics')],
       };
@@ -418,7 +418,7 @@ export function createNotebook(app) {
       newB.addEventListener('click', () => { const kept = keepSheet(); fillSheet('NOTEBOOK', '', null); setMode('edit'); sayNb(kept ? 'kept on the shelf as ' + kept : 'a new sheet'); });
       openB.addEventListener('click', () => {
         const notes = shelf.list();
-        contextMenu({ anchor: openB, label: 'open note', entries: notes.length ? notes.slice(0, 8).map((n) => [n.title || n.name, () => {
+        contextMenu({ anchor: openB, label: 'Open note', entries: notes.length ? notes.slice(0, 8).map((n) => [n.title || n.name, () => {
           if (n.path !== curPath) keepSheet(); const p = shelf.open(n.path); if (!p) return;
           fillSheet(p.title, p.md, n.path); setMode(p.md.trim() ? 'view' : 'edit'); sayNb('opened ' + n.path); }, false, n.path, { raw: true }]) : [['no note on the shelf yet', null, true, '', { raw: true }]] });
       });

@@ -229,7 +229,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
         return true;
       } catch (e) {
         swClient.error = String(e && e.message || e); swClient.state = 'failed';
-        swClient.say('UPDATE FAILED · ' + brief(swClient.error) + ' · TRY AGAIN', 'update failed: ' + swClient.error);
+        swClient.say('UPDATE FAILED · ' + brief(swClient.error) + ' · TRY AGAIN', 'Could not update: ' + swClient.error);
         return false;
       }
     },
@@ -257,7 +257,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       };
       if (w) { w.addEventListener('statechange', () => {
         if (w.state === 'activated') again();
-        else if (w.state === 'redundant') { done(); swClient.say('UPDATE FAILED · ' + brief(swClient.failure || 'the install was refused') + ' · TRY AGAIN', 'update failed: ' + (swClient.failure || 'the install was refused')); }
+        else if (w.state === 'redundant') { done(); swClient.say('UPDATE FAILED · ' + brief(swClient.failure || 'the install was refused') + ' · TRY AGAIN', 'Could not update: ' + (swClient.failure || 'the install was refused')); }
         else waits();
       }); waits(); }
       else { done(); swClient.say('UPDATE DID NOT START · TRY AGAIN', 'update: no worker is installing'); }
@@ -313,7 +313,7 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
       if (d.type === 'LW_SW_INSTALL_FAILED') {                                   // 033: the reason, kept and said
         swClient.failure = d.why || 'the install was refused'; swClient.error = swClient.failure;
         if (swClient.state !== 'taking' && swClient.state !== 'refreshing') swClient.state = 'failed';
-        swClient.say('UPDATE FAILED · ' + brief(swClient.failure) + ' · TRY AGAIN', 'update failed: ' + swClient.failure);
+        swClient.say('UPDATE FAILED · ' + brief(swClient.failure) + ' · TRY AGAIN', 'Could not update: ' + swClient.failure);
         return 'failed';
       }
       if (d.type === 'LW_SW_ACTIVE' || d.type === 'LW_SW_BUILD') {

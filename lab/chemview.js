@@ -70,7 +70,7 @@ export function createChem(host, api) {
   let kappa = 1e-3, speed = 10, dt = 0.01, integrator = 'mmut', tda = false, core = false, valence = false, pulse = 'none', delta = false;   // iteration 008 U: Δρ is a switch (`delta`) beside KICK, no longer a VIEW
   let sol = null, rt = null, running = false, inflight = false, said = null;   // said: 0.5.4 P4's status of what is on stage (tell)
   let solveSeq = 0, specTask = 0, spec = null, fit = null, fitErr = null, lastSpec = 0, lastFit = 0, selected = null;
-  let fieldHash = null, mBuf = null, oBuf = null, dRef = null, dBuf = null, statusText = 'no molecule solved yet', pending = null;
+  let fieldHash = null, mBuf = null, oBuf = null, dRef = null, dBuf = null, statusText = 'No molecule solved yet', pending = null;
   let vib = null, vibOn = false, vibK = 0, vibAmp = 1, vibFr = null, vibBusy = false, vibAgain = false, vibD = null, vibJ = -1, vibRate = 0, vibSh = null, vibAt = null, pendingVib = null;   // 0.7.0 V1 VIBRATE
   /* THE RESTORED ORBITAL INDEX HAS TO SURVIVE THE RE-SOLVE THAT RESTORING IT CAUSES.  A solve sets `orbital` to
      HOMO, which is right for a molecule the hand just picked and WRONG for one a file just reopened: load() puts a
@@ -209,7 +209,7 @@ export function createChem(host, api) {
      left (loaded lazily, only when the list opens), a group's name a row that is never chosen; no native <select>.  `mSel` keeps the old
      reads: value (set: chosen only when it is on this page) · options (the rows) · selectedIndex = −1 (nothing chosen) */
   let mRows = [];
-  const mList = listSelect({ aria: 'molecule', items: [], value: preset, cls: 'mol-sel', repick: true, onChange: (id) => { mStep.set(id); rowPic(); handPick(id); } });   // a hand press: a DOWNLOAD row installs (and asks persist once)
+  const mList = listSelect({ aria: 'Molecule', items: [], value: preset, cls: 'mol-sel', repick: true, onChange: (id) => { mStep.set(id); rowPic(); handPick(id); } });   // a hand press: a DOWNLOAD row installs (and asks persist once)
   const mSel = { get value() { return mList.get() || ''; }, set value(id) { mList.set(mRows.some((r) => r.id === id && !r.coming) ? id : null); }, set selectedIndex(_) { mList.set(null); }, get options() { return mRows; } };
   /* iteration 008 U · THE DOWNLOAD GLYPH: the molecule chosen is a record not yet on this device — the kit's `download` beside its name, a press fetches
      it (checked against its sha-256 name, persist asked once) and opens it: the same road a DOWNLOAD row's pick takes */
@@ -643,7 +643,7 @@ export function createChem(host, api) {
       /* 0.5.3 M2 · a failed open (C₆₀'s record offline) gives the dropdown BACK before the solution goes: the last solved molecule
          is chosen again (or, with none, nothing), so a hand re-pick of the one that failed is a change and is answered */
       if (!r || r.error || !Number.isFinite(r.energy)) { if (sol) { preset = sol.key.split('|')[0]; mSeg.set(preset); } else mSel.selectedIndex = -1;
-        return failed(why || 'solve failed: ' + ((r && (r.refused || r.error)) || 'no answer')); }
+        return failed(why || 'Could not solve: ' + ((r && (r.refused || r.error)) || 'no answer')); }
       /* 0.3.1 · S4: the defaults this landing fills (the orbital, and through notify() the register's selection and the STATES
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {
@@ -656,11 +656,11 @@ export function createChem(host, api) {
       if (seq !== solveSeq) return null;                                       // S4a-VERIFY B1: no stale spectrum post either
       return call({ op: 'chem.spectrum', atoms, basis, charge }, () => Promise.resolve(null)).then((s) => {
         if (seq !== solveSeq || sol !== r) return null;
-        if (!s || s.error || !s.roots) { status((s && s.refused) || 'spectrum failed: ' + ((s && s.error) || 'no answer'), 'warn'); return r; }
+        if (!s || s.error || !s.roots) { status((s && s.refused) || 'Could not find the spectrum: ' + ((s && s.error) || 'no answer'), 'warn'); return r; }
         sol.roots = s.roots; sol.tda = s.tda; sol.timings = s.timings || sol.timings;
         refresh(); return r;
       });
-    }).catch((e) => (seq === solveSeq ? failed('solve failed: ' + String(e && e.message || e)) : null))
+    }).catch((e) => (seq === solveSeq ? failed('Could not solve: ' + String(e && e.message || e)) : null))
       .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq) loading(false); });
     pending = { key, p: task };
     return task;
@@ -729,7 +729,7 @@ export function createChem(host, api) {
         r.identity = MS ? MS.identityOf({ atoms: v.atoms, basisHash: r.hash, charge: v.charge, multiplicity: 1, model: 'RHF' }) : null; land(r); };
       if (api.derived) api.derived(fill); else fill();
       return r;
-    }).catch((e) => (seq === solveSeq ? failed('open failed: ' + String(e && e.message || e)) : null))
+    }).catch((e) => (seq === solveSeq ? failed('Could not open: ' + String(e && e.message || e)) : null))
       .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq) loading(false); });
     pending = { key, p: task };
     return task;
@@ -847,7 +847,7 @@ export function createChem(host, api) {
     return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY, factors: flowOn,
       pulse: pulse === 'none' ? null : { shape: pulse, omega: (bright().find((k) => k.f > 1e-3) || {}).omega || 0 } }).then((r) => {   // 0.7.0 V1 PULSES
       if (seq !== solveSeq) return null;
-      if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && (r.refused || r.error)) || 'no real-time engine'), 'warn'); setRun(false); return null; }   // a kick that did not land leaves no run: RUN goes down and hands the field back
+      if (!r || r.error || !r.ok) { status('Could not kick: ' + ((r && (r.refused || r.error)) || 'no real-time engine'), 'warn'); setRun(false); return null; }   // a kick that did not land leaves no run: RUN goes down and hands the field back
       rt = { t: r.t || 0, D_re: r.D_re || null, D_im: r.D_im || null, F: factorsOf(r), electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
         restartEvery: r.restartEvery, restartPolicy: r.restartPolicy, sinceRestart: r.sinceRestart || 0 };
       spec = null; fit = null; fitErr = null;

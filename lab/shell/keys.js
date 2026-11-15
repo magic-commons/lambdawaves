@@ -105,7 +105,7 @@ export function createKeys(app) {
       app.ctl.busy.onHold = (on) => { if (on && !release && C.isPlaying() && !filming()) release = C.suspendRealtime(now()); else if (!on && release) { release(now()); release = null; } }; }
     /* 021 R3 · TWO ⏮, EACH SAYS WHAT IT MOVES: the work bar's sends the modulation beat and the TIMELINE playhead to bar 1 and leaves ψ's t
        (the main bar's ⏮ moves t); one position spanning both is a kit door for 1.5.6 (docs/FOR-MIR.md) */
-    { const h = app.state.tl.root.querySelector('.transport-home'); if (h) { h.title = 'Beat → bar 1 · the TIMELINE playhead to the start'; h.setAttribute('aria-label', 'timeline back to bar 1'); } }
+    { const h = app.state.tl.root.querySelector('.transport-home'); if (h) { h.title = 'Beat → bar 1 · the TIMELINE playhead to the start'; h.setAttribute('aria-label', 'Timeline back to bar 1'); } }
     /* the window draws no pane of its own: its ruler, lanes and work bar are each a .glass pane (a lane clipped by the scroller), its rail chips */
     /* 041 P12 (Josh 11-09: "On the CSB, If the timeline has a clip or anything, let the icon show it's highlighted similar to how modulation window is
        when there's something active on it"): the bar's TIMELINE seat is lit (`live`, csb.css) while the arrangement holds a clip */
