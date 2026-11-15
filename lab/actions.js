@@ -41,7 +41,7 @@ export function createActions(app) {
   /* 022 P2 · the rows a CONTEXT MENU runs (lab/context-menus.js hands the pressed element as `{ el }`; a key acts on the focus) */
   const at = (a) => (a && a.el) || document.activeElement || document.body, eventAt = (a) => { const t = at(a); return t.closest ? t.closest('[data-event]') : null; }, knobAt = (a) => at(a).closest && at(a).closest('.k'), tileAt = (a) => at(a).closest && at(a).closest('.mm-tile');
   /* 039 W6 EVERY ROW ANSWERS: a row's result is said where it is seen — the toast — and kept on SPECTRUM's status line */
-  const tell = (line, ok = true) => { W().wState.setStatus(line, ok ? 'live' : 'warn'); notice(line, { kind: ok ? 'ok' : 'warn', ms: ok ? 3200 : 5000 }); };
+  const tell = (line, ok = true) => { W().wState.setStatus(line, ok ? 'live' : 'warn'); notice(line, { kind: ok ? 'ok' : 'warn' }); };
   const said = (ok, what) => tell(ok ? what + ' copied' : 'the clipboard refused the copy', ok);
   const copyOut = (text, what) => { if (!text) return false; copyText(String(text)).then((ok) => said(ok, what)); return true; };
   const wordOf = (k, a) => { const t = tileAt(a); if (t) return k === 'name' ? (t.getAttribute('aria-label') || '').split(' — ')[0] : (t.querySelector('.mm-lbl, .mm-sym') || {}).textContent;

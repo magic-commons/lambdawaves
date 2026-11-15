@@ -124,8 +124,7 @@ export async function createController(app) {
   function setKeepFrames(v) {
     keep.frames = !!v; if (ui.keepSw) ui.keepSw.set(keep.frames);
     if (!ui.scrub) return;
-    const r = ui.scrub.root; r.classList.toggle('disabled', !keep.frames); r.style.opacity = keep.frames ? '' : '.35'; r.style.pointerEvents = keep.frames ? '' : 'none';
-    r.tabIndex = keep.frames ? 0 : -1; r.setAttribute('aria-disabled', String(!keep.frames));   // wave 62: a control the pointer cannot reach must not be reachable by Tab either
+    const r = ui.scrub.root; ui.scrub.setDisabled(!keep.frames);   // the kit's: the fade, out of the Tab order, aria-disabled (wave 62)
     r.title = keep.frames ? '' : 'Enable KEEP FRAMES to animate the playhead';
     if (!keep.frames) ui.scrub.set(0);
     schedule(TIER.PRESENT);

@@ -25,7 +25,7 @@ export function createWidgetsWindow(app) {
       n[it.kind] = (n[it.kind] || 0) + 1; const r = el('div', 'wg-row', list); r.dataset.id = it.id;
       const K = kinds().find((k) => k.kind === it.kind), g = K && glyphEl(K.glyph, 'wg-gly', 16); if (g) r.append(g);   // 044 AV2 (L18): the FINDER's row — its kind's glyph, its word, its number
       label(el('span', 'wg-word', r), it.label); el('span', 'wg-n', r, String(n[it.kind]));
-      r.append(trig({ label: '', glyph: 'close', title: 'Remove this widget', cls: 'wg-x', onFire: () => L.remove(it.id) }).root);
+      r.append(trig({ label: 'Remove this widget', glyph: 'close', word: false, title: 'Remove this widget', cls: 'wg-x', onFire: () => L.remove(it.id) }).root);
     }
     w.setStatus(items.length ? String(items.length) : '', 'live'); edit.set(L.edit()); snap.set(L.snap());
   };

@@ -214,7 +214,7 @@ export function createSpectrumCard(app) {
     if (ui.scaleSeg) ui.scaleSeg.set(sturm.on ? 'sturmian' : 'hydrogen');
     if (ui.lambdaKnob) { ui.lambdaKnob.set(sturm.lambda); ui.lambdaKnob.setDisabled(!on); }
     const keep = (elm, title) => keepT(elm, on, title);
-    if (ui.abSw) { ui.abSw.root.disabled = on; ui.abSw.root.classList.toggle('disabled', on); keep(ui.abSw.root, 'A / B TRANSITION: off under STURMIAN (SCALE → HYDROGEN)'); }
+    if (ui.abSw) { ui.abSw.setDisabled(on); keep(ui.abSw.root, 'A / B TRANSITION: off under STURMIAN (SCALE → HYDROGEN)'); }
     if (ui.abOmega) ui.abOmega.setDisabled(on);
     if (ui.abRo && !on && /STURMIAN/.test(ui.abRo.root.textContent)) { ui.abRo.set('—  /  —', ''); ui.abRo.setSub('store two states, then TRANSITION plays A → B → A at Ω'); }
     if (ui.fz) { ui.fz.setDisabled(on); if (on) ui.fz.set(0); }

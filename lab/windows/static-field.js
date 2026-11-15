@@ -46,7 +46,7 @@ export function createStaticField(app) {
   /* the propagator's stand-downs (the Sturmian's road: RATE · K_z · DEFECT · A⇄B) and the readout — every number computed; synced after any write of STARK F (a restore, an operator switch, NO FIELD) */
   function interSync() { const P = reg.P, S = !!(P && P.stark), F = reg.field.Fz; ui.interSw.set(!!reg.field.inter); if (app.hooks.status) app.hooks.status();
     for (const k of [ui.kzKnob, ui.defKnob, ui.kzRate, ui.defRate, ui.abOmega]) if (k) k.setDisabled(!!P);
-    if (ui.abSw) { ui.abSw.root.disabled = !!P; ui.abSw.root.classList.toggle('disabled', !!P); }
+    if (ui.abSw) ui.abSw.setDisabled(!!P);
     if (!S) { ui.interRo.set(reg.field.inter ? 'set STARK F' : 'off', ''); ui.interRo.setSub(reg.field.inter ? 'engages at F > 0' : 'STARK F acts within each shell'); ui.interRo.root.title = ''; return; }
     ui.kzRate.set(0); ui.defRate.set(0); setRotationRate('kz', 0); setRotationRate('def', 0);
     let k = 1, k1 = 0; while (k <= 7 && saddle(k) > F) k++; for (let j = 1; j < P.n; j++) if (Math.abs(P.C[j]) > Math.abs(P.C[k1])) k1 = j;   // k1: the eigenvector carrying 1s

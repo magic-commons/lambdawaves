@@ -28,7 +28,7 @@
  * `lambdawaves.q0.stroke` { mode, mol } (041 H1: SPECTRUM's and MOLECULES' own, homes BUTTONS and PAINT); `strokeButton` (037 H6: one toggle
  * button) is its seat on each ladder's head, the seats of one family in step.
  */
-import { el, hint } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
+import { el, hint, trig } from './mir/kit.js';
 const STROKE_KEY = 'lambdawaves.q0.stroke', MODES = ['buttons', 'paint'];
 /* 041 H1 · PAINT IN MOLECULES, BUTTONS IN SPECTRUM (Josh 11-09: "Let paint be the default for molecules and 'buttons' for default for spectrum"):
    the one record holds a mode per family — `mode` SPECTRUM's (its old field, so an older record is SPECTRUM's choice), `mol` the ORBITAL and
@@ -51,15 +51,13 @@ export function watchStroke(fn, where = 'spectrum') { watchers[HOME[where] ? whe
  *  family in step through watchStroke; a press flips the PREFERENCE `lambdawaves.q0.stroke`.  The face is the mode in force;
  *  it replaced 036 P1's two-cell segmented control (strokeSeg). */
 export function strokeButton(where = 'spectrum') {
-  const b = el('button', 'trig sp-stroke'); b.type = 'button';
+  const t = trig({ label: 'BUTTONS', glyph: 'hand', word: false, cls: 'sp-stroke', onFire: () => setStrokeMode(strokeMode(where) === 'paint' ? 'buttons' : 'paint', where) }), b = t.root;   // 044 L89: the kit's glyph form
   let shown = null;
   watchStroke((m) => {
     if (m === shown) return; shown = m; const paint = m === 'paint';
-    b.innerHTML = glyphSvg(paint ? 'brush' : 'hand', 'gly', 16); b.dataset.state = m;   // no aria-pressed: the face is not lit, the glyph alone swaps (FILL ALL ↔ EMPTY's law); the word says the mode
-    b.setAttribute('aria-label', paint ? 'PAINT' : 'BUTTONS');
+    t.setGlyph(paint ? 'brush' : 'hand'); t.setLabel(paint ? 'PAINT' : 'BUTTONS'); b.dataset.state = m;   // no aria-pressed: the face is not lit, the glyph alone swaps (FILL ALL ↔ EMPTY's law); the word says the mode
     b.title = paint ? 'PAINT · drag adds, right-drag removes · press: BUTTONS' : 'BUTTONS · a click toggles one · press: PAINT';
   }, where);
-  b.addEventListener('click', () => setStrokeMode(strokeMode(where) === 'paint' ? 'buttons' : 'paint', where));
   return { root: b };
 }
 export function paintStroke(surface, o) {
@@ -119,13 +117,11 @@ export function paintStroke(surface, o) {
    (`FILL ALL · …` / `EMPTY · …`), each ladder handing its own tail. */
 /* 021 V2: the two drawings live in the one table (lab/icons.js `fillAll`, `emptyAll`) */
 export function fillButton(row, titles, onPress) {
-  const b = el('button', 'trig reg-fill', row); b.type = 'button';
   let empty = null;
+  const t = trig({ label: 'EMPTY', glyph: 'emptyAll', word: false, cls: 'reg-fill', onFire: () => onPress(empty) }), b = t.root; row.appendChild(b);   // 044 L89: the kit's glyph form
   const draw = (v) => {
-    b.innerHTML = glyphSvg(v ? 'fillAll' : 'emptyAll', 'gly', 20);
-    const word = v ? 'FILL ALL' : 'EMPTY'; b.setAttribute('aria-label', word); b.title = word + ' · ' + (v ? titles.fill : titles.empty); b.dataset.state = v ? 'fill' : 'empty';
+    const word = v ? 'FILL ALL' : 'EMPTY'; t.setGlyph(v ? 'fillAll' : 'emptyAll'); t.setLabel(word); b.title = word + ' · ' + (v ? titles.fill : titles.empty); b.dataset.state = v ? 'fill' : 'empty';
   };
-  b.addEventListener('click', () => onPress(empty));
   return { root: b, set(v, ok = true) { const e = !!v; if (e !== empty) { empty = e; draw(e); } b.disabled = !ok; }, get empty() { return empty; } };
 }
 

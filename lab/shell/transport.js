@@ -295,7 +295,7 @@ export function createTransport(app) {
   /* 039 W7 BAR LOCK RESTORES THE TEMPO: the lock remembers the tempo it replaced, and a second press while the fitted tempo still stands
      puts that one back (a tempo moved by hand since is the user's: the next press locks again from it).  Each press says what it did */
   let held = null;
-  const bpmNow = () => app.state.modHost.model.transport.bpm, tell = (line, warn) => { if (app.state.modView) app.state.modView.say(line, warn ? 'warn' : undefined); notice(line, { kind: warn ? 'warn' : 'ok', ms: warn ? 5000 : 3200 }); };
+  const bpmNow = () => app.state.modHost.model.transport.bpm, tell = (line, warn) => { if (app.state.modView) app.state.modView.say(line, warn ? 'warn' : undefined); notice(line, { kind: warn ? 'warn' : 'ok' }); };
   barLock.on = () => !!(held && app.state.modHost && bpmNow() === held.to);
   function barLock() {
     if (!app.state.modHost) return { ok: false, reason: 'no modulation rack' };
