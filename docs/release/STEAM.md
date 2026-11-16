@@ -26,8 +26,8 @@ Each folder's root holds `COPYING` (λWAVES' GPL-3.0), `NOTICE`, `SOURCE.md` (th
 the build's description on Steam, and attach the source archive to the matching GitHub Release (GPL §6).
 
 **No AI marks** (044 S1, Josh 11-12: "steam version does not show logo"; the web build too, 11-15). The MAIN MENU has no credits strip on
-any host and `img/ai/` and `img/menu/ai/` are gone from the tree (`package.mjs` still removes the tip jar's QR). ABOUT still says in words
-that AI coding agents built the app.
+any host and `img/ai/` and `img/menu/ai/` are gone from the tree (`package.mjs` still removes the tip jar's QR). ABOUT's sentence
+naming the agents left too (Josh 11-16); the README and `LEGAL-PROVENANCE.md` say how the app was built.
 The same signal leaves two more things unbuilt on the desktop (044 S5, S7, Josh 11-12): the MIR wordmark in the MAIN MENU's bottom-right
 corner, and the tip jar (EXPANSIONS' ko-fi card and the "tip?" sheet before an install); `package.mjs` removes `img/menu/tip-qr.svg` too.
 

@@ -47,8 +47,7 @@ export function createMirGui(app) {
     about: { fonts: './fonts/', credits: [
       [{ t: '{name} {version} · © 2026 MAGIC COMMONS', vars: { name: 'λWAVES', version: BUILD_LINE } }],
       gplLicence('λWAVES'),
-      [{ t: 'Special thanks: Team @ Chronus Quantum for the Molecular Orbital Model (ChronusQ) · ‘Electron Orbitals’ by Brian Johnson · Paul Falstad’s Math & Physics Java Applets · Seth Shultz · Beatriz Erranté, independent research & assistance.' }],
-      [{ t: 'Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).' }]] },
+      [{ t: 'Special thanks: Team @ Chronus Quantum for the Molecular Orbital Model (ChronusQ) · ‘Electron Orbitals’ by Brian Johnson · Paul Falstad’s Math & Physics Java Applets · Seth Shultz · Beatriz Erranté, independent research & assistance.' }]] },
     rack: { resetLayout: () => app.sh.layout.resetLayout() },
     /* iteration 004 · SAMPLING's AUTOMATION reaches λWAVES' one modulation host (BASINS skin.js): the grid the TIMELINE's arrangement is
        read on (FRAME · 1/32 · 1/16 · 1/8 beat); without it the kit's fallback asks installModulation, which λWAVES never runs.  SCRUB is
