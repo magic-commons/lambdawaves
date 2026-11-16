@@ -18,17 +18,16 @@ The output, in `tools/platform/electron/out/`:
 
 | folder | launch | what is inside |
 |---|---|---|
-| `lambdawaves-win32-x64/` | `lambdawaves.exe` | Electron, `resources/app.asar` (the host: three files), `resources/dist/` (the app: the site's bytes less the credits strip's files, below) |
+| `lambdawaves-win32-x64/` | `lambdawaves.exe` | Electron, `resources/app.asar` (the host: three files), `resources/dist/` (the app: the site's bytes less the tip jar's QR) |
 | `lambdawaves-linux-x64/` | `lambdawaves` | the same, for Linux and SteamOS |
 
 Each folder's root holds `COPYING` (λWAVES' GPL-3.0), `NOTICE`, `SOURCE.md` (the tag and commit it was built from), and Electron's own
 `LICENSE` and `LICENSES.chromium.html`. They must stay. `out/build-identity.json` names the commit and the `dist/` hash: put the commit in
 the build's description on Steam, and attach the source archive to the matching GitHub Release (GPL §6).
 
-**No AI marks on the desktop** (044 S1, Josh 11-12: "steam version does not show logo"). The MAIN MENU's credits strip (the three marks of
-Claude, Gemini and GPT) is not built when the page runs in the desktop host (`window.lwavesDesktop`, the same signal that hides UPDATE
-APP), and `package.mjs` removes `img/ai/` and `img/menu/ai/` (the marks, Google Sans Flex, and OpenAI Sans, which has no licence in the
-tree) from each folder's `resources/dist/`. ABOUT still says in words that AI coding agents built the app. The site is unchanged.
+**No AI marks** (044 S1, Josh 11-12: "steam version does not show logo"; the web build too, 11-15). The MAIN MENU has no credits strip on
+any host and `img/ai/` and `img/menu/ai/` are gone from the tree (`package.mjs` still removes the tip jar's QR). ABOUT still says in words
+that AI coding agents built the app.
 The same signal leaves two more things unbuilt on the desktop (044 S5, S7, Josh 11-12): the MIR wordmark in the MAIN MENU's bottom-right
 corner, and the tip jar (EXPANSIONS' ko-fi card and the "tip?" sheet before an install); `package.mjs` removes `img/menu/tip-qr.svg` too.
 

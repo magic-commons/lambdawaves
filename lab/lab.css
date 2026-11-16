@@ -107,6 +107,7 @@ body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* w
 body[data-theme="dark"] .mir-win:is(.lw-about, .lw-notebook) { --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
 .mir-win:is(.lw-about, .lw-notebook) > .mir-win-body { display: flex; flex-direction: column; }
 .mir-win.lw-notebook[data-mode="view"] .nb-text, .mir-win.lw-notebook[data-mode="edit"] .nb-view { display: none; }   /* the kit's rules key on the old #notebook */
+.mir-win.lw-notebook .nb-mode[aria-pressed="true"] { color: var(--acc); background: var(--state-hover, var(--glass-raise)); }   /* Josh 11-15: EDIT is lit while the text is open */
 @media (hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px) {   /* the phone (skin.css' breakpoint): the NOTEBOOK is the whole screen, opaque, as #notebook was */
   .mir-win.lw-notebook { left: 0 !important; top: 0 !important; width: calc(100vw / var(--in-zoom, 1)) !important; height: calc(100dvh / var(--in-zoom, 1)) !important; max-width: none; max-height: none;
     border-radius: 0; -webkit-backdrop-filter: none; backdrop-filter: none; background: hsl(var(--glass-tint) / 1); }

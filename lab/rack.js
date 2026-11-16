@@ -842,7 +842,7 @@ export async function boot(dom) {
   const { transport } = createTransport(app);
 
   /* ── badges (§41) ─────────────────────────────────────────────────────── */
-  const badges = createBadges({ dom, accept: () => swClient.accept(), field, reg, mat, clock, domain, quality,
+  const badges = createBadges({ dom, accept: () => swClient.press(), field, reg, mat, clock, domain, quality,
     getSpace: () => app.state.space, stateReaders, ui }); app.hooks.sheet = badges.sheet;   // N7 seam 6: lab/badges.js
 
   /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF: lab/sw-client.js (N7 seam 5).  The tab that ASKED reloads; a tab that

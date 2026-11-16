@@ -228,23 +228,6 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   if (!globalThis.lwavesDesktop) { const mir = el('button', 'mm-corner mm-br mm-mirb', face);   // 044 S5 (Josh 11-12: "you can remove it outright"): no wordmark on the desktop's face; nothing else moves
      mir.type = 'button'; mir.setAttribute('aria-label', 'ABOUT MIR'); hint(mir, 'ABOUT MIR — the toolkit this app is built on'); mir.addEventListener('click', () => openAbout('mir', mir));
     for (const th of ['dark', 'light']) { const i = el('img', 'mm-mir', mir); i.alt = 'MIR'; i.dataset.theme = th; i.decoding = 'async'; i.draggable = false; i.src = './img/mir-logo-' + th + '.svg'; } }
-  if (!globalThis.lwavesDesktop) { const credits = el('button', 'mm-corner mm-credits', face);   // 044 S1 (Josh 11-12): the desktop (Steam) build shows no AI marks and its package holds none of their files (tools/platform/electron/package.mjs)
-    credits.type = 'button'; credits.setAttribute('aria-label', 'Built with Claude by Anthropic, GPT by OpenAI and Gemini by Google');   // 041 P6 (Josh 11-09: "Show no mouse-over hint for the AI thingy in the main menu"): no hint (039 X16's is gone); the names still slide out and the aria name stands
-    /* 036 G6 (Josh 11-03: "Claude Logo is incorrect; use the actual real logo. Checkout the screenshot of the correct font and logo styling. Also
-       no need to show company who made it"): the about site's real marks and names — Claude's starburst (img/ai/claude-mark.svg, its
-       terracotta) and its serif wordmark in the theme's ink (claude-word-{dark,light}.svg) in place of a typed name; GPT in OpenAI Sans and
-       Gemini in Google Sans Flex (img/menu/ai/, DATA; skin.css @font-face); no makers' line (ABOUT names them) */
-    const aiPic = (host, cls, src, alt = '') => { const i = el('img', cls, host); i.alt = alt; i.decoding = 'async'; i.draggable = false; i.src = src; return i; };
-    for (const [ai, name] of [['claude', 'Claude'], ['gemini', 'Gemini'], ['openai', 'GPT']]) {   // the site's order (Josh's shot 10; the critic of 036)
-      const c = el('span', 'mm-cr', credits); c.dataset.ai = ai;
-      if (ai === 'claude') aiPic(c, 'mm-cr-mark', './img/ai/claude-mark.svg');
-      else if (ai === 'openai') el('i', 'mm-cr-mark mm-cr-ink', c);             // the blossom as a mask over the ink (skin.css)
-      else aiPic(c, 'mm-cr-mark', './img/ai/gemini.svg');                         // its own gradient
-      const t = el('span', '', el('span', 'mm-cr-name', c));
-      if (ai === 'claude') for (const th of ['dark', 'light']) aiPic(t, 'mm-cr-word', './img/ai/claude-word-' + th + '.svg', name).dataset.theme = th;
-      else el('b', '', t, name);
-    }
-    credits.addEventListener('click', () => credits.classList.toggle('open')); }   // a tap shows the names (touch), a second puts them away
   /* 035 G3 · THE SHEET (Josh 11-03: "Hitting settings icon will reveal a little slide-over which is a minimalist-CSS version of Settings rack window
      > Quality, among other things from MIR Options"): ⚙ slides `.mm-sheet` in from the menu's right edge, its head (SETTINGS, ×) over a body that
      scrolls.  Its rows are the SETTINGS card's (app.hooks.menuSheet, lab/windows/settings-card.js — this module never imports it), built at the

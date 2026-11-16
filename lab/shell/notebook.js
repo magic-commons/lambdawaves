@@ -233,13 +233,14 @@ export function createNotebook(app) {
          limit only hid valid Markdown while leaving usable space empty. Render the complete note
          here and let the pane's own geometry decide how much is visible at once. */
       function render() { const src = ta.value || '*empty — press ◐ to write*'; view.innerHTML = renderMarkdown(src.length > 200000 ? src.slice(0, 200000) + '\n\n*… preview truncated at 200 000 characters; the notes are kept whole*' : src); }   // 2026-09-11: a pasted book previews its first 200 k instead of one huge synchronous innerHTML
-      const setMode = (m) => { nb.dataset.mode = m; const v = m === 'view'; modeB.dataset.glyph = v ? 'edit' : 'preview'; modeB.replaceChildren(...[glyphEl(v ? 'edit' : 'preview', 'gly')].filter(Boolean)); ariaLabel(modeB, v ? 'EDIT' : 'PREVIEW'); hint(modeB, v ? 'EDIT — back to the text' : 'PREVIEW — the notes as they read'); if (v) render(); else ta.focus(); };
+      const setMode = (m) => { nb.dataset.mode = m; const v = m === 'view'; modeB.setAttribute('aria-pressed', String(!v)); if (v) render(); else ta.focus(); };   // Josh 11-15: one EDIT button, lit while the text is open (the loudspeaker said nothing here)
       nb.dataset.mode = 'edit';
       /* the head's tools (044 L102: the kit's head buttons, before its ×): NEW NOTE, OPEN NOTE, EDIT ↔ PREVIEW, PROJECTS */
       const tool = (cls, glyph, tip) => { const b = el('button', 'mir-win-btn ' + cls); b.type = 'button'; b.dataset.glyph = glyph; const g = glyphEl(glyph, 'gly gly-' + glyph); if (g) b.append(g); hint(b, tip); ariaLabel(b, tip.split(' — ')[0]); return b; };
       const newB = tool('nb-new', 'plus', 'NEW NOTE — keeps this one on the shelf'), openB = tool('nb-open', 'folder', 'OPEN NOTE — a note from the shelf');
-      const modeB = tool('nb-mode', 'preview', 'PREVIEW — the notes as they read'), projB = tool('nb-projects-btn', 'folders', 'PROJECTS — save, open, folders, recent'); projB.dataset.keyAction = 'folders';
+      const modeB = tool('nb-mode', 'edit', 'EDIT — lit while the text is open, off while the notes read'), projB = tool('nb-projects-btn', 'folders', 'PROJECTS — save, open, folders, recent'); projB.dataset.keyAction = 'folders';
       win.tools.prepend(newB, openB, modeB, projB);
+      modeB.setAttribute('aria-pressed', 'true');
       { const x = win.tools.querySelector('.mir-win-x'); if (x) x.dataset.keyAction = 'notebook'; }   // the key table writes its J on the × (it was the old head's)
       modeB.addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }

@@ -1173,37 +1173,14 @@ body.menu-open #menubar { visibility: hidden; }   /* a phone lifts the kit's bar
 #lwMenu .mm-br { right: 24px; bottom: 22px; }
 #lwMenu .mm-mir { display: block; height: 24px; width: auto; }
 body[data-theme="light"] #lwMenu .mm-mir[data-theme="dark"], body:not([data-theme="light"]) #lwMenu .mm-mir[data-theme="light"] { display: none; }
-#lwMenu .mm-credits { left: 24px; bottom: 22px; height: 24px; gap: 14px; color: var(--fg); opacity: .78; cursor: default; transition: opacity 140ms; }
-#lwMenu .mm-credits:is(:hover, :focus-visible, .open) { opacity: 1; }
-#lwMenu .mm-cr { display: flex; align-items: center; }
-#lwMenu .mm-cr-mark { display: block; flex: none; width: 24px; height: 24px; }
-#lwMenu .mm-cr-ink { background: currentColor; -webkit-mask: url('img/ai/openai-blossom.svg') center / 125% no-repeat; mask: url('img/ai/openai-blossom.svg') center / 125% no-repeat; }
-#lwMenu .mm-cr-name { display: grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns 380ms var(--ease), opacity 240ms ease; }
-#lwMenu .mm-cr-name > span { display: grid; min-width: 0; overflow: hidden; white-space: nowrap; text-align: left; font-family: var(--font-ui); line-height: 1; }
-#lwMenu .mm-cr-name > span > * { padding-left: 8px; translate: -6px 0; transition: translate 380ms var(--ease); }
-#lwMenu .mm-cr-name b { font-size: 13px; font-weight: 600; letter-spacing: .02em; }
-/* 036 G6 · THE REAL MARKS: Claude's serif wordmark (two files, the CSS shows the theme's), GPT in OpenAI Sans and Gemini in Google Sans Flex at
-   the about site's weights and tracking (img/menu/ai/, DATA — the loader keeps them; until then the UI face stands in) */
-@font-face { font-family: 'Google Sans Flex'; src: url('img/menu/ai/GoogleSansFlex-Semibold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }   /* SIL OFL 1.1 — img/ai/GoogleSansFlex-OFL.txt (precached: a licence travels with the install) */
-@font-face { font-family: 'OpenAI Sans'; src: url('img/menu/ai/OpenAISans-Semibold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
-#lwMenu .mm-cr-word { display: block; height: 13px; width: auto; }
-body[data-theme="light"] #lwMenu .mm-cr-word[data-theme="dark"], body:not([data-theme="light"]) #lwMenu .mm-cr-word[data-theme="light"] { display: none; }
-#lwMenu .mm-cr[data-ai="openai"] .mm-cr-name b { font: 600 15px/1 'OpenAI Sans', var(--font-ui); letter-spacing: -.025em; }
-#lwMenu .mm-cr[data-ai="gemini"] .mm-cr-name b { font: 600 15px/1 'Google Sans Flex', var(--font-ui); letter-spacing: -.035em; }
-#lwMenu .mm-cr:nth-child(2) :is(.mm-cr-name, .mm-cr-name > span > *) { transition-delay: 50ms; } #lwMenu .mm-cr:nth-child(3) :is(.mm-cr-name, .mm-cr-name > span > *) { transition-delay: 100ms; }
-#lwMenu .mm-credits:is(:focus-visible, .open) .mm-cr-name { grid-template-columns: 1fr; opacity: 1; } #lwMenu .mm-credits:is(:focus-visible, .open) .mm-cr-name > span > * { translate: 0 0; }
-@media (hover: hover) and (pointer: fine) and (min-width: 701px) { #lwMenu .mm-credits:hover .mm-cr-name { grid-template-columns: 1fr; opacity: 1; } #lwMenu .mm-credits:hover .mm-cr-name > span > * { translate: 0 0; } }
 #lwMenu .mm-face.in .mm-corner { animation: mm-rise 620ms var(--ease) 560ms both; }
 @media (max-width: 700px) {
   #lwMenu .mm-face { padding-block: 60px; } #lwMenu .mm-face-logo { height: min(clamp(84px, 17vh, 184px), calc((100vw - 32px) * 124 / 447)); }   /* the logo (447 × 124) never wider than the phone */
   #lwMenu .mm-tr { top: 12px; right: 12px; gap: 2px; } #lwMenu .mm-tr .mm-navb { width: 32px; height: 32px; } #lwMenu .mm-tr .mm-navb .mm-ico { width: 18px; height: 18px; }
   #lwMenu .mm-br { right: 16px; bottom: 16px; } #lwMenu .mm-mir { height: 18px; }
-  #lwMenu .mm-credits { left: 16px; bottom: 16px; height: 18px; gap: 10px; } #lwMenu .mm-cr-mark { width: 18px; height: 18px; }
-  #lwMenu .mm-cr-name b, #lwMenu .mm-cr[data-ai] .mm-cr-name b { font-size: 12px; } #lwMenu .mm-cr-word { height: 10px; } #lwMenu .mm-cr-name > span > * { padding-left: 6px; }
 }
-@media (prefers-reduced-motion: reduce) { #lwMenu .mm-face.in .mm-corner { animation: none; } #lwMenu :is(.mm-cr-name, .mm-cr-name > span > *) { transition: none; translate: none; } }
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-face.in .mm-corner { animation: none; } }
 :root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-face.in .mm-corner { animation: none; }
-:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu :is(.mm-cr-name, .mm-cr-name > span > *) { transition: none; translate: none; }
 /* 034 M3 · THE TUTORIAL (picker.js showTutorial) in the decks' seat; the head keeps the logo, ← and THEME.  037 U2 THE PLAYER: nothing in it
    scrolls but the scroller of tiles */
 #lwMenu .mm-tut { grid-row: 2; grid-column: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; padding: 6px 24px 28px; box-sizing: border-box; }

@@ -22,8 +22,7 @@ import { TUTORIAL, HEROES, WALLS } from './picker.js';
 
 const KEY = 'lambdawaves.q0.loader';
 const APP_MEAN = 20000, FACE_W = 40000;   // the bar's weight of one precache entry (≈ 8.2 MiB over ≈ 430 files) and of one face, in bytes
-const AI_FACES = globalThis.lwavesDesktop ? [] : [['600 15px "OpenAI Sans"', 'OpenAISans-Semibold.woff2'], ['600 15px "Google Sans Flex"', 'GoogleSansFlex-Semibold.ttf']];   // 044 S1: the credits strip's faces; the desktop build has no strip and no such file
-const FACES = ['16px Roboto', '16px "LW Title"', '16px "STIX Two Math"', ...AI_FACES.map((f) => f[0])];
+const FACES = ['16px Roboto', '16px "LW Title"', '16px "STIX Two Math"'];
 const FLAG = ['#f15b66', '#f5bf5e', '#5bcfc2', '#f58b53', '#68cb83', '#767fd3', '#bad969', '#5ca9e4', '#b979d0'];   // img/mir-logo-*.svg's nine, row by row
 const OFF = new Set(['automation', 'declined', 'unsupported', 'failed']);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -36,7 +35,6 @@ function menuSet() {
   add('wall', 'collage/collage.json');
   for (const f of ['mir-interface.webp', 'library-dark.webp', 'library-light.webp']) add('wall', 'face/' + f);
   for (const [id, th] of Object.entries(HEROES)) for (const t of th.split(' ')) { add('wall', `vol/${id}.${t}.mp4`); add('wall', `vol/${id}.${t}.webp`); }
-  for (const f of AI_FACES) add('faces', 'ai/' + f[1]);
   for (const r of TUTORIAL) for (const t of r.themes.split(' ')) { add('tut', `tut/${r.id}.${t}.mp4`); add('tut', `tut/${r.id}.${t}.webp`); }
   return out;
 }

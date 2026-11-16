@@ -158,6 +158,9 @@ export function createSwClient({ buildBadge, setStatus, getProjects, untouched, 
     get offering() { return (dlg && dlg.root) || null; },
     /** the offer, pressed (the badge, UPDATE) — or, with { quiet: true }, taken for an untouched session, or with { force: true }
      *  UPDATE ALL (the user's yes for every open window) */
+    /** the badge's press (Josh 11-15): an offer is taken; a notice that offers nothing (UPDATED · THIS BUILD IS INSTALLED, a failure) is put away */
+    press() { if (swClient.state === 'ready' || swClient.state === 'replaced') return swClient.accept();
+      const b = buildBadge(); if (b && !['mixed', 'taking', 'refreshing'].includes(swClient.state)) b.hidden = true; return false; },
     accept(opt) {
       /* a tab whose build another tab replaced: the swap has already happened, so its badge's press is a plain reload (the
          beforeunload guard still asks for a dirty project — after the swap, which here is the only order there is) */
